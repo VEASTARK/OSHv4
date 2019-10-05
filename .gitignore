@@ -166,3 +166,4 @@ fabric.properties
 ### Gradle
 /gradle/*
 /.idea/*
+.gradle/
