@@ -1,0 +1,11 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+}

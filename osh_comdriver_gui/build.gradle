@@ -1,0 +1,13 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+    compile project(":osh_driver_batterystorage")
+    compile project(":osh_driver_hvac_watertank")
+}

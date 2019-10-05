@@ -1,0 +1,14 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+    compile project(":osh_en50523")
+    compile project(":osh_comdriver_weather")
+}

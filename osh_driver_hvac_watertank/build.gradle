@@ -1,0 +1,15 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+        resources {
+            srcDir 'data'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+}

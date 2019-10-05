@@ -1,0 +1,88 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'datatypes_src'
+            srcDir 'generated_src'
+            srcDir 'generated_src_sim'
+            srcDir 'osh_src'
+            srcDir 'simulation_src'
+            srcDir 'utils_src'
+        }
+
+        resources {
+            srcDir 'data'
+        }
+    }
+}
+
+configurations {
+    jaxb
+}
+
+dependencies {
+    jaxb (
+            'com.sun.xml.bind:jaxb-xjc:2.2.7',
+            'com.sun.xml.bind:jaxb-impl:2.2.7',
+            'javax.activation:activation:1.1.1'
+    )
+}
+
+task jaxb {
+    System.setProperty('javax.xml.accessExternalSchema', 'all')
+    def jaxbTargetDir = file("generated_src")
+    def jaxbTargetDir2 = file("generated_src_sim")
+
+    doLast {
+        jaxbTargetDir.mkdirs()
+        jaxbTargetDir2.mkdirs()
+
+        ant.taskdef(
+                name: 'xjc',
+                classname: 'com.sun.tools.xjc.XJCTask',
+                classpath: configurations.jaxb.asPath
+        )
+        ant.jaxbTargetDir = jaxbTargetDir
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/OSHConfiguration.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/CALConfiguration.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/EALConfiguration.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/OCConfiguration.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/GridLayout.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/XsdApplianceProgramConfigurations.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/XsdMieleDeviceProfile.xsd'
+        )
+
+        ant.jaxbTargetDir = jaxbTargetDir2
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src_sim/Screenplay.xsd'
+        )
+    }
+}

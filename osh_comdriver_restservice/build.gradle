@@ -1,0 +1,14 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+    compile project(":osh_busdriver_appliance_mielegateway")
+    compile project(":osh_driver_appliance")
+    compile project(":osh_en50523")
+}

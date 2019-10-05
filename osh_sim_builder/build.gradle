@@ -1,0 +1,35 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+    compile project(":osh_comdriver_gui")
+    compile project(":osh_comdriver_signals")
+    compile project(":osh_driver_appliance")
+    compile project(":osh_driver_baseload")
+    compile project(":osh_en50523")
+    compile project(":osh_driver_chp")
+    compile project(":osh_driver_hvac_heater_ihe")
+    compile project(":osh_ems_ea")
+    compile project(":osh_driver_pv")
+    compile project(":osh_driver_batterystorage")
+    compile project(":osh_busdriver_appliance_mielegateway")
+    compile project(":osh_busdriver_automation_bacnet")
+    compile project(":osh_busdriver_automation_wago")
+    compile project(":osh_comdriver_dof")
+    compile project(":osh_comdriver_logger")
+    compile project(":osh_comdriver_restservice")
+    compile project(":osh_driver_appliance_miele")
+    compile project(":osh_driver_hvac")
+    compile project(":osh_driver_hvac_watertank")
+    compile project(":osh_driver_smartmeter")
+    compile project(":osh_driver_smartmeter_bcontrol")
+    compile project(":osh_driver_smartplug")
+    compile project(":osh_driver_chp_dachs")
+    compile project(":osh_driver_hvac_heater_gas")
+}

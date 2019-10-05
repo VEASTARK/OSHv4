@@ -1,0 +1,12 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'osh_jmetal_src'
+        }
+    }
+}
+
+dependencies {
+    compile project(":osh_core")
+}
