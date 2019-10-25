@@ -14,8 +14,8 @@ allprojects {
     version '5.0-SNAPSHOT'
 }
 
-sourceCompatibility = 13
-targetCompatibility = 13
+sourceCompatibility = 12
+targetCompatibility = 12
 
 subprojects {
     repositories {
@@ -29,8 +29,8 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'idea'
 
-    sourceCompatibility = 13
-    targetCompatibility = 13
+    sourceCompatibility = 12
+    targetCompatibility = 12
 }
 
 sourceSets {
