@@ -30,3 +30,11 @@ dependencies {
     compile project(":osh_driver_chp_dachs")
     compile project(":osh_driver_hvac_heater_gas")
 }
+
+task runSingleHHLocal(type: JavaExec) {
+    dependsOn build
+    group = "Execution"
+    description = "starts the single houshold local simulation"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "osh.runsimulation.runSimulationPackage"
+}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OCConfiguration xmlns="http://osh/Configuration/ControllerBox" xmlns:ns2="http://osh/Configuration/System">
+<OCConfiguration xmlns="http://osh/configuration/oc" xmlns:ns2="http://osh/configuration/system">
     <globalOcUuid>e5ad4b36-d417-4be6-a1c8-c3ad68e52977</globalOcUuid>
     <globalControllerClass>osh.mgmt.globalcontroller.OSHGlobalControllerJMetal</globalControllerClass>
     <globalControllerParameters>

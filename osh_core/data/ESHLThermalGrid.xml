@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<GridLayout xmlns="http://osh/Energy/Grid/Configuration">
+<GridLayout xmlns="http://osh/configuration/grid">
     <connections>
         <activeEntityUUID>e83c5db0-93d9-4a24-9e7a-c756b67e0802</activeEntityUUID>
         <passiveEntityUUID>268ea9bd-572c-46dd-a383-960b4ed65337</passiveEntityUUID>

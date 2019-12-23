@@ -45,11 +45,6 @@ task jaxb {
 
         ant.xjc(
                 destdir: '${jaxbTargetDir}',
-                schema: 'generated_src/OSHConfiguration.xsd'
-        )
-
-        ant.xjc(
-                destdir: '${jaxbTargetDir}',
                 schema: 'generated_src/CALConfiguration.xsd'
         )
 
@@ -76,6 +71,11 @@ task jaxb {
         ant.xjc(
                 destdir: '${jaxbTargetDir}',
                 schema: 'generated_src/XsdMieleDeviceProfile.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                schema: 'generated_src/OSHConfiguration.xsd'
         )
 
         ant.jaxbTargetDir = jaxbTargetDir2

@@ -4,8 +4,10 @@
 	xmlns:tns="http://osh/configuration/system" 
 	elementFormDefault="qualified">
 
-    <include schemaLocation="includes/DeviceTypes.xsd"/>
-    <include schemaLocation="includes/ConfigurationParameter.xsd"/>
+    <include schemaLocation="includes/SystemMaster.xsd" />
+
+<!--    <include schemaLocation="includes/DeviceTypes.xsd"/>-->
+<!--    <include schemaLocation="includes/ConfigurationParameter.xsd"/>-->
 
 
 	<simpleType name="runningType">

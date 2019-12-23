@@ -169,3 +169,9 @@ fabric.properties
 /gradle/*
 /.idea/*
 .gradle/
+
+
+### OSH Internals
+
+# folder for newly created configfiles (copy to osh_sim_loader/configfiles for commit)
+/osh_sim_builder/configfiles

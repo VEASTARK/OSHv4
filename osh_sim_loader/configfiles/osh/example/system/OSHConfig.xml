@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OSHConfiguration xmlns="http://osh/Configuration/System">
+<OSHConfiguration xmlns="http://osh/configuration/system">
     <runningType>SIMULATION</runningType>
     <randomSeed>-398436685533402347</randomSeed>
     <engineParameters>
