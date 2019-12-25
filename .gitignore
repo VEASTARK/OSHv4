@@ -175,3 +175,9 @@ fabric.properties
 
 # folder for newly created configfiles (copy to osh_sim_loader/configfiles for commit)
 /osh_sim_builder/configfiles
+# folder for newly created multiple configfiles (copy to osh_sim_loader/configfiles for commit)
+/osh_sim_builder/multiplePackages
+# log folder for ran simulations
+/osh_sim_loader/logs
+# output folder for newly created appliance configuration profiles (copy to osh_sim_loader/configfiles for commit)
+/osh_driver_appliance/data/profiles/out

@@ -23,11 +23,11 @@ public class DW_4CO_5PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2",
 									"Washing 3", "Washing 4", }, new String[] {
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_0_A_0.csv",
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_0_A_1.csv",
-									"data/profiles/renamed/dw/DW_pause.csv", },
+									"data/profiles/renamed/dw/DW_pause2.csv", },
 							0, 1, -1, -1) }),
 			new ToolApplianceConfiguration(
 					1,
@@ -38,11 +38,11 @@ public class DW_4CO_5PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2",
 									"Washing 3", "Washing 4", }, new String[] {
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_1_A_0.csv",
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_1_A_1.csv",
-									"data/profiles/renamed/dw/DW_pause.csv", },
+									"data/profiles/renamed/dw/DW_pause2.csv", },
 							0, 1, -1, -1) }),
 			new ToolApplianceConfiguration(
 					2,
@@ -53,11 +53,11 @@ public class DW_4CO_5PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2",
 									"Washing 3", "Washing 4", }, new String[] {
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_2_A_0.csv",
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_2_A_1.csv",
-									"data/profiles/renamed/dw/DW_pause.csv", },
+									"data/profiles/renamed/dw/DW_pause2.csv", },
 							0, 1, -1, -1) }),
 			new ToolApplianceConfiguration(
 					3,
@@ -68,11 +68,11 @@ public class DW_4CO_5PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2",
 									"Washing 3", "Washing 4", }, new String[] {
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_3_A_0.csv",
-									"data/profiles/renamed/dw/DW_pause.csv",
+									"data/profiles/renamed/dw/DW_pause2.csv",
 									"data/profiles/renamed/dw/DW_3_A_1.csv",
-									"data/profiles/renamed/dw/DW_pause.csv", },
+									"data/profiles/renamed/dw/DW_pause2.csv", },
 							0, 1, -1, -1) }) };
 
 }

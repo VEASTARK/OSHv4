@@ -26,11 +26,11 @@ public class WM_3CO_5PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2", "Washing 3", "Washing 4" },
 									new String[] {
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_0_A_0.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_0_A_1.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											},
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
@@ -39,11 +39,11 @@ public class WM_3CO_5PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2", "Washing 3", "Washing 4" },
 									new String[] {
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_0_MC_A_0.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_0_MC_A_1.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											},
 									0, 1, 2, -1), }),
 			new ToolApplianceConfiguration(
@@ -58,11 +58,11 @@ public class WM_3CO_5PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2", "Washing 3", "Washing 4" },
 									new String[] {
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_1_A_0.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_1_A_1.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											},
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
@@ -71,11 +71,11 @@ public class WM_3CO_5PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2", "Washing 3", "Washing 4" },
 									new String[] {
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_1_MC_A_0.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_1_MC_A_1.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											},
 									0, 1, 2, -1), }),
 			new ToolApplianceConfiguration(
@@ -90,11 +90,11 @@ public class WM_3CO_5PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2", "Washing 3", "Washing 4" },
 									new String[] {
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_2_A_0.csv",
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_2_A_1.csv",
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											},
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
@@ -103,11 +103,11 @@ public class WM_3CO_5PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2", "Washing 3", "Washing 4" },
 									new String[] {
-											"data/profiles/renamed/wm/WM_pause.csv",
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_2_MC_A_0.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											"data/profiles/renamed/wm/WM_2_MC_A_1.csv",
-											"data/profiles/renamed/wm/WM_pause.csv", 
+											"data/profiles/renamed/wm/WM_pause2.csv",
 											},
 									0, 1, 2, -1), }) };
 

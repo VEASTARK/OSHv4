@@ -32,7 +32,7 @@ dependencies {
 }
 
 task runSingleHHLocal(type: JavaExec) {
-    dependsOn build
+    dependsOn compileJava
     group = "Execution"
     description = "starts the single houshold local simulation"
     classpath = sourceSets.main.runtimeClasspath

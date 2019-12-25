@@ -86,3 +86,11 @@ task jaxb {
         )
     }
 }
+
+task constructGridConfiguration(type: JavaExec) {
+    dependsOn compileJava
+    group = "Construction"
+    description = "constructs the energy grid configuration files"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "osh.esc.grid.instances.GridInstance"
+}

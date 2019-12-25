@@ -5,10 +5,211 @@ sourceSets {
             srcDir 'src_sim'
             srcDir 'src_toolbox'
         }
+
+        resources {
+            srcDir 'data'
+        }
     }
 }
 
 dependencies {
     compile project(":osh_core")
     compile project(":osh_en50523")
+}
+
+task constructDWApplianceProfiles {
+    dependsOn compileJava
+    group = "Construction.ACP"
+    description = "constructs the appliance configuration profiles for the dish washer (DW)"
+
+    //to prevent execution in configuration Phase
+    doFirst {
+        mkdir "data/profiles/out/dw"
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_1PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_1PH_1PR_SC_H"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_1PH_2PR_MC_EH"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_3PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_3PH_2PR_MC_EH"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_5PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.dw.generate_DW_4CO_5PH_4PR_MC_EH"
+        }
+    }
+}
+
+task constructIHApplianceProfiles {
+    dependsOn compileJava
+    group = "Construction.ACP"
+    description = "constructs the appliance configuration profiles for the induction cooktop (IH)"
+
+    //to prevent execution in configuration Phase
+    doFirst {
+        mkdir "data/profiles/out/ih"
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.ih.generate_IH_3CO_1PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.ih.generate_IH_3CO_1PH_1PR_SC_G"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.ih.generate_IH_3CO_1PH_2PR_MC_EG"
+        }
+    }
+}
+
+task constructOVApplianceProfiles {
+    dependsOn compileJava
+    group = "Construction.ACP"
+    description = "constructs the appliance configuration profiles for the oven (OV)"
+
+    //to prevent execution in configuration Phase
+    doFirst {
+        mkdir "data/profiles/out/ov"
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.ov.generate_OV_3CO_1PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.ov.generate_OV_3CO_1PH_1PR_SC_G"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.ov.generate_OV_3CO_1PH_2PR_MC_EG"
+        }
+    }
+}
+
+task constructTDApplianceProfiles {
+    dependsOn compileJava
+    group = "Construction.ACP"
+    description = "constructs the appliance configuration profiles for the tumble dryer (TD)"
+
+    //to prevent execution in configuration Phase
+    doFirst {
+        mkdir "data/profiles/out/td"
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_1PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_1PH_1PR_SC_H"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_1PH_2PR_MC_EH"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_3PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_3PH_2PR_MC_EH"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_9PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.td.condensing.generate_TD_3CO_9PH_2PR_MC_EH"
+        }
+    }
+}
+
+task constructWMApplianceProfiles {
+    dependsOn compileJava
+    group = "Construction.ACP"
+    description = "constructs the appliance configuration profiles for the washing machine (WM)"
+
+    //to prevent execution in configuration Phase
+    doFirst {
+        mkdir "data/profiles/out/wm"
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_1PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_1PH_1PR_SC_H"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_1PH_2PR_MC_EH"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_3PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_3PH_2PR_MC_EH"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_5PH_1PR_SC_E"
+        }
+
+        javaexec {
+            classpath = sourceSets.main.runtimeClasspath
+            main = "osh.toolbox.appliance.wm.generate_WM_3CO_5PH_2PR_MC_EH"
+        }
+    }
+}
+
+task constructAllApplianceProfiles {
+    dependsOn constructDWApplianceProfiles, constructIHApplianceProfiles, constructOVApplianceProfiles,
+            constructTDApplianceProfiles, constructWMApplianceProfiles
+    group = "Construction.ACP"
+    description = "constructs the appliance configuration profiles for the washing machine (WM)"
 }

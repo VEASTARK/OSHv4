@@ -26,9 +26,9 @@ public class TD_3CO_3PH_1PR_SC_E {
 									"Drying 3", "Drying 4", "Drying 5",
 									"Drying 6", "Drying 7", "Drying 8" },
 							new String[] {
-									"data/profiles/renamed/td/TD_CO_pause.csv",
+									"data/profiles/renamed/td/TD_CO_pause2.csv",
 									"data/profiles/renamed/td/TD_CO_0.csv",
-									"data/profiles/renamed/td/TD_CO_pause.csv", },
+									"data/profiles/renamed/td/TD_CO_pause2.csv", },
 							0, 1, -1, -1), }),
 			new ToolApplianceConfiguration(
 					1,
@@ -42,9 +42,9 @@ public class TD_3CO_3PH_1PR_SC_E {
 									"Drying 3", "Drying 4", "Drying 5",
 									"Drying 6", "Drying 7", "Drying 8" },
 							new String[] {
-									"data/profiles/renamed/td/TD_CO_pause.csv",
+									"data/profiles/renamed/td/TD_CO_pause2.csv",
 									"data/profiles/renamed/td/TD_CO_1.csv",
-									"data/profiles/renamed/td/TD_CO_pause.csv", },
+									"data/profiles/renamed/td/TD_CO_pause2.csv", },
 							0, 1, -1, -1), }),
 			new ToolApplianceConfiguration(
 					2,
@@ -58,9 +58,9 @@ public class TD_3CO_3PH_1PR_SC_E {
 									"Drying 3", "Drying 4", "Drying 5",
 									"Drying 6", "Drying 7", "Drying 8" },
 							new String[] {
-									"data/profiles/renamed/td/TD_CO_pause.csv",
+									"data/profiles/renamed/td/TD_CO_pause2.csv",
 									"data/profiles/renamed/td/TD_CO_2.csv",
-									"data/profiles/renamed/td/TD_CO_pause.csv", },
+									"data/profiles/renamed/td/TD_CO_pause2.csv", },
 							0, 1, -1, -1), }) };
 
 }

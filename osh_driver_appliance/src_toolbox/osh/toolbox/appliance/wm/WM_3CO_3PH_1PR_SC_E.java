@@ -23,9 +23,9 @@ public class WM_3CO_3PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2" },
 							new String[] {
-									"data/profiles/renamed/wm/WM_pause.csv",
+									"data/profiles/renamed/wm/WM_pause2.csv",
 									"data/profiles/renamed/wm/WM_0.csv",
-									"data/profiles/renamed/wm/WM_pause.csv", },
+									"data/profiles/renamed/wm/WM_pause2.csv", },
 							0, 1, -1, -1), }),
 			new ToolApplianceConfiguration(
 					1,
@@ -36,9 +36,9 @@ public class WM_3CO_3PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2" },
 							new String[] {
-									"data/profiles/renamed/wm/WM_pause.csv",
+									"data/profiles/renamed/wm/WM_pause2.csv",
 									"data/profiles/renamed/wm/WM_1.csv",
-									"data/profiles/renamed/wm/WM_pause.csv", },
+									"data/profiles/renamed/wm/WM_pause2.csv", },
 							0, 1, -1, -1), }),
 			new ToolApplianceConfiguration(
 					2,
@@ -49,9 +49,9 @@ public class WM_3CO_3PH_1PR_SC_E {
 							0, "pure electric uninterruptible", new String[] {
 									"Washing 0", "Washing 1", "Washing 2" },
 							new String[] {
-									"data/profiles/renamed/wm/WM_pause.csv",
+									"data/profiles/renamed/wm/WM_pause2.csv",
 									"data/profiles/renamed/wm/WM_2.csv",
-									"data/profiles/renamed/wm/WM_pause.csv", },
+									"data/profiles/renamed/wm/WM_pause2.csv", },
 							0, 1, -1, -1), }), };
 
 }

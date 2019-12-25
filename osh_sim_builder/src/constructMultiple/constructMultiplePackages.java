@@ -81,7 +81,7 @@ public class constructMultiplePackages {
 			}
 		}
         if (config.containsKey("tankSizes"))
-			constructSimulationPackage.tankSize = (int) config.get("tankSizes");
+			constructSimulationPackage.tankSize = (Integer) config.get("tankSizes");
 		if (config.containsKey("pvType")) {
 			PVConfiguration pvConfig = (PVConfiguration) config.get("pvType");
 			constructSimulationPackage.pvComplexPowerMax = pvConfig.pvComplexPowerMax;
@@ -115,27 +115,27 @@ public class constructMultiplePackages {
 			}
 		}
 		if (config.containsKey("persons")) {
-			constructSimulationPackage.numberOfPersons = (int) config.get("persons");
+			constructSimulationPackage.numberOfPersons = (Integer) config.get("persons");
 			constructSimulationPackage.simPackage.getDynamicScreenplayArguments().getNumPersons().clear();
-			constructSimulationPackage.simPackage.getDynamicScreenplayArguments().getNumPersons().add((int) config.get("persons"));
+			constructSimulationPackage.simPackage.getDynamicScreenplayArguments().getNumPersons().add((Integer) config.get("persons"));
 		}
 		if (config.containsKey("compression")) {
 			constructSimulationPackage.compressionType = ((CompressionConfiguration) config.get("compression")).compressionType;
 			constructSimulationPackage.compressionValue = ((CompressionConfiguration) config.get("compression")).compressionValue;
 		}
 		if (config.containsKey("escResolution")) {
-			constructSimulationPackage.stepSizeESCinOptimization = (int) config.get("escResolution");
+			constructSimulationPackage.stepSizeESCinOptimization = (Integer) config.get("escResolution");
 		}
 		if (config.containsKey("autoProbFactor")) {
-			constructSimulationPackage.autoProbMuatationFactor = (double) config.get("autoProbFactor");
+			constructSimulationPackage.autoProbMuatationFactor = (Double) config.get("autoProbFactor");
 		}
 		if (config.containsKey("crossoverProb")) {
-			constructSimulationPackage.crossoverProbability = (double) config.get("crossoverProb");
+			constructSimulationPackage.crossoverProbability = (Double) config.get("crossoverProb");
 		}
 		if (config.containsKey("epsOptimisationObjective")) {
 			constructSimulationPackage.simPackage.getEPSOptimizationObjectives().clear();
 			constructSimulationPackage.simPackage.getEPSOptimizationObjectives().add(
-					(int) config.get("epsOptimisationObjective"));
+					(Integer) config.get("epsOptimisationObjective"));
 		}
 		if (config.containsKey("pls")) {
 			PLSType plsType = (PLSType) config.get("pls");

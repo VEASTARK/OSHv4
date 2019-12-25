@@ -26,9 +26,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_0.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
 									1,
@@ -36,9 +36,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_0_MC.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, 2, -1), }),
 			new ToolApplianceConfiguration(
 					1,
@@ -52,9 +52,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_1.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
 									1,
@@ -62,9 +62,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_1_MC.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, 2, -1), }),
 			new ToolApplianceConfiguration(
 					2,
@@ -78,9 +78,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_2.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
 									1,
@@ -88,9 +88,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_2_MC.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, 2, -1), }),
 			new ToolApplianceConfiguration(
 					3,
@@ -104,9 +104,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_3.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, -1, -1),
 							new ToolApplianceConfigurationProfile(
 									1,
@@ -114,9 +114,9 @@ public class DW_4CO_3PH_2PR_MC_EH {
 									new String[] { "Washing 0", "Washing 1",
 											"Washing 2" },
 									new String[] {
-											"data/profiles/renamed/dw/DW_pause.csv",
+											"data/profiles/renamed/dw/DW_pause2.csv",
 											"data/profiles/renamed/dw/DW_3_MC.csv",
-											"data/profiles/renamed/dw/DW_pause.csv", },
+											"data/profiles/renamed/dw/DW_pause2.csv", },
 									0, 1, 2, -1), }) };
 
 }

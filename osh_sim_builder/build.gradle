@@ -33,3 +33,19 @@ dependencies {
     compile project(":osh_driver_chp_dachs")
     compile project(":osh_driver_hvac_heater_gas")
 }
+
+task constructSingleHHConfig(type: JavaExec) {
+    dependsOn compileJava
+    group = "Construction"
+    description = "constructs the configuration files for a single HH simlation"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "constructsimulation.constructSimulationPackage"
+}
+
+task constructMultipleSingleHHConfig(type: JavaExec) {
+    dependsOn compileJava
+    group = "Construction"
+    description = "constructs multiple configuration files for single HH simulations"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "constructMultiple.constructMultiplePackages"
+}

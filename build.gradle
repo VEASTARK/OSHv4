@@ -4,6 +4,10 @@ plugins {
     id 'idea'
 }
 
+jar.enabled = false
+compileTestJava.enabled = false
+processTestResources.enabled = false
+
 repositories {
     mavenCentral()
     maven { url "https://clojars.org/repo" }
@@ -28,6 +32,9 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse'
     apply plugin: 'idea'
+
+    compileTestJava.enabled = false
+    processTestResources.enabled = false
 
     sourceCompatibility = 12
     targetCompatibility = 12
