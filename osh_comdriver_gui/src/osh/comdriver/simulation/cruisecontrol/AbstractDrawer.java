@@ -33,7 +33,7 @@ abstract class AbstractDrawer extends JPanel {
 	private boolean showPast;
 	private int showDays = 2;
 	
-	{
+	static {
 		// set a theme using the new shadow generator feature available in
 		// 1.0.14 - for backwards compatibility it is not enabled by default
 		ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
@@ -60,11 +60,11 @@ abstract class AbstractDrawer extends JPanel {
 	/**
 	 * Creates a chart.
 	 *
-	 * @param dataset1  a dataset.
+	 * @param dataset  a dataset.
 	 *
 	 * @return A chart.
 	 */
-	private JFreeChart createChart(XYDataset dataset, long lastentry) {
+	private JFreeChart createChart(XYDataset dataset, long lastEntry) {
 
 		JFreeChart chart = ChartFactory.createTimeSeriesChart(
 				name,  // title
@@ -108,8 +108,8 @@ abstract class AbstractDrawer extends JPanel {
 		((DateAxis) plot.getDomainAxis()).setTimeZone(TimeZone.getTimeZone("GMT"));
 		plot.getDomainAxis().setAutoRange(false);
 		
-		long begin = getRangeBegin(lastentry);
-		long end = getRangeEnd(lastentry);
+		long begin = getRangeBegin(lastEntry);
+		long end = getRangeEnd(lastEntry);
 		
 		plot.getDomainAxis().setRange(begin, end);
 		
@@ -122,21 +122,21 @@ abstract class AbstractDrawer extends JPanel {
 	
 	protected abstract String getAxisName();
 	
-	protected long getRangeBegin(long lastentry) {
-		int daysintopast = 0;
-		if (showPast) daysintopast = getShowDays() - 1;
+	protected long getRangeBegin(long lastEntry) {
+		int daysIntoPast = 0;
+		if (showPast) daysIntoPast = getShowDays() - 1;
 		
-		long ret = (lastentry / 86400 - daysintopast) * 86400 * 1000;
+		long ret = (lastEntry / 86400 - daysIntoPast) * 86400 * 1000;
 		if (ret < 0) ret = 0;
 		
 		return ret;
 	}
 	
-	protected long getRangeEnd(long lastentry) {
-		int daysintofuture = 1;
-		if (!showPast) daysintofuture = getShowDays() + 1;
+	protected long getRangeEnd(long lastEntry) {
+		int daysIntoFuture = 1;
+		if (!showPast) daysIntoFuture = getShowDays() + 1;
 		
-		return (lastentry / 86400 + daysintofuture) * 86400 * 1000;
+		return (lastEntry / 86400 + daysIntoFuture) * 86400 * 1000;
 	}
 
 	protected abstract List<XYSeries> getSeries(long begin, long end);
@@ -171,8 +171,7 @@ abstract class AbstractDrawer extends JPanel {
 		} 
 		else {
 			XYDataset dataset = createDataset();
-			JFreeChart chart = createChart(dataset, getNumberOfEntries());
-			return chart;
+            return createChart(dataset, getNumberOfEntries());
 		}
 	}
 	

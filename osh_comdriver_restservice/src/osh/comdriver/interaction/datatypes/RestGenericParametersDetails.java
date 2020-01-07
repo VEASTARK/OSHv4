@@ -1,7 +1,5 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +10,6 @@ import java.util.UUID;
  * @author Ingo Mauser
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="genericParametersDetails")
 public class RestGenericParametersDetails extends RestStateDetail {
 	protected Map<String,String> map;
@@ -20,7 +17,7 @@ public class RestGenericParametersDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestGenericParametersDetails() {
+    protected RestGenericParametersDetails() {
 		this(null, 0);
 	}
 	

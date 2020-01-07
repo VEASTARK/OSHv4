@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType
 public class DeviceMetaDriverDetails extends StateExchange {
 
@@ -30,7 +29,7 @@ public class DeviceMetaDriverDetails extends StateExchange {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private DeviceMetaDriverDetails() {
+    protected DeviceMetaDriverDetails() {
 		this(null, 0);
 	}
 

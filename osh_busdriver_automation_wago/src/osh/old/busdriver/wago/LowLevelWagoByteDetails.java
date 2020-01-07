@@ -28,9 +28,9 @@ public class LowLevelWagoByteDetails extends StateExchange {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private LowLevelWagoByteDetails() {
+    protected LowLevelWagoByteDetails() {
 		this(null, 0);
-	};
+	}
 	
 	public LowLevelWagoByteDetails(UUID sender, long timestamp) {
 		super(sender, timestamp);

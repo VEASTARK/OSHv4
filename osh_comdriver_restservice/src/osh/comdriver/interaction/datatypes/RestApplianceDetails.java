@@ -44,7 +44,7 @@ public class RestApplianceDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestApplianceDetails() {
+    protected RestApplianceDetails() {
 		this(null, 0);
 	};
 

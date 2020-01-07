@@ -1,7 +1,5 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
@@ -11,7 +9,6 @@ import java.util.UUID;
  * @author Kaibin Bao
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType
 public class RestStateDetail {
 	
@@ -21,7 +18,7 @@ public class RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestStateDetail() {
+    protected RestStateDetail() {
 		this(null, 0);
 	}
 	
@@ -71,10 +68,8 @@ public class RestStateDetail {
 				return false;
 		} else if (!sender.equals(other.sender))
 			return false;
-		if (timestamp != other.timestamp)
-			return false;
-		return true;
-	}
+        return timestamp == other.timestamp;
+    }
 	
 	
 }

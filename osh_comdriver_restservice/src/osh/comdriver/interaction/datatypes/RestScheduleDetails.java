@@ -1,7 +1,5 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
@@ -10,7 +8,6 @@ import java.util.UUID;
  * @author Kaibin Bao
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="scheduleDetails")
 public class RestScheduleDetails extends RestStateDetail {
 	
@@ -19,7 +16,7 @@ public class RestScheduleDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestScheduleDetails() {
+    protected RestScheduleDetails() {
 		this(null, 0);
 	}
 	

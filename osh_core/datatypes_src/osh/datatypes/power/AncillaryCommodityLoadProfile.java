@@ -62,12 +62,12 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
 //		}
 	}
 	
-	/** WARNING: Do NOT use if you want to either set Loads nonsequential (now or in the future) or if you want to compress/merge/clone ...
+	/** WARNING: Do NOT use if you want to either set Loads non-sequential (now or in the future) or if you want to compress/merge/clone ...
 	 * 
 	 * 
 	 * Sets the load of the provided ancillaryCommodity, but will ignore same power level inputs
 	 * 
-	 * @param states the ancillary meter states
+	 * @param state the ancillary meter states
 	 * @param t the time to put the ancillary meter values
 	 */
 	public void setLoadSequential(AncillaryMeterState state, Long t) {

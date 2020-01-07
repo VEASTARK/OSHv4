@@ -29,7 +29,7 @@
     
     <complexType name="SubjectAction">
     	<sequence>
-            <element minOccurs="1" maxOccurs="1" name="tick" type="long"/>
+            <element name="tick" type="long"/>
             <element name="periodicAction" type="boolean" default="false"/>
             <element name="periodicRefresh" type="int" default="0"/>
             <element name="actionType" type="tns:ActionType"/>
@@ -41,7 +41,7 @@
     
     <complexType name="PerformAction">
     	<sequence>
-            <element minOccurs="1" maxOccurs="unbounded" name="actionParameterCollection" type="tns:ActionParameters"/>
+            <element maxOccurs="unbounded" name="actionParameterCollection" type="tns:ActionParameters"/>
             <element name="appendAction" minOccurs="0" maxOccurs="unbounded" type="tns:SubjectAction"/>
     	</sequence>
     </complexType>

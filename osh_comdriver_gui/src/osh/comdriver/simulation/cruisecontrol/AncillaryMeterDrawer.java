@@ -32,7 +32,7 @@ public class AncillaryMeterDrawer extends JPanel {
 	private static final Dimension preferredSize = new Dimension(500, 270);
 	private static final long serialVersionUID = 1L;
 
-	{
+	static {
 		// set a theme using the new shadow generator feature available in
 		// 1.0.14 - for backwards compatibility it is not enabled by default
 		ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
@@ -42,25 +42,24 @@ public class AncillaryMeterDrawer extends JPanel {
 	 * A demonstration application showing how to create a simple time series
 	 * chart. This example uses monthly data.
 	 *
-	 * @param title  the frame title.
 	 */
 	public AncillaryMeterDrawer(
 			AncillaryCommodityLoadProfile ancillaryMeter,
 			long currentTime) {
 		super(new BorderLayout());
 		
-		panel = (ChartPanel) createDemoPanel(ancillaryMeter, currentTime);
+		panel = createDemoPanel(ancillaryMeter, currentTime);
 		panel.setPreferredSize(preferredSize);
 		this.add(panel, BorderLayout.CENTER);
 	}
 
 	/**
-	 * CONSTUCTOR
+	 * constructor
 	 */
 	public AncillaryMeterDrawer() {
 		super(new BorderLayout());
 		
-		panel = (ChartPanel) createDemoPanel();
+		panel = createDemoPanel();
 		panel.setPreferredSize(preferredSize);
 		this.add(panel, BorderLayout.CENTER);
 	}
@@ -119,19 +118,19 @@ public class AncillaryMeterDrawer extends JPanel {
 		Color[] color = new Color[numberOfSeries];
 		
 		for (int i = 0; i < numberOfSeries / 2; i++) {
-			color[i] = Color.getHSBColor(i * 1.0f / (numberOfSeries / 2), 1.0f, 1.0f);
+			color[i] = Color.getHSBColor(i * 1.0f / (numberOfSeries / 2.0f), 1.0f, 1.0f);
 		}
 		
 		int i = 0;
 		
 		for (int j = 0; j < dataset1.getSeriesCount() / 2; j++) {
-			float[] rgbcolor = Color.RGBtoHSB(
+			float[] rgbColor = Color.RGBtoHSB(
 					color[i].getRed(),
 					color[i].getGreen(),
 					color[i].getBlue(),
 					null);
-			plot.getRendererForDataset(dataset1).setSeriesPaint(2 * j, Color.getHSBColor(rgbcolor[0], 1.0f, 1.0f));
-			plot.getRendererForDataset(dataset1).setSeriesPaint(2 * j + 1, Color.getHSBColor(rgbcolor[0], 1.0f, 0.6f));
+			plot.getRendererForDataset(dataset1).setSeriesPaint(2 * j, Color.getHSBColor(rgbColor[0], 1.0f, 1.0f));
+			plot.getRendererForDataset(dataset1).setSeriesPaint(2 * j + 1, Color.getHSBColor(rgbColor[0], 1.0f, 0.6f));
 			i++;
 		}
 		
@@ -144,21 +143,20 @@ public class AncillaryMeterDrawer extends JPanel {
 		nowLine.add(time*1000, upperBound);
 		XYSeriesCollection nowColl = new XYSeriesCollection(); //power axis
 		nowColl.addSeries(nowLine);
-		XYDataset nowSet = nowColl;
-		
-		plot.setDataset(3, nowSet);
+
+        plot.setDataset(3, nowColl);
 		plot.mapDatasetToRangeAxis(3, 1);
 		
-		plot.getRendererForDataset(nowSet).setSeriesPaint(0, Color.DARK_GRAY);
-		plot.getRendererForDataset(nowSet).setSeriesStroke(
-				0, 
-				(Stroke) new BasicStroke(
-						2.0f, 
-						BasicStroke.CAP_ROUND, 
-						BasicStroke.JOIN_ROUND,
-						1.0f, 
-						new float[] {6.0f, 6.0f}, 
-						0.0f));
+		plot.getRendererForDataset(nowColl).setSeriesPaint(0, Color.DARK_GRAY);
+		plot.getRendererForDataset(nowColl).setSeriesStroke(
+				0,
+                new BasicStroke(
+                        2.0f,
+                        BasicStroke.CAP_ROUND,
+                        BasicStroke.JOIN_ROUND,
+                        1.0f,
+                        new float[] {6.0f, 6.0f},
+                        0.0f));
 		
 		plot.setDomainAxis(new DateAxis());
 		((DateAxis) plot.getDomainAxis()).setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -188,11 +186,11 @@ public class AncillaryMeterDrawer extends JPanel {
 			
 			for (AncillaryCommodity an : AncillaryCommodity.values()) {
 				
-				XYSeries[] powerProfile = (XYSeries[]) renderSeries(ancillaryMeter, an, currentTime);
-				
-				for (int j = 0; j < powerProfile.length; j++) {
-					dataset.addSeries(powerProfile[j]);
-				}				
+				XYSeries[] powerProfile = renderSeries(ancillaryMeter, an, currentTime);
+
+                for (XYSeries xySeries : powerProfile) {
+                    dataset.addSeries(xySeries);
+                }
 			}			
 		}
 		
@@ -268,9 +266,8 @@ public class AncillaryMeterDrawer extends JPanel {
 	private static JFreeChart createStuffForPanel(
 			AncillaryCommodityLoadProfile ancillaryMeter,
 			long time) {
-		XYDataset[] datasets = createDataset(ancillaryMeter, time);
-		JFreeChart chart = createChart(datasets[0], time);
-		return chart;
+		XYDataset[] dataSets = createDataset(ancillaryMeter, time);
+        return createChart(dataSets[0], time);
 	}
 	
 	private static JFreeChart createStuffForPanel() {
@@ -278,7 +275,5 @@ public class AncillaryMeterDrawer extends JPanel {
 	}
 	
 	public void updateTime(long timestamp) {
-		//
 	}
-	
 }

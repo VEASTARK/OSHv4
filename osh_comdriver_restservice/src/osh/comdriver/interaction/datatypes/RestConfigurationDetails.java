@@ -38,7 +38,7 @@ public class RestConfigurationDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestConfigurationDetails() {
+    protected RestConfigurationDetails() {
 		this(null, 0);
 	}
 

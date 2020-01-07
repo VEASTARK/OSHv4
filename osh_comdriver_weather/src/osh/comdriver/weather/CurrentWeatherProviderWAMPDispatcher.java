@@ -30,8 +30,6 @@ public class CurrentWeatherProviderWAMPDispatcher{
 	private IGlobalLogger globalLogger;
 	private WeatherProviderWAMPDriver comDriver;
 	
-	private boolean shutdown;
-	
 	private String url = "ws://wamp-router:8080/ws";
 	private String realm = "eshl";
 //	private String realm = "realm1";
@@ -55,8 +53,7 @@ public class CurrentWeatherProviderWAMPDispatcher{
 	 * CONSTRUCTOR
 	 * 
 	 * @param logger
-	 * @param address
-	 * @throws MalformedURLException
+	 * @param comDriver
 	 */
 	public CurrentWeatherProviderWAMPDispatcher(IGlobalLogger logger,WeatherProviderWAMPDriver comDriver) {
 		super();
@@ -152,10 +149,5 @@ public class CurrentWeatherProviderWAMPDispatcher{
 				});
 
 		client.open();
-	}
-
-	
-	public void shutdown() {
-		this.shutdown = true;
 	}
 }

@@ -30,7 +30,7 @@ public class UUIDGenerationHelperWago {
 	public static long getWago750860UUIDHigherPart( Wago750860ModuleType moduleType, short id, short wagoPort ) {
 		return ( ( (((WAGO_750_860_UUID_PREFIX + moduleType.value())) & 0xFFFFFFFFL) << 32 ) |
 			     ( (((long)id) & 0xFFFFL)   << 16 ) |
-			     ( (((long)wagoPort) & 0xFFFFL) <<  0 ));
+			     ((((long) wagoPort) & 0xFFFFL)));
 	}
 	
 	public static UUID changeWago750860UUIDPort( UUID uuid, short port) {
@@ -62,22 +62,22 @@ public class UUIDGenerationHelperWago {
 	private static long getUUIDLowerPart( byte[] low_array, int high_part ) {
 		// keep brackets and 0xff because of negative numbers
 		if( low_array.length >= 8 ) {
-			return	(((long)high_part&0xffffffff) << 32) ^ // just don't ask why...
+			return	(((long) high_part) << 32) ^ // just don't ask why...
 					((((long)low_array[0]&0xff) << 48) |
 					 (((long)low_array[1]&0xff) << 32) |
 					 (((long)low_array[2]&0xff) << 24) | // EUI-64 ... byte 4..5 are skipped
 					 (((long)low_array[5]&0xff) << 16) |
 					 (((long)low_array[6]&0xff) <<  8) |
-					 (((long)low_array[7]&0xff) <<  0));
+					 (((long) low_array[7] & 0xff)));
 		} else
 		if( low_array.length >= 4 ) {
-			return	(((long)high_part&0xffffffff) << 32) |
+			return	(((long) high_part) << 32) |
 					(((long)low_array[0]&0xff) << 24) |
 					(((long)low_array[1]&0xff) << 16) |
 					(((long)low_array[2]&0xff) <<  8) |
-					(((long)low_array[3]&0xff) <<  0);
+					(((long) low_array[3] & 0xff));
 		} else {
-			return	(((long)high_part&0xffffffff) << 32);
+			return	(((long) high_part) << 32);
 		}
 	}
 	

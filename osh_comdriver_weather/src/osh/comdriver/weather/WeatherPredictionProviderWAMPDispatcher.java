@@ -30,8 +30,6 @@ public class WeatherPredictionProviderWAMPDispatcher{
 	private IGlobalLogger globalLogger;
 	private WeatherProviderWAMPDriver comDriver;
 	
-	private boolean shutdown;
-	
 	private String url = "ws://wamp-router:8080/ws";
 	private String realm = "eshl";
 //	private String realm = "realm1";
@@ -152,10 +150,5 @@ public class WeatherPredictionProviderWAMPDispatcher{
 				});
 
 		client.open();
-	}
-
-	
-	public void shutdown() {
-		this.shutdown = true;
 	}
 }

@@ -1,7 +1,5 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
@@ -10,7 +8,6 @@ import java.util.UUID;
  * @author Ingo Mauser
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="temperatureSensorDetails")
 public class RestTemperatureSensorDetails extends RestStateDetail {
 
@@ -19,7 +16,7 @@ public class RestTemperatureSensorDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestTemperatureSensorDetails() {
+    protected RestTemperatureSensorDetails() {
 		this(null, 0);
 	}
 	

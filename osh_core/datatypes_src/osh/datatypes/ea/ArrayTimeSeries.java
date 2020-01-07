@@ -26,48 +26,48 @@ public class ArrayTimeSeries implements ITimeSeries {
 
 	@Override
 	public void add(ITimeSeries operand, long offset) {
-		long newlength = Math.max(this.length(), offset+operand.length());
-		double[] newarray = Arrays.copyOf(values, (int) newlength);
+		long newLength = Math.max(this.length(), offset+operand.length());
+		double[] newArray = Arrays.copyOf(values, (int) newLength);
 
 		long maxIdx = Math.min(this.length(), offset+operand.length());
 		for( long i = Math.max(0, offset); i < maxIdx; i++ ) {
-			newarray[(int) i] += operand.get((int) (i-offset));
+			newArray[(int) i] += operand.get((int) (i-offset));
 		}
 		
-		values = newarray;
+		values = newArray;
 	}
 
 	@Override
 	public void sub(ITimeSeries operand, long offset) {
-		long newlength = Math.max(this.length(), offset+operand.length());
-		double[] newarray = Arrays.copyOf(values, (int) newlength);
+		long newLength = Math.max(this.length(), offset+operand.length());
+		double[] newArray = Arrays.copyOf(values, (int) newLength);
 
 		long maxIdx = Math.min(this.length(), offset+operand.length());
 		for( long i = Math.max(0, offset); i < maxIdx; i++ ) {
-			newarray[(int) i] -= operand.get((int) (i-offset));
+			newArray[(int) i] -= operand.get((int) (i-offset));
 		}
 		
-		values = newarray;
+		values = newArray;
 	}
 	
 	@Override
 	public void multiply(ITimeSeries operand, long offset) {
-		long newlength = Math.max(this.length(), offset+operand.length());
-		double[] newarray = Arrays.copyOf(values, (int) newlength);
+		long newLength = Math.max(this.length(), offset+operand.length());
+		double[] newArray = Arrays.copyOf(values, (int) newLength);
 
-		for( long i = 0; i < newlength; i++ ) {
+		for( long i = 0; i < newLength; i++ ) {
 			if( i < this.length() ) {
 				if( i-offset >= 0 && i-offset < operand.length() ) {
-					newarray[(int) i] = this.get(i) * operand.get(i-offset);
+					newArray[(int) i] = this.get(i) * operand.get(i-offset);
 				} else {
-					newarray[(int) i] = 0.0;
+					newArray[(int) i] = 0.0;
 				}
 			} else {
-				newarray[(int) i] = 0.0;
+				newArray[(int) i] = 0.0;
 			}
 		}
 		
-		values = newarray;
+		values = newArray;
 	}
 
 	@Override
@@ -96,9 +96,7 @@ public class ArrayTimeSeries implements ITimeSeries {
 
 	@Override
 	public void setLength(long newLength) {
-		double[] newarray = Arrays.copyOf(values, (int) newLength);
-		
-		values = newarray;
+        values = Arrays.copyOf(values, (int) newLength);
 	}
 
 	@Override

@@ -20,8 +20,6 @@ public class UUIDGenerationHelperMiele {
 	/**
 	 * Generates the higher part of Miele-UUIDs
 	 * @param mieleUID
-	 * @param brandID
-	 * @param manufacturerID
 	 * @return
 	 */
 	public static long getMieleUUIDHigherPart( int mieleUID ) {
@@ -41,7 +39,7 @@ public class UUIDGenerationHelperMiele {
 	public static long getHomeApplianceUUIDHigherPart( int first32Bit, short companyID, short brandID ) {
 		return ( ( (((long)first32Bit) & 0xFFFFFFFFL) << 32 ) |
 			     ( (((long)companyID) & 0xFFFFL) << 16 ) |
-			     ( (((long)brandID) & 0xFFFFL) << 0 ));
+			     ((((long) brandID) & 0xFFFFL)));
 	}
 	
 	
@@ -60,22 +58,22 @@ public class UUIDGenerationHelperMiele {
 	private static long getUUIDLowerPart( byte[] low_array, int high_part ) {
 		// keep brackets and 0xff because of negative numbers
 		if ( low_array.length >= 8 ) {
-			return	(((long)high_part&0xffffffff) << 32) ^ // just don't ask why...
+			return	(((long) high_part) << 32) ^ // just don't ask why...
 					((((long)low_array[0]&0xff) << 48) |
 					 (((long)low_array[1]&0xff) << 32) |
 					 (((long)low_array[2]&0xff) << 24) | // EUI-64 ... byte 4..5 are skipped
 					 (((long)low_array[5]&0xff) << 16) |
 					 (((long)low_array[6]&0xff) <<  8) |
-					 (((long)low_array[7]&0xff) <<  0));
+					 (((long) low_array[7] & 0xff)));
 		} else
 		if ( low_array.length >= 4 ) {
-			return	(((long)high_part&0xffffffff) << 32) |
+			return	(((long) high_part) << 32) |
 					(((long)low_array[0]&0xff) << 24) |
 					(((long)low_array[1]&0xff) << 16) |
 					(((long)low_array[2]&0xff) <<  8) |
-					(((long)low_array[3]&0xff) <<  0);
+					(((long) low_array[3] & 0xff));
 		} else {
-			return	(((long)high_part&0xffffffff) << 32);
+			return	(((long) high_part) << 32);
 		}
 	}
 	

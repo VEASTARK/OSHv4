@@ -100,7 +100,7 @@ public class BacNetThermalDriver extends HALDeviceDriver {
 				throw new OSHException("Invalid Actuator");
 			
 			// 4 combinations of deviceId, objectId
-			String[] actuators = actuatorObjectName.replaceAll("\\[|\\]", "").split(",");
+			String[] actuators = actuatorObjectName.replaceAll("[\\[\\]]", "").split(",");
 					
 			// for
 			for (int i = 0; i < actuators.length; i++) {

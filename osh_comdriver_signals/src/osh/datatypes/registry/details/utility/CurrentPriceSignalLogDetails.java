@@ -18,7 +18,6 @@ import java.util.UUID;
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType
 @Entity
 @Table(name="log_currentpricesignal")
@@ -41,7 +40,7 @@ public class CurrentPriceSignalLogDetails extends StateExchange {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private CurrentPriceSignalLogDetails() {
+	protected CurrentPriceSignalLogDetails() {
 		this(null, 0);
 	}
 	

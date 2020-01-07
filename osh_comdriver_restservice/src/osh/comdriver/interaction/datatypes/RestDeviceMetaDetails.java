@@ -3,12 +3,9 @@ package osh.comdriver.interaction.datatypes;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="deviceMetaDetails")
 public class RestDeviceMetaDetails extends RestStateDetail {
 
@@ -25,7 +22,7 @@ public class RestDeviceMetaDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestDeviceMetaDetails() {
+    protected RestDeviceMetaDetails() {
 		this(null, 0);
 	}
 

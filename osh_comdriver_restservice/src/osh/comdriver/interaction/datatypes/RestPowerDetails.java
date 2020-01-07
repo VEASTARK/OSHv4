@@ -1,7 +1,5 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
@@ -10,7 +8,6 @@ import java.util.UUID;
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="powerDetails")
 public class RestPowerDetails extends RestStateDetail {
 	
@@ -21,7 +18,7 @@ public class RestPowerDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestPowerDetails() {
+    protected RestPowerDetails() {
 		this(null, 0);
 	}
 	

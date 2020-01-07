@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 public class DBPriceSignalProviderComDriver extends CALComDriver {
 	
-	private EnumMap<AncillaryCommodity,PriceSignal> currentPriceSignal = new EnumMap<AncillaryCommodity, PriceSignal>(AncillaryCommodity.class);
+	private EnumMap<AncillaryCommodity,PriceSignal> currentPriceSignal = new EnumMap<>(AncillaryCommodity.class);
 	
 	private PriceSignalThread priceSignalThread;
 	

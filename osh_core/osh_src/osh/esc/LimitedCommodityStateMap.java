@@ -4,8 +4,12 @@ import osh.datatypes.commodity.Commodity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author Sebastian Kramer
+ */
 public class LimitedCommodityStateMap implements Serializable {
 	
 	/**
@@ -44,44 +48,31 @@ public class LimitedCommodityStateMap implements Serializable {
 			Commodity.REACTIVEPOWER,
 	};
 	
-//	private static final Commodity[] allThermalCommodities = {
-//			Commodity.COLDWATERPOWER,
-//			Commodity.DOMESTICHOTWATERPOWER,
-//			Commodity.HEATINGHOTWATERPOWER,
-//			Commodity.LIQUIDGASPOWER,
-//			Commodity.NATURALGASPOWER
-//	};
-	
-	private static final List<Commodity> allElec = new ArrayList<Commodity>();
+	private static final List<Commodity> allElectricCommoditiesList = new ArrayList<>();
 	
 	static {
-		for (Commodity c : allElectricalCommodities) {
-			allElec.add(c);
-		}
+        Collections.addAll(allElectricCommoditiesList, allElectricalCommodities);
 	}
 	
 	public LimitedCommodityStateMap() {
 		
 		powers = new double[commodityCount];
-//		Arrays.fill(ordinalToPowerMap, -1);
-//		Arrays.fill(ordinalToElecMap, -1);
-//		Arrays.fill(ordinalToThermalMap, -1);
 		for (int i = 0; i < commodityCount; i++) {
 			ordinalToElecMap[i] = -1;
 			ordinalToThermalMap[i] = -1;
 		}
-		int elecParts = allElec.size();
-		addElectrical = new double[elecParts][1];
-		addThermal = new double[commodityCount - elecParts][2];
-		int elecCount = 0, thermalCount = 0;
+		int electricParts = allElectricCommoditiesList.size();
+		addElectrical = new double[electricParts][1];
+		addThermal = new double[commodityCount - electricParts][2];
+		int electricCount = 0, thermalCount = 0;
 		
 		for (int i = 0; i < commodityCount; i++) {
 			Commodity c = allCommodities[i];
 			
 			ordinalToPowerMap[c.ordinal()] = i;
 			
-			if (allElec.contains(c)) {
-				ordinalToElecMap[c.ordinal()] = elecCount++;
+			if (allElectricCommoditiesList.contains(c)) {
+				ordinalToElecMap[c.ordinal()] = electricCount++;
 			} else {
 				ordinalToThermalMap[c.ordinal()] = thermalCount++;
 			}
@@ -96,33 +87,27 @@ public class LimitedCommodityStateMap implements Serializable {
 			ordinalToElecMap[i] = -1;
 			ordinalToThermalMap[i] = -1;
 		}
-//		Arrays.fill(ordinalToPowerMap, -1);
-//		Arrays.fill(ordinalToElecMap, -1);
-//		Arrays.fill(ordinalToThermalMap, -1);
-		int elecCount = 0, thermalCount = 0;
+		int electricCount = 0, thermalCount = 0;
 		
 		for (int i = 0; i < allPossibleCommodities.length; i++) {
 			Commodity c = allPossibleCommodities[i];
 			
 			ordinalToPowerMap[c.ordinal()] = i;
 			
-			if (allElec.contains(c)) {
-				ordinalToElecMap[c.ordinal()] = elecCount++;
+			if (allElectricCommoditiesList.contains(c)) {
+				ordinalToElecMap[c.ordinal()] = electricCount++;
 			} else {
 				ordinalToThermalMap[c.ordinal()] = thermalCount++;
 			}
 		}
 		
-		addElectrical = new double[elecCount][1];
+		addElectrical = new double[electricCount][1];
 		addThermal = new double[thermalCount][2];
 	}
 	
 	public LimitedCommodityStateMap(List<Commodity> allPossibleCommodities) {
 		
 		powers = new double[allPossibleCommodities.size()];
-//		Arrays.fill(ordinalToPowerMap, -1);
-//		Arrays.fill(ordinalToElecMap, -1);
-//		Arrays.fill(ordinalToThermalMap, -1);
 		for (int i = 0; i < commodityCount; i++) {
 			ordinalToPowerMap[i] = -1;
 			ordinalToElecMap[i] = -1;
@@ -135,7 +120,7 @@ public class LimitedCommodityStateMap implements Serializable {
 			
 			ordinalToPowerMap[c.ordinal()] = i;
 			
-			if (allElec.contains(c)) {
+			if (allElectricCommoditiesList.contains(c)) {
 				ordinalToElecMap[c.ordinal()] = elecCount++;
 			} else {
 				ordinalToThermalMap[c.ordinal()] = thermalCount++;

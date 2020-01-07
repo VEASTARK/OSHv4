@@ -1,7 +1,5 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Collection;
 import java.util.UUID;
@@ -11,7 +9,6 @@ import java.util.UUID;
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="electricityDetails")
 public class RestElectricityDetails extends RestStateDetail {
 	
@@ -31,7 +28,7 @@ public class RestElectricityDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestElectricityDetails() {
+    protected RestElectricityDetails() {
 		this(null, 0);
 	}
 	
@@ -154,11 +151,9 @@ public class RestElectricityDetails extends RestStateDetail {
 		if (Double.doubleToLongBits(totalEnergyConsumption) != Double
 				.doubleToLongBits(other.totalEnergyConsumption))
 			return false;
-		if (Double.doubleToLongBits(voltage) != Double
-				.doubleToLongBits(other.voltage))
-			return false;
-		return true;
-	}
+        return Double.doubleToLongBits(voltage) == Double
+                .doubleToLongBits(other.voltage);
+    }
 	
 	@Override
 	public String toString() {

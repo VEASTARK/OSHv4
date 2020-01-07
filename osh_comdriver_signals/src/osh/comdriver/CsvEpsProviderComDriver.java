@@ -145,7 +145,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 		}
 		
 		if (ancillaryCommoditiesAsArray != null) {
-			ancillaryCommoditiesAsArray = ancillaryCommoditiesAsArray.replaceAll("\\[|\\]|\\s", "");
+			ancillaryCommoditiesAsArray = ancillaryCommoditiesAsArray.replaceAll("\\[|]|\\s", "");
 			activeAncillaryCommodities = Stream.of(ancillaryCommoditiesAsArray.split(","))
 			        .map(AncillaryCommodity::fromString)
 			        .collect(Collectors.toList());

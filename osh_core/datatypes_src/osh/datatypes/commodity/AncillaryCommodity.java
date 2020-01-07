@@ -16,19 +16,20 @@ public enum AncillaryCommodity {
 	REACTIVEPOWEREXTERNAL	("reactivepowerexternal", "Blindleistung Bezug", "reactive power consumption", "W"),	// 
 	
 	@XmlEnumValue("pvactivepowerfeedin")
-	PVACTIVEPOWERFEEDIN		("pvactivepowerfeedin", "Wirkleistung Rückspeisung von PV", "active power feedin from PV", "W"),	// 
+	PVACTIVEPOWERFEEDIN		("pvactivepowerfeedin", "Wirkleistung Rückspeisung von PV", "active power feed-in from PV", "W"),	//
 	
 	@XmlEnumValue("pvactivepowerautoconsumption")
 	PVACTIVEPOWERAUTOCONSUMPTION ("pvactivepowerautoconsumption", "Wirkleistung Eigenstromnutzung von PV", "active power auto consumption from PV", "W"),	//
 	
 	@XmlEnumValue("chpactivepowerfeedin")
-	CHPACTIVEPOWERFEEDIN		("chpactivepowerfeedin", "Wirkleistung Rückspeisung von CHP", "active power feedin from CHP", "W"),	// 
+	CHPACTIVEPOWERFEEDIN		("chpactivepowerfeedin", "Wirkleistung Rückspeisung von CHP", "active power feed-in from CHP", "W"),	//
 	
 	@XmlEnumValue("chpactivepowerautoconsumption")
 	CHPACTIVEPOWERAUTOCONSUMPTION ("chpactivepowerautoconsumption", "Wirkleistung Eigenstromnutzung von CHP", "active power auto consumption from CHP", "W"),	//
 	
 	@XmlEnumValue("batteryactivepowerfeedin")
-	BATTERYACTIVEPOWERFEEDIN		("batteryactivepowerfeedin", "Wirkleistung Rückspeisung von Batterie", "active power feedin from battery", "W"),	// 
+	BATTERYACTIVEPOWERFEEDIN		("batteryactivepowerfeedin", "Wirkleistung Rückspeisung von Batterie", "active power feed-in from " +
+            "battery", "W"),	//
 	
 	@XmlEnumValue("batteryactivepowerautoconsumption")
 	BATTERYACTIVEPOWERAUTOCONSUMPTION ("batteryactivepowerautoconsumption", "Wirkleistung Eigenstromnutzung von Batterie", "active power auto consumption from battery", "W"),	//
@@ -49,7 +50,6 @@ public enum AncillaryCommodity {
 	
 	/**
 	 * CONSTRUCTOR
-	 * @param state byte (meaning is UNSIGNED byte (0 - 255))
 	 */
 	AncillaryCommodity(String commodity, String descriptionDE, String descriptionEN, String unit) {
 		this.commodity = commodity;

@@ -25,7 +25,7 @@ public class LastActionExchange extends StateExchange {
 	/** for JAXB, do not use */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private LastActionExchange() {
+    protected LastActionExchange() {
 		super(null, 0);
 	}
 	

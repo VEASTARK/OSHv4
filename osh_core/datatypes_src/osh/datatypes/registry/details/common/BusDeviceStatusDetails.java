@@ -14,7 +14,6 @@ import java.util.UUID;
  * @author Kaibin Bao, Ingo Mauser
  *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType
 public class BusDeviceStatusDetails extends StateExchange {
 
@@ -41,7 +40,7 @@ public class BusDeviceStatusDetails extends StateExchange {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private BusDeviceStatusDetails() {
+    protected BusDeviceStatusDetails() {
 		this(null, 0, ConnectionStatus.UNDEFINED);
 	}
 

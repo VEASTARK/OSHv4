@@ -1,12 +1,9 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
 
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType(name="switchDetails")
 public class RestSwitchDetails extends RestStateDetail {
 	protected boolean on;
@@ -14,7 +11,7 @@ public class RestSwitchDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestSwitchDetails() {
+    protected RestSwitchDetails() {
 		this(null, 0);
 	};
 	

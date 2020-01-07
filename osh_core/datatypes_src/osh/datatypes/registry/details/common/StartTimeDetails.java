@@ -29,7 +29,7 @@ public class StartTimeDetails extends StateExchange {
 	
 	@SuppressWarnings("unused")
 	@Deprecated
-	private StartTimeDetails() {
+	protected StartTimeDetails() {
 		super(null, 0);
 	}
 	

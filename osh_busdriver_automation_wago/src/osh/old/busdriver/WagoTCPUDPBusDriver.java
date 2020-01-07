@@ -278,7 +278,7 @@ public class WagoTCPUDPBusDriver extends HALBusDriver implements UpdateListener,
 			// extract wago target ids
 			long higherPart = targetId.getMostSignificantBits();
 			short moduleId = (short) ((higherPart >> 16) & 0xffff);
-			short portId = (short) ((higherPart >> 0) & 0xffff);
+			short portId = (short) ((higherPart) & 0xffff);
 			byte moduleType = (byte) ((higherPart >> 32) & 0xff);
 			int uuidPrefix = (int) ((higherPart >> 32) & 0xffffff00);
 

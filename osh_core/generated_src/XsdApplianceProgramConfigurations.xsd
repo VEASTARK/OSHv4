@@ -4,8 +4,7 @@
 	xmlns:wp="http://osh/configuration/appliance" 
 	targetNamespace="http://osh/configuration/appliance"
 
-	elementFormDefault="qualified" 
-	attributeFormDefault="unqualified">
+	elementFormDefault="qualified">
 
 
 	<!--included Schema Files -->
@@ -31,9 +30,9 @@
 
 	<xs:complexType name="xsd.Program">
 		<xs:sequence>
-			<xs:element name="ProgramID" type="wp:byte" minOccurs="1" maxOccurs="1" />
-			<xs:element name="ProgramName" type="wp:name" minOccurs="0" maxOccurs="1" />
-			<xs:element name="Descriptions" type="wp:XsdDescriptions" minOccurs="0" maxOccurs="1" />
+			<xs:element name="ProgramID" type="wp:byte"/>
+			<xs:element name="ProgramName" type="wp:name" minOccurs="0"/>
+			<xs:element name="Descriptions" type="wp:XsdDescriptions" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -42,13 +41,13 @@
 
 	<xs:complexType name="xsd.ApplianceProgramConfiguration">
 		<xs:sequence>
-			<xs:element name="ConfigurationID" type="wp:nonNegativeInt" minOccurs="1" maxOccurs="1" />
-			<xs:element name="ConfigurationName" type="wp:name" minOccurs="0" maxOccurs="1" />
+			<xs:element name="ConfigurationID" type="wp:nonNegativeInt"/>
+			<xs:element name="ConfigurationName" type="wp:name" minOccurs="0"/>
 			<!--DIN EN 50523 ProgramConfiguration and description -->
-			<xs:element name="Program" type="wp:xsd.Program" minOccurs="1" maxOccurs="1" />
-			<xs:element name="Parameters" type="wp:xsd.ConfigurationParameters" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Program" type="wp:xsd.Program"/>
+			<xs:element name="Parameters" type="wp:xsd.ConfigurationParameters" minOccurs="0"/>
 			<!--underlying LoadProfiles for local O/C Unit -->
-			<xs:element name="LoadProfiles" type="wp:XsdLoadProfiles" minOccurs="1" maxOccurs="1" />
+			<xs:element name="LoadProfiles" type="wp:XsdLoadProfiles"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -62,7 +61,7 @@
 	<xs:element name="xsd.ApplianceProgramConfigurations">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="ApplianceProgramConfiguration" type="wp:xsd.ApplianceProgramConfiguration" minOccurs="1" maxOccurs="unbounded" />
+				<xs:element name="ApplianceProgramConfiguration" type="wp:xsd.ApplianceProgramConfiguration" maxOccurs="unbounded" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

@@ -32,7 +32,6 @@ public class Schedule implements Serializable {
 		super();
 	}
 	
-	
 	/**
 	 * CONSTRUCTOR
 	 * @param profile
@@ -75,8 +74,7 @@ public class Schedule implements Serializable {
 	
 	public Schedule clone() {
 		ILoadProfile<Commodity> clonedProfile = this.profile.clone();
-		Schedule clone = new Schedule(clonedProfile, lukewarmCervisia,scheduleName);
-		return clone;
+        return new Schedule(clonedProfile, lukewarmCervisia,scheduleName);
 	}
 	
 	@Override

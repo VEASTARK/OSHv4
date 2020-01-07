@@ -131,15 +131,11 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 
 		loadProfile.put(t, v);
 		if (this.endingTimeOfProfile < t + 1) {
-			if (this.endingTimeOfProfile == t 
-					&& power == 0) {
-				//do nothing
-				// KEEP this: only 1 tick with value 0 -> no tick
-			} 
-			else {
-				this.endingTimeOfProfile = t + 1;
+			if (this.endingTimeOfProfile != t
+					|| power != 0) {
+                this.endingTimeOfProfile = t + 1;
 			}
-		}		
+		}
 	}
 
 	protected <T> Entry<Long, T> getNext(
@@ -204,14 +200,11 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 			Iterator<Entry<Long, Tick>> iSet2 = loadProfile2.entrySet()
 					.iterator();
 
-			Entry<Long, Tick> entry1 = null;
-			Entry<Long, Tick> entry2 = null;
+			Entry<Long, Tick> entry1 = getNext(iSet1, this.endingTimeOfProfile);
+			Entry<Long, Tick> entry2 = getNext(iSet2, other.endingTimeOfProfile);
 
 			int activeValue1 = 0;
 			int activeValue2 = 0;
-
-			entry1 = getNext(iSet1, this.endingTimeOfProfile);
-			entry2 = getNext(iSet2, other.endingTimeOfProfile);
 
 			while (entry1 != null && entry2 != null) {
 
@@ -565,55 +558,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 	}
 	
 	public int getAverageLoadFromTillSequential(C commodity, long start, long end) {
-		
-		if (start >= endingTimeOfProfile) {
-			return 0;
-		}
-		Entry<Long, Tick> current = currentEntry.get(commodity);
-		
-		//checking if profile has values
-		if (current == null) 
-			return 0;
-		
-		double avg = 0.0;
-		long currentTime = start;
-		double span = end - start;
-		long maxTime = Math.min(end, endingTimeOfProfile);
-		
-//		
-		Entry<Long, Tick> next = nextEntry.get(commodity);
-
-		//no other values for the requested time period
-		if (next == null || next.getKey() >= maxTime) {
-//			avg = ((double) current.getValue().value) * (((double) (maxTime - currentTime)) / span);
-			return current.getValue().value;
-		}
-		
-		Iterator<Entry<Long, Tick>> entryIterator = iterators.get(commodity);
-		
-		while (next != null && next.getKey() < maxTime) {
-			long nextChange = next.getKey();
-			
-			avg += current.getValue().value * (nextChange - currentTime);
-			currentTime = nextChange;
-			current = next;
-			
-			if (entryIterator.hasNext()) {
-				next = entryIterator.next();
-			} else {
-				next = null;
-			}
-		}
-		
-		if (currentTime < maxTime) {
-			avg += current.getValue().value * (maxTime - currentTime);
-		}
-		
-		currentEntry.put(commodity, current);
-		nextEntry.put(commodity, next);
-//		iterators.put(commodity, entryIterator);
-		
-		return (int) Math.round(avg / span);
+	    return (int) Math.round(getAverageLoadFromTillSequentialNotRounded(commodity, start, end));
 	}
 	
 	public double getAverageLoadFromTillSequentialNotRounded(C commodity, long start, long end) {
@@ -799,7 +744,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 			for (Iterator<Map.Entry<Long, Tick>> it = map.entrySet().iterator(); it.hasNext();) {
 				Entry<Long,Tick> e = it.next();
 				// if last -> set value
-				if (it.hasNext() == false) {
+				if (!it.hasNext()) {
 					compressed.setLoad(c, e.getKey(), e.getValue().value);
 					
 					if (lastLookedAtTick != null) {
@@ -952,7 +897,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 			for (Iterator<Map.Entry<Long, Tick>> it = map.entrySet().iterator(); it.hasNext();) {
 				Entry<Long,Tick> e = it.next();
 				// if last -> set value
-				if (it.hasNext() == false) {
+				if (!it.hasNext()) {
 					compressed.setLoad(c, e.getKey(), e.getValue().value);
 					
 					if (lastTick != null) {
@@ -1097,23 +1042,23 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 	
 	@Override
 	public String toString() {
-		String returnValue = "";
+		StringBuilder returnValue = new StringBuilder();
 		
 		for ( Entry<C, TreeMap<Long, Tick>> es : commodities.entrySet() ) {
-			returnValue += "Profile for " + enumType.getSimpleName() + " " + es.getKey() + ": " + es.getValue().toString();
+			returnValue.append("Profile for ").append(enumType.getSimpleName()).append(" ").append(es.getKey()).append(": ").append(es.getValue().toString());
 		}
 		
-		return returnValue;
+		return returnValue.toString();
 	}
 
 	@Override
 	public String toStringShort() {
-		String returnValue = "[ ";
+		StringBuilder returnValue = new StringBuilder("[ ");
 		
 		for ( Entry<C, TreeMap<Long, Tick>> es : commodities.entrySet() ) {
 			TreeMap<Long, Tick> map = es.getValue();
 			if( map != null && map.lastEntry() != null ) {
-				returnValue += es.getKey() + ", ";
+				returnValue.append(es.getKey()).append(", ");
 			}
 		}
 		

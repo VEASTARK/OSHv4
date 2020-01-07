@@ -14,12 +14,6 @@ import java.util.UUID;
 
 public abstract class StateExchange extends Exchange implements Cloneable, Serializable {
 
-//	/** for JAXB */
-//	@Deprecated
-//	private StateExchange() {
-//		super(null, 0);
-//	}
-	
 	/**
 	 * 
 	 */

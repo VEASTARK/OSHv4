@@ -33,7 +33,7 @@ public class RestBusDeviceStatusDetails extends RestStateDetail {
 	/** for JAXB */
 	@SuppressWarnings("unused")
 	@Deprecated
-	private RestBusDeviceStatusDetails() {
+    protected RestBusDeviceStatusDetails() {
 		this(null, 0);
 	}
 

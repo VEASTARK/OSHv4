@@ -38,8 +38,9 @@ public class CurrentWeatherRequestThread implements Runnable {
 	 * CONSTRUCTOR
 	 * 
 	 * @param globalLogger
-	 * @param WeatherPredictionProviderComDriver
+	 * @param comDriver
 	 * @param urlCurrentWeather
+	 * @param apiKey
 	 */
 	public CurrentWeatherRequestThread(IGlobalLogger globalLogger,
 			WeatherPredictionProviderComDriver comDriver, String urlCurrentWeather,
@@ -108,16 +109,10 @@ public class CurrentWeatherRequestThread implements Runnable {
 
 		try {
 			obj = mapper.readValue(new URL(urlToWeatherAPI + apiKey), CurrentWeatherMap.class);
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return obj;
+        return obj;
 	}
 }

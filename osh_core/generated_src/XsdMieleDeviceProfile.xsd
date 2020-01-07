@@ -10,9 +10,9 @@
                 <element name="deviceUUID" type="string"/>
                 <element name="deviceType" type="string"/>
                 <element name="deviceDescription" type="string"/>
-                <element name="hasProfile" minOccurs="1" maxOccurs="1" type="boolean"/>
-                <element name="Intelligent" minOccurs="1" maxOccurs="1" type="boolean"/>
-                <element name="profileTicks" minOccurs="1" maxOccurs="1" type="tns:ProfileTicks"/>
+                <element name="hasProfile" type="boolean"/>
+                <element name="Intelligent" type="boolean"/>
+                <element name="profileTicks" type="tns:ProfileTicks"/>
 			</sequence>
 		</complexType>
 	</element>
@@ -20,13 +20,13 @@
 
 	<complexType name="ProfileTicks">
 		<sequence>
-            <element name="profileTick" minOccurs="1" maxOccurs="unbounded" type="tns:ProfileTick"/>
+            <element name="profileTick" maxOccurs="unbounded" type="tns:ProfileTick"/>
 		</sequence>
 	</complexType>
 
 	<complexType name="ProfileTick">
 		<sequence>
-			<element name="load" minOccurs="1" maxOccurs="unbounded">
+			<element name="load" maxOccurs="unbounded">
 				<complexType>
 					<sequence>
                         <element name="commodity" type="string"/>

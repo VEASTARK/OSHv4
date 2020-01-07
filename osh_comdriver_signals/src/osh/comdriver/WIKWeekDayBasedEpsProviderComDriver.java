@@ -144,7 +144,7 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
 		}
 		
 		if (ancillaryCommoditiesAsArray != null) {
-			ancillaryCommoditiesAsArray = ancillaryCommoditiesAsArray.replaceAll("\\[|\\]|\\s", "");
+			ancillaryCommoditiesAsArray = ancillaryCommoditiesAsArray.replaceAll("\\[|]|\\s", "");
 			activeAncillaryCommodities = Stream.of(ancillaryCommoditiesAsArray.split(","))
 			        .map(AncillaryCommodity::fromString)
 			        .collect(Collectors.toList());
@@ -163,7 +163,7 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
 		}
 		
 		if (activePowerPrices != null) {
-			activePowerPrices = activePowerPrices.replaceAll("\\[|\\]|\\s", "");
+			activePowerPrices = activePowerPrices.replaceAll("\\[|]|\\s", "");
 			this.activePowerPrices = Arrays.asList(activePowerPrices.split(","))
 					.stream()
 					.map(inp -> Double.parseDouble(inp))
