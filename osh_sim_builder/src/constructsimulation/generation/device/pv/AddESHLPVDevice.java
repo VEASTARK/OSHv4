@@ -10,38 +10,38 @@ import java.util.UUID;
 
 public class AddESHLPVDevice {
 
-	public static void addRealPvDevice(
-			EALConfiguration ealConfiguration,
-			
-			DeviceTypes deviceType,
-			DeviceClassification classification,
-			UUID deviceId, 
-			
-			String driverClassName,
-			String localObserverClass,
-			boolean isControllable,
-			String localControllerClass,
-			
-			ScreenplayType screenplayType,
-			
-			String nominalPower,
-			String usedcommodities) {
-		
-		
-		AssignedDevice device = CreateESHLPvDevice.createRealPvDevice(
-				deviceType, 
-				classification, 
-				deviceId, 
-				driverClassName, 
-				localObserverClass, 
-				isControllable, 
-				localControllerClass, 
-				screenplayType,
-				nominalPower,
-				usedcommodities);
-		
-		ealConfiguration.getAssignedDevices().add(device);
-		
-	}
-	
+    public static void addRealPvDevice(
+            EALConfiguration ealConfiguration,
+
+            DeviceTypes deviceType,
+            DeviceClassification classification,
+            UUID deviceId,
+
+            String driverClassName,
+            String localObserverClass,
+            boolean isControllable,
+            String localControllerClass,
+
+            ScreenplayType screenplayType,
+
+            String nominalPower,
+            String usedCommodities) {
+
+
+        AssignedDevice device = CreateESHLPvDevice.createRealPvDevice(
+                deviceType,
+                classification,
+                deviceId,
+                driverClassName,
+                localObserverClass,
+                isControllable,
+                localControllerClass,
+                screenplayType,
+                nominalPower,
+                usedCommodities);
+
+        ealConfiguration.getAssignedDevices().add(device);
+
+    }
+
 }

@@ -17,9 +17,9 @@ import java.util.List;
 
 /**
  * <p>Java class for XsdPhase complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XsdPhase">
  *   &lt;complexContent>
@@ -35,12 +35,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XsdPhase", propOrder = {
-    "tick"
+        "tick"
 })
 public class XsdPhase {
 
@@ -58,44 +56,40 @@ public class XsdPhase {
 
     /**
      * Gets the value of the tick property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the tick property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getTick().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link XsdTick }
-     * 
-     * 
      */
     public List<XsdTick> getTick() {
-        if (tick == null) {
-            tick = new ArrayList<XsdTick>();
+        if (this.tick == null) {
+            this.tick = new ArrayList<>();
         }
         return this.tick;
     }
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
-        return id;
+        return this.id;
     }
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;
@@ -103,23 +97,19 @@ public class XsdPhase {
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getName() {
-        return name;
+        return this.name;
     }
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setName(String value) {
         this.name = value;
@@ -127,15 +117,13 @@ public class XsdPhase {
 
     /**
      * Gets the value of the minLength property.
-     * 
      */
     public int getMinLength() {
-        return minLength;
+        return this.minLength;
     }
 
     /**
      * Sets the value of the minLength property.
-     * 
      */
     public void setMinLength(int value) {
         this.minLength = value;
@@ -143,15 +131,13 @@ public class XsdPhase {
 
     /**
      * Gets the value of the maxLength property.
-     * 
      */
     public int getMaxLength() {
-        return maxLength;
+        return this.maxLength;
     }
 
     /**
      * Sets the value of the maxLength property.
-     * 
      */
     public void setMaxLength(int value) {
         this.maxLength = value;

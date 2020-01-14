@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,23 +10,21 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "pod"
+        "pod"
 })
 public class Sys_ implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -2396860001716780611L;
-	@JsonProperty("pod")
-    private String pod;
+     *
+     */
+    private static final long serialVersionUID = -2396860001716780611L;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("pod")
+    private String pod;
 
     /**
-     * 
-     * @return
-     *     The pod
+     * @return The pod
      */
     @JsonProperty("pod")
     public String getPod() {
@@ -35,9 +32,7 @@ public class Sys_ implements Serializable {
     }
 
     /**
-     * 
-     * @param pod
-     *     The pod
+     * @param pod The pod
      */
     @JsonProperty("pod")
     public void setPod(String pod) {

@@ -12,48 +12,46 @@ import osh.registry.interfaces.IEventTypeReceiver;
 import java.util.UUID;
 
 
-
 /**
- * 
  * @author Jan Mueller
- *
  */
 public class WeatherPredictionComManager extends ComManager implements IEventTypeReceiver {
 
-	CurrentWeatherDetails currentWeatherDetails;
-	WeatherPredictionDetails weatherPredictionDetails;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param uuid
-	 */
-	public WeatherPredictionComManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-	}
+    CurrentWeatherDetails currentWeatherDetails;
+    WeatherPredictionDetails weatherPredictionDetails;
 
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();	
-		getTimer().registerComponent(this, 1);
-	}
-	
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		super.onNextTimePeriod();
 
-	}
-	
-	
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(
-			Class<T> type, T event) throws OSHException {
-		// NOTHING
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param uuid
+     */
+    public WeatherPredictionComManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+    }
 
-	@Override
-	public void onDriverUpdate(ICALExchange exchangeObject) {
-		// NOTHING
-	}	
-	
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+        this.getTimer().registerComponent(this, 1);
+    }
+
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        super.onNextTimePeriod();
+
+    }
+
+
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T event) {
+        // NOTHING
+    }
+
+    @Override
+    public void onDriverUpdate(ICALExchange exchangeObject) {
+        // NOTHING
+    }
+
 }

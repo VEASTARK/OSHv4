@@ -28,58 +28,59 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 /**
- * This class implements a selection operator used for selecting the best 
+ * This class implements a selection operator used for selecting the best
  * solution in a SolutionSet according to a given comparator
  */
 @SuppressWarnings("rawtypes")
 public class BestSolutionSelection extends Selection {
-  
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-// Comparator
-  private Comparator comparator_;
-    
-  public BestSolutionSelection(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-  	super(parameters, pseudoRandom) ;
 
-  	comparator_ = null ;
-  	
-  	if (parameters.get("comparator") != null)
-  		comparator_ = (Comparator) parameters.get("comparator") ;  		
-  }
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    // Comparator
+    private Comparator comparator_;
 
-  /**
-   * Constructor
-   * @param comparator
-   */
-  //public BestSolutionSelection(Comparator comparator) {
-  //	comparator_ = comparator ;
-  //}
-  
-  /**
-  * Performs the operation
-  * @param object Object representing a SolutionSet.
-  * @return the best solution found
-  */
-  @SuppressWarnings("unchecked")
-  @Override
-  public Object execute(Object object) {
-    SolutionSet solutionSet     = (SolutionSet)object;
-    
-    if (solutionSet.size() == 0) {
-      return null;
+    public BestSolutionSelection(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
+
+        this.comparator_ = null;
+
+        if (parameters.get("comparator") != null)
+            this.comparator_ = (Comparator) parameters.get("comparator");
     }
-    int bestSolution ;
-    
-    bestSolution = 0 ;
-   	
-    for (int i = 1; i < solutionSet.size(); i++) {
-    	if (comparator_.compare(solutionSet.get(i), solutionSet.get(bestSolution)) < 0)  
-    		bestSolution = i ;
-    } // for
-    
-    return bestSolution ;    
-  } // Execute     
+
+    /**
+     * Constructor
+     * @param comparator
+     */
+    //public BestSolutionSelection(Comparator comparator) {
+    //	comparator_ = comparator ;
+    //}
+
+    /**
+     * Performs the operation
+     *
+     * @param object Object representing a SolutionSet.
+     * @return the best solution found
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object execute(Object object) {
+        SolutionSet solutionSet = (SolutionSet) object;
+
+        if (solutionSet.size() == 0) {
+            return null;
+        }
+        int bestSolution;
+
+        bestSolution = 0;
+
+        for (int i = 1; i < solutionSet.size(); i++) {
+            if (this.comparator_.compare(solutionSet.get(i), solutionSet.get(bestSolution)) < 0)
+                bestSolution = i;
+        } // for
+
+        return bestSolution;
+    } // Execute
 } // BestObjectiveSelection

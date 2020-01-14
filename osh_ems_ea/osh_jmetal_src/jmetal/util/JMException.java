@@ -28,21 +28,21 @@ import java.io.Serializable;
  * jMetal exception class
  */
 public class JMException extends Exception implements Serializable {
-  
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
-/**
-   * Constructor
-   * @param Error message
-   */
-  public JMException (String message){
-     super(message);      
-  } // JmetalException
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-  public JMException (Throwable e){
-	     super(e);      
-  } // JmetalException
+    /**
+     * Constructor
+     *
+     */
+    public JMException(String message) {
+        super(message);
+    } // JmetalException
+
+    public JMException(Throwable e) {
+        super(e);
+    } // JmetalException
 }

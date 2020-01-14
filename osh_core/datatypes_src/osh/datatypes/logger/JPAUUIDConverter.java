@@ -9,25 +9,23 @@ import org.eclipse.persistence.sessions.Session;
 import java.util.UUID;
 
 /**
- * 
  * @author Kaibin Bao, Ingo Mauser
- *
  */
 public class JPAUUIDConverter implements Converter {
 
-	private static final long serialVersionUID = 6982191183318975736L;
+    private static final long serialVersionUID = 6982191183318975736L;
 
-	@Override
+    @Override
     public Object convertObjectValueToDataValue(Object objectValue,
-            Session session) {
-		if( objectValue == null )
-			return "null";
+                                                Session session) {
+        if (objectValue == null)
+            return "null";
         return objectValue.toString();
     }
 
     @Override
     public UUID convertDataValueToObjectValue(Object dataValue,
-            Session session) {
+                                              Session session) {
         return UUID.fromString((String) dataValue);
     }
 

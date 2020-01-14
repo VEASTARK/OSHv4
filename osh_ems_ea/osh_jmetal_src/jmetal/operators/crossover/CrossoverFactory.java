@@ -34,47 +34,48 @@ import java.util.HashMap;
  */
 @SuppressWarnings("rawtypes")
 public class CrossoverFactory {
-    
-	public static Crossover getCrossoverOperator(String name, HashMap parameters, OSHRandomGenerator halRandomGenerator) throws JMException {
-		PseudoRandom pseudoRandom = new PseudoRandom(halRandomGenerator);
-		return getCrossoverOperator(name, parameters, pseudoRandom);
-	}
-	
-   /**
-   * Gets a crossover operator through its name.
-   * @param name Name of the operator
-   * @return The operator
-   */
-  @SuppressWarnings("unchecked")
-public static Crossover getCrossoverOperator(String name, HashMap parameters, PseudoRandom pseudoRandom) throws JMException {
-    if (name.equalsIgnoreCase("SBXCrossover"))
-      return new SBXCrossover(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("SinglePointCrossover"))
-        return new SinglePointCrossover(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("PMXCrossover"))
-      return new PMXCrossover(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("TwoPointsCrossover"))
-      return new TwoPointsCrossover(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("HUXCrossover"))
-      return new HUXCrossover(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("DifferentialEvolutionCrossover"))
-      return new DifferentialEvolutionCrossover(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("BLXAlphaCrossover"))
-        return new BLXAlphaCrossover(parameters, pseudoRandom);
-	else if (name.equalsIgnoreCase("ProblemPartCrossover"))
-		return new ProblemPartCrossover(parameters, pseudoRandom);
-	else if (name.equalsIgnoreCase("SingleBinaryNPointsCrossover"))
-		return new SingleBinaryNPointsCrossover(parameters, pseudoRandom);
-	else if (name.equalsIgnoreCase("UniformBinaryCrossover"))
-		return new UniformBinaryCrossover(parameters, pseudoRandom);
-	else if (name.equalsIgnoreCase("ShuffledBinaryCrossover"))
-		return new ShuffledBinaryCrossover(parameters, pseudoRandom);
-	else if (name.equals("SingleBinarySinglePointCrossover"))
-		return new SingleBinarySinglePointCrossover(parameters, pseudoRandom);    
-    else {
-      Configuration.logger_.severe("CrossoverFactory.getCrossoverOperator. " +
-          "Operator '" + name + "' not found ");
-      throw new JMException("Exception in " + name + ".getCrossoverOperator()") ;
-    } // else        
-  } // getCrossoverOperator
+
+    public static Crossover getCrossoverOperator(String name, HashMap parameters, OSHRandomGenerator halRandomGenerator) throws JMException {
+        PseudoRandom pseudoRandom = new PseudoRandom(halRandomGenerator);
+        return getCrossoverOperator(name, parameters, pseudoRandom);
+    }
+
+    /**
+     * Gets a crossover operator through its name.
+     *
+     * @param name Name of the operator
+     * @return The operator
+     */
+    @SuppressWarnings("unchecked")
+    public static Crossover getCrossoverOperator(String name, HashMap parameters, PseudoRandom pseudoRandom) throws JMException {
+        if (name.equalsIgnoreCase("SBXCrossover"))
+            return new SBXCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("SinglePointCrossover"))
+            return new SinglePointCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("PMXCrossover"))
+            return new PMXCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("TwoPointsCrossover"))
+            return new TwoPointsCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("HUXCrossover"))
+            return new HUXCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("DifferentialEvolutionCrossover"))
+            return new DifferentialEvolutionCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("BLXAlphaCrossover"))
+            return new BLXAlphaCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("ProblemPartCrossover"))
+            return new ProblemPartCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("SingleBinaryNPointsCrossover"))
+            return new SingleBinaryNPointsCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("UniformBinaryCrossover"))
+            return new UniformBinaryCrossover(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("ShuffledBinaryCrossover"))
+            return new ShuffledBinaryCrossover(parameters, pseudoRandom);
+        else if (name.equals("SingleBinarySinglePointCrossover"))
+            return new SingleBinarySinglePointCrossover(parameters, pseudoRandom);
+        else {
+            Configuration.logger_.severe("CrossoverFactory.getCrossoverOperator. " +
+                    "Operator '" + name + "' not found ");
+            throw new JMException("Exception in " + name + ".getCrossoverOperator()");
+        } // else
+    } // getCrossoverOperator
 } // CrossoverFactory

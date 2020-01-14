@@ -15,142 +15,138 @@ import osh.utils.physics.ComplexPowerUtil;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser, Sebastian Kramer
- *
  */
-public class NonControllableDachsChpLocalController 
-				extends LocalController
-				implements IHasState {
-	
-	private long lastTimeIppSent = Long.MIN_VALUE;
-	private boolean lastSentState;
-	
+public class NonControllableDachsChpLocalController
+        extends LocalController
+        implements IHasState {
 
-	private long newIPPAfter;
-	private double currentHotWaterStorageMinTemp;
-	private double currentHotWaterStorageMaxTemp;
-	private double fixedCostPerStart;
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	private long runningSince;
-	private long stoppedSince;
-	private int lastThermalPower;
+    private long lastTimeIppSent = Long.MIN_VALUE;
+    private boolean lastSentState;
 
-	/**
-	 * CONSTRUCTOR
-	 */
-	public NonControllableDachsChpLocalController(IOSHOC controllerbox) {
-		super(controllerbox);
-	}
-	
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		getTimer().registerComponent(this, 1);
-	}
-	
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		super.onNextTimePeriod();
-		
-		
-		
-		// get new MOX
-		DachsChpMOX mox = (DachsChpMOX) getDataFromLocalObserver();
-		
-		long now = getTimer().getUnixTime();
-		this.newIPPAfter = mox.getNewIPPAfter();
-		this.currentHotWaterStorageMinTemp = mox.getCurrentHotWaterStorageMinTemp();
-		this.currentHotWaterStorageMaxTemp = mox.getCurrentHotWaterStorageMaxTemp();
-		this.fixedCostPerStart = mox.getFixedCostPerStart();
-		
-		this.compressionType = mox.getCompressionType();
-		this.compressionValue = mox.getCompressionValue();
-		
-		if (mox.isRunning())
-			lastThermalPower = mox.getThermalPower();
-		
-		if ((now > lastTimeIppSent + newIPPAfter) || mox.isRunning() != lastSentState) {
-			int typicalActivePower = mox.getTypicalActivePower();
-			int typicalReactivePower = mox.getTypicalReactivePower();
-			int typicalThermalpower = mox.getTypicalThermalPower();
-			int typicalGasPower = mox.getTypicalGasPower();
-			boolean isRunning = mox.isRunning();
-			
-			// new IPP
-			boolean toBeScheduled = false;
-			DachsChpNonControllableIPP sipp = null;
-			try {
-				sipp = new DachsChpNonControllableIPP(
-						getDeviceID(), 
-						getGlobalLogger(), 
-						getTimer().getUnixTime(), 
-						toBeScheduled,
-						mox.getMinRuntime(),
-						new GenericChpModel(
-								typicalActivePower, 
-								typicalReactivePower, 
-								typicalThermalpower, 
-								typicalGasPower, 
-								ComplexPowerUtil.convertActiveAndReactivePowerToCosPhi(typicalActivePower, typicalReactivePower),
-								isRunning, 
-								lastThermalPower, 
-								runningSince, 
-								stoppedSince),
-						isRunning,
-						currentHotWaterStorageMinTemp,
-						currentHotWaterStorageMaxTemp,
-						mox.getWaterTemperature(), 
-						fixedCostPerStart,
-						compressionType,
-						compressionValue);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			getOCRegistry().setState(
-					InterdependentProblemPart.class, this, sipp);
-			
-			lastTimeIppSent = now;
-			lastSentState = isRunning;
-		}
-		
-		double currentWaterTemp = mox.getWaterTemperature(); // get it...
-		
-		ChpControllerExchange cx = null;
-		if (currentWaterTemp <= currentHotWaterStorageMinTemp) {
-			//starting
-			runningSince = now;
-			cx = new ChpControllerExchange(
-					getDeviceID(), 
-					now, 
-					false, 
-					false, 
-					true,
-					15 * 60);
-		}
-		else if (currentWaterTemp >= currentHotWaterStorageMaxTemp) {
-			stoppedSince = now;
-			cx = new ChpControllerExchange(
-					getDeviceID(), 
-					getTimer().getUnixTime(), 
-					true,
-					false, 
-					false, 
-					0);
-		}
-		if (cx != null) {
-			this.updateOcDataSubscriber(cx);
-		}
-	}
-	
-	
-	@Override
-	public UUID getUUID() {
-		return getDeviceID();
-	}
+
+    private long newIPPAfter;
+    private double currentHotWaterStorageMinTemp;
+    private double currentHotWaterStorageMaxTemp;
+    private double fixedCostPerStart;
+
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
+
+    private long runningSince;
+    private long stoppedSince;
+    private int lastThermalPower;
+
+    /**
+     * CONSTRUCTOR
+     */
+    public NonControllableDachsChpLocalController(IOSHOC osh) {
+        super(osh);
+    }
+
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+        this.getTimer().registerComponent(this, 1);
+    }
+
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        super.onNextTimePeriod();
+
+
+        // get new MOX
+        DachsChpMOX mox = (DachsChpMOX) this.getDataFromLocalObserver();
+
+        long now = this.getTimer().getUnixTime();
+        this.newIPPAfter = mox.getNewIPPAfter();
+        this.currentHotWaterStorageMinTemp = mox.getCurrentHotWaterStorageMinTemp();
+        this.currentHotWaterStorageMaxTemp = mox.getCurrentHotWaterStorageMaxTemp();
+        this.fixedCostPerStart = mox.getFixedCostPerStart();
+
+        this.compressionType = mox.getCompressionType();
+        this.compressionValue = mox.getCompressionValue();
+
+        if (mox.isRunning())
+            this.lastThermalPower = mox.getThermalPower();
+
+        if ((now > this.lastTimeIppSent + this.newIPPAfter) || mox.isRunning() != this.lastSentState) {
+            int typicalActivePower = mox.getTypicalActivePower();
+            int typicalReactivePower = mox.getTypicalReactivePower();
+            int typicalThermalPower = mox.getTypicalThermalPower();
+            int typicalGasPower = mox.getTypicalGasPower();
+            boolean isRunning = mox.isRunning();
+
+            // new IPP
+            boolean toBeScheduled = false;
+            DachsChpNonControllableIPP sIPP = null;
+            try {
+                sIPP = new DachsChpNonControllableIPP(
+                        this.getDeviceID(),
+                        this.getGlobalLogger(),
+                        this.getTimer().getUnixTime(),
+                        toBeScheduled,
+                        mox.getMinRuntime(),
+                        new GenericChpModel(
+                                typicalActivePower,
+                                typicalReactivePower,
+                                typicalThermalPower,
+                                typicalGasPower,
+                                ComplexPowerUtil.convertActiveAndReactivePowerToCosPhi(typicalActivePower, typicalReactivePower),
+                                isRunning,
+                                this.lastThermalPower,
+                                this.runningSince,
+                                this.stoppedSince),
+                        isRunning,
+                        this.currentHotWaterStorageMinTemp,
+                        this.currentHotWaterStorageMaxTemp,
+                        mox.getWaterTemperature(),
+                        this.fixedCostPerStart,
+                        this.compressionType,
+                        this.compressionValue);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            this.getOCRegistry().setState(
+                    InterdependentProblemPart.class, this, sIPP);
+
+            this.lastTimeIppSent = now;
+            this.lastSentState = isRunning;
+        }
+
+        double currentWaterTemp = mox.getWaterTemperature(); // get it...
+
+        ChpControllerExchange cx = null;
+        if (currentWaterTemp <= this.currentHotWaterStorageMinTemp) {
+            //starting
+            this.runningSince = now;
+            cx = new ChpControllerExchange(
+                    this.getDeviceID(),
+                    now,
+                    false,
+                    false,
+                    true,
+                    15 * 60);
+        } else if (currentWaterTemp >= this.currentHotWaterStorageMaxTemp) {
+            this.stoppedSince = now;
+            cx = new ChpControllerExchange(
+                    this.getDeviceID(),
+                    this.getTimer().getUnixTime(),
+                    true,
+                    false,
+                    false,
+                    0);
+        }
+        if (cx != null) {
+            this.updateOcDataSubscriber(cx);
+        }
+    }
+
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
 
 }

@@ -7,76 +7,75 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * A meter device of the wago xml interface
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 @XmlType
 public class WagoPowerMeter {
-	@XmlTransient
-	private int groupId;
-	
-	@XmlPath("@port")
-	private int meterId;
+    @XmlTransient
+    private int groupId;
 
-	@XmlPath("voltage/@value")
-	private double voltage;
-	
-	@XmlPath("current/@value")
-	private double current;
-	
-	@XmlPath("power/@value")
-	private double power;
-	
-	@XmlPath("energy/@value")
-	private double energy;
-	
-	@XmlPath("transformerdivisor/@value")
-	private double transformerdivisor;
-	
-	@XmlPath("dcfilter/@value")
-	private boolean dcfilter;
+    @XmlPath("@port")
+    private int meterId;
 
-	@XmlPath("power/@time")
-	private long timestamp;
+    @XmlPath("voltage/@value")
+    private double voltage;
 
-	public long getTimestamp() {
-		return timestamp;
-	}
-	
-	public int getGroupId() {
-		return groupId;
-	}
+    @XmlPath("current/@value")
+    private double current;
 
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
+    @XmlPath("power/@value")
+    private double power;
 
-	public int getMeterId() {
-		return meterId;
-	}
+    @XmlPath("energy/@value")
+    private double energy;
 
-	public double getVoltage() {
-		return voltage;
-	}
+    @XmlPath("transformerdivisor/@value")
+    private double transformerDivisor;
 
-	public double getCurrent() {
-		return current;
-	}
+    @XmlPath("dcfilter/@value")
+    private boolean dcFilter;
 
-	public double getPower() {
-		return power;
-	}
+    @XmlPath("power/@time")
+    private long timestamp;
 
-	public double getEnergy() {
-		return energy;
-	}
+    public long getTimestamp() {
+        return this.timestamp;
+    }
 
-	public double getTransformerdivisor() {
-		return transformerdivisor;
-	}
+    public int getGroupId() {
+        return this.groupId;
+    }
 
-	public boolean isDcfilter() {
-		return dcfilter;
-	}
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
+
+    public int getMeterId() {
+        return this.meterId;
+    }
+
+    public double getVoltage() {
+        return this.voltage;
+    }
+
+    public double getCurrent() {
+        return this.current;
+    }
+
+    public double getPower() {
+        return this.power;
+    }
+
+    public double getEnergy() {
+        return this.energy;
+    }
+
+    public double getTransformerDivisor() {
+        return this.transformerDivisor;
+    }
+
+    public boolean isDcFilter() {
+        return this.dcFilter;
+    }
 }

@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://osh/configuration/grid"
-	elementFormDefault="qualified" 
-	xmlns="http://www.w3.org/2001/XMLSchema" 
-	xmlns:tns="http://osh/configuration/grid">
+<schema xmlns:tns="http://osh/configuration/grid"
+        targetNamespace="http://osh/configuration/grid"
+        elementFormDefault="qualified"
+        xmlns="http://www.w3.org/2001/XMLSchema">
 
 
-	<complexType name="LayoutConnection">
-		<sequence>
+    <complexType name="LayoutConnection">
+        <sequence>
             <element name="activeEntityUUID" type="string"/>
             <element name="passiveEntityUUID" type="string"/>
             <element name="activeToPassiveCommodity" type="string"/>
             <element name="passiveToActiveCommodity" type="string"/>
-		</sequence>
-	</complexType>
-	
-	<complexType name="devicePerMeter">
-		<sequence>
+        </sequence>
+    </complexType>
+
+    <complexType name="devicePerMeter">
+        <sequence>
             <element name="meterUUID" type="string"/>
             <element name="deviceUUID" type="string"/>
             <element name="deviceType" type="string"/>
-		</sequence>
-	</complexType>
-	
-	
-	<element name="GridLayout">
-		<complexType>
-			<sequence>
+        </sequence>
+    </complexType>
+
+
+    <element name="GridLayout">
+        <complexType>
+            <sequence>
                 <element minOccurs="0" maxOccurs="unbounded" name="connections" type="tns:LayoutConnection"/>
                 <element minOccurs="0" maxOccurs="unbounded" name="meterUUIDs" type="string"/>
                 <element minOccurs="0" maxOccurs="unbounded" name="deviceMeterMap" type="tns:devicePerMeter"/>
-			</sequence>
-		</complexType>
-	</element>
+            </sequence>
+        </complexType>
+    </element>
 </schema>

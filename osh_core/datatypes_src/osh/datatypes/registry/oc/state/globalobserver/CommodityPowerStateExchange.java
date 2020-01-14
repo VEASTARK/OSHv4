@@ -11,93 +11,91 @@ import java.util.UUID;
 
 /**
  * Current power consumption of all devices covered by this EMS
- * @author Ingo Mauser
  *
+ * @author Ingo Mauser
  */
 public class CommodityPowerStateExchange extends StateExchange {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2451111383309555786L;
-	EnumMap<Commodity,Double> powerState;
-	DeviceTypes deviceType;
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 2451111383309555786L;
+    final EnumMap<Commodity, Double> powerState;
+    final DeviceTypes deviceType;
 
 
-	/**
-	 * CONSTRUCTOR
-	 * @param sender
-	 * @param timestamp
-	 */
-	public CommodityPowerStateExchange(
-			UUID sender, 
-			long timestamp,
-			DeviceTypes deviceType) {
-		this(
-				sender, 
-				timestamp, 
-				new EnumMap<Commodity, Double>(Commodity.class),
-				deviceType);
-	}
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param sender
-	 * @param timestamp
-	 * @param powerState
-	 */
-	public CommodityPowerStateExchange(
-			UUID sender, 
-			long timestamp,
-			EnumMap<Commodity,Double> powerState,
-			DeviceTypes deviceType) {
-		super(sender, timestamp);
+    /**
+     * CONSTRUCTOR
+     *
+     * @param sender
+     * @param timestamp
+     */
+    public CommodityPowerStateExchange(
+            UUID sender,
+            long timestamp,
+            DeviceTypes deviceType) {
+        this(
+                sender,
+                timestamp,
+                new EnumMap<>(Commodity.class),
+                deviceType);
+    }
 
-		this.powerState = powerState;
-		this.deviceType = deviceType;
-	}
-	
-	
-	public void addPowerState(Commodity commodity, double value) {
-		powerState.put(commodity, value);
-	}
-	
-	
-	public Double getPowerState(Commodity commodity) {
-		return powerState.get(commodity);
-	}
-	
-	
-	public EnumMap<Commodity, Double> getPowerState() {
-		return powerState;
-	}
-	
-	public DeviceTypes getDeviceType() {
-		return deviceType;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param sender
+     * @param timestamp
+     * @param powerState
+     */
+    public CommodityPowerStateExchange(
+            UUID sender,
+            long timestamp,
+            EnumMap<Commodity, Double> powerState,
+            DeviceTypes deviceType) {
+        super(sender, timestamp);
 
-	@Override
-	public CommodityPowerStateExchange clone() {
-		CommodityPowerStateExchange cloned = new CommodityPowerStateExchange(
-				this.getSender(), 
-				this.getTimestamp(),
-				this.getDeviceType());
-		
-		for (Entry<Commodity,Double> e : powerState.entrySet()) {
-			Double value = e.getValue();
-			if (value != null) {
-				value = (double) value;
-			}
-			cloned.addPowerState(e.getKey(), value);
-		}
-		
-		return cloned;
-	
-	}
+        this.powerState = powerState;
+        this.deviceType = deviceType;
+    }
 
-	@Override
-	public String toString() {
-		return "CommodityPowerState: " + powerState.toString();
-	}
-	
+
+    public void addPowerState(Commodity commodity, double value) {
+        this.powerState.put(commodity, value);
+    }
+
+
+    public Double getPowerState(Commodity commodity) {
+        return this.powerState.get(commodity);
+    }
+
+
+    public EnumMap<Commodity, Double> getPowerState() {
+        return this.powerState;
+    }
+
+    public DeviceTypes getDeviceType() {
+        return this.deviceType;
+    }
+
+    @Override
+    public CommodityPowerStateExchange clone() {
+        CommodityPowerStateExchange cloned = new CommodityPowerStateExchange(
+                this.getSender(),
+                this.getTimestamp(),
+                this.deviceType);
+
+        for (Entry<Commodity, Double> e : this.powerState.entrySet()) {
+            cloned.addPowerState(e.getKey(), e.getValue());
+        }
+
+        return cloned;
+
+    }
+
+    @Override
+    public String toString() {
+        return "CommodityPowerState: " + this.powerState.toString();
+    }
+
 }

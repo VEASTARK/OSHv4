@@ -8,58 +8,54 @@ import java.util.UUID;
 
 /**
  * container class for the local observer and controller
- * 
+ *
  * @author Florian Allerding
  */
 public class LocalOCUnit extends OCUnit {
 
-	public LocalObserver localObserver;
-	public LocalController localController;
-	private DeviceTypes deviceType;
-	private DeviceClassification deviceClassification;
-	
-	
-	public LocalOCUnit(
-			IOSHOC controllerbox, 
-			UUID deviceID, 
-			LocalObserver localObserver,
-			LocalController localController){
-		super(deviceID, controllerbox);
-		
-		//create local controller/observer  and assign to the OCUnit
-		this.localObserver = localObserver;
-		this.localController = localController;
-		
-		if (localObserver!=null){
-			this.localObserver.assignLocalOCUnit(this);
-		}
-		if (localController!=null){
-			this.localController.assignLocalOCUnit(this);
-		}
-	}
-
-	
-	public void setDeviceClassification(DeviceClassification deviceClassification) {
-		this.deviceClassification = deviceClassification;
-	}
+    public final LocalObserver localObserver;
+    public final LocalController localController;
+    private DeviceTypes deviceType;
+    private DeviceClassification deviceClassification;
 
 
-	public DeviceClassification getDeviceClassification() {
-		return deviceClassification;
-	}
+    public LocalOCUnit(
+            IOSHOC osh,
+            UUID deviceID,
+            LocalObserver localObserver,
+            LocalController localController) {
+        super(deviceID, osh);
 
+        //create local controller/observer  and assign to the OCUnit
+        this.localObserver = localObserver;
+        this.localController = localController;
 
-	public void setDeviceType(DeviceTypes deviceType) {
-		this.deviceType = deviceType;
-	}
+        if (localObserver != null) {
+            this.localObserver.assignLocalOCUnit(this);
+        }
+        if (localController != null) {
+            this.localController.assignLocalOCUnit(this);
+        }
+    }
 
+    public DeviceClassification getDeviceClassification() {
+        return this.deviceClassification;
+    }
 
-	public DeviceTypes getDeviceType() {
-		return deviceType;
-	}
+    public void setDeviceClassification(DeviceClassification deviceClassification) {
+        this.deviceClassification = deviceClassification;
+    }
 
-	@Override
-	public String toString() {
-		return "LocalUnit " + getUnitID();
-	}
+    public DeviceTypes getDeviceType() {
+        return this.deviceType;
+    }
+
+    public void setDeviceType(DeviceTypes deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    @Override
+    public String toString() {
+        return "LocalUnit " + this.getUnitID();
+    }
 }

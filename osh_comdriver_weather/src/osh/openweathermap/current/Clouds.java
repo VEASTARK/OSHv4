@@ -1,4 +1,3 @@
-
 package osh.openweathermap.current;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,23 +10,21 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "all"
+        "all"
 })
 public class Clouds implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 114087702500001318L;
-	@JsonProperty("all")
-    private Integer all;
+     *
+     */
+    private static final long serialVersionUID = 114087702500001318L;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("all")
+    private Integer all;
 
     /**
-     * 
-     * @return
-     *     The all
+     * @return The all
      */
     @JsonProperty("all")
     public Integer getAll() {
@@ -35,9 +32,7 @@ public class Clouds implements Serializable {
     }
 
     /**
-     * 
-     * @param all
-     *     The all
+     * @param all The all
      */
     @JsonProperty("all")
     public void setAll(Integer all) {

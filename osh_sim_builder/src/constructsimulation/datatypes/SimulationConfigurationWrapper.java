@@ -7,42 +7,44 @@ import osh.configuration.system.OSHConfiguration;
 import osh.simulation.screenplay.Screenplay;
 
 public class SimulationConfigurationWrapper {
-	
-	public SimulationConfigurationWrapper(
-			OCConfiguration occonfig,
-			EALConfiguration ealconfig,
-			CALConfiguration calConfig,
-			OSHConfiguration oshConfig,
-			Screenplay myScreenplay) {
-		this.occonfig = occonfig;
-		this.ealconfig = ealconfig;
-		this.calConfig = calConfig;
-		this.oshConfig = oshConfig;
-		this.myScreenplay = myScreenplay;
-	}
-	
-	private OCConfiguration occonfig;
-	private EALConfiguration ealconfig;
-	private CALConfiguration calConfig;
-	private OSHConfiguration oshConfig;
-	private Screenplay myScreenplay;
-	
-	public OCConfiguration getOcconfig() {
-		return occonfig;
-	}
-	public EALConfiguration getEalconfig() {
-		return ealconfig;
-	}
-	public CALConfiguration getCalConfig() {
-		return calConfig;
-	}
-	public OSHConfiguration getOshConfig() {
-		return oshConfig;
-	}
-	public Screenplay getMyScreenplay() {
-		return myScreenplay;
-	}
-	
+
+    private final OCConfiguration ocConfig;
+    private final EALConfiguration ealConfig;
+    private final CALConfiguration calConfig;
+    private final OSHConfiguration oshConfig;
+    private final Screenplay myScreenplay;
+    public SimulationConfigurationWrapper(
+            OCConfiguration ocConfig,
+            EALConfiguration ealConfig,
+            CALConfiguration calConfig,
+            OSHConfiguration oshConfig,
+            Screenplay myScreenplay) {
+        this.ocConfig = ocConfig;
+        this.ealConfig = ealConfig;
+        this.calConfig = calConfig;
+        this.oshConfig = oshConfig;
+        this.myScreenplay = myScreenplay;
+    }
+
+    public OCConfiguration getOcConfig() {
+        return this.ocConfig;
+    }
+
+    public EALConfiguration getEalConfig() {
+        return this.ealConfig;
+    }
+
+    public CALConfiguration getCalConfig() {
+        return this.calConfig;
+    }
+
+    public OSHConfiguration getOshConfig() {
+        return this.oshConfig;
+    }
+
+    public Screenplay getMyScreenplay() {
+        return this.myScreenplay;
+    }
 
 
 }

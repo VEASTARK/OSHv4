@@ -22,164 +22,159 @@ import java.util.UUID;
 //import osh.hal.exchange.PvHALStaticDetailsExchange;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class PvSimulationDriverHollData extends DeviceSimulationDriver {
-	
-	private boolean pvSwitchedOn;
-	
-	private String pathToFiles;
-	private String fileExtension;
-	private double profileNominalPower;
-	
-	private int pastDaysPrediction;
-	
-	/** nominal power of PV (e.g. 4.6 kWpeak) */
-	private final int nominalPower;
-	
-	/** according to inverter (technical, due to VAmax) S = SQR(P^2+Q^2) */
-	@SuppressWarnings("unused")
-	private final int complexPowerMax;
-	
-	/** according to inverter (technical, due to cosPhi: e.g. 0.8ind...0.8cap) */
-	private double cosPhiMax;
 
-	private PvProfileHollSingleton profile;
+    /**
+     * nominal power of PV (e.g. 4.6 kWpeak)
+     */
+    private final int nominalPower;
+    /**
+     * according to inverter (technical, due to VAmax) S = SQR(P^2+Q^2)
+     */
+    @SuppressWarnings("unused")
+    private final int complexPowerMax;
+    private boolean pvSwitchedOn;
+    private String pathToFiles;
+    private String fileExtension;
+    private double profileNominalPower;
+    private int pastDaysPrediction;
+    /**
+     * according to inverter (technical, due to cosPhi: e.g. 0.8ind...0.8cap)
+     */
+    private double cosPhiMax;
 
-	/**
-	 * CONSTRUCTOR
-	 * @throws Exception
-	 */
-	public PvSimulationDriverHollData(
-			IOSH controllerbox, 
-			UUID deviceID,
-			OSHParameterCollection driverConfig)
-			throws Exception {
-		super(controllerbox, deviceID, driverConfig);
-		
-		this.pvSwitchedOn = true;
-		
+    private PvProfileHollSingleton profile;
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @throws Exception
+     */
+    public PvSimulationDriverHollData(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig)
+            throws Exception {
+        super(osh, deviceID, driverConfig);
+
+        this.pvSwitchedOn = true;
+
 //		String profileSourceName = driverConfig.getParameter("profilesource");
-		this.nominalPower = Integer.valueOf(driverConfig.getParameter("nominalpower"));
-		this.complexPowerMax = Integer.valueOf(driverConfig.getParameter("complexpowermax"));
-		this.cosPhiMax = Double.valueOf(driverConfig.getParameter("cosphimax"));
-		
-		try {
-			this.pastDaysPrediction = Integer.valueOf(driverConfig.getParameter("pastDaysPrediction"));
-		}
-		catch (Exception e) {
-			this.pastDaysPrediction = 14;
-			getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
-		}
-		
-		try {
-			this.pathToFiles = driverConfig.getParameter("pathToFiles");
-			if (pathToFiles == null) throw new IllegalArgumentException();
-		}
-		catch (Exception e) {
-			this.pathToFiles = "configfiles/pv/holl2013cleaned";
-			getGlobalLogger().logWarning("Can't get pathToFiles, using the default value: " + this.pathToFiles);
-		}
-		
-		try {
-			this.fileExtension = driverConfig.getParameter("fileExtension");
-			if (fileExtension == null) throw new IllegalArgumentException();
-		}
-		catch (Exception e) {
-			this.fileExtension = ".csv";
-			getGlobalLogger().logWarning("Can't get fileExtension, using the default value: " + this.fileExtension);
-		}
-		
-		try {
-			this.profileNominalPower = Double.valueOf(driverConfig.getParameter("profileNominalPower"));
-		}
-		catch (Exception e) {
-			this.profileNominalPower = 5307.48;
-			getGlobalLogger().logWarning("Can't get profileNominalPower, using the default value: " + this.profileNominalPower);
-		}
-		// load profile
-		profile = new PvProfileHollSingleton(
-				nominalPower, pathToFiles + fileExtension, profileNominalPower, this.cosPhiMax);
-		
-		//TODO adapt profile (power, heading), after making it singleton...
-		
-	}
-	
-	@Override
-	public void onSimulationIsUp() throws SimulationSubjectException {
-		super.onSimulationIsUp();
-		//initially give LocalObserver load data of past days
-		long startTime = getTimer().getUnixTimeAtStart();
-		
-		List<SparseLoadProfile> predicitons = new LinkedList<SparseLoadProfile>();
+        this.nominalPower = Integer.parseInt(driverConfig.getParameter("nominalpower"));
+        this.complexPowerMax = Integer.parseInt(driverConfig.getParameter("complexpowermax"));
+        this.cosPhiMax = Double.parseDouble(driverConfig.getParameter("cosphimax"));
 
-		int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(startTime);
-		
-		
-		//starting in reverse so that the oldest profile is at index 0 in the list
-		for (int i = pastDaysPrediction; i >= 1; i--) {
-			
-			int pastDay = Math.floorMod(dayOfYear - i, 365);
-			predicitons.add(profile.getPowerForDay(pastDay));
-		}
-		
-		PvPredictionExchange _ox = new PvPredictionExchange(this.getDeviceID(), getTimer().getUnixTime(), predicitons, pastDaysPrediction);
-		this.notifyObserver(_ox);
-	}
+        try {
+            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter("pastDaysPrediction"));
+        } catch (Exception e) {
+            this.pastDaysPrediction = 14;
+            this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
+        }
+
+        try {
+            this.pathToFiles = driverConfig.getParameter("pathToFiles");
+            if (this.pathToFiles == null) throw new IllegalArgumentException();
+        } catch (Exception e) {
+            this.pathToFiles = "configfiles/pv/holl2013cleaned";
+            this.getGlobalLogger().logWarning("Can't get pathToFiles, using the default value: " + this.pathToFiles);
+        }
+
+        try {
+            this.fileExtension = driverConfig.getParameter("fileExtension");
+            if (this.fileExtension == null) throw new IllegalArgumentException();
+        } catch (Exception e) {
+            this.fileExtension = ".csv";
+            this.getGlobalLogger().logWarning("Can't get fileExtension, using the default value: " + this.fileExtension);
+        }
+
+        try {
+            this.profileNominalPower = Double.parseDouble(driverConfig.getParameter("profileNominalPower"));
+        } catch (Exception e) {
+            this.profileNominalPower = 5307.48;
+            this.getGlobalLogger().logWarning("Can't get profileNominalPower, using the default value: " + this.profileNominalPower);
+        }
+        // load profile
+        this.profile = new PvProfileHollSingleton(
+                this.nominalPower, this.pathToFiles + this.fileExtension, this.profileNominalPower, this.cosPhiMax);
+
+        //TODO adapt profile (power, heading), after making it singleton...
+
+    }
+
+    @Override
+    public void onSimulationIsUp() throws SimulationSubjectException {
+        super.onSimulationIsUp();
+        //initially give LocalObserver load data of past days
+        long startTime = this.getTimer().getUnixTimeAtStart();
+
+        List<SparseLoadProfile> predictions = new LinkedList<>();
+
+        int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(startTime);
+
+
+        //starting in reverse so that the oldest profile is at index 0 in the list
+        for (int i = this.pastDaysPrediction; i >= 1; i--) {
+
+            int pastDay = Math.floorMod(dayOfYear - i, 365);
+            predictions.add(this.profile.getPowerForDay(pastDay));
+        }
+
+        PvPredictionExchange _ox = new PvPredictionExchange(this.getDeviceID(), this.getTimer().getUnixTime(), predictions, this.pastDaysPrediction);
+        this.notifyObserver(_ox);
+    }
 
 
     @Override
-	public void onNextTimeTick() {
-		
-		long now = getTimer().getUnixTime();
-		
-		if (this.pvSwitchedOn && now % 60 == 0) {
-			
-			this.setPower(
-					Commodity.ACTIVEPOWER, 
-					profile.getPowerAt(now));
-			
-			try {
-				this.setPower(
-						Commodity.REACTIVEPOWER, 
-						(int) ComplexPowerUtil.convertActiveToReactivePower(
-								getPower(Commodity.ACTIVEPOWER), 
-								this.cosPhiMax, 
-								true));
-			} 
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-		}
-		
-		PvObserverExchange _ox = new PvObserverExchange(
-				this.getDeviceID(), 
-				now);
-		_ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
-		_ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));
-		this.notifyObserver(_ox);
-	}
-	
-	@Override
-	protected void onControllerRequest(HALControllerExchange controllerRequest) {
-		PvControllerExchange controllerExchange = (PvControllerExchange) controllerRequest;
-		Boolean newPvSwitchedOn = controllerExchange.getNewPvSwitchedOn();
-		
-		// check whether to switch pv on or off
-		if (newPvSwitchedOn != null) {
-			this.pvSwitchedOn = newPvSwitchedOn;
-			if (this.pvSwitchedOn == false) {
-				this.setPower(Commodity.ACTIVEPOWER, 0);
-				this.setPower(Commodity.REACTIVEPOWER, 0);
-			}
-		}
-	}
+    public void onNextTimeTick() {
 
-	@Override
-	public void performNextAction(SubjectAction nextAction) {
-		//NOTHING
-	}
+        long now = this.getTimer().getUnixTime();
+
+        if (this.pvSwitchedOn && now % 60 == 0) {
+
+            this.setPower(
+                    Commodity.ACTIVEPOWER,
+                    this.profile.getPowerAt(now));
+
+            try {
+                this.setPower(
+                        Commodity.REACTIVEPOWER,
+                        (int) ComplexPowerUtil.convertActiveToReactivePower(
+                                this.getPower(Commodity.ACTIVEPOWER),
+                                this.cosPhiMax,
+                                true));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        PvObserverExchange _ox = new PvObserverExchange(
+                this.getDeviceID(),
+                now);
+        _ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
+        _ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));
+        this.notifyObserver(_ox);
+    }
+
+    @Override
+    protected void onControllerRequest(HALControllerExchange controllerRequest) {
+        PvControllerExchange controllerExchange = (PvControllerExchange) controllerRequest;
+        Boolean newPvSwitchedOn = controllerExchange.getNewPvSwitchedOn();
+
+        // check whether to switch pv on or off
+        if (newPvSwitchedOn != null) {
+            this.pvSwitchedOn = newPvSwitchedOn;
+            if (!this.pvSwitchedOn) {
+                this.setPower(Commodity.ACTIVEPOWER, 0);
+                this.setPower(Commodity.REACTIVEPOWER, 0);
+            }
+        }
+    }
+
+    @Override
+    public void performNextAction(SubjectAction nextAction) {
+        //NOTHING
+    }
 }

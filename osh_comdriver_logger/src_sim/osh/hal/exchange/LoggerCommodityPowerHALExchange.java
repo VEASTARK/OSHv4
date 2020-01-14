@@ -9,32 +9,30 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class LoggerCommodityPowerHALExchange extends HALExchange {
-	
-	EnumMap<Commodity,Double> powerState;
-	
 
-	/**
-	 * CONSTRUCTOR
-	 */
-	public LoggerCommodityPowerHALExchange(
-			UUID deviceID, Long timestamp, 
-			EnumMap<Commodity,Double> powerState) {
-		super(deviceID, timestamp);
-		
-		this.powerState = new EnumMap<>(Commodity.class);
-		for (Entry<Commodity,Double> e : powerState.entrySet()) {
-			this.powerState.put(e.getKey(), e.getValue());
-		}
-	}
+    final EnumMap<Commodity, Double> powerState;
 
 
-	public EnumMap<Commodity, Double> getPowerState() {
-		return powerState;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public LoggerCommodityPowerHALExchange(
+            UUID deviceID, Long timestamp,
+            EnumMap<Commodity, Double> powerState) {
+        super(deviceID, timestamp);
+
+        this.powerState = new EnumMap<>(Commodity.class);
+        for (Entry<Commodity, Double> e : powerState.entrySet()) {
+            this.powerState.put(e.getKey(), e.getValue());
+        }
+    }
+
+
+    public EnumMap<Commodity, Double> getPowerState() {
+        return this.powerState;
+    }
 
 }

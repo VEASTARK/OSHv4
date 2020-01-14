@@ -15,114 +15,112 @@ import osh.eal.hal.exchange.IHALExchange;
 import java.util.UUID;
 
 /**
- * 
  * @author Florian Allerding, Till Schuberth, Ingo Mauser
- *
  */
-public abstract class BusManager extends OCComponent 
-							implements	IRealTimeSubscriber, 
-										ILifeCycleListener, 
-										IDriverDataSubscriber, 
-										IOCHALDataPublisher  {
+public abstract class BusManager extends OCComponent
+        implements IRealTimeSubscriber,
+        ILifeCycleListener,
+        IDriverDataSubscriber,
+        IOCHALDataPublisher {
 
-	private HALBusDriver busDriver;
-	private UUID uuid;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 */
-	public BusManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox);
-		this.uuid = uuid;
-	}
-	
-	
-	@Override
-	public IOSHOC getOSH() {
-		return (IOSHOC) super.getOSH();
-	}
+    private HALBusDriver busDriver;
+    private final UUID uuid;
 
-	
-	@Override
-	public OSHComponent getSyncObject() {
-		return this;
-	}
 
-	@Override
-	public void setOcDataSubscriber(IOCHALDataSubscriber monitorObject) {
-		this.busDriver = (HALBusDriver) monitorObject;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     */
+    public BusManager(IOSHOC osh, UUID uuid) {
+        super(osh);
+        this.uuid = uuid;
+    }
 
-	@Override
-	public void removeOcDataSubscriber(IOCHALDataSubscriber monitorObject) {
-		this.busDriver = null;
-	}
 
-	
-	public HALBusDriver getBusDriver() {
-		return this.busDriver;
-	}
-	
-	public UUID getUUID() {
-		return this.uuid;
-	}
-	
-	
-	@Override
-	public void updateOcDataSubscriber(IHALExchange halexchange) throws OSHException {
-		if (this.busDriver != null) {
-			this.busDriver.onDataFromOcComponent(halexchange);
-		}
-		else {
-			//NOTHING
-			//TODO: error message/exception
-		}
-	}
+    @Override
+    public IOSHOC getOSH() {
+        return super.getOSH();
+    }
 
-	@Override
-	public final void onDataFromCALDriver(IHALExchange exchangeObject) {
-		synchronized(getSyncObject()) {
-			onDriverUpdate(exchangeObject);
-		}
-	}
-	
-	public abstract void onDriverUpdate(IHALExchange exchangeObject);
 
-	@Override
-	public void onSystemRunning() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public OSHComponent getSyncObject() {
+        return this;
+    }
 
-	@Override
-	public void onSystemShutdown() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void setOcDataSubscriber(IOCHALDataSubscriber monitorObject) {
+        this.busDriver = (HALBusDriver) monitorObject;
+    }
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void removeOcDataSubscriber(IOCHALDataSubscriber monitorObject) {
+        this.busDriver = null;
+    }
 
-	@Override
-	public void onSystemHalt() throws OSHException {
-		//NOTHING
-	}
 
-	@Override
-	public void onSystemResume() throws OSHException {
-		//NOTHING
-	}
+    public HALBusDriver getBusDriver() {
+        return this.busDriver;
+    }
 
-	@Override
-	public void onSystemError() throws OSHException {
-		//NOTHING
-	}
+    public UUID getUUID() {
+        return this.uuid;
+    }
 
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		//NOTHING
-	}
+
+    @Override
+    public void updateOcDataSubscriber(IHALExchange halExchange) {
+        if (this.busDriver != null) {
+            this.busDriver.onDataFromOcComponent(halExchange);
+        } else {
+            //NOTHING
+            //TODO: error message/exception
+        }
+    }
+
+    @Override
+    public final void onDataFromCALDriver(IHALExchange exchangeObject) {
+        synchronized (this.getSyncObject()) {
+            this.onDriverUpdate(exchangeObject);
+        }
+    }
+
+    public abstract void onDriverUpdate(IHALExchange exchangeObject);
+
+    @Override
+    public void onSystemRunning() {
+        //NOTHING
+    }
+
+    @Override
+    public void onSystemShutdown() {
+        //NOTHING
+    }
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        //NOTHING
+    }
+
+    @Override
+    public void onSystemHalt() {
+        //NOTHING
+    }
+
+    @Override
+    public void onSystemResume() {
+        //NOTHING
+    }
+
+    @Override
+    public void onSystemError() {
+        //NOTHING
+    }
+
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        //NOTHING
+    }
 
 }

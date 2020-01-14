@@ -6,23 +6,22 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * wago xml interface
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 @XmlType
 public class WagoRelayData {
-	@XmlPath("@id")
-	private int id;
-	
-	@XmlPath("output/@state")
-	private boolean state;
+    @XmlPath("@id")
+    private int id;
 
-	public int getId() {
-		return id;
-	}
+    @XmlPath("output/@state")
+    private boolean state;
 
-	public boolean getState() {
-		return state;
-	}	
+    public int getId() {
+        return this.id;
+    }
+
+    public boolean getState() {
+        return this.state;
+    }
 }

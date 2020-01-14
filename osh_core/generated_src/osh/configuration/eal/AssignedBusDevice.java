@@ -22,9 +22,9 @@ import java.util.List;
 
 /**
  * <p>Java class for AssignedBusDevice complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="AssignedBusDevice">
  *   &lt;complexContent>
@@ -42,18 +42,16 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AssignedBusDevice", propOrder = {
-    "busDeviceID",
-    "busDeviceType",
-    "busDeviceClassification",
-    "busDeviceDescription",
-    "busManagerClassName",
-    "busDriverClassName",
-    "busDriverParameters"
+        "busDeviceID",
+        "busDeviceType",
+        "busDeviceClassification",
+        "busDeviceDescription",
+        "busManagerClassName",
+        "busDriverClassName",
+        "busDriverParameters"
 })
 public class AssignedBusDevice {
 
@@ -73,23 +71,19 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busDeviceID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getBusDeviceID() {
-        return busDeviceID;
+        return this.busDeviceID;
     }
 
     /**
      * Sets the value of the busDeviceID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setBusDeviceID(String value) {
         this.busDeviceID = value;
@@ -97,23 +91,19 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busDeviceType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BusDeviceTypes }
-     *     
+     *
+     * @return possible object is
+     * {@link BusDeviceTypes }
      */
     public BusDeviceTypes getBusDeviceType() {
-        return busDeviceType;
+        return this.busDeviceType;
     }
 
     /**
      * Sets the value of the busDeviceType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BusDeviceTypes }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link BusDeviceTypes }
      */
     public void setBusDeviceType(BusDeviceTypes value) {
         this.busDeviceType = value;
@@ -121,23 +111,19 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busDeviceClassification property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BusDeviceClassification }
-     *     
+     *
+     * @return possible object is
+     * {@link BusDeviceClassification }
      */
     public BusDeviceClassification getBusDeviceClassification() {
-        return busDeviceClassification;
+        return this.busDeviceClassification;
     }
 
     /**
      * Sets the value of the busDeviceClassification property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BusDeviceClassification }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link BusDeviceClassification }
      */
     public void setBusDeviceClassification(BusDeviceClassification value) {
         this.busDeviceClassification = value;
@@ -145,23 +131,19 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busDeviceDescription property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getBusDeviceDescription() {
-        return busDeviceDescription;
+        return this.busDeviceDescription;
     }
 
     /**
      * Sets the value of the busDeviceDescription property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setBusDeviceDescription(String value) {
         this.busDeviceDescription = value;
@@ -169,23 +151,19 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busManagerClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getBusManagerClassName() {
-        return busManagerClassName;
+        return this.busManagerClassName;
     }
 
     /**
      * Sets the value of the busManagerClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setBusManagerClassName(String value) {
         this.busManagerClassName = value;
@@ -193,23 +171,19 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busDriverClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getBusDriverClassName() {
-        return busDriverClassName;
+        return this.busDriverClassName;
     }
 
     /**
      * Sets the value of the busDriverClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setBusDriverClassName(String value) {
         this.busDriverClassName = value;
@@ -217,29 +191,27 @@ public class AssignedBusDevice {
 
     /**
      * Gets the value of the busDriverParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the busDriverParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getBusDriverParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getBusDriverParameters() {
-        if (busDriverParameters == null) {
-            busDriverParameters = new ArrayList<ConfigurationParameter>();
+        if (this.busDriverParameters == null) {
+            this.busDriverParameters = new ArrayList<>();
         }
         return this.busDriverParameters;
     }

@@ -7,38 +7,39 @@ import osh.eal.hal.HALRealTimeDriver;
 
 /**
  * Super class for all components managed by the OCManager or HALManager
- * 
+ *
  * @author Florian Allerding, Ingo Mauser
  */
 public abstract class OSHComponent {
-	
-	private IOSH theOrganicSmartHome;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param theOrganicSmartHome
-	 */
-	public OSHComponent(IOSH theOrganicSmartHome) {
-		super();
-		this.theOrganicSmartHome = theOrganicSmartHome;
-	}
-	
 
-	public IGlobalLogger getGlobalLogger() {
-		return theOrganicSmartHome.getLogger();
-	}
+    private final IOSH theOrganicSmartHome;
 
-	public OSHRandomGenerator getRandomGenerator() {
-		return theOrganicSmartHome.getRandomGenerator();
-	}
-	
-	protected IOSH getOSH() {
-		return theOrganicSmartHome;
-	}
 
-	public HALRealTimeDriver getTimer() {
-		return theOrganicSmartHome.getTimer();
-	}
-	
+    /**
+     * CONSTRUCTOR
+     *
+     * @param theOrganicSmartHome
+     */
+    public OSHComponent(IOSH theOrganicSmartHome) {
+        super();
+        this.theOrganicSmartHome = theOrganicSmartHome;
+    }
+
+
+    public IGlobalLogger getGlobalLogger() {
+        return this.theOrganicSmartHome.getLogger();
+    }
+
+    public OSHRandomGenerator getRandomGenerator() {
+        return this.theOrganicSmartHome.getRandomGenerator();
+    }
+
+    protected IOSH getOSH() {
+        return this.theOrganicSmartHome;
+    }
+
+    public HALRealTimeDriver getTimer() {
+        return this.theOrganicSmartHome.getTimer();
+    }
+
 }

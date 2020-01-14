@@ -20,9 +20,9 @@ import java.util.List;
 
 /**
  * <p>Java class for GAConfiguration complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GAConfiguration">
  *   &lt;complexContent>
@@ -42,20 +42,18 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GAConfiguration", propOrder = {
-    "numEvaluations",
-    "popSize",
-    "crossoverOperator",
-    "mutationOperator",
-    "selectionOperator",
-    "crossoverParameters",
-    "mutationParameters",
-    "selectionParameters",
-    "stoppingRules"
+        "numEvaluations",
+        "popSize",
+        "crossoverOperator",
+        "mutationOperator",
+        "selectionOperator",
+        "crossoverParameters",
+        "mutationParameters",
+        "selectionParameters",
+        "stoppingRules"
 })
 public class GAConfiguration {
 
@@ -74,15 +72,13 @@ public class GAConfiguration {
 
     /**
      * Gets the value of the numEvaluations property.
-     * 
      */
     public int getNumEvaluations() {
-        return numEvaluations;
+        return this.numEvaluations;
     }
 
     /**
      * Sets the value of the numEvaluations property.
-     * 
      */
     public void setNumEvaluations(int value) {
         this.numEvaluations = value;
@@ -90,15 +86,13 @@ public class GAConfiguration {
 
     /**
      * Gets the value of the popSize property.
-     * 
      */
     public int getPopSize() {
-        return popSize;
+        return this.popSize;
     }
 
     /**
      * Sets the value of the popSize property.
-     * 
      */
     public void setPopSize(int value) {
         this.popSize = value;
@@ -106,23 +100,19 @@ public class GAConfiguration {
 
     /**
      * Gets the value of the crossoverOperator property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getCrossoverOperator() {
-        return crossoverOperator;
+        return this.crossoverOperator;
     }
 
     /**
      * Sets the value of the crossoverOperator property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setCrossoverOperator(String value) {
         this.crossoverOperator = value;
@@ -130,23 +120,19 @@ public class GAConfiguration {
 
     /**
      * Gets the value of the mutationOperator property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getMutationOperator() {
-        return mutationOperator;
+        return this.mutationOperator;
     }
 
     /**
      * Sets the value of the mutationOperator property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMutationOperator(String value) {
         this.mutationOperator = value;
@@ -154,23 +140,19 @@ public class GAConfiguration {
 
     /**
      * Gets the value of the selectionOperator property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getSelectionOperator() {
-        return selectionOperator;
+        return this.selectionOperator;
     }
 
     /**
      * Sets the value of the selectionOperator property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setSelectionOperator(String value) {
         this.selectionOperator = value;
@@ -178,116 +160,108 @@ public class GAConfiguration {
 
     /**
      * Gets the value of the crossoverParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the crossoverParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCrossoverParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getCrossoverParameters() {
-        if (crossoverParameters == null) {
-            crossoverParameters = new ArrayList<ConfigurationParameter>();
+        if (this.crossoverParameters == null) {
+            this.crossoverParameters = new ArrayList<>();
         }
         return this.crossoverParameters;
     }
 
     /**
      * Gets the value of the mutationParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the mutationParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMutationParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getMutationParameters() {
-        if (mutationParameters == null) {
-            mutationParameters = new ArrayList<ConfigurationParameter>();
+        if (this.mutationParameters == null) {
+            this.mutationParameters = new ArrayList<>();
         }
         return this.mutationParameters;
     }
 
     /**
      * Gets the value of the selectionParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the selectionParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSelectionParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getSelectionParameters() {
-        if (selectionParameters == null) {
-            selectionParameters = new ArrayList<ConfigurationParameter>();
+        if (this.selectionParameters == null) {
+            this.selectionParameters = new ArrayList<>();
         }
         return this.selectionParameters;
     }
 
     /**
      * Gets the value of the stoppingRules property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the stoppingRules property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getStoppingRules().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link StoppingRule }
-     * 
-     * 
      */
     public List<StoppingRule> getStoppingRules() {
-        if (stoppingRules == null) {
-            stoppingRules = new ArrayList<StoppingRule>();
+        if (this.stoppingRules == null) {
+            this.stoppingRules = new ArrayList<>();
         }
         return this.stoppingRules;
     }

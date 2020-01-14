@@ -35,55 +35,55 @@ import java.util.HashMap;
 @SuppressWarnings("rawtypes")
 public class BinaryTournament extends Selection {
 
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-/**
-   * Stores the <code>Comparator</code> used to compare two
-   * solutions
-   */
-  private Comparator comparator_;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    /**
+     * Stores the <code>Comparator</code> used to compare two
+     * solutions
+     */
+    private final Comparator comparator_;
 
-  /**
-   * Constructor
-   * Creates a new Binary tournament operator using a BinaryTournamentComparator
-   */
-  public BinaryTournament(HashMap<String, Object> parameters, PseudoRandom pseudoRandom){
-  	super(parameters, pseudoRandom) ;
-  	if ((parameters != null) && (parameters.get("comparator") != null))
-  		comparator_ = (Comparator) parameters.get("comparator") ;  	
-  	else
-      //comparator_ = new BinaryTournamentComparator();
-      comparator_ = new DominanceComparator();
-  } // BinaryTournament
-  
-  /**
-  * Performs the operation
-  * @param object Object representing a SolutionSet
-  * @return the selected solution
-  */
-  @SuppressWarnings("unchecked")
-  @Override
-  public Object execute(Object object){
-    SolutionSet solutionSet = (SolutionSet)object;
-    Solution solution1, solution2;
-    solution1 = solutionSet.get(pseudoRandom.randInt(0,solutionSet.size()-1));
-    solution2 = solutionSet.get(pseudoRandom.randInt(0,solutionSet.size()-1));
+    /**
+     * Constructor
+     * Creates a new Binary tournament operator using a BinaryTournamentComparator
+     */
+    public BinaryTournament(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
+        if ((parameters != null) && (parameters.get("comparator") != null))
+            this.comparator_ = (Comparator) parameters.get("comparator");
+        else
+            //comparator_ = new BinaryTournamentComparator();
+            this.comparator_ = new DominanceComparator();
+    } // BinaryTournament
 
-    if (solutionSet.size() >= 2)
-    	while (solution1 == solution2)
-        solution2 = solutionSet.get(pseudoRandom.randInt(0,solutionSet.size()-1));
-    
-    int flag = comparator_.compare(solution1,solution2);
-    if (flag == -1)
-      return solution1;
-    else if (flag == 1)
-      return solution2;
-    else
-      if (pseudoRandom.randDouble()<0.5)
-        return solution1;
-      else
-        return solution2;                       
-  } // execute
+    /**
+     * Performs the operation
+     *
+     * @param object Object representing a SolutionSet
+     * @return the selected solution
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object execute(Object object) {
+        SolutionSet solutionSet = (SolutionSet) object;
+        Solution solution1, solution2;
+        solution1 = solutionSet.get(this.pseudoRandom.randInt(0, solutionSet.size() - 1));
+        solution2 = solutionSet.get(this.pseudoRandom.randInt(0, solutionSet.size() - 1));
+
+        if (solutionSet.size() >= 2)
+            while (solution1 == solution2)
+                solution2 = solutionSet.get(this.pseudoRandom.randInt(0, solutionSet.size() - 1));
+
+        int flag = this.comparator_.compare(solution1, solution2);
+        if (flag < 0)
+            return solution1;
+        else if (flag > 0)
+            return solution2;
+        else if (this.pseudoRandom.randDouble() < 0.5)
+            return solution1;
+        else
+            return solution2;
+    } // execute
 } // BinaryTournament

@@ -7,30 +7,27 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class HttpRestInteractionComManagerExchange 
-				extends HALControllerExchange {
-	
-	private StateExchange stateExchange;
+public class HttpRestInteractionComManagerExchange
+        extends HALControllerExchange {
 
-	/**
-	 * 
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public HttpRestInteractionComManagerExchange(UUID deviceID, Long timestamp, StateExchange stateExchange) {
-		super(deviceID, timestamp);
-		this.stateExchange = stateExchange;
-	}
+    private StateExchange stateExchange;
 
-	public StateExchange getStateExchange() {
-		return stateExchange;
-	}
-	
-	public void setStateExchange(StateExchange stateExchange) {
-		this.stateExchange = stateExchange;
-	}
+    /**
+     * @param deviceID
+     * @param timestamp
+     */
+    public HttpRestInteractionComManagerExchange(UUID deviceID, Long timestamp, StateExchange stateExchange) {
+        super(deviceID, timestamp);
+        this.stateExchange = stateExchange;
+    }
+
+    public StateExchange getStateExchange() {
+        return this.stateExchange;
+    }
+
+    public void setStateExchange(StateExchange stateExchange) {
+        this.stateExchange = stateExchange;
+    }
 }

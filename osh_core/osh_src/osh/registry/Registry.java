@@ -20,351 +20,339 @@ import java.util.Map.Entry;
 
 
 /**
- * 
  * @author Till Schuberth, Florian Allerding, Ingo Mauser
- * 
  */
 public abstract class Registry extends OSHComponent implements IRegistry {
-	
-	private Map<Class<? extends StateExchange>, Map<UUID, StateExchange>> states = new HashMap<Class<? extends StateExchange>, Map<UUID, StateExchange>>();
-	private Map<Class<? extends StateExchange>, Set<EventReceiverWrapper>> stateListeners = new HashMap<Class<? extends StateExchange>, Set<EventReceiverWrapper>>();
 
-	private Map<Class<? extends EventExchange>, Set<EventReceiverWrapper>> eventListeners = new HashMap<Class<? extends EventExchange>, Set<EventReceiverWrapper>>();
+    private final Map<Class<? extends StateExchange>, Map<UUID, StateExchange>> states = new HashMap<>();
+    private final Map<Class<? extends StateExchange>, Set<EventReceiverWrapper>> stateListeners = new HashMap<>();
 
-	private Map<EventReceiverWrapper, EventQueue> queues = new HashMap<EventReceiverWrapper, EventQueue>();
-	private Map<EventReceiverWrapper, StateChangedEventSet> statechangedeventsets = new HashMap<>();
+    private final Map<Class<? extends EventExchange>, Set<EventReceiverWrapper>> eventListeners = new HashMap<>();
 
-	private InvokerThreadRegistry invokerRegistry;
+    private final Map<EventReceiverWrapper, EventQueue> queues = new HashMap<>();
+    private final Map<EventReceiverWrapper, StateChangedEventSet> stateChangedEventSets = new HashMap<>();
 
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public Registry(IOSH osh) {
-		super(osh);
-		invokerRegistry = new InvokerThreadRegistry(osh);
-	}
+    private final InvokerThreadRegistry invokerRegistry;
 
-	/**
-	 * listener.onQueueEventReceived() is called
-	 */
-	public synchronized EventQueue register(
-			Class<? extends EventExchange> type, IEventTypeReceiver subscriber)
-			throws OSHException {
-		return register(type, new EventReceiverWrapper(subscriber));
-	}
-	/**
-	 * listener.onQueueEventReceived() is called
-	 */
-	private synchronized EventQueue register(
-			Class<? extends EventExchange> type, EventReceiverWrapper subscriber)
-			throws OSHException {
-		if (type == null || subscriber == null)
-			throw new IllegalArgumentException("argument is null");
 
-		// add subscriber to the set of subscribers for this event type
-		Set<EventReceiverWrapper> eventtypeSubscribers = eventListeners.get(type);
-		if (eventtypeSubscribers == null) {
-			eventtypeSubscribers = new HashSet<EventReceiverWrapper>();
-			eventListeners.put(type, eventtypeSubscribers);
-		}
-		eventtypeSubscribers.add(subscriber);
+    /**
+     * CONSTRUCTOR
+     */
+    public Registry(IOSH osh) {
+        super(osh);
+        this.invokerRegistry = new InvokerThreadRegistry(osh);
+    }
 
-		// create one queue for every subscriber
-		EventQueue queue = queues.get(subscriber);
-		if (queue == null) {
-			queue = new EventQueue(getGlobalLogger(), "EventQueue for "
-					+ subscriber.getUUID().toString());
-			queues.put(subscriber, queue);
-			invokerRegistry.addQueueSubscriber(subscriber, queue);
-		}
-		return queue;
-	}
+    /**
+     * listener.onQueueEventReceived() is called
+     */
+    public synchronized EventQueue register(
+            Class<? extends EventExchange> type, IEventTypeReceiver subscriber)
+            throws OSHException {
+        return this.register(type, new EventReceiverWrapper(subscriber));
+    }
 
-	public <T extends EventExchange, U extends T> void sendEvent(Class<T> type,
-			U ex) {
-		if (type == null || ex == null)
-			throw new IllegalArgumentException("argument is null");
+    /**
+     * listener.onQueueEventReceived() is called
+     */
+    private synchronized EventQueue register(
+            Class<? extends EventExchange> type, EventReceiverWrapper subscriber)
+            throws OSHException {
+        if (type == null || subscriber == null)
+            throw new IllegalArgumentException("argument is null");
 
-		sendEvent(type, ex, null);
-	}
+        // add subscriber to the set of subscribers for this event type
+        Set<EventReceiverWrapper> eventTypeSubscribers = this.eventListeners.computeIfAbsent(type, k -> new HashSet<>());
+        eventTypeSubscribers.add(subscriber);
 
-	public <T extends CommandExchange, U extends T> void sendCommand(
-			Class<T> type, U ex) {
-		if (type == null || ex == null)
-			throw new IllegalArgumentException("argument is null");
+        // create one queue for every subscriber
+        EventQueue queue = this.queues.get(subscriber);
+        if (queue == null) {
+            queue = new EventQueue(this.getGlobalLogger(), "EventQueue for "
+                    + subscriber.getUUID().toString());
+            this.queues.put(subscriber, queue);
+            this.invokerRegistry.addQueueSubscriber(subscriber, queue);
+        }
+        return queue;
+    }
 
-		UUID receiver = ex.getReceiver();
-		if (receiver == null)
-			throw new NullPointerException("CommandExchange: receiver is null");
+    public <T extends EventExchange, U extends T> void sendEvent(Class<T> type,
+                                                                 U ex) {
+        if (type == null || ex == null)
+            throw new IllegalArgumentException("argument is null");
 
-		sendEvent(type, ex, receiver);
-	}
+        this.sendEvent(type, ex, null);
+    }
 
-	private synchronized <T extends EventExchange, U extends T> void sendEvent(
-			Class<T> type, U ex, UUID receiver) {
-		Set<EventReceiverWrapper> listeners = eventListeners.get(type);
-		if (listeners == null)
-			return; // no listeners
+    public <T extends CommandExchange, U extends T> void sendCommand(
+            Class<T> type, U ex) {
+        if (type == null || ex == null)
+            throw new IllegalArgumentException("argument is null");
 
-		for (EventReceiverWrapper r : listeners) {
-			if (receiver != null) {
-				if (!r.getUUID().equals(receiver))
-					continue; // not the receiver
-			}
-			EventQueue queue = queues.get(r);
+        UUID receiver = ex.getReceiver();
+        if (receiver == null)
+            throw new NullPointerException("CommandExchange: receiver is null");
 
-			U exclone;
-			try {
-				//a cast to T should be sufficient, but if I
-				//can't cast to U, cloning isn't implemented
-				//properly anyway...
-				exclone = (U) ex.clone();
-			} catch (ClassCastException e){
-				throw new RuntimeException("You didn't implement cloning properly in your EventExchange-subclass.", e);
-			}
-			enqueueAndNotify(queue, type, exclone, r);
-		}
-	}
+        this.sendEvent(type, ex, receiver);
+    }
 
-	public synchronized <T extends StateExchange> T getState(
-			Class<T> type,
-			UUID stateprovider) {
-		Map<UUID, StateExchange> map = states.get(type);
-		if (map == null)
-			return null;
+    @SuppressWarnings("unchecked")
+    private synchronized <T extends EventExchange, U extends T> void sendEvent(
+            Class<T> type, U ex, UUID receiver) {
+        Set<EventReceiverWrapper> listeners = this.eventListeners.get(type);
+        if (listeners == null)
+            return; // no listeners
 
-		StateExchange state = map.get(stateprovider);
-		if (state == null)
-			return null;
+        for (EventReceiverWrapper r : listeners) {
+            if (receiver != null) {
+                if (!r.getUUID().equals(receiver))
+                    continue; // not the receiver
+            }
+            EventQueue queue = this.queues.get(r);
 
-		@SuppressWarnings("unchecked")
-		T t = (T) (state.clone());
+            U exClone;
+            try {
+                //a cast to T should be sufficient, but if I
+                //can't cast to U, cloning isn't implemented
+                //properly anyway...
+                exClone = (U) ex.clone();
+            } catch (ClassCastException e) {
+                throw new RuntimeException("You didn't implement cloning properly in your EventExchange-subclass.", e);
+            }
+            this.enqueueAndNotify(queue, type, exClone, r);
+        }
+    }
 
-		return t;
-	}
+    public synchronized <T extends StateExchange> T getState(
+            Class<T> type,
+            UUID stateProvider) {
+        Map<UUID, StateExchange> map = this.states.get(type);
+        if (map == null)
+            return null;
 
-	public synchronized <T extends StateExchange> Map<UUID, T> getStates(
-			Class<? extends T> type) {
-		Map<UUID, StateExchange> map = states.get(type);
-		if (map == null)
-			return new HashMap<UUID, T>();
+        StateExchange state = map.get(stateProvider);
+        if (state == null)
+            return null;
 
-		Map<UUID, T> copy = new HashMap<UUID, T>();
-		for (Entry<UUID, StateExchange> e : map.entrySet()) {
-			UUID uuid = e.getKey();
-			StateExchange ex = e.getValue();
-			
-			@SuppressWarnings("unchecked")
-			T clone = (T) ex.clone();
-			
-			copy.put(uuid, clone);
-		}
-		return copy;
-	}
+        @SuppressWarnings("unchecked")
+        T t = (T) (state.clone());
 
-	public Set<Class<? extends StateExchange>> getTypes() {
-		Set<Class<? extends StateExchange>> types = new HashSet<Class<? extends StateExchange>>();
+        return t;
+    }
 
-		synchronized (this) {
-			types.addAll(states.keySet());
-		}
+    public synchronized <T extends StateExchange> Map<UUID, T> getStates(
+            Class<? extends T> type) {
+        Map<UUID, StateExchange> map = this.states.get(type);
+        if (map == null)
+            return new HashMap<>();
 
-		return types;
-	}
+        Map<UUID, T> copy = new HashMap<>();
+        for (Entry<UUID, StateExchange> e : map.entrySet()) {
+            UUID uuid = e.getKey();
+            StateExchange ex = e.getValue();
 
-	public synchronized <T extends StateExchange, U extends T> void setState(
-			Class<T> type, 
-			IHasState provider, 
-			U state) {
+            @SuppressWarnings("unchecked")
+            T clone = (T) ex.clone();
 
-		if (!provider.getUUID().equals(state.getSender()))
-			throw new IllegalArgumentException(
-					"provider uuid doesn't match sender uuid");
+            copy.put(uuid, clone);
+        }
+        return copy;
+    }
 
-		setState(type, provider.getUUID(), state);
-	}
+    public Set<Class<? extends StateExchange>> getTypes() {
+        Set<Class<? extends StateExchange>> types;
 
-	/**
-	 * Set the state of an arbitrary object. !USE WITH CARE! This is used by bus
-	 * drivers.
-	 * 
-	 * @param type
-	 * @param state
-	 */
-	public synchronized <T extends StateExchange, U extends T> void setStateOfSender(
-			Class<T> type, U state) {
-		setState(type, state.getSender(), state);
-	}
+        synchronized (this) {
+            types = new HashSet<>(this.states.keySet());
+        }
 
-	private synchronized <T extends StateExchange, U extends T> void setState(
-			Class<T> type, UUID uuid, U state) {
-		Map<UUID, StateExchange> map = states.get(type);
-		if (map == null) {
-			map = new HashMap<UUID, StateExchange>();
-			states.put(type, map);
-		}
-		map.put(uuid, state);
+        return types;
+    }
 
-		// inform listeners
-		Set<EventReceiverWrapper> listeners = stateListeners.get(type);
-		// only one exchange for every listener needed, because StateChangedExchange not modifiable
-		StateChangedExchange stChEx = new StateChangedExchange(
-				getTimer().getUnixTime(), 
-				type, 
-				uuid);
-		if (listeners != null) {
-			for (EventReceiverWrapper r : listeners) {
-				notifyStateChange(stChEx, r);
-			}
-		}
-	}
+    public synchronized <T extends StateExchange, U extends T> void setState(
+            Class<T> type,
+            IHasState provider,
+            U state) {
 
-	/**
-	 * Registers a listener which is notified whenever a state (from any device)
-	 * is changed. This is a legacy function, please use the new version with
-	 * IEventTypeReceiver as listener
-	 * 
-	 * @param type
-	 * @param listener
-	 * @throws OSHException
-	 */
-	public synchronized void registerStateChangeListener(
-			Class<? extends StateExchange> type, IEventTypeReceiver listener)
-					throws OSHException {
-		registerStateChangeListener(type, new EventReceiverWrapper(listener));
-	}
-	/**
-	 * Registers a listener which is notified whenever a state (from any device)
-	 * is changed. This is a legacy function, please use the new version with
-	 * IEventTypeReceiver as listener
-	 * 
-	 * @param type
-	 * @param listener
-	 * @throws OSHException
-	 */
-	private synchronized void registerStateChangeListener(
-			Class<? extends StateExchange> type, EventReceiverWrapper listener)
-					throws OSHException {
-		if (type == null || listener == null)
-			throw new IllegalArgumentException("argument is null");
-		Set<EventReceiverWrapper> listeners = stateListeners.get(type);
-		if (listeners == null) {
-			listeners = new HashSet<EventReceiverWrapper>();
-			stateListeners.put(type, listeners);
-		}
-		listeners.add(listener);
+        if (!provider.getUUID().equals(state.getSender()))
+            throw new IllegalArgumentException(
+                    "provider uuid doesn't match sender uuid");
 
-		if (!statechangedeventsets.containsKey(listener)) {
-			String name;
-			if (listener.getUUID() == null)
-				name = "StateChangeListenerQueue for "
-						+ listener.getClass().getName();
-			else
-				name = "StateChangeListenerQueue for "
-						+ listener.getUUID().toString();
-			
-			StateChangedEventSet eventset = new StateChangedEventSet(getGlobalLogger(), name);
-			statechangedeventsets.put(listener, eventset);
-			invokerRegistry.addStateSubscriber(listener, eventset);
-		}
+        this.setState(type, provider.getUUID(), state);
+    }
 
-		// push all current states (may be optional)
-		Map<UUID, StateExchange> map = states.get(type);
-		if (map != null) {
-			for (Entry<UUID, StateExchange> e : map.entrySet()) {
-				long timestamp = getTimer().getUnixTime();
-				notifyStateChange(
-						new StateChangedExchange(timestamp, type, e.getKey()),
-						listener);
-			}
-		}
-	}
+    /**
+     * Set the state of an arbitrary object. !USE WITH CARE! This is used by bus
+     * drivers.
+     *
+     * @param type
+     * @param state
+     */
+    public synchronized <T extends StateExchange, U extends T> void setStateOfSender(
+            Class<T> type, U state) {
+        this.setState(type, state.getSender(), state);
+    }
 
-	/**
-	 * enqueue ex in Queue queue and notify ComponentThread
-	 */
-	private <T extends EventExchange> void enqueueAndNotify(EventQueue queue, Class<T> eventtype, T ex,
-			EventReceiverWrapper receiver) {
+    private synchronized <T extends StateExchange, U extends T> void setState(
+            Class<T> type, UUID uuid, U state) {
+        Map<UUID, StateExchange> map = this.states.computeIfAbsent(type, k -> new HashMap<>());
+        map.put(uuid, state);
 
-		queue.enqueue(eventtype, ex);
+        // inform listeners
+        Set<EventReceiverWrapper> listeners = this.stateListeners.get(type);
+        // only one exchange for every listener needed, because StateChangedExchange not modifiable
+        StateChangedExchange stChEx = new StateChangedExchange(
+                this.getTimer().getUnixTime(),
+                type,
+                uuid);
+        if (listeners != null) {
+            for (EventReceiverWrapper r : listeners) {
+                this.notifyStateChange(stChEx, r);
+            }
+        }
+    }
 
-		try {
-			invokerRegistry.invoke(receiver);
-		} catch (SubscriberNotFoundException e) {
-			getGlobalLogger().logWarning("receiver has not been found!", e);
-		} catch (InvokerThreadException e) {
-			getGlobalLogger().logError("thread exception", e);
-		}
-	}
-	
-	private void notifyStateChange(StateChangedExchange ex,
-			EventReceiverWrapper receiver) {
-		StateChangedEventSet eventset = statechangedeventsets.get(receiver);
-		if( eventset != null ) {
-			eventset.enqueue(ex);
-		} else {
-			getGlobalLogger().logError("event set of " + receiver + " not found!");
-		}
-		
-		try {
-			invokerRegistry.notifyStateSubscriber(receiver);
-		} catch (SubscriberNotFoundException e) {
-			getGlobalLogger().logWarning("receiver has not been found!", e);
-		} catch (InvokerThreadException e) {
-			getGlobalLogger().logError("thread exception", e);
-		}
-	}
+    /**
+     * Registers a listener which is notified whenever a state (from any device)
+     * is changed. This is a legacy function, please use the new version with
+     * IEventTypeReceiver as listener
+     *
+     * @param type
+     * @param listener
+     * @throws OSHException
+     */
+    public synchronized void registerStateChangeListener(
+            Class<? extends StateExchange> type, IEventTypeReceiver listener)
+            throws OSHException {
+        this.registerStateChangeListener(type, new EventReceiverWrapper(listener));
+    }
 
-	/**
-	 * Let the {@link EventQueueSubscriberInvoker}s process all queues. Only
-	 * during simulation, all queue processing is done after this call. Use this
-	 * for the simulation engine.
-	 * 
-	 */
-	public synchronized void flushAllQueues() {
-		invokerRegistry.triggerInvokers();
-	}
+    /**
+     * Registers a listener which is notified whenever a state (from any device)
+     * is changed. This is a legacy function, please use the new version with
+     * IEventTypeReceiver as listener
+     *
+     * @param type
+     * @param listener
+     * @throws OSHException
+     */
+    private synchronized void registerStateChangeListener(
+            Class<? extends StateExchange> type, EventReceiverWrapper listener)
+            throws OSHException {
+        if (type == null || listener == null)
+            throw new IllegalArgumentException("argument is null");
+        Set<EventReceiverWrapper> listeners = this.stateListeners.computeIfAbsent(type, k -> new HashSet<>());
+        listeners.add(listener);
 
-	/**
-	 * 
-	 * Use this for the simulation engine.
-	 * 
-	 * @return false iff there is at least one event in some queue
-	 */
-	public synchronized boolean areAllQueuesEmpty() {
-		for (EventQueue queue : queues.values()) {
-			if (!queue.isEmpty())
-				return false;
-		}
+        if (!this.stateChangedEventSets.containsKey(listener)) {
+            String name;
+            if (listener.getUUID() == null)
+                name = "StateChangeListenerQueue for "
+                        + listener.getClass().getName();
+            else
+                name = "StateChangeListenerQueue for "
+                        + listener.getUUID().toString();
 
-		return true;
-	}
+            StateChangedEventSet eventSet = new StateChangedEventSet(this.getGlobalLogger(), name);
+            this.stateChangedEventSets.put(listener, eventSet);
+            this.invokerRegistry.addStateSubscriber(listener, eventSet);
+        }
 
-	// TODO: WE SHOULD SYNCHRONIZE with queues, not always with the complete
-	// registry
-	/**
-	 * Use the returned object to perform one atomic operation consisting of
-	 * multiple method calls. Example:
-	 * 
-	 * synchronized (registry.getSyncObject()) { Type bla =
-	 * registry.getState(..); if (bla.func()) { registry.setState(...); } }
-	 * 
-	 * @return Object for synchronization
-	 */
-	public Object getSyncObject() {
-		return this;
-	}
+        // push all current states (may be optional)
+        Map<UUID, StateExchange> map = this.states.get(type);
+        if (map != null) {
+            for (Entry<UUID, StateExchange> e : map.entrySet()) {
+                long timestamp = this.getTimer().getUnixTime();
+                this.notifyStateChange(
+                        new StateChangedExchange(timestamp, type, e.getKey()),
+                        listener);
+            }
+        }
+    }
 
-	/**
-	 * Starts threads of the internal invoker thread registry.
-	 */
-	public void startQueueProcessingThreads() {
-		invokerRegistry.startThreads();
-	}
+    /**
+     * enqueue ex in Queue queue and notify ComponentThread
+     */
+    private <T extends EventExchange> void enqueueAndNotify(EventQueue queue, Class<T> eventType, T ex,
+                                                            EventReceiverWrapper receiver) {
 
-	// FIXME: registry unregister functions
-	// TODO: unregister functions unimplemented. Be careful, because you also have to
-	// remove all queues that are not longer needed, otherwise they will get
-	// filled and never be emptied.
+        queue.enqueue(eventType, ex);
+
+        try {
+            this.invokerRegistry.invoke(receiver);
+        } catch (SubscriberNotFoundException e) {
+            this.getGlobalLogger().logWarning("receiver has not been found!", e);
+        } catch (InvokerThreadException e) {
+            this.getGlobalLogger().logError("thread exception", e);
+        }
+    }
+
+    private void notifyStateChange(StateChangedExchange ex,
+                                   EventReceiverWrapper receiver) {
+        StateChangedEventSet eventSet = this.stateChangedEventSets.get(receiver);
+        if (eventSet != null) {
+            eventSet.enqueue(ex);
+        } else {
+            this.getGlobalLogger().logError("event set of " + receiver + " not found!");
+        }
+
+        try {
+            this.invokerRegistry.notifyStateSubscriber(receiver);
+        } catch (SubscriberNotFoundException e) {
+            this.getGlobalLogger().logWarning("receiver has not been found!", e);
+        } catch (InvokerThreadException e) {
+            this.getGlobalLogger().logError("thread exception", e);
+        }
+    }
+
+    /**
+     * Let the {@link EventQueueSubscriberInvoker}s process all queues. Only
+     * during simulation, all queue processing is done after this call. Use this
+     * for the simulation engine.
+     */
+    public synchronized void flushAllQueues() {
+        this.invokerRegistry.triggerInvokers();
+    }
+
+    /**
+     * Use this for the simulation engine.
+     *
+     * @return false iff there is at least one event in some queue
+     */
+    public synchronized boolean areAllQueuesEmpty() {
+        for (EventQueue queue : this.queues.values()) {
+            if (queue.isNotEmpty())
+                return false;
+        }
+
+        return true;
+    }
+
+    // TODO: WE SHOULD SYNCHRONIZE with queues, not always with the complete
+    // registry
+
+    /**
+     * Use the returned object to perform one atomic operation consisting of
+     * multiple method calls. Example:
+     * <p>
+     * synchronized (registry.getSyncObject()) { Type bla =
+     * registry.getState(..); if (bla.func()) { registry.setState(...); } }
+     *
+     * @return Object for synchronization
+     */
+    public Object getSyncObject() {
+        return this;
+    }
+
+    /**
+     * Starts threads of the internal invoker thread registry.
+     */
+    public void startQueueProcessingThreads() {
+        this.invokerRegistry.startThreads();
+    }
+
+    // FIXME: registry unregister functions
+    // TODO: unregister functions unimplemented. Be careful, because you also have to
+    // remove all queues that are not longer needed, otherwise they will get
+    // filled and never be emptied.
 }

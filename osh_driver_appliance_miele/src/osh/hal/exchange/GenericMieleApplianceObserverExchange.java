@@ -10,86 +10,83 @@ import osh.hal.interfaces.appliance.IHALGenericApplianceIsCurrentlyControllable;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class GenericMieleApplianceObserverExchange 
-				extends HALDeviceObserverExchange
-				implements  IHALElectricalPowerDetails,
-							IHALGasPowerDetails,
-							IHALGenericApplianceDetails,
-							IHALGenericApplianceIsCurrentlyControllable {
+public class GenericMieleApplianceObserverExchange
+        extends HALDeviceObserverExchange
+        implements IHALElectricalPowerDetails,
+        IHALGasPowerDetails,
+        IHALGenericApplianceDetails,
+        IHALGenericApplianceIsCurrentlyControllable {
 
-	// ### IHALElectricPowerDetails ###
-	private int activePower;
-	private int reactivePower;
-	
-	// ### IHALGasPowerDetails ###
-	private int gasPower;
-	
-	// ### IHALGenericApplianceDetails ###
-	private EN50523DeviceState en50523DeviceState;
-	
-	// ### IHALGenericApplianceIsCurrentlyControllable ###
-	private boolean currentlyControllable;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 * @param device1stDoF
-	 * @param originalLoadProfile
-	 */
-	public GenericMieleApplianceObserverExchange(
-			UUID deviceID, 
-			Long timestamp) {
-		super(deviceID, timestamp);
-	}
+    // ### IHALElectricPowerDetails ###
+    private int activePower;
+    private int reactivePower;
+
+    // ### IHALGasPowerDetails ###
+    private int gasPower;
+
+    // ### IHALGenericApplianceDetails ###
+    private EN50523DeviceState en50523DeviceState;
+
+    // ### IHALGenericApplianceIsCurrentlyControllable ###
+    private boolean currentlyControllable;
 
 
-	public int getActivePower() {
-		return activePower;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public GenericMieleApplianceObserverExchange(
+            UUID deviceID,
+            Long timestamp) {
+        super(deviceID, timestamp);
+    }
 
-	public void setActivePower(int activePower) {
-		this.activePower = activePower;
-	}
+
+    public int getActivePower() {
+        return this.activePower;
+    }
+
+    public void setActivePower(int activePower) {
+        this.activePower = activePower;
+    }
 
 
-	public int getReactivePower() {
-		return reactivePower;
-	}
+    public int getReactivePower() {
+        return this.reactivePower;
+    }
 
-	public void setReactivePower(int reactivePower) {
-		this.reactivePower = reactivePower;
-	}
+    public void setReactivePower(int reactivePower) {
+        this.reactivePower = reactivePower;
+    }
 
-	public int getGasPower() {
-		return gasPower;
-	}
+    public int getGasPower() {
+        return this.gasPower;
+    }
 
-	public void setGasPower(int gasPower) {
-		this.gasPower = gasPower;
-	}
+    public void setGasPower(int gasPower) {
+        this.gasPower = gasPower;
+    }
 
-	@Override
-	public EN50523DeviceState getEN50523DeviceState() {
-		return en50523DeviceState;
-	}
+    @Override
+    public EN50523DeviceState getEN50523DeviceState() {
+        return this.en50523DeviceState;
+    }
 
-	public void setEn50523DeviceState(EN50523DeviceState en50523DeviceState) {
-		this.en50523DeviceState = en50523DeviceState;
-	}
+    public void setEn50523DeviceState(EN50523DeviceState en50523DeviceState) {
+        this.en50523DeviceState = en50523DeviceState;
+    }
 
-	@Override
-	public boolean isCurrentlyControllable() {
-		return currentlyControllable;
-	}
+    @Override
+    public boolean isCurrentlyControllable() {
+        return this.currentlyControllable;
+    }
 
-	public void setCurrentlyControllable(boolean currentlyControllable) {
-		this.currentlyControllable = currentlyControllable;
-	}
-	
+    public void setCurrentlyControllable(boolean currentlyControllable) {
+        this.currentlyControllable = currentlyControllable;
+    }
+
 }

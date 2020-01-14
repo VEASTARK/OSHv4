@@ -12,51 +12,51 @@ import osh.simulation.screenplay.ScreenplayType;
 import java.util.UUID;
 
 public class AddLiebherrFreezer {
-	
-	public static void addLiebherrFreezer(
-			EALConfiguration ealConfiguration,
-			
-			UUID deviceId,
-			ScreenplayType screenplayType,
-			
-			String driverClassName,
-			String localObserverClass,
-			boolean isControllable,
-			String localControllerClass,
-			String comPort) {
-	
-	
-		AssignedDevice _assdev = CreateDevice.createDevice(
-				DeviceTypes.FREEZER, 
-				DeviceClassification.APPLIANCE, 
-				deviceId, 
-				driverClassName, 
-				localObserverClass, 
-				isControllable, 
-				localControllerClass);
-		
-		// add parameters for driver
-		
-		{
-			ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(
-					"screenplaytype", 
-					"String", 
-					"" + screenplayType);
-			_assdev.getDriverParameters().add(cp);
-		}
-		
-		{
-			ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(
-					"comport", 
-					"String", 
-					"" + comPort);
-			_assdev.getDriverParameters().add(cp);
-		}
-		
-		// other parameters...
-		
-		ealConfiguration.getAssignedDevices().add(_assdev);
-	
-	}
+
+    public static void addLiebherrFreezer(
+            EALConfiguration ealConfiguration,
+
+            UUID deviceId,
+            ScreenplayType screenplayType,
+
+            String driverClassName,
+            String localObserverClass,
+            boolean isControllable,
+            String localControllerClass,
+            String comPort) {
+
+
+        AssignedDevice _assdev = CreateDevice.createDevice(
+                DeviceTypes.FREEZER,
+                DeviceClassification.APPLIANCE,
+                deviceId,
+                driverClassName,
+                localObserverClass,
+                isControllable,
+                localControllerClass);
+
+        // add parameters for driver
+
+        {
+            ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(
+                    "screenplaytype",
+                    "String",
+                    "" + screenplayType);
+            _assdev.getDriverParameters().add(cp);
+        }
+
+        {
+            ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(
+                    "comport",
+                    "String",
+                    "" + comPort);
+            _assdev.getDriverParameters().add(cp);
+        }
+
+        // other parameters...
+
+        ealConfiguration.getAssignedDevices().add(_assdev);
+
+    }
 
 }

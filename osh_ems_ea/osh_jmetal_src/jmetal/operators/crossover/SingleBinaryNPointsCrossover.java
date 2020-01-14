@@ -32,182 +32,179 @@ import java.util.*;
 
 /**
  * This class allows to apply a n points crossover operator using two parent
- * solutions. 
+ * solutions.
  * NOTE: the type of the solutions must be Binary
  */
 @SuppressWarnings({"rawtypes"})
 public class SingleBinaryNPointsCrossover extends Crossover {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Valid solution types to apply this operator 
-	 */  
-	private static final List VALID_TYPES = Arrays.asList(BinarySolutionType.class) ;
+    /**
+     * Valid solution types to apply this operator
+     */
+    private static final List VALID_TYPES = Collections.singletonList(BinarySolutionType.class);
 
-	private Double crossoverProbability_ = null;
+    private Double crossoverProbability_;
 
-	private Integer points_ = null;
+    private Integer points_;
 
-	/**
-	 * Constructor
-	 * Creates a new instance of the n point crossover operator
-	 */
-	public SingleBinaryNPointsCrossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-		super(parameters, pseudoRandom) ;
+    /**
+     * Constructor
+     * Creates a new instance of the n point crossover operator
+     */
+    public SingleBinaryNPointsCrossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
 
-		if (parameters.get("probability") != null)
-			crossoverProbability_ = (Double) parameters.get("probability") ;
-		if (parameters.get("points") != null)
-			points_ = (Integer) parameters.get("points");
-	} // SingleBinaryNPointsCrossover
-
-
-	/**
-	 * Constructor
-	 * @param A properties containing the Operator parameters
-	 * Creates a new instance of the n point crossover operator
-	 */
-	//public SingleBinaryNPointsCrossover(Properties properties) {
-	//	this();
-	//}
+        if (parameters.get("probability") != null)
+            this.crossoverProbability_ = (Double) parameters.get("probability");
+        if (parameters.get("points") != null)
+            this.points_ = (Integer) parameters.get("points");
+    } // SingleBinaryNPointsCrossover
 
 
-	/**
-	 * Perform the crossover operation
-	 * @param probability Crossover probability
-	 * @param parent1 The first parent
-	 * @param parent2 The second parent
-	 * @return Two offspring solutions
-	 * @throws JMException 
-	 */
-	public Solution[] doCrossover(double probability,
-			int points,
-			Solution parent1, 
-			Solution parent2) throws JMException {
-		//TODO: Making the crossover work for multiple decision variables
+    /**
+     * Constructor
+     * @param A properties containing the Operator parameters
+     * Creates a new instance of the n point crossover operator
+     */
+    //public SingleBinaryNPointsCrossover(Properties properties) {
+    //	this();
+    //}
 
-		Solution [] offspring = new Solution[2];
 
-		offspring[0] = new Solution(parent1);
-		offspring[1] = new Solution(parent2);
+    /**
+     * Perform the crossover operation
+     *
+     * @param probability Crossover probability
+     * @param parent1     The first parent
+     * @param parent2     The second parent
+     * @return Two offspring solutions
+     * @throws JMException
+     */
+    public Solution[] doCrossover(double probability,
+                                  int points,
+                                  Solution parent1,
+                                  Solution parent2) throws JMException {
+        //TODO: Making the crossover work for multiple decision variables
 
-		if (parent1.getType().getClass() == BinarySolutionType.class) {
-			if (pseudoRandom.randDouble() < probability) {		
-				
+        Solution[] offspring = new Solution[2];
 
-				int numberOfBits = parent1.getNumberOfBits();
+        offspring[0] = new Solution(parent1);
+        offspring[1] = new Solution(parent2);
 
-				//aborting for 0 bit solutions
-				if (numberOfBits == 0) {
-					return offspring;
-				}					
-				//adjusting for small bitstrings
-				if (numberOfBits < points) {
-					points = numberOfBits;
-				}
+        if (parent1.getType().getClass() == BinarySolutionType.class) {
+            if (this.pseudoRandom.randDouble() < probability) {
 
-				//Step 1: Generate the random cutting points and sort them
-				HashSet<Integer> xoPoints = new HashSet<Integer>(points);
-				Integer[] crossoverPoints = new Integer[points + 1];					
 
-				while(xoPoints.size() != points) {
-					while(!xoPoints.add(pseudoRandom.randInt(0, numberOfBits - 1)));
-				}
-				
-				//adding start and finish for easier iterating
-				//if start and/or end are selected as crossoverPoints then this will effectively reduce the number of xo-points 
-				xoPoints.add(0);
-				xoPoints.add(numberOfBits);
+                int numberOfBits = parent1.getNumberOfBits();
 
-				crossoverPoints = xoPoints.toArray(crossoverPoints);
-				
-				Arrays.sort(crossoverPoints);
-				
-				//Step 2: Do the crossover
-				//using bitset operations is faster then just setting bits one after another
-				BitSet tmp1 = new BitSet();
-				tmp1.or(((Binary) offspring[0].getDecisionVariables()[0]).bits_);
-				BitSet tmp2 = new BitSet();
-				tmp2.or(((Binary) offspring[1].getDecisionVariables()[0]).bits_);
-				
-				for (int i = 1; i < crossoverPoints.length; i++) {
-					if (i % 2 == 0) {
-						((Binary) offspring[0].getDecisionVariables()[0]).bits_.clear(crossoverPoints[i - 1], crossoverPoints[i]);
-						((Binary) offspring[1].getDecisionVariables()[0]).bits_.clear(crossoverPoints[i - 1], crossoverPoints[i]);
-					} else {
-						tmp1.clear(crossoverPoints[i - 1], crossoverPoints[i]);
-						tmp2.clear(crossoverPoints[i - 1], crossoverPoints[i]);
-					}
-				}
-				((Binary) offspring[0].getDecisionVariables()[0]).bits_.or(tmp2);
-				((Binary) offspring[1].getDecisionVariables()[0]).bits_.or(tmp1);				
-				
-			} // if 
-		} // if
-		else
-		{
-			Configuration.logger_.severe("SingleBinaryNPointsCrossover.doCrossover: invalid " +
-					"type" + 
-					parent1.getDecisionVariables()[0].getVariableType());
-			Class cls = java.lang.String.class;
-			String name = cls.getName(); 
-			throw new JMException("Exception in " + name + ".doCrossover()") ; 
-		}
+                //aborting for 0 bit solutions
+                if (numberOfBits == 0) {
+                    return offspring;
+                }
+                //adjusting for small bitstrings
+                if (numberOfBits < points) {
+                    points = numberOfBits;
+                }
 
-		return offspring;                                                                                      
-	} // makeCrossover
+                //Step 1: Generate the random cutting points and sort them
+                HashSet<Integer> xoPoints = new HashSet<>(points);
+                Integer[] crossoverPoints = new Integer[points + 1];
 
-	/**
-	 * Executes the operation
-	 * @param object An object containing an array of two solutions 
-	 * @return An object containing an array with the offSprings
-	 * @throws JMException 
-	 */
-	@Override
-	@SuppressWarnings({ })
-	public Object execute(Object object) throws JMException {
-		Solution [] parents = (Solution [])object;
+                while (xoPoints.size() != points) {
+                    while (!xoPoints.add(this.pseudoRandom.randInt(0, numberOfBits - 1))) ;
+                }
 
-		if (!(VALID_TYPES.contains(parents[0].getType().getClass())  &&
-				VALID_TYPES.contains(parents[1].getType().getClass())) ) {
+                //adding start and finish for easier iterating
+                //if start and/or end are selected as crossoverPoints then this will effectively reduce the number of xo-points
+                xoPoints.add(0);
+                xoPoints.add(numberOfBits);
 
-			Configuration.logger_.severe("SingleBinaryNPointsCrossover.execute: the solutions " +
-					"are not of the right type. The type should be 'Binary', but " +
-					parents[0].getType() + " and " + 
-					parents[1].getType() + " are obtained");
+                crossoverPoints = xoPoints.toArray(crossoverPoints);
 
-			Class cls = java.lang.String.class;
-			String name = cls.getName();
-			throw new JMException("Exception in " + name + ".execute()");
-		} // if 
+                Arrays.sort(crossoverPoints);
 
-		if (parents.length < 2)
-		{
-			Configuration.logger_.severe("SingleBinaryNPointsCrossover.execute: operator needs two " +
-					"parents");
-			Class cls = java.lang.String.class;
-			String name = cls.getName(); 
-			throw new JMException("Exception in " + name + ".execute()") ;      
-		}
+                //Step 2: Do the crossover
+                //using bitset operations is faster then just setting bits one after another
+                BitSet tmp1 = new BitSet();
+                tmp1.or(((Binary) offspring[0].getDecisionVariables()[0]).bits_);
+                BitSet tmp2 = new BitSet();
+                tmp2.or(((Binary) offspring[1].getDecisionVariables()[0]).bits_);
 
-		if (points_ == null || points_ < 1)
-		{
-			Configuration.logger_.severe("SingleBinaryNPointsCrossover.execute: number of cutting points cannot be negative or zero");
-			Class cls = java.lang.String.class;
-			String name = cls.getName(); 
-			throw new JMException("Exception in " + name + ".execute()") ;      
-		}
+                for (int i = 1; i < crossoverPoints.length; i++) {
+                    if (i % 2 == 0) {
+                        ((Binary) offspring[0].getDecisionVariables()[0]).bits_.clear(crossoverPoints[i - 1], crossoverPoints[i]);
+                        ((Binary) offspring[1].getDecisionVariables()[0]).bits_.clear(crossoverPoints[i - 1], crossoverPoints[i]);
+                    } else {
+                        tmp1.clear(crossoverPoints[i - 1], crossoverPoints[i]);
+                        tmp2.clear(crossoverPoints[i - 1], crossoverPoints[i]);
+                    }
+                }
+                ((Binary) offspring[0].getDecisionVariables()[0]).bits_.or(tmp2);
+                ((Binary) offspring[1].getDecisionVariables()[0]).bits_.or(tmp1);
 
-		Solution [] offspring = doCrossover(crossoverProbability_,
-				points_,
-				parents[0],
-				parents[1]);
+            } // if
+        } // if
+        else {
+            Configuration.logger_.severe("SingleBinaryNPointsCrossover.doCrossover: invalid " +
+                    "type" +
+                    parent1.getDecisionVariables()[0].getVariableType());
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".doCrossover()");
+        }
 
-		return offspring; 
-	} // execute
+        return offspring;
+    } // makeCrossover
+
+    /**
+     * Executes the operation
+     *
+     * @param object An object containing an array of two solutions
+     * @return An object containing an array with the offSprings
+     * @throws JMException
+     */
+    @Override
+    @SuppressWarnings({})
+    public Object execute(Object object) throws JMException {
+        Solution[] parents = (Solution[]) object;
+
+        if (parents.length < 2) {
+            Configuration.logger_.severe("SingleBinaryNPointsCrossover.execute: operator needs two " +
+                    "parents");
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        }
+
+        if (!(VALID_TYPES.contains(parents[0].getType().getClass()) &&
+                VALID_TYPES.contains(parents[1].getType().getClass()))) {
+
+            Configuration.logger_.severe("SingleBinaryNPointsCrossover.execute: the solutions " +
+                    "are not of the right type. The type should be 'Binary', but " +
+                    parents[0].getType() + " and " +
+                    parents[1].getType() + " are obtained");
+
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        } // if
+
+        if (this.points_ == null || this.points_ < 1) {
+            Configuration.logger_.severe("SingleBinaryNPointsCrossover.execute: number of cutting points cannot be negative or zero");
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        }
+
+        return this.doCrossover(this.crossoverProbability_,
+                this.points_,
+                parents[0],
+                parents[1]);
+    } // execute
 
 } // SingleBinaryNPointsCrossover

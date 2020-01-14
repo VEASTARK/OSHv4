@@ -15,9 +15,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,12 +29,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "applianceProgramConfiguration"
+        "applianceProgramConfiguration"
 })
 @XmlRootElement(name = "xsd.ApplianceProgramConfigurations")
 public class XsdApplianceProgramConfigurations {
@@ -44,29 +42,27 @@ public class XsdApplianceProgramConfigurations {
 
     /**
      * Gets the value of the applianceProgramConfiguration property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the applianceProgramConfiguration property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getApplianceProgramConfiguration().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link XsdApplianceProgramConfiguration }
-     * 
-     * 
      */
     public List<XsdApplianceProgramConfiguration> getApplianceProgramConfiguration() {
-        if (applianceProgramConfiguration == null) {
-            applianceProgramConfiguration = new ArrayList<XsdApplianceProgramConfiguration>();
+        if (this.applianceProgramConfiguration == null) {
+            this.applianceProgramConfiguration = new ArrayList<>();
         }
         return this.applianceProgramConfiguration;
     }

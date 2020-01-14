@@ -12,50 +12,50 @@ import java.util.UUID;
 
 /**
  * ENDPROGRAMMED IPP -> nothing to do
- * 
- * @author Ingo Mauser
  *
+ * @author Ingo Mauser
  */
 public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction> {
-	
-	private static final long serialVersionUID = 4075698811201735555L;
 
-	
-	/** 
-	 * CONSTRUCTOR 
-	 * for serialization only, do NOT use */
-	@Deprecated
-	protected FutureAppliancesStaticIPP() {
-		super();
-	}	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public FutureAppliancesStaticIPP(
-			UUID deviceId, 
-			IGlobalLogger logger,
-			long timestamp, 
-			boolean toBeScheduled,
-			long optimizationHorizon, 
-			DeviceTypes deviceType, 
-			long referenceTime,
-			Schedule schedule,
-			LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		
-		super(
-				deviceId, 
-				logger,
-				timestamp, 
-				toBeScheduled,
-				optimizationHorizon, 
-				deviceType, 
-				referenceTime,
-				schedule,
-				compressionType,
-				compressionValue,
-				"FutureStaticApplianceIPP");
-	}
+    private static final long serialVersionUID = 4075698811201735555L;
+
+
+    /**
+     * CONSTRUCTOR
+     * for serialization only, do NOT use
+     */
+    @Deprecated
+    protected FutureAppliancesStaticIPP() {
+        super();
+    }
+
+    /**
+     * CONSTRUCTOR
+     */
+    public FutureAppliancesStaticIPP(
+            UUID deviceId,
+            IGlobalLogger logger,
+            long timestamp,
+            boolean toBeScheduled,
+            long optimizationHorizon,
+            DeviceTypes deviceType,
+            long referenceTime,
+            Schedule schedule,
+            LoadProfileCompressionTypes compressionType,
+            int compressionValue) {
+
+        super(
+                deviceId,
+                logger,
+                timestamp,
+                toBeScheduled,
+                optimizationHorizon,
+                deviceType,
+                referenceTime,
+                schedule,
+                compressionType,
+                compressionValue,
+                "FutureStaticApplianceIPP");
+    }
 
 }

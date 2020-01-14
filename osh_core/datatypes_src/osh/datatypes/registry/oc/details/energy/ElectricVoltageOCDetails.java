@@ -6,35 +6,34 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class ElectricVoltageOCDetails extends StateExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4347656947206748157L;
-	protected double voltage;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param sender
-	 * @param timestamp
-	 */
-	public ElectricVoltageOCDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = 4347656947206748157L;
+    protected double voltage;
 
 
-	public double getVoltage() {
-		return voltage;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param sender
+     * @param timestamp
+     */
+    public ElectricVoltageOCDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
 
-	public void setVoltage(double voltage) {
-		this.voltage = voltage;
-	}
+
+    public double getVoltage() {
+        return this.voltage;
+    }
+
+    public void setVoltage(double voltage) {
+        this.voltage = voltage;
+    }
 
 }

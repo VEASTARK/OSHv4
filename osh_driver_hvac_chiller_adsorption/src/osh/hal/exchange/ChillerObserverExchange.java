@@ -11,111 +11,109 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class ChillerObserverExchange 
-				extends HALDeviceObserverExchange
-				implements 	IHALAdsorptionChillerDetails,
-							IHALElectricalPowerDetails,
-							IHALColdWaterPowerDetails,
-							IHALHotWaterPowerDetails{
-	
-	// ### IHALAdsortionChillerDetails ###
-	private boolean running;
-	private int minRuntimeRemaining;
-	
-	// ### IHALElectricPowerDetails ###
-	private int activePower;
-	private int reactivePower;
-	
-	// ### IHALColdWaterPowerDetails ###
-	private int coldWaterPower;
-	
-	// ### IHALHotWaterPowerDetails ###
-	private int hotWaterPower;
-	
-	//DIRTY HACK!
-	private OutdoorTemperatures outdoorTemperature;
+public class ChillerObserverExchange
+        extends HALDeviceObserverExchange
+        implements IHALAdsorptionChillerDetails,
+        IHALElectricalPowerDetails,
+        IHALColdWaterPowerDetails,
+        IHALHotWaterPowerDetails {
 
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public ChillerObserverExchange(
-			UUID deviceID, 
-			Long timestamp,
-			boolean running,
-			OutdoorTemperatures outdoorTemperature) {
-		super(deviceID, timestamp);
-		
-		this.running = running;
-		this.outdoorTemperature = outdoorTemperature;
-	}
+    // ### IHALAdsortionChillerDetails ###
+    private final boolean running;
+    private int minRuntimeRemaining;
 
-	@Override
-	public int getMinRuntimeRemaining() {
-		return minRuntimeRemaining;
-	}
+    // ### IHALElectricPowerDetails ###
+    private int activePower;
+    private int reactivePower;
 
-	public void setMinRuntimeRemaining(int minRuntimeRemaining) {
-		this.minRuntimeRemaining = minRuntimeRemaining;
-	}
+    // ### IHALColdWaterPowerDetails ###
+    private int coldWaterPower;
 
-	@Override
-	public int getActivePower() {
-		return activePower;
-	}
+    // ### IHALHotWaterPowerDetails ###
+    private int hotWaterPower;
 
-	public void setActivePower(int activePower) {
-		this.activePower = activePower;
-	}
+    //DIRTY HACK!
+    private final OutdoorTemperatures outdoorTemperature;
 
-	@Override
-	public int getReactivePower() {
-		return reactivePower;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public ChillerObserverExchange(
+            UUID deviceID,
+            Long timestamp,
+            boolean running,
+            OutdoorTemperatures outdoorTemperature) {
+        super(deviceID, timestamp);
 
-	public void setReactivePower(int reactivePower) {
-		this.reactivePower = reactivePower;
-	}
+        this.running = running;
+        this.outdoorTemperature = outdoorTemperature;
+    }
 
-	
+    @Override
+    public int getMinRuntimeRemaining() {
+        return this.minRuntimeRemaining;
+    }
 
-	public int getColdWaterPower() {
-		return coldWaterPower;
-	}
+    public void setMinRuntimeRemaining(int minRuntimeRemaining) {
+        this.minRuntimeRemaining = minRuntimeRemaining;
+    }
 
-	public void setColdWaterPower(int coldWaterPower) {
-		this.coldWaterPower = coldWaterPower;
-	}
+    @Override
+    public int getActivePower() {
+        return this.activePower;
+    }
 
-	public int getHotWaterPower() {
-		return hotWaterPower;
-	}
+    public void setActivePower(int activePower) {
+        this.activePower = activePower;
+    }
 
-	public void setHotWaterPower(int hotWaterPower) {
-		this.hotWaterPower = hotWaterPower;
-	}
+    @Override
+    public int getReactivePower() {
+        return this.reactivePower;
+    }
 
-	@Override
-	public boolean isRunning() {
-		return running;
-	}
-	
-	public OutdoorTemperatures getOutdoorTemperature() {
-		return outdoorTemperature;
-	}
+    public void setReactivePower(int reactivePower) {
+        this.reactivePower = reactivePower;
+    }
 
-	@Override
-	public double getHotWaterTemperature() {
-		return Double.NaN;
-	}
 
-	@Override
-	public double getColdWaterTemperature() {
-		return Double.NaN;
-	}
+    public int getColdWaterPower() {
+        return this.coldWaterPower;
+    }
+
+    public void setColdWaterPower(int coldWaterPower) {
+        this.coldWaterPower = coldWaterPower;
+    }
+
+    public int getHotWaterPower() {
+        return this.hotWaterPower;
+    }
+
+    public void setHotWaterPower(int hotWaterPower) {
+        this.hotWaterPower = hotWaterPower;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return this.running;
+    }
+
+    public OutdoorTemperatures getOutdoorTemperature() {
+        return this.outdoorTemperature;
+    }
+
+    @Override
+    public double getHotWaterTemperature() {
+        return Double.NaN;
+    }
+
+    @Override
+    public double getColdWaterTemperature() {
+        return Double.NaN;
+    }
 }

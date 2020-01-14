@@ -10,51 +10,50 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class LoggerDetailedCostsHALExchange extends HALExchange {
 
-	private EnumMap<AncillaryCommodity,Integer> powerValueMap;
-	
-	private EnumMap<AncillaryCommodity,PriceSignal> ps;
-	private EnumMap<AncillaryCommodity,PowerLimitSignal> pwrLimit;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public LoggerDetailedCostsHALExchange(
-			UUID deviceID, 
-			Long timestamp,
-			EnumMap<AncillaryCommodity,Integer> map,
-			EnumMap<AncillaryCommodity,PriceSignal> ps,
-			EnumMap<AncillaryCommodity,PowerLimitSignal> pwrLimit) {
-		super(deviceID, timestamp);
-		
-		this.powerValueMap = new EnumMap<>(AncillaryCommodity.class);
-		
-		for (Entry<AncillaryCommodity,Integer> e : map.entrySet()) {
-			this.powerValueMap.put(e.getKey(), e.getValue());
-		}
-		
-		this.ps = ps;
-		this.pwrLimit = pwrLimit;
-	}
+    private final EnumMap<AncillaryCommodity, Integer> powerValueMap;
 
-	public EnumMap<AncillaryCommodity, Integer> getPowerValueMap() {
-		return powerValueMap;
-	}
-	
-	public EnumMap<AncillaryCommodity, PriceSignal> getPs() {
-		return ps;
-	}
+    private final EnumMap<AncillaryCommodity, PriceSignal> ps;
+    private final EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
 
-	public EnumMap<AncillaryCommodity,PowerLimitSignal> getPwrLimit() {
-		return pwrLimit;
-	}
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public LoggerDetailedCostsHALExchange(
+            UUID deviceID,
+            Long timestamp,
+            EnumMap<AncillaryCommodity, Integer> map,
+            EnumMap<AncillaryCommodity, PriceSignal> ps,
+            EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit) {
+        super(deviceID, timestamp);
+
+        this.powerValueMap = new EnumMap<>(AncillaryCommodity.class);
+
+        for (Entry<AncillaryCommodity, Integer> e : map.entrySet()) {
+            this.powerValueMap.put(e.getKey(), e.getValue());
+        }
+
+        this.ps = ps;
+        this.pwrLimit = pwrLimit;
+    }
+
+    public EnumMap<AncillaryCommodity, Integer> getPowerValueMap() {
+        return this.powerValueMap;
+    }
+
+    public EnumMap<AncillaryCommodity, PriceSignal> getPs() {
+        return this.ps;
+    }
+
+    public EnumMap<AncillaryCommodity, PowerLimitSignal> getPwrLimit() {
+        return this.pwrLimit;
+    }
 
 }

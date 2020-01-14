@@ -28,31 +28,32 @@ import jmetal.encodings.variable.Int;
 import jmetal.util.PseudoRandom;
 
 /**
- * Class representing the solution type of solutions composed of Int variables 
+ * Class representing the solution type of solutions composed of Int variables
  */
 public class IntSolutionType extends SolutionType {
 
-	/**
-	 * Constructor
-	 * @param problem  Problem to solve
-	 */
-	public IntSolutionType(Problem problem, PseudoRandom pseudoRandom) throws ClassNotFoundException {
-		super(problem) ;
-	} // Constructor
+    /**
+     * Constructor
+     *
+     * @param problem Problem to solve
+     */
+    public IntSolutionType(Problem problem, PseudoRandom pseudoRandom) {
+        super(problem);
+    } // Constructor
 
-	/**
-	 * Creates the variables of the solution
-	 */
-	@Override
-	public Variable[] createVariables() {
-		Variable[] variables = new Variable[problem_.getNumberOfVariables()];
+    /**
+     * Creates the variables of the solution
+     */
+    @Override
+    public Variable[] createVariables() {
+        Variable[] variables = new Variable[this.problem_.getNumberOfVariables()];
 
-		for (int var = 0; var < problem_.getNumberOfVariables(); var++)
-			variables[var] = new Int(
-					(int)problem_.getLowerLimit(var),
-					(int)problem_.getUpperLimit(var),
-					pseudoRandom);    
+        for (int var = 0; var < this.problem_.getNumberOfVariables(); var++)
+            variables[var] = new Int(
+                    (int) this.problem_.getLowerLimit(var),
+                    (int) this.problem_.getUpperLimit(var),
+                    this.pseudoRandom);
 
-		return variables ;
-	} // createVariables
+        return variables;
+    } // createVariables
 } // IntSolutionType

@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "assignedComDevices"
+        "assignedComDevices"
 })
 @XmlRootElement(name = "CALConfiguration")
 public class CALConfiguration {
@@ -46,29 +44,27 @@ public class CALConfiguration {
 
     /**
      * Gets the value of the assignedComDevices property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the assignedComDevices property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAssignedComDevices().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link AssignedComDevice }
-     * 
-     * 
      */
     public List<AssignedComDevice> getAssignedComDevices() {
-        if (assignedComDevices == null) {
-            assignedComDevices = new ArrayList<AssignedComDevice>();
+        if (this.assignedComDevices == null) {
+            this.assignedComDevices = new ArrayList<>();
         }
         return this.assignedComDevices;
     }

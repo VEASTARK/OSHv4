@@ -7,42 +7,41 @@ import java.util.Iterator;
 
 /**
  * Iterator for a NodeList (XML DOM)
- *
  */
 public class NodeListIterable implements Iterable<Node> {
-	private NodeList list;
+    private final NodeList list;
 
-	public NodeListIterable(NodeList list) {
-		this.list = list;
-	}
+    public NodeListIterable(NodeList list) {
+        this.list = list;
+    }
 
-	public static class NodeListIterator implements Iterator<Node> {
-		private NodeList list;
-		private int pos = 0;
+    @Override
+    public Iterator<Node> iterator() {
+        return new NodeListIterator(this.list);
+    }
 
-		public NodeListIterator(NodeList list) {
-			this.list = list;
-		}
+    public static class NodeListIterator implements Iterator<Node> {
+        private final NodeList list;
+        private int pos;
 
-		@Override
-		public boolean hasNext() {
-			return pos < list.getLength();
-		}
+        public NodeListIterator(NodeList list) {
+            this.list = list;
+        }
 
-		@Override
-		public Node next() {
-			return list.item(pos++);
-		}
+        @Override
+        public boolean hasNext() {
+            return this.pos < this.list.getLength();
+        }
 
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public Node next() {
+            return this.list.item(this.pos++);
+        }
 
-	}
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
 
-	@Override
-	public Iterator<Node> iterator() {
-		return new NodeListIterator(list);
-	}
+    }
 }

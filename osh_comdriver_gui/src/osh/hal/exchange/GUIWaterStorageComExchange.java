@@ -6,72 +6,71 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class GUIWaterStorageComExchange extends CALComExchange {
-	
-	private double currenttemp;
-	private double mintemp;
-	private double maxtemp;
-	private double demand;
-	private double supply;
-	private UUID tankId;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 * @param currenttemp
-	 * @param mintemp
-	 * @param maxtemp
-	 */
-	public GUIWaterStorageComExchange(
-			UUID deviceID, 
-			Long timestamp,
-			double currenttemp, 
-			double mintemp, 
-			double maxtemp,
-			double demand,
-			double supply,
-			UUID tankId) {
-		super(deviceID, timestamp);
-		
-		this.currenttemp = currenttemp;
-		this.mintemp = mintemp;
-		this.maxtemp = maxtemp;
-		this.demand = demand;
-		this.supply = supply;
-		this.tankId = tankId;
-	}
+
+    private final double currentTemp;
+    private final double minTemp;
+    private final double maxTemp;
+    private final double demand;
+    private final double supply;
+    private final UUID tankId;
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     * @param currentTemp
+     * @param minTemp
+     * @param maxTemp
+     */
+    public GUIWaterStorageComExchange(
+            UUID deviceID,
+            Long timestamp,
+            double currentTemp,
+            double minTemp,
+            double maxTemp,
+            double demand,
+            double supply,
+            UUID tankId) {
+        super(deviceID, timestamp);
+
+        this.currentTemp = currentTemp;
+        this.minTemp = minTemp;
+        this.maxTemp = maxTemp;
+        this.demand = demand;
+        this.supply = supply;
+        this.tankId = tankId;
+    }
 
 
-	public double getCurrenttemp() {
-		return currenttemp;
-	}
+    public double getCurrentTemp() {
+        return this.currentTemp;
+    }
 
 
-	public double getMintemp() {
-		return mintemp;
-	}
+    public double getMinTemp() {
+        return this.minTemp;
+    }
 
 
-	public double getMaxtemp() {
-		return maxtemp;
-	}
-	
-	public double getDemand() {
-		return demand;
-	}
+    public double getMaxTemp() {
+        return this.maxTemp;
+    }
+
+    public double getDemand() {
+        return this.demand;
+    }
 
 
-	public double getSupply() {
-		return supply;
-	}
-	
-	public UUID getTankId() {
-		return tankId;
-	}
+    public double getSupply() {
+        return this.supply;
+    }
+
+    public UUID getTankId() {
+        return this.tankId;
+    }
 
 }

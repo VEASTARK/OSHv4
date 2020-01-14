@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,22 +10,24 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "temp",
-    "temp_min",
-    "temp_max",
-    "pressure",
-    "sea_level",
-    "grnd_level",
-    "humidity",
-    "temp_kf"
+        "temp",
+        "temp_min",
+        "temp_max",
+        "pressure",
+        "sea_level",
+        "grnd_level",
+        "humidity",
+        "temp_kf"
 })
 public class Main implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -7118374191663116511L;
-	@JsonProperty("temp")
+     *
+     */
+    private static final long serialVersionUID = -7118374191663116511L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("temp")
     private Double temp;
     @JsonProperty("temp_min")
     private Double tempMin;
@@ -42,13 +43,9 @@ public class Main implements Serializable {
     private Integer humidity;
     @JsonProperty("temp_kf")
     private Double tempKf;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The temp
+     * @return The temp
      */
     @JsonProperty("temp")
     public Double getTemp() {
@@ -56,9 +53,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param temp
-     *     The temp
+     * @param temp The temp
      */
     @JsonProperty("temp")
     public void setTemp(Double temp) {
@@ -66,9 +61,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The tempMin
+     * @return The tempMin
      */
     @JsonProperty("temp_min")
     public Double getTempMin() {
@@ -76,9 +69,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param tempMin
-     *     The temp_min
+     * @param tempMin The temp_min
      */
     @JsonProperty("temp_min")
     public void setTempMin(Double tempMin) {
@@ -86,9 +77,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The tempMax
+     * @return The tempMax
      */
     @JsonProperty("temp_max")
     public Double getTempMax() {
@@ -96,9 +85,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param tempMax
-     *     The temp_max
+     * @param tempMax The temp_max
      */
     @JsonProperty("temp_max")
     public void setTempMax(Double tempMax) {
@@ -106,9 +93,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The pressure
+     * @return The pressure
      */
     @JsonProperty("pressure")
     public Double getPressure() {
@@ -116,9 +101,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param pressure
-     *     The pressure
+     * @param pressure The pressure
      */
     @JsonProperty("pressure")
     public void setPressure(Double pressure) {
@@ -126,9 +109,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The seaLevel
+     * @return The seaLevel
      */
     @JsonProperty("sea_level")
     public Double getSeaLevel() {
@@ -136,9 +117,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param seaLevel
-     *     The sea_level
+     * @param seaLevel The sea_level
      */
     @JsonProperty("sea_level")
     public void setSeaLevel(Double seaLevel) {
@@ -146,9 +125,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The grndLevel
+     * @return The grndLevel
      */
     @JsonProperty("grnd_level")
     public Double getGrndLevel() {
@@ -156,9 +133,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param grndLevel
-     *     The grnd_level
+     * @param grndLevel The grnd_level
      */
     @JsonProperty("grnd_level")
     public void setGrndLevel(Double grndLevel) {
@@ -166,9 +141,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The humidity
+     * @return The humidity
      */
     @JsonProperty("humidity")
     public Integer getHumidity() {
@@ -176,9 +149,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param humidity
-     *     The humidity
+     * @param humidity The humidity
      */
     @JsonProperty("humidity")
     public void setHumidity(Integer humidity) {
@@ -186,9 +157,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The tempKf
+     * @return The tempKf
      */
     @JsonProperty("temp_kf")
     public Double getTempKf() {
@@ -196,9 +165,7 @@ public class Main implements Serializable {
     }
 
     /**
-     * 
-     * @param tempKf
-     *     The temp_kf
+     * @param tempKf The temp_kf
      */
     @JsonProperty("temp_kf")
     public void setTempKf(Double tempKf) {

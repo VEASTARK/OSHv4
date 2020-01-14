@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for PerformAction complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PerformAction">
  *   &lt;complexContent>
@@ -33,13 +33,11 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PerformAction", propOrder = {
-    "actionParameterCollection",
-    "appendAction"
+        "actionParameterCollection",
+        "appendAction"
 })
 public class PerformAction {
 
@@ -49,58 +47,54 @@ public class PerformAction {
 
     /**
      * Gets the value of the actionParameterCollection property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the actionParameterCollection property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getActionParameterCollection().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ActionParameters }
-     * 
-     * 
      */
     public List<ActionParameters> getActionParameterCollection() {
-        if (actionParameterCollection == null) {
-            actionParameterCollection = new ArrayList<ActionParameters>();
+        if (this.actionParameterCollection == null) {
+            this.actionParameterCollection = new ArrayList<>();
         }
         return this.actionParameterCollection;
     }
 
     /**
      * Gets the value of the appendAction property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the appendAction property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAppendAction().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link SubjectAction }
-     * 
-     * 
      */
     public List<SubjectAction> getAppendAction() {
-        if (appendAction == null) {
-            appendAction = new ArrayList<SubjectAction>();
+        if (this.appendAction == null) {
+            this.appendAction = new ArrayList<>();
         }
         return this.appendAction;
     }

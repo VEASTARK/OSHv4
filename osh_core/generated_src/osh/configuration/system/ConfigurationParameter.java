@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for ConfigurationParameter complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ConfigurationParameter">
  *   &lt;complexContent>
@@ -32,14 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ConfigurationParameter", propOrder = {
-    "parameterName",
-    "parameterValue",
-    "parameterType"
+        "parameterName",
+        "parameterValue",
+        "parameterType"
 })
 public class ConfigurationParameter {
 
@@ -52,23 +50,19 @@ public class ConfigurationParameter {
 
     /**
      * Gets the value of the parameterName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getParameterName() {
-        return parameterName;
+        return this.parameterName;
     }
 
     /**
      * Sets the value of the parameterName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setParameterName(String value) {
         this.parameterName = value;
@@ -76,23 +70,19 @@ public class ConfigurationParameter {
 
     /**
      * Gets the value of the parameterValue property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getParameterValue() {
-        return parameterValue;
+        return this.parameterValue;
     }
 
     /**
      * Sets the value of the parameterValue property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setParameterValue(String value) {
         this.parameterValue = value;
@@ -100,23 +90,19 @@ public class ConfigurationParameter {
 
     /**
      * Gets the value of the parameterType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getParameterType() {
-        return parameterType;
+        return this.parameterType;
     }
 
     /**
      * Sets the value of the parameterType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setParameterType(String value) {
         this.parameterType = value;

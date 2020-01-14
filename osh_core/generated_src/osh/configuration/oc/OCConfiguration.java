@@ -17,9 +17,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -37,18 +37,16 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "globalOcUuid",
-    "globalControllerClass",
-    "globalControllerParameters",
-    "globalObserverClass",
-    "globalObserverParameters",
-    "optimizationMainRandomSeed",
-    "gaConfiguration"
+        "globalOcUuid",
+        "globalControllerClass",
+        "globalControllerParameters",
+        "globalObserverClass",
+        "globalObserverParameters",
+        "optimizationMainRandomSeed",
+        "gaConfiguration"
 })
 @XmlRootElement(name = "OCConfiguration")
 public class OCConfiguration {
@@ -68,23 +66,19 @@ public class OCConfiguration {
 
     /**
      * Gets the value of the globalOcUuid property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getGlobalOcUuid() {
-        return globalOcUuid;
+        return this.globalOcUuid;
     }
 
     /**
      * Sets the value of the globalOcUuid property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setGlobalOcUuid(String value) {
         this.globalOcUuid = value;
@@ -92,23 +86,19 @@ public class OCConfiguration {
 
     /**
      * Gets the value of the globalControllerClass property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getGlobalControllerClass() {
-        return globalControllerClass;
+        return this.globalControllerClass;
     }
 
     /**
      * Sets the value of the globalControllerClass property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setGlobalControllerClass(String value) {
         this.globalControllerClass = value;
@@ -116,52 +106,46 @@ public class OCConfiguration {
 
     /**
      * Gets the value of the globalControllerParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the globalControllerParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getGlobalControllerParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getGlobalControllerParameters() {
-        if (globalControllerParameters == null) {
-            globalControllerParameters = new ArrayList<ConfigurationParameter>();
+        if (this.globalControllerParameters == null) {
+            this.globalControllerParameters = new ArrayList<>();
         }
         return this.globalControllerParameters;
     }
 
     /**
      * Gets the value of the globalObserverClass property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getGlobalObserverClass() {
-        return globalObserverClass;
+        return this.globalObserverClass;
     }
 
     /**
      * Sets the value of the globalObserverClass property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setGlobalObserverClass(String value) {
         this.globalObserverClass = value;
@@ -169,52 +153,46 @@ public class OCConfiguration {
 
     /**
      * Gets the value of the globalObserverParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the globalObserverParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getGlobalObserverParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getGlobalObserverParameters() {
-        if (globalObserverParameters == null) {
-            globalObserverParameters = new ArrayList<ConfigurationParameter>();
+        if (this.globalObserverParameters == null) {
+            this.globalObserverParameters = new ArrayList<>();
         }
         return this.globalObserverParameters;
     }
 
     /**
      * Gets the value of the optimizationMainRandomSeed property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getOptimizationMainRandomSeed() {
-        return optimizationMainRandomSeed;
+        return this.optimizationMainRandomSeed;
     }
 
     /**
      * Sets the value of the optimizationMainRandomSeed property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setOptimizationMainRandomSeed(String value) {
         this.optimizationMainRandomSeed = value;
@@ -222,23 +200,19 @@ public class OCConfiguration {
 
     /**
      * Gets the value of the gaConfiguration property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link GAConfiguration }
-     *     
+     *
+     * @return possible object is
+     * {@link GAConfiguration }
      */
     public GAConfiguration getGaConfiguration() {
-        return gaConfiguration;
+        return this.gaConfiguration;
     }
 
     /**
      * Sets the value of the gaConfiguration property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link GAConfiguration }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link GAConfiguration }
      */
     public void setGaConfiguration(GAConfiguration value) {
         this.gaConfiguration = value;

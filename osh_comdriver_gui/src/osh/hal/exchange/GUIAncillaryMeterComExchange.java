@@ -7,32 +7,28 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
 public class GUIAncillaryMeterComExchange extends CALComExchange {
 
-	private AncillaryCommodityLoadProfile ancillaryMeter;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public GUIAncillaryMeterComExchange(
-			UUID deviceID, 
-			Long timestamp,
-			AncillaryCommodityLoadProfile ancillaryMeter) {
-		super(deviceID, timestamp);
-		
-		synchronized ( ancillaryMeter ) {
-			this.ancillaryMeter = ancillaryMeter.clone();
-		}
-	}
+    private final AncillaryCommodityLoadProfile ancillaryMeter;
 
 
-	public AncillaryCommodityLoadProfile getAncillaryMeter() {
-		return ancillaryMeter;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public GUIAncillaryMeterComExchange(
+            UUID deviceID,
+            Long timestamp,
+            AncillaryCommodityLoadProfile ancillaryMeter) {
+        super(deviceID, timestamp);
+
+        this.ancillaryMeter = ancillaryMeter.clone();
+    }
+
+
+    public AncillaryCommodityLoadProfile getAncillaryMeter() {
+        return this.ancillaryMeter;
+    }
 
 }

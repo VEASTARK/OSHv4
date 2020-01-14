@@ -23,117 +23,117 @@ package jmetal.util;
 
 import java.util.Random;
 
- /**
+/**
  * This code has been taken from deb NSGA-II implementation
  * The code is available to download from
  * http://www.iitk.ac.in/kangal/codes.shtml
- *
  */
 
-public class RandomGenerator implements IRandomGenerator{
-    
-  /* Definition of random number generation routines */
-  double seed;
-  double [] oldrand = new double[55];
-  int jrand;
+public class RandomGenerator implements IRandomGenerator {
 
-  /**
-   * Constructor
-   */
-  public RandomGenerator(){
-    this.seed = (new Random(System.nanoTime())).nextDouble();
-    this.randomize();
-  } // RandomGenerator
+    /* Definition of random number generation routines */
+    final double seed;
+    final double[] oldRand = new double[55];
+    int jRand;
 
-  /* Get seed number for random and start it up */
-  void randomize(){
-    int j1;
-    for(j1=0; j1<=54; j1++){
-      oldrand[j1] = 0.0;
+    /**
+     * Constructor
+     */
+    public RandomGenerator() {
+        this.seed = (new Random(System.nanoTime())).nextDouble();
+        this.randomize();
+    } // RandomGenerator
+
+    /* Get seed number for random and start it up */
+    synchronized void randomize() {
+        int j1;
+        for (j1 = 0; j1 <= 54; j1++) {
+            this.oldRand[j1] = 0.0;
+        }
+        this.jRand = 0;
+        this.warmup_random(this.seed);
+    } // randomize
+
+    /* Get randomize off and running */
+    synchronized void warmup_random(double seed) {
+        int j1, ii;
+        double new_random, prev_random;
+        this.oldRand[54] = seed;
+        new_random = 0.000000001;
+        prev_random = seed;
+        for (j1 = 1; j1 <= 54; j1++) {
+            ii = (21 * j1) % 54;
+            this.oldRand[ii] = new_random;
+            new_random = prev_random - new_random;
+            if (new_random < 0.0) {
+                new_random += 1.0;
+            }
+            prev_random = this.oldRand[ii];
+        }
+        this.advance_random();
+        this.advance_random();
+        this.advance_random();
+        this.jRand = 0;
+    } // warmup_random
+
+    /* Create next batch of 55 random numbers */
+    synchronized void advance_random() {
+        int j1;
+        double new_random;
+
+        for (j1 = 0; j1 < 24; j1++) {
+            new_random = this.oldRand[j1] - this.oldRand[j1 + 31];
+            if (new_random < 0.0) {
+                new_random += 1.0;
+            }
+            this.oldRand[j1] = new_random;
+        }
+        for (j1 = 24; j1 < 55; j1++) {
+            new_random = this.oldRand[j1] - this.oldRand[j1 - 24];
+            if (new_random < 0.0) {
+                new_random += 1.0;
+            }
+            this.oldRand[j1] = new_random;
+        }
+    } //advance_ramdom
+
+    /* Fetch a single random number between 0.0 and 1.0 */
+    synchronized double randomPercent() {
+        this.jRand++;
+        if (this.jRand >= 55) {
+            this.jRand = 1;
+            this.advance_random();
+        }
+        return this.oldRand[this.jRand];
+    } //randomPerc
+
+    /* Fetch a single integer between 0 and upperbound */
+    public int nextInt(int upperBound) {
+        return this.rndInt(0, upperBound);
     }
-    jrand=0;
-    warmup_random (seed);
-  } // randomize
 
-  /* Get randomize off and running */
-  void warmup_random (double seed){
-    int j1, ii;
-    double new_random, prev_random;
-    oldrand[54] = seed;
-    new_random = 0.000000001;
-    prev_random = seed;
-    for(j1=1; j1<=54; j1++){
-      ii = (21*j1)%54;
-      oldrand[ii] = new_random;
-      new_random = prev_random-new_random;
-      if(new_random<0.0){
-        new_random += 1.0;
-      }
-      prev_random = oldrand[ii];
+    /* Fetch a single double between 0.0 and 1.0 */
+    public double nextDouble() {
+        return this.randomPercent();
     }
-    advance_random ();
-    advance_random ();
-    advance_random ();
-    jrand = 0;
-  } // warmup_random
 
-  /* Create next batch of 55 random numbers */
-  void advance_random (){
-    int j1;
-    double new_random;
-    for(j1=0; j1<24; j1++){
-      new_random = oldrand[j1]-oldrand[j1+31];
-      if(new_random<0.0){
-        new_random = new_random+1.0;
-      }
-      oldrand[j1] = new_random;
-    }
-    for(j1=24; j1<55; j1++){
-      new_random = oldrand[j1]-oldrand[j1-24];
-      if(new_random<0.0){
-        new_random = new_random+1.0;
-      }
-      oldrand[j1] = new_random;
-    }
-  } //advance_ramdom
+    /* Fetch a single random integer between low and high including the bounds */
+    public int rndInt(int low, int high) {
+        int res;
+        if (low >= high) {
+            res = low;
+        } else {
+            res = low + (int) (this.randomPercent() * (high - low + 1));
+            if (res > high) {
+                res = high;
+            }
+        }
+        return (res);
+    } // rnd
 
-  /* Fetch a single random number between 0.0 and 1.0 */
-  double randomperc(){
-    jrand++;
-    if(jrand>=55){
-      jrand = 1;
-      advance_random();
-    }
-    return oldrand[jrand];
-  } //randomPerc
-
-  /* Fetch a single integer between 0 and upperbound */
-  synchronized public int nextInt(int upperBound) {
-  	return rndInt(0, upperBound) ;
-  }
-
-  /* Fetch a single double between 0.0 and 1.0 */
-  synchronized public double nextDouble() {
-  	return randomperc() ;
-  }
-  
-  /* Fetch a single random integer between low and high including the bounds */
-  synchronized public int rndInt (int low, int high){
-    int res;
-    if (low >= high){
-      res = low;
-    } else {
-      res = low + (int)(randomperc()*(high-low+1));
-      if (res > high){
-        res = high;
-      }
-    }
-    return (res);
-  } // rnd
-
-  /* Fetch a single random real number between low and high including the */
-  /* bounds */
-  synchronized public double rndReal (double low, double high){
-    return (low + (high-low)*randomperc());
-  } //rndreal
+    /* Fetch a single random real number between low and high including the */
+    /* bounds */
+    synchronized public double rndReal(double low, double high) {
+        return (low + (high - low) * this.randomPercent());
+    } //rndreal
 } // RandomGenerator

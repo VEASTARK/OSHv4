@@ -1,17 +1,18 @@
 package osh.utils;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
- * Utility for making deep copies (vs. clone()'s shallow copies) of 
+ * Utility for making deep copies (vs. clone()'s shallow copies) of
  * objects. Objects are first serialized and then deserialized. Error
  * checking is fairly minimal in this implementation. If an object is
  * encountered that cannot be serialized (or that references an object
  * that cannot be serialized) an error is printed to System.err and
  * null is returned. Depending on your specific application, it might
  * make more sense to have copy(...) re-throw the exception.
- * 
+ *
  * @author Sebastian Kramer
  */
 public class DeepCopy {
@@ -24,25 +25,20 @@ public class DeepCopy {
         Object obj = null;
         try {
             // Write the object out to a byte array
-            FastByteArrayOutputStream fbos = 
+            FastByteArrayOutputStream fBos =
                     new FastByteArrayOutputStream();
-            ObjectOutputStream out = new ObjectOutputStream(fbos);
+            ObjectOutputStream out = new ObjectOutputStream(fBos);
             out.writeObject(orig);
             out.flush();
             out.close();
 
             // Retrieve an input stream from the byte array and read
             // a copy of the object back in. 
-            ObjectInputStream in = 
-                new ObjectInputStream(fbos.getInputStream());
+            ObjectInputStream in =
+                    new ObjectInputStream(fBos.getInputStream());
             obj = in.readObject();
-        }
-        catch(IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-            System.exit(0);
-        }
-        catch(ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
             System.exit(0);
         }
         return obj;

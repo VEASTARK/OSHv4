@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for BusDeviceTypes.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -33,7 +33,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "BusDeviceTypes")
 @XmlEnum
@@ -52,20 +51,20 @@ public enum BusDeviceTypes {
     private final String value;
 
     BusDeviceTypes(String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
+        this.value = v;
     }
 
     public static BusDeviceTypes fromValue(String v) {
-        for (BusDeviceTypes c: BusDeviceTypes.values()) {
+        for (BusDeviceTypes c : BusDeviceTypes.values()) {
             if (c.value.equals(v)) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String value() {
+        return this.value;
     }
 
 }

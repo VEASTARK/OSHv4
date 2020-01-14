@@ -31,27 +31,28 @@ import jmetal.encodings.variable.Real;
  */
 public class RealSolutionType extends SolutionType {
 
-	/**
-	 * Constructor
-	 * @param problem Problem to solve
-	 */
-	public RealSolutionType(Problem problem) {
-		super(problem) ;
-	} // Constructor
+    /**
+     * Constructor
+     *
+     * @param problem Problem to solve
+     */
+    public RealSolutionType(Problem problem) {
+        super(problem);
+    } // Constructor
 
-	/**
-	 * Creates the variables of the solution
-	 */
-	@Override
-	public Variable[] createVariables() {
-		Variable[] variables = new Variable[problem_.getNumberOfVariables()];
+    /**
+     * Creates the variables of the solution
+     */
+    @Override
+    public Variable[] createVariables() {
+        Variable[] variables = new Variable[this.problem_.getNumberOfVariables()];
 
-		for (int var = 0; var < problem_.getNumberOfVariables(); var++)
-			variables[var] = new Real(
-					problem_.getLowerLimit(var),
-					problem_.getUpperLimit(var),
-					pseudoRandom); 
+        for (int var = 0; var < this.problem_.getNumberOfVariables(); var++)
+            variables[var] = new Real(
+                    this.problem_.getLowerLimit(var),
+                    this.problem_.getUpperLimit(var),
+                    this.pseudoRandom);
 
-		return variables ;
-	} // createVariables
+        return variables;
+    } // createVariables
 } // RealSolutionType

@@ -4,16 +4,18 @@ import java.util.UUID;
 
 /**
  * Interface for prediction
- * @author Florian Allerding, Till Schuberth
  *
+ * @author Florian Allerding, Till Schuberth
  */
 public interface IAction {
-	public UUID getDeviceId();
-	public long getTimestamp();
-	public boolean equals(IAction other);
-	
+    UUID getDeviceId();
+
+    long getTimestamp();
+
+    boolean equals(IAction other);
+
 //	public IAction createAction(long newTimestamp);
-	
-	@Override
-	public int hashCode();
+
+    @Override
+    int hashCode();
 }

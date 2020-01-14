@@ -8,42 +8,39 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Ingo Mauser
- *
  */
 public class GUIScheduleStateExchange extends StateExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -9037948484261116427L;
-	private List<Schedule> schedules;
-	private int stepSize;
-	
-	public GUIScheduleStateExchange(
-			UUID sender, 
-			long timestamp, 
-			List<Schedule> schedules,
-			int stepSize) {
-		super(sender, timestamp);
-		this.schedules = schedules;
-		this.stepSize = stepSize;
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = -9037948484261116427L;
+    private final List<Schedule> schedules;
+    private final int stepSize;
 
-	public List<Schedule> getDebugGetSchedules() {
-		return schedules;
-	}
+    public GUIScheduleStateExchange(
+            UUID sender,
+            long timestamp,
+            List<Schedule> schedules,
+            int stepSize) {
+        super(sender, timestamp);
+        this.schedules = schedules;
+        this.stepSize = stepSize;
+    }
 
-	public int getStepSize() {
-		return stepSize;
-	}
+    public List<Schedule> getDebugGetSchedules() {
+        return this.schedules;
+    }
 
-	@Override
-	public GUIScheduleStateExchange clone() {
-		GUIScheduleStateExchange copy = (GUIScheduleStateExchange) super.clone();
-		//TODO: do proper cloning
-		return copy;
-	}
+    public int getStepSize() {
+        return this.stepSize;
+    }
+
+    @Override
+    public GUIScheduleStateExchange clone() {
+        //TODO: do proper cloning
+        return (GUIScheduleStateExchange) super.clone();
+    }
 
 }

@@ -8,38 +8,32 @@ import osh.eal.hal.exchange.IHALExchange;
 import osh.hal.exchange.BacNetThermalExchange;
 
 
-
 /**
- * 
  * @author Kaibin Bao
- *
  */
 @Deprecated
 public class BacNetThermalLocalObserver extends LocalObserver {
 
-	
-	public BacNetThermalLocalObserver(IOSHOC controllerbox) {
-		super(controllerbox);
-	}
+
+    public BacNetThermalLocalObserver(IOSHOC osh) {
+        super(osh);
+    }
 
 
-
-	@Override
-	public void onDeviceStateUpdate() {
-		IHALExchange hx = getObserverDataObject();
-		if( hx instanceof BacNetThermalExchange ) {
+    @Override
+    public void onDeviceStateUpdate() {
+        IHALExchange hx = this.getObserverDataObject();
+        if (hx instanceof BacNetThermalExchange) {
 //			getGlobalLogger().logDebug("got thermal information: " + hx.toString());
-		}
-	}
+        }
+    }
 
 
-
-	@Override
-	public IModelOfObservationExchange getObservedModelData(
-			IModelOfObservationType type) {
-		return null;
-	}
-
+    @Override
+    public IModelOfObservationExchange getObservedModelData(
+            IModelOfObservationType type) {
+        return null;
+    }
 
 
 }

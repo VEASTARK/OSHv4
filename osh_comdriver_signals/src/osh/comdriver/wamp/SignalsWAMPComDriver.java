@@ -11,70 +11,65 @@ import osh.datatypes.limit.PriceSignal;
 import osh.hal.exchange.EpsComExchange;
 import osh.hal.exchange.PlsComExchange;
 
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.UUID;
 
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
 public class SignalsWAMPComDriver extends CALComDriver implements Runnable {
-	
-	private Map<AncillaryCommodity, PriceSignal> priceSignals;
-	private Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
-	
-	SignalsWAMPDispatcher signalsWampDispatcher;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param deviceID
-	 * @param driverConfig
-	 * @throws UnknownHostException 
-	 */
-	public SignalsWAMPComDriver(
-			IOSH controllerbox,
-			UUID deviceID, 
-			OSHParameterCollection driverConfig) throws UnknownHostException {
-		super(controllerbox, deviceID, driverConfig);
 
-	}	
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		
-		this.signalsWampDispatcher = new SignalsWAMPDispatcher(getGlobalLogger());
-		
-		new Thread(this, "push proxy of EPS/PLS signals driver to WAMP").start();
-	}
-	
-	@Override
-	public void run() {
-		while (true) {
-			synchronized (this.signalsWampDispatcher) {
-				try { // wait for new data
-					this.signalsWampDispatcher.wait();
-				} 
-				catch (InterruptedException e) {
-					getGlobalLogger().logError("should not happen", e);
-					break;
-				}				
-			}
-		}		
-	}
+    SignalsWAMPDispatcher signalsWampDispatcher;
+    private Map<AncillaryCommodity, PriceSignal> priceSignals;
+    private Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
 
-	@Override
-	public void updateDataFromComManager(ICALExchange exchangeObject) {
-		if (exchangeObject instanceof EpsComExchange) {
-			priceSignals = ((EpsComExchange) exchangeObject).getPriceSignals();
-			this.signalsWampDispatcher.sendEPS(priceSignals);
-		} else if (exchangeObject instanceof PlsComExchange) {			
-			powerLimitSignals = ((PlsComExchange) exchangeObject).getPowerLimitSignals();
-			this.signalsWampDispatcher.sendPLS(powerLimitSignals);
-		}
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param deviceID
+     * @param driverConfig
+     */
+    public SignalsWAMPComDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig) {
+        super(osh, deviceID, driverConfig);
+
+    }
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+
+        this.signalsWampDispatcher = new SignalsWAMPDispatcher(this.getGlobalLogger());
+
+        new Thread(this, "push proxy of EPS/PLS signals driver to WAMP").start();
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            synchronized (this.signalsWampDispatcher) {
+                try { // wait for new data
+                    this.signalsWampDispatcher.wait();
+                } catch (InterruptedException e) {
+                    this.getGlobalLogger().logError("should not happen", e);
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateDataFromComManager(ICALExchange exchangeObject) {
+        if (exchangeObject instanceof EpsComExchange) {
+            this.priceSignals = ((EpsComExchange) exchangeObject).getPriceSignals();
+            this.signalsWampDispatcher.sendEPS(this.priceSignals);
+        } else if (exchangeObject instanceof PlsComExchange) {
+            this.powerLimitSignals = ((PlsComExchange) exchangeObject).getPowerLimitSignals();
+            this.signalsWampDispatcher.sendPLS(this.powerLimitSignals);
+        }
+    }
 }

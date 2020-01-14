@@ -8,70 +8,69 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
- *
  */
-public class SmartPlugObserverExchange 
-				extends HALDeviceObserverExchange 
-				implements	IHALElectricalPowerDetails, 
-							IHALSwitchDetails {
-	
-	//
-	private boolean incompleteData;
-	
-	// ### IHALElectricPowerDetails ###
-	private int activePower;
-	private int reactivePower;
-	
-	// ### IHALSwitchDetails ###
-	private boolean on;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public SmartPlugObserverExchange(UUID deviceID, Long timestamp) {
-		super(deviceID, timestamp);
-	}
+public class SmartPlugObserverExchange
+        extends HALDeviceObserverExchange
+        implements IHALElectricalPowerDetails,
+        IHALSwitchDetails {
 
-	public void setIncompleteData(boolean incompleteData) {
-		this.incompleteData = incompleteData;
-	}
-	
-	public boolean isIncompleteData() {
-		return incompleteData;
-	}
+    //
+    private boolean incompleteData;
 
-	public boolean isOn() {
-		return on;
-	}
+    // ### IHALElectricPowerDetails ###
+    private int activePower;
+    private int reactivePower;
 
+    // ### IHALSwitchDetails ###
+    private boolean on;
 
-	public void setOn(boolean on) {
-		this.on = on;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public SmartPlugObserverExchange(UUID deviceID, Long timestamp) {
+        super(deviceID, timestamp);
+    }
+
+    public boolean isIncompleteData() {
+        return this.incompleteData;
+    }
+
+    public void setIncompleteData(boolean incompleteData) {
+        this.incompleteData = incompleteData;
+    }
+
+    public boolean isOn() {
+        return this.on;
+    }
 
 
-	public int getActivePower() {
-		return activePower;
-	}
+    public void setOn(boolean on) {
+        this.on = on;
+    }
 
 
-	public void setActivePower(int activePower) {
-		this.activePower = activePower;
-	}
+    public int getActivePower() {
+        return this.activePower;
+    }
 
 
-	public int getReactivePower() {
-		return reactivePower;
-	}
+    public void setActivePower(int activePower) {
+        this.activePower = activePower;
+    }
 
 
-	public void setReactivePower(int reactivePower) {
-		this.reactivePower = reactivePower;
-	}
+    public int getReactivePower() {
+        return this.reactivePower;
+    }
 
-	
+
+    public void setReactivePower(int reactivePower) {
+        this.reactivePower = reactivePower;
+    }
+
+
 }

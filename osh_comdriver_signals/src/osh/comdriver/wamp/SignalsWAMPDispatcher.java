@@ -19,76 +19,63 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
 public class SignalsWAMPDispatcher {
 
-	private IGlobalLogger logger;
-
-//	private String url = "ws://wamp-router:8080/ws";
+    // Scheduler
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    final Scheduler rxScheduler = Schedulers.from(this.executor);
+    private final IGlobalLogger logger;
+    //	private String url = "ws://wamp-router:8080/ws";
 //	private String realm = "eshl";
-	private String url = "ws://localhost:8080/ws";
-	private String realm = "realm1";
-
-	private WampClient client;
-
-
-	// Scheduler
-	ExecutorService executor = Executors.newSingleThreadExecutor();
-	Scheduler rxScheduler = Schedulers.from(executor);
+    private final String url = "ws://localhost:8080/ws";
+    private final String realm = "realm1";
+    private WampClient client;
 
 
-	/**
-	 * CONSTRUCTOR
-	 * 
-	 * @param logger
-	 * @param address
-	 * @throws MalformedURLException
-	 */
-	public SignalsWAMPDispatcher(IGlobalLogger logger) {
-		super();
+    /**
+     * CONSTRUCTOR
+     *
+     * @param logger
+     * @throws MalformedURLException
+     */
+    public SignalsWAMPDispatcher(IGlobalLogger logger) {
+        super();
 
-		this.logger = logger;
-		
+        this.logger = logger;
+
         WampClientBuilder builder = new WampClientBuilder();
         try {
-        	IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
+            IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
             builder.withConnectorProvider(connectorProvider)
-            .withUri(url)
-            .withRealm(realm)
-            .withInfiniteReconnects()
-            .withReconnectInterval(3, TimeUnit.SECONDS);
-            
-            client = builder.build();
+                    .withUri(this.url)
+                    .withRealm(this.realm)
+                    .withInfiniteReconnects()
+                    .withReconnectInterval(3, TimeUnit.SECONDS);
+
+            this.client = builder.build();
         } catch (Exception e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             return;
         }
-        
-        client.open();
-	}	
-	
-	public void sendEPS(Map<AncillaryCommodity, PriceSignal> priceSignals) {
-		client.publish("eshl.signals.eps", priceSignals, new TypeReference<Map<AncillaryCommodity, PriceSignal>>(){})
-		      .observeOn(rxScheduler)
-		      .subscribe( response -> {
-		    	  logger.logInfo(response);
-		      }, err -> {
-		    	  logger.logError("publishing eps failed", err);
-		      });
-	}
-	
-	public void sendPLS(Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignal) {
-		client.publish("eshl.signals.pls", powerLimitSignal, new TypeReference<Map<AncillaryCommodity, PowerLimitSignal>>(){})
-		      .observeOn(rxScheduler)
-		      .subscribe( response -> {
-		    	  logger.logInfo(response);
-		      }, err -> {
-		    	  logger.logError("publishing pls failed", err);
-		      });
-	}
-	
-	
+
+        this.client.open();
+    }
+
+    public void sendEPS(Map<AncillaryCommodity, PriceSignal> priceSignals) {
+        this.client.publish("eshl.signals.eps", priceSignals, new TypeReference<Map<AncillaryCommodity, PriceSignal>>() {
+        })
+                .observeOn(this.rxScheduler)
+                .subscribe(this.logger::logInfo, err -> this.logger.logError("publishing eps failed", err));
+    }
+
+    public void sendPLS(Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignal) {
+        this.client.publish("eshl.signals.pls", powerLimitSignal, new TypeReference<Map<AncillaryCommodity, PowerLimitSignal>>() {
+        })
+                .observeOn(this.rxScheduler)
+                .subscribe(this.logger::logInfo, err -> this.logger.logError("publishing pls failed", err));
+    }
+
+
 }

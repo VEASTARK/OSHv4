@@ -9,32 +9,30 @@ import osh.registry.interfaces.IHasState;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public abstract class ThermalDemandLocalObserver 
-				extends LocalObserver
-				implements IHasState {
-	
-	
-	/**
-	 * CONSTRUCTOR 
-	 */
-	public ThermalDemandLocalObserver(IOSHOC osh) {
-		super(osh);
-	}
-	
-	
-	@Override
-	public IModelOfObservationExchange getObservedModelData(
-			IModelOfObservationType type) {
-		return null;
-	}
+public abstract class ThermalDemandLocalObserver
+        extends LocalObserver
+        implements IHasState {
 
-	@Override
-	public UUID getUUID() {
-		return getDeviceID();
-	}
-	
+
+    /**
+     * CONSTRUCTOR
+     */
+    public ThermalDemandLocalObserver(IOSHOC osh) {
+        super(osh);
+    }
+
+
+    @Override
+    public IModelOfObservationExchange getObservedModelData(
+            IModelOfObservationType type) {
+        return null;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
+
 }

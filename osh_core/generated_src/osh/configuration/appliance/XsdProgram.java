@@ -18,9 +18,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * <p>Java class for xsd.Program complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="xsd.Program">
  *   &lt;complexContent>
@@ -34,14 +34,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "xsd.Program", propOrder = {
-    "programID",
-    "programName",
-    "descriptions"
+        "programID",
+        "programName",
+        "descriptions"
 })
 public class XsdProgram {
 
@@ -55,15 +53,13 @@ public class XsdProgram {
 
     /**
      * Gets the value of the programID property.
-     * 
      */
     public int getProgramID() {
-        return programID;
+        return this.programID;
     }
 
     /**
      * Sets the value of the programID property.
-     * 
      */
     public void setProgramID(int value) {
         this.programID = value;
@@ -71,23 +67,19 @@ public class XsdProgram {
 
     /**
      * Gets the value of the programName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getProgramName() {
-        return programName;
+        return this.programName;
     }
 
     /**
      * Sets the value of the programName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setProgramName(String value) {
         this.programName = value;
@@ -95,23 +87,19 @@ public class XsdProgram {
 
     /**
      * Gets the value of the descriptions property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XsdDescriptions }
-     *     
+     *
+     * @return possible object is
+     * {@link XsdDescriptions }
      */
     public XsdDescriptions getDescriptions() {
-        return descriptions;
+        return this.descriptions;
     }
 
     /**
      * Sets the value of the descriptions property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XsdDescriptions }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XsdDescriptions }
      */
     public void setDescriptions(XsdDescriptions value) {
         this.descriptions = value;

@@ -7,77 +7,75 @@ import java.util.UUID;
 
 /**
  * Communication program duration, starting time, and remaining time
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 public class MieleApplianceDriverDetails extends StateExchange {
 
-	/**  */
-	private static final long serialVersionUID = 5818061135587946337L;
-	protected long expectedProgramDuration;
-	protected long startTime;
-	protected long programRemainingTime;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5818061135587946337L;
+    protected long expectedProgramDuration;
+    protected long startTime;
+    protected long programRemainingTime;
 
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public MieleApplianceDriverDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
 
-	/**
-	 * gets the program duration in seconds 
-	 * 
-	 * @param expectedProgramDuration
-	 */
-	public long getExpectedProgramDuration() {
-		return expectedProgramDuration;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public MieleApplianceDriverDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
 
-	/**
-	 * sets the program duration in seconds 
-	 * 
-	 * @param expectedProgramDuration
-	 */
-	public void setExpectedProgramDuration(long expectedProgramDuration) {
-		this.expectedProgramDuration = expectedProgramDuration;
-	}
+    /**
+     * gets the program duration in seconds
+     */
+    public long getExpectedProgramDuration() {
+        return this.expectedProgramDuration;
+    }
 
-	/**
-	 * gets the start time from the timer set by the user
-	 * 
-	 * @return
-	 */
-	public long getStartTime() {
-		return startTime;
-	}
+    /**
+     * sets the program duration in seconds
+     *
+     * @param expectedProgramDuration
+     */
+    public void setExpectedProgramDuration(long expectedProgramDuration) {
+        this.expectedProgramDuration = expectedProgramDuration;
+    }
 
-	/**
-	 * setter for startTime
-	 * 
-	 * @param startTime
-	 */
-	public void setStartTime(long startTime) {
-		this.startTime = startTime;
-	}
-	
-	/**
-	 * gets the remaining program time in seconds 
-	 * 
-	 * @param expectedProgramDuration
-	 */
-	public long getProgramRemainingTime() {
-		return programRemainingTime;
-	}
+    /**
+     * gets the start time from the timer set by the user
+     *
+     * @return
+     */
+    public long getStartTime() {
+        return this.startTime;
+    }
 
-	/**
-	 * sets the remaining program time in seconds 
-	 * 
-	 * @param expectedProgramDuration
-	 */
-	public void setProgramRemainingTime(long programTimeLeft) {
-		this.programRemainingTime = programTimeLeft;
-	}
-	
+    /**
+     * setter for startTime
+     *
+     * @param startTime
+     */
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * gets the remaining program time in seconds
+     */
+    public long getProgramRemainingTime() {
+        return this.programRemainingTime;
+    }
+
+    /**
+     * sets the remaining program time in seconds
+     *
+     * @param programTimeLeft
+     */
+    public void setProgramRemainingTime(long programTimeLeft) {
+        this.programRemainingTime = programTimeLeft;
+    }
+
 }

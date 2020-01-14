@@ -28,187 +28,183 @@ import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * This class allows to apply a two points crossover operator using two parent
- * solutions. 
+ * solutions.
  * NOTE: the type of the solutions must be Permutation..
  */
 public class TwoPointsCrossover extends Crossover {
 
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-/**
-   * Valid solution types to apply this operator 
-   */
-  @SuppressWarnings({ "rawtypes" })
-  private static final List VALID_TYPES = Arrays.asList(PermutationSolutionType.class) ;
+    /**
+     * Valid solution types to apply this operator
+     */
+    @SuppressWarnings({"rawtypes"})
+    private static final List VALID_TYPES = Collections.singletonList(PermutationSolutionType.class);
 
-  private Double crossoverProbability_ = null;
+    private Double crossoverProbability_;
 
-	/**
-	 * Constructor
-	 * Creates a new intance of the two point crossover operator
-	 */
-	public TwoPointsCrossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-		super(parameters, pseudoRandom) ;
-		
-  	if (parameters.get("probability") != null)
-  		crossoverProbability_ = (Double) parameters.get("probability") ;  		
-	} // TwoPointsCrossover
+    /**
+     * Constructor
+     * Creates a new intance of the two point crossover operator
+     */
+    public TwoPointsCrossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
 
-
-	/**
-	 * Constructor
-	 * @param A properties containing the Operator parameters
-	 * Creates a new intance of the two point crossover operator
-	 */
-	//public TwoPointsCrossover(Properties properties) {
-	//	this();
-	//}
+        if (parameters.get("probability") != null)
+            this.crossoverProbability_ = (Double) parameters.get("probability");
+    } // TwoPointsCrossover
 
 
-	/**
-	 * Perform the crossover operation
-	 * @param probability Crossover probability
-	 * @param parent1 The first parent
-	 * @param parent2 The second parent
-	 * @return Two offspring solutions
-	 * @throws JMException 
-	 */
-	@SuppressWarnings("rawtypes")
-	public Solution[] doCrossover(double   probability, 
-			Solution parent1, 
-			Solution parent2) throws JMException {
+    /**
+     * Constructor
+     * @param A properties containing the Operator parameters
+     * Creates a new intance of the two point crossover operator
+     */
+    //public TwoPointsCrossover(Properties properties) {
+    //	this();
+    //}
 
-		Solution [] offspring = new Solution[2];
 
-		offspring[0] = new Solution(parent1);
-		offspring[1] = new Solution(parent2);
+    /**
+     * Perform the crossover operation
+     *
+     * @param probability Crossover probability
+     * @param parent1     The first parent
+     * @param parent2     The second parent
+     * @return Two offspring solutions
+     * @throws JMException
+     */
+    @SuppressWarnings("rawtypes")
+    public Solution[] doCrossover(double probability,
+                                  Solution parent1,
+                                  Solution parent2) throws JMException {
 
-		if (parent1.getType().getClass() == PermutationSolutionType.class) {
-				if (pseudoRandom.randDouble() < probability) {
-					int crosspoint1        ;
-					int crosspoint2        ;
-					int permutationLength  ;
-					int[] parent1Vector;
-					int[] parent2Vector;
-					int[] offspring1Vector;
-					int[] offspring2Vector;
+        Solution[] offspring = new Solution[2];
 
-					permutationLength = ((Permutation)parent1.getDecisionVariables()[0]).getLength() ;
-					parent1Vector     = ((Permutation)parent1.getDecisionVariables()[0]).vector_ ;
-					parent2Vector    = ((Permutation)parent2.getDecisionVariables()[0]).vector_ ;    
-					offspring1Vector = ((Permutation)offspring[0].getDecisionVariables()[0]).vector_ ;
-					offspring2Vector = ((Permutation)offspring[1].getDecisionVariables()[0]).vector_ ;
+        offspring[0] = new Solution(parent1);
+        offspring[1] = new Solution(parent2);
 
-					// STEP 1: Get two cutting points
-					crosspoint1 = pseudoRandom.randInt(0,permutationLength-1) ;
-					crosspoint2 = pseudoRandom.randInt(0,permutationLength-1) ;
+        if (parent1.getType().getClass() == PermutationSolutionType.class) {
+            if (this.pseudoRandom.randDouble() < probability) {
+                int crosspoint1;
+                int crosspoint2;
+                int permutationLength;
+                int[] parent1Vector;
+                int[] parent2Vector;
+                int[] offspring1Vector;
+                int[] offspring2Vector;
 
-					while (crosspoint2 == crosspoint1)  
-						crosspoint2 = pseudoRandom.randInt(0,permutationLength-1) ;
+                permutationLength = ((Permutation) parent1.getDecisionVariables()[0]).getLength();
+                parent1Vector = ((Permutation) parent1.getDecisionVariables()[0]).vector_;
+                parent2Vector = ((Permutation) parent2.getDecisionVariables()[0]).vector_;
+                offspring1Vector = ((Permutation) offspring[0].getDecisionVariables()[0]).vector_;
+                offspring2Vector = ((Permutation) offspring[1].getDecisionVariables()[0]).vector_;
 
-					if (crosspoint1 > crosspoint2) {
-						int swap ;
-						swap        = crosspoint1 ;
-						crosspoint1 = crosspoint2 ;
-						crosspoint2 = swap          ;
-					} // if
+                // STEP 1: Get two cutting points
+                crosspoint1 = this.pseudoRandom.randInt(0, permutationLength - 1);
+                crosspoint2 = this.pseudoRandom.randInt(0, permutationLength - 1);
 
-					// STEP 2: Obtain the first child
-					int m = 0;
-					for(int j = 0; j < permutationLength; j++) {
-						boolean exist = false;
-						int temp = parent2Vector[j];
-						for(int k = crosspoint1; k <= crosspoint2; k++) {
-							if (temp == offspring1Vector[k]) {
-								exist = true;
-								break;
-							} // if
-						} // for
-						if (!exist) {
-							if (m == crosspoint1)
-								m = crosspoint2 + 1;
-							offspring1Vector[m++] = temp;
-						} // if
-					} // for
+                while (crosspoint2 == crosspoint1)
+                    crosspoint2 = this.pseudoRandom.randInt(0, permutationLength - 1);
 
-					// STEP 3: Obtain the second child
-					m = 0;
-					for(int j = 0; j < permutationLength; j++) {
-						boolean exist = false;
-						int temp = parent1Vector[j];
-						for(int k = crosspoint1; k <= crosspoint2; k++) {
-							if (temp == offspring2Vector[k]) {
-								exist = true;
-								break;
-							} // if
-						} // for
-						if(!exist) {
-							if (m == crosspoint1)
-								m = crosspoint2 + 1;
-							offspring2Vector[m++] = temp;
-						} // if
-					} // for
-				} // if 
-			} // if
-			else
-			{
-				Configuration.logger_.severe("TwoPointsCrossover.doCrossover: invalid " +
-						"type" + 
-						parent1.getDecisionVariables()[0].getVariableType());
-				Class cls = java.lang.String.class;
-				String name = cls.getName(); 
-				throw new JMException("Exception in " + name + ".doCrossover()") ; 
-			}
+                if (crosspoint1 > crosspoint2) {
+                    int swap;
+                    swap = crosspoint1;
+                    crosspoint1 = crosspoint2;
+                    crosspoint2 = swap;
+                } // if
 
-		return offspring;                                                                                      
-	} // makeCrossover
+                // STEP 2: Obtain the first child
+                int m = 0;
+                for (int j = 0; j < permutationLength; j++) {
+                    boolean exist = false;
+                    int temp = parent2Vector[j];
+                    for (int k = crosspoint1; k <= crosspoint2; k++) {
+                        if (temp == offspring1Vector[k]) {
+                            exist = true;
+                            break;
+                        } // if
+                    } // for
+                    if (!exist) {
+                        if (m == crosspoint1)
+                            m = crosspoint2 + 1;
+                        offspring1Vector[m++] = temp;
+                    } // if
+                } // for
 
-	/**
-	 * Executes the operation
-	 * @param object An object containing an array of two solutions 
-	 * @return An object containing an array with the offSprings
-	 * @throws JMException 
-	 */
-	@Override
-	@SuppressWarnings({ "unused", "rawtypes" })
-	public Object execute(Object object) throws JMException {
-		Solution [] parents = (Solution [])object;
-		Double crossoverProbability ;
+                // STEP 3: Obtain the second child
+                m = 0;
+                for (int j = 0; j < permutationLength; j++) {
+                    boolean exist = false;
+                    int temp = parent1Vector[j];
+                    for (int k = crosspoint1; k <= crosspoint2; k++) {
+                        if (temp == offspring2Vector[k]) {
+                            exist = true;
+                            break;
+                        } // if
+                    } // for
+                    if (!exist) {
+                        if (m == crosspoint1)
+                            m = crosspoint2 + 1;
+                        offspring2Vector[m++] = temp;
+                    } // if
+                } // for
+            } // if
+        } // if
+        else {
+            Configuration.logger_.severe("TwoPointsCrossover.doCrossover: invalid " +
+                    "type" +
+                    parent1.getDecisionVariables()[0].getVariableType());
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".doCrossover()");
+        }
 
-    if (!(VALID_TYPES.contains(parents[0].getType().getClass())  &&
-        VALID_TYPES.contains(parents[1].getType().getClass())) ) {
+        return offspring;
+    } // makeCrossover
 
-			Configuration.logger_.severe("TwoPointsCrossover.execute: the solutions " +
-					"are not of the right type. The type should be 'Permutation', but " +
-					parents[0].getType() + " and " + 
-					parents[1].getType() + " are obtained");
-		} // if 
+    /**
+     * Executes the operation
+     *
+     * @param object An object containing an array of two solutions
+     * @return An object containing an array with the offSprings
+     * @throws JMException
+     */
+    @Override
+    @SuppressWarnings({"unused", "rawtypes"})
+    public Object execute(Object object) throws JMException {
+        Solution[] parents = (Solution[]) object;
+        Double crossoverProbability;
 
-		crossoverProbability = (Double)getParameter("probability");
+        if (parents.length < 2) {
+            Configuration.logger_.severe("TwoPointsCrossover.execute: operator needs two " +
+                    "parents");
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        }
 
-		if (parents.length < 2)
-		{
-			Configuration.logger_.severe("TwoPointsCrossover.execute: operator needs two " +
-			"parents");
-			Class cls = java.lang.String.class;
-			String name = cls.getName(); 
-			throw new JMException("Exception in " + name + ".execute()") ;      
-		}
+        if (!(VALID_TYPES.contains(parents[0].getType().getClass()) &&
+                VALID_TYPES.contains(parents[1].getType().getClass()))) {
 
-		Solution [] offspring = doCrossover(crossoverProbability_,
-				parents[0],
-				parents[1]);
+            Configuration.logger_.severe("TwoPointsCrossover.execute: the solutions " +
+                    "are not of the right type. The type should be 'Permutation', but " +
+                    parents[0].getType() + " and " +
+                    parents[1].getType() + " are obtained");
+        } // if
 
-		return offspring; 
-	} // execute
+        return this.doCrossover(this.crossoverProbability_,
+                parents[0],
+                parents[1]);
+    } // execute
 
 } // TwoPointsCrossover

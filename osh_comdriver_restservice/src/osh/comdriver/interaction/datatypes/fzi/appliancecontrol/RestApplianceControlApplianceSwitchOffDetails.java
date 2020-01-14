@@ -1,33 +1,29 @@
 package osh.comdriver.interaction.datatypes.fzi.appliancecontrol;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
  * @author Kaibin Bao, Ingo Mauser
- *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
-@XmlType(name="applianceDetails")
+@XmlType(name = "applianceDetails")
 public class RestApplianceControlApplianceSwitchOffDetails {
-	
-protected boolean done = true;
-	
-	/** for JAXB */
-	public RestApplianceControlApplianceSwitchOffDetails() {
-		//NOTHING
-	}
 
-	public boolean isDone() {
-		return done;
-	}
+    protected boolean done = true;
 
-	public void setDone(boolean done) {
-		this.done = done;
-	};
-	
-	
-	
+    /**
+     * for JAXB
+     */
+    public RestApplianceControlApplianceSwitchOffDetails() {
+        //NOTHING
+    }
+
+    public boolean isDone() {
+        return this.done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
+    }
+
+
 }

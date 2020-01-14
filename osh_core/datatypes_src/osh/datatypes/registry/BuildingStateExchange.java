@@ -3,247 +3,241 @@ package osh.datatypes.registry;
 import java.util.UUID;
 
 /**
- * 
  * @author Simone Droll
- *
  */
 
 public class BuildingStateExchange extends StateExchange {
 
-	private static final long serialVersionUID = -6624430081473462447L;
+    private static final long serialVersionUID = -6624430081473462447L;
 
-	long currentTick;
-	private long timestamp;
-	double currentActivePower;
-	double currentActivePowerConsumption;
-	double currentActivePowerChp;
-	double currentActivePowerChpFeedIn;
-	double currentActivePowerChpAutoConsumption;
-	double currentActivePowerPv;
-	double currentActivePowerPvFeedIn;
-	double currentActivePowerPvAutoConsumption;
-	double currentActivePowerBatteryCharging;
-	double currentActivePowerBatteryDischarging;
-	double currentActivePowerBatteryAutoConsumption;
-	double currentActivePowerBatteryFeedIn;
-	double currentActivePowerExternal;
-	double currentReactivePowerExternal;
-	double currentGasPowerExternal;
+    long currentTick;
+    double currentActivePower;
+    double currentActivePowerConsumption;
+    double currentActivePowerChp;
+    double currentActivePowerChpFeedIn;
+    double currentActivePowerChpAutoConsumption;
+    double currentActivePowerPv;
+    double currentActivePowerPvFeedIn;
+    double currentActivePowerPvAutoConsumption;
+    double currentActivePowerBatteryCharging;
+    double currentActivePowerBatteryDischarging;
+    double currentActivePowerBatteryAutoConsumption;
+    double currentActivePowerBatteryFeedIn;
+    double currentActivePowerExternal;
+    double currentReactivePowerExternal;
+    double currentGasPowerExternal;
+    private long timestamp;
 
-	public BuildingStateExchange() {
-	}
-	
-	
-	public BuildingStateExchange(BuildingStateExchange other) {
-		super(other.sender, other.timestamp);
+    public BuildingStateExchange() {
+    }
 
 
-		this.currentTick = other.currentTick;
-		this.currentActivePower = other.currentActivePower;
-		this.currentActivePowerConsumption = other.currentActivePowerConsumption;
-		this.currentActivePowerChp = other.currentActivePowerChp;
-		this.currentActivePowerChpFeedIn = other.currentActivePowerChpFeedIn;
-		this.currentActivePowerChpAutoConsumption = other.currentActivePowerChpAutoConsumption;
-		this.currentActivePowerPv = other.currentActivePowerPv;
-		this.currentActivePowerPvFeedIn = other.currentActivePowerPvFeedIn;
-		this.currentActivePowerPvAutoConsumption = other.currentActivePowerPvAutoConsumption;
-		this.currentActivePowerBatteryCharging = other.currentActivePowerBatteryCharging;
-		this.currentActivePowerBatteryDischarging = other.currentActivePowerBatteryDischarging;
-		this.currentActivePowerBatteryAutoConsumption = other.currentActivePowerBatteryAutoConsumption;
-		this.currentActivePowerBatteryFeedIn = other.currentActivePowerBatteryFeedIn;
-		this.currentActivePowerExternal = other.currentActivePowerExternal;
-		this.currentReactivePowerExternal = other.currentReactivePowerExternal;
-		this.currentGasPowerExternal = other.currentGasPowerExternal;
-	}
+    public BuildingStateExchange(BuildingStateExchange other) {
+        super(other.sender, other.timestamp);
 
-	public BuildingStateExchange(UUID sender, long currentTick, long timestamp, double currentActivePower,
-			double currentActivePowerConsumption, double currentActivePowerChp, double currentActivePowerChpFeedIn,
-			double currentActivePowerChpAutoConsumption, double currentActivePowerPv, double currentActivePowerPvFeedIn,
-			double currentActivePowerPvAutoConsumption, double currentActivePowerBatteryCharging, double currentActivePowerBatteryDischarging,
-			double currentActivePowerBatteryAutoConsumption, double currentActivePowerBatteryFeedIn,
-			double currentActivePowerExternal, double currentReactivePowerExternal, double currentGasPowerExternal) {
 
-		super(sender, timestamp);
-		
-		this.currentTick = currentTick;
-		this.currentActivePower = currentActivePower;
-		this.currentActivePowerConsumption = currentActivePowerConsumption;
-		this.currentActivePowerChp = currentActivePowerChp;
-		this.currentActivePowerChpFeedIn = currentActivePowerChpFeedIn;
-		this.currentActivePowerChpAutoConsumption = currentActivePowerChpAutoConsumption;
-		this.currentActivePowerPv = currentActivePowerPv;
-		this.currentActivePowerPvFeedIn = currentActivePowerPvFeedIn;
-		this.currentActivePowerPvAutoConsumption = currentActivePowerPvAutoConsumption;
-		this.currentActivePowerBatteryCharging = currentActivePowerBatteryCharging;
-		this.currentActivePowerBatteryDischarging = currentActivePowerBatteryDischarging;
-		this.currentActivePowerBatteryAutoConsumption = currentActivePowerBatteryAutoConsumption;
-		this.currentActivePowerBatteryFeedIn = currentActivePowerBatteryFeedIn;
-		this.currentActivePowerExternal = currentActivePowerExternal;
-		this.currentReactivePowerExternal = currentReactivePowerExternal;
-		this.currentGasPowerExternal = currentGasPowerExternal;
-		System.out.println("HHSE erzeugt");
-	}
+        this.currentTick = other.currentTick;
+        this.currentActivePower = other.currentActivePower;
+        this.currentActivePowerConsumption = other.currentActivePowerConsumption;
+        this.currentActivePowerChp = other.currentActivePowerChp;
+        this.currentActivePowerChpFeedIn = other.currentActivePowerChpFeedIn;
+        this.currentActivePowerChpAutoConsumption = other.currentActivePowerChpAutoConsumption;
+        this.currentActivePowerPv = other.currentActivePowerPv;
+        this.currentActivePowerPvFeedIn = other.currentActivePowerPvFeedIn;
+        this.currentActivePowerPvAutoConsumption = other.currentActivePowerPvAutoConsumption;
+        this.currentActivePowerBatteryCharging = other.currentActivePowerBatteryCharging;
+        this.currentActivePowerBatteryDischarging = other.currentActivePowerBatteryDischarging;
+        this.currentActivePowerBatteryAutoConsumption = other.currentActivePowerBatteryAutoConsumption;
+        this.currentActivePowerBatteryFeedIn = other.currentActivePowerBatteryFeedIn;
+        this.currentActivePowerExternal = other.currentActivePowerExternal;
+        this.currentReactivePowerExternal = other.currentReactivePowerExternal;
+        this.currentGasPowerExternal = other.currentGasPowerExternal;
+    }
 
-	
+    public BuildingStateExchange(UUID sender, long currentTick, long timestamp, double currentActivePower,
+                                 double currentActivePowerConsumption, double currentActivePowerChp, double currentActivePowerChpFeedIn,
+                                 double currentActivePowerChpAutoConsumption, double currentActivePowerPv, double currentActivePowerPvFeedIn,
+                                 double currentActivePowerPvAutoConsumption, double currentActivePowerBatteryCharging, double currentActivePowerBatteryDischarging,
+                                 double currentActivePowerBatteryAutoConsumption, double currentActivePowerBatteryFeedIn,
+                                 double currentActivePowerExternal, double currentReactivePowerExternal, double currentGasPowerExternal) {
 
-	
-	public double getCurrentActivePowerConsumption() {
-		return currentActivePowerConsumption;
-	}
+        super(sender, timestamp);
 
-	public void setCurrentActivePowerConsumption(double currentActivePowerConsumption) {
-		this.currentActivePowerConsumption = currentActivePowerConsumption;
-	}
+        this.currentTick = currentTick;
+        this.currentActivePower = currentActivePower;
+        this.currentActivePowerConsumption = currentActivePowerConsumption;
+        this.currentActivePowerChp = currentActivePowerChp;
+        this.currentActivePowerChpFeedIn = currentActivePowerChpFeedIn;
+        this.currentActivePowerChpAutoConsumption = currentActivePowerChpAutoConsumption;
+        this.currentActivePowerPv = currentActivePowerPv;
+        this.currentActivePowerPvFeedIn = currentActivePowerPvFeedIn;
+        this.currentActivePowerPvAutoConsumption = currentActivePowerPvAutoConsumption;
+        this.currentActivePowerBatteryCharging = currentActivePowerBatteryCharging;
+        this.currentActivePowerBatteryDischarging = currentActivePowerBatteryDischarging;
+        this.currentActivePowerBatteryAutoConsumption = currentActivePowerBatteryAutoConsumption;
+        this.currentActivePowerBatteryFeedIn = currentActivePowerBatteryFeedIn;
+        this.currentActivePowerExternal = currentActivePowerExternal;
+        this.currentReactivePowerExternal = currentReactivePowerExternal;
+        this.currentGasPowerExternal = currentGasPowerExternal;
+        System.out.println("HHSE erzeugt");
+    }
 
-	public double getCurrentActivePowerChpAutoConsumption() {
-		return currentActivePowerChpAutoConsumption;
-	}
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 
-	public void setCurrentActivePowerChpAutoConsumption(double currentActivePowerChpAutoConsumption) {
-		this.currentActivePowerChpAutoConsumption = currentActivePowerChpAutoConsumption;
-	}
+    public double getCurrentActivePowerConsumption() {
+        return this.currentActivePowerConsumption;
+    }
 
-	public double getCurrentActivePowerPvAutoConsumption() {
-		return currentActivePowerPvAutoConsumption;
-	}
+    public void setCurrentActivePowerConsumption(double currentActivePowerConsumption) {
+        this.currentActivePowerConsumption = currentActivePowerConsumption;
+    }
 
-	public void setCurrentActivePowerPvAutoConsumption(double currentActivePowerPvAutoConsumption) {
-		this.currentActivePowerPvAutoConsumption = currentActivePowerPvAutoConsumption;
-	}
+    public double getCurrentActivePowerChpAutoConsumption() {
+        return this.currentActivePowerChpAutoConsumption;
+    }
 
-	public long getCurrentTick() {
-		return currentTick;
-	}
+    public void setCurrentActivePowerChpAutoConsumption(double currentActivePowerChpAutoConsumption) {
+        this.currentActivePowerChpAutoConsumption = currentActivePowerChpAutoConsumption;
+    }
 
-	public void setCurrentTick(long currentTick) {
-		this.currentTick = currentTick;
-	}
+    public double getCurrentActivePowerPvAutoConsumption() {
+        return this.currentActivePowerPvAutoConsumption;
+    }
 
-	public UUID getSender() {
-		return sender;
-	}
+    public void setCurrentActivePowerPvAutoConsumption(double currentActivePowerPvAutoConsumption) {
+        this.currentActivePowerPvAutoConsumption = currentActivePowerPvAutoConsumption;
+    }
 
-	public void setSender(UUID sender) {
-		this.sender = sender;
-	}
+    public long getCurrentTick() {
+        return this.currentTick;
+    }
 
-	public long getTimestamp() {
-		return timestamp;
-	}
+    public void setCurrentTick(long currentTick) {
+        this.currentTick = currentTick;
+    }
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
+    public UUID getSender() {
+        return this.sender;
+    }
 
-	public double getCurrentActivePower() {
-		return currentActivePower;
-	}
+    public void setSender(UUID sender) {
+        this.sender = sender;
+    }
 
-	public void setCurrentActivePower(double currentActivePower) {
-		this.currentActivePower = currentActivePower;
-	}
+    public long getTimestamp() {
+        return this.timestamp;
+    }
 
-	public double getCurrentActivePowerChp() {
-		return currentActivePowerChp;
-	}
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public void setCurrentActivePowerChp(double currentActivePowerChp) {
-		this.currentActivePowerChp = currentActivePowerChp;
-	}
+    public double getCurrentActivePower() {
+        return this.currentActivePower;
+    }
 
-	public double getCurrentActivePowerChpFeedIn() {
-		return currentActivePowerChpFeedIn;
-	}
+    public void setCurrentActivePower(double currentActivePower) {
+        this.currentActivePower = currentActivePower;
+    }
 
-	public void setCurrentActivePowerChpFeedIn(double currentActivePowerChpFeedIn) {
-		this.currentActivePowerChpFeedIn = currentActivePowerChpFeedIn;
-	}
+    public double getCurrentActivePowerChp() {
+        return this.currentActivePowerChp;
+    }
 
-	public double getCurrentActivePowerPv() {
-		return currentActivePowerPv;
-	}
+    public void setCurrentActivePowerChp(double currentActivePowerChp) {
+        this.currentActivePowerChp = currentActivePowerChp;
+    }
 
-	public void setCurrentActivePowerPv(double currentActivePowerPv) {
-		this.currentActivePowerPv = currentActivePowerPv;
-	}
+    public double getCurrentActivePowerChpFeedIn() {
+        return this.currentActivePowerChpFeedIn;
+    }
 
-	public double getCurrentActivePowerPvFeedIn() {
-		return currentActivePowerPvFeedIn;
-	}
+    public void setCurrentActivePowerChpFeedIn(double currentActivePowerChpFeedIn) {
+        this.currentActivePowerChpFeedIn = currentActivePowerChpFeedIn;
+    }
 
-	public void setCurrentActivePowerPvFeedIn(double currentActivePowerPvFeedIn) {
-		this.currentActivePowerPvFeedIn = currentActivePowerPvFeedIn;
-	}
-	
-	public double getCurrentActivePowerBatteryCharging() {
-		return currentActivePowerBatteryCharging;
-	}
+    public double getCurrentActivePowerPv() {
+        return this.currentActivePowerPv;
+    }
 
-	public void setCurrentActivePowerBatteryCharging(double currentActivePowerBatteryCharging) {
-		this.currentActivePowerBatteryCharging = currentActivePowerBatteryCharging;
-	}
+    public void setCurrentActivePowerPv(double currentActivePowerPv) {
+        this.currentActivePowerPv = currentActivePowerPv;
+    }
 
-	public double getCurrentActivePowerBatteryDischarging() {
-		return currentActivePowerBatteryDischarging;
-	}
+    public double getCurrentActivePowerPvFeedIn() {
+        return this.currentActivePowerPvFeedIn;
+    }
 
-	public void setCurrentActivePowerBatteryDischarging(double currentActivePowerBatteryDischarging) {
-		this.currentActivePowerBatteryDischarging = currentActivePowerBatteryDischarging;
-	}
+    public void setCurrentActivePowerPvFeedIn(double currentActivePowerPvFeedIn) {
+        this.currentActivePowerPvFeedIn = currentActivePowerPvFeedIn;
+    }
 
-	public double getCurrentActivePowerBatteryAutoConsumption() {
-		return currentActivePowerBatteryAutoConsumption;
-	}
+    public double getCurrentActivePowerBatteryCharging() {
+        return this.currentActivePowerBatteryCharging;
+    }
 
-	public void setCurrentActivePowerBatteryAutoConsumption(double currentActivePowerBatteryAutoConsumption) {
-		this.currentActivePowerBatteryAutoConsumption = currentActivePowerBatteryAutoConsumption;
-	}
+    public void setCurrentActivePowerBatteryCharging(double currentActivePowerBatteryCharging) {
+        this.currentActivePowerBatteryCharging = currentActivePowerBatteryCharging;
+    }
 
-	public double getCurrentActivePowerBatteryFeedIn() {
-		return currentActivePowerBatteryFeedIn;
-	}
+    public double getCurrentActivePowerBatteryDischarging() {
+        return this.currentActivePowerBatteryDischarging;
+    }
 
-	public void setCurrentActivePowerBatteryFeedIn(double currentActivePowerBatteryFeedIn) {
-		this.currentActivePowerBatteryFeedIn = currentActivePowerBatteryFeedIn;
-	}
+    public void setCurrentActivePowerBatteryDischarging(double currentActivePowerBatteryDischarging) {
+        this.currentActivePowerBatteryDischarging = currentActivePowerBatteryDischarging;
+    }
 
-	public double getCurrentActivePowerExternal() {
-		return currentActivePowerExternal;
-	}
+    public double getCurrentActivePowerBatteryAutoConsumption() {
+        return this.currentActivePowerBatteryAutoConsumption;
+    }
 
-	public void setCurrentActivePowerExternal(double currentActivePowerExternal) {
-		this.currentActivePowerExternal = currentActivePowerExternal;
-	}
+    public void setCurrentActivePowerBatteryAutoConsumption(double currentActivePowerBatteryAutoConsumption) {
+        this.currentActivePowerBatteryAutoConsumption = currentActivePowerBatteryAutoConsumption;
+    }
 
-	public double getCurrentReactivePowerExternal() {
-		return currentReactivePowerExternal;
-	}
+    public double getCurrentActivePowerBatteryFeedIn() {
+        return this.currentActivePowerBatteryFeedIn;
+    }
 
-	public void setCurrentReactivePowerExternal(double currentReactivePowerExternal) {
-		this.currentReactivePowerExternal = currentReactivePowerExternal;
-	}
+    public void setCurrentActivePowerBatteryFeedIn(double currentActivePowerBatteryFeedIn) {
+        this.currentActivePowerBatteryFeedIn = currentActivePowerBatteryFeedIn;
+    }
 
-	public double getCurrentGasPowerExternal() {
-		return currentGasPowerExternal;
-	}
+    public double getCurrentActivePowerExternal() {
+        return this.currentActivePowerExternal;
+    }
 
-	public void setCurrentGasPowerExternal(double currentGasPowerExternal) {
-		this.currentGasPowerExternal = currentGasPowerExternal;
-	}
+    public void setCurrentActivePowerExternal(double currentActivePowerExternal) {
+        this.currentActivePowerExternal = currentActivePowerExternal;
+    }
 
-	@Override
-	public String toString() {
-		return getClass().getName() + ": Sender " + getSender() + ", time: " + getTimestamp();
-	}
-	
+    public double getCurrentReactivePowerExternal() {
+        return this.currentReactivePowerExternal;
+    }
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+    public void setCurrentReactivePowerExternal(double currentReactivePowerExternal) {
+        this.currentReactivePowerExternal = currentReactivePowerExternal;
+    }
 
-	public BuildingStateExchange clone() {
-		
-		return new BuildingStateExchange(this);
-	}
-	
+    public double getCurrentGasPowerExternal() {
+        return this.currentGasPowerExternal;
+    }
+
+    public void setCurrentGasPowerExternal(double currentGasPowerExternal) {
+        this.currentGasPowerExternal = currentGasPowerExternal;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getName() + ": Sender " + this.sender + ", time: " + this.timestamp;
+    }
+
+    public BuildingStateExchange clone() {
+
+        return new BuildingStateExchange(this);
+    }
+
 }

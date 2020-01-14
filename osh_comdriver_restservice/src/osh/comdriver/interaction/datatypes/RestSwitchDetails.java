@@ -4,26 +4,27 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
 
-@XmlType(name="switchDetails")
+@XmlType(name = "switchDetails")
 public class RestSwitchDetails extends RestStateDetail {
-	protected boolean on;
-	
-	/** for JAXB */
-	@SuppressWarnings("unused")
-	@Deprecated
-    protected RestSwitchDetails() {
-		this(null, 0);
-	};
-	
-	public RestSwitchDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
+    protected boolean on;
 
-	public boolean isOn() {
-		return on;
-	}
+    /**
+     * for JAXB
+     */
+    @Deprecated
+    public RestSwitchDetails() {
+        this(null, 0);
+    }
 
-	public void setOn(boolean on) {
-		this.on = on;
-	};
+    public RestSwitchDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
+
+    public boolean isOn() {
+        return this.on;
+    }
+
+    public void setOn(boolean on) {
+        this.on = on;
+    }
 }

@@ -2,235 +2,220 @@ package osh.rems.simulation;
 
 import osh.cal.CALComDriver;
 import osh.cal.ICALExchange;
+import osh.comdriver.signals.PowerLimitSignalGenerator;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
-import osh.datatypes.power.PowerInterval;
 import osh.hal.exchange.PlsComExchange;
-import osh.simulation.exception.SimulationSubjectException;
 
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 /**
- * 
  * @author Simone Droll
- *
  */
 
 public class RemsPlsProviderComDriver extends CALComDriver {
 
-	private EnumMap<AncillaryCommodity, PowerLimitSignal> remsPowerLimitSignals;
+    private EnumMap<AncillaryCommodity, PowerLimitSignal> remsPowerLimitSignals;
 
-	/** Time after which a signal is send */
-	private int newSignalAfterThisPeriod;
+    /**
+     * Time after which a signal is send
+     */
+    private int newSignalAfterThisPeriod;
 
-	/** Maximum time the signal is available in advance (36h) */
-	private int signalPeriod;
+    /**
+     * Maximum time the signal is available in advance (36h)
+     */
+    private int signalPeriod;
 
-	private int activeLowerLimit;
-	private int activeUpperLimit;
+    private int activeLowerLimit;
+    private int activeUpperLimit;
 
-	private int reactiveLowerLimit;
-	private int reactiveUpperLimit;
+    private int reactiveLowerLimit;
+    private int reactiveUpperLimit;
 
-	private EnumMap<AncillaryCommodity, PowerLimitSignal> newSignals;
-	private boolean newSignalReceived = false;
-	
-	private long lastTimeSignalSent = 0L;
+    private EnumMap<AncillaryCommodity, PowerLimitSignal> newSignals;
+    private boolean newSignalReceived;
 
-	public RemsPlsProviderComDriver(IOSH controllerbox, UUID deviceID, OSHParameterCollection driverConfig)
-			throws SimulationSubjectException {
-		super(controllerbox, deviceID, driverConfig);
-		this.remsPowerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
+    private long lastTimeSignalSent;
 
-		try {
-			this.newSignalAfterThisPeriod = Integer.valueOf(getComConfig().getParameter("newSignalAfterThisPeriod"));
-		} catch (Exception e) {
-			this.newSignalAfterThisPeriod = 43200; // 12h
-			getGlobalLogger().logWarning(
-					"Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
-		}
+    public RemsPlsProviderComDriver(IOSH osh, UUID deviceID, OSHParameterCollection driverConfig) {
+        super(osh, deviceID, driverConfig);
+        this.remsPowerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
 
-		try {
-			this.signalPeriod = Integer.valueOf(getComConfig().getParameter("signalPeriod"));
-		} catch (Exception e) {
-			this.signalPeriod = 129600; // 36h
-			getGlobalLogger().logWarning("Can't get signalPeriod, using the default value: " + this.signalPeriod);
-		}
+        try {
+            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+        } catch (Exception e) {
+            this.newSignalAfterThisPeriod = 43200; // 12h
+            this.getGlobalLogger().logWarning(
+                    "Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
+        }
 
-		try {
-			this.activeLowerLimit = Integer.valueOf(getComConfig().getParameter("activeLowerLimit"));
-		} catch (Exception e) {
-			this.activeLowerLimit = -3000; // kW
-			getGlobalLogger()
-					.logWarning("Can't get activeLowerLimit, using the default value: " + this.activeLowerLimit);
-		}
+        try {
+            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter("signalPeriod"));
+        } catch (Exception e) {
+            this.signalPeriod = 129600; // 36h
+            this.getGlobalLogger().logWarning("Can't get signalPeriod, using the default value: " + this.signalPeriod);
+        }
 
-		try {
-			this.activeUpperLimit = Integer.valueOf(getComConfig().getParameter("activeUpperLimit"));
-		} catch (Exception e) {
-			this.activeUpperLimit = 10000; // kW
-			getGlobalLogger()
-					.logWarning("Can't get activeUpperLimit, using the default value: " + this.activeUpperLimit);
-		}
+        try {
+            this.activeLowerLimit = Integer.parseInt(this.getComConfig().getParameter("activeLowerLimit"));
+        } catch (Exception e) {
+            this.activeLowerLimit = -3000; // kW
+            this.getGlobalLogger()
+                    .logWarning("Can't get activeLowerLimit, using the default value: " + this.activeLowerLimit);
+        }
 
-		try {
-			this.reactiveLowerLimit = Integer.valueOf(getComConfig().getParameter("reactiveLowerLimit"));
-		} catch (Exception e) {
-			this.reactiveLowerLimit = -3000; // kW
-			getGlobalLogger()
-					.logWarning("Can't get reactiveLowerLimit, using the default value: " + this.reactiveLowerLimit);
-		}
+        try {
+            this.activeUpperLimit = Integer.parseInt(this.getComConfig().getParameter("activeUpperLimit"));
+        } catch (Exception e) {
+            this.activeUpperLimit = 10000; // kW
+            this.getGlobalLogger()
+                    .logWarning("Can't get activeUpperLimit, using the default value: " + this.activeUpperLimit);
+        }
 
-		try {
-			this.reactiveUpperLimit = Integer.valueOf(getComConfig().getParameter("reactiveUpperLimit"));
-		} catch (Exception e) {
-			this.reactiveUpperLimit = 10000; // kW
-			getGlobalLogger()
-					.logWarning("Can't get reactiveUpperLimit, using the default value: " + this.reactiveUpperLimit);
-		}
-	}
+        try {
+            this.reactiveLowerLimit = Integer.parseInt(this.getComConfig().getParameter("reactiveLowerLimit"));
+        } catch (Exception e) {
+            this.reactiveLowerLimit = -3000; // kW
+            this.getGlobalLogger()
+                    .logWarning("Can't get reactiveLowerLimit, using the default value: " + this.reactiveLowerLimit);
+        }
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
+        try {
+            this.reactiveUpperLimit = Integer.parseInt(this.getComConfig().getParameter("reactiveUpperLimit"));
+        } catch (Exception e) {
+            this.reactiveUpperLimit = 10000; // kW
+            this.getGlobalLogger()
+                    .logWarning("Can't get reactiveUpperLimit, using the default value: " + this.reactiveUpperLimit);
+        }
+    }
 
-		long now = getTimer().getUnixTime();
-		remsPowerLimitSignals = generateNewPowerLimitSignal(now);
-		PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, remsPowerLimitSignals);
-		this.notifyComManager(ex);
-		
-		lastTimeSignalSent = now;
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
 
-		// register
-		this.getTimer().registerComponent(this, 1);
-	}
+        long now = this.getTimer().getUnixTime();
+        this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
+        PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, this.remsPowerLimitSignals);
+        this.notifyComManager(ex);
 
-	// TODO: better signal
-	private EnumMap<AncillaryCommodity, PowerLimitSignal> generateNewPowerLimitSignal(long now) {
-		EnumMap<AncillaryCommodity, PowerLimitSignal> newPls = new EnumMap<>(AncillaryCommodity.class);
+        this.lastTimeSignalSent = now;
 
-		PowerLimitSignal activePowerLimitSignal = new PowerLimitSignal();
-		activePowerLimitSignal.setPowerLimit(now, activeUpperLimit, activeLowerLimit);
-		activePowerLimitSignal.setKnownPowerLimitInterval(now, now + signalPeriod);
-		newPls.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, activePowerLimitSignal);
+        // register
+        this.getTimer().registerComponent(this, 1);
+    }
 
-		PowerLimitSignal reactivePowerLimitSignal = new PowerLimitSignal();
-		reactivePowerLimitSignal.setPowerLimit(now, reactiveUpperLimit, reactiveLowerLimit);
-		reactivePowerLimitSignal.setKnownPowerLimitInterval(now, now + signalPeriod);
-		newPls.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, reactivePowerLimitSignal);
+    // TODO: better signal
+    private EnumMap<AncillaryCommodity, PowerLimitSignal> generateNewPowerLimitSignal(long now) {
+        EnumMap<AncillaryCommodity, PowerLimitSignal> newPls = new EnumMap<>(AncillaryCommodity.class);
 
-		return newPls;
-	}
+        newPls.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, PowerLimitSignalGenerator.generateFlatPowerLimitSignal(now,
+                now + this.signalPeriod, this.activeUpperLimit, this.activeLowerLimit));
 
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		super.onNextTimePeriod();
+        newPls.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, PowerLimitSignalGenerator.generateFlatPowerLimitSignal(now,
+                now + this.signalPeriod, this.reactiveUpperLimit, this.reactiveLowerLimit));
 
-		long now = getTimer().getUnixTime();
-		
-		// generate new PriceSignal and send it
-		if ((now - lastTimeSignalSent) >= newSignalAfterThisPeriod) {
-			// PLS
-			remsPowerLimitSignals = generateNewPowerLimitSignal(now);
-			PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, remsPowerLimitSignals);
-			this.notifyComManager(ex);
-			
-			lastTimeSignalSent = now;
-		} else if (newSignalReceived) {
-			EnumMap<AncillaryCommodity, PowerLimitSignal> plSignals = new EnumMap<AncillaryCommodity, PowerLimitSignal>(AncillaryCommodity.class);
-			for (Entry<AncillaryCommodity, PowerLimitSignal> pls : newSignals.entrySet()) {
-				plSignals.put(pls.getKey(), pls.getValue());
-			}
+        return newPls;
+    }
 
-			PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, remsPowerLimitSignals);
-			this.notifyComManager(ex);
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        super.onNextTimePeriod();
 
-			newSignalReceived = false;
-			newSignals.clear();
-			
-			lastTimeSignalSent = now;
-		}
-	}
+        long now = this.getTimer().getUnixTime();
 
-	// PLS needs to be relative from now
-	public void setNewSignal(PowerLimitSignal signal) {
-		// System.out.println("PowerLimitSignal received");
-		newSignals = new EnumMap<AncillaryCommodity, PowerLimitSignal>(AncillaryCommodity.class);
-		long now = getTimer().getUnixTime();
-		PowerLimitSignal pls = new PowerLimitSignal();
-		pls.setKnownPowerLimitInterval(now, now + signal.getLimitUnknownAtAndAfter());
-		for (Entry<Long, PowerInterval> en : signal.getPowerLimits().entrySet()) {
-			pls.setPowerLimit(en.getKey() + now, en.getValue());
-		}
-		newSignals.put(signal.getAc(), pls);
-		newSignalReceived = true;
-	}
+        // generate new PriceSignal and send it
+        if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+            // PLS
+            this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
+            PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, this.remsPowerLimitSignals);
+            this.notifyComManager(ex);
 
-	public EnumMap<AncillaryCommodity, PowerLimitSignal> getPowerLimitSignals() {
-		return remsPowerLimitSignals;
-	}
+            this.lastTimeSignalSent = now;
+        } else if (this.newSignalReceived) {
 
-	public void setPowerLimitSignals(EnumMap<AncillaryCommodity, PowerLimitSignal> remsPowerLimitSignals) {
-		this.remsPowerLimitSignals = remsPowerLimitSignals;
-	}
+            //ensure that even if we only receive a signal for one ancillary commodity the signals for all the others
+            // have a sufficient horizon
+            this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
+            for (Entry<AncillaryCommodity, PowerLimitSignal> pls : this.newSignals.entrySet()) {
+                this.remsPowerLimitSignals.put(pls.getKey(), pls.getValue());
+            }
 
-	public int getNewSignalAfterThisPeriod() {
-		return newSignalAfterThisPeriod;
-	}
+            PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, this.remsPowerLimitSignals);
+            this.notifyComManager(ex);
 
-	public void setNewSignalAfterThisPeriod(int newSignalAfterThisPeriod) {
-		this.newSignalAfterThisPeriod = newSignalAfterThisPeriod;
-	}
+            this.newSignalReceived = false;
+            this.newSignals.clear();
 
-	public int getSignalPeriod() {
-		return signalPeriod;
-	}
+            this.lastTimeSignalSent = now;
+        }
+    }
 
-	public void setSignalPeriod(int signalPeriod) {
-		this.signalPeriod = signalPeriod;
-	}
+    public EnumMap<AncillaryCommodity, PowerLimitSignal> getPowerLimitSignals() {
+        return this.remsPowerLimitSignals;
+    }
 
-	public int getActiveLowerLimit() {
-		return activeLowerLimit;
-	}
+    public void setPowerLimitSignals(EnumMap<AncillaryCommodity, PowerLimitSignal> remsPowerLimitSignals) {
+        this.remsPowerLimitSignals = remsPowerLimitSignals;
+    }
 
-	public void setActiveLowerLimit(int activeLowerLimit) {
-		this.activeLowerLimit = activeLowerLimit;
-	}
+    public int getNewSignalAfterThisPeriod() {
+        return this.newSignalAfterThisPeriod;
+    }
 
-	public int getActiveUpperLimit() {
-		return activeUpperLimit;
-	}
+    public void setNewSignalAfterThisPeriod(int newSignalAfterThisPeriod) {
+        this.newSignalAfterThisPeriod = newSignalAfterThisPeriod;
+    }
 
-	public void setActiveUpperLimit(int activeUpperLimit) {
-		this.activeUpperLimit = activeUpperLimit;
-	}
+    public int getSignalPeriod() {
+        return this.signalPeriod;
+    }
 
-	public int getReactiveLowerLimit() {
-		return reactiveLowerLimit;
-	}
+    public void setSignalPeriod(int signalPeriod) {
+        this.signalPeriod = signalPeriod;
+    }
 
-	public void setReactiveLowerLimit(int reactiveLowerLimit) {
-		this.reactiveLowerLimit = reactiveLowerLimit;
-	}
+    public int getActiveLowerLimit() {
+        return this.activeLowerLimit;
+    }
 
-	public int getReactiveUpperLimit() {
-		return reactiveUpperLimit;
-	}
+    public void setActiveLowerLimit(int activeLowerLimit) {
+        this.activeLowerLimit = activeLowerLimit;
+    }
 
-	public void setReactiveUpperLimit(int reactiveUpperLimit) {
-		this.reactiveUpperLimit = reactiveUpperLimit;
-	}
+    public int getActiveUpperLimit() {
+        return this.activeUpperLimit;
+    }
 
-	@Override
-	public void updateDataFromComManager(ICALExchange exchangeObject) {
-		// NOTHING
+    public void setActiveUpperLimit(int activeUpperLimit) {
+        this.activeUpperLimit = activeUpperLimit;
+    }
 
-	}
+    public int getReactiveLowerLimit() {
+        return this.reactiveLowerLimit;
+    }
+
+    public void setReactiveLowerLimit(int reactiveLowerLimit) {
+        this.reactiveLowerLimit = reactiveLowerLimit;
+    }
+
+    public int getReactiveUpperLimit() {
+        return this.reactiveUpperLimit;
+    }
+
+    public void setReactiveUpperLimit(int reactiveUpperLimit) {
+        this.reactiveUpperLimit = reactiveUpperLimit;
+    }
+
+    @Override
+    public void updateDataFromComManager(ICALExchange exchangeObject) {
+        // NOTHING
+
+    }
 
 }

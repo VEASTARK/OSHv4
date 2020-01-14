@@ -7,34 +7,33 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * wago xml interface
- * 
- * @author tisu
  *
+ * @author tisu
  */
 @XmlType
 public class WagoDoData {
-	@XmlTransient
-	private int groupId;
-	
-	@XmlPath("@id")
-	private int id;
-	
-	@XmlPath("@state")
-	private boolean state;
+    @XmlTransient
+    private int groupId;
 
-	public int getGroupId() {
-		return groupId;
-	}
+    @XmlPath("@id")
+    private int id;
 
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
-	}
+    @XmlPath("@state")
+    private boolean state;
 
-	public int getId() {
-		return id;
-	}
+    public int getGroupId() {
+        return this.groupId;
+    }
 
-	public boolean getState() {
-		return state;
-	}
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public boolean getState() {
+        return this.state;
+    }
 }

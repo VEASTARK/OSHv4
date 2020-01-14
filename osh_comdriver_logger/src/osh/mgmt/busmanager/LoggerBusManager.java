@@ -11,30 +11,29 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Ingo Mauser
- *
  */
 public abstract class LoggerBusManager extends BusManager implements IEventTypeReceiver {
 
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param uuid
-	 */
-	public LoggerBusManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param uuid
+     */
+    public LoggerBusManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+    }
 
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(
-			Class<T> type, T event) throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T event) throws OSHException {
+        //NOTHING
+    }
 
-	@Override
-	public void onDriverUpdate(IHALExchange exchangeObject) {
-		//NOTHING
-	}
+    @Override
+    public void onDriverUpdate(IHALExchange exchangeObject) {
+        //NOTHING
+    }
 
 }

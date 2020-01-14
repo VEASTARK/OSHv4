@@ -5,68 +5,66 @@ import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class HotWaterTankObserverExchange extends HALDeviceObserverExchange {
 
-	private double topTemperature;
+    private final double topTemperature;
 
-	private double tankCapacity;
-	private double tankDiameter;
-	private double ambientTemperature;
-	
-	private double hotWaterDemand;
-	private double hotWaterSupply;
+    private final double tankCapacity;
+    private final double tankDiameter;
+    private final double ambientTemperature;
 
-	
-	/**
-	 * CONSTRUCTOR
-	 * 
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public HotWaterTankObserverExchange(
-			UUID deviceID, 
-			Long timestamp,
-			double topTemperature, 
-			double tankCapacity, 
-			double tankDiameter,
-			double ambientTemperature,
-			double hotWaterDemand,
-			double hotWaterSupply) {
-		super(deviceID, timestamp);
+    private final double hotWaterDemand;
+    private final double hotWaterSupply;
 
-		this.topTemperature = topTemperature;
-		this.tankCapacity = tankCapacity;
-		this.tankDiameter = tankDiameter;
-		this.ambientTemperature = ambientTemperature;
-		this.hotWaterDemand = hotWaterDemand;
-		this.hotWaterSupply = hotWaterSupply;
-	}
 
-	public double getTopTemperature() {
-		return topTemperature;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public HotWaterTankObserverExchange(
+            UUID deviceID,
+            Long timestamp,
+            double topTemperature,
+            double tankCapacity,
+            double tankDiameter,
+            double ambientTemperature,
+            double hotWaterDemand,
+            double hotWaterSupply) {
+        super(deviceID, timestamp);
 
-	public double getTankCapacity() {
-		return tankCapacity;
-	}
+        this.topTemperature = topTemperature;
+        this.tankCapacity = tankCapacity;
+        this.tankDiameter = tankDiameter;
+        this.ambientTemperature = ambientTemperature;
+        this.hotWaterDemand = hotWaterDemand;
+        this.hotWaterSupply = hotWaterSupply;
+    }
 
-	public double getAmbientTemperature() {
-		return ambientTemperature;
-	}
-	
-	public double getTankDiameter() {
-		return tankDiameter;
-	}
-	
-	public double getHotWaterDemand() {
-		return hotWaterDemand;
-	}
-	
-	public double getHotWaterSupply() {
-		return hotWaterSupply;
-	}
+    public double getTopTemperature() {
+        return this.topTemperature;
+    }
+
+    public double getTankCapacity() {
+        return this.tankCapacity;
+    }
+
+    public double getAmbientTemperature() {
+        return this.ambientTemperature;
+    }
+
+    public double getTankDiameter() {
+        return this.tankDiameter;
+    }
+
+    public double getHotWaterDemand() {
+        return this.hotWaterDemand;
+    }
+
+    public double getHotWaterSupply() {
+        return this.hotWaterSupply;
+    }
 }

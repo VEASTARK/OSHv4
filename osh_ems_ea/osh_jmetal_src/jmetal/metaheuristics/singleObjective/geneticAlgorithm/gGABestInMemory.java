@@ -36,244 +36,239 @@ import java.util.Comparator;
  */
 public class gGABestInMemory extends Algorithm {
 
-	private static final long serialVersionUID = 1L;
-	private boolean showDebugMessages;
-	private Variable[] bestInMemory;
-	
-	private boolean writePopulationsToFile;
-	
-	/**
-	 * Constructor Create a new GGA instance.
-	 * 
-	 * @param problem Problem to solve.
-	 */
-	public gGABestInMemory(
-			Problem problem, 
-			Real[] bestInMemory,
-			boolean showDebugMessages,
-			boolean writePopulationsToFile) {
-		super(problem);
-		
-		this.bestInMemory = bestInMemory;
-		this.showDebugMessages = showDebugMessages;
-		
-		this.writePopulationsToFile = writePopulationsToFile;
-	} // GGA
+    private static final long serialVersionUID = 1L;
+    private final boolean showDebugMessages;
+    private final Variable[] bestInMemory;
 
-	/**
-	 * Execute the GGA algorithm
-	 * 
-	 * @throws JMException
-	 */
-	@SuppressWarnings("resource")
-	public SolutionSet execute() throws JMException, ClassNotFoundException {
-		
-		String folderName = "logs/" + System.currentTimeMillis() / 1000 + "/";
-		String outputFileName = folderName + "popLog.csv";
-		PrintWriter pw = null;
-		
-		if (writePopulationsToFile) {
-			try {
-				File theDir = new File(folderName);
+    private final boolean writePopulationsToFile;
 
-				  // if the directory does not exist, create it
-				  if (!theDir.exists()) {
-				    theDir.mkdir();  
-				  }
-				
-				pw = new PrintWriter(new File(outputFileName));
-			} 
-			catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		
-		// int generation = 0;
-		int populationSize;
-		int maxEvaluations;
-		int evaluations;
+    /**
+     * Constructor Create a new GGA instance.
+     *
+     * @param problem Problem to solve.
+     */
+    public gGABestInMemory(
+            Problem problem,
+            Real[] bestInMemory,
+            boolean showDebugMessages,
+            boolean writePopulationsToFile) {
+        super(problem);
 
-		SolutionSet population;
-		SolutionSet offspringPopulation;
+        this.bestInMemory = bestInMemory;
+        this.showDebugMessages = showDebugMessages;
 
-		Operator mutationOperator;
-		Operator crossoverOperator;
-		Operator selectionOperator;
+        this.writePopulationsToFile = writePopulationsToFile;
+    } // GGA
 
-		@SuppressWarnings("rawtypes")
-		Comparator comparator;
-		comparator = new ObjectiveComparator(0); // Single objective comparator
+    /**
+     * Execute the GGA algorithm
+     *
+     * @throws JMException
+     */
+    @SuppressWarnings("resource")
+    public SolutionSet execute() throws JMException {
 
-		// Read the params
-		populationSize = ((Integer) this.getInputParameter("populationSize"))
-				.intValue();
-		maxEvaluations = ((Integer) this.getInputParameter("maxEvaluations"))
-				.intValue();
+        String folderName = "logs/" + System.currentTimeMillis() / 1000 + "/";
+        String outputFileName = folderName + "popLog.csv";
+        PrintWriter pw = null;
 
-		// Initialize the variables
-		population = new SolutionSet(populationSize);
-		offspringPopulation = new SolutionSet(populationSize);
+        if (this.writePopulationsToFile) {
+            try {
+                File theDir = new File(folderName);
 
-		evaluations = 0;
+                // if the directory does not exist, create it
+                if (!theDir.exists()) {
+                    theDir.mkdir();
+                }
 
-		// Read the operators
-		mutationOperator = this.operators_.get("mutation");
-		crossoverOperator = this.operators_.get("crossover");
-		selectionOperator = this.operators_.get("selection");
+                pw = new PrintWriter(new File(outputFileName));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
-		// Create the initial population
-		Solution newIndividual;
-		Solution bestIndividualInMemory = null;
 
-		bestIndividualInMemory = new Solution(problem_, bestInMemory);
-		problem_.evaluate(bestIndividualInMemory);
-		evaluations++;
-		population.add(bestIndividualInMemory);
-		if (pw != null) {
-			String s = "";
-			for (Variable v : bestIndividualInMemory.getDecisionVariables()) {
-				Real r = (Real) v;
-				s = s + r.getValue() + ";";
-			}
-			s = s + bestIndividualInMemory.getObjective(0);
-			pw.println(s);
-			pw.flush();
-		}
-		
-		for (int i = 0; i < populationSize - 1; i++) {
-			newIndividual = new Solution(problem_);
-			problem_.evaluate(newIndividual);
-			evaluations++;
-			population.add(newIndividual);
-			if (pw != null) {
-				String s = "";
-				for (Variable v : newIndividual.getDecisionVariables()) {
-					Real r = (Real) v;
-					s = s + r.getValue() + ";";
-				}
-				s = s + newIndividual.getObjective(0);
-				pw.println(s);
-				pw.flush();
-			}
-		} // for
+        // int generation = 0;
+        int populationSize;
+        int maxEvaluations;
+        int evaluations;
 
-		// Sort population
-		population.sort(comparator);
-		do {
-			if ((evaluations % 1) == 0) {
-				if (showDebugMessages) {
-					// Evaluations; Fitness; Populationsize; Generations;
-					// MutationProbability; CrossoverProbability
-					System.out.println(evaluations + "; "
-							+ population.get(0).getObjective(0) + "; "
-							+ population.get(0).getDecisionVariables()[0]
-							+ "; "
-							+ population.get(0).getDecisionVariables()[1]
-							+ "; "
-							+ population.get(0).getDecisionVariables()[2]);
-				}
-			} //
+        SolutionSet population;
+        SolutionSet offspringPopulation;
 
-			// Copy the best two individuals to the offspring population
-			offspringPopulation.add(new Solution(population.get(0)));
-			offspringPopulation.add(new Solution(population.get(1)));
+        Operator mutationOperator;
+        Operator crossoverOperator;
+        Operator selectionOperator;
 
-			evaluations += 2; // To get back right number of Evaluations
+        @SuppressWarnings("rawtypes")
+        Comparator comparator;
+        comparator = new ObjectiveComparator(0); // Single objective comparator
 
-			// Reproductive cycle
-			for (int i = 0; i < ((populationSize / 2) - 1); i++) {
-				// Selection
-				Solution[] parents = new Solution[2];
-				
-				Object selected = selectionOperator.execute(population);
-				
-				if (selected instanceof Solution[]) 
-					parents = (Solution[]) selected;
-				else if (selected instanceof Solution) {
-					parents[0] = (Solution) selected;
-					parents[1] = (Solution) selectionOperator.execute(population);
-				} else {
-					throw new JMException("Selection operator does not return a Solution object");
-				}
+        // Read the params
+        populationSize = (Integer) this.getInputParameter("populationSize");
+        maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
 
-				// Crossover
-				Solution[] offspring = (Solution[]) crossoverOperator
-						.execute(parents);
+        // Initialize the variables
+        population = new SolutionSet(populationSize);
+        offspringPopulation = new SolutionSet(populationSize);
 
-				// <Workaround for 0 bits>
-				// int totalNumberOfBits = 0;
-				// for (int v = 0; v < parents[0].getDecisionVariables().length;
-				// v++) {
-				// totalNumberOfBits +=
-				// ((Binary)
-				// parents[0].getDecisionVariables()[v]).getNumberOfBits();
-				// }
-				//
-				// Solution [] offspring;
-				// if (totalNumberOfBits == 0) {
-				// offspring = new Solution[2];
-				// offspring[0] = parents[0];
-				// offspring[1] = parents[1];
-				// }
-				// else {
-				// offspring = (Solution []) crossoverOperator.execute(parents);
-				// }
+        evaluations = 0;
 
-				// Mutation
-				mutationOperator.execute(offspring[0]);
-				mutationOperator.execute(offspring[1]);
+        // Read the operators
+        mutationOperator = this.operators_.get("mutation");
+        crossoverOperator = this.operators_.get("crossover");
+        selectionOperator = this.operators_.get("selection");
 
-				// Evaluation of the new individual
-				problem_.evaluate(offspring[0]);
-				problem_.evaluate(offspring[1]);
+        // Create the initial population
+        Solution newIndividual;
+        Solution bestIndividualInMemory;
 
-				evaluations += 2;
+        bestIndividualInMemory = new Solution(this.problem_, this.bestInMemory);
+        this.problem_.evaluate(bestIndividualInMemory);
+        evaluations++;
+        population.add(bestIndividualInMemory);
+        if (pw != null) {
+            StringBuilder s = new StringBuilder();
+            for (Variable v : bestIndividualInMemory.getDecisionVariables()) {
+                Real r = (Real) v;
+                s.append(r.getValue()).append(";");
+            }
+            s.append(bestIndividualInMemory.getObjective(0));
+            pw.println(s);
+            pw.flush();
+        }
 
-				// Replacement: the two new individuals are inserted in the
-				// offspring
-				// population
-				offspringPopulation.add(offspring[0]);
-				offspringPopulation.add(offspring[1]);
+        for (int i = 0; i < populationSize - 1; i++) {
+            newIndividual = new Solution(this.problem_);
+            this.problem_.evaluate(newIndividual);
+            evaluations++;
+            population.add(newIndividual);
+            if (pw != null) {
+                StringBuilder s = new StringBuilder();
+                for (Variable v : newIndividual.getDecisionVariables()) {
+                    Real r = (Real) v;
+                    s.append(r.getValue()).append(";");
+                }
+                s.append(newIndividual.getObjective(0));
+                pw.println(s);
+                pw.flush();
+            }
+        } // for
 
-			} // for
+        // Sort population
+        population.sort(comparator);
+        do {
+            if (this.showDebugMessages) {
+                // Evaluations; Fitness; Populationsize; Generations;
+                // MutationProbability; CrossoverProbability
+                System.out.println(evaluations + "; "
+                        + population.get(0).getObjective(0) + "; "
+                        + population.get(0).getDecisionVariables()[0]
+                        + "; "
+                        + population.get(0).getDecisionVariables()[1]
+                        + "; "
+                        + population.get(0).getDecisionVariables()[2]);
+            }
 
-			// The offspring population becomes the new current population
-			population.clear();
-			for (int i = 0; i < populationSize; i++) {
-				population.add(offspringPopulation.get(i));
-				if (pw != null) {
-					String s = "";
-					for (Variable v : offspringPopulation.get(i).getDecisionVariables()) {
-						Real r = (Real) v;
-						s = s + r.getValue() + ";";
-					}
-					s = s + offspringPopulation.get(i).getObjective(0);
-					pw.println(s);
-					pw.flush();
-				}
-			}
-			offspringPopulation.clear();
-			population.sort(comparator);
-			// generation++;
-			// if (showDebugMessages) System.out.println("Generation: " +
-			// generation ) ; //for Debugging only
-		} while (evaluations < maxEvaluations - 1); // while
+            // Copy the best two individuals to the offspring population
+            offspringPopulation.add(new Solution(population.get(0)));
+            offspringPopulation.add(new Solution(population.get(1)));
 
-		// Return a population with the best individual
-		SolutionSet resultPopulation = new SolutionSet(1);
-		resultPopulation.add(population.get(0));
+            evaluations += 2; // To get back right number of Evaluations
 
-		if (pw != null) {
-			pw.close();
-		}
-		
-		if (showDebugMessages)
-			System.out.println("Evaluations: "
-					+ (evaluations + " Fitness: " + population.get(0)
-							.getObjective(0)));
+            // Reproductive cycle
+            for (int i = 0; i < ((populationSize / 2) - 1); i++) {
+                // Selection
+                Solution[] parents = new Solution[2];
 
-		return resultPopulation;
-	} // execute
+                Object selected = selectionOperator.execute(population);
+
+                if (selected instanceof Solution[])
+                    parents = (Solution[]) selected;
+                else if (selected instanceof Solution) {
+                    parents[0] = (Solution) selected;
+                    parents[1] = (Solution) selectionOperator.execute(population);
+                } else {
+                    throw new JMException("Selection operator does not return a Solution object");
+                }
+
+                // Crossover
+                Solution[] offspring = (Solution[]) crossoverOperator
+                        .execute(parents);
+
+                // <Workaround for 0 bits>
+                // int totalNumberOfBits = 0;
+                // for (int v = 0; v < parents[0].getDecisionVariables().length;
+                // v++) {
+                // totalNumberOfBits +=
+                // ((Binary)
+                // parents[0].getDecisionVariables()[v]).getNumberOfBits();
+                // }
+                //
+                // Solution [] offspring;
+                // if (totalNumberOfBits == 0) {
+                // offspring = new Solution[2];
+                // offspring[0] = parents[0];
+                // offspring[1] = parents[1];
+                // }
+                // else {
+                // offspring = (Solution []) crossoverOperator.execute(parents);
+                // }
+
+                // Mutation
+                mutationOperator.execute(offspring[0]);
+                mutationOperator.execute(offspring[1]);
+
+                // Evaluation of the new individual
+                this.problem_.evaluate(offspring[0]);
+                this.problem_.evaluate(offspring[1]);
+
+                evaluations += 2;
+
+                // Replacement: the two new individuals are inserted in the
+                // offspring
+                // population
+                offspringPopulation.add(offspring[0]);
+                offspringPopulation.add(offspring[1]);
+
+            } // for
+
+            // The offspring population becomes the new current population
+            population.clear();
+            for (int i = 0; i < populationSize; i++) {
+                population.add(offspringPopulation.get(i));
+                if (pw != null) {
+                    StringBuilder s = new StringBuilder();
+                    for (Variable v : offspringPopulation.get(i).getDecisionVariables()) {
+                        Real r = (Real) v;
+                        s.append(r.getValue()).append(";");
+                    }
+                    s.append(offspringPopulation.get(i).getObjective(0));
+                    pw.println(s);
+                    pw.flush();
+                }
+            }
+            offspringPopulation.clear();
+            population.sort(comparator);
+            // generation++;
+            // if (showDebugMessages) System.out.println("Generation: " +
+            // generation ) ; //for Debugging only
+        } while (evaluations < maxEvaluations - 1); // while
+
+        // Return a population with the best individual
+        SolutionSet resultPopulation = new SolutionSet(1);
+        resultPopulation.add(population.get(0));
+
+        if (pw != null) {
+            pw.close();
+        }
+
+        if (this.showDebugMessages)
+            System.out.println("Evaluations: "
+                    + (evaluations + " Fitness: " + population.get(0)
+                    .getObjective(0)));
+
+        return resultPopulation;
+    } // execute
 
 } // gGA

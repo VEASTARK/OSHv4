@@ -22,9 +22,9 @@ import java.util.List;
 
 /**
  * <p>Java class for AssignedComDevice complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="AssignedComDevice">
  *   &lt;complexContent>
@@ -42,18 +42,16 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AssignedComDevice", propOrder = {
-    "comDeviceID",
-    "comDeviceType",
-    "comDeviceClassification",
-    "comDeviceDescription",
-    "comManagerClassName",
-    "comDriverClassName",
-    "comDriverParameters"
+        "comDeviceID",
+        "comDeviceType",
+        "comDeviceClassification",
+        "comDeviceDescription",
+        "comManagerClassName",
+        "comDriverClassName",
+        "comDriverParameters"
 })
 public class AssignedComDevice {
 
@@ -73,23 +71,19 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comDeviceID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getComDeviceID() {
-        return comDeviceID;
+        return this.comDeviceID;
     }
 
     /**
      * Sets the value of the comDeviceID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setComDeviceID(String value) {
         this.comDeviceID = value;
@@ -97,23 +91,19 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comDeviceType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ComDeviceTypes }
-     *     
+     *
+     * @return possible object is
+     * {@link ComDeviceTypes }
      */
     public ComDeviceTypes getComDeviceType() {
-        return comDeviceType;
+        return this.comDeviceType;
     }
 
     /**
      * Sets the value of the comDeviceType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ComDeviceTypes }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ComDeviceTypes }
      */
     public void setComDeviceType(ComDeviceTypes value) {
         this.comDeviceType = value;
@@ -121,23 +111,19 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comDeviceClassification property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ComDeviceClassification }
-     *     
+     *
+     * @return possible object is
+     * {@link ComDeviceClassification }
      */
     public ComDeviceClassification getComDeviceClassification() {
-        return comDeviceClassification;
+        return this.comDeviceClassification;
     }
 
     /**
      * Sets the value of the comDeviceClassification property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ComDeviceClassification }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ComDeviceClassification }
      */
     public void setComDeviceClassification(ComDeviceClassification value) {
         this.comDeviceClassification = value;
@@ -145,23 +131,19 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comDeviceDescription property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getComDeviceDescription() {
-        return comDeviceDescription;
+        return this.comDeviceDescription;
     }
 
     /**
      * Sets the value of the comDeviceDescription property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setComDeviceDescription(String value) {
         this.comDeviceDescription = value;
@@ -169,23 +151,19 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comManagerClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getComManagerClassName() {
-        return comManagerClassName;
+        return this.comManagerClassName;
     }
 
     /**
      * Sets the value of the comManagerClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setComManagerClassName(String value) {
         this.comManagerClassName = value;
@@ -193,23 +171,19 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comDriverClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getComDriverClassName() {
-        return comDriverClassName;
+        return this.comDriverClassName;
     }
 
     /**
      * Sets the value of the comDriverClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setComDriverClassName(String value) {
         this.comDriverClassName = value;
@@ -217,29 +191,27 @@ public class AssignedComDevice {
 
     /**
      * Gets the value of the comDriverParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the comDriverParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getComDriverParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getComDriverParameters() {
-        if (comDriverParameters == null) {
-            comDriverParameters = new ArrayList<ConfigurationParameter>();
+        if (this.comDriverParameters == null) {
+            this.comDriverParameters = new ArrayList<>();
         }
         return this.comDriverParameters;
     }

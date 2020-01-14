@@ -15,57 +15,54 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class PlsProviderComManager 
-				extends ComManager 
-				implements IHasState {
+public class PlsProviderComManager
+        extends ComManager
+        implements IHasState {
 
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param uuid
-	 */
-	public PlsProviderComManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-	}
-	
-	
-	/**
-	 * Receive data from ComDriver
-	 */
-	@Override
-	public void onDriverUpdate(ICALExchange exchangeObject) {
-		
-		// receive signal from ComDriver as OX-object
-		if (exchangeObject instanceof PlsComExchange) {
-			
-			getGlobalLogger().logInfo("SmartHome received new PLS signal...");
-			PlsComExchange ox = (PlsComExchange) exchangeObject;
-			
-			
-			// set states in oc registry
-			PlsStateExchange pricedetails = new PlsStateExchange(
-					getUUID(), 
-					ox.getTimestamp());
-			
-			for (Entry<AncillaryCommodity,PowerLimitSignal> e : ox.getPowerLimitSignals().entrySet()) {
-				pricedetails.setPowerLimitSignal(e.getKey(), e.getValue());
-			}
-			
-			getOCRegistry().setState(PlsStateExchange.class, this, pricedetails);
-		}
-		else {
-			try {
-				throw new OSHException("Signal unknown");
-			} 
-			catch (OSHException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param uuid
+     */
+    public PlsProviderComManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+    }
+
+
+    /**
+     * Receive data from ComDriver
+     */
+    @Override
+    public void onDriverUpdate(ICALExchange exchangeObject) {
+
+        // receive signal from ComDriver as OX-object
+        if (exchangeObject instanceof PlsComExchange) {
+
+            this.getGlobalLogger().logInfo("SmartHome received new PLS signal...");
+            PlsComExchange ox = (PlsComExchange) exchangeObject;
+
+
+            // set states in oc registry
+            PlsStateExchange priceDetails = new PlsStateExchange(
+                    this.getUUID(),
+                    ox.getTimestamp());
+
+            for (Entry<AncillaryCommodity, PowerLimitSignal> e : ox.getPowerLimitSignals().entrySet()) {
+                priceDetails.setPowerLimitSignal(e.getKey(), e.getValue());
+            }
+
+            this.getOCRegistry().setState(PlsStateExchange.class, this, priceDetails);
+        } else {
+            try {
+                throw new OSHException("Signal unknown");
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

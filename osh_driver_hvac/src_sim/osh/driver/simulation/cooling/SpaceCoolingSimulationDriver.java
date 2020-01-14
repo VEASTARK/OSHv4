@@ -13,40 +13,42 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public abstract class SpaceCoolingSimulationDriver extends DeviceSimulationDriver {
 
-	protected ArrayList<ChillerCalendarDate> dates;
-	/** [W] (negative value) */
-	protected double coldWaterPowerDemand;
-	/** [�C] */
-	protected OutdoorTemperatures outdoorTemperature;
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public SpaceCoolingSimulationDriver(
-			IOSH osh, 
-			UUID deviceID, 
-			OSHParameterCollection driverConfig)
-			throws HALException {
-		super(osh, deviceID, driverConfig);
-	}
-	
-	
-	@Override
-	public void onSystemIsUp() {
-		super.onSystemIsUp();
-	
-		this.outdoorTemperature = new HollOutdoorTemperatures(getGlobalLogger());
-	}
-	
-	@Override
-	public void performNextAction(SubjectAction nextAction) {
-		//NOTHING
-	}
-	
+    protected ArrayList<ChillerCalendarDate> dates;
+    /**
+     * [W] (negative value)
+     */
+    protected double coldWaterPowerDemand;
+    /**
+     * [�C]
+     */
+    protected OutdoorTemperatures outdoorTemperature;
+
+    /**
+     * CONSTRUCTOR
+     */
+    public SpaceCoolingSimulationDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig)
+            throws HALException {
+        super(osh, deviceID, driverConfig);
+    }
+
+
+    @Override
+    public void onSystemIsUp() {
+        super.onSystemIsUp();
+
+        this.outdoorTemperature = new HollOutdoorTemperatures(this.getGlobalLogger());
+    }
+
+    @Override
+    public void performNextAction(SubjectAction nextAction) {
+        //NOTHING
+    }
+
 }

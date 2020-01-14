@@ -20,9 +20,9 @@ import java.util.List;
 
 /**
  * <p>Java class for AssignedLocalOCUnit complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="AssignedLocalOCUnit">
  *   &lt;complexContent>
@@ -38,16 +38,14 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AssignedLocalOCUnit", propOrder = {
-    "unitDescription",
-    "localControllerClassName",
-    "localObserverClassName",
-    "localObserverParameters",
-    "localControllerParameters"
+        "unitDescription",
+        "localControllerClassName",
+        "localObserverClassName",
+        "localObserverParameters",
+        "localControllerParameters"
 })
 public class AssignedLocalOCUnit {
 
@@ -62,23 +60,19 @@ public class AssignedLocalOCUnit {
 
     /**
      * Gets the value of the unitDescription property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getUnitDescription() {
-        return unitDescription;
+        return this.unitDescription;
     }
 
     /**
      * Sets the value of the unitDescription property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUnitDescription(String value) {
         this.unitDescription = value;
@@ -86,23 +80,19 @@ public class AssignedLocalOCUnit {
 
     /**
      * Gets the value of the localControllerClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getLocalControllerClassName() {
-        return localControllerClassName;
+        return this.localControllerClassName;
     }
 
     /**
      * Sets the value of the localControllerClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLocalControllerClassName(String value) {
         this.localControllerClassName = value;
@@ -110,23 +100,19 @@ public class AssignedLocalOCUnit {
 
     /**
      * Gets the value of the localObserverClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getLocalObserverClassName() {
-        return localObserverClassName;
+        return this.localObserverClassName;
     }
 
     /**
      * Sets the value of the localObserverClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLocalObserverClassName(String value) {
         this.localObserverClassName = value;
@@ -134,58 +120,54 @@ public class AssignedLocalOCUnit {
 
     /**
      * Gets the value of the localObserverParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the localObserverParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLocalObserverParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getLocalObserverParameters() {
-        if (localObserverParameters == null) {
-            localObserverParameters = new ArrayList<ConfigurationParameter>();
+        if (this.localObserverParameters == null) {
+            this.localObserverParameters = new ArrayList<>();
         }
         return this.localObserverParameters;
     }
 
     /**
      * Gets the value of the localControllerParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the localControllerParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLocalControllerParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getLocalControllerParameters() {
-        if (localControllerParameters == null) {
-            localControllerParameters = new ArrayList<ConfigurationParameter>();
+        if (this.localControllerParameters == null) {
+            this.localControllerParameters = new ArrayList<>();
         }
         return this.localControllerParameters;
     }

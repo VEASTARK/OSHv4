@@ -37,94 +37,96 @@ import java.util.List;
  * This class implements a uniform mutation operator.
  */
 @SuppressWarnings("rawtypes")
-public class UniformMutation extends Mutation{
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-/**
-   * Valid solution types to apply this operator 
-   */
-  private static final List VALID_TYPES = Arrays.asList(RealSolutionType.class,
-  		                                            ArrayRealSolutionType.class) ;
-  /**
-   * Stores the value used in a uniform mutation operator
-   */
-  private Double perturbation_;
-  
-  private Double mutationProbability_ = null;
+public class UniformMutation extends Mutation {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    /**
+     * Valid solution types to apply this operator
+     */
+    private static final List VALID_TYPES = Arrays.asList(RealSolutionType.class,
+            ArrayRealSolutionType.class);
+    /**
+     * Stores the value used in a uniform mutation operator
+     */
+    private Double perturbation_;
 
-  /** 
-   * Constructor
-   * Creates a new uniform mutation operator instance
-   */
-  public UniformMutation(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-  	super(parameters, pseudoRandom) ;
-  	
-  	if (parameters.get("probability") != null)
-  		mutationProbability_ = (Double) parameters.get("probability") ;  		
-  	if (parameters.get("perturbation") != null)
-  		perturbation_ = (Double) parameters.get("perturbation") ;  		
+    private Double mutationProbability_;
 
-  } // UniformMutation
+    /**
+     * Constructor
+     * Creates a new uniform mutation operator instance
+     */
+    public UniformMutation(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
 
+        if (parameters.get("probability") != null)
+            this.mutationProbability_ = (Double) parameters.get("probability");
+        if (parameters.get("perturbation") != null)
+            this.perturbation_ = (Double) parameters.get("perturbation");
 
-  /**
-   * Constructor
-   * Creates a new uniform mutation operator instance
-   */
-  //public UniformMutation(Properties properties) {
-  //  this();
-  //} // UniformMutation
+    } // UniformMutation
 
 
-  /**
-  * Performs the operation
-  * @param probability Mutation probability
-  * @param solution The solution to mutate
-   * @throws JMException 
-  */
-  public void doMutation(double probability, Solution solution) throws JMException {  
-  	XReal x = new XReal(solution) ; 
+    /**
+     * Constructor
+     * Creates a new uniform mutation operator instance
+     */
+    //public UniformMutation(Properties properties) {
+    //  this();
+    //} // UniformMutation
 
-    for (int var = 0; var < solution.getDecisionVariables().length; var++) {
-      if (pseudoRandom.randDouble() < probability) {
-        double rand = pseudoRandom.randDouble();
-        double tmp = (rand - 0.5)*perturbation_.doubleValue();
-                                
-        tmp += x.getValue(var);
-                
-        if (tmp < x.getLowerBound(var))
-          tmp = x.getLowerBound(var);
-        else if (tmp > x.getUpperBound(var))
-          tmp = x.getUpperBound(var);
-                
-        x.setValue(var, tmp) ;
-      } // if
-    } // for
-  } // doMutation
-  
-  /**
-  * Executes the operation
-  * @param object An object containing the solution to mutate
-   * @throws JMException 
-  */
-  @Override
-  public Object execute(Object object) throws JMException {
-    Solution solution = (Solution )object;
-    
-		if (!VALID_TYPES.contains(solution.getType().getClass())) {
-      Configuration.logger_.severe("UniformMutation.execute: the solution " +
-          "is not of the right type. The type should be 'Real', but " +
-          solution.getType() + " is obtained");
 
-      Class cls = java.lang.String.class;
-      String name = cls.getName(); 
-      throw new JMException("Exception in " + name + ".execute()") ;
-    } // if 
-    
-    doMutation(mutationProbability_,solution);
-        
-    return solution;
-  } // execute                  
+    /**
+     * Performs the operation
+     *
+     * @param probability Mutation probability
+     * @param solution    The solution to mutate
+     * @throws JMException
+     */
+    public void doMutation(double probability, Solution solution) throws JMException {
+        XReal x = new XReal(solution);
+
+        for (int var = 0; var < solution.getDecisionVariables().length; var++) {
+            if (this.pseudoRandom.randDouble() < probability) {
+                double rand = this.pseudoRandom.randDouble();
+                double tmp = (rand - 0.5) * this.perturbation_;
+
+                tmp += x.getValue(var);
+
+                if (tmp < x.getLowerBound(var))
+                    tmp = x.getLowerBound(var);
+                else if (tmp > x.getUpperBound(var))
+                    tmp = x.getUpperBound(var);
+
+                x.setValue(var, tmp);
+            } // if
+        } // for
+    } // doMutation
+
+    /**
+     * Executes the operation
+     *
+     * @param object An object containing the solution to mutate
+     * @throws JMException
+     */
+    @Override
+    public Object execute(Object object) throws JMException {
+        Solution solution = (Solution) object;
+
+        if (!VALID_TYPES.contains(solution.getType().getClass())) {
+            Configuration.logger_.severe("UniformMutation.execute: the solution " +
+                    "is not of the right type. The type should be 'Real', but " +
+                    solution.getType() + " is obtained");
+
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        } // if
+
+        this.doMutation(this.mutationProbability_, solution);
+
+        return solution;
+    } // execute
 } // UniformMutation

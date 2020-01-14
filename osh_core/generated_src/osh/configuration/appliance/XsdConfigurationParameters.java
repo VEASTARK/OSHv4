@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for xsd.ConfigurationParameters complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="xsd.ConfigurationParameters">
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "xsd.ConfigurationParameters", propOrder = {
-    "parameter"
+        "parameter"
 })
 public class XsdConfigurationParameters {
 
@@ -46,29 +44,27 @@ public class XsdConfigurationParameters {
 
     /**
      * Gets the value of the parameter property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the parameter property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParameter().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link XsdConfigurationParameter }
-     * 
-     * 
      */
     public List<XsdConfigurationParameter> getParameter() {
-        if (parameter == null) {
-            parameter = new ArrayList<XsdConfigurationParameter>();
+        if (this.parameter == null) {
+            this.parameter = new ArrayList<>();
         }
         return this.parameter;
     }

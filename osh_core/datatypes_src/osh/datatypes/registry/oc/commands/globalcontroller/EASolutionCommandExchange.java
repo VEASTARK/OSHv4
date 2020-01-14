@@ -7,31 +7,29 @@ import java.util.UUID;
 
 
 /**
- * 
- * @author Till Schuberth, Ingo Mauser
- *
  * @param <PhenotypeType>
+ * @author Till Schuberth, Ingo Mauser
  */
 public class EASolutionCommandExchange<PhenotypeType extends ISolution> extends CommandExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4399537651455121419L;
-	private PhenotypeType phenotype;
-	
-	public EASolutionCommandExchange(
-			UUID sender, 
-			UUID receiver, 
-			long timestamp, 
-			PhenotypeType phenotype) {
-		super(sender, receiver, timestamp);
-		
-		this.phenotype = phenotype;
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = 4399537651455121419L;
+    private final PhenotypeType phenotype;
 
-	public PhenotypeType getPhenotype() {
-		return phenotype;
-	}
+    public EASolutionCommandExchange(
+            UUID sender,
+            UUID receiver,
+            long timestamp,
+            PhenotypeType phenotype) {
+        super(sender, receiver, timestamp);
+
+        this.phenotype = phenotype;
+    }
+
+    public PhenotypeType getPhenotype() {
+        return this.phenotype;
+    }
 
 }

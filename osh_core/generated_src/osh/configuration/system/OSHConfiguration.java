@@ -15,9 +15,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -35,18 +35,16 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "runningType",
-    "randomSeed",
-    "engineParameters",
-    "logFilePath",
-    "gridConfigurations",
-    "meterUUID",
-    "hhUUID"
+        "runningType",
+        "randomSeed",
+        "engineParameters",
+        "logFilePath",
+        "gridConfigurations",
+        "meterUUID",
+        "hhUUID"
 })
 @XmlRootElement(name = "OSHConfiguration")
 public class OSHConfiguration {
@@ -66,23 +64,19 @@ public class OSHConfiguration {
 
     /**
      * Gets the value of the runningType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link RunningType }
-     *     
+     *
+     * @return possible object is
+     * {@link RunningType }
      */
     public RunningType getRunningType() {
-        return runningType;
+        return this.runningType;
     }
 
     /**
      * Sets the value of the runningType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link RunningType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link RunningType }
      */
     public void setRunningType(RunningType value) {
         this.runningType = value;
@@ -90,23 +84,19 @@ public class OSHConfiguration {
 
     /**
      * Gets the value of the randomSeed property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getRandomSeed() {
-        return randomSeed;
+        return this.randomSeed;
     }
 
     /**
      * Sets the value of the randomSeed property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setRandomSeed(String value) {
         this.randomSeed = value;
@@ -114,52 +104,46 @@ public class OSHConfiguration {
 
     /**
      * Gets the value of the engineParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the engineParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEngineParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getEngineParameters() {
-        if (engineParameters == null) {
-            engineParameters = new ArrayList<ConfigurationParameter>();
+        if (this.engineParameters == null) {
+            this.engineParameters = new ArrayList<>();
         }
         return this.engineParameters;
     }
 
     /**
      * Gets the value of the logFilePath property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getLogFilePath() {
-        return logFilePath;
+        return this.logFilePath;
     }
 
     /**
      * Sets the value of the logFilePath property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLogFilePath(String value) {
         this.logFilePath = value;
@@ -167,52 +151,46 @@ public class OSHConfiguration {
 
     /**
      * Gets the value of the gridConfigurations property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the gridConfigurations property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getGridConfigurations().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GridConfig }
-     * 
-     * 
      */
     public List<GridConfig> getGridConfigurations() {
-        if (gridConfigurations == null) {
-            gridConfigurations = new ArrayList<GridConfig>();
+        if (this.gridConfigurations == null) {
+            this.gridConfigurations = new ArrayList<>();
         }
         return this.gridConfigurations;
     }
 
     /**
      * Gets the value of the meterUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getMeterUUID() {
-        return meterUUID;
+        return this.meterUUID;
     }
 
     /**
      * Sets the value of the meterUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMeterUUID(String value) {
         this.meterUUID = value;
@@ -220,23 +198,19 @@ public class OSHConfiguration {
 
     /**
      * Gets the value of the hhUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getHhUUID() {
-        return hhUUID;
+        return this.hhUUID;
     }
 
     /**
      * Sets the value of the hhUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setHhUUID(String value) {
         this.hhUUID = value;

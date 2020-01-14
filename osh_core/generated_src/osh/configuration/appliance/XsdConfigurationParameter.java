@@ -18,9 +18,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * <p>Java class for xsd.ConfigurationParameter complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="xsd.ConfigurationParameter">
  *   &lt;complexContent>
@@ -33,13 +33,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "xsd.ConfigurationParameter", propOrder = {
-    "parameterName",
-    "parameterValue"
+        "parameterName",
+        "parameterValue"
 })
 public class XsdConfigurationParameter {
 
@@ -51,23 +49,19 @@ public class XsdConfigurationParameter {
 
     /**
      * Gets the value of the parameterName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getParameterName() {
-        return parameterName;
+        return this.parameterName;
     }
 
     /**
      * Sets the value of the parameterName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setParameterName(String value) {
         this.parameterName = value;
@@ -75,23 +69,19 @@ public class XsdConfigurationParameter {
 
     /**
      * Gets the value of the parameterValue property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getParameterValue() {
-        return parameterValue;
+        return this.parameterValue;
     }
 
     /**
      * Sets the value of the parameterValue property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setParameterValue(String value) {
         this.parameterValue = value;

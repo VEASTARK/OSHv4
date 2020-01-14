@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -12,22 +11,24 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "dt",
-    "main",
-    "weather",
-    "clouds",
-    "wind",
-    "rain",
-    "sys",
-    "dt_txt"
+        "dt",
+        "main",
+        "weather",
+        "clouds",
+        "wind",
+        "rain",
+        "sys",
+        "dt_txt"
 })
 public class List implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 222461263111307230L;
-	@JsonProperty("dt")
+     *
+     */
+    private static final long serialVersionUID = 222461263111307230L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("dt")
     private Long dt;
     @JsonProperty("main")
     private Main main;
@@ -45,13 +46,9 @@ public class List implements Serializable {
     private Sys_ sys;
     @JsonProperty("dt_txt")
     private String dtTxt;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The dt
+     * @return The dt
      */
     @JsonProperty("dt")
     public Long getDt() {
@@ -59,9 +56,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param dt
-     *     The dt
+     * @param dt The dt
      */
     @JsonProperty("dt")
     public void setDt(Long dt) {
@@ -69,9 +64,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The main
+     * @return The main
      */
     @JsonProperty("main")
     public Main getMain() {
@@ -79,9 +72,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param main
-     *     The main
+     * @param main The main
      */
     @JsonProperty("main")
     public void setMain(Main main) {
@@ -89,9 +80,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The weather
+     * @return The weather
      */
     @JsonProperty("weather")
     public java.util.List<Weather> getWeather() {
@@ -99,9 +88,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param weather
-     *     The weather
+     * @param weather The weather
      */
     @JsonProperty("weather")
     public void setWeather(java.util.List<Weather> weather) {
@@ -109,9 +96,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The clouds
+     * @return The clouds
      */
     @JsonProperty("clouds")
     public Clouds getClouds() {
@@ -119,9 +104,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param clouds
-     *     The clouds
+     * @param clouds The clouds
      */
     @JsonProperty("clouds")
     public void setClouds(Clouds clouds) {
@@ -129,9 +112,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The wind
+     * @return The wind
      */
     @JsonProperty("wind")
     public Wind getWind() {
@@ -139,9 +120,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param wind
-     *     The wind
+     * @param wind The wind
      */
     @JsonProperty("wind")
     public void setWind(Wind wind) {
@@ -149,9 +128,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The rain
+     * @return The rain
      */
     @JsonProperty("rain")
     public Rain getRain() {
@@ -159,18 +136,15 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param rain
-     *     The rain
+     * @param rain The rain
      */
     @JsonProperty("rain")
     public void setRain(Rain rain) {
         this.rain = rain;
     }
+
     /**
-     * 
-     * @return
-     *     The snow
+     * @return The snow
      */
     @JsonProperty("snow")
     public Snow getSnow() {
@@ -178,18 +152,15 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param snow
-     *     The snow
+     * @param snow The snow
      */
     @JsonProperty("snow")
     public void setSnow(Snow snow) {
         this.snow = snow;
     }
+
     /**
-     * 
-     * @return
-     *     The sys
+     * @return The sys
      */
     @JsonProperty("sys")
     public Sys_ getSys() {
@@ -197,9 +168,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param sys
-     *     The sys
+     * @param sys The sys
      */
     @JsonProperty("sys")
     public void setSys(Sys_ sys) {
@@ -207,9 +176,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The dtTxt
+     * @return The dtTxt
      */
     @JsonProperty("dt_txt")
     public String getDtTxt() {
@@ -217,9 +184,7 @@ public class List implements Serializable {
     }
 
     /**
-     * 
-     * @param dtTxt
-     *     The dt_txt
+     * @param dtTxt The dt_txt
      */
     @JsonProperty("dt_txt")
     public void setDtTxt(String dtTxt) {

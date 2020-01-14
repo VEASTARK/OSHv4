@@ -30,6 +30,7 @@ import java.util.Comparator;
  */
 @SuppressWarnings("rawtypes")
 public interface IConstraintViolationComparator extends Comparator {
-  int compare(Object o1, Object o2) ;
-  boolean needToCompare(Solution s1, Solution s2) ;
+    int compare(Object o1, Object o2);
+
+    boolean needToCompare(Solution s1, Solution s2);
 }

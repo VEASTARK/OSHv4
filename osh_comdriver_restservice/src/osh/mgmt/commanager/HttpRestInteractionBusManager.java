@@ -23,85 +23,85 @@ import java.util.UUID;
 
 /**
  * get stuff from O/C-registry
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 public class HttpRestInteractionBusManager extends BusManager implements IEventTypeReceiver {
 
-	public HttpRestInteractionBusManager(
-			IOSHOC controllerbox,
-			UUID uuid) {
-		super(controllerbox, uuid);
-	}
-	
-	public boolean setSwitchDetails(UUID element, SwitchRequest sd) {
-		SwitchCommandExchange swcmd = new SwitchCommandExchange(
-				getUUID(), 
-				element, 
-				getTimer().getUnixTime(), 
-				sd.getTurnOn());
-		getOCRegistry().sendCommand(SwitchCommandExchange.class, swcmd);
-		
-		return true;
-	}
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		
-		ArrayList<Class<? extends StateExchange>> stateTypesPushedToDriver = new ArrayList<>();
-		stateTypesPushedToDriver.add(ElectricPowerDriverDetails.class);
-		stateTypesPushedToDriver.add(CommodityPowerStateExchange.class);
-		stateTypesPushedToDriver.add(ExpectedStartTimeExchange.class);
-		
-		initializeStatePushToDriver( stateTypesPushedToDriver );
-	}
+    public HttpRestInteractionBusManager(
+            IOSHOC osh,
+            UUID uuid) {
+        super(osh, uuid);
+    }
 
-	// push states to com driver { 
-	
-	private void initializeStatePushToDriver(ArrayList<Class<? extends StateExchange>> stateTypesPushedToDriver) throws OSHException {
-		// register to future state changes
-		for( Class<? extends StateExchange> type : stateTypesPushedToDriver ) {
-			getOCRegistry().registerStateChangeListener(type, this);
-		}
+    public boolean setSwitchDetails(UUID element, SwitchRequest sd) {
+        SwitchCommandExchange swcmd = new SwitchCommandExchange(
+                this.getUUID(),
+                element,
+                this.getTimer().getUnixTime(),
+                sd.getTurnOn());
+        this.getOCRegistry().sendCommand(SwitchCommandExchange.class, swcmd);
 
-		// push current states to driver
-		for( Class<? extends StateExchange> type : stateTypesPushedToDriver ) {
-			for( Entry<UUID, ? extends StateExchange> ent : getOCRegistry().getStates(type).entrySet() ) {
-				HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
-						getUUID(), getTimer().getUnixTime(), ent.getValue() );
-				
-				updateOcDataSubscriber(toDriverExchange);
-			}
-		}
-	}
+        return true;
+    }
 
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(
-			Class<T> type, T event) throws OSHException {
-		if( event instanceof StateChangedExchange) {
-			UUID uuid = ((StateChangedExchange) event).getStatefulentity();
-			Class<? extends StateExchange> typeOfObj = ((StateChangedExchange) event).getType();
-			StateExchange sx = getOCRegistry().getState(typeOfObj, uuid);
-			
-			HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
-					getUUID(), 
-					getTimer().getUnixTime(), 
-					sx );
-			
-			updateOcDataSubscriber(toDriverExchange);
-		}
-	}
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
 
-	// } 
+        ArrayList<Class<? extends StateExchange>> stateTypesPushedToDriver = new ArrayList<>();
+        stateTypesPushedToDriver.add(ElectricPowerDriverDetails.class);
+        stateTypesPushedToDriver.add(CommodityPowerStateExchange.class);
+        stateTypesPushedToDriver.add(ExpectedStartTimeExchange.class);
 
-	public MieleDofStateExchange getDof(UUID uuid) {
-		return getOCRegistry().getState(MieleDofStateExchange.class, uuid);
-	}
+        this.initializeStatePushToDriver(stateTypesPushedToDriver);
+    }
 
-	@Override
-	public void onDriverUpdate(IHALExchange exchangeObject) {
-		//NOTHING
-	}
+    // push states to com driver {
+
+    private void initializeStatePushToDriver(ArrayList<Class<? extends StateExchange>> stateTypesPushedToDriver) throws OSHException {
+        // register to future state changes
+        for (Class<? extends StateExchange> type : stateTypesPushedToDriver) {
+            this.getOCRegistry().registerStateChangeListener(type, this);
+        }
+
+        // push current states to driver
+        for (Class<? extends StateExchange> type : stateTypesPushedToDriver) {
+            for (Entry<UUID, ? extends StateExchange> ent : this.getOCRegistry().getStates(type).entrySet()) {
+                HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
+                        this.getUUID(), this.getTimer().getUnixTime(), ent.getValue());
+
+                this.updateOcDataSubscriber(toDriverExchange);
+            }
+        }
+    }
+
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T event) {
+        if (event instanceof StateChangedExchange) {
+            UUID uuid = ((StateChangedExchange) event).getStatefulEntity();
+            Class<? extends StateExchange> typeOfObj = ((StateChangedExchange) event).getType();
+            StateExchange sx = this.getOCRegistry().getState(typeOfObj, uuid);
+
+            HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
+                    this.getUUID(),
+                    this.getTimer().getUnixTime(),
+                    sx);
+
+            this.updateOcDataSubscriber(toDriverExchange);
+        }
+    }
+
+    // }
+
+    public MieleDofStateExchange getDof(UUID uuid) {
+        return this.getOCRegistry().getState(MieleDofStateExchange.class, uuid);
+    }
+
+    @Override
+    public void onDriverUpdate(IHALExchange exchangeObject) {
+        //NOTHING
+    }
 
 }

@@ -27,125 +27,127 @@ import jmetal.util.comparators.ObjectiveComparator;
 
 import java.util.Comparator;
 
-/** 
+/**
  * Class implementing a (mu + lambda) ES. Lambda must be divisible by mu
  */
 @SuppressWarnings("rawtypes")
 public class ElitistES extends Algorithm {
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-  private int     mu_     ;
-  private int     lambda_ ;
-  private boolean showDebugMessages;
-  
- /**
-  * Constructor
-  * Create a new ElitistES instance.
-  * @param problem Problem to solve.
-  * @mu Mu
-  * @lambda Lambda
-  */
-  public ElitistES(Problem problem, int mu, int lambda, boolean showDebugMessages){
-    super(problem) ;
-    mu_      = mu     ;
-    lambda_  = lambda ;
-    this.showDebugMessages = showDebugMessages;
-  } // ElitistES
-  
- /**
-  * Execute the ElitistES algorithm
- * @throws JMException 
-  */
-  @Override
-  public SolutionSet execute() throws JMException, ClassNotFoundException {
-    int maxEvaluations ;
-    int evaluations    ;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    private final int mu_;
+    private final int lambda_;
+    private final boolean showDebugMessages;
 
-    SolutionSet population          ;
-    SolutionSet offspringPopulation ;  
+    /**
+     * Constructor
+     * Create a new ElitistES instance.
+     *
+     * @param problem Problem to solve.
+     * @mu Mu
+     * @lambda Lambda
+     */
+    public ElitistES(Problem problem, int mu, int lambda, boolean showDebugMessages) {
+        super(problem);
+        this.mu_ = mu;
+        this.lambda_ = lambda;
+        this.showDebugMessages = showDebugMessages;
+    } // ElitistES
 
-    Operator   mutationOperator ;
-    Comparator comparator       ;
-    
-    comparator = new ObjectiveComparator(0) ; // Single objective comparator
-    
-    // Read the params
-    maxEvaluations = ((Integer)this.getInputParameter("maxEvaluations")).intValue();                
-   
-    // Initialize the variables
-    population          = new SolutionSet(mu_) ;   
-    offspringPopulation = new SolutionSet(mu_ + lambda_) ;
-    
-    evaluations  = 0;                
+    /**
+     * Execute the ElitistES algorithm
+     *
+     * @throws JMException
+     */
+    @Override
+    public SolutionSet execute() throws JMException {
+        int maxEvaluations;
+        int evaluations;
 
-    // Read the operators
-    mutationOperator  = this.operators_.get("mutation");
+        SolutionSet population;
+        SolutionSet offspringPopulation;
 
-    //System.out.println("(" + mu_ + " + " + lambda_+")ES") ;
-     
-    // Create the parent population of mu solutions
-    Solution newIndividual;
-    for (int i = 0; i < mu_; i++) {
-      newIndividual = new Solution(problem_);                    
-      problem_.evaluate(newIndividual);            
-      evaluations++;
-      population.add(newIndividual);
-    } //for       
-     
-    // Main loop
-    int offsprings ;
-    offsprings = lambda_ / mu_ ; 
-    
-    double lastFitness = Double.MAX_VALUE;
-    
-    while (evaluations < maxEvaluations) {
-      // STEP 1. Generate the mu+lambda population
-      for (int i = 0; i < mu_; i++) {
-        for (int j = 0; j < offsprings; j++) {
-          Solution offspring = new Solution(population.get(i)) ;
-          mutationOperator.execute(offspring);
-          problem_.evaluate(offspring) ;
-          offspringPopulation.add(offspring) ;
-          evaluations ++ ;
-        } // for
-      } // for
-      
-      // STEP 2. Add the mu individuals to the offspring population
-      for (int i = 0 ; i < mu_; i++) {
-        offspringPopulation.add(population.get(i)) ;
-      } // for
-      population.clear() ;
+        Operator mutationOperator;
+        Comparator comparator;
 
-      // STEP 3. Sort the mu+lambda population
-      offspringPopulation.sort(comparator) ;
-            
-      // STEP 4. Create the new mu population
-      for (int i = 0; i < mu_; i++)
-        population.add(offspringPopulation.get(i)) ;
+        comparator = new ObjectiveComparator(0); // Single objective comparator
 
-      if (showDebugMessages) {
-    	  double newFitness = population.get(0).getObjective(0);
-    	  if (newFitness < lastFitness) {
-    		  lastFitness = newFitness;
-    		  System.out.println("Evaluation: " + evaluations + " Better Fitness: " + newFitness ) ;
-    	  }
-      }
-      
+        // Read the params
+        maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
 
-      // STEP 6. Delete the mu+lambda population
-      offspringPopulation.clear() ;
-    } // while
-    
-    // Return a population with the best individual
-    SolutionSet resultPopulation = new SolutionSet(1) ;
-    resultPopulation.add(population.get(0)) ;
-    
-    if (showDebugMessages) {
-    	System.out.println("Number of Evaluations: " + evaluations);
-    }
-    
-    return resultPopulation ;
-  } // execute
+        // Initialize the variables
+        population = new SolutionSet(this.mu_);
+        offspringPopulation = new SolutionSet(this.mu_ + this.lambda_);
+
+        evaluations = 0;
+
+        // Read the operators
+        mutationOperator = this.operators_.get("mutation");
+
+        //System.out.println("(" + mu_ + " + " + lambda_+")ES") ;
+
+        // Create the parent population of mu solutions
+        Solution newIndividual;
+        for (int i = 0; i < this.mu_; i++) {
+            newIndividual = new Solution(this.problem_);
+            this.problem_.evaluate(newIndividual);
+            evaluations++;
+            population.add(newIndividual);
+        } //for
+
+        // Main loop
+        int offsprings;
+        offsprings = this.lambda_ / this.mu_;
+
+        double lastFitness = Double.MAX_VALUE;
+
+        while (evaluations < maxEvaluations) {
+            // STEP 1. Generate the mu+lambda population
+            for (int i = 0; i < this.mu_; i++) {
+                for (int j = 0; j < offsprings; j++) {
+                    Solution offspring = new Solution(population.get(i));
+                    mutationOperator.execute(offspring);
+                    this.problem_.evaluate(offspring);
+                    offspringPopulation.add(offspring);
+                    evaluations++;
+                } // for
+            } // for
+
+            // STEP 2. Add the mu individuals to the offspring population
+            for (int i = 0; i < this.mu_; i++) {
+                offspringPopulation.add(population.get(i));
+            } // for
+            population.clear();
+
+            // STEP 3. Sort the mu+lambda population
+            offspringPopulation.sort(comparator);
+
+            // STEP 4. Create the new mu population
+            for (int i = 0; i < this.mu_; i++)
+                population.add(offspringPopulation.get(i));
+
+            if (this.showDebugMessages) {
+                double newFitness = population.get(0).getObjective(0);
+                if (newFitness < lastFitness) {
+                    lastFitness = newFitness;
+                    System.out.println("Evaluation: " + evaluations + " Better Fitness: " + newFitness);
+                }
+            }
+
+
+            // STEP 6. Delete the mu+lambda population
+            offspringPopulation.clear();
+        } // while
+
+        // Return a population with the best individual
+        SolutionSet resultPopulation = new SolutionSet(1);
+        resultPopulation.add(population.get(0));
+
+        if (this.showDebugMessages) {
+            System.out.println("Number of Evaluations: " + evaluations);
+        }
+
+        return resultPopulation;
+    } // execute
 } // ElitistES

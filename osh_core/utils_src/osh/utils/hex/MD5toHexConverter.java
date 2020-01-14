@@ -5,31 +5,30 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Found in the Web...
- * @author Ingo Mauser
  *
+ * @author Ingo Mauser
  */
 public class MD5toHexConverter {
 
-	public static String md5Hex(String s) {
+    public static String md5Hex(String s) {
         String result = null;
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] digest = md5.digest(s.getBytes());
             result = toHex(digest);
-        }
-        catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             // WILL NEVER HAPPEN
         }
         return result;
     }
-	
-	public static String toHex(byte[] a) {
+
+    public static String toHex(byte[] a) {
         StringBuilder sb = new StringBuilder(a.length * 2);
-        for (int i = 0; i < a.length; i++) {
-            sb.append(Character.forDigit((a[i] & 0xf0) >> 4, 16));
-            sb.append(Character.forDigit(a[i] & 0x0f, 16));
+        for (byte b : a) {
+            sb.append(Character.forDigit((b & 0xf0) >> 4, 16));
+            sb.append(Character.forDigit(b & 0x0f, 16));
         }
         return sb.toString();
     }
-	
+
 }

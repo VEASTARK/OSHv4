@@ -7,132 +7,132 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 /**
- * 
  * @author Till Schuberth
- *
  */
+@SuppressWarnings("rawtypes")
 class StatesTableModel implements TableModel {
-			
-	private Set<TableModelListener> modellisteners = new HashSet<TableModelListener>();
-	private Entry<UUID, StateExchange>[] data;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	@SuppressWarnings("unchecked")
-	public StatesTableModel() {
-		this.data = new Entry[0];
-	}
-	
-	
-	@Override
-	public int getRowCount() {
-		return data.length;
-	}
 
-	@Override
-	public int getColumnCount() {
-		return 3;
-	}
+    public static final Entry[] DEFAULT_DATA = new Entry[0];
 
-	@Override
-	public String getColumnName(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return "Sender";
-		case 1:
-			return "Timestamp";
-		case 2:
-			return "Value";
-		default:
-			return null;
-		}
-	}
+    private final Set<TableModelListener> modelListeners = new HashSet<>();
+    private final ReentrantReadWriteLock modelLock = new ReentrantReadWriteLock();
+    private Entry<UUID, StateExchange>[] data;
 
-	@Override
-	public Class<?> getColumnClass(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return UUID.class;
-		case 1:
-			return Long.class;
-		case 2:
-			return String.class;
-		default:
-			return null;
-		}
-	}
 
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return false;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    @SuppressWarnings("unchecked")
+    public StatesTableModel() {
+        this.data = DEFAULT_DATA;
+    }
 
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		if (rowIndex < 0 || rowIndex >= data.length) return null;
-		switch (columnIndex) {
-		case 0:
-			return data[rowIndex].getKey();
-		case 1:
-			return data[rowIndex].getValue().getTimestamp();
-		case 2:
-			return data[rowIndex].getValue().toString();
-		default:
-			return null;
-		}
-	}
 
-	@Override
-	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-	}
+    @Override
+    public int getRowCount() {
+        return this.data.length;
+    }
 
-	@Override
-	public synchronized void addTableModelListener(TableModelListener l) {
-		if (l != null) modellisteners.add(l);
-	}
+    @Override
+    public int getColumnCount() {
+        return 3;
+    }
 
-	@Override
-	public synchronized void removeTableModelListener(TableModelListener l) {
-		if (l != null) modellisteners.remove(l);
-	}
-	
-	private void notifyTableModelListener() {
-		HashSet<TableModelListener> listeners;
-		synchronized (this) {
-			listeners = new HashSet<TableModelListener>(modellisteners);
-		}
-		
-		for (TableModelListener l : listeners) {
-			l.tableChanged(new TableModelEvent(this));
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void setData(Map<UUID, ? extends StateExchange> data) {
-		
-		if (data == null) {
-			this.data = new Entry[0];
-		} else {
-			Map<UUID, StateExchange> strdata = new HashMap<UUID, StateExchange>();
-			for (Entry<UUID, ? extends StateExchange> e : data.entrySet()) {
-				strdata.put(e.getKey(), e.getValue());
-			}
-			this.data = strdata.entrySet().toArray(new Entry[0]);
-			Arrays.sort(this.data, new Comparator<Entry<UUID, ?>>() {
+    @Override
+    public String getColumnName(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return "Sender";
+            case 1:
+                return "Timestamp";
+            case 2:
+                return "Value";
+            default:
+                return null;
+        }
+    }
 
-				@Override
-				public int compare(Entry<UUID, ?> o1,
-						Entry<UUID, ?> o2) {
-					return o1.getKey().compareTo(o2.getKey());
-				}
-				
-			});
-		}
-		notifyTableModelListener();
-	}
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return UUID.class;
+            case 1:
+                return Long.class;
+            case 2:
+                return String.class;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        if (rowIndex < 0 || rowIndex >= this.data.length) return null;
+        switch (columnIndex) {
+            case 0:
+                return this.data[rowIndex].getKey();
+            case 1:
+                return this.data[rowIndex].getValue().getTimestamp();
+            case 2:
+                return this.data[rowIndex].getValue().toString();
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+    }
+
+    @Override
+    public void addTableModelListener(TableModelListener l) {
+        this.modelLock.writeLock().lock();
+        if (l != null) this.modelListeners.add(l);
+        this.modelLock.writeLock().lock();
+    }
+
+    @Override
+    public void removeTableModelListener(TableModelListener l) {
+        this.modelLock.writeLock().lock();
+        if (l != null) this.modelListeners.remove(l);
+        this.modelLock.writeLock().unlock();
+    }
+
+    private void notifyTableModelListener() {
+        HashSet<TableModelListener> listeners;
+
+        this.modelLock.readLock().lock();
+        listeners = new HashSet<>(this.modelListeners);
+        this.modelLock.readLock().unlock();
+
+        for (TableModelListener l : listeners) {
+            l.tableChanged(new TableModelEvent(this));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setData(Map<UUID, ? extends StateExchange> data) {
+
+        if (data == null) {
+            this.data = DEFAULT_DATA;
+        } else {
+            Map<UUID, StateExchange> strData = new HashMap<>();
+            for (Entry<UUID, ? extends StateExchange> e : data.entrySet()) {
+                strData.put(e.getKey(), e.getValue());
+            }
+            this.data = strData.entrySet().toArray(DEFAULT_DATA);
+            Arrays.sort(this.data, Entry.comparingByKey());
+        }
+        this.notifyTableModelListener();
+    }
 }

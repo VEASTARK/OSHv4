@@ -4,11 +4,10 @@ import osh.datatypes.registry.StateExchange;
 
 
 /**
- * 
  * @author Till Schuberth
- *
  */
 public interface StateViewerListener {
-	public void stateViewerRegistryChanged(StateViewerRegistryEnum registry);
-	public void stateViewerClassChanged(Class<? extends StateExchange> cls);
+    void stateViewerRegistryChanged(StateViewerRegistryEnum registry);
+
+    void stateViewerClassChanged(Class<? extends StateExchange> cls);
 }

@@ -35,187 +35,188 @@ import java.util.Comparator;
  */
 @SuppressWarnings({"rawtypes", "unused", "unchecked"})
 public class HypervolumeArchive extends Archive {
-  
-  /**
-	 * 
-	 */
-  private static final long serialVersionUID = 1L;
 
-  /** 
-   * Stores the maximum size of the archive.
-   */
-  private int maxSize_;
-  
-  /**
-   * stores the number of the objectives.
-   */
-  private int objectives_;    
-  
-  /**
-   * Stores a <code>Comparator</code> for dominance checking.
-   */
-  private Comparator dominance_;
-  
-  /**
-   * Stores a <code>Comparator</code> for equality checking (in the objective
-   * space).
-   */
-  private Comparator equals_; 
-  
-  /**
-   * Stores a <code>Distance</code> object, for distances utilities
-   */
-  private Distance distance_; 
-      
-  private MetricsUtil utils_ ;
-  
-  private double      offset_ ;
-  private Comparator crowdingDistance_; 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * Constructor. 
-   * @param maxSize The maximum size of the archive.
-   * @param numberOfObjectives The number of objectives.
-   */
-  public HypervolumeArchive(int maxSize, int numberOfObjectives) {
-    super(maxSize);
-    maxSize_          = maxSize;
-    objectives_       = numberOfObjectives;        
-    dominance_        = new DominanceComparator();
-    equals_           = new EqualSolutions();
-    distance_         = new Distance();
-    utils_            = new MetricsUtil() ;
-    offset_           = 100 ;
-    crowdingDistance_ = new CrowdingDistanceComparator();
+    /**
+     * Stores the maximum size of the archive.
+     */
+    private final int maxSize_;
 
-  } // CrowdingArchive
-    
-  
-  /**
-   * Adds a <code>Solution</code> to the archive. If the <code>Solution</code>
-   * is dominated by any member of the archive, then it is discarded. If the 
-   * <code>Solution</code> dominates some members of the archive, these are
-   * removed. If the archive is full and the <code>Solution</code> has to be
-   * inserted, the solutions are sorted by crowding distance and the one having
-   * the minimum crowding distance value.
-   * @param solution The <code>Solution</code>
-   * @return true if the <code>Solution</code> has been inserted, false 
-   * otherwise.
-   */
-  public boolean add(Solution solution){
-    int flag = 0;
-    int i = 0;
-    Solution aux; //Store an solution temporally
+    /**
+     * stores the number of the objectives.
+     */
+    private final int objectives_;
 
-    while (i < solutionsList_.size()){
-      aux = solutionsList_.get(i);            
-            
-      flag = dominance_.compare(solution,aux);
-      if (flag == 1) {               // The solution to add is dominated
-        return false;                // Discard the new solution
-      } else if (flag == -1) {       // A solution in the archive is dominated
-        solutionsList_.remove(i);    // Remove it from the population            
-      } else {
-          if (equals_.compare(aux,solution)==0) { // There is an equal solution 
-                                                  // in the population
-            return false; // Discard the new solution
-          }  // if
-          i++;
-      }
-    }
-    // Insert the solution into the archive
-    solutionsList_.add(solution);        
-    if (size() > maxSize_) { // The archive is full
-      double[][] frontValues = this.writeObjectivesToMatrix();
-      int numberOfObjectives = objectives_;
-      // STEP 1. Obtain the maximum and minimum values of the Pareto front
-      double[] maximumValues = utils_.getMaximumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
-      double[] minimumValues = utils_.getMinimumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
-      // STEP 2. Get the normalized front
-      double[][] normalizedFront = utils_.getNormalizedFront(frontValues, maximumValues, minimumValues);
-      // compute offsets for reference point in normalized space
-      double[] offsets = new double[maximumValues.length];
-      for (i = 0; i < maximumValues.length; i++) {
-        offsets[i] = offset_ / (maximumValues[i] - minimumValues[i]);
-      }
-      // STEP 3. Inverse the pareto front. This is needed because the original
-      //metric by Zitzler is for maximization problems
-      double[][] invertedFront = utils_.invertedFront(normalizedFront);
-      // shift away from origin, so that boundary points also get a contribution > 0
-      for (double[] point : invertedFront) {
-        for (i = 0; i < point.length; i++) {
-          point[i] += offsets[i];
+    /**
+     * Stores a <code>Comparator</code> for dominance checking.
+     */
+    private final Comparator dominance_;
+
+    /**
+     * Stores a <code>Comparator</code> for equality checking (in the objective
+     * space).
+     */
+    private final Comparator equals_;
+
+    /**
+     * Stores a <code>Distance</code> object, for distances utilities
+     */
+    private final Distance distance_;
+
+    private final MetricsUtil utils_;
+
+    private final double offset_;
+    private final Comparator crowdingDistance_;
+
+    /**
+     * Constructor.
+     *
+     * @param maxSize            The maximum size of the archive.
+     * @param numberOfObjectives The number of objectives.
+     */
+    public HypervolumeArchive(int maxSize, int numberOfObjectives) {
+        super(maxSize);
+        this.maxSize_ = maxSize;
+        this.objectives_ = numberOfObjectives;
+        this.dominance_ = new DominanceComparator();
+        this.equals_ = new EqualSolutions();
+        this.distance_ = new Distance();
+        this.utils_ = new MetricsUtil();
+        this.offset_ = 100;
+        this.crowdingDistance_ = new CrowdingDistanceComparator();
+
+    } // CrowdingArchive
+
+
+    /**
+     * Adds a <code>Solution</code> to the archive. If the <code>Solution</code>
+     * is dominated by any member of the archive, then it is discarded. If the
+     * <code>Solution</code> dominates some members of the archive, these are
+     * removed. If the archive is full and the <code>Solution</code> has to be
+     * inserted, the solutions are sorted by crowding distance and the one having
+     * the minimum crowding distance value.
+     *
+     * @param solution The <code>Solution</code>
+     * @return true if the <code>Solution</code> has been inserted, false
+     * otherwise.
+     */
+    public boolean add(Solution solution) {
+        int flag;
+        int i = 0;
+        Solution aux; //Store an solution temporally
+
+        while (i < this.solutionsList_.size()) {
+            aux = this.solutionsList_.get(i);
+
+            flag = this.dominance_.compare(solution, aux);
+            if (flag == 1) {               // The solution to add is dominated
+                return false;                // Discard the new solution
+            } else if (flag == -1) {       // A solution in the archive is dominated
+                this.solutionsList_.remove(i);    // Remove it from the population
+            } else {
+                if (this.equals_.compare(aux, solution) == 0) { // There is an equal solution
+                    // in the population
+                    return false; // Discard the new solution
+                }  // if
+                i++;
+            }
         }
-      }
+        // Insert the solution into the archive
+        this.solutionsList_.add(solution);
+        if (this.size() > this.maxSize_) { // The archive is full
+            double[][] frontValues = this.writeObjectivesToMatrix();
+            int numberOfObjectives = this.objectives_;
+            // STEP 1. Obtain the maximum and minimum values of the Pareto front
+            double[] maximumValues = this.utils_.getMaximumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
+            double[] minimumValues = this.utils_.getMinimumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
+            // STEP 2. Get the normalized front
+            double[][] normalizedFront = this.utils_.getNormalizedFront(frontValues, maximumValues, minimumValues);
+            // compute offsets for reference point in normalized space
+            double[] offsets = new double[maximumValues.length];
+            for (i = 0; i < maximumValues.length; i++) {
+                offsets[i] = this.offset_ / (maximumValues[i] - minimumValues[i]);
+            }
+            // STEP 3. Inverse the pareto front. This is needed because the original
+            //metric by Zitzler is for maximization problems
+            double[][] invertedFront = this.utils_.invertedFront(normalizedFront);
+            // shift away from origin, so that boundary points also get a contribution > 0
+            for (double[] point : invertedFront) {
+                for (i = 0; i < point.length; i++) {
+                    point[i] += offsets[i];
+                }
+            }
 
-      // calculate contributions and sort
-      double[] contributions = utils_.hvContributions(objectives_, invertedFront);
-      for (i = 0; i < contributions.length; i++) {
-        // contribution values are used analogously to crowding distance
-        this.get(i).setCrowdingDistance(contributions[i]);
-      }
+            // calculate contributions and sort
+            double[] contributions = this.utils_.hvContributions(this.objectives_, invertedFront);
+            for (i = 0; i < contributions.length; i++) {
+                // contribution values are used analogously to crowding distance
+                this.get(i).setCrowdingDistance(contributions[i]);
+            }
 
-      this.sort(new CrowdingDistanceComparator());
+            this.sort(new CrowdingDistanceComparator());
 
-      //remove(indexWorst(crowdingDistance_));
-      remove(size()-1);
+            //remove(indexWorst(crowdingDistance_));
+            this.remove(this.size() - 1);
+        }
+        return true;
+    } // add
+
+
+    /**
+     * This method forces to compute the contribution of each solution (required for PAEShv)
+     */
+    public void actualiseHVContribution() {
+        if (this.size() > 2) { // The contribution can be updated
+            double[][] frontValues = this.writeObjectivesToMatrix();
+            int numberOfObjectives = this.objectives_;
+            // STEP 1. Obtain the maximum and minimum values of the Pareto front
+            double[] maximumValues = this.utils_.getMaximumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
+            double[] minimumValues = this.utils_.getMinimumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
+            // STEP 2. Get the normalized front
+            double[][] normalizedFront = this.utils_.getNormalizedFront(frontValues, maximumValues, minimumValues);
+            // compute offsets for reference point in normalized space
+            double[] offsets = new double[maximumValues.length];
+            for (int i = 0; i < maximumValues.length; i++) {
+                offsets[i] = this.offset_ / (maximumValues[i] - minimumValues[i]);
+            }
+            // STEP 3. Inverse the pareto front. This is needed because the original
+            //metric by Zitzler is for maximization problems
+            double[][] invertedFront = this.utils_.invertedFront(normalizedFront);
+            // shift away from origin, so that boundary points also get a contribution > 0
+            for (double[] point : invertedFront) {
+                for (int i = 0; i < point.length; i++) {
+                    point[i] += offsets[i];
+                }
+            }
+
+            // calculate contributions and sort
+            double[] contributions = this.utils_.hvContributions(this.objectives_, invertedFront);
+            for (int i = 0; i < contributions.length; i++) {
+                // contribution values are used analogously to crowding distance
+                this.get(i).setCrowdingDistance(contributions[i]);
+            }
+        }
+    } // computeHVContribution
+
+
+    /**
+     * This method returns the location (integer position) of a solution in the archive.
+     * For that, the equals_ comparator is used
+     */
+    public int getLocation(Solution solution) {
+        int location = -1;
+        int index = 0;
+        while ((index < this.size()) && (location != -1)) {
+            if (this.equals_.compare(solution, this.get(index)) == 0) {
+                location = index;
+            }
+            index++;
+        }
+        return location;
     }
-    return true;
-  } // add
-  
-     
-  /**
-   * This method forces to compute the contribution of each solution (required for PAEShv)
-   */
-  public void actualiseHVContribution() {
-	  if (size() > 2) { // The contribution can be updated
-	      double[][] frontValues = this.writeObjectivesToMatrix();
-	      int numberOfObjectives = objectives_;
-	      // STEP 1. Obtain the maximum and minimum values of the Pareto front
-	      double[] maximumValues = utils_.getMaximumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
-	      double[] minimumValues = utils_.getMinimumValues(this.writeObjectivesToMatrix(), numberOfObjectives);
-	      // STEP 2. Get the normalized front
-	      double[][] normalizedFront = utils_.getNormalizedFront(frontValues, maximumValues, minimumValues);
-	      // compute offsets for reference point in normalized space
-	      double[] offsets = new double[maximumValues.length];
-	      for (int i = 0; i < maximumValues.length; i++) {
-	        offsets[i] = offset_ / (maximumValues[i] - minimumValues[i]);
-	      }
-	      // STEP 3. Inverse the pareto front. This is needed because the original
-	      //metric by Zitzler is for maximization problems
-	      double[][] invertedFront = utils_.invertedFront(normalizedFront);
-	      // shift away from origin, so that boundary points also get a contribution > 0
-	      for (double[] point : invertedFront) {
-	        for (int i = 0; i < point.length; i++) {
-	          point[i] += offsets[i];
-	        }
-	      }
 
-	      // calculate contributions and sort
-	      double[] contributions = utils_.hvContributions(objectives_, invertedFront);
-	      for (int i = 0; i < contributions.length; i++) {
-	        // contribution values are used analogously to crowding distance
-	        this.get(i).setCrowdingDistance(contributions[i]);
-	      }	     	    	      
-	    }	  
-  } // computeHVContribution
-  
-  
-  /**
-   * This method returns the location (integer position) of a solution in the archive.
-   * For that, the equals_ comparator is used
-   * 
-   */
-  public int getLocation(Solution solution) {
-	  int location = -1;
-	  int index = 0;
-	  while ((index < size()) && (location!=-1) ) {
-		  if (equals_.compare(solution, get(index))==0) {
-			  location = index;
-		  }
-		  index++;
-	  }
-	  return location;
-  }
-  
 } // HypervolumeArchive

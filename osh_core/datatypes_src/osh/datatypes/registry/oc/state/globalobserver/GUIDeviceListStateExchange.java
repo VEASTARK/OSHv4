@@ -14,24 +14,24 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GUIDeviceListStateExchange extends StateExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 9104434585663750101L;
-	private Set<DeviceTableEntry> deviceList;
-	
-	@Deprecated
-	public GUIDeviceListStateExchange() {
-		super(null, 0L);
-	}
-	
-	public GUIDeviceListStateExchange(UUID sender, long timestamp, Set<DeviceTableEntry> deviceList) {
-		super(sender, timestamp);
-		this.deviceList = deviceList;
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = 9104434585663750101L;
+    private Set<DeviceTableEntry> deviceList;
 
-	public Set<DeviceTableEntry> getDeviceList() {
-		return deviceList;
-	}
+    @Deprecated
+    public GUIDeviceListStateExchange() {
+        super(null, 0L);
+    }
+
+    public GUIDeviceListStateExchange(UUID sender, long timestamp, Set<DeviceTableEntry> deviceList) {
+        super(sender, timestamp);
+        this.deviceList = deviceList;
+    }
+
+    public Set<DeviceTableEntry> getDeviceList() {
+        return this.deviceList;
+    }
 
 }

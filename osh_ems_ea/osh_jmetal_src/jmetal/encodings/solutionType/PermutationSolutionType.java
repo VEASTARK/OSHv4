@@ -27,30 +27,31 @@ import jmetal.core.Variable;
 import jmetal.encodings.variable.Permutation;
 import jmetal.util.PseudoRandom;
 
-/** 
+/**
  * Class representing the solution type of solutions composed of Permutation
- * variables 
+ * variables
  */
 public class PermutationSolutionType extends SolutionType {
 
-	/**
-	 * Constructor
-	 * @param problem  Problem to solve
-	 */
-	public PermutationSolutionType(Problem problem, PseudoRandom pseudoRandom) {
-		super(problem) ;
-  } // PermutationSolution
-	
-	/**
-	 * Creates the variables of the solution
-	 */
-	@Override
-	public Variable[]  createVariables() {
-		Variable [] variables = new Variable[problem_.getNumberOfVariables()];
-		    
-    for (int var = 0; var < problem_.getNumberOfVariables(); var++)
-    	variables[var] = new Permutation(problem_.getLength(var)) ;   
-    
-    return variables ;
-	} // createVariables
+    /**
+     * Constructor
+     *
+     * @param problem Problem to solve
+     */
+    public PermutationSolutionType(Problem problem, PseudoRandom pseudoRandom) {
+        super(problem);
+    } // PermutationSolution
+
+    /**
+     * Creates the variables of the solution
+     */
+    @Override
+    public Variable[] createVariables() {
+        Variable[] variables = new Variable[this.problem_.getNumberOfVariables()];
+
+        for (int var = 0; var < this.problem_.getNumberOfVariables(); var++)
+            variables[var] = new Permutation(this.problem_.getLength(var));
+
+        return variables;
+    } // createVariables
 } // PermutationSolutionType

@@ -1,7 +1,6 @@
 package osh.mgmt.localobserver;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalObserver;
 import osh.datatypes.commodity.Commodity;
@@ -27,197 +26,192 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser, Sebastian Kramer
- *
  */
-public class BaseloadLocalObserver 
-				extends LocalObserver 
-				implements IHasState, IEventTypeReceiver {
-	
-	private final int profileResolutionInSec = 900;
-	
-	private float weightForOtherWeekday;
-	private float weightForSameWeekday;
-	private int usedDaysForPrediction;
-	
-	private List<SparseLoadProfile> lastDayProfiles = new ArrayList<SparseLoadProfile>();
-	
-	private SparseLoadProfile lastDayProfile;
-	private SparseLoadProfile predictedBaseloadProfile;
-	
-	private long timeFromMidnight = Long.MAX_VALUE;
-	private int timeRangeCounter;
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public BaseloadLocalObserver(IOSHOC controllerbox) {
-		super(controllerbox);
-		
-		lastDayProfile = new SparseLoadProfile();
-		predictedBaseloadProfile = lastDayProfile;
-	}
-	
-	private void monitorBaseloadProfile(int activeBaseload, int reactiveBaseload){
-		
-		if (this.timeFromMidnight == 0) {
-			// a brand new day...let's make a new prediction
-			
-			if (lastDayProfile.getEndingTimeOfProfile() != 0) {
-				while (lastDayProfiles.size() >= usedDaysForPrediction)
-					lastDayProfiles.remove(0);
-				lastDayProfile.setEndingTimeOfProfile(86400);
-				lastDayProfiles.add(lastDayProfile);
-			}
-			predictedBaseloadProfile = new SparseLoadProfile();
-			SparseLoadProfile predictedLoadToday = new SparseLoadProfile();
-			SparseLoadProfile predictedLoadTomorow = new SparseLoadProfile();
-			
-			double weightSumToday = 0.0;
-			double weightSumTomorrow = 0.0;
-			
-			//Prediction for today
-			for (int i = 0; i < lastDayProfiles.size(); i++) {
-				double weight = ((i + 1) % 7 == 0) ? weightForSameWeekday : weightForOtherWeekday;
-				SparseLoadProfile weightedProfile = lastDayProfiles.get(i).clone();
-				weightedProfile.multiplyLoadsWithFactor(weight);
-				predictedLoadToday = predictedLoadToday.merge(weightedProfile, 0);
-				weightSumToday += weight;
-			}
-			predictedLoadToday.setEndingTimeOfProfile(86400);
-			predictedLoadToday.multiplyLoadsWithFactor(1 / weightSumToday);
-			
-			//Prediction for tomorrow
-			for (int i = 0; i < lastDayProfiles.size() - 1; i++) {
-				double weight = ((i + 2) % 7 == 0) ? weightForSameWeekday : weightForOtherWeekday;	
-				SparseLoadProfile weightedProfile = lastDayProfiles.get(i).clone();
-				weightedProfile.multiplyLoadsWithFactor(weight);
-				predictedLoadTomorow = predictedLoadTomorow.merge(weightedProfile, 0);
-				weightSumTomorrow += weight;
-			}
-			predictedLoadTomorow.setEndingTimeOfProfile(86400);
-			predictedLoadTomorow.multiplyLoadsWithFactor(1 / weightSumTomorrow);
+public class BaseloadLocalObserver
+        extends LocalObserver
+        implements IHasState, IEventTypeReceiver {
 
-			predictedBaseloadProfile = predictedLoadToday.merge(
-					predictedLoadTomorow, 86400).getProfileWithoutDuplicateValues();
-			
-			//create a new profile for the prediction
-			lastDayProfile = new SparseLoadProfile();	
-		}
-		else {
-			if (timeFromMidnight == 86400 - 1) {
-				lastDayProfile.setLoad(
-						Commodity.ACTIVEPOWER, 
-						timeFromMidnight, 
-						activeBaseload);
-				lastDayProfile.setLoad(
-						Commodity.REACTIVEPOWER, 
-						timeFromMidnight, 
-						reactiveBaseload);
-			} 
-			else if (timeRangeCounter >= profileResolutionInSec) {
-				lastDayProfile.setLoad(
-						Commodity.ACTIVEPOWER, 
-						timeFromMidnight, 
-						activeBaseload);
-				lastDayProfile.setLoad(
-						Commodity.REACTIVEPOWER, 
-						timeFromMidnight, 
-						reactiveBaseload);
-				timeRangeCounter = 1;
-			}
-			else {
-				timeRangeCounter++;
-			}
-		}
-	}
+    private final int profileResolutionInSec = 900;
 
-	@Override
-	public void onDeviceStateUpdate() {
-		
-		IHALExchange _oxObj = getObserverDataObject();
-		
-		if (_oxObj instanceof BaseloadObserverExchange) {
-			BaseloadObserverExchange _ox = (BaseloadObserverExchange) _oxObj;
+    private float weightForOtherWeekday;
+    private float weightForSameWeekday;
+    private int usedDaysForPrediction;
 
-			CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-					getUUID(), 
-					getTimer().getUnixTime(),
-					DeviceTypes.OTHER);
-			
-			for (Commodity c : _ox.getCommodities()) {
-				int power = _ox.getPower(c);
-				cpse.addPowerState(c, power);
-			}
-			
-			this.getOCRegistry().setState(
-					CommodityPowerStateExchange.class,
-					this,
-					cpse);
-			
-			long lastTimeFromMidnight = this.timeFromMidnight;
-			this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimer().getUnixTime());
-			
-			//monitor the baseload
-			this.monitorBaseloadProfile(_ox.getActivePower(), _ox.getReactivePower());		
-			
-			if (lastTimeFromMidnight > this.timeFromMidnight) {
-				//a new day has begun...
-				updateIPP();
-			}
-		} else if (_oxObj instanceof BaseloadPredictionExchange) {
-			BaseloadPredictionExchange _pred = (BaseloadPredictionExchange) _oxObj;
-			
-			lastDayProfiles = _pred.getPredicitons();
-			this.usedDaysForPrediction = _pred.getUsedDaysForPrediction();
-			this.weightForOtherWeekday = _pred.getWeightForOtherWeekday();
-			this.weightForSameWeekday = _pred.getWeightForSameWeekday();
-			
-		} else if (_oxObj instanceof StaticCompressionExchange) {
-			StaticCompressionExchange _stat = (StaticCompressionExchange) _oxObj;
-			this.compressionType = _stat.getCompressionType();
-			this.compressionValue = _stat.getCompressionValue();
-		}
-	}
+    private List<SparseLoadProfile> lastDayProfiles = new ArrayList<>();
 
-	
-	private void updateIPP() {
-		long now = getTimer().getUnixTime();
-		
-		BaseloadIPP ipp = new BaseloadIPP(
-				getDeviceID(), 
-				getGlobalLogger(), 
-				now, 
-				false, 
-				DeviceTypes.BASELOAD, 
-				now, 
-				predictedBaseloadProfile.cloneWithOffset(now),
-				compressionType,
-				compressionValue);
+    private SparseLoadProfile lastDayProfile;
+    private SparseLoadProfile predictedBaseloadProfile;
 
-		this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
-	}
+    private long timeFromMidnight = Long.MAX_VALUE;
+    private int timeRangeCounter;
+
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
+
+    /**
+     * CONSTRUCTOR
+     */
+    public BaseloadLocalObserver(IOSHOC osh) {
+        super(osh);
+
+        this.lastDayProfile = new SparseLoadProfile();
+        this.predictedBaseloadProfile = this.lastDayProfile;
+    }
+
+    private void monitorBaseloadProfile(int activeBaseload, int reactiveBaseload) {
+
+        if (this.timeFromMidnight == 0) {
+            // a brand new day...let's make a new prediction
+
+            if (this.lastDayProfile.getEndingTimeOfProfile() != 0) {
+                while (this.lastDayProfiles.size() >= this.usedDaysForPrediction)
+                    this.lastDayProfiles.remove(0);
+                this.lastDayProfile.setEndingTimeOfProfile(86400);
+                this.lastDayProfiles.add(this.lastDayProfile);
+            }
+            this.predictedBaseloadProfile = new SparseLoadProfile();
+            SparseLoadProfile predictedLoadToday = new SparseLoadProfile();
+            SparseLoadProfile predictedLoadTomorrow = new SparseLoadProfile();
+
+            double weightSumToday = 0.0;
+            double weightSumTomorrow = 0.0;
+
+            //Prediction for today
+            for (int i = 0; i < this.lastDayProfiles.size(); i++) {
+                double weight = ((i + 1) % 7 == 0) ? this.weightForSameWeekday : this.weightForOtherWeekday;
+                SparseLoadProfile weightedProfile = this.lastDayProfiles.get(i).clone();
+                weightedProfile.multiplyLoadsWithFactor(weight);
+                predictedLoadToday = predictedLoadToday.merge(weightedProfile, 0);
+                weightSumToday += weight;
+            }
+            predictedLoadToday.setEndingTimeOfProfile(86400);
+            predictedLoadToday.multiplyLoadsWithFactor(1 / weightSumToday);
+
+            //Prediction for tomorrow
+            for (int i = 0; i < this.lastDayProfiles.size() - 1; i++) {
+                double weight = ((i + 2) % 7 == 0) ? this.weightForSameWeekday : this.weightForOtherWeekday;
+                SparseLoadProfile weightedProfile = this.lastDayProfiles.get(i).clone();
+                weightedProfile.multiplyLoadsWithFactor(weight);
+                predictedLoadTomorrow = predictedLoadTomorrow.merge(weightedProfile, 0);
+                weightSumTomorrow += weight;
+            }
+            predictedLoadTomorrow.setEndingTimeOfProfile(86400);
+            predictedLoadTomorrow.multiplyLoadsWithFactor(1 / weightSumTomorrow);
+
+            this.predictedBaseloadProfile = predictedLoadToday.merge(
+                    predictedLoadTomorrow, 86400).getProfileWithoutDuplicateValues();
+
+            //create a new profile for the prediction
+            this.lastDayProfile = new SparseLoadProfile();
+        } else {
+            if (this.timeFromMidnight == 86400 - 1) {
+                this.lastDayProfile.setLoad(
+                        Commodity.ACTIVEPOWER,
+                        this.timeFromMidnight,
+                        activeBaseload);
+                this.lastDayProfile.setLoad(
+                        Commodity.REACTIVEPOWER,
+                        this.timeFromMidnight,
+                        reactiveBaseload);
+            } else if (this.timeRangeCounter >= this.profileResolutionInSec) {
+                this.lastDayProfile.setLoad(
+                        Commodity.ACTIVEPOWER,
+                        this.timeFromMidnight,
+                        activeBaseload);
+                this.lastDayProfile.setLoad(
+                        Commodity.REACTIVEPOWER,
+                        this.timeFromMidnight,
+                        reactiveBaseload);
+                this.timeRangeCounter = 1;
+            } else {
+                this.timeRangeCounter++;
+            }
+        }
+    }
+
+    @Override
+    public void onDeviceStateUpdate() {
+
+        IHALExchange _oxObj = this.getObserverDataObject();
+
+        if (_oxObj instanceof BaseloadObserverExchange) {
+            BaseloadObserverExchange _ox = (BaseloadObserverExchange) _oxObj;
+
+            CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
+                    this.getUUID(),
+                    this.getTimer().getUnixTime(),
+                    DeviceTypes.OTHER);
+
+            for (Commodity c : _ox.getCommodities()) {
+                int power = _ox.getPower(c);
+                cpse.addPowerState(c, power);
+            }
+
+            this.getOCRegistry().setState(
+                    CommodityPowerStateExchange.class,
+                    this,
+                    cpse);
+
+            long lastTimeFromMidnight = this.timeFromMidnight;
+            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimer().getUnixTime());
+
+            //monitor the baseload
+            this.monitorBaseloadProfile(_ox.getActivePower(), _ox.getReactivePower());
+
+            if (lastTimeFromMidnight > this.timeFromMidnight) {
+                //a new day has begun...
+                this.updateIPP();
+            }
+        } else if (_oxObj instanceof BaseloadPredictionExchange) {
+            BaseloadPredictionExchange _pred = (BaseloadPredictionExchange) _oxObj;
+
+            this.lastDayProfiles = _pred.getPredictions();
+            this.usedDaysForPrediction = _pred.getUsedDaysForPrediction();
+            this.weightForOtherWeekday = _pred.getWeightForOtherWeekday();
+            this.weightForSameWeekday = _pred.getWeightForSameWeekday();
+
+        } else if (_oxObj instanceof StaticCompressionExchange) {
+            StaticCompressionExchange _stat = (StaticCompressionExchange) _oxObj;
+            this.compressionType = _stat.getCompressionType();
+            this.compressionValue = _stat.getCompressionValue();
+        }
+    }
 
 
-	@Override
-	public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
-		return null;
-	}
+    private void updateIPP() {
+        long now = this.getTimer().getUnixTime();
 
-	@Override
-	public UUID getUUID() {
-		return getDeviceID();
-	}
+        BaseloadIPP ipp = new BaseloadIPP(
+                this.getDeviceID(),
+                this.getGlobalLogger(),
+                now,
+                false,
+                DeviceTypes.BASELOAD,
+                now,
+                this.predictedBaseloadProfile.cloneWithOffset(now),
+                this.compressionType,
+                this.compressionValue);
+
+        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+    }
 
 
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(
-			Class<T> type, T event) throws OSHException {
-		//NOTHING
-	}
-	
+    @Override
+    public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
+        return null;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
+
+
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T event) {
+        //NOTHING
+    }
+
 }

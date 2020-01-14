@@ -11,35 +11,33 @@ import osh.simulation.exception.SimulationSubjectException;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class ESHLDomesticHotWaterSimulationDriver 
-					extends ThermalDemandSimulationDriver {
+public class ESHLDomesticHotWaterSimulationDriver
+        extends ThermalDemandSimulationDriver {
 
-	public ESHLDomesticHotWaterSimulationDriver(
-			IOSH controllerbox,
-			UUID deviceID, 
-			OSHParameterCollection driverConfig)
-			throws SimulationSubjectException, HALException {
-		super(controllerbox, deviceID, driverConfig, Commodity.DOMESTICHOTWATERPOWER);
-	}
+    public ESHLDomesticHotWaterSimulationDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig)
+            throws SimulationSubjectException, HALException {
+        super(osh, deviceID, driverConfig, Commodity.DOMESTICHOTWATERPOWER);
+    }
 
-	@Override
-	protected double getDayOfWeekCorrection(int convertUnixTime2CorrectedWeekdayInt) {
-		return VDI6002DomesticHotWaterStatistics.getDayOfWeekCorrection(convertUnixTime2CorrectedWeekdayInt);
-	}
+    @Override
+    protected double getDayOfWeekCorrection(int convertUnixTime2CorrectedWeekdayInt) {
+        return VDI6002DomesticHotWaterStatistics.getDayOfWeekCorrection(convertUnixTime2CorrectedWeekdayInt);
+    }
 
-	@Override
-	protected double getMonthlyCorrection(int convertUnixTime2MonthInt) {
-		return VDI6002DomesticHotWaterStatistics.getMonthlyCorrection(convertUnixTime2MonthInt);
-	}
+    @Override
+    protected double getMonthlyCorrection(int convertUnixTime2MonthInt) {
+        return VDI6002DomesticHotWaterStatistics.getMonthlyCorrection(convertUnixTime2MonthInt);
+    }
 
-	@Override
-	protected double getGeneralCorrection() {
-		// manual correction to achieve 700 kWh / (PAX * a)
-		return 0.77500775;
-	}
-	
+    @Override
+    protected double getGeneralCorrection() {
+        // manual correction to achieve 700 kWh / (PAX * a)
+        return 0.77500775;
+    }
+
 }

@@ -10,69 +10,70 @@ import osh.registry.OCRegistry;
 
 /**
  * abstract superclass for all controllers
- * 
+ *
  * @author Florian Allerding
  */
 public abstract class Controller extends OCComponent implements IRealTimeSubscriber, ILifeCycleListener {
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 */
-	public Controller(IOSHOC controllerbox) {
-		super(controllerbox);
-	}
-	
-	
-	@Override
-	public IOSHOC getOSH() {
-		return (IOSHOC) super.getOSH();
-	}
-	
-	
-	protected OCRegistry getOCRegistry() {
-		return getOSH().getOCRegistry();
-	}
 
-	@Override
-	public void onSystemError() throws OSHException {
-		//...in case of use please override
-	}
 
-	@Override
-	public void onSystemHalt() throws OSHException {
-		//...in case of use please override
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     */
+    public Controller(IOSHOC osh) {
+        super(osh);
+    }
 
-	@Override
-	public void onSystemRunning() throws OSHException {
-		//...in case of use please override
-	}
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		//...in case of use please override
-	}
+    @Override
+    public IOSHOC getOSH() {
+        return super.getOSH();
+    }
 
-	@Override
-	public void onSystemResume() throws OSHException {
-		//...in case of use please override
-	}
 
-	@Override
-	public void onSystemShutdown() throws OSHException {
-		//...in case of use please override
-	}
+    protected OCRegistry getOCRegistry() {
+        return this.getOSH().getOCRegistry();
+    }
 
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		//...in case of use please override
-	}
+    @Override
+    public void onSystemError() {
+        //...in case of use please override
+    }
 
-	@Override
-	public OSHComponent getSyncObject() {
-		return this;
-	}
-	
+    @Override
+    public void onSystemHalt() {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onSystemRunning() {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onSystemResume() {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onSystemShutdown() throws OSHException {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        //...in case of use please override
+    }
+
+    @Override
+    public OSHComponent getSyncObject() {
+        return this;
+    }
+
 }

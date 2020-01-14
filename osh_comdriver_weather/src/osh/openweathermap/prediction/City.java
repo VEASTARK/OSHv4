@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,21 +10,22 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "id",
-    "name",
-    "coord",
-    "country",
-    "population",
-    "sys"
+        "id",
+        "name",
+        "coord",
+        "country",
+        "population",
+        "sys"
 })
 public class City implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 8561825936745968716L;
-	
-	@JsonProperty("id")
+     *
+     */
+    private static final long serialVersionUID = 8561825936745968716L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("id")
     private Integer id;
     @JsonProperty("name")
     private String name;
@@ -37,13 +37,9 @@ public class City implements Serializable {
     private Integer population;
     @JsonProperty("sys")
     private Sys sys;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The id
+     * @return The id
      */
     @JsonProperty("id")
     public Integer getId() {
@@ -51,9 +47,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @param id
-     *     The id
+     * @param id The id
      */
     @JsonProperty("id")
     public void setId(Integer id) {
@@ -61,9 +55,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The name
+     * @return The name
      */
     @JsonProperty("name")
     public String getName() {
@@ -71,9 +63,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @param name
-     *     The name
+     * @param name The name
      */
     @JsonProperty("name")
     public void setName(String name) {
@@ -81,9 +71,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The coord
+     * @return The coord
      */
     @JsonProperty("coord")
     public Coord getCoord() {
@@ -91,9 +79,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @param coord
-     *     The coord
+     * @param coord The coord
      */
     @JsonProperty("coord")
     public void setCoord(Coord coord) {
@@ -101,9 +87,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The country
+     * @return The country
      */
     @JsonProperty("country")
     public String getCountry() {
@@ -111,9 +95,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @param country
-     *     The country
+     * @param country The country
      */
     @JsonProperty("country")
     public void setCountry(String country) {
@@ -121,9 +103,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The population
+     * @return The population
      */
     @JsonProperty("population")
     public Integer getPopulation() {
@@ -131,9 +111,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @param population
-     *     The population
+     * @param population The population
      */
     @JsonProperty("population")
     public void setPopulation(Integer population) {
@@ -141,9 +119,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The sys
+     * @return The sys
      */
     @JsonProperty("sys")
     public Sys getSys() {
@@ -151,9 +127,7 @@ public class City implements Serializable {
     }
 
     /**
-     * 
-     * @param sys
-     *     The sys
+     * @param sys The sys
      */
     @JsonProperty("sys")
     public void setSys(Sys sys) {

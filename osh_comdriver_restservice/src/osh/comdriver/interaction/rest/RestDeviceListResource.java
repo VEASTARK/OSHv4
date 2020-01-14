@@ -15,147 +15,139 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 
  * @author Kaibin Bao, Ingo Mauser
- * 
  */
 @Path("/")
 public class RestDeviceListResource {
 
-	@SuppressWarnings("unused")
-	private HttpRestInteractionBusManager interactionComManager;
-	private HttpRestInteractionProviderBusDriver interactionDriver;
+    private final HttpRestInteractionBusManager interactionComManager;
+    private final HttpRestInteractionProviderBusDriver interactionDriver;
 
-	/**
-	 * CONSTRUCTOR
-	 * 
-	 * @param comMgr
-	 * @param driver
-	 */
-	public RestDeviceListResource(HttpRestInteractionBusManager comMgr,
-			HttpRestInteractionProviderBusDriver driver) {
-		super();
-		
-		this.interactionComManager = comMgr;
-		this.interactionDriver = driver;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param comMgr
+     * @param driver
+     */
+    public RestDeviceListResource(HttpRestInteractionBusManager comMgr,
+                                  HttpRestInteractionProviderBusDriver driver) {
+        super();
 
-	private RestDeviceList getDeviceStates(
-			List<String> types,
-			List<UUID> uuids, 
-			List<String> locations, 
-			List<String> deviceClassifications, 
-			List<String> deviceTypes) {
-		RestDeviceList list = new RestDeviceList();
-		List<String> typeNames = null;
+        this.interactionComManager = comMgr;
+        this.interactionDriver = driver;
+    }
 
-		if (!types.isEmpty()) {
-			typeNames = new ArrayList<>();
+    private RestDeviceList getDeviceStates(
+            List<String> types,
+            List<UUID> uuids,
+            List<String> locations,
+            List<String> deviceClassifications,
+            List<String> deviceTypes) {
+        RestDeviceList list = new RestDeviceList();
+        List<String> typeNames = null;
 
-			for (String type : types) {
-				typeNames.add(type);
-			}
-		} /* else: typesLC = null */
+        if (!types.isEmpty()) {
 
-		Map<UUID, RestDevice> stateMap = interactionDriver.getRestStateDetails();
+            typeNames = new ArrayList<>(types);
+        } /* else: typesLC = null */
 
-		for (Map.Entry<UUID, RestDevice> ent : stateMap.entrySet()) {
-			RestDevice dev = ent.getValue();
+        Map<UUID, RestDevice> stateMap = this.interactionDriver.getRestStateDetails();
 
-			// only states for a list of uuids
-			if (uuids != null && !uuids.isEmpty()) { 
-				if (!uuids.contains(ent.getKey())) {
-					continue;
-				}
-			}
+        for (Map.Entry<UUID, RestDevice> ent : stateMap.entrySet()) {
+            RestDevice dev = ent.getValue();
 
-			if (dev.hasDeviceMetaDetails()) {
-				RestDeviceMetaDetails rdmd = dev.getDeviceMetaDetails();
-				if (!locations.isEmpty()
-						&& !locations.contains(rdmd.getLocation()))
-					continue;
-				if (!deviceClassifications.isEmpty()
-						&& !deviceClassifications.contains(rdmd.getDeviceClassification().name()))
-					continue;
-				if (!deviceTypes.isEmpty()
-						&& !deviceTypes.contains(rdmd.getDeviceType().name()))
-					continue;
-			} else {
-				if (!locations.isEmpty() || !deviceTypes.isEmpty())
-					continue;
-			}
+            // only states for a list of uuids
+            if (uuids != null && !uuids.isEmpty()) {
+                if (!uuids.contains(ent.getKey())) {
+                    continue;
+                }
+            }
 
-			if (typeNames != null) {
-				RestDevice clone = dev.cloneOnly(typeNames);
-				if (clone != null)
-					list.add(clone);
-			} else
-				list.add(dev);
-		} // for every device
+            if (dev.hasDeviceMetaDetails()) {
+                RestDeviceMetaDetails rdmd = dev.getDeviceMetaDetails();
+                if (!locations.isEmpty()
+                        && !locations.contains(rdmd.getLocation()))
+                    continue;
+                if (!deviceClassifications.isEmpty()
+                        && !deviceClassifications.contains(rdmd.getDeviceClassification().name()))
+                    continue;
+                if (!deviceTypes.isEmpty()
+                        && !deviceTypes.contains(rdmd.getDeviceType().name()))
+                    continue;
+            } else {
+                if (!locations.isEmpty() || !deviceTypes.isEmpty())
+                    continue;
+            }
 
-		return list;
-	}
+            if (typeNames != null) {
+                RestDevice clone = dev.cloneOnly(typeNames);
+                if (clone != null)
+                    list.add(clone);
+            } else
+                list.add(dev);
+        } // for every device
 
-	@GET
-	@Produces({ "application/xml", "application/json" })
-	public RestDeviceList getAssignedDevices(
-			@QueryParam("type") List<String> types,
-			@QueryParam("uuid") List<UUID> uuids,
-			@QueryParam("location") List<String> locations,
-			@QueryParam("deviceclass") List<String> deviceClassifications,
-			@QueryParam("devicetype") List<String> deviceTypes) {
-		return getDeviceStates(types, uuids, locations, deviceClassifications, deviceTypes);
-	}
+        return list;
+    }
 
-	@POST
-	@Path("/{uuid}/")
-	@Consumes({ "application/xml", "application/json"  })
-	public Response switchCommand(
-			@PathParam("uuid") String sUUID,
-			RestSwitchCommand command) {
-		
-		UUID uuid;
-		try {
-			uuid = UUID.fromString(sUUID);
-		} 
-		catch (IllegalArgumentException e) {
-			throw new NotFoundException();
-		}
+    @GET
+    @Produces({"application/xml", "application/json"})
+    public RestDeviceList getAssignedDevices(
+            @QueryParam("type") List<String> types,
+            @QueryParam("uuid") List<UUID> uuids,
+            @QueryParam("location") List<String> locations,
+            @QueryParam("deviceclass") List<String> deviceClassifications,
+            @QueryParam("devicetype") List<String> deviceTypes) {
+        return this.getDeviceStates(types, uuids, locations, deviceClassifications, deviceTypes);
+    }
 
-		interactionDriver.sendSwitchRequest(uuid, command.isTurnOn());
+    @POST
+    @Path("/{uuid}/")
+    @Consumes({"application/xml", "application/json"})
+    public Response switchCommand(
+            @PathParam("uuid") String sUUID,
+            RestSwitchCommand command) {
 
-		return Response.ok().build();
-	}
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(sUUID);
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException();
+        }
 
-	@GET
-	@Path("/{uuid}/do")
-	@Consumes({ "application/xml", "application/json"  })
-	public Response doAction(
-			@PathParam("uuid") String sUUID,
-			@QueryParam("action") String action) {
-		
-		UUID uuid;
-		try {
-			uuid = UUID.fromString(sUUID);
-		} 
-		catch (IllegalArgumentException e) {
-			throw new NotFoundException();
-		}
+        this.interactionDriver.sendSwitchRequest(uuid, command.isTurnOn());
 
-		if ("start".equals(action)) {
-			interactionDriver.sendStartRequest(uuid);
-		}
-		if ("stop".equals(action)) {
-			interactionDriver.sendStopRequest(uuid);
-		}
-		if ("switchOn".equals(action)) {
-			interactionDriver.sendSwitchRequest(uuid, true);
-		}
-		if ("switchOff".equals(action)) {
-			interactionDriver.sendSwitchRequest(uuid, false);
-		}
+        return Response.ok().build();
+    }
 
-		return Response.ok().build();
-	}
+    @GET
+    @Path("/{uuid}/do")
+    @Consumes({"application/xml", "application/json"})
+    public Response doAction(
+            @PathParam("uuid") String sUUID,
+            @QueryParam("action") String action) {
+
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(sUUID);
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException();
+        }
+
+        if ("start".equals(action)) {
+            this.interactionDriver.sendStartRequest(uuid);
+        }
+        if ("stop".equals(action)) {
+            this.interactionDriver.sendStopRequest(uuid);
+        }
+        if ("switchOn".equals(action)) {
+            this.interactionDriver.sendSwitchRequest(uuid, true);
+        }
+        if ("switchOff".equals(action)) {
+            this.interactionDriver.sendSwitchRequest(uuid, false);
+        }
+
+        return Response.ok().build();
+    }
 
 }

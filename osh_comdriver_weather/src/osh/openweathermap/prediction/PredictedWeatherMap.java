@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -12,20 +11,21 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "city",
-    "cod",
-    "message",
-    "cnt",
-    "list"
+        "city",
+        "cod",
+        "message",
+        "cnt",
+        "list"
 })
 public class PredictedWeatherMap implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 5345842240523779736L;
-	
-	@JsonProperty("city")
+     *
+     */
+    private static final long serialVersionUID = 5345842240523779736L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("city")
     private City city;
     @JsonProperty("cod")
     private String cod;
@@ -35,13 +35,9 @@ public class PredictedWeatherMap implements Serializable {
     private Integer cnt;
     @JsonProperty("list")
     private java.util.List<osh.openweathermap.prediction.List> list = new ArrayList<osh.openweathermap.prediction.List>();
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The city
+     * @return The city
      */
     @JsonProperty("city")
     public City getCity() {
@@ -49,9 +45,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param city
-     *     The city
+     * @param city The city
      */
     @JsonProperty("city")
     public void setCity(City city) {
@@ -59,9 +53,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The cod
+     * @return The cod
      */
     @JsonProperty("cod")
     public String getCod() {
@@ -69,9 +61,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param cod
-     *     The cod
+     * @param cod The cod
      */
     @JsonProperty("cod")
     public void setCod(String cod) {
@@ -79,9 +69,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The message
+     * @return The message
      */
     @JsonProperty("message")
     public Double getMessage() {
@@ -89,9 +77,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param message
-     *     The message
+     * @param message The message
      */
     @JsonProperty("message")
     public void setMessage(Double message) {
@@ -99,9 +85,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The cnt
+     * @return The cnt
      */
     @JsonProperty("cnt")
     public Integer getCnt() {
@@ -109,9 +93,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param cnt
-     *     The cnt
+     * @param cnt The cnt
      */
     @JsonProperty("cnt")
     public void setCnt(Integer cnt) {
@@ -119,9 +101,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The list
+     * @return The list
      */
     @JsonProperty("list")
     public java.util.List<osh.openweathermap.prediction.List> getList() {
@@ -129,9 +109,7 @@ public class PredictedWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param list
-     *     The list
+     * @param list The list
      */
     @JsonProperty("list")
     public void setList(java.util.List<osh.openweathermap.prediction.List> list) {

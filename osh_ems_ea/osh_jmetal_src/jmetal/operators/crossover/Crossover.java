@@ -30,15 +30,15 @@ import java.util.HashMap;
  * This class represents the super class of all the crossover operators
  */
 public abstract class Crossover extends Operator {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	protected PseudoRandom pseudoRandom;
 
-	public Crossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-	  super(parameters);
-	  this.pseudoRandom = pseudoRandom;
-  }
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    protected final PseudoRandom pseudoRandom;
+
+    public Crossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters);
+        this.pseudoRandom = pseudoRandom;
+    }
 } // Crossover

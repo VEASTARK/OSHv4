@@ -12,83 +12,84 @@ import java.util.UUID;
 
 /**
  * Superclass for local observers
- * 
+ *
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
- * 
  */
 public abstract class LocalObserver extends Observer implements IDriverDataSubscriber {
-	
-	// the local O/C-Unit
-	private LocalOCUnit assignedOCUnit;
-	
 
-	// current representation of the state from the observed device
-	private volatile IHALExchange observerDataObject;
-	
-
-	/**
-	 * CONSTRUCTOR
-	 */
-	public LocalObserver(IOSH osh) {
-		super(osh);
-	}
-
-	
-	protected void assignLocalOCUnit(LocalOCUnit localOCUnit) {
-		this.assignedOCUnit = localOCUnit;
-		// this.deviceID = this.assignedOCUnit.getDeviceID();
-	}
-
-	public LocalOCUnit getAssignedOCUnit() {
-		return assignedOCUnit;
-	}
-	
-	/**
-	 * returns the local controllerUnit according to this observer
-	 * @return
-	 */
-	public LocalController getLocalController() {
-		return this.getAssignedOCUnit().localController;
-	}
-
-	public UUID getDeviceID() {
-		return this.assignedOCUnit.getUnitID();
-	}
-	
-	public DeviceTypes getDeviceType () {
-		return this.assignedOCUnit.getDeviceType();
-	}
-	
-	public DeviceClassification getDeviceClassification () {
-		return this.assignedOCUnit.getDeviceClassification();
-	}
-	
-
-	/**
-	 * get the current representation of the state from the observed device
-	 * @return current representation of the state from the observed device
-	 */
-	public IHALExchange getObserverDataObject() {
-		return observerDataObject;
-	}
-
-	public HALRealTimeDriver getSystemTimer() {
-		return getOSH().getTimer();
-	}
-
-	/**
-	 * is invoked every time when the state of the device changes
-	 */
-	public abstract void onDeviceStateUpdate() throws OCUnitException;
+    // the local O/C-Unit
+    private LocalOCUnit assignedOCUnit;
 
 
-	@Override
-	public final void onDataFromCALDriver(IHALExchange exchangeObject) throws OCUnitException {
-		// cast to the observer object
-		synchronized (getSyncObject()) {
-			this.observerDataObject = exchangeObject;
-			this.onDeviceStateUpdate();
-		}
-	}
-	
+    // current representation of the state from the observed device
+    private volatile IHALExchange observerDataObject;
+
+
+    /**
+     * CONSTRUCTOR
+     */
+    public LocalObserver(IOSH osh) {
+        super(osh);
+    }
+
+
+    protected void assignLocalOCUnit(LocalOCUnit localOCUnit) {
+        this.assignedOCUnit = localOCUnit;
+        // this.deviceID = this.assignedOCUnit.getDeviceID();
+    }
+
+    public LocalOCUnit getAssignedOCUnit() {
+        return this.assignedOCUnit;
+    }
+
+    /**
+     * returns the local controllerUnit according to this observer
+     *
+     * @return
+     */
+    public LocalController getLocalController() {
+        return this.assignedOCUnit.localController;
+    }
+
+    public UUID getDeviceID() {
+        return this.assignedOCUnit.getUnitID();
+    }
+
+    public DeviceTypes getDeviceType() {
+        return this.assignedOCUnit.getDeviceType();
+    }
+
+    public DeviceClassification getDeviceClassification() {
+        return this.assignedOCUnit.getDeviceClassification();
+    }
+
+
+    /**
+     * get the current representation of the state from the observed device
+     *
+     * @return current representation of the state from the observed device
+     */
+    public IHALExchange getObserverDataObject() {
+        return this.observerDataObject;
+    }
+
+    public HALRealTimeDriver getSystemTimer() {
+        return this.getOSH().getTimer();
+    }
+
+    /**
+     * is invoked every time when the state of the device changes
+     */
+    public abstract void onDeviceStateUpdate() throws OCUnitException;
+
+
+    @Override
+    public final void onDataFromCALDriver(IHALExchange exchangeObject) throws OCUnitException {
+        // cast to the observer object
+        synchronized (this.getSyncObject()) {
+            this.observerDataObject = exchangeObject;
+            this.onDeviceStateUpdate();
+        }
+    }
+
 }

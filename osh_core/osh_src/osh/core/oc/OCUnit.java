@@ -7,27 +7,27 @@ import java.util.UUID;
 
 /**
  * abstract superclass for the O/C-Unit container
- * 
+ *
  * @author Florian Allerding
  */
 public abstract class OCUnit {
-	
-	private IOSHOC controllerbox;
-	protected final UUID unitID;
-	
-	
-	public OCUnit(UUID unitID, IOSHOC controllerbox) {
-		this.controllerbox = controllerbox;
-		this.unitID = unitID;
-	}
-	
-	
-	protected HALRealTimeDriver getSystemTimer() {
-		return controllerbox.getTimer();
-	}
-	
-	public UUID getUnitID() {
-		return unitID;
-	}
+
+    protected final UUID unitID;
+    private final IOSHOC osh;
+
+
+    public OCUnit(UUID unitID, IOSHOC osh) {
+        this.osh = osh;
+        this.unitID = unitID;
+    }
+
+
+    protected HALRealTimeDriver getSystemTimer() {
+        return this.osh.getTimer();
+    }
+
+    public UUID getUnitID() {
+        return this.unitID;
+    }
 
 }

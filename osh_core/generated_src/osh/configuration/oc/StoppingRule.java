@@ -20,9 +20,9 @@ import java.util.List;
 
 /**
  * <p>Java class for StoppingRule complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="StoppingRule">
  *   &lt;complexContent>
@@ -35,13 +35,11 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StoppingRule", propOrder = {
-    "stoppingRuleName",
-    "ruleParameters"
+        "stoppingRuleName",
+        "ruleParameters"
 })
 public class StoppingRule {
 
@@ -51,23 +49,19 @@ public class StoppingRule {
 
     /**
      * Gets the value of the stoppingRuleName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getStoppingRuleName() {
-        return stoppingRuleName;
+        return this.stoppingRuleName;
     }
 
     /**
      * Sets the value of the stoppingRuleName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setStoppingRuleName(String value) {
         this.stoppingRuleName = value;
@@ -75,29 +69,27 @@ public class StoppingRule {
 
     /**
      * Gets the value of the ruleParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the ruleParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRuleParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getRuleParameters() {
-        if (ruleParameters == null) {
-            ruleParameters = new ArrayList<ConfigurationParameter>();
+        if (this.ruleParameters == null) {
+            this.ruleParameters = new ArrayList<>();
         }
         return this.ruleParameters;
     }

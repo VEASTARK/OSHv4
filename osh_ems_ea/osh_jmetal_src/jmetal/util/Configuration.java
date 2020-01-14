@@ -29,13 +29,13 @@ import java.util.logging.Logger;
  */
 public class Configuration implements Serializable {
 
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-/** 
-   * Logger object 
-   */
-  public static Logger logger_ = Logger.getLogger("jMetal");
-    
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    /**
+     * Logger object
+     */
+    public static final Logger logger_ = Logger.getLogger("jMetal");
+
 } // Configuration

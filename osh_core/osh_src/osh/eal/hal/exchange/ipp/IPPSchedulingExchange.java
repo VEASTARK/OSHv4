@@ -6,44 +6,42 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
-public class IPPSchedulingExchange 
-				extends HALObserverExchange {
-	
-	private long newIppAfter;
-	private long rescheduleAfter;
-	private double triggerIfDeltaX;
-	
-	public IPPSchedulingExchange(UUID deviceID, Long timestamp) {
-		super(deviceID, timestamp);
-	}
+public class IPPSchedulingExchange
+        extends HALObserverExchange {
 
-	public long getNewIppAfter() {
-		return newIppAfter;
-	}
+    private long newIppAfter;
+    private long rescheduleAfter;
+    private double triggerIfDeltaX;
 
-	public void setNewIppAfter(long newIppAfter) {
-		this.newIppAfter = newIppAfter;
-	}
+    public IPPSchedulingExchange(UUID deviceID, Long timestamp) {
+        super(deviceID, timestamp);
+    }
 
-	public long getRescheduleAfter() {
-		return rescheduleAfter;
-	}
+    public long getNewIppAfter() {
+        return this.newIppAfter;
+    }
 
-	public void setRescheduleAfter(long rescheduleAfter) {
-		this.rescheduleAfter = rescheduleAfter;
-	}
+    public void setNewIppAfter(long newIppAfter) {
+        this.newIppAfter = newIppAfter;
+    }
 
-	public double getTriggerIfDeltaX() {
-		return triggerIfDeltaX;
-	}
+    public long getRescheduleAfter() {
+        return this.rescheduleAfter;
+    }
 
-	public void setTriggerIfDeltaX(double triggerIfDeltaX) {
-		this.triggerIfDeltaX = triggerIfDeltaX;
-	}
-	
+    public void setRescheduleAfter(long rescheduleAfter) {
+        this.rescheduleAfter = rescheduleAfter;
+    }
+
+    public double getTriggerIfDeltaX() {
+        return this.triggerIfDeltaX;
+    }
+
+    public void setTriggerIfDeltaX(double triggerIfDeltaX) {
+        this.triggerIfDeltaX = triggerIfDeltaX;
+    }
+
 
 }

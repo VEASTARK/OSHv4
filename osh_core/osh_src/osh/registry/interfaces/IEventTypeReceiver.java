@@ -7,8 +7,10 @@ import java.util.UUID;
 
 
 public interface IEventTypeReceiver extends IQueueEventTypeSubscriber, IPromiseToEnsureSynchronization {
-	
-	/** return null if the element has no UUID, but it won't be able to receive commands */
-	public UUID getUUID();
-	
+
+    /**
+     * return null if the element has no UUID, but it won't be able to receive commands
+     */
+    UUID getUUID();
+
 }

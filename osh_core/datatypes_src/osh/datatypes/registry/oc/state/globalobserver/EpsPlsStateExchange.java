@@ -10,101 +10,97 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Ingo Mauser
- *
  */
 public class EpsPlsStateExchange extends StateExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5984069610430579990L;
-	
-	private EnumMap<AncillaryCommodity,PriceSignal> ps;
-	private EnumMap<AncillaryCommodity,PowerLimitSignal> pwrLimit;
-	
-	private final int epsOptimizationObjective;
-	private final int plsOptimizationObjective;
-	private final int varOptimizationObjective;
-	private final double plsUpperOverlimitFactor;
-	private final double plsLowerOverlimitFactor;
-	
-	private final boolean epsPlsChanged;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param sender
-	 * @param timestamp
-	 * @param ps
-	 * @param pwrLimit
-	 */
-	public EpsPlsStateExchange(
-			UUID sender, 
-			long timestamp,
-			EnumMap<AncillaryCommodity,PriceSignal> ps,
-			EnumMap<AncillaryCommodity,PowerLimitSignal> pwrLimit,
-			int epsOptimizationObjective,
-			int plsOptimizationObjective,
-			int varOptimizationObjective,
-			double plsUpperOverlimitFactor,
-			double plsLowerOverlimitFactor,
-			boolean epsPlsChanged) {
-		super(sender, timestamp);
-		
-		this.ps = ps;
-		this.pwrLimit = pwrLimit;
-		this.epsOptimizationObjective = epsOptimizationObjective;
-		this.plsOptimizationObjective = plsOptimizationObjective;
-		this.varOptimizationObjective = varOptimizationObjective;
-		this.plsUpperOverlimitFactor = plsUpperOverlimitFactor;
-		this.plsLowerOverlimitFactor = plsLowerOverlimitFactor;
-		this.epsPlsChanged = epsPlsChanged;
-	}
-
-	
-	public EnumMap<AncillaryCommodity,PriceSignal> getPs() {
-		return ps;
-	}
-
-	public EnumMap<AncillaryCommodity,PowerLimitSignal> getPwrLimit() {
-		return pwrLimit;
-	}
-	
-	public int getEpsOptimizationObjective() {
-		return epsOptimizationObjective;
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5984069610430579990L;
+    private final int epsOptimizationObjective;
+    private final int plsOptimizationObjective;
+    private final int varOptimizationObjective;
+    private final double plsUpperOverLimitFactor;
+    private final double plsLowerOverLimitFactor;
+    private final boolean epsPlsChanged;
+    private final EnumMap<AncillaryCommodity, PriceSignal> ps;
+    private final EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
 
 
-	public int getPlsOptimizationObjective() {
-		return plsOptimizationObjective;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param sender
+     * @param timestamp
+     * @param ps
+     * @param pwrLimit
+     */
+    public EpsPlsStateExchange(
+            UUID sender,
+            long timestamp,
+            EnumMap<AncillaryCommodity, PriceSignal> ps,
+            EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit,
+            int epsOptimizationObjective,
+            int plsOptimizationObjective,
+            int varOptimizationObjective,
+            double plsUpperOverLimitFactor,
+            double plsLowerOverLimitFactor,
+            boolean epsPlsChanged) {
+        super(sender, timestamp);
+
+        this.ps = ps;
+        this.pwrLimit = pwrLimit;
+        this.epsOptimizationObjective = epsOptimizationObjective;
+        this.plsOptimizationObjective = plsOptimizationObjective;
+        this.varOptimizationObjective = varOptimizationObjective;
+        this.plsUpperOverLimitFactor = plsUpperOverLimitFactor;
+        this.plsLowerOverLimitFactor = plsLowerOverLimitFactor;
+        this.epsPlsChanged = epsPlsChanged;
+    }
 
 
-	public int getVarOptimizationObjective() {
-		return varOptimizationObjective;
-	}
+    public EnumMap<AncillaryCommodity, PriceSignal> getPs() {
+        return this.ps;
+    }
+
+    public EnumMap<AncillaryCommodity, PowerLimitSignal> getPwrLimit() {
+        return this.pwrLimit;
+    }
+
+    public int getEpsOptimizationObjective() {
+        return this.epsOptimizationObjective;
+    }
 
 
-	public double getPlsUpperOverlimitFactor() {
-		return plsUpperOverlimitFactor;
-	}
-	
-	public double getPlsLowerOverlimitFactor() {
-		return plsLowerOverlimitFactor;
-	}
+    public int getPlsOptimizationObjective() {
+        return this.plsOptimizationObjective;
+    }
 
 
-	public boolean isEpsPlsChanged() {
-		return epsPlsChanged;
-	}
+    public int getVarOptimizationObjective() {
+        return this.varOptimizationObjective;
+    }
 
 
-	@Override
-	public EpsPlsStateExchange clone() {
-		
-		// TODO cloning
+    public double getPlsUpperOverLimitFactor() {
+        return this.plsUpperOverLimitFactor;
+    }
+
+    public double getPlsLowerOverLimitFactor() {
+        return this.plsLowerOverLimitFactor;
+    }
+
+
+    public boolean isEpsPlsChanged() {
+        return this.epsPlsChanged;
+    }
+
+
+    @Override
+    public EpsPlsStateExchange clone() {
+
+        // TODO cloning
 //		EnumMap<AncillaryCommodity,PriceSignal> newPs = new HashMap<>();
 //		for (Entry<AncillaryCommodity,PriceSignal> e : ps.entrySet()) {
 //			newPs.put(e.getKey(), e.getValue().clone());
@@ -114,20 +110,18 @@ public class EpsPlsStateExchange extends StateExchange {
 //		for (Entry<AncillaryCommodity,PowerLimitSignal> e : pwrLimit.entrySet()) {
 //			newPls.put(e.getKey(), e.getValue().clone());
 //		}
-		
-		EpsPlsStateExchange copy = 
-				new EpsPlsStateExchange(
-						getSender(),
-						getTimestamp(),
-						ps,
-						pwrLimit,
-						epsOptimizationObjective,
-						plsOptimizationObjective,
-						varOptimizationObjective,
-						plsUpperOverlimitFactor,
-						plsLowerOverlimitFactor,
-						epsPlsChanged);
-		return copy;
-	}
+
+        return new EpsPlsStateExchange(
+                this.getSender(),
+                this.getTimestamp(),
+                this.ps,
+                this.pwrLimit,
+                this.epsOptimizationObjective,
+                this.plsOptimizationObjective,
+                this.varOptimizationObjective,
+                this.plsUpperOverLimitFactor,
+                this.plsLowerOverLimitFactor,
+                this.epsPlsChanged);
+    }
 
 }

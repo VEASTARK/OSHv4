@@ -7,29 +7,27 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Jan Mueller
- *
  */
-public class GUIBatteryStorageStateExchange 
-				extends BatteryStorageOCSX 
-				implements EqualData<BatteryStorageOCSX> {
+public class GUIBatteryStorageStateExchange
+        extends BatteryStorageOCSX
+        implements EqualData<BatteryStorageOCSX> {
 
-	private static final long serialVersionUID = 2308641394864672076L;
+    private static final long serialVersionUID = 2308641394864672076L;
 
 
-	public GUIBatteryStorageStateExchange(
-			UUID sender, 
-			long timestamp,
-			double currentStateOfCharge, 
-			double minStateOfCharge, 
-			double maxStateOfCharge,
-			UUID batteryId) {
-		super(sender, timestamp, currentStateOfCharge, minStateOfCharge, maxStateOfCharge, batteryId);
-	}
+    public GUIBatteryStorageStateExchange(
+            UUID sender,
+            long timestamp,
+            double currentStateOfCharge,
+            double minStateOfCharge,
+            double maxStateOfCharge,
+            UUID batteryId) {
+        super(sender, timestamp, currentStateOfCharge, minStateOfCharge, maxStateOfCharge, batteryId);
+    }
 
-	
-	public boolean equalData(GUIBatteryStorageStateExchange o) {
-		return super.equalData(o);
-	}
+
+    public boolean equalData(GUIBatteryStorageStateExchange o) {
+        return super.equalData(o);
+    }
 }

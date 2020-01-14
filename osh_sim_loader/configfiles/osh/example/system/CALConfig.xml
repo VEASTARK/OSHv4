@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<CALConfiguration xmlns="http://osh/configuration/cal" xmlns:ns2="http://osh/configuration/system">
+<CALConfiguration xmlns:ns2="http://osh/configuration/system" xmlns="http://osh/configuration/cal">
     <assignedComDevices>
         <comDeviceID>6e95bc70-57cb-11e1-b86c-0800200c9a66</comDeviceID>
         <comDeviceType>GUI</comDeviceType>
@@ -43,7 +43,8 @@
         </comDriverParameters>
         <comDriverParameters>
             <ns2:parameterName>activePowerPrices</ns2:parameterName>
-            <ns2:parameterValue>0=26.10,21600=35.01,43200=39.58,46800=31.48,61200=35.01,68400=31.48,79200=26.10</ns2:parameterValue>
+            <ns2:parameterValue>0=26.10,21600=35.01,43200=39.58,46800=31.48,61200=35.01,68400=31.48,79200=26.10
+            </ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
         <comDriverParameters>
@@ -63,7 +64,9 @@
         </comDriverParameters>
         <comDriverParameters>
             <ns2:parameterName>ancillaryCommodities</ns2:parameterName>
-            <ns2:parameterValue>[activepowerexternal, reactivepowerexternal, naturalgaspowerexternal, pvactivepowerfeedin, chpactivepowerfeedin, pvactivepowerautoconsumption, chpactivepowerautoconsumption]</ns2:parameterValue>
+            <ns2:parameterValue>[activepowerexternal, reactivepowerexternal, naturalgaspowerexternal,
+                pvactivepowerfeedin, chpactivepowerfeedin, pvactivepowerautoconsumption, chpactivepowerautoconsumption]
+            </ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
         <comDriverParameters>

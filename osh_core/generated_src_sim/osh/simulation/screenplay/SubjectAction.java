@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for SubjectAction complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="SubjectAction">
  *   &lt;complexContent>
@@ -38,18 +38,16 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SubjectAction", propOrder = {
-    "tick",
-    "periodicAction",
-    "periodicRefresh",
-    "actionType",
-    "deviceID",
-    "nextState",
-    "performAction"
+        "tick",
+        "periodicAction",
+        "periodicRefresh",
+        "actionType",
+        "deviceID",
+        "nextState",
+        "performAction"
 })
 public class SubjectAction {
 
@@ -67,15 +65,13 @@ public class SubjectAction {
 
     /**
      * Gets the value of the tick property.
-     * 
      */
     public long getTick() {
-        return tick;
+        return this.tick;
     }
 
     /**
      * Sets the value of the tick property.
-     * 
      */
     public void setTick(long value) {
         this.tick = value;
@@ -83,15 +79,13 @@ public class SubjectAction {
 
     /**
      * Gets the value of the periodicAction property.
-     * 
      */
     public boolean isPeriodicAction() {
-        return periodicAction;
+        return this.periodicAction;
     }
 
     /**
      * Sets the value of the periodicAction property.
-     * 
      */
     public void setPeriodicAction(boolean value) {
         this.periodicAction = value;
@@ -99,15 +93,13 @@ public class SubjectAction {
 
     /**
      * Gets the value of the periodicRefresh property.
-     * 
      */
     public int getPeriodicRefresh() {
-        return periodicRefresh;
+        return this.periodicRefresh;
     }
 
     /**
      * Sets the value of the periodicRefresh property.
-     * 
      */
     public void setPeriodicRefresh(int value) {
         this.periodicRefresh = value;
@@ -115,23 +107,19 @@ public class SubjectAction {
 
     /**
      * Gets the value of the actionType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ActionType }
-     *     
+     *
+     * @return possible object is
+     * {@link ActionType }
      */
     public ActionType getActionType() {
-        return actionType;
+        return this.actionType;
     }
 
     /**
      * Sets the value of the actionType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ActionType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ActionType }
      */
     public void setActionType(ActionType value) {
         this.actionType = value;
@@ -139,23 +127,19 @@ public class SubjectAction {
 
     /**
      * Gets the value of the deviceID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceID() {
-        return deviceID;
+        return this.deviceID;
     }
 
     /**
      * Sets the value of the deviceID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceID(String value) {
         this.deviceID = value;
@@ -163,15 +147,13 @@ public class SubjectAction {
 
     /**
      * Gets the value of the nextState property.
-     * 
      */
     public boolean isNextState() {
-        return nextState;
+        return this.nextState;
     }
 
     /**
      * Sets the value of the nextState property.
-     * 
      */
     public void setNextState(boolean value) {
         this.nextState = value;
@@ -179,29 +161,27 @@ public class SubjectAction {
 
     /**
      * Gets the value of the performAction property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the performAction property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getPerformAction().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link PerformAction }
-     * 
-     * 
      */
     public List<PerformAction> getPerformAction() {
-        if (performAction == null) {
-            performAction = new ArrayList<PerformAction>();
+        if (this.performAction == null) {
+            this.performAction = new ArrayList<>();
         }
         return this.performAction;
     }

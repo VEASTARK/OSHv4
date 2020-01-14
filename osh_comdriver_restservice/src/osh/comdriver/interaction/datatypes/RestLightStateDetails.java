@@ -4,33 +4,32 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-@XmlType(name="lightStateDetails")
+@XmlType(name = "lightStateDetails")
 public class RestLightStateDetails extends RestStateDetail {
 
-	protected boolean state;
-	
-	/** for JAXB */
-	@SuppressWarnings("unused")
-	@Deprecated
-    protected RestLightStateDetails() {
-		this(null, 0);
-	}
-	
-	public RestLightStateDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
+    protected boolean state;
 
-	
-	public boolean isState() {
-		return state;
-	}
+    /**
+     * for JAXB
+     */
+    @Deprecated
+    public RestLightStateDetails() {
+        this(null, 0);
+    }
 
-	public void setState(boolean state) {
-		this.state = state;
-	}
+    public RestLightStateDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
+
+
+    public boolean isState() {
+        return this.state;
+    }
+
+    public void setState(boolean state) {
+        this.state = state;
+    }
 
 }

@@ -4,14 +4,12 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class BacNetThermalLocalController extends LocalController {
 
-	public BacNetThermalLocalController(IOSHOC controllerbox) {
-		super(controllerbox);
-	}
+    public BacNetThermalLocalController(IOSHOC osh) {
+        super(osh);
+    }
 
 }

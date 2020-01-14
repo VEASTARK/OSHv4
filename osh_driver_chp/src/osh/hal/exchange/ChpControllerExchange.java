@@ -5,68 +5,64 @@ import osh.eal.hal.exchange.HALControllerExchange;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class ChpControllerExchange 
-				extends HALControllerExchange {
-	
-	private boolean stopGenerationFlag;
-	
-	private boolean electricityRequest;
-	private boolean heatingRequest;
-	
-	private int scheduledRuntime;
+public class ChpControllerExchange
+        extends HALControllerExchange {
 
-	/**
-	 * 
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public ChpControllerExchange(
-			UUID deviceID, 
-			Long timestamp, 
-			boolean stopGenerationFlag, 
-			boolean electricityRequest, 
-			boolean heatingRequest,
-			int scheduledRuntime) {
-		super(deviceID, timestamp);
-		
-		this.stopGenerationFlag = stopGenerationFlag;
-		this.electricityRequest = electricityRequest;
-		this.heatingRequest = heatingRequest;
-		this.scheduledRuntime = scheduledRuntime;
-	}
+    private boolean stopGenerationFlag;
 
-	
-	public boolean isStopGenerationFlag() {
-		return stopGenerationFlag;
-	}
+    private boolean electricityRequest;
+    private boolean heatingRequest;
 
-	public boolean isElectricityRequest() {
-		return electricityRequest;
-	}
+    private final int scheduledRuntime;
 
-	public boolean isHeatingRequest() {
-		return heatingRequest;
-	}
+    /**
+     * @param deviceID
+     * @param timestamp
+     */
+    public ChpControllerExchange(
+            UUID deviceID,
+            Long timestamp,
+            boolean stopGenerationFlag,
+            boolean electricityRequest,
+            boolean heatingRequest,
+            int scheduledRuntime) {
+        super(deviceID, timestamp);
 
-	public int getScheduledRuntime() {
-		return scheduledRuntime;
-	}
+        this.stopGenerationFlag = stopGenerationFlag;
+        this.electricityRequest = electricityRequest;
+        this.heatingRequest = heatingRequest;
+        this.scheduledRuntime = scheduledRuntime;
+    }
 
 
-	public void setElectricityRequest(boolean electricityRequest) {
-		this.electricityRequest = electricityRequest;
-	}
-	
-	public void setHeatingRequest(boolean heatingRequest) {
-		this.heatingRequest = heatingRequest;
-	}
-	
-	public void setStopGenerationFlag(boolean stopGenerationFlag) {
-		this.stopGenerationFlag = stopGenerationFlag;
-	}
-	
+    public boolean isStopGenerationFlag() {
+        return this.stopGenerationFlag;
+    }
+
+    public void setStopGenerationFlag(boolean stopGenerationFlag) {
+        this.stopGenerationFlag = stopGenerationFlag;
+    }
+
+    public boolean isElectricityRequest() {
+        return this.electricityRequest;
+    }
+
+    public void setElectricityRequest(boolean electricityRequest) {
+        this.electricityRequest = electricityRequest;
+    }
+
+    public boolean isHeatingRequest() {
+        return this.heatingRequest;
+    }
+
+    public void setHeatingRequest(boolean heatingRequest) {
+        this.heatingRequest = heatingRequest;
+    }
+
+    public int getScheduledRuntime() {
+        return this.scheduledRuntime;
+    }
+
 }

@@ -6,74 +6,72 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import java.util.Map;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class AdsorptionChillerMOX implements IModelOfObservationExchange {
-	
-	private double coldWaterTemperature;
-	private double hotWaterTemperature;
-	private boolean running;
-	private int remainingRunningTime;
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	private Map<Long, Double> temperatureMap;
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public AdsorptionChillerMOX(
-			double coldWaterTemperature, 
-			double hotWaterTemperature,
-			boolean running, 
-			int remainingRunningTime,
-			Map<Long, Double> temperatureMap,
-			LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		super();
-		
-		this.coldWaterTemperature = coldWaterTemperature;
-		this.hotWaterTemperature = hotWaterTemperature;
-		this.running = running;
-		this.remainingRunningTime = remainingRunningTime;
-		
-		this.compressionType = compressionType;
-		this.compressionValue = compressionValue;
-		
-		this.temperatureMap = temperatureMap;
-	}
+
+    private final double coldWaterTemperature;
+    private final double hotWaterTemperature;
+    private final boolean running;
+    private final int remainingRunningTime;
+
+    private final LoadProfileCompressionTypes compressionType;
+    private final int compressionValue;
+
+    private final Map<Long, Double> temperatureMap;
+
+    /**
+     * CONSTRUCTOR
+     */
+    public AdsorptionChillerMOX(
+            double coldWaterTemperature,
+            double hotWaterTemperature,
+            boolean running,
+            int remainingRunningTime,
+            Map<Long, Double> temperatureMap,
+            LoadProfileCompressionTypes compressionType,
+            int compressionValue) {
+        super();
+
+        this.coldWaterTemperature = coldWaterTemperature;
+        this.hotWaterTemperature = hotWaterTemperature;
+        this.running = running;
+        this.remainingRunningTime = remainingRunningTime;
+
+        this.compressionType = compressionType;
+        this.compressionValue = compressionValue;
+
+        this.temperatureMap = temperatureMap;
+    }
 
 
-	public double getColdWaterTemperature() {
-		return coldWaterTemperature;
-	}
+    public double getColdWaterTemperature() {
+        return this.coldWaterTemperature;
+    }
 
-	public double getHotWaterTemperature() {
-		return hotWaterTemperature;
-	}
-	
-	public boolean isRunning() {
-		return running;
-	}
+    public double getHotWaterTemperature() {
+        return this.hotWaterTemperature;
+    }
 
-	public int getRemainingRunningTime() {
-		return remainingRunningTime;
-	}	
-	
-	public Map<Long, Double> getTemperatureMap() {
-		return temperatureMap;
-	}
+    public boolean isRunning() {
+        return this.running;
+    }
 
+    public int getRemainingRunningTime() {
+        return this.remainingRunningTime;
+    }
 
-	public LoadProfileCompressionTypes getCompressionType() {
-		return compressionType;
-	}
+    public Map<Long, Double> getTemperatureMap() {
+        return this.temperatureMap;
+    }
 
 
-	public int getCompressionValue() {
-		return compressionValue;
-	}
+    public LoadProfileCompressionTypes getCompressionType() {
+        return this.compressionType;
+    }
+
+
+    public int getCompressionValue() {
+        return this.compressionValue;
+    }
 }

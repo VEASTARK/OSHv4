@@ -1,4 +1,3 @@
-
 package osh.openweathermap.current;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,18 +10,20 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "message",
-    "country",
-    "sunrise",
-    "sunset"
+        "message",
+        "country",
+        "sunrise",
+        "sunset"
 })
 public class Sys implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 4780565443413501059L;
-	@JsonProperty("message")
+     *
+     */
+    private static final long serialVersionUID = 4780565443413501059L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("message")
     private Double message;
     @JsonProperty("country")
     private String country;
@@ -30,13 +31,9 @@ public class Sys implements Serializable {
     private Integer sunrise;
     @JsonProperty("sunset")
     private Integer sunset;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The message
+     * @return The message
      */
     @JsonProperty("message")
     public Double getMessage() {
@@ -44,9 +41,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @param message
-     *     The message
+     * @param message The message
      */
     @JsonProperty("message")
     public void setMessage(Double message) {
@@ -54,9 +49,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The country
+     * @return The country
      */
     @JsonProperty("country")
     public String getCountry() {
@@ -64,9 +57,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @param country
-     *     The country
+     * @param country The country
      */
     @JsonProperty("country")
     public void setCountry(String country) {
@@ -74,9 +65,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The sunrise
+     * @return The sunrise
      */
     @JsonProperty("sunrise")
     public Integer getSunrise() {
@@ -84,9 +73,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @param sunrise
-     *     The sunrise
+     * @param sunrise The sunrise
      */
     @JsonProperty("sunrise")
     public void setSunrise(Integer sunrise) {
@@ -94,9 +81,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The sunset
+     * @return The sunset
      */
     @JsonProperty("sunset")
     public Integer getSunset() {
@@ -104,9 +89,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @param sunset
-     *     The sunset
+     * @param sunset The sunset
      */
     @JsonProperty("sunset")
     public void setSunset(Integer sunset) {

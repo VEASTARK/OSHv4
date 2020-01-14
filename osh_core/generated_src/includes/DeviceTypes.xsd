@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://osh/configuration/system" elementFormDefault="qualified">
-	
-	
-	<simpleType name="DeviceTypes">
-		<restriction base="string">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://osh/configuration/system"
+        elementFormDefault="qualified">
+
+
+    <simpleType name="DeviceTypes">
+        <restriction base="string">
             <enumeration value="HVAC"/>
 
             <enumeration value="COMBINATIONAPPARATUS"/>
@@ -56,8 +57,8 @@
             <enumeration value="SMOKESENSOR"/>
             <enumeration value="MOTIONSENSOR"/>
             <enumeration value="CONTACTSENSOR"/>
-			
-			<!-- Smart Plugs -->
+
+            <!-- Smart Plugs -->
             <enumeration value="METERPLUG"/>
             <enumeration value="SWITCHPLUG"/>
             <enumeration value="METERSWITCHPLUG"/>
@@ -90,16 +91,16 @@
 
             <enumeration value="INSERTHEATINGELEMENT"/>
             <enumeration value="DOMESTICHOTWATER"/>
-		</restriction>
-	</simpleType>
-	
-	<simpleType name="DeviceClassification">
-		<restriction base="string">
+        </restriction>
+    </simpleType>
+
+    <simpleType name="DeviceClassification">
+        <restriction base="string">
             <enumeration value="HVAC"/>
 
             <enumeration value="APPLIANCE"/>
-			
-			<enumeration value="LUMINAIRE"><!-- Beleuchtung --></enumeration>
+
+            <enumeration value="LUMINAIRE"><!-- Beleuchtung --></enumeration>
 
             <enumeration value="ELECTRICVEHICLE"/>
 
@@ -127,11 +128,11 @@
             <enumeration value="BATTERYSTORAGE"/>
 
             <enumeration value="N/A"/>
-		</restriction>
-	</simpleType>
+        </restriction>
+    </simpleType>
 
-	<simpleType name="ComDeviceTypes">
-		<restriction base="string">
+    <simpleType name="ComDeviceTypes">
+        <restriction base="string">
             <enumeration value="USERINTERACTIONDEVICE"/>
             <enumeration value="GUI"/>
 
@@ -146,22 +147,22 @@
             <enumeration value="DATABASELOGGER"/>
 
             <enumeration value="OTHER"/>
-		</restriction>
-	</simpleType>
+        </restriction>
+    </simpleType>
 
-	<simpleType name="ComDeviceClassification">
-		<restriction base="string">
+    <simpleType name="ComDeviceClassification">
+        <restriction base="string">
             <enumeration value="USERINTERACTION"/>
             <enumeration value="UTILITY"/>
             <enumeration value="LOGGER"/>
 
             <enumeration value="OTHER"/>
-		</restriction>
-	</simpleType>
+        </restriction>
+    </simpleType>
 
 
-	<simpleType name="BusDeviceTypes">
-		<restriction base="string">
+    <simpleType name="BusDeviceTypes">
+        <restriction base="string">
             <enumeration value="CHILLIICONTROLLER"/>
             <enumeration value="EEBUSGATEWAY"/>
             <enumeration value="HABITEQGATEWAY"/>
@@ -171,14 +172,14 @@
             <enumeration value="WAGO750-860"/>
             <enumeration value="FILELOGGER"/>
             <enumeration value="OTHER"/>
-		</restriction>
-	</simpleType>
+        </restriction>
+    </simpleType>
 
-	<simpleType name="BusDeviceClassification">
-		<restriction base="string">
+    <simpleType name="BusDeviceClassification">
+        <restriction base="string">
             <enumeration value="GATEWAY"/>
             <enumeration value="BUSCONTROLLER"/>
-		</restriction>
-	</simpleType>
+        </restriction>
+    </simpleType>
 
 </schema>

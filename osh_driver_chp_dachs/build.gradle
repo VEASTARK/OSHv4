@@ -8,7 +8,7 @@ sourceSets {
 }
 
 dependencies {
-    compile project(":osh_core")
-    compile project(":osh_driver_chp")
-    compile project(":osh_driver_hvac_watertank")
+    implementation project(":osh_core")
+    implementation project(":osh_driver_chp")
+    implementation project(":osh_driver_hvac_watertank")
 }

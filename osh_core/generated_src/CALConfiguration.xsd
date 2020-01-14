@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" 
-	targetNamespace="http://osh/configuration/cal"
-	xmlns:ins="http://osh/configuration/system"
-	xmlns:tns="http://osh/configuration/cal"
-	elementFormDefault="qualified">
+<schema xmlns:ins="http://osh/configuration/system"
+        xmlns:tns="http://osh/configuration/cal"
+        xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://osh/configuration/cal"
+        elementFormDefault="qualified">
 
-    <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system" />
+    <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system"/>
 
-	<element name="CALConfiguration">
-		<complexType>
-			<sequence>
+    <element name="CALConfiguration">
+        <complexType>
+            <sequence>
                 <element name="assignedComDevices" type="tns:AssignedComDevice" minOccurs="0" maxOccurs="unbounded"/>
-			</sequence>
-		</complexType>
-	</element>
-	
-	
-	<complexType name="AssignedComDevice">
-		<sequence>
+            </sequence>
+        </complexType>
+    </element>
+
+
+    <complexType name="AssignedComDevice">
+        <sequence>
             <element name="comDeviceID" type="string"/>
             <element name="comDeviceType" type="ins:ComDeviceTypes"/>
             <element name="comDeviceClassification" type="ins:ComDeviceClassification"/>
@@ -25,7 +25,7 @@
             <element name="comManagerClassName" type="string"/>
             <element name="comDriverClassName" type="string"/>
             <element minOccurs="0" maxOccurs="unbounded" name="comDriverParameters" type="ins:ConfigurationParameter"/>
-		</sequence>
-	</complexType>
-	
+        </sequence>
+    </complexType>
+
 </schema>

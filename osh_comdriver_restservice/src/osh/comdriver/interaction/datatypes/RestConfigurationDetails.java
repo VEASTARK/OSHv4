@@ -2,63 +2,59 @@ package osh.comdriver.interaction.datatypes;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 import java.util.UUID;
 
 
 /**
- * 
  * @author Kaibin Bao, Ingo Mauser
- *
  */
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
 @XmlType
 public class RestConfigurationDetails extends RestStateDetail {
 
-	@XmlType
-	public enum ConfigurationStatus {
-		@XmlEnumValue("UNCONFIGURED")
-		UNCONFIGURED,
-		@XmlEnumValue("CONFIGURED")
-		CONFIGURED,
-		@XmlEnumValue("USED")
-		USED,
-		@XmlEnumValue("ERROR")
-		ERROR
-	}
-	
-	@Enumerated(value=EnumType.STRING) 
-	protected ConfigurationStatus configurationStatus;
-	
-	protected UUID usedBy;
-	
-	/** for JAXB */
-	@SuppressWarnings("unused")
-	@Deprecated
-    protected RestConfigurationDetails() {
-		this(null, 0);
-	}
+    @Enumerated(value = EnumType.STRING)
+    protected ConfigurationStatus configurationStatus;
+    protected UUID usedBy;
 
-	public RestConfigurationDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
+    /**
+     * for JAXB
+     */
+    @SuppressWarnings("unused")
+    @Deprecated
+    public RestConfigurationDetails() {
+        this(null, 0);
+    }
 
-	public ConfigurationStatus getConfigurationStatus() {
-		return configurationStatus;
-	}
+    public RestConfigurationDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
 
-	public void setConfigurationStatus(ConfigurationStatus configurationStatus) {
-		this.configurationStatus = configurationStatus;
-	}
+    public ConfigurationStatus getConfigurationStatus() {
+        return this.configurationStatus;
+    }
 
-	public UUID getUsedBy() {
-		return usedBy;
-	}
+    public void setConfigurationStatus(ConfigurationStatus configurationStatus) {
+        this.configurationStatus = configurationStatus;
+    }
 
-	public void setUsedBy(UUID usedBy) {
-		this.usedBy = usedBy;
-	}
+    public UUID getUsedBy() {
+        return this.usedBy;
+    }
+
+    public void setUsedBy(UUID usedBy) {
+        this.usedBy = usedBy;
+    }
+
+    @XmlType
+    public enum ConfigurationStatus {
+        @XmlEnumValue("UNCONFIGURED")
+        UNCONFIGURED,
+        @XmlEnumValue("CONFIGURED")
+        CONFIGURED,
+        @XmlEnumValue("USED")
+        USED,
+        @XmlEnumValue("ERROR")
+        ERROR
+    }
 }

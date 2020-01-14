@@ -39,104 +39,105 @@ import java.util.*;
  */
 @SuppressWarnings("rawtypes")
 public class BitFlipMutation extends Mutation {
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-/**
-   * Valid solution types to apply this operator 
-   */
-  private static final List VALID_TYPES = Arrays.asList(BinarySolutionType.class,
-      BinaryRealSolutionType.class,
-      IntSolutionType.class) ;
+    /**
+     * Valid solution types to apply this operator
+     */
+    private static final List VALID_TYPES = Arrays.asList(BinarySolutionType.class,
+            BinaryRealSolutionType.class,
+            IntSolutionType.class);
 
-  protected Double mutationProbability_ = null ;
-  
-	/**
-	 * Constructor
-	 * Creates a new instance of the Bit Flip mutation operator
-	 */
-	public BitFlipMutation(
-			HashMap<String, Object> parameters,
-			PseudoRandom pseudoRandom) {
-		super(parameters, pseudoRandom) ;
-  	if (parameters.get("probability") != null)
-  		mutationProbability_ = (Double) parameters.get("probability") ;  		
-	} // BitFlipMutation
+    protected Double mutationProbability_;
 
-	/**
-	 * Perform the mutation operation
-	 * @param probability Mutation probability
-	 * @param solution The solution to mutate
-	 * @throws JMException
-	 */
-	public void doMutation(double probability, Solution solution) throws JMException {
-		try {
-			if ((solution.getType().getClass() == BinarySolutionType.class) ||
-					(solution.getType().getClass() == BinaryRealSolutionType.class)) {				
-				for (int i = 0; i < solution.getDecisionVariables().length; i++) {					
-					Binary variable = (Binary) solution.getDecisionVariables()[i];				
-					BitSet set = new BitSet(variable.getNumberOfBits());
-					int count = variable.getNumberOfBits();
-					double countD = count;
-					/* number of bits flipped is B(n, p) distributed (n = number of bits, p = mutationProbability),
-					 * this can be approximated with N(np, sqrt(np * (1-p)))
-					 */					
-					int x = (int) Math.round(Math.sqrt(probability * (1-probability) * countD)
-					        * pseudoRandom.nextGaussian() + countD * probability);
-					
-					//very low probability in some special cases that x is bigger then the bitcount
-					x = Math.min(x, count);
-					
-					Set<Integer> indices = new HashSet<Integer>();
-					while(indices.size() < x){
-					     indices.add(pseudoRandom.randInt(0, count - 1));
-					}
-					for (Integer j : indices)
-						set.set(j);					
-					variable.bits_.xor(set);
-				}
-			} // if
-			else { // Integer representation
-				for (int i = 0; i < solution.getDecisionVariables().length; i++)
-					if (pseudoRandom.randDouble() < probability) {
-						int value = pseudoRandom.randInt(
-								(int)solution.getDecisionVariables()[i].getLowerBound(),
-								(int)solution.getDecisionVariables()[i].getUpperBound());
-						solution.getDecisionVariables()[i].setValue(value);
-					} // if
-			} // else
-		} catch (ClassCastException e1) {
-			Configuration.logger_.severe("BitFlipMutation.doMutation: " +
-					"ClassCastException error" + e1.getMessage());
-			Class cls = java.lang.String.class;
-			String name = cls.getName();
-			throw new JMException("Exception in " + name + ".doMutation()");
-		}
-	} // doMutation
+    /**
+     * Constructor
+     * Creates a new instance of the Bit Flip mutation operator
+     */
+    public BitFlipMutation(
+            HashMap<String, Object> parameters,
+            PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
+        if (parameters.get("probability") != null)
+            this.mutationProbability_ = (Double) parameters.get("probability");
+    } // BitFlipMutation
 
-	/**
-	 * Executes the operation
-	 * @param object An object containing a solution to mutate
-	 * @return An object containing the mutated solution
-	 * @throws JMException 
-	 */
-	@Override
-	public Object execute(Object object) throws JMException {
-		Solution solution = (Solution) object;
+    /**
+     * Perform the mutation operation
+     *
+     * @param probability Mutation probability
+     * @param solution    The solution to mutate
+     * @throws JMException
+     */
+    public void doMutation(double probability, Solution solution) throws JMException {
+        try {
+            if ((solution.getType().getClass() == BinarySolutionType.class) ||
+                    (solution.getType().getClass() == BinaryRealSolutionType.class)) {
+                for (int i = 0; i < solution.getDecisionVariables().length; i++) {
+                    Binary variable = (Binary) solution.getDecisionVariables()[i];
+                    BitSet set = new BitSet(variable.getNumberOfBits());
+                    int count = variable.getNumberOfBits();
+                    /* number of bits flipped is B(n, p) distributed (n = number of bits, p = mutationProbability),
+                     * this can be approximated with N(np, sqrt(np * (1-p)))
+                     */
+                    int x = (int) Math.round(Math.sqrt(probability * (1 - probability) * count)
+                            * this.pseudoRandom.nextGaussian() + count * probability);
 
-		if (!VALID_TYPES.contains(solution.getType().getClass())) {
-			Configuration.logger_.severe("BitFlipMutation.execute: the solution " +
-					"is not of the right type. The type should be 'Binary', " +
-					"'BinaryReal' or 'Int', but " + solution.getType() + " is obtained");
+                    //very low probability in some special cases that x is bigger then the bitcount
+                    x = Math.min(x, count);
 
-			Class cls = java.lang.String.class;
-			String name = cls.getName();
-			throw new JMException("Exception in " + name + ".execute()");
-		} // if 
+                    Set<Integer> indices = new HashSet<>();
+                    while (indices.size() < x) {
+                        indices.add(this.pseudoRandom.randInt(0, count - 1));
+                    }
+                    for (Integer j : indices)
+                        set.set(j);
+                    variable.bits_.xor(set);
+                }
+            } // if
+            else { // Integer representation
+                for (int i = 0; i < solution.getDecisionVariables().length; i++)
+                    if (this.pseudoRandom.randDouble() < probability) {
+                        int value = this.pseudoRandom.randInt(
+                                (int) solution.getDecisionVariables()[i].getLowerBound(),
+                                (int) solution.getDecisionVariables()[i].getUpperBound());
+                        solution.getDecisionVariables()[i].setValue(value);
+                    } // if
+            } // else
+        } catch (ClassCastException e1) {
+            Configuration.logger_.severe("BitFlipMutation.doMutation: " +
+                    "ClassCastException error" + e1.getMessage());
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".doMutation()");
+        }
+    } // doMutation
 
-		doMutation(mutationProbability_, solution);
-		return solution;
-	} // execute
+    /**
+     * Executes the operation
+     *
+     * @param object An object containing a solution to mutate
+     * @return An object containing the mutated solution
+     * @throws JMException
+     */
+    @Override
+    public Object execute(Object object) throws JMException {
+        Solution solution = (Solution) object;
+
+        if (!VALID_TYPES.contains(solution.getType().getClass())) {
+            Configuration.logger_.severe("BitFlipMutation.execute: the solution " +
+                    "is not of the right type. The type should be 'Binary', " +
+                    "'BinaryReal' or 'Int', but " + solution.getType() + " is obtained");
+
+            Class cls = java.lang.String.class;
+            String name = cls.getName();
+            throw new JMException("Exception in " + name + ".execute()");
+        } // if
+
+        this.doMutation(this.mutationProbability_, solution);
+        return solution;
+    } // execute
 } // BitFlipMutation

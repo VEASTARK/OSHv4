@@ -13,100 +13,99 @@ import java.util.UUID;
 
 /**
  * IPP for devices without any interaction (e.g., appliance is off)
- * 
- * @author Ingo Mauser, Sebastian Kramer
  *
+ * @author Ingo Mauser, Sebastian Kramer
  */
-public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType extends IPrediction> 
-							extends NonControllableIPP<PhenotypeType, PredictionType> {	
+public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType extends IPrediction>
+        extends NonControllableIPP<PhenotypeType, PredictionType> {
 
-	private static final long serialVersionUID = -8858902765784429939L;
+    private static final long serialVersionUID = -8858902765784429939L;
+    public static final Commodity[] ALL_OUTPUT_COMMODITIES = {};
 
-	private Schedule schedule;
-	private String description;
-	
-	
-	/**
-	 * CONSTRUCTOR for serialization usage only, do not use
-	 */
-	@Deprecated
-	protected StaticIPP() {
-		super();
-	}	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public StaticIPP(
-			UUID deviceId, 
-			IGlobalLogger logger,
-			long timestamp, 
-			boolean toBeScheduled,
-			long optimizationHorizon, 
-			DeviceTypes deviceType, 
-			long referenceTime,
-			Schedule schedule,
-			LoadProfileCompressionTypes compressionType,
-			int compressionValue,
-			String description) {
-		
-		super(
-				deviceId, 
-				logger, 
-				toBeScheduled, 
-				false, //does not need ancillary meter state as Input State
-				false, //does not react to input states
-				true, //is static
-				referenceTime,
-				deviceType,
-				new Commodity[]{
-				},
-				compressionType,
-				compressionValue);
+    private Schedule schedule;
+    private String description;
 
-		this.schedule = schedule;
-		this.description = description;
-	}
 
-	
-	@Override
-	public void initializeInterdependentCalculation(
-			long maxReferenceTime,
-			BitSet solution,
-			int stepSize,
-			boolean createLoadProfile,
-			boolean keepPrediction) {
-		this.stepSize = stepSize;
-		this.internalInterdependentOutputStates = null;
-		setOutputStates(null);
-		// do nothing
-	}
-	
-	@Override
-	public void calculateNextStep() {
-		// do nothing		
-	}
-	
-	@Override
-	public Schedule getFinalInterdependentSchedule() {
-		return schedule;
-	}
-	
+    /**
+     * CONSTRUCTOR for serialization usage only, do not use
+     */
+    @Deprecated
+    protected StaticIPP() {
+        super();
+    }
+
+    /**
+     * CONSTRUCTOR
+     */
+    public StaticIPP(
+            UUID deviceId,
+            IGlobalLogger logger,
+            long timestamp,
+            boolean toBeScheduled,
+            long optimizationHorizon,
+            DeviceTypes deviceType,
+            long referenceTime,
+            Schedule schedule,
+            LoadProfileCompressionTypes compressionType,
+            int compressionValue,
+            String description) {
+
+        super(
+                deviceId,
+                logger,
+                toBeScheduled,
+                false, //does not need ancillary meter state as Input State
+                false, //does not react to input states
+                true, //is static
+                referenceTime,
+                deviceType,
+                ALL_OUTPUT_COMMODITIES,
+                compressionType,
+                compressionValue);
+
+        this.schedule = schedule;
+        this.description = description;
+    }
+
+
+    @Override
+    public void initializeInterdependentCalculation(
+            long maxReferenceTime,
+            BitSet solution,
+            int stepSize,
+            boolean createLoadProfile,
+            boolean keepPrediction) {
+        this.stepSize = stepSize;
+        this.internalInterdependentOutputStates = null;
+        this.setOutputStates(null);
+        // do nothing
+    }
+
+    @Override
+    public void calculateNextStep() {
+        // do nothing
+    }
+
+    @Override
+    public Schedule getFinalInterdependentSchedule() {
+        return this.schedule;
+    }
+
 //	@Override
 //	public Schedule getSchedule(BitSet solution) {
 //		return schedule;
 //	}
 
-	@Override
-	public void recalculateEncoding(long currentTime, long maxHorizon) {
-		this.setReferenceTime(currentTime);
-	}
-	
-	// ### to string ###
-	
-	@Override
-	public String problemToString() {
-		return "[" + getReferenceTime() + "] " + description;
-	}
-	
+    @Override
+    public void recalculateEncoding(long currentTime, long maxHorizon) {
+        this.setReferenceTime(currentTime);
+    }
+
+    // ### to string ###
+
+    @Override
+    public String problemToString() {
+        return "[" + this.getReferenceTime() + "] " + this.description;
+    }
+
 }

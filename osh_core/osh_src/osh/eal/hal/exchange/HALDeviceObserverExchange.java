@@ -9,79 +9,80 @@ import java.util.UUID;
 
 /**
  * Please remember cloning!
- * @author Florian Allerding, Ingo Mauser
  *
+ * @author Florian Allerding, Ingo Mauser
  */
-public class HALDeviceObserverExchange 
-				extends HALObserverExchange
-				implements IHALDeviceMetaDetails {
-	
-	private String name;
-	private String location;
-	
-	private DeviceTypes deviceType;
-	private DeviceClassification deviceClass;
-	
-	private boolean configured;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public HALDeviceObserverExchange(UUID deviceID, Long timestamp) {
-		super(deviceID, timestamp);
-	}
-	
+public class HALDeviceObserverExchange
+        extends HALObserverExchange
+        implements IHALDeviceMetaDetails {
 
-	public String getName() {
-		return name;
-	}
+    private String name;
+    private String location;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private DeviceTypes deviceType;
+    private DeviceClassification deviceClass;
 
-	public String getLocation() {
-		return location;
-	}
+    private boolean configured;
 
-	public void setLocation(String location) {
-		this.location = location;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public HALDeviceObserverExchange(UUID deviceID, Long timestamp) {
+        super(deviceID, timestamp);
+    }
 
-	public DeviceTypes getDeviceType() {
-		return deviceType;
-	}
 
-	public void setDeviceType(DeviceTypes deviceType) {
-		this.deviceType = deviceType;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public DeviceClassification getDeviceClassification() {
-		return deviceClass;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setDeviceClass(DeviceClassification deviceClass) {
-		this.deviceClass = deviceClass;
-	}
+    public String getLocation() {
+        return this.location;
+    }
 
-	public boolean isConfigured() {
-		return configured;
-	}
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
-	public void setConfigured(boolean configured) {
-		this.configured = configured;
-	}
-	
-	public void setDeviceMetaDetails(DeviceMetaDriverDetails deviceMetaDetails) {
-		this.name = deviceMetaDetails.getName();
-		this.location = deviceMetaDetails.getLocation();
-		
-		this.deviceType = deviceMetaDetails.getDeviceType();
-		this.deviceClass = deviceMetaDetails.getDeviceClassification();
-		
-		this.configured = deviceMetaDetails.isConfigured();
-	}
+    public DeviceTypes getDeviceType() {
+        return this.deviceType;
+    }
+
+    public void setDeviceType(DeviceTypes deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public DeviceClassification getDeviceClassification() {
+        return this.deviceClass;
+    }
+
+    public void setDeviceClass(DeviceClassification deviceClass) {
+        this.deviceClass = deviceClass;
+    }
+
+    public boolean isConfigured() {
+        return this.configured;
+    }
+
+    public void setConfigured(boolean configured) {
+        this.configured = configured;
+    }
+
+    public void setDeviceMetaDetails(DeviceMetaDriverDetails deviceMetaDetails) {
+        this.name = deviceMetaDetails.getName();
+        this.location = deviceMetaDetails.getLocation();
+
+        this.deviceType = deviceMetaDetails.getDeviceType();
+        this.deviceClass = deviceMetaDetails.getDeviceClassification();
+
+        this.configured = deviceMetaDetails.isConfigured();
+    }
 
 }

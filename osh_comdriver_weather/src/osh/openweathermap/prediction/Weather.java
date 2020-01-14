@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,18 +10,20 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "id",
-    "main",
-    "description",
-    "icon"
+        "id",
+        "main",
+        "description",
+        "icon"
 })
 public class Weather implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 6127732491371114625L;
-	@JsonProperty("id")
+     *
+     */
+    private static final long serialVersionUID = 6127732491371114625L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("id")
     private Integer id;
     @JsonProperty("main")
     private String main;
@@ -30,13 +31,9 @@ public class Weather implements Serializable {
     private String description;
     @JsonProperty("icon")
     private String icon;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The id
+     * @return The id
      */
     @JsonProperty("id")
     public Integer getId() {
@@ -44,9 +41,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @param id
-     *     The id
+     * @param id The id
      */
     @JsonProperty("id")
     public void setId(Integer id) {
@@ -54,9 +49,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The main
+     * @return The main
      */
     @JsonProperty("main")
     public String getMain() {
@@ -64,9 +57,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @param main
-     *     The main
+     * @param main The main
      */
     @JsonProperty("main")
     public void setMain(String main) {
@@ -74,9 +65,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The description
+     * @return The description
      */
     @JsonProperty("description")
     public String getDescription() {
@@ -84,9 +73,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @param description
-     *     The description
+     * @param description The description
      */
     @JsonProperty("description")
     public void setDescription(String description) {
@@ -94,9 +81,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The icon
+     * @return The icon
      */
     @JsonProperty("icon")
     public String getIcon() {
@@ -104,9 +89,7 @@ public class Weather implements Serializable {
     }
 
     /**
-     * 
-     * @param icon
-     *     The icon
+     * @param icon The icon
      */
     @JsonProperty("icon")
     public void setIcon(String icon) {

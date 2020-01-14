@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for devicePerMeter complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="devicePerMeter">
  *   &lt;complexContent>
@@ -32,14 +32,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "devicePerMeter", propOrder = {
-    "meterUUID",
-    "deviceUUID",
-    "deviceType"
+        "meterUUID",
+        "deviceUUID",
+        "deviceType"
 })
 public class DevicePerMeter {
 
@@ -52,23 +50,19 @@ public class DevicePerMeter {
 
     /**
      * Gets the value of the meterUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getMeterUUID() {
-        return meterUUID;
+        return this.meterUUID;
     }
 
     /**
      * Sets the value of the meterUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMeterUUID(String value) {
         this.meterUUID = value;
@@ -76,23 +70,19 @@ public class DevicePerMeter {
 
     /**
      * Gets the value of the deviceUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceUUID() {
-        return deviceUUID;
+        return this.deviceUUID;
     }
 
     /**
      * Sets the value of the deviceUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceUUID(String value) {
         this.deviceUUID = value;
@@ -100,23 +90,19 @@ public class DevicePerMeter {
 
     /**
      * Gets the value of the deviceType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceType() {
-        return deviceType;
+        return this.deviceType;
     }
 
     /**
      * Sets the value of the deviceType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceType(String value) {
         this.deviceType = value;

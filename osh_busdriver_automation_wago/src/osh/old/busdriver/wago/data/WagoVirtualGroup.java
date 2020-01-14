@@ -9,35 +9,34 @@ import java.util.Map;
 
 /**
  * wago xml interface
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 @XmlType
 public class WagoVirtualGroup {
-	@XmlPath("@id")
-	private int groupId;
+    @XmlPath("@id")
+    private int groupId;
 
-	@XmlPath("output")
-	private List<WagoVirtualSwitch> vswitches;
+    @XmlPath("output")
+    private List<WagoVirtualSwitch> vSwitches;
 
-	public int getGroupId() {
-		return groupId;
-	}
+    public int getGroupId() {
+        return this.groupId;
+    }
 
-	public List<WagoVirtualSwitch> getVswitches() {
-		return vswitches;
-	}
+    public List<WagoVirtualSwitch> getVSwitches() {
+        return this.vSwitches;
+    }
 
-	public byte getByte() {
-		Map<Integer, WagoVirtualSwitch> map = new HashMap<>();
-		for (WagoVirtualSwitch vs : vswitches) map.put(vs.getId()%10, vs);
-		byte ret = 0;
-		for (int i = 7; i >= 0; i--) {
-			ret <<= 1;
-			if (map.get(i).getState()) ret |= 1;
-		}
-		
-		return ret;
-	}
+    public byte getByte() {
+        Map<Integer, WagoVirtualSwitch> map = new HashMap<>();
+        for (WagoVirtualSwitch vs : this.vSwitches) map.put(vs.getId() % 10, vs);
+        byte ret = 0;
+        for (int i = 7; i >= 0; i--) {
+            ret <<= 1;
+            if (map.get(i).getState()) ret |= 1;
+        }
+
+        return ret;
+    }
 }

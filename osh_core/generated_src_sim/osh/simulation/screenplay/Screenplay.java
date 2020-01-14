@@ -15,9 +15,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,12 +29,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "simActions"
+        "simActions"
 })
 @XmlRootElement(name = "Screenplay")
 public class Screenplay {
@@ -44,29 +42,27 @@ public class Screenplay {
 
     /**
      * Gets the value of the simActions property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the simActions property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSIMActions().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link SubjectAction }
-     * 
-     * 
      */
     public List<SubjectAction> getSIMActions() {
-        if (simActions == null) {
-            simActions = new ArrayList<SubjectAction>();
+        if (this.simActions == null) {
+            this.simActions = new ArrayList<>();
         }
         return this.simActions;
     }

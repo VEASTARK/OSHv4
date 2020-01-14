@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for BusDeviceClassification.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "BusDeviceClassification")
 @XmlEnum
@@ -34,12 +33,12 @@ public enum BusDeviceClassification {
     GATEWAY,
     BUSCONTROLLER;
 
-    public String value() {
-        return name();
-    }
-
     public static BusDeviceClassification fromValue(String v) {
         return valueOf(v);
+    }
+
+    public String value() {
+        return this.name();
     }
 
 }

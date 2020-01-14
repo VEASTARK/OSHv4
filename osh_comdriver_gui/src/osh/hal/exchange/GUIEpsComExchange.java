@@ -10,33 +10,31 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
- *
  */
 public class GUIEpsComExchange extends CALComExchange {
-	
-	private EnumMap<AncillaryCommodity,PriceSignal> priceSignals;
 
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public GUIEpsComExchange(UUID deviceID, Long timestamp) {
-		super(deviceID, timestamp);
-	}
+    private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
 
 
-	public EnumMap<AncillaryCommodity, PriceSignal> getPriceSignals() {
-		return priceSignals;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public GUIEpsComExchange(UUID deviceID, Long timestamp) {
+        super(deviceID, timestamp);
+    }
 
-	public void setPriceSignals(EnumMap<AncillaryCommodity, PriceSignal> priceSignals) {
-		EnumMap<AncillaryCommodity,PriceSignal> clonedSignal = new EnumMap<>(AncillaryCommodity.class);
-		for ( Entry<AncillaryCommodity,PriceSignal> e : priceSignals.entrySet()) {
-			clonedSignal.put(e.getKey(), e.getValue().clone());
-		}
-		this.priceSignals = clonedSignal;
-	}
+
+    public EnumMap<AncillaryCommodity, PriceSignal> getPriceSignals() {
+        return this.priceSignals;
+    }
+
+    public void setPriceSignals(EnumMap<AncillaryCommodity, PriceSignal> priceSignals) {
+        EnumMap<AncillaryCommodity, PriceSignal> clonedSignal = new EnumMap<>(AncillaryCommodity.class);
+        for (Entry<AncillaryCommodity, PriceSignal> e : priceSignals.entrySet()) {
+            clonedSignal.put(e.getKey(), e.getValue().clone());
+        }
+        this.priceSignals = clonedSignal;
+    }
 
 }

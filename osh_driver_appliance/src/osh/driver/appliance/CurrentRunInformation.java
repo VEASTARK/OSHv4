@@ -1,60 +1,58 @@
 package osh.driver.appliance;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class CurrentRunInformation {
-	
-	private int currentProfileID = -1;
-	private int currentSegment = -1;
-	private boolean currentlyRunningPhase = false; // false: PAUSE, true: PHASE
-	private int currentTickCounter = 0;
-	
-	public CurrentRunInformation(
-			int currentProfileID, 
-			int currentSegment,
-			boolean currentlyRunningPhase, 
-			int currentTickCounter) {
-		super();
-		
-		this.currentProfileID = currentProfileID;
-		this.currentSegment = currentSegment;
-		this.currentlyRunningPhase = currentlyRunningPhase;
-		this.currentTickCounter = currentTickCounter;
-	}
 
-	public int getCurrentProfileID() {
-		return currentProfileID;
-	}
+    private int currentProfileID;
+    private int currentSegment;
+    private boolean currentlyRunningPhase; // false: PAUSE, true: PHASE
+    private int currentTickCounter;
 
-	public void setCurrentProfileID(int currentProfileID) {
-		this.currentProfileID = currentProfileID;
-	}
+    public CurrentRunInformation(
+            int currentProfileID,
+            int currentSegment,
+            boolean currentlyRunningPhase,
+            int currentTickCounter) {
+        super();
 
-	public int getCurrentSegment() {
-		return currentSegment;
-	}
+        this.currentProfileID = currentProfileID;
+        this.currentSegment = currentSegment;
+        this.currentlyRunningPhase = currentlyRunningPhase;
+        this.currentTickCounter = currentTickCounter;
+    }
 
-	public void setCurrentSegment(int currentSegment) {
-		this.currentSegment = currentSegment;
-	}
+    public int getCurrentProfileID() {
+        return this.currentProfileID;
+    }
 
-	public boolean isCurrentlyRunningPhase() {
-		return currentlyRunningPhase;
-	}
+    public void setCurrentProfileID(int currentProfileID) {
+        this.currentProfileID = currentProfileID;
+    }
 
-	public void setCurrentlyRunningPhase(boolean currentlyRunningPhase) {
-		this.currentlyRunningPhase = currentlyRunningPhase;
-	}
+    public int getCurrentSegment() {
+        return this.currentSegment;
+    }
 
-	public int getCurrentTickCounter() {
-		return currentTickCounter;
-	}
+    public void setCurrentSegment(int currentSegment) {
+        this.currentSegment = currentSegment;
+    }
 
-	public void setCurrentTickCounter(int currentTickCounter) {
-		this.currentTickCounter = currentTickCounter;
-	}
-	
+    public boolean isCurrentlyRunningPhase() {
+        return this.currentlyRunningPhase;
+    }
+
+    public void setCurrentlyRunningPhase(boolean currentlyRunningPhase) {
+        this.currentlyRunningPhase = currentlyRunningPhase;
+    }
+
+    public int getCurrentTickCounter() {
+        return this.currentTickCounter;
+    }
+
+    public void setCurrentTickCounter(int currentTickCounter) {
+        this.currentTickCounter = currentTickCounter;
+    }
+
 }

@@ -31,14 +31,14 @@ import java.util.HashMap;
  */
 public abstract class Mutation extends Operator {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	protected PseudoRandom pseudoRandom;
-	
-	public Mutation(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-	  super(parameters);
-	  this.pseudoRandom = pseudoRandom;
-  }
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    protected final PseudoRandom pseudoRandom;
+
+    public Mutation(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters);
+        this.pseudoRandom = pseudoRandom;
+    }
 } // Mutation

@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for LayoutConnection complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="LayoutConnection">
  *   &lt;complexContent>
@@ -33,15 +33,13 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LayoutConnection", propOrder = {
-    "activeEntityUUID",
-    "passiveEntityUUID",
-    "activeToPassiveCommodity",
-    "passiveToActiveCommodity"
+        "activeEntityUUID",
+        "passiveEntityUUID",
+        "activeToPassiveCommodity",
+        "passiveToActiveCommodity"
 })
 public class LayoutConnection {
 
@@ -56,23 +54,19 @@ public class LayoutConnection {
 
     /**
      * Gets the value of the activeEntityUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getActiveEntityUUID() {
-        return activeEntityUUID;
+        return this.activeEntityUUID;
     }
 
     /**
      * Sets the value of the activeEntityUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setActiveEntityUUID(String value) {
         this.activeEntityUUID = value;
@@ -80,23 +74,19 @@ public class LayoutConnection {
 
     /**
      * Gets the value of the passiveEntityUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getPassiveEntityUUID() {
-        return passiveEntityUUID;
+        return this.passiveEntityUUID;
     }
 
     /**
      * Sets the value of the passiveEntityUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPassiveEntityUUID(String value) {
         this.passiveEntityUUID = value;
@@ -104,23 +94,19 @@ public class LayoutConnection {
 
     /**
      * Gets the value of the activeToPassiveCommodity property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getActiveToPassiveCommodity() {
-        return activeToPassiveCommodity;
+        return this.activeToPassiveCommodity;
     }
 
     /**
      * Sets the value of the activeToPassiveCommodity property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setActiveToPassiveCommodity(String value) {
         this.activeToPassiveCommodity = value;
@@ -128,23 +114,19 @@ public class LayoutConnection {
 
     /**
      * Gets the value of the passiveToActiveCommodity property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getPassiveToActiveCommodity() {
-        return passiveToActiveCommodity;
+        return this.passiveToActiveCommodity;
     }
 
     /**
      * Sets the value of the passiveToActiveCommodity property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPassiveToActiveCommodity(String value) {
         this.passiveToActiveCommodity = value;

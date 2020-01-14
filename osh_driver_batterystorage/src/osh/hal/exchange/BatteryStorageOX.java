@@ -7,181 +7,179 @@ import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 import java.util.UUID;
 
 /**
- * 
  * @author Jan Mueller
- *
  */
 public class BatteryStorageOX
-					extends HALDeviceObserverExchange
-					implements IHALElectricalPowerDetails {
+        extends HALDeviceObserverExchange
+        implements IHALElectricalPowerDetails {
 
-	private int activePower;
-	private int reactivePower;
-	
-	private double batteryStateOfCharge;
-	private double batteryStateOfHealth;
-	private int batteryStandingLoss;
-	private int batteryMinChargingState;
-	private int batteryMaxChargingState;
-	private int batteryMinChargePower;
-	private int batteryMinDischargePower;
-	private int batteryMaxChargePower;
-	private int inverterMinComplexPower;
-	private int inverterMaxComplexPower;
-	private int inverterMaxPower;
-	private int inverterMinPower;
-	private int batteryMaxDischargePower;
-	
-	private int rescheduleAfter;
-	private long newIppAfter;
-	private int triggerIppIfDeltaSoCBigger;
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public BatteryStorageOX(
-			UUID deviceID, 
-			Long timestamp,
+    private final int activePower;
+    private final int reactivePower;
 
-			int activePower,
-			int reactivePower,
-			
-			double batteryStateOfCharge,
-			double batteryStateOfHealth,
-			int batteryStandingLoss,
-			int batteryMinChargingState,
-			int batteryMaxChargingState,
-			int batteryMinChargePower,
-			int batteryMaxChargePower,
-			int batteryMinDischargePower,
-			int batteryMaxDischargePower,
-			int inverterMinComplexPower,
-			int inverterMaxComplexPower,
-			int inverterMinPower,
-			int inverterMaxPower,
-			int rescheduleAfter,
-			long newIppAfter,
-			int triggerIppIfDeltaSoCBigger,
-			LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		
-		super(deviceID, timestamp);
-		
+    private final double batteryStateOfCharge;
+    private double batteryStateOfHealth;
+    private final int batteryStandingLoss;
+    private final int batteryMinChargingState;
+    private final int batteryMaxChargingState;
+    private final int batteryMinChargePower;
+    private final int batteryMinDischargePower;
+    private final int batteryMaxChargePower;
+    private final int inverterMinComplexPower;
+    private final int inverterMaxComplexPower;
+    private final int inverterMaxPower;
+    private final int inverterMinPower;
+    private final int batteryMaxDischargePower;
 
-		this.activePower = activePower;
-		this.reactivePower = reactivePower;
-		
-		this.batteryStateOfCharge = batteryStateOfCharge;
-		
-		this.batteryStandingLoss = batteryStandingLoss;
-		
-		this.batteryMinChargingState = batteryMinChargingState;
-		this.batteryMaxChargingState = batteryMaxChargingState;
-		
-		this.batteryMinChargePower = batteryMinChargePower;
-		this.batteryMaxChargePower = batteryMaxChargePower;
-		
-		this.batteryMinDischargePower = batteryMinDischargePower;
-		this.batteryMaxDischargePower = batteryMaxDischargePower;
-		
-		this.inverterMinComplexPower = inverterMinComplexPower;
-		this.inverterMaxComplexPower = inverterMaxComplexPower;
-		
-		this.inverterMaxPower = inverterMaxPower;
-		this.inverterMinPower = inverterMinPower;
-		
-		this.rescheduleAfter = rescheduleAfter;
-		this.newIppAfter = newIppAfter;
-		this.triggerIppIfDeltaSoCBigger = triggerIppIfDeltaSoCBigger;
-		
-		this.compressionType = compressionType;
-		this.compressionValue = compressionValue;
-	}
-	
-	@Override
-	public int getActivePower() {
-		return activePower;
-	}
-
-	@Override
-	public int getReactivePower() {
-		return reactivePower;
-	}
+    private final int rescheduleAfter;
+    private final long newIppAfter;
+    private final int triggerIppIfDeltaSoCBigger;
+    private final LoadProfileCompressionTypes compressionType;
+    private final int compressionValue;
 
 
-	public double getBatteryStateOfCharge() {
-		return batteryStateOfCharge;
-	}
-	
-	public double getBatteryStateOfHealth() {
-		return batteryStateOfHealth;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public BatteryStorageOX(
+            UUID deviceID,
+            Long timestamp,
 
-	public int getBatteryStandingLoss() {
-		return batteryStandingLoss;
-	}
+            int activePower,
+            int reactivePower,
 
-	public int getBatteryMinChargingState() {
-		return batteryMinChargingState;
-	}
+            double batteryStateOfCharge,
+            double batteryStateOfHealth,
+            int batteryStandingLoss,
+            int batteryMinChargingState,
+            int batteryMaxChargingState,
+            int batteryMinChargePower,
+            int batteryMaxChargePower,
+            int batteryMinDischargePower,
+            int batteryMaxDischargePower,
+            int inverterMinComplexPower,
+            int inverterMaxComplexPower,
+            int inverterMinPower,
+            int inverterMaxPower,
+            int rescheduleAfter,
+            long newIppAfter,
+            int triggerIppIfDeltaSoCBigger,
+            LoadProfileCompressionTypes compressionType,
+            int compressionValue) {
 
-	public int getBatteryMaxChargingState() {
-		return batteryMaxChargingState;
-	}
+        super(deviceID, timestamp);
 
-	public int getBatteryMinChargePower() {
-		return batteryMinChargePower;
-	}
 
-	public int getBatteryMinDischargePower() {
-		return batteryMinDischargePower;
-	}
+        this.activePower = activePower;
+        this.reactivePower = reactivePower;
 
-	public int getBatteryMaxChargePower() {
-		return batteryMaxChargePower;
-	}
+        this.batteryStateOfCharge = batteryStateOfCharge;
 
-	public int getInverterMinComplexPower() {
-		return inverterMinComplexPower;
-	}
+        this.batteryStandingLoss = batteryStandingLoss;
 
-	public int getInverterMaxComplexPower() {
-		return inverterMaxComplexPower;
-	}
+        this.batteryMinChargingState = batteryMinChargingState;
+        this.batteryMaxChargingState = batteryMaxChargingState;
 
-	public int getInverterMaxPower() {
-		return inverterMaxPower;
-	}
+        this.batteryMinChargePower = batteryMinChargePower;
+        this.batteryMaxChargePower = batteryMaxChargePower;
 
-	public int getInverterMinPower() {
-		return inverterMinPower;
-	}
+        this.batteryMinDischargePower = batteryMinDischargePower;
+        this.batteryMaxDischargePower = batteryMaxDischargePower;
 
-	public int getBatteryMaxDischargePower() {
-		return batteryMaxDischargePower;
-	}
-	
-	public int getRescheduleAfter() {
-		return rescheduleAfter;
-	}
+        this.inverterMinComplexPower = inverterMinComplexPower;
+        this.inverterMaxComplexPower = inverterMaxComplexPower;
 
-	public long getNewIppAfter() {
-		return newIppAfter;
-	}
+        this.inverterMaxPower = inverterMaxPower;
+        this.inverterMinPower = inverterMinPower;
 
-	public int getTriggerIppIfDeltaSoCBigger() {
-		return triggerIppIfDeltaSoCBigger;
-	}
+        this.rescheduleAfter = rescheduleAfter;
+        this.newIppAfter = newIppAfter;
+        this.triggerIppIfDeltaSoCBigger = triggerIppIfDeltaSoCBigger;
 
-	public LoadProfileCompressionTypes getCompressionType() {
-		return compressionType;
-	}
+        this.compressionType = compressionType;
+        this.compressionValue = compressionValue;
+    }
 
-	public int getCompressionValue() {
-		return compressionValue;
-	}
-	
+    @Override
+    public int getActivePower() {
+        return this.activePower;
+    }
+
+    @Override
+    public int getReactivePower() {
+        return this.reactivePower;
+    }
+
+
+    public double getBatteryStateOfCharge() {
+        return this.batteryStateOfCharge;
+    }
+
+    public double getBatteryStateOfHealth() {
+        return this.batteryStateOfHealth;
+    }
+
+    public int getBatteryStandingLoss() {
+        return this.batteryStandingLoss;
+    }
+
+    public int getBatteryMinChargingState() {
+        return this.batteryMinChargingState;
+    }
+
+    public int getBatteryMaxChargingState() {
+        return this.batteryMaxChargingState;
+    }
+
+    public int getBatteryMinChargePower() {
+        return this.batteryMinChargePower;
+    }
+
+    public int getBatteryMinDischargePower() {
+        return this.batteryMinDischargePower;
+    }
+
+    public int getBatteryMaxChargePower() {
+        return this.batteryMaxChargePower;
+    }
+
+    public int getInverterMinComplexPower() {
+        return this.inverterMinComplexPower;
+    }
+
+    public int getInverterMaxComplexPower() {
+        return this.inverterMaxComplexPower;
+    }
+
+    public int getInverterMaxPower() {
+        return this.inverterMaxPower;
+    }
+
+    public int getInverterMinPower() {
+        return this.inverterMinPower;
+    }
+
+    public int getBatteryMaxDischargePower() {
+        return this.batteryMaxDischargePower;
+    }
+
+    public int getRescheduleAfter() {
+        return this.rescheduleAfter;
+    }
+
+    public long getNewIppAfter() {
+        return this.newIppAfter;
+    }
+
+    public int getTriggerIppIfDeltaSoCBigger() {
+        return this.triggerIppIfDeltaSoCBigger;
+    }
+
+    public LoadProfileCompressionTypes getCompressionType() {
+        return this.compressionType;
+    }
+
+    public int getCompressionValue() {
+        return this.compressionValue;
+    }
+
 }

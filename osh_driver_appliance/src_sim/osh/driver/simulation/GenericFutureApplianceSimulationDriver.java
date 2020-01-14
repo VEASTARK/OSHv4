@@ -1,7 +1,6 @@
 package osh.driver.simulation;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
-import org.xml.sax.SAXException;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.appliance.XsdApplianceProgramConfigurations;
 import osh.core.OSHRandomGenerator;
@@ -20,7 +19,6 @@ import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
 import osh.registry.interfaces.IHasState;
 import osh.simulation.DatabaseLoggerThread;
-import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.*;
 import osh.utils.time.TimeConversion;
 
@@ -34,127 +32,148 @@ import java.util.*;
 
 /**
  * Interruptible hybrid appliance
- * 
- * @author Ingo Mauser
  *
+ * @author Ingo Mauser
  */
-public class GenericFutureApplianceSimulationDriver 
-					extends ApplianceSimulationDriver 
-					implements IHasState {
+public class GenericFutureApplianceSimulationDriver
+        extends ApplianceSimulationDriver
+        implements IHasState {
 
-	// ### Variables for ESC ###
+
+    public static final int[] DEFAULT_CORRECTION_IDS = new int[0];
+
+    // ### Variables for ESC ###
 
 //	/** Currently unused, but may be used to react, e.g., on in-flow water temperature... */
 //	@SuppressWarnings("unused")
 //	private EnumMap<Commodity, RealCommodityState> commodityInputStates;
 
-	// ### Variables for DeviceState ###
+    // ### Variables for DeviceState ###
 
-	/** DIN EN 50523 DeviceState (OFF, RUNNING, ...) */
-	protected EN50523DeviceState currentEn50523State;
+    /**
+     * DIN EN 50523 DeviceState (OFF, RUNNING, ...)
+     */
+    protected EN50523DeviceState currentEn50523State;
 
-	/** DIN EN 50523 Remote Control State (DISABLED, TEMPORARILY_DISABLED, ENABLED) */
-	protected EN50523DeviceStateRemoteControl currentEn50523RemoteControlState;
-
-
-	// ### quasi-static Variables for Configurations (= program + extras + loadProfiles) ###
-
-	/** All Configurations (= program + extras + loadProfiles) */
-	protected XsdApplianceProgramConfigurations applianceConfigurations;
+    /**
+     * DIN EN 50523 Remote Control State (DISABLED, TEMPORARILY_DISABLED, ENABLED)
+     */
+    protected EN50523DeviceStateRemoteControl currentEn50523RemoteControlState;
 
 
-	// ### Variables for current Configuration ###
+    // ### quasi-static Variables for Configurations (= program + extras + loadProfiles) ###
 
-	/** Device Configuration which is now active: Selected by user on device */
-	protected Integer selectedConfigurationID = null;
-
-	/** StartingTime of Active Configuration Profile (ACP) */
-	protected Long configurationStartedAt = null;
-	
-	protected long lastSet1sttDof = 0;
-
-	/** StartingTime of Active Phase in Active Configuration Profile */
-	protected Long phaseStartedAt = null;
+    /**
+     * All Configurations (= program + extras + loadProfiles)
+     */
+    protected XsdApplianceProgramConfigurations applianceConfigurations;
 
 
-	// ### PRIVATE variables for exclusive usage in this class, NOT in subclasses ###
+    // ### Variables for current Configuration ###
 
-	/** in case of eDoF: result of optimization */
-	private Integer selectedProfileID;
+    /**
+     * Device Configuration which is now active: Selected by user on device
+     */
+    protected Integer selectedConfigurationID;
 
-	/** in case of tDoF: result of optimization  */
-	private long[] selectedStartingTimes;
+    /**
+     * StartingTime of Active Configuration Profile (ACP)
+     */
+    protected Long configurationStartedAt;
 
-	/**
-	 * Active Configuration Profile (ACP)<br>
-	 * contains:<br> 
-	 * dynamicLoadProfiles: remaining dynamic load profiles with tDoF or eDoF (using relative times to 0)<br>
-	 */
-	private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
+    protected long lastSet1sttDof;
 
-	/** indicates whether ACP has changed */
-	private boolean acpChanged;
-
-
-	/** if there was no way to schedule the planned runs for a day schedule the runs the day after */
-	private int runCorrection = 0;
-	private int[] correctionSelectedIDs = new int[0];
-
-	// ### Debugging and Logging variables ###
-	//TODO make nice
-	/** number of total runs since loading of driver */
-	private double activePowerConsumption = 0.0;
-	private int totalRealizedNumberOfRuns = 0;
-	private int totalPlannedNumberOfRuns = 0;
-	private int[] profileNumberOfRuns;
-	private double avgTotalRuns = 0.0;
-	private int totalNumberOfRunsProfile0 = 0;
-	private int totalNumberOfRunsProfile1 = 0;
-	private int[] startTimes = new int[1440];
-	private int[] dofs = new int[1440];
-	private int[] profilesSelected;
+    /**
+     * StartingTime of Active Phase in Active Configuration Profile
+     */
+    protected Long phaseStartedAt;
 
 
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param deviceID
-	 * @param driverConfig
-	 * @throws SimulationSubjectException
-	 * @throws JAXBException 
-	 * @throws SAXException 
-	 * @throws HALException 
-	 */
-	public GenericFutureApplianceSimulationDriver(
-			IOSH controllerbox,
-			UUID deviceID, 
-			OSHParameterCollection driverConfig)
-					throws SimulationSubjectException, JAXBException, SAXException, HALException {
-		super(controllerbox, deviceID, driverConfig);
+    // ### PRIVATE variables for exclusive usage in this class, NOT in subclasses ###
 
-		// load some variables (e.g. initialize variables)
+    /**
+     * in case of eDoF: result of optimization
+     */
+    private Integer selectedProfileID;
 
-		// IMPORTANT:
-		// if (getDeviceType() == DeviceTypes.WASHINGMACHINE) <-- does NOT work!
+    /**
+     * in case of tDoF: result of optimization
+     */
+    private long[] selectedStartingTimes;
 
-		// get WashingParametersConfigurations profile file
-		{
-			String configurationsFile = driverConfig.getParameter("profilesource");
-			if (configurationsFile != null) {
-				JAXBContext jaxbWMParameters = JAXBContext.newInstance("osh.configuration.appliance");
-				Unmarshaller unmarshallerConfigurations = jaxbWMParameters.createUnmarshaller();
-				Object unmarshalledConfigurations = unmarshallerConfigurations.unmarshal(new File(configurationsFile));
-				if (unmarshalledConfigurations instanceof XsdApplianceProgramConfigurations) {
-					this.applianceConfigurations = (XsdApplianceProgramConfigurations) unmarshalledConfigurations;
-				}
-				else {
-					throw new HALException("No valid configurations file found!");
-				}
-			}
-			else {
-				throw new HALException("Appliance configurations are missing!");
-			}
-		}
+    /**
+     * Active Configuration Profile (ACP)<br>
+     * contains:<br>
+     * dynamicLoadProfiles: remaining dynamic load profiles with tDoF or eDoF (using relative times to 0)<br>
+     */
+    private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
+
+    /**
+     * indicates whether ACP has changed
+     */
+    private boolean acpChanged;
+
+
+    /**
+     * if there was no way to schedule the planned runs for a day schedule the runs the day after
+     */
+    private int runCorrection;
+    private int[] correctionSelectedIDs = DEFAULT_CORRECTION_IDS;
+
+    // ### Debugging and Logging variables ###
+    //TODO make nice
+    /**
+     * number of total runs since loading of driver
+     */
+    private double activePowerConsumption;
+    private int totalRealizedNumberOfRuns;
+    private int totalPlannedNumberOfRuns;
+    private int[] profileNumberOfRuns;
+    private double avgTotalRuns;
+    private int totalNumberOfRunsProfile0;
+    private int totalNumberOfRunsProfile1;
+    private final int[] startTimes = new int[1440];
+    private final int[] dofs = new int[1440];
+    private int[] profilesSelected;
+
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param deviceID
+     * @param driverConfig
+     * @throws JAXBException
+     * @throws HALException
+     */
+    public GenericFutureApplianceSimulationDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig)
+            throws JAXBException, HALException {
+        super(osh, deviceID, driverConfig);
+
+        // load some variables (e.g. initialize variables)
+
+        // IMPORTANT:
+        // if (getDeviceType() == DeviceTypes.WASHINGMACHINE) <-- does NOT work!
+
+        // get WashingParametersConfigurations profile file
+        {
+            String configurationsFile = driverConfig.getParameter("profilesource");
+            if (configurationsFile != null) {
+                JAXBContext jaxbWMParameters = JAXBContext.newInstance("osh.configuration.appliance");
+                Unmarshaller unmarshallerConfigurations = jaxbWMParameters.createUnmarshaller();
+                Object unmarshalledConfigurations = unmarshallerConfigurations.unmarshal(new File(configurationsFile));
+                if (unmarshalledConfigurations instanceof XsdApplianceProgramConfigurations) {
+                    this.applianceConfigurations = (XsdApplianceProgramConfigurations) unmarshalledConfigurations;
+                } else {
+                    throw new HALException("No valid configurations file found!");
+                }
+            } else {
+                throw new HALException("Appliance configurations are missing!");
+            }
+        }
 
 //		SEKR: Already done by superclass(DeviceSimulationDriver)
 //		// get Commodities used by this device
@@ -168,19 +187,19 @@ public class GenericFutureApplianceSimulationDriver
 //			}
 //		}
 
-		// default: OFF
-		turnOff();
+        // default: OFF
+        this.turnOff();
 
-		// default: remote enabled (well...it's a simulation...)
-		this.currentEn50523RemoteControlState = EN50523DeviceStateRemoteControl.ENABLED_REMOTE_CONTROL;
+        // default: remote enabled (well...it's a simulation...)
+        this.currentEn50523RemoteControlState = EN50523DeviceStateRemoteControl.ENABLED_REMOTE_CONTROL;
 
-		this.profilesSelected = new int[applianceConfigurations.getApplianceProgramConfiguration().size()];
-		this.profileNumberOfRuns = new int[getConfigurationShares().length];
-		Arrays.fill(profilesSelected, 0);
-		Arrays.fill(profileNumberOfRuns, 0);
-		Arrays.fill(startTimes, 0);
-		Arrays.fill(dofs, 0);
-	}
+        this.profilesSelected = new int[this.applianceConfigurations.getApplianceProgramConfiguration().size()];
+        this.profileNumberOfRuns = new int[this.getConfigurationShares().length];
+        Arrays.fill(this.profilesSelected, 0);
+        Arrays.fill(this.profileNumberOfRuns, 0);
+        Arrays.fill(this.startTimes, 0);
+        Arrays.fill(this.dofs, 0);
+    }
 
 
 //	Nothing to do for now
@@ -197,132 +216,126 @@ public class GenericFutureApplianceSimulationDriver
 //	}
 
 
-	@Override
-	public void onNextTimeTick() {
-		// get current time
-		long now = getTimer().getUnixTime();
+    @Override
+    public void onNextTimeTick() {
+        // get current time
+        long now = this.getTimer().getUnixTime();
 
-		// if not OFF -> device logic for running etc
-		if (currentEn50523State == EN50523DeviceState.OFF) {
-			// Device is OFF - there is nothing to do
-			// set power to 0 (to be safe)
-			for (Commodity c : usedCommodities) {
-				this.setPower(c, 0);
-			}
-		}
-		else if (currentEn50523State == EN50523DeviceState.PROGRAMMED) {
-			doLogicProgrammed(now);
-		}
-		else if (currentEn50523State == EN50523DeviceState.RUNNING) {
-			doLogicRunning(now);
-		}
-		else if (currentEn50523State == EN50523DeviceState.ENDPROGRAMMED) {
-			// if ENDPROGAMMED then the appliance is immediately turned off by user
-			turnOff();
-		}
+        // if not OFF -> device logic for running etc
+        if (this.currentEn50523State == EN50523DeviceState.OFF) {
+            // Device is OFF - there is nothing to do
+            // set power to 0 (to be safe)
+            for (Commodity c : this.usedCommodities) {
+                this.setPower(c, 0);
+            }
+        } else if (this.currentEn50523State == EN50523DeviceState.PROGRAMMED) {
+            this.doLogicProgrammed(now);
+        } else if (this.currentEn50523State == EN50523DeviceState.RUNNING) {
+            this.doLogicRunning(now);
+        } else if (this.currentEn50523State == EN50523DeviceState.ENDPROGRAMMED) {
+            // if ENDPROGAMMED then the appliance is immediately turned off by user
+            this.turnOff();
+        }
 
 
-		// notify observer about current power states
-		FutureApplianceObserverExchange observerObj
-		= new FutureApplianceObserverExchange(
-				this.getDeviceID(), 
-				now,
-				this.getPower(Commodity.ACTIVEPOWER), // IHALElectricPowerDetails
-				this.getPower(Commodity.REACTIVEPOWER), // IHALElectricPowerDetails
-				this.getPower(Commodity.HEATINGHOTWATERPOWER), // IHALThermalPowerDetails
-				this.getPower(Commodity.DOMESTICHOTWATERPOWER), // IHALThermalPowerDetails
-				this.getPower(Commodity.NATURALGASPOWER) // IHALGasPowerDetails
-				);
-		observerObj.setDOF(lastSet1sttDof);
+        // notify observer about current power states
+        FutureApplianceObserverExchange observerObj
+                = new FutureApplianceObserverExchange(
+                this.getDeviceID(),
+                now,
+                this.getPower(Commodity.ACTIVEPOWER), // IHALElectricPowerDetails
+                this.getPower(Commodity.REACTIVEPOWER), // IHALElectricPowerDetails
+                this.getPower(Commodity.HEATINGHOTWATERPOWER), // IHALThermalPowerDetails
+                this.getPower(Commodity.DOMESTICHOTWATERPOWER), // IHALThermalPowerDetails
+                this.getPower(Commodity.NATURALGASPOWER) // IHALGasPowerDetails
+        );
+        observerObj.setDOF(this.lastSet1sttDof);
 
-		this.activePowerConsumption += (double) this.getPower(Commodity.ACTIVEPOWER);
+        this.activePowerConsumption += (double) this.getPower(Commodity.ACTIVEPOWER);
 
-		// IHALGenericApplianceDetails
-		observerObj.setEn50523DeviceState(currentEn50523State);
+        // IHALGenericApplianceDetails
+        observerObj.setEn50523DeviceState(this.currentEn50523State);
 
-		// IHALGenericApplianceProgramDetails
-		if ( this.acpChanged ) {
-			// profile changed
-			// ACP: clone and compress
-			observerObj.setApplianceConfigurationProfile(
-					applianceConfigurationProfile, 
-					LoadProfileCompressionTypes.DISCONTINUITIES,
-					1,
-					-1);
-			observerObj.setAcpReferenceTime(now);
-			this.acpChanged = false;
-		}
-		else {
-			// ACP in OX = null
-		}
-
-		if (this.applianceConfigurationProfile != null) {
-			observerObj.setAcpID(this.applianceConfigurationProfile.getAcpID());
-		}
-
-		// send OX
-		this.notifyObserver(observerObj);
-	}
+        // IHALGenericApplianceProgramDetails
+        if (this.acpChanged) {
+            // profile changed
+            // ACP: clone and compress
+            observerObj.setApplianceConfigurationProfile(
+                    this.applianceConfigurationProfile,
+                    LoadProfileCompressionTypes.DISCONTINUITIES,
+                    1,
+                    -1);
+            observerObj.setAcpReferenceTime(now);
+            this.acpChanged = false;
+        }
 
 
-	/**
-	 * Logic when in state PROGRAMMED
-	 */
-	private void doLogicProgrammed(long now) {
-		// start device if time is reached / if it has been optimized...
-		if (this.selectedStartingTimes == null) {
-			// PROGRAMMED and not optimized, yet
-			// wait for optimization
-			getGlobalLogger().logDebug(getDeviceType() + " : PROGRAMMED @" + now + ", waiting for optimization...");
-		}
-		else {
-			// received selected starting times, go RUNNING (maybe running in pause...)
-			setEN50523State(EN50523DeviceState.RUNNING);
-			this.configurationStartedAt = now;
-			this.phaseStartedAt = now;
-			this.acpChanged = true;
-			getGlobalLogger().logDebug(
-					getDeviceType() + " : started RUNNING @" + now 
-					+ " with selectedStartingTimes: " + Arrays.toString(selectedStartingTimes)
-					+ " and selectedProfile: " + selectedProfileID);
-		}
-	}
+        if (this.applianceConfigurationProfile != null) {
+            observerObj.setAcpID(this.applianceConfigurationProfile.getAcpID());
+        }
+
+        // send OX
+        this.notifyObserver(observerObj);
+    }
 
 
-	/**
-	 * Logic when in state RUNNING
-	 */
-	private void doLogicRunning(long now) {
-		// validity check
-		{
-			int currentDurationSinceStart = (int) (now - configurationStartedAt);
-			if (currentDurationSinceStart < 0) {
-				getGlobalLogger().logError(getDeviceType() + " ERROR: timewarp, currentDurationSinceStart is negative!", new Exception());
-			}
-		}
+    /**
+     * Logic when in state PROGRAMMED
+     */
+    private void doLogicProgrammed(long now) {
+        // start device if time is reached / if it has been optimized...
+        if (this.selectedStartingTimes == null) {
+            // PROGRAMMED and not optimized, yet
+            // wait for optimization
+            this.getGlobalLogger().logDebug(this.getDeviceType() + " : PROGRAMMED @" + now + ", waiting for optimization...");
+        } else {
+            // received selected starting times, go RUNNING (maybe running in pause...)
+            this.setEN50523State(EN50523DeviceState.RUNNING);
+            this.configurationStartedAt = now;
+            this.phaseStartedAt = now;
+            this.acpChanged = true;
+            this.getGlobalLogger().logDebug(
+                    this.getDeviceType() + " : started RUNNING @" + now
+                            + " with selectedStartingTimes: " + Arrays.toString(this.selectedStartingTimes)
+                            + " and selectedProfile: " + this.selectedProfileID);
+        }
+    }
 
-		// ### calculate current state in ApplianceConfigurationProfile ###
-		// get LoadProfile
-		SparseLoadProfile[][] dlp = applianceConfigurationProfile.getDynamicLoadProfiles();
-		// get min max times
-		int[][][] minMaxTimes = applianceConfigurationProfile.getMinMaxDurations();
 
-		if (this.selectedStartingTimes == null) {
-			getGlobalLogger().logDebug(getDeviceType() + " ERROR: should not happen");
-		}
+    /**
+     * Logic when in state RUNNING
+     */
+    private void doLogicRunning(long now) {
+        // validity check
+        {
+            int currentDurationSinceStart = (int) (now - this.configurationStartedAt);
+            if (currentDurationSinceStart < 0) {
+                this.getGlobalLogger().logError(this.getDeviceType() + " ERROR: timewarp, currentDurationSinceStart is negative!", new Exception());
+            }
+        }
 
-		if (selectedStartingTimes.length != minMaxTimes[selectedProfileID].length
-				|| selectedStartingTimes.length != dlp[selectedProfileID].length ) {
-			getGlobalLogger().logDebug(getDeviceType() + " ERROR: wrong length");
-		}
+        // ### calculate current state in ApplianceConfigurationProfile ###
+        // get LoadProfile
+        SparseLoadProfile[][] dlp = this.applianceConfigurationProfile.getDynamicLoadProfiles();
+        // get min max times
+        int[][][] minMaxTimes = this.applianceConfigurationProfile.getMinMaxDurations();
 
-		// check if next phase has to be started
-		// [0] is currently running phase / next phase
-		if (selectedStartingTimes.length > 1 && now >= selectedStartingTimes[1]) {
-			// NEW PHASE
-			// current phase is finished...
-			// next phase is due...
-			getGlobalLogger().logDebug(getDeviceType() + " : switched to next phase");
+        if (this.selectedStartingTimes == null) {
+            this.getGlobalLogger().logDebug(this.getDeviceType() + " ERROR: should not happen");
+        }
+
+        if (this.selectedStartingTimes.length != minMaxTimes[this.selectedProfileID].length
+                || this.selectedStartingTimes.length != dlp[this.selectedProfileID].length) {
+            this.getGlobalLogger().logDebug(this.getDeviceType() + " ERROR: wrong length");
+        }
+
+        // check if next phase has to be started
+        // [0] is currently running phase / next phase
+        if (this.selectedStartingTimes.length > 1 && now >= this.selectedStartingTimes[1]) {
+            // NEW PHASE
+            // current phase is finished...
+            // next phase is due...
+            this.getGlobalLogger().logDebug(this.getDeviceType() + " : switched to next phase");
 //			if (selectedNextProfileID != null) {
 //				if (selectedProfileID != selectedNextProfileID) {
 //					getGlobalLogger().logDebug(getDeviceType() + " : switching to new profile: " + selectedNextProfileID);
@@ -331,711 +344,698 @@ public class GenericFutureApplianceSimulationDriver
 //				selectedNextProfileID = null;
 //			}
 
-			// ### determine new ACP ###
-			// shorten old DLP and MinMaxTimes
-			SparseLoadProfile[][] newDlp = new SparseLoadProfile[dlp.length][];
-			int[][][] newMinMaxTimes = new int[dlp.length][][];
-			for (int i = 0; i < dlp.length; i++) {
-				newDlp[i] = new SparseLoadProfile[dlp[i].length - 1];
-				newMinMaxTimes[i] = new int[dlp[i].length - 1][];
-				for (int j = 1 /* sic! */; j < dlp[i].length; j++) {
-					newDlp[i][j-1] = dlp[i][j];
-					newMinMaxTimes[i][j-1] = minMaxTimes[i][j];
-				}
-			}
-			
-			// build new ACP
-			ApplianceProgramConfigurationStatus newACP = new ApplianceProgramConfigurationStatus(
-					UUID.randomUUID(), 
-					newDlp,
-					newMinMaxTimes,
-					now);
-			this.applianceConfigurationProfile = newACP;
-			
-			//next phase would be last phase --> do not send an updated acp as this would cause a rescheduling, controller will reschedule when device --> off
-			if (selectedStartingTimes.length == 2 && selectedStartingTimes[1] + minMaxTimes[selectedProfileID][1][0] <= now + 1) {
-				getGlobalLogger().logDebug("Switched to last phase, set notReschedule-Flag");
-				newACP.setDoNotReschedule(true);
-			} 
-			
-			this.acpChanged = true;
-			this.phaseStartedAt = now;
+            // ### determine new ACP ###
+            // shorten old DLP and MinMaxTimes
+            SparseLoadProfile[][] newDlp = new SparseLoadProfile[dlp.length][];
+            int[][][] newMinMaxTimes = new int[dlp.length][][];
+            for (int i = 0; i < dlp.length; i++) {
+                newDlp[i] = new SparseLoadProfile[dlp[i].length - 1];
+                newMinMaxTimes[i] = new int[dlp[i].length - 1][];
+                for (int j = 1 /* sic! */; j < dlp[i].length; j++) {
+                    newDlp[i][j - 1] = dlp[i][j];
+                    newMinMaxTimes[i][j - 1] = minMaxTimes[i][j];
+                }
+            }
 
-			// shorten selectedStartingTimes (until upcoming optimization is finished)
-			long[] newSelectedStartingTimes = new long[selectedStartingTimes.length - 1];
-			for (int i = 1; i < selectedStartingTimes.length; i++) {
-				newSelectedStartingTimes[i-1] = selectedStartingTimes[i];
-			}
-			this.selectedStartingTimes = newSelectedStartingTimes;
+            // build new ACP
+            ApplianceProgramConfigurationStatus newACP = new ApplianceProgramConfigurationStatus(
+                    UUID.randomUUID(),
+                    newDlp,
+                    newMinMaxTimes,
+                    now);
+            this.applianceConfigurationProfile = newACP;
 
-			// set new power values...
-			for (Commodity c : usedCommodities) {
-				try {
-					setPower(c, newDlp[selectedProfileID][0].getLoadAt(c, (int) (now - phaseStartedAt))); // (now - configurationStartedAt) = 0!
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		else if (selectedStartingTimes.length == 1 && selectedStartingTimes[0] + minMaxTimes[selectedProfileID][0][0] <= now) {
-			// END LAST PHASE
-			// it has been the last phase:
-			// END of program reached (in simulation: always exactly as expected)
+            //next phase would be last phase --> do not send an updated acp as this would cause a rescheduling, controller will reschedule when device --> off
+            if (this.selectedStartingTimes.length == 2 && this.selectedStartingTimes[1] + minMaxTimes[this.selectedProfileID][1][0] <= now + 1) {
+                this.getGlobalLogger().logDebug("Switched to last phase, set notReschedule-Flag");
+                newACP.setDoNotReschedule(true);
+            }
 
-			if (selectedProfileID == 0) {
-				totalNumberOfRunsProfile0++;
-			}
-			else if (selectedProfileID == 1) {
-				totalNumberOfRunsProfile1++;
-			}
-			
-			this.profilesSelected[selectedProfileID]++;
+            this.acpChanged = true;
+            this.phaseStartedAt = now;
 
-			totalRealizedNumberOfRuns++;
+            // shorten selectedStartingTimes (until upcoming optimization is finished)
+            long[] newSelectedStartingTimes = new long[this.selectedStartingTimes.length - 1];
+            System.arraycopy(this.selectedStartingTimes, 1, newSelectedStartingTimes, 0, this.selectedStartingTimes.length - 1);
+            this.selectedStartingTimes = newSelectedStartingTimes;
 
-			// switch to ENDPROGRAMMED
-			setEN50523State(EN50523DeviceState.ENDPROGRAMMED);
+            // set new power values...
+            for (Commodity c : this.usedCommodities) {
+                try {
+                    this.setPower(c, newDlp[this.selectedProfileID][0].getLoadAt(c, (int) (now - this.phaseStartedAt))); // (now - configurationStartedAt) = 0!
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (this.selectedStartingTimes.length == 1 && this.selectedStartingTimes[0] + minMaxTimes[this.selectedProfileID][0][0] <= now) {
+            // END LAST PHASE
+            // it has been the last phase:
+            // END of program reached (in simulation: always exactly as expected)
 
-			// set all powers to 0
-			for (Commodity c : usedCommodities) {
-				setPower(c, 0);
-			}
-		}
-		else {
-			// stay in CURRENT PHASE...
-			// phase is running (not yet finished)...
-			// is RUNNING...get current power values / load
+            if (this.selectedProfileID == 0) {
+                this.totalNumberOfRunsProfile0++;
+            } else if (this.selectedProfileID == 1) {
+                this.totalNumberOfRunsProfile1++;
+            }
 
-			int currentDurationSinceStart = (int) (now - phaseStartedAt);
-			int corrected = (int) (currentDurationSinceStart % dlp[selectedProfileID][0].getEndingTimeOfProfile());
+            this.profilesSelected[this.selectedProfileID]++;
 
-			// set new power values...
-			for (Commodity c : usedCommodities) {
-				setPower(c, dlp[selectedProfileID][0].getLoadAt(c, corrected));
-			}
-		}
-	}
+            this.totalRealizedNumberOfRuns++;
 
-	/**
-	 * Turn it off...
-	 */
-	private void turnOff() {
-		long now = getTimer().getUnixTime();
+            // switch to ENDPROGRAMMED
+            this.setEN50523State(EN50523DeviceState.ENDPROGRAMMED);
 
-		for (Commodity c : usedCommodities) {
-			this.setPower(c, 0);
-		}
+            // set all powers to 0
+            for (Commodity c : this.usedCommodities) {
+                this.setPower(c, 0);
+            }
+        } else {
+            // stay in CURRENT PHASE...
+            // phase is running (not yet finished)...
+            // is RUNNING...get current power values / load
 
-		setEN50523State(EN50523DeviceState.OFF);
-		getGlobalLogger().logDebug(getDeviceType() + " : switched OFF @" + now);
+            int currentDurationSinceStart = (int) (now - this.phaseStartedAt);
+            int corrected = (int) (currentDurationSinceStart % dlp[this.selectedProfileID][0].getEndingTimeOfProfile());
 
-		// reset variables
-		this.acpChanged = true;
-		this.applianceConfigurationProfile = null;
+            // set new power values...
+            for (Commodity c : this.usedCommodities) {
+                this.setPower(c, dlp[this.selectedProfileID][0].getLoadAt(c, corrected));
+            }
+        }
+    }
 
-		this.configurationStartedAt = null;
-		this.phaseStartedAt = null;
+    /**
+     * Turn it off...
+     */
+    private void turnOff() {
+        long now = this.getTimer().getUnixTime();
 
-		this.selectedConfigurationID = null;
-		this.selectedProfileID = null;
+        for (Commodity c : this.usedCommodities) {
+            this.setPower(c, 0);
+        }
+
+        this.setEN50523State(EN50523DeviceState.OFF);
+        this.getGlobalLogger().logDebug(this.getDeviceType() + " : switched OFF @" + now);
+
+        // reset variables
+        this.acpChanged = true;
+        this.applianceConfigurationProfile = null;
+
+        this.configurationStartedAt = null;
+        this.phaseStartedAt = null;
+
+        this.selectedConfigurationID = null;
+        this.selectedProfileID = null;
 //		this.selectedNextProfileID = null;
-		this.selectedStartingTimes = null;
-	}
+        this.selectedStartingTimes = null;
+    }
 
 
-	@Override
-	public void onSystemShutdown() throws OSHException {
-		super.onSystemShutdown();
+    @Override
+    public void onSystemShutdown() throws OSHException {
+        super.onSystemShutdown();
 
-		if (getOSH().getOSHstatus().isSimulation()) {
-			//DEBUG
-			// output the number of runs of this device
+        if (this.getOSH().getOSHStatus().isSimulation()) {
+            //DEBUG
+            // output the number of runs of this device
 
-			if (DatabaseLoggerThread.isLogDevices()) {
-				DatabaseLoggerThread.enqueueDevices(totalPlannedNumberOfRuns, totalRealizedNumberOfRuns, activePowerConsumption / 3600000.0 , profileNumberOfRuns, 
-						dofs, startTimes, profilesSelected, getDeviceType());
-			}
+            if (DatabaseLoggerThread.isLogDevices()) {
+                DatabaseLoggerThread.enqueueDevices(this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns, this.activePowerConsumption / 3600000.0, this.profileNumberOfRuns,
+                        this.dofs, this.startTimes, this.profilesSelected, this.getDeviceType());
+            }
 
-			try {
-				String fileName = getOSH().getOSHstatus().getLogDir()  + "/"
-						//						+ "_" + getRandomGenerator().getNextLong() 
-						+ "_" + getDeviceType() 
-						+ "_" + (System.currentTimeMillis() / 1000)
-						+ ".txt";
-				PrintWriter pwr = new PrintWriter(new File(fileName));
-				pwr.println("TOTAL;"+totalPlannedNumberOfRuns);
-				pwr.println("AVGTOTAL;"+avgTotalRuns);
-				pwr.println("REALTOTAL;"+totalRealizedNumberOfRuns);
-				pwr.println("TOTAL0;"+totalNumberOfRunsProfile0);
-				pwr.println("TOTAL1;"+totalNumberOfRunsProfile1);
-				pwr.close();
-				System.out.println("Output: " + fileName);
-			}
-			catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			//DEBUG END
-		}
-	}
-
-
-	/**
-	 * temporary until state machine is included<br>
-	 * re-programming: oldState == newState but state could have changed (e.g. other configurationId)
-	 * @param newState
-	 */
-	private void setEN50523State(EN50523DeviceState newState) {
-		getGlobalLogger().logDebug(
-				getDeviceType() 
-				+ " : performAction: change from " + currentEn50523State
-				+ " to " + newState + " (" + getDeviceID() + ")");
-
-		this.currentEn50523State = newState;
-	}
+            try {
+                String fileName = this.getOSH().getOSHStatus().getLogDir() + "/"
+                        //						+ "_" + getRandomGenerator().getNextLong()
+                        + "_" + this.getDeviceType()
+                        + "_" + (System.currentTimeMillis() / 1000)
+                        + ".txt";
+                PrintWriter pwr = new PrintWriter(new File(fileName));
+                pwr.println("TOTAL;" + this.totalPlannedNumberOfRuns);
+                pwr.println("AVGTOTAL;" + this.avgTotalRuns);
+                pwr.println("REALTOTAL;" + this.totalRealizedNumberOfRuns);
+                pwr.println("TOTAL0;" + this.totalNumberOfRunsProfile0);
+                pwr.println("TOTAL1;" + this.totalNumberOfRunsProfile1);
+                pwr.close();
+                System.out.println("Output: " + fileName);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            //DEBUG END
+        }
+    }
 
 
-	/**
-	 * Is called when there is a new CX object
-	 * @param controllerRequest
-	 * @throws HALException 
-	 */
-	@Override
-	protected void onControllerRequest(HALControllerExchange controllerRequest) throws HALException {
-		super.onControllerRequest(controllerRequest);
+    /**
+     * temporary until state machine is included<br>
+     * re-programming: oldState == newState but state could have changed (e.g. other configurationId)
+     *
+     * @param newState
+     */
+    private void setEN50523State(EN50523DeviceState newState) {
+        this.getGlobalLogger().logDebug(
+                this.getDeviceType()
+                        + " : performAction: change from " + this.currentEn50523State
+                        + " to " + newState + " (" + this.getDeviceID() + ")");
 
-		FutureApplianceControllerExchange cx = (FutureApplianceControllerExchange) controllerRequest;
-
-		// command without ACP available (may be shut off...)
-		if (applianceConfigurationProfile == null) {
-			getGlobalLogger().logError(getDeviceType() + " ERROR: received bad command (applianceConfigurationProfile == null)");
-			// throw it away...
-			return;
-		}
-		// check whether UUID of ApplianceConfigurationProfile is still valid
-		if (!applianceConfigurationProfile.getAcpID().equals(cx.getApplianceConfigurationProfileID())) {
-			getGlobalLogger().logError(getDeviceType() + " received bad command (invalid UUID of ACP)");
-			getGlobalLogger().logError(getDeviceType() + " mismatch: applianceConfigurationProfileID to OC != applianceConfigurationProfileID from OC");
-			// throw it away...
-			return;
-		}
-		//
-		if (selectedStartingTimes != null
-				&& selectedProfileID == cx.getSelectedProfileId()
-				&& selectedStartingTimes.length < cx.getSelectedStartTimes().length) {
-			getGlobalLogger().logError(getDeviceType() + " ERROR: wrong length");
-			// throw it away...
-			return;
-		}
-		//
-		if (this.acpChanged ) {
-			getGlobalLogger().logError(getDeviceType() + " ERROR: ACP changed, throw it away...");
-			// throw it away...
-			return;
-		}
-
-		// normal
-		if (currentEn50523State == EN50523DeviceState.PROGRAMMED
-				|| currentEn50523State == EN50523DeviceState.RUNNING) {
-			// reprogram appliance
-						
-			if (selectedProfileID != null) {
-				if (selectedProfileID != cx.getSelectedProfileId()) {
-					getGlobalLogger().logDebug(getDeviceType() + " : switching to new profile: " + cx.getSelectedProfileId());
-				}				
-			}
-			
-			selectedProfileID = cx.getSelectedProfileId();
-			selectedStartingTimes = cx.getSelectedStartTimes();
-
-			String selectTimes = Arrays.toString(selectedStartingTimes);
-			getGlobalLogger().logDebug(getDeviceType() + " RECEIVED Selected starting times: " + selectTimes + " with selected profile: " + selectedProfileID);// (selectedNextProfileID == null ? selectedProfileID : selectedNextProfileID));
-		}
-		else {
-			getGlobalLogger().logError(getDeviceType() + " received CX although not in state PROGRAMMED or RUNNING");
-		}
-
-	}
+        this.currentEn50523State = newState;
+    }
 
 
-	// <### SCREENPLAY STUFF ###>
+    /**
+     * Is called when there is a new CX object
+     *
+     * @param controllerRequest
+     * @throws HALException
+     */
+    @Override
+    protected void onControllerRequest(HALControllerExchange controllerRequest) throws HALException {
+        super.onControllerRequest(controllerRequest);
 
-	// for generation of appliance executions...
-	@Override
-	public void performNextAction(SubjectAction nextAction) {
+        FutureApplianceControllerExchange cx = (FutureApplianceControllerExchange) controllerRequest;
 
-		// IMPORTANT: DO DoF-Action FIRST!
+        // command without ACP available (may be shut off...)
+        if (this.applianceConfigurationProfile == null) {
+            this.getGlobalLogger().logError(this.getDeviceType() + " ERROR: received bad command (applianceConfigurationProfile == null)");
+            // throw it away...
+            return;
+        }
+        // check whether UUID of ApplianceConfigurationProfile is still valid
+        if (!this.applianceConfigurationProfile.getAcpID().equals(cx.getApplianceConfigurationProfileID())) {
+            this.getGlobalLogger().logError(this.getDeviceType() + " received bad command (invalid UUID of ACP)");
+            this.getGlobalLogger().logError(this.getDeviceType() + " mismatch: applianceConfigurationProfileID to OC != applianceConfigurationProfileID from OC");
+            // throw it away...
+            return;
+        }
+        //
+        if (this.selectedStartingTimes != null
+                && this.selectedProfileID == cx.getSelectedProfileId()
+                && this.selectedStartingTimes.length < cx.getSelectedStartTimes().length) {
+            this.getGlobalLogger().logError(this.getDeviceType() + " ERROR: wrong length");
+            // throw it away...
+            return;
+        }
+        //
+        if (this.acpChanged) {
+            this.getGlobalLogger().logError(this.getDeviceType() + " ERROR: ACP changed, throw it away...");
+            // throw it away...
+            return;
+        }
 
-		// DoF-Action
-		if (nextAction.getActionType() == ActionType.USER_ACTION) {
-			int newDof = 0;
+        // normal
+        if (this.currentEn50523State == EN50523DeviceState.PROGRAMMED
+                || this.currentEn50523State == EN50523DeviceState.RUNNING) {
+            // reprogram appliance
 
-			String dofString = ActionParametersHelper.getValueForParameterOfParameters(
-					nextAction.getPerformAction().get(0), 
-					"dof", 
-					"tdof");
+            if (this.selectedProfileID != null) {
+                if (this.selectedProfileID != cx.getSelectedProfileId()) {
+                    this.getGlobalLogger().logDebug(this.getDeviceType() + " : switching to new profile: " + cx.getSelectedProfileId());
+                }
+            }
 
-			if (dofString != null) {
-				newDof = Integer.valueOf(dofString);
-			}
-			else {
-				newDof = 0;
-			}
-			
-			lastSet1sttDof = newDof;
-		}
+            this.selectedProfileID = cx.getSelectedProfileId();
+            this.selectedStartingTimes = cx.getSelectedStartTimes();
 
-		//if the next state is true the i-appliance is filled up and is now able to run
-		else if (nextAction.isNextState() && nextAction.getActionType() == ActionType.I_DEVICE_ACTION) {
+            String selectTimes = Arrays.toString(this.selectedStartingTimes);
+            this.getGlobalLogger().logDebug(this.getDeviceType() + " RECEIVED Selected starting times: " + selectTimes + " with selected profile: " + this.selectedProfileID);// (selectedNextProfileID == null ? selectedProfileID : selectedNextProfileID));
+        } else {
+            this.getGlobalLogger().logError(this.getDeviceType() + " received CX although not in state PROGRAMMED or RUNNING");
+        }
 
-			// SAFETY FIRST!
-			if (currentEn50523State == EN50523DeviceState.PROGRAMMED
-					|| currentEn50523State == EN50523DeviceState.RUNNING) {
-				getGlobalLogger().logDebug(getDeviceType() + " device already running, no new action possible");
-				return;
-			}
+    }
 
-			// get selected configurationID
-			String selectedConfigurationIDString = ActionParametersHelper.getValueForParameterOfParameters(
-					nextAction.getPerformAction().get(0), 
-					"appliance", 
-					"configuration");
-			if (selectedConfigurationIDString != null) {
-				selectedConfigurationID = Integer.valueOf(selectedConfigurationIDString);
-			}
-			else {
-				selectedConfigurationID = 0;
-			}
 
-			// ### build ApplianceConfigurationProfile ###
-			SparseLoadProfile[][] dynamicLoadProfiles = XsdLoadProfilesHelperTool.getSparseLoadProfilesArray(
-					applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID).getLoadProfiles());
-			// get min and max times
-			int[][][] minMaxTimes = new int[dynamicLoadProfiles.length][][];
-			for (int i = 0; i < dynamicLoadProfiles.length; i++) {
-				minMaxTimes[i] = new int[dynamicLoadProfiles[i].length][2];
-				for (int j = 0; j < dynamicLoadProfiles[i].length; j++) {
-					minMaxTimes[i][j][0] = applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID)
-							.getLoadProfiles().getLoadProfile().get(0).getPhases().getPhase().get(j).getMinLength();
-					minMaxTimes[i][j][1] = applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID)
-							.getLoadProfiles().getLoadProfile().get(0).getPhases().getPhase().get(j).getMaxLength();		
-				}
-			}
+    // <### SCREENPLAY STUFF ###>
 
-			if ( this.isControllable() ) {
-				// if controllable then PROGRAMMED
-				this.configurationStartedAt = getTimer().getUnixTime();
-				setEN50523State(EN50523DeviceState.PROGRAMMED); // wait until optimization in PROGRAMMED state
-				selectedProfileID = null; // safety first...
+    // for generation of appliance executions...
+    @Override
+    public void performNextAction(SubjectAction nextAction) {
+
+        // IMPORTANT: DO DoF-Action FIRST!
+
+        // DoF-Action
+        if (nextAction.getActionType() == ActionType.USER_ACTION) {
+            int newDof;
+
+            String dofString = ActionParametersHelper.getValueForParameterOfParameters(
+                    nextAction.getPerformAction().get(0),
+                    "dof",
+                    "tdof");
+
+            if (dofString != null) {
+                newDof = Integer.parseInt(dofString);
+            } else {
+                newDof = 0;
+            }
+
+            this.lastSet1sttDof = newDof;
+        }
+
+        //if the next state is true the i-appliance is filled up and is now able to run
+        else if (nextAction.isNextState() && nextAction.getActionType() == ActionType.I_DEVICE_ACTION) {
+
+            // SAFETY FIRST!
+            if (this.currentEn50523State == EN50523DeviceState.PROGRAMMED
+                    || this.currentEn50523State == EN50523DeviceState.RUNNING) {
+                this.getGlobalLogger().logDebug(this.getDeviceType() + " device already running, no new action possible");
+                return;
+            }
+
+            // get selected configurationID
+            String selectedConfigurationIDString = ActionParametersHelper.getValueForParameterOfParameters(
+                    nextAction.getPerformAction().get(0),
+                    "appliance",
+                    "configuration");
+            if (selectedConfigurationIDString != null) {
+                this.selectedConfigurationID = Integer.valueOf(selectedConfigurationIDString);
+            } else {
+                this.selectedConfigurationID = 0;
+            }
+
+            // ### build ApplianceConfigurationProfile ###
+            SparseLoadProfile[][] dynamicLoadProfiles = XsdLoadProfilesHelperTool.getSparseLoadProfilesArray(
+                    this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID).getLoadProfiles());
+            // get min and max times
+            int[][][] minMaxTimes = new int[dynamicLoadProfiles.length][][];
+            for (int i = 0; i < dynamicLoadProfiles.length; i++) {
+                minMaxTimes[i] = new int[dynamicLoadProfiles[i].length][2];
+                for (int j = 0; j < dynamicLoadProfiles[i].length; j++) {
+                    minMaxTimes[i][j][0] = this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)
+                            .getLoadProfiles().getLoadProfile().get(0).getPhases().getPhase().get(j).getMinLength();
+                    minMaxTimes[i][j][1] = this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)
+                            .getLoadProfiles().getLoadProfile().get(0).getPhases().getPhase().get(j).getMaxLength();
+                }
+            }
+
+            if (this.isControllable()) {
+                // if controllable then PROGRAMMED
+                this.configurationStartedAt = this.getTimer().getUnixTime();
+                this.setEN50523State(EN50523DeviceState.PROGRAMMED); // wait until optimization in PROGRAMMED state
+                this.selectedProfileID = null; // safety first...
 //				selectedNextProfileID = null; //safety first
-				selectedStartingTimes = null; // safety first...
-			}
-			else {
-				// if NOT controllable then RUNNING
-				this.configurationStartedAt = getTimer().getUnixTime();
-				this.phaseStartedAt = configurationStartedAt;
-				setEN50523State(EN50523DeviceState.RUNNING);
-				this.selectedProfileID = 0; // start with the first profile
+                this.selectedStartingTimes = null; // safety first...
+            } else {
+                // if NOT controllable then RUNNING
+                this.configurationStartedAt = this.getTimer().getUnixTime();
+                this.phaseStartedAt = this.configurationStartedAt;
+                this.setEN50523State(EN50523DeviceState.RUNNING);
+                this.selectedProfileID = 0; // start with the first profile
 
-				// shorten available profiles in DLP
-				SparseLoadProfile[][] shortenedDlp = new SparseLoadProfile[1][];
-				shortenedDlp[0] = dynamicLoadProfiles[0];
-				dynamicLoadProfiles = shortenedDlp;
+                // shorten available profiles in DLP
+                SparseLoadProfile[][] shortenedDlp = new SparseLoadProfile[1][];
+                shortenedDlp[0] = dynamicLoadProfiles[0];
+                dynamicLoadProfiles = shortenedDlp;
 
-				// shorten minMaxTimes
-				int[][][] shortenedMinMaxTimes = new int[1][][];
-				shortenedMinMaxTimes[0] = minMaxTimes[0];
-				minMaxTimes = shortenedMinMaxTimes;
+                // shorten minMaxTimes
+                int[][][] shortenedMinMaxTimes = new int[1][][];
+                shortenedMinMaxTimes[0] = minMaxTimes[0];
+                minMaxTimes = shortenedMinMaxTimes;
 
-				// set starting times (start immediately with minimum times)
-				selectedStartingTimes = new long[shortenedDlp[0].length];
-				long time = configurationStartedAt;
-				for (int i = 0; i < dynamicLoadProfiles[0].length; i++) {
-					selectedStartingTimes[i] = time;
-					time = time + minMaxTimes[0][i][0];
-				}
-			}
+                // set starting times (start immediately with minimum times)
+                this.selectedStartingTimes = new long[shortenedDlp[0].length];
+                long time = this.configurationStartedAt;
+                for (int i = 0; i < dynamicLoadProfiles[0].length; i++) {
+                    this.selectedStartingTimes[i] = time;
+                    time += minMaxTimes[0][i][0];
+                }
+            }
 
-			ApplianceProgramConfigurationStatus newACP = new ApplianceProgramConfigurationStatus(
-					UUID.randomUUID(), 
-					dynamicLoadProfiles,
-					minMaxTimes,
-					getTimer().getUnixTime());
-			this.applianceConfigurationProfile = newACP;
-			this.acpChanged = true;
+            this.applianceConfigurationProfile = new ApplianceProgramConfigurationStatus(
+                    UUID.randomUUID(),
+                    dynamicLoadProfiles,
+                    minMaxTimes,
+                    this.getTimer().getUnixTime());
+            this.acpChanged = true;
 
-		}
-		else if (!nextAction.isNextState() && nextAction.getActionType() == ActionType.I_DEVICE_ACTION) {
-			// should currently not be in use...
-			getGlobalLogger().logDebug(
-					getDeviceType() 
-					+ " performAction: change from " + currentEn50523State.toString() 
-					+ " to OFF (" + getDeviceID() + ")");
-			turnOff();
-		}
-	}
+        } else if (!nextAction.isNextState() && nextAction.getActionType() == ActionType.I_DEVICE_ACTION) {
+            // should currently not be in use...
+            this.getGlobalLogger().logDebug(
+                    this.getDeviceType()
+                            + " performAction: change from " + this.currentEn50523State.toString()
+                            + " to OFF (" + this.getDeviceID() + ")");
+            this.turnOff();
+        }
+    }
 
-	@Override
-	protected void generateDynamicDailyScreenplay() throws OSHException {
-		// get current Random-Number and construct new Random-generator
-		// (reason: there might be a varying number of random values necessary for one day,
-		//          resulting in deviations of the optimization using different parameters for
-		//          the optimization)
-		// Author: IMA
+    @Override
+    protected void generateDynamicDailyScreenplay() throws OSHException {
+        // get current Random-Number and construct new Random-generator
+        // (reason: there might be a varying number of random values necessary for one day,
+        //          resulting in deviations of the optimization using different parameters for
+        //          the optimization)
+        // Author: IMA
 
-		long initialNumber = getRandomGenerator().getNextLong();
-		OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
+        long initialNumber = this.getRandomGenerator().getNextLong();
+        OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
 
-		// get number of configurations
-		int noOfPrograms = applianceConfigurations.getApplianceProgramConfiguration().size();
-		if (noOfPrograms != getConfigurationShares().length) {
-			throw new OSHException("ERROR: noOfPrograms != configurationShares.length");
-		}
+        // get number of configurations
+        int noOfPrograms = this.applianceConfigurations.getApplianceProgramConfiguration().size();
+        if (noOfPrograms != this.getConfigurationShares().length) {
+            throw new OSHException("ERROR: noOfPrograms != configurationShares.length");
+        }
 
-		boolean lastDay = (getTimer().getUnixTime() - getTimer().getUnixTimeAtStart()) / 86400 
-				== (getSimulationEngine().getSimulationDuration() / 86400 - 1);
+        boolean lastDay = (this.getTimer().getUnixTime() - this.getTimer().getUnixTimeAtStart()) / 86400
+                == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1);
 
-		//calculate runs per day, correct for impossible runs from earlier days
-		int runsToday = 0;
-		// days with higher consumption explained by run of devices have more runs
-		long now = getTimer().getUnixTime();
-		int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
-		double avgRunsToday = getAvgDailyRuns() * getCorrectionFactorDay()[dayOfYear];
-		
-		int dailyRunsMin = (int) Math.floor(avgRunsToday);
-		int dailyRunsMax = (int) Math.ceil(avgRunsToday);
-		double probMax = avgRunsToday - dailyRunsMin;
-		double r = newRandomGen.getNextDouble();
-		if (r < probMax) {
-			runsToday += dailyRunsMax;
-		}
-		else {
-			runsToday += dailyRunsMin;
-		}		
+        //calculate runs per day, correct for impossible runs from earlier days
+        int runsToday = 0;
+        // days with higher consumption explained by run of devices have more runs
+        long now = this.getTimer().getUnixTime();
+        int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
+        double avgRunsToday = this.getAvgDailyRuns() * this.getCorrectionFactorDay()[dayOfYear];
 
-		this.avgTotalRuns += avgRunsToday;
-		this.totalPlannedNumberOfRuns += runsToday;
-		
+        int dailyRunsMin = (int) Math.floor(avgRunsToday);
+        int dailyRunsMax = (int) Math.ceil(avgRunsToday);
+        double probMax = avgRunsToday - dailyRunsMin;
+        double r = newRandomGen.getNextDouble();
+        if (r < probMax) {
+            runsToday += dailyRunsMax;
+        } else {
+            runsToday += dailyRunsMin;
+        }
 
-		// if there is at least one run today...generate action!
-		if (runsToday + runCorrection > 0) {
-
-			// select programs randomly (e.g. washing parameters...)
-			// based on configurationShares -> prepare distribution
-			double[] configurationDistribution = new double[getConfigurationShares().length];
-			for (int i = 0; i < getConfigurationShares().length; i++) {
-				if (i == 0) {
-					configurationDistribution[0] = getConfigurationShares()[0];
-				}
-				else if (i == getConfigurationShares().length - 1) {
-					configurationDistribution[i] = 1;
-				}
-				else {
-					configurationDistribution[i] = configurationDistribution[i-1] + getConfigurationShares()[i];
-				}
-			}
-
-			// calculate max tDoF based on number of runs today and their maximum possible duration
-			int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(applianceConfigurations);
-			//check if parts of this day are blocked by actions of the previous day
-			long blockedTime = checkForBlockedSeconds();
-			long blockedSeconds = blockedTime == 0 ? 0 : blockedTime - now;
-
-			int currentMax1stDof = calcMax1stTDof(runsToday + runCorrection, (int) (86400 - blockedSeconds), maxProgramDuration);
-
-			//if there is more then 1 run to be scheduled, save the runtimes to check if planned runs do overlap
-			int[] generatedConfigurationIDs = new int[runsToday + runCorrection];
-			int[] selectedProfileLengths = new int[runsToday + runCorrection];
-			
-			//restoring configured runs from earlier days that could notr be scheduled
-			for (int i = 0; i < runCorrection; i++) {
-				generatedConfigurationIDs[i] = correctionSelectedIDs[i];
-				selectedProfileLengths[i] = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-						applianceConfigurations.getApplianceProgramConfiguration().get(correctionSelectedIDs[i]));				
-			}
-
-			//generate configurationIDs
-			for (int i = 0; i < runsToday; i++) {
-				// select one program randomly
-				double randomForProgramChoice = newRandomGen.getNextDouble();
-				int configurationForThisRun = 0;
-				for (int j = 0; j < configurationDistribution.length; j++) {
-					if (randomForProgramChoice > configurationDistribution[j]) {
-						configurationForThisRun++;
-					}
-				}
-				generatedConfigurationIDs[runCorrection + i] = configurationForThisRun;
-				selectedProfileLengths[runCorrection + i] = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-						applianceConfigurations.getApplianceProgramConfiguration().get(configurationForThisRun));
-				
-				this.profileNumberOfRuns[configurationForThisRun]++;
-			}
-			
-			runsToday += runCorrection;
-			runCorrection = 0;
-			correctionSelectedIDs = new int[0];
-
-			int errorCount = -1;
-			Long[][] selectedStartTimeAndDofs = null;
-
-			while(selectedStartTimeAndDofs == null) {
-				errorCount++;
-				
-				if (runsToday == 0)
-					continue;
-
-				if (errorCount == 40) {
-					//okay, we can't shift it to the next day, so we'll cheat
-					if (lastDay) {
-						long lastEndTime = blockedTime == 0 ? now : blockedTime;
-						long endOfSim = getSimulationEngine().getSimulationDuration() + getTimer().getUnixTimeAtStart();
-						
-						selectedStartTimeAndDofs = new Long[runsToday][2];
-						for (int i = 0; i < runsToday; i++) {
-							//not even cheating works, so good bye sweet sweet world
-							if (lastEndTime >= endOfSim) {
-								runsToday = i;
-								selectedStartTimeAndDofs = Arrays.copyOf(selectedStartTimeAndDofs, runsToday);
-
-								getGlobalLogger().logError("UUID=" +  getDeviceID() + " DeviceType=" + getDeviceType() + " Cannot possibly schedule for last day");
-								break;
-							}
-
-							selectedStartTimeAndDofs[i][0] = lastEndTime + 100;							
-							selectedStartTimeAndDofs[i][1] = 0L;
-
-							lastEndTime = lastEndTime + 100 + selectedProfileLengths[i];
-						}
-
-						break;
-
-					} else {
-
-						getGlobalLogger().logError("UUID=" +  getDeviceID() + " DeviceType=" + getDeviceType() + " Unable to schedule a run, correcting now");
-						errorCount = 0;
-						//move last selected run to tomorrow
-						runCorrection++;
-						this.correctionSelectedIDs = Arrays.copyOf(this.correctionSelectedIDs, runCorrection);
-						this.correctionSelectedIDs[runCorrection - 1] = generatedConfigurationIDs[runsToday - 1];						
-
-						runsToday--;						
-						generatedConfigurationIDs = Arrays.copyOf(generatedConfigurationIDs, runsToday);
-						selectedProfileLengths = Arrays.copyOf(selectedProfileLengths, runsToday);
-						//no way to schedule even 1 run
-						if (runsToday == 0) {
-							getGlobalLogger().logError("UUID=" +  getDeviceID() + " DeviceType=" + getDeviceType() + " Cannot even schedule a single run for this day");
-							break;
-						}							
-					}						
-				}				
-
-				selectedStartTimeAndDofs = generateStartTimesAndTDofs(runsToday, selectedProfileLengths, newRandomGen, now, blockedSeconds, currentMax1stDof, lastDay);				
-			}
-			
-			for (int i = 0; i < runsToday; i++) {
-				
-				long startTime = selectedStartTimeAndDofs[i][0];
-				long tDof = selectedStartTimeAndDofs[i][1];
-				
-				// Log it to console for debugging...
-				getGlobalLogger().logDebug("UUID=" +  getDeviceID() + " DeviceType=" + getDeviceType() + " Start=" + startTime + " DoF=" + tDof);
-				generateAndSetActions(startTime, generatedConfigurationIDs[i], tDof);				
-			}
-		}
-	}
-
-	private Long[][] generateStartTimesAndTDofs(int numberToGenerate, int[] selectedProfileLengths, OSHRandomGenerator randomGen, 
-			long now, long blockedSeconds, int currentMax1stTDof, boolean lastDay) throws OSHException {
-
-		Long[][] values = new Long[numberToGenerate][2];
-
-		for (int i = 0; i < numberToGenerate; i++) {
-			long startTime = 0;
-			int maxTicks = selectedProfileLengths[i];
-			int middleOfPowerConsumption = maxTicks / 2;	
-
-			do {
-				// select random start time for run
-				double randomValue = randomGen.getNextDouble();		
-				startTime = getRandomTimestampForRunToday(
-						now, 
-						middleOfPowerConsumption, 
-						randomValue, 
-						randomGen);
-			} while (startTime <= now + blockedSeconds);
-
-			// better do not generate action for the beginning of the simulation (no signal...)
-			if (startTime < getTimer().getUnixTimeAtStart() + 100) {
-				startTime = 100;
-			}
-			//ensure the start time is in the future (action will otherwise be deleted)
-			startTime = Math.max(now + 100, startTime);
-
-			long tDof = generateNewDof(true, numberToGenerate, startTime, randomGen, getDeviceMax1stDof(), currentMax1stTDof);
-
-			//check that startTime does not violate previous selected startTimes/tDofs
-			long currentEnd = startTime + tDof + maxTicks + 100;
-			
-			if (lastDay && currentEnd >= getTimer().getUnixTimeAtStart() + getSimulationEngine().getSimulationDuration())
-				return null;
-			
-			for (int j = 0; j < i; j++) {
-
-				long otherEnd = (values[j][0] + values[j][1] + selectedProfileLengths[j] + 100);
-
-				if ((startTime >= values[j][0] && startTime <= otherEnd)
-						|| (currentEnd >= values[j][0] && currentEnd <= otherEnd)
-						|| (startTime <= values[j][0] && currentEnd >= otherEnd)) {
-					return null;
-				}				
-			}
-			values[i][0] = startTime;
-			values[i][1] = tDof;
-		}
-
-		return values;
-	}
-
-	private void generateAndSetActions(long startTime, int configurationID, long tDof) {
-		
-		dofs[(int) Math.round((double) tDof / 60.0)]++;
-		startTimes[TimeConversion.convertUnixTime2MinuteOfDay(startTime)]++;
-
-		SubjectAction action = new SubjectAction();
-		action.setTick(startTime);		      
-		action.setDeviceID(getDeviceID().toString());
-		action.setNextState(true);
-		action.setActionType(ActionType.I_DEVICE_ACTION);
-
-		// add selected configuration to program action
-		PerformAction configurationPerformAction = new PerformAction();
-		ActionParameters configurationActionParameters = new ActionParameters();
-		configurationActionParameters.setParametersName("appliance");
-		ActionParameter configurationActionParameter = new ActionParameter();
-		configurationActionParameter.setName("configuration");
-		configurationActionParameter.setValue("" + configurationID);
-		configurationActionParameters.getParameter().add(configurationActionParameter);
-		configurationPerformAction.getActionParameterCollection().add(configurationActionParameters);
-		action.getPerformAction().add(configurationPerformAction);
-		this.setAction(action);
+        this.avgTotalRuns += avgRunsToday;
+        this.totalPlannedNumberOfRuns += runsToday;
 
 
-		//create now the new action
-		SubjectAction dofAction = new SubjectAction();
-		dofAction.setTick(startTime - 1); // Do 1 sec in advance!
-		dofAction.setDeviceID(this.getDeviceID().toString());
-		dofAction.setActionType(ActionType.USER_ACTION);
-		dofAction.setNextState(false);		
-		PerformAction dofAction2Perform = new PerformAction();
-		ActionParameters dofActionParameters = new ActionParameters();
-		dofActionParameters.setParametersName("dof");
-		ActionParameter dofActionParameter = new ActionParameter();
-		dofActionParameter.setName("tdof");
-		dofActionParameter.setValue("" + tDof);
-		dofActionParameters.getParameter().add(dofActionParameter);
-		dofAction2Perform.getActionParameterCollection().add(dofActionParameters);
-		dofAction.getPerformAction().add(dofAction2Perform);
-		this.setAction(dofAction);
-	}
+        // if there is at least one run today...generate action!
+        if (runsToday + this.runCorrection > 0) {
+
+            // select programs randomly (e.g. washing parameters...)
+            // based on configurationShares -> prepare distribution
+            double[] configurationDistribution = new double[this.getConfigurationShares().length];
+            for (int i = 0; i < this.getConfigurationShares().length; i++) {
+                if (i == 0) {
+                    configurationDistribution[0] = this.getConfigurationShares()[0];
+                } else if (i == this.getConfigurationShares().length - 1) {
+                    configurationDistribution[i] = 1;
+                } else {
+                    configurationDistribution[i] = configurationDistribution[i - 1] + this.getConfigurationShares()[i];
+                }
+            }
+
+            // calculate max tDoF based on number of runs today and their maximum possible duration
+            int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(this.applianceConfigurations);
+            //check if parts of this day are blocked by actions of the previous day
+            long blockedTime = this.checkForBlockedSeconds();
+            long blockedSeconds = blockedTime == 0 ? 0 : blockedTime - now;
+
+            int currentMax1stDof = this.calcMax1stTDof(runsToday + this.runCorrection, (int) (86400 - blockedSeconds), maxProgramDuration);
+
+            //if there is more then 1 run to be scheduled, save the runtimes to check if planned runs do overlap
+            int[] generatedConfigurationIDs = new int[runsToday + this.runCorrection];
+            int[] selectedProfileLengths = new int[runsToday + this.runCorrection];
+
+            //restoring configured runs from earlier days that could notr be scheduled
+            for (int i = 0; i < this.runCorrection; i++) {
+                generatedConfigurationIDs[i] = this.correctionSelectedIDs[i];
+                selectedProfileLengths[i] = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
+                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.correctionSelectedIDs[i]));
+            }
+
+            //generate configurationIDs
+            for (int i = 0; i < runsToday; i++) {
+                // select one program randomly
+                double randomForProgramChoice = newRandomGen.getNextDouble();
+                int configurationForThisRun = 0;
+                for (double v : configurationDistribution) {
+                    if (randomForProgramChoice > v) {
+                        configurationForThisRun++;
+                    }
+                }
+                generatedConfigurationIDs[this.runCorrection + i] = configurationForThisRun;
+                selectedProfileLengths[this.runCorrection + i] = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
+                        this.applianceConfigurations.getApplianceProgramConfiguration().get(configurationForThisRun));
+
+                this.profileNumberOfRuns[configurationForThisRun]++;
+            }
+
+            runsToday += this.runCorrection;
+            this.runCorrection = 0;
+            this.correctionSelectedIDs = DEFAULT_CORRECTION_IDS;
+
+            int errorCount = -1;
+            Long[][] selectedStartTimeAndDofs = null;
+
+            while (selectedStartTimeAndDofs == null) {
+                errorCount++;
+
+                if (runsToday == 0)
+                    continue;
+
+                if (errorCount == 40) {
+                    //okay, we can't shift it to the next day, so we'll cheat
+                    if (lastDay) {
+                        long lastEndTime = blockedTime == 0 ? now : blockedTime;
+                        long endOfSim = this.getSimulationEngine().getSimulationDuration() + this.getTimer().getUnixTimeAtStart();
+
+                        selectedStartTimeAndDofs = new Long[runsToday][2];
+                        for (int i = 0; i < runsToday; i++) {
+                            //not even cheating works, so good bye sweet sweet world
+                            if (lastEndTime >= endOfSim) {
+                                runsToday = i;
+                                selectedStartTimeAndDofs = Arrays.copyOf(selectedStartTimeAndDofs, runsToday);
+
+                                this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Cannot possibly schedule for last day");
+                                break;
+                            }
+
+                            selectedStartTimeAndDofs[i][0] = lastEndTime + 100;
+                            selectedStartTimeAndDofs[i][1] = 0L;
+
+                            lastEndTime += 100 + selectedProfileLengths[i];
+                        }
+
+                        break;
+
+                    } else {
+
+                        this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Unable to schedule a run, correcting now");
+                        errorCount = 0;
+                        //move last selected run to tomorrow
+                        this.runCorrection++;
+                        this.correctionSelectedIDs = Arrays.copyOf(this.correctionSelectedIDs, this.runCorrection);
+                        this.correctionSelectedIDs[this.runCorrection - 1] = generatedConfigurationIDs[runsToday - 1];
+
+                        runsToday--;
+                        generatedConfigurationIDs = Arrays.copyOf(generatedConfigurationIDs, runsToday);
+                        selectedProfileLengths = Arrays.copyOf(selectedProfileLengths, runsToday);
+                        //no way to schedule even 1 run
+                        if (runsToday == 0) {
+                            this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Cannot even schedule a single run for this day");
+                            break;
+                        }
+                    }
+                }
+
+                selectedStartTimeAndDofs = this.generateStartTimesAndTDofs(runsToday, selectedProfileLengths, newRandomGen, now, blockedSeconds, currentMax1stDof, lastDay);
+            }
+
+            for (int i = 0; i < runsToday; i++) {
+
+                long startTime = selectedStartTimeAndDofs[i][0];
+                long tDof = selectedStartTimeAndDofs[i][1];
+
+                // Log it to console for debugging...
+                this.getGlobalLogger().logDebug("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Start=" + startTime + " DoF=" + tDof);
+                this.generateAndSetActions(startTime, generatedConfigurationIDs[i], tDof);
+            }
+        }
+    }
+
+    private Long[][] generateStartTimesAndTDofs(int numberToGenerate, int[] selectedProfileLengths, OSHRandomGenerator randomGen,
+                                                long now, long blockedSeconds, int currentMax1stTDof, boolean lastDay) {
+
+        Long[][] values = new Long[numberToGenerate][2];
+
+        for (int i = 0; i < numberToGenerate; i++) {
+            long startTime;
+            int maxTicks = selectedProfileLengths[i];
+            int middleOfPowerConsumption = maxTicks / 2;
+
+            do {
+                // select random start time for run
+                double randomValue = randomGen.getNextDouble();
+                startTime = this.getRandomTimestampForRunToday(
+                        now,
+                        middleOfPowerConsumption,
+                        randomValue,
+                        randomGen);
+            } while (startTime <= now + blockedSeconds);
+
+            // better do not generate action for the beginning of the simulation (no signal...)
+            if (startTime < this.getTimer().getUnixTimeAtStart() + 100) {
+                startTime = 100;
+            }
+            //ensure the start time is in the future (action will otherwise be deleted)
+            startTime = Math.max(now + 100, startTime);
+
+            long tDof = this.generateNewDof(true, numberToGenerate, startTime, randomGen, this.getDeviceMax1stDof(), currentMax1stTDof);
+
+            //check that startTime does not violate previous selected startTimes/tDofs
+            long currentEnd = startTime + tDof + maxTicks + 100;
+
+            if (lastDay && currentEnd >= this.getTimer().getUnixTimeAtStart() + this.getSimulationEngine().getSimulationDuration())
+                return null;
+
+            for (int j = 0; j < i; j++) {
+
+                long otherEnd = (values[j][0] + values[j][1] + selectedProfileLengths[j] + 100);
+
+                if ((startTime >= values[j][0] && startTime <= otherEnd)
+                        || (currentEnd >= values[j][0] && currentEnd <= otherEnd)
+                        || (startTime <= values[j][0] && currentEnd >= otherEnd)) {
+                    return null;
+                }
+            }
+            values[i][0] = startTime;
+            values[i][1] = tDof;
+        }
+
+        return values;
+    }
+
+    private void generateAndSetActions(long startTime, int configurationID, long tDof) {
+
+        this.dofs[(int) Math.round(tDof / 60.0)]++;
+        this.startTimes[TimeConversion.convertUnixTime2MinuteOfDay(startTime)]++;
+
+        SubjectAction action = new SubjectAction();
+        action.setTick(startTime);
+        action.setDeviceID(this.getDeviceID().toString());
+        action.setNextState(true);
+        action.setActionType(ActionType.I_DEVICE_ACTION);
+
+        // add selected configuration to program action
+        PerformAction configurationPerformAction = new PerformAction();
+        ActionParameters configurationActionParameters = new ActionParameters();
+        configurationActionParameters.setParametersName("appliance");
+        ActionParameter configurationActionParameter = new ActionParameter();
+        configurationActionParameter.setName("configuration");
+        configurationActionParameter.setValue("" + configurationID);
+        configurationActionParameters.getParameter().add(configurationActionParameter);
+        configurationPerformAction.getActionParameterCollection().add(configurationActionParameters);
+        action.getPerformAction().add(configurationPerformAction);
+        this.setAction(action);
 
 
-	// Overrides the tDoF in the LocalController
-	@Override
-	protected int generateNewDof(
-			boolean useRandomDof, 
-			int actionCountPerDay, 
-			long applianceActionTimeTick, 
-			OSHRandomGenerator randomGen,
-			int maxDof,
-			int maxPossibleDof) {
-		// generate DOFs with binary distribution
-		if (getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
-			int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(applianceConfigurations);
-			if (86400 / ((maxProgramDuration + 1) * actionCountPerDay) < 1 && actionCountPerDay > 1) {
-				return 0;
-				//we now have a run correction for this
+        //create now the new action
+        SubjectAction dofAction = new SubjectAction();
+        dofAction.setTick(startTime - 1); // Do 1 sec in advance!
+        dofAction.setDeviceID(this.getDeviceID().toString());
+        dofAction.setActionType(ActionType.USER_ACTION);
+        dofAction.setNextState(false);
+        PerformAction dofAction2Perform = new PerformAction();
+        ActionParameters dofActionParameters = new ActionParameters();
+        dofActionParameters.setParametersName("dof");
+        ActionParameter dofActionParameter = new ActionParameter();
+        dofActionParameter.setName("tdof");
+        dofActionParameter.setValue("" + tDof);
+        dofActionParameters.getParameter().add(dofActionParameter);
+        dofAction2Perform.getActionParameterCollection().add(dofActionParameters);
+        dofAction.getPerformAction().add(dofAction2Perform);
+        this.setAction(dofAction);
+    }
+
+
+    // Overrides the tDoF in the LocalController
+    @Override
+    protected int generateNewDof(
+            boolean useRandomDof,
+            int actionCountPerDay,
+            long applianceActionTimeTick,
+            OSHRandomGenerator randomGen,
+            int maxDof,
+            int maxPossibleDof) {
+        // generate DOFs with binary distribution
+        int newDof = maxDof;
+        if (this.getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
+            int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(this.applianceConfigurations);
+            if (86400 / ((maxProgramDuration + 1) * actionCountPerDay) < 1 && actionCountPerDay > 1) {
+                return 0;
+                //we now have a run correction for this
 //				throw new RuntimeException("Program duration to long for multiple runs per day");
-			}
+            }
 
-			// in 15 minutes steps only
-			int stepSize = 900;
-			maxDof = maxDof / stepSize;
-			//deviate
-			//E(X)=0.5*max=28800s=8h or E(X)=0.5*max=14400s=4h or similar
-			BinomialDistribution binDistribution = new BinomialDistribution(maxDof, 0.5);
-			double rand = randomGen.getNextDouble();
-			int newValue = 0;
-			for (int i = 0; i < maxDof; i++) {
-				if (binDistribution.cumulativeProbability(i) > rand) {
-					newValue = i;
-					break;
-				}
-			}
-			return Math.min(newValue * stepSize, maxPossibleDof);
-		}
+            // in 15 minutes steps only
+            int stepSize = 900;
+            newDof /= stepSize;
+            //deviate
+            //E(X)=0.5*max=28800s=8h or E(X)=0.5*max=14400s=4h or similar
+            BinomialDistribution binDistribution = new BinomialDistribution(newDof, 0.5);
+            double rand = randomGen.getNextDouble();
+            int newValue = 0;
+            for (int i = 0; i < newDof; i++) {
+                if (binDistribution.cumulativeProbability(i) > rand) {
+                    newValue = i;
+                    break;
+                }
+            }
+            return Math.min(newValue * stepSize, maxPossibleDof);
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 
-	private long checkForBlockedSeconds() {
-		long maxBlock = 0;
+    private long checkForBlockedSeconds() {
+        long maxBlock = 0;
 
-		// overlapping with PLANNED (only in simulation) action from this day 
-		// (actions from the other day should be already scheduled and in actions...)
-		Collection<SubjectAction> existingActions = getActions();
-		Iterator<SubjectAction> it = existingActions.iterator();
+        // overlapping with PLANNED (only in simulation) action from this day
+        // (actions from the other day should be already scheduled and in actions...)
+        Collection<SubjectAction> existingActions = this.getActions();
+        Iterator<SubjectAction> it = existingActions.iterator();
 
-		int tdof = 0;
+        int tDof = 0;
 
-		while(it.hasNext()) {
-			SubjectAction a = it.next();
+        while (it.hasNext()) {
+            SubjectAction a = it.next();
 
-			if (a.getActionType() == ActionType.USER_ACTION) {
+            if (a.getActionType() == ActionType.USER_ACTION) {
 
-				tdof = Integer.parseInt(ActionParametersHelper.getValueForParameterOfParameters(
-						a.getPerformAction().get(0), 
-						"dof", 
-						"tdof"));				
-			} else if (a.getActionType() == ActionType.I_DEVICE_ACTION) {
+                tDof = Integer.parseInt(ActionParametersHelper.getValueForParameterOfParameters(
+                        a.getPerformAction().get(0),
+                        "dof",
+                        "tdof"));
+            } else if (a.getActionType() == ActionType.I_DEVICE_ACTION) {
 
-				int selectedConfigurationID = Integer.parseInt(ActionParametersHelper.getValueForParameterOfParameters(
-						a.getPerformAction().get(0), 
-						"appliance", 
-						"configuration"));
+                int selectedConfigurationID = Integer.parseInt(ActionParametersHelper.getValueForParameterOfParameters(
+                        a.getPerformAction().get(0),
+                        "appliance",
+                        "configuration"));
 
-				int maxDur = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-						applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID));
+                int maxDur = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
+                        this.applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID));
 
-				maxBlock = Math.max(maxBlock, a.getTick() + maxDur + tdof + 100);				
-			}
-			getGlobalLogger().logError("UUID=" +  getDeviceID() + " DeviceType=" + getDeviceType() + " SubjectActions still remaining at the start of the day");
-		}
+                maxBlock = Math.max(maxBlock, a.getTick() + maxDur + tDof + 100);
+            }
+            this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " SubjectActions still remaining at the start of the day");
+        }
 
-		// check if overlapping with scheduled/running action from the other day (day before)
-		if (selectedStartingTimes != null) {
-			int lastIndex = selectedStartingTimes.length - 1;
-			long otherLast = 
-					selectedStartingTimes[lastIndex] 
-							+ applianceConfigurationProfile.getDynamicLoadProfiles()[selectedProfileID][lastIndex].getEndingTimeOfProfile() + 100;
-			
-			//running action could be rescheduled, so look for maximum length this could run
-			if (this.isControllable()) {
-				long lastPossibleEnd = this.configurationStartedAt + this.lastSet1sttDof 
-						+ XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-								applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID)) + 100;				
-				otherLast = Math.max(lastPossibleEnd, otherLast);
-			}			
-			
-			maxBlock = Math.max(maxBlock, otherLast);
+        // check if overlapping with scheduled/running action from the other day (day before)
+        if (this.selectedStartingTimes != null) {
+            int lastIndex = this.selectedStartingTimes.length - 1;
+            long otherLast =
+                    this.selectedStartingTimes[lastIndex]
+                            + this.applianceConfigurationProfile.getDynamicLoadProfiles()[this.selectedProfileID][lastIndex].getEndingTimeOfProfile() + 100;
 
-		}
+            //running action could be rescheduled, so look for maximum length this could run
+            if (this.isControllable()) {
+                long lastPossibleEnd = this.configurationStartedAt + this.lastSet1sttDof
+                        + XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
+                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)) + 100;
+                otherLast = Math.max(lastPossibleEnd, otherLast);
+            }
 
-		return maxBlock;
+            maxBlock = Math.max(maxBlock, otherLast);
 
-	}
+        }
+
+        return maxBlock;
+
+    }
 
 
-	// ### ESC STUFF ###
+    // ### ESC STUFF ###
 
 //	SEKR: Already done by superclass (DeviceSimulationDriver)
 //	@Override
@@ -1072,11 +1072,11 @@ public class GenericFutureApplianceSimulationDriver
 //	}
 
 
-	// ### GETTER ###
+    // ### GETTER ###
 
-	@Override
-	public UUID getUUID() {
-		return getDeviceID();
-	}
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
 
 }

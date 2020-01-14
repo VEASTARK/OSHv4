@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for runningType.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "runningType")
 @XmlEnum
@@ -36,12 +35,12 @@ public enum RunningType {
     SIMULATION,
     HIL;
 
-    public String value() {
-        return name();
-    }
-
     public static RunningType fromValue(String v) {
         return valueOf(v);
+    }
+
+    public String value() {
+        return this.name();
     }
 
 }

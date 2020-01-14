@@ -28,55 +28,56 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 /**
- * This class implements a selection operator used for selecting the worst 
+ * This class implements a selection operator used for selecting the worst
  * solution in a SolutionSet according to a given comparator
  */
 @SuppressWarnings("rawtypes")
 public class WorstSolutionSelection extends Selection {
-  
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-// Comparator
-  private Comparator comparator_;
-    
-  public WorstSolutionSelection(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-  	super(parameters, pseudoRandom) ;
-  	
-  	comparator_ = (Comparator)parameters.get("comparator") ;
-  }
-  
-  /**
-   * Constructor
-   * @param comparator
-   */
-  //public WorstSolutionSelection(Comparator comparator) {
-  //	comparator_ = comparator ;
-  //}
-  
-  /**
-  * Performs the operation
-  * @param object Object representing a SolutionSet.
-  * @return the best solution found
-  */
-  @SuppressWarnings("unchecked")
-  @Override
-  public Object execute(Object object) {
-    SolutionSet solutionSet = (SolutionSet)object;
-    
-    if (solutionSet.size() == 0) {
-      return null;
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    // Comparator
+    private final Comparator comparator_;
+
+    public WorstSolutionSelection(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters, pseudoRandom);
+
+        this.comparator_ = (Comparator) parameters.get("comparator");
     }
-    int worstSolution ;
-    
-    worstSolution = 0 ;
-   	
-    for (int i = 1; i < solutionSet.size(); i++) {
-    	if (comparator_.compare(solutionSet.get(i), solutionSet.get(worstSolution)) > 0)  
-    		worstSolution = i ;
-    } // for
-    
-    return worstSolution ;    
-  } // Execute     
+
+    /**
+     * Constructor
+     * @param comparator
+     */
+    //public WorstSolutionSelection(Comparator comparator) {
+    //	comparator_ = comparator ;
+    //}
+
+    /**
+     * Performs the operation
+     *
+     * @param object Object representing a SolutionSet.
+     * @return the best solution found
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object execute(Object object) {
+        SolutionSet solutionSet = (SolutionSet) object;
+
+        if (solutionSet.size() == 0) {
+            return null;
+        }
+        int worstSolution;
+
+        worstSolution = 0;
+
+        for (int i = 1; i < solutionSet.size(); i++) {
+            if (this.comparator_.compare(solutionSet.get(i), solutionSet.get(worstSolution)) > 0)
+                worstSolution = i;
+        } // for
+
+        return worstSolution;
+    } // Execute
 } // WorstObjectiveSelection

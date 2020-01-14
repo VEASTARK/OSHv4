@@ -28,89 +28,96 @@ import jmetal.core.SolutionSet;
  * QualityIndicator class
  */
 public class QualityIndicator {
-  SolutionSet trueParetoFront_ ;
-  double      trueParetoFrontHypervolume_ ;
-  Problem     problem_ ; 
-  public jmetal.qualityIndicator.util.MetricsUtil utils_  ;
-  
-  /**
-   * Constructor
-   * @param problem The problem
-   * @param paretoFrontFile  Pareto front file
-   */
-  public QualityIndicator(Problem problem, String paretoFrontFile) {
-    problem_ = problem ;
-    utils_ = new jmetal.qualityIndicator.util.MetricsUtil() ;
-    trueParetoFront_ = utils_.readNonDominatedSolutionSet(paretoFrontFile);
-    trueParetoFrontHypervolume_ = new Hypervolume().hypervolume(
-                 trueParetoFront_.writeObjectivesToMatrix(),   
-                 trueParetoFront_.writeObjectivesToMatrix(),
-                 problem_.getNumberOfObjectives());
-  } // Constructor 
-  
-  /**
-   * Returns the hypervolume of solution set
-   * @param solutionSet Solution set
-   * @return The value of the hypervolume indicator
-   */
-  public double getHypervolume(SolutionSet solutionSet) {
-    return new Hypervolume().hypervolume(solutionSet.writeObjectivesToMatrix(),
-                                         trueParetoFront_.writeObjectivesToMatrix(),
-                                         problem_.getNumberOfObjectives());
-  } // getHypervolume
+    public final jmetal.qualityIndicator.util.MetricsUtil utils_;
+    final SolutionSet trueParetoFront_;
+    final double trueParetoFrontHypervolume_;
+    final Problem problem_;
 
-    
-  /**
-   * Returns the hypervolume of the true Pareto front
-   * @return The hypervolume of the true Pareto front
-   */
-  public double getTrueParetoFrontHypervolume() {
-    return trueParetoFrontHypervolume_ ;
-  }
-  
-  /**
-   * Returns the inverted generational distance of solution set
-   * @param solutionSet Solution set
-   * @return The value of the hypervolume indicator
-   */
-  public double getIGD(SolutionSet solutionSet) {
-    return new InvertedGenerationalDistance().invertedGenerationalDistance(
-                    solutionSet.writeObjectivesToMatrix(),
-                    trueParetoFront_.writeObjectivesToMatrix(),
-                    problem_.getNumberOfObjectives());
-  } // getIGD
-  
- /**
-   * Returns the generational distance of solution set
-  * @param solutionSet Solution set
-   * @return The value of the hypervolume indicator
-   */
-  public double getGD(SolutionSet solutionSet) {
-    return new GenerationalDistance().generationalDistance(
-                    solutionSet.writeObjectivesToMatrix(),
-                    trueParetoFront_.writeObjectivesToMatrix(),
-                    problem_.getNumberOfObjectives());
-  } // getGD
-  
-  /**
-   * Returns the spread of solution set
-   * @param solutionSet Solution set
-   * @return The value of the hypervolume indicator
-   */
-  public double getSpread(SolutionSet solutionSet) {
-    return new Spread().spread(solutionSet.writeObjectivesToMatrix(),
-                               trueParetoFront_.writeObjectivesToMatrix(),
-                               problem_.getNumberOfObjectives());
-  } // getGD
-  
     /**
-   * Returns the epsilon indicator of solution set
+     * Constructor
+     *
+     * @param problem         The problem
+     * @param paretoFrontFile Pareto front file
+     */
+    public QualityIndicator(Problem problem, String paretoFrontFile) {
+        this.problem_ = problem;
+        this.utils_ = new jmetal.qualityIndicator.util.MetricsUtil();
+        this.trueParetoFront_ = this.utils_.readNonDominatedSolutionSet(paretoFrontFile);
+        this.trueParetoFrontHypervolume_ = new Hypervolume().hypervolume(
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.problem_.getNumberOfObjectives());
+    } // Constructor
+
+    /**
+     * Returns the hypervolume of solution set
+     *
      * @param solutionSet Solution set
-   * @return The value of the hypervolume indicator
-   */
-  public double getEpsilon(SolutionSet solutionSet) {
-    return new Epsilon().epsilon(solutionSet.writeObjectivesToMatrix(),
-                                 trueParetoFront_.writeObjectivesToMatrix(),
-                                 problem_.getNumberOfObjectives());
-  } // getEpsilon
+     * @return The value of the hypervolume indicator
+     */
+    public double getHypervolume(SolutionSet solutionSet) {
+        return new Hypervolume().hypervolume(solutionSet.writeObjectivesToMatrix(),
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.problem_.getNumberOfObjectives());
+    } // getHypervolume
+
+
+    /**
+     * Returns the hypervolume of the true Pareto front
+     *
+     * @return The hypervolume of the true Pareto front
+     */
+    public double getTrueParetoFrontHypervolume() {
+        return this.trueParetoFrontHypervolume_;
+    }
+
+    /**
+     * Returns the inverted generational distance of solution set
+     *
+     * @param solutionSet Solution set
+     * @return The value of the hypervolume indicator
+     */
+    public double getIGD(SolutionSet solutionSet) {
+        return new InvertedGenerationalDistance().invertedGenerationalDistance(
+                solutionSet.writeObjectivesToMatrix(),
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.problem_.getNumberOfObjectives());
+    } // getIGD
+
+    /**
+     * Returns the generational distance of solution set
+     *
+     * @param solutionSet Solution set
+     * @return The value of the hypervolume indicator
+     */
+    public double getGD(SolutionSet solutionSet) {
+        return new GenerationalDistance().generationalDistance(
+                solutionSet.writeObjectivesToMatrix(),
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.problem_.getNumberOfObjectives());
+    } // getGD
+
+    /**
+     * Returns the spread of solution set
+     *
+     * @param solutionSet Solution set
+     * @return The value of the hypervolume indicator
+     */
+    public double getSpread(SolutionSet solutionSet) {
+        return new Spread().spread(solutionSet.writeObjectivesToMatrix(),
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.problem_.getNumberOfObjectives());
+    } // getGD
+
+    /**
+     * Returns the epsilon indicator of solution set
+     *
+     * @param solutionSet Solution set
+     * @return The value of the hypervolume indicator
+     */
+    public double getEpsilon(SolutionSet solutionSet) {
+        return new Epsilon().epsilon(solutionSet.writeObjectivesToMatrix(),
+                this.trueParetoFront_.writeObjectivesToMatrix(),
+                this.problem_.getNumberOfObjectives());
+    } // getEpsilon
 } // QualityIndicator

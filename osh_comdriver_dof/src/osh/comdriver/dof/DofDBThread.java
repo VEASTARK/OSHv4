@@ -11,215 +11,202 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author ???
- *
  */
 public class DofDBThread extends Thread {
 
-	private static Connection dofSQLconnection;
+    private static Connection dofSQLConnection;
 
-	private IGlobalLogger globalLogger;
-	private HashMap<UUID, Integer> appliance1stDof;
-	private HashMap<UUID, Integer> appliance2ndDof;
-	private DatabaseDofProviderComDriver userInteractionProvider;
-	
-	private String dbHost;
-	private String dbPort;
-	private String dbName;
-	private String dbUser;
-	private String dbPasswd;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param globalLogger
-	 * @param userInteractionProvider
-	 */
-	public DofDBThread(
-			IGlobalLogger globalLogger,
-			DatabaseDofProviderComDriver userInteractionProvider,
-			String dbHost, String dbPort, String dbName,
-			String dbUser, String dbPasswd) {
-		super();
-		
-		this.globalLogger = globalLogger;
-		this.appliance1stDof = new HashMap<>();
-		this.appliance2ndDof = new HashMap<>();
-		this.userInteractionProvider = userInteractionProvider;
+    private final IGlobalLogger globalLogger;
+    private final HashMap<UUID, Integer> appliance1stDof;
+    private final HashMap<UUID, Integer> appliance2ndDof;
+    private final DatabaseDofProviderComDriver userInteractionProvider;
 
-		this.dbHost = dbHost;
-		this.dbPort = dbPort;
-		this.dbName = dbName;
-		this.dbUser = dbUser;
-		this.dbPasswd = dbPasswd;
-	}
+    private final String dbHost;
+    private final String dbPort;
+    private final String dbName;
+    private final String dbUser;
+    private final String dbPassword;
 
-	/**
-	 * @return the dofSQLconnection
-	 */
-	public Connection getDofSQLconnection() {
-		return dofSQLconnection;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param globalLogger
+     * @param userInteractionProvider
+     */
+    public DofDBThread(
+            IGlobalLogger globalLogger,
+            DatabaseDofProviderComDriver userInteractionProvider,
+            String dbHost, String dbPort, String dbName,
+            String dbUser, String dbPassword) {
+        super();
 
-	/**
-	 * 
-	 * @param dbHost
-	 * @param dbPort
-	 * @param dbName
-	 * @param dbUser
-	 * @param dbPasswd
-	 * @throws SQLException
-	 */
-	public void setUpSQLConnection() throws SQLException {
+        this.globalLogger = globalLogger;
+        this.appliance1stDof = new HashMap<>();
+        this.appliance2ndDof = new HashMap<>();
+        this.userInteractionProvider = userInteractionProvider;
 
-		globalLogger
-				.logDebug("* establishing SQL connection for DoF driver...");
+        this.dbHost = dbHost;
+        this.dbPort = dbPort;
+        this.dbName = dbName;
+        this.dbUser = dbUser;
+        this.dbPassword = dbPassword;
+    }
 
-		// set db adress DB
-		String host_url = "jdbc:mysql://" + dbHost + ":" + dbPort + "/"
-				+ dbName;
+    /**
+     * @return the dofSQLConnection
+     */
+    public Connection getDofSQLConnection() {
+        return dofSQLConnection;
+    }
 
-		dofSQLconnection = DriverManager.getConnection(host_url, dbUser,
-				dbPasswd);
+    /**
+     * @throws SQLException
+     */
+    public void setUpSQLConnection() throws SQLException {
 
-		globalLogger.logDebug("* ...SQL connection for DoF driver OK");
+        this.globalLogger
+                .logDebug("* establishing SQL connection for DoF driver...");
 
-	}
+        // set db adress DB
+        String host_url = "jdbc:mysql://" + this.dbHost + ":" + this.dbPort + "/"
+                + this.dbName;
 
-	@Override
-	public void run() {
-		super.run();
+        DofDBThread.dofSQLConnection = DriverManager.getConnection(host_url, this.dbUser,
+                this.dbPassword);
 
-		while (true) {
+        this.globalLogger.logDebug("* ...SQL connection for DoF driver OK");
 
-			try {
-				getDofData();
-				this.userInteractionProvider.processDofInformation(
-						appliance1stDof, 
-						appliance2ndDof);
-				this.renewApplianceScheduleTable();
-			} 
-			catch (Exception e) {
-				globalLogger.logError(
-						"transfering user interaction data faild", e);
-			}
-			try {
-				sleep(1000);
-			} catch (InterruptedException e) {
-			} // ignore
-		}
-	}
+    }
 
-	private void renewApplianceScheduleTable() {
-		Statement statement = null;
-		String query = null;
-		try {
-			// get the connection
-			statement = dofSQLconnection.createStatement();
-			// set the autocommit to false
-			dofSQLconnection.setAutoCommit(false);
-			// first delete old data
-			query = "DELETE FROM `" + "appliance_schedule" + "`";
-			statement.execute(query);
+    @Override
+    public void run() {
+        super.run();
 
-			ArrayList<ExpectedStartTimeExchange> applianceSchedule = this.userInteractionProvider
-					.triggerComManager();
+        while (true) {
 
-			if (applianceSchedule != null) {
+            try {
+                this.getDofData();
+                this.userInteractionProvider.processDofInformation(
+                        this.appliance1stDof,
+                        this.appliance2ndDof);
+                this.renewApplianceScheduleTable();
+            } catch (Exception e) {
+                this.globalLogger.logError(
+                        "transferring user interaction data failed", e);
+            }
+            try {
+                sleep(1000);
+            } catch (InterruptedException ignored) {
+            } // ignore
+        }
+    }
 
-				for (int i = 0; i < applianceSchedule.size(); i++) {
+    private void renewApplianceScheduleTable() {
+        Statement statement = null;
+        String query;
+        try {
+            // get the connection
+            statement = dofSQLConnection.createStatement();
+            // set the autocommit to false
+            dofSQLConnection.setAutoCommit(false);
+            // first delete old data
+            query = "DELETE FROM `" + "appliance_schedule" + "`";
+            statement.execute(query);
 
-					String devId = applianceSchedule.get(i).getSender()
-							.toString();
-					int startTime = (int) applianceSchedule.get(i)
-							.getExpectedStartTime();
+            ArrayList<ExpectedStartTimeExchange> applianceSchedule = this.userInteractionProvider
+                    .triggerComManager();
 
-					query = "INSERT INTO `" + "appliance_schedule" + "`"
-							+ "(`uuid`, `scheduled_at`, `scheduled_to`) "
-							+ "VALUES (" + "'" + devId + "', " + "'"
-							+ (System.currentTimeMillis() / 1000L) + "', "
-							+ "'" + startTime + "'" + ")";
-					statement.execute(query);
-				}
-				// commit the query
-				dofSQLconnection.commit();
+            if (applianceSchedule != null) {
 
-				if (statement != null) {
-					try {
-						statement.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+                for (ExpectedStartTimeExchange expectedStartTimeExchange : applianceSchedule) {
 
-				}
-			}
+                    String devId = expectedStartTimeExchange.getSender()
+                            .toString();
+                    int startTime = (int) expectedStartTimeExchange
+                            .getExpectedStartTime();
 
-		} catch (Exception ex) {
-			if (statement != null) {
-				try {
-					statement.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			globalLogger.logError("update of the DOF table failed", ex);
-			try {
-				dofSQLconnection.close();
-				getDofSQLconnection();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		} finally {
-			// accept now the auto commit again
-			try {
-				dofSQLconnection.setAutoCommit(true);
-			} 
-			catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+                    query = "INSERT INTO `" + "appliance_schedule" + "`"
+                            + "(`uuid`, `scheduled_at`, `scheduled_to`) "
+                            + "VALUES (" + "'" + devId + "', " + "'"
+                            + (System.currentTimeMillis() / 1000L) + "', "
+                            + "'" + startTime + "'" + ")";
+                    statement.execute(query);
+                }
+                // commit the query
+                dofSQLConnection.commit();
 
-	private void getDofData() {
-		Statement statement = null;
-		String query = null;
-		ResultSet resultSet = null;
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
 
-		try {
-			statement = dofSQLconnection.createStatement();
+            }
 
-			query = "SELECT * FROM appliance_dof";
-			statement.execute(query);
-			// dofSQLconnection.commit();
+        } catch (Exception ex) {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            this.globalLogger.logError("update of the DOF table failed", ex);
+            try {
+                dofSQLConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            // accept now the auto commit again
+            try {
+                dofSQLConnection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-			resultSet = statement.getResultSet();
+    private void getDofData() {
+        Statement statement = null;
+        String query;
+        ResultSet resultSet;
 
-			while (resultSet.next()) {
+        try {
+            statement = dofSQLConnection.createStatement();
 
-				UUID appId = UUID.fromString(resultSet.getString("uuid"));
-				Integer app1stDof = Integer.valueOf(resultSet.getInt("firstdof"));
-				Integer app2ndDof = Integer.valueOf(resultSet.getInt("seconddof"));
+            query = "SELECT * FROM appliance_dof";
+            statement.execute(query);
+            // dofSQLconnection.commit();
 
-				appliance1stDof.put(appId, app1stDof);
-				appliance2ndDof.put(appId, app2ndDof);
-			}
-			statement.close();
-		} catch (Exception ex) {
-			if (statement != null) {
-				try {
-					statement.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			try {
-				dofSQLconnection.close();
-				getDofSQLconnection();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			globalLogger.logError("getting DofData failed!", ex);
-		}
-	}
+            resultSet = statement.getResultSet();
+
+            while (resultSet.next()) {
+
+                UUID appId = UUID.fromString(resultSet.getString("uuid"));
+                Integer app1stDof = resultSet.getInt("firstdof");
+                Integer app2ndDof = resultSet.getInt("seconddof");
+
+                this.appliance1stDof.put(appId, app1stDof);
+                this.appliance2ndDof.put(appId, app2ndDof);
+            }
+            statement.close();
+        } catch (Exception ex) {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                dofSQLConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            this.globalLogger.logError("getting DofData failed!", ex);
+        }
+    }
 
 }

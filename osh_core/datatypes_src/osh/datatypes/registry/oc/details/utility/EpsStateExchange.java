@@ -10,66 +10,63 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class EpsStateExchange extends StateExchange {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4956166786914687416L;
-	private EnumMap<AncillaryCommodity,PriceSignal> priceSignals;
-	private boolean causeScheduling = false;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param sender
-	 * @param timestamp
-	 */
-	public EpsStateExchange(UUID sender, long timestamp) {
-		super(sender, timestamp);
-		
-		priceSignals = new EnumMap<>(AncillaryCommodity.class);
-	}
-	
-	public EpsStateExchange(UUID sender, long timestamp, boolean causeScheduling) {
-		super(sender, timestamp);
-		
-		priceSignals = new EnumMap<>(AncillaryCommodity.class);
-		this.causeScheduling = causeScheduling;
-	}
-	
-	public void setPriceSignals(EnumMap<AncillaryCommodity,PriceSignal> priceSignals) {
-		this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
-		
-		for (Entry<AncillaryCommodity,PriceSignal> e : priceSignals.entrySet()) {
-			this.priceSignals.put(e.getKey(), e.getValue().clone());
-		}
-	}
-	
-	
-	public void setPriceSignal(AncillaryCommodity vc, PriceSignal priceSignal) {
-		PriceSignal copy = priceSignal.clone();
-		priceSignals.put(vc, copy);
-	}
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4956166786914687416L;
+    private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
+    private boolean causeScheduling;
 
 
-	public EnumMap<AncillaryCommodity, PriceSignal> getPriceSignals() {
-		return priceSignals;
-	}
-	
-	public boolean causeScheduling() {
-		return causeScheduling;
-	}
-	
-	@Override
-	public EpsStateExchange clone() {
-		EpsStateExchange clonedX = new EpsStateExchange(getSender(), getTimestamp());
-		clonedX.setPriceSignals(this.getPriceSignals());
-		clonedX.causeScheduling = this.causeScheduling;
-		return clonedX;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param sender
+     * @param timestamp
+     */
+    public EpsStateExchange(UUID sender, long timestamp) {
+        super(sender, timestamp);
+
+        this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
+    }
+
+    public EpsStateExchange(UUID sender, long timestamp, boolean causeScheduling) {
+        super(sender, timestamp);
+
+        this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
+        this.causeScheduling = causeScheduling;
+    }
+
+    public void setPriceSignal(AncillaryCommodity vc, PriceSignal priceSignal) {
+        PriceSignal copy = priceSignal.clone();
+        this.priceSignals.put(vc, copy);
+    }
+
+    public EnumMap<AncillaryCommodity, PriceSignal> getPriceSignals() {
+        return this.priceSignals;
+    }
+
+    public void setPriceSignals(EnumMap<AncillaryCommodity, PriceSignal> priceSignals) {
+        this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
+
+        for (Entry<AncillaryCommodity, PriceSignal> e : priceSignals.entrySet()) {
+            this.priceSignals.put(e.getKey(), e.getValue().clone());
+        }
+    }
+
+    public boolean causeScheduling() {
+        return this.causeScheduling;
+    }
+
+    @Override
+    public EpsStateExchange clone() {
+        EpsStateExchange clonedX = new EpsStateExchange(this.getSender(), this.getTimestamp());
+        clonedX.setPriceSignals(this.priceSignals);
+        clonedX.causeScheduling = this.causeScheduling;
+        return clonedX;
+    }
 }

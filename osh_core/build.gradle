@@ -20,14 +20,16 @@ configurations {
 }
 
 dependencies {
-    jaxb (
+    jaxb(
             'com.sun.xml.bind:jaxb-xjc:2.2.7',
             'com.sun.xml.bind:jaxb-impl:2.2.7',
             'javax.activation:activation:1.1.1'
     )
 }
 
-task jaxb {
+task generateXSDClasses {
+    group = "Construction"
+
     System.setProperty('javax.xml.accessExternalSchema', 'all')
     def jaxbTargetDir = file("generated_src")
     def jaxbTargetDir2 = file("generated_src_sim")

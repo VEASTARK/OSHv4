@@ -5,119 +5,118 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The XML homebus device detail root node
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 
 public class MieleApplianceRawDataJSON {
     @JsonProperty("applianceTypeName")
-	private String applianceTypeName;
-    
+    private String applianceTypeName;
+
     @JsonProperty("stateName")
-	private String stateName;
+    private String stateName;
 
     @JsonProperty("programName")
-	private String programName;
-	
+    private String programName;
+
     @JsonProperty("phaseName")
-	private String phaseName;
-	
+    private String phaseName;
+
     @JsonIgnore
-	private MieleDuration startTime;
-	
+    private MieleDuration startTime;
+
     @JsonIgnore
-	private MieleDuration smartStartTime;
-	
+    private MieleDuration smartStartTime;
+
     @JsonIgnore
-	private MieleDuration remainingTime;
-	
+    private MieleDuration remainingTime;
+
     @JsonIgnore
-	private MieleDuration duration;
-	
+    private MieleDuration duration;
+
     @JsonIgnore
-	private MieleDuration endTime;
-	
-	/* GETTERS */
-	
-	public String getApplianceTypeName() {
-		return applianceTypeName;
-	}
+    private MieleDuration endTime;
 
-	public String getStateName() {
-		return stateName;
-	}
+    /* GETTERS */
 
-	public String getProgramName() {
-		return programName;
-	}
+    public String getApplianceTypeName() {
+        return this.applianceTypeName;
+    }
 
-	public String getPhaseName() {
-		return phaseName;
-	}
+    public String getStateName() {
+        return this.stateName;
+    }
 
-	public MieleDuration getStartTime() {
-		return startTime;
-	}
+    public String getProgramName() {
+        return this.programName;
+    }
 
-	public MieleDuration getSmartStartTime() {
-		return smartStartTime;
-	}
+    public String getPhaseName() {
+        return this.phaseName;
+    }
 
-	public MieleDuration getRemainingTime() {
-		return remainingTime;
-	}
+    public MieleDuration getStartTime() {
+        return this.startTime;
+    }
 
-	public MieleDuration getDuration() {
-		return duration;
-	}
-
-	public MieleDuration getEndTime() {
-		return endTime;
-	}
-	
     @JsonProperty("startTime")
-	public void setStartTime(Integer startTime) {
-    	if( startTime != null ) {
-    		this.startTime = new MieleDuration(startTime);
-    	} else {
-    		this.startTime = null;
-    	}
-	}
-	
+    public void setStartTime(Integer startTime) {
+        if (startTime != null) {
+            this.startTime = new MieleDuration(startTime);
+        } else {
+            this.startTime = null;
+        }
+    }
+
+    public MieleDuration getSmartStartTime() {
+        return this.smartStartTime;
+    }
+
     @JsonProperty("smartStartTime")
     public void setSmartStartTime(Integer smartStartTime) {
-    	if( smartStartTime != null ) {
-    		this.smartStartTime = new MieleDuration(smartStartTime);
-    	} else {
-    		this.smartStartTime = null;
-    	}
-	}
-    
+        if (smartStartTime != null) {
+            this.smartStartTime = new MieleDuration(smartStartTime);
+        } else {
+            this.smartStartTime = null;
+        }
+    }
+
+    public MieleDuration getRemainingTime() {
+        return this.remainingTime;
+    }
+
     @JsonProperty("remainingTime")
     public void setRemainingTime(Integer remainingTime) {
-    	if( remainingTime != null ) {
-    		this.remainingTime = new MieleDuration(remainingTime);
-    	} else {
-    		this.remainingTime = null;
-    	}
-	}
-    
+        if (remainingTime != null) {
+            this.remainingTime = new MieleDuration(remainingTime);
+        } else {
+            this.remainingTime = null;
+        }
+    }
+
+    public MieleDuration getDuration() {
+        return this.duration;
+    }
+
     @JsonProperty("duration")
-	public void setDuration(Integer duration) {
-    	if( duration != null ) {
-    		this.duration = new MieleDuration(duration);
-    	} else {
-    		this.duration = null;
-    	}
-	}
-	
+    public void setDuration(Integer duration) {
+        if (duration != null) {
+            this.duration = new MieleDuration(duration);
+        } else {
+            this.duration = null;
+        }
+    }
+
+    public MieleDuration getEndTime() {
+        return this.endTime;
+    }
+
     @JsonProperty("endTime")
-	public void setEndTime(Integer endTime) {
-    	if( endTime != null ) {
-    		this.endTime = new MieleDuration(endTime);
-    	} else {
-    		this.endTime = null;
-    	}
-	}
+    public void setEndTime(Integer endTime) {
+        if (endTime != null) {
+            this.endTime = new MieleDuration(endTime);
+        } else {
+            this.endTime = null;
+        }
+    }
 }

@@ -29,49 +29,50 @@ import jmetal.encodings.variable.Real;
 import jmetal.util.PseudoRandom;
 
 /**
- * Class representing  a solution type including two variables: an integer 
+ * Class representing  a solution type including two variables: an integer
  * and a real.
  */
 public class IntRealSolutionType extends SolutionType {
-	private final int intVariables_ ;
-	private final int realVariables_ ;
+    private final int intVariables_;
+    private final int realVariables_;
 
-	/**
-	 * Constructor
-	 * @param problem  Problem to solve
-	 * @param intVariables Number of integer variables
-	 * @param realVariables Number of real variables
-	 */
-	public IntRealSolutionType(
-			Problem problem, 
-			int intVariables, 
-			int realVariables,
-			PseudoRandom pseudoRandom) {
-		super(problem) ;
-		intVariables_ = intVariables ;
-		realVariables_ = realVariables ;
-	} // Constructor
+    /**
+     * Constructor
+     *
+     * @param problem       Problem to solve
+     * @param intVariables  Number of integer variables
+     * @param realVariables Number of real variables
+     */
+    public IntRealSolutionType(
+            Problem problem,
+            int intVariables,
+            int realVariables,
+            PseudoRandom pseudoRandom) {
+        super(problem);
+        this.intVariables_ = intVariables;
+        this.realVariables_ = realVariables;
+    } // Constructor
 
-	/**
-	 * Creates the variables of the solution
-	 * @throws ClassNotFoundException
-	 */
-	@Override
-	public Variable[] createVariables() throws ClassNotFoundException {
-		Variable [] variables = new Variable[problem_.getNumberOfVariables()];
+    /**
+     * Creates the variables of the solution
+     *
+     */
+    @Override
+    public Variable[] createVariables() {
+        Variable[] variables = new Variable[this.problem_.getNumberOfVariables()];
 
-		for (int var = 0; var < intVariables_; var++)
-		  variables[var] = new Int(
-				  (int)problem_.getLowerLimit(var), 
-				  (int)problem_.getUpperLimit(var),
-				  pseudoRandom); 
-		
-		for (int var = intVariables_; var < (intVariables_ + realVariables_); var++)
-				variables[var] = new Real(
-						problem_.getLowerLimit(var), 
-						problem_.getUpperLimit(var),
-						pseudoRandom);  
+        for (int var = 0; var < this.intVariables_; var++)
+            variables[var] = new Int(
+                    (int) this.problem_.getLowerLimit(var),
+                    (int) this.problem_.getUpperLimit(var),
+                    this.pseudoRandom);
 
-		return variables ;
-	} // createVariables
+        for (int var = this.intVariables_; var < (this.intVariables_ + this.realVariables_); var++)
+            variables[var] = new Real(
+                    this.problem_.getLowerLimit(var),
+                    this.problem_.getUpperLimit(var),
+                    this.pseudoRandom);
+
+        return variables;
+    } // createVariables
 } // IntRealSolutionType

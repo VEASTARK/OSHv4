@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for GridConfig complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GridConfig">
  *   &lt;complexContent>
@@ -31,13 +31,11 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GridConfig", propOrder = {
-    "gridType",
-    "gridLayoutSource"
+        "gridType",
+        "gridLayoutSource"
 })
 public class GridConfig {
 
@@ -48,23 +46,19 @@ public class GridConfig {
 
     /**
      * Gets the value of the gridType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getGridType() {
-        return gridType;
+        return this.gridType;
     }
 
     /**
      * Sets the value of the gridType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setGridType(String value) {
         this.gridType = value;
@@ -72,23 +66,19 @@ public class GridConfig {
 
     /**
      * Gets the value of the gridLayoutSource property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getGridLayoutSource() {
-        return gridLayoutSource;
+        return this.gridLayoutSource;
     }
 
     /**
      * Sets the value of the gridLayoutSource property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setGridLayoutSource(String value) {
         this.gridLayoutSource = value;

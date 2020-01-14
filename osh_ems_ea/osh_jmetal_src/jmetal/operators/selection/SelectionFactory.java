@@ -33,43 +33,45 @@ import java.util.HashMap;
  */
 @SuppressWarnings("rawtypes")
 public class SelectionFactory {
-    
-	
-	public static Selection getSelectionOperator(String name, HashMap parameters, OSHRandomGenerator halRandomGenerator) throws JMException {
-		PseudoRandom pseudoRandom = new PseudoRandom(halRandomGenerator);
-		return getSelectionOperator(name, parameters, pseudoRandom);
-	}
-  /**
-   * Gets a selection operator through its name.
-   * @param name of the operator
-   * @return the operator
-   * @throws JMException 
-   */
-	@SuppressWarnings("unchecked")
-  public static Selection getSelectionOperator(String name, HashMap parameters, PseudoRandom pseudoRandom) throws JMException {
-    if (name.equalsIgnoreCase("BinaryTournament"))
-      return new BinaryTournament(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("BinaryTournament2"))
-      return new BinaryTournament2(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("PESA2Selection"))
-      return new PESA2Selection(parameters,pseudoRandom);
-    else if (name.equalsIgnoreCase("RandomSelection"))
-      return new RandomSelection(parameters,pseudoRandom);    
-    else if (name.equalsIgnoreCase("RankingAndCrowdingSelection"))
-      return new RankingAndCrowdingSelection(parameters,pseudoRandom);
-    else if (name.equalsIgnoreCase("DifferentialEvolutionSelection"))
-      return new DifferentialEvolutionSelection(parameters,pseudoRandom);
-    else if (name.equalsIgnoreCase("WorstSolutionSelection"))
-      return new WorstSolutionSelection(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("RouletteWheelSelection"))
-      return new RouletteWheelSelection(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("StochasticUniversalSampling"))
-      return new StochasticUniversalSampling(parameters, pseudoRandom);
-    else if (name.equalsIgnoreCase("BestSolutionSelection"))
-  	  return new BestSolutionSelection(parameters, pseudoRandom);
-    else {
-      Configuration.logger_.severe("Operator '" + name + "' not found ");
-      throw new JMException("Exception in " + name + ".getSelectionOperator()") ;
-    } // else    
-  } // getSelectionOperator
+
+
+    public static Selection getSelectionOperator(String name, HashMap parameters, OSHRandomGenerator halRandomGenerator) throws JMException {
+        PseudoRandom pseudoRandom = new PseudoRandom(halRandomGenerator);
+        return getSelectionOperator(name, parameters, pseudoRandom);
+    }
+
+    /**
+     * Gets a selection operator through its name.
+     *
+     * @param name of the operator
+     * @return the operator
+     * @throws JMException
+     */
+    @SuppressWarnings("unchecked")
+    public static Selection getSelectionOperator(String name, HashMap parameters, PseudoRandom pseudoRandom) throws JMException {
+        if (name.equalsIgnoreCase("BinaryTournament"))
+            return new BinaryTournament(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("BinaryTournament2"))
+            return new BinaryTournament2(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("PESA2Selection"))
+            return new PESA2Selection(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("RandomSelection"))
+            return new RandomSelection(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("RankingAndCrowdingSelection"))
+            return new RankingAndCrowdingSelection(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("DifferentialEvolutionSelection"))
+            return new DifferentialEvolutionSelection(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("WorstSolutionSelection"))
+            return new WorstSolutionSelection(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("RouletteWheelSelection"))
+            return new RouletteWheelSelection(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("StochasticUniversalSampling"))
+            return new StochasticUniversalSampling(parameters, pseudoRandom);
+        else if (name.equalsIgnoreCase("BestSolutionSelection"))
+            return new BestSolutionSelection(parameters, pseudoRandom);
+        else {
+            Configuration.logger_.severe("Operator '" + name + "' not found ");
+            throw new JMException("Exception in " + name + ".getSelectionOperator()");
+        } // else
+    } // getSelectionOperator
 } // SelectionFactory

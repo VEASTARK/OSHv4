@@ -11,57 +11,55 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class BaseloadObserverExchange 
-				extends HALDeviceObserverExchange
-				implements IHALElectricalPowerDetails, IHALGasPowerDetails {
-	
-	private EnumMap<Commodity,Integer> powerMap;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 * @param complexPower
-	 */
-	public BaseloadObserverExchange(
-			UUID deviceID, 
-			Long timestamp) {
-		super(deviceID, timestamp);
-		
-		this.powerMap = new EnumMap<>(Commodity.class);
-	}
-	
-	
-	public Integer getPower(Commodity c) {
-		return powerMap.get(c);
-	}
-	
-	public void setPower(Commodity c, int power) {
-		powerMap.put(c, power);
-	}
-	
-	public Set<Commodity> getCommodities() {
-		return powerMap.keySet();
-	}
-	
-	@Override
-	public int getGasPower() {
-		return powerMap.get(Commodity.NATURALGASPOWER);
-	}
+public class BaseloadObserverExchange
+        extends HALDeviceObserverExchange
+        implements IHALElectricalPowerDetails, IHALGasPowerDetails {
 
-	@Override
-	public int getActivePower() {
-		return powerMap.get(Commodity.ACTIVEPOWER);
-	}
+    private final EnumMap<Commodity, Integer> powerMap;
 
-	@Override
-	public int getReactivePower() {
-		return powerMap.get(Commodity.REACTIVEPOWER);
-	}
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public BaseloadObserverExchange(
+            UUID deviceID,
+            Long timestamp) {
+        super(deviceID, timestamp);
+
+        this.powerMap = new EnumMap<>(Commodity.class);
+    }
+
+
+    public Integer getPower(Commodity c) {
+        return this.powerMap.get(c);
+    }
+
+    public void setPower(Commodity c, int power) {
+        this.powerMap.put(c, power);
+    }
+
+    public Set<Commodity> getCommodities() {
+        return this.powerMap.keySet();
+    }
+
+    @Override
+    public int getGasPower() {
+        return this.powerMap.get(Commodity.NATURALGASPOWER);
+    }
+
+    @Override
+    public int getActivePower() {
+        return this.powerMap.get(Commodity.ACTIVEPOWER);
+    }
+
+    @Override
+    public int getReactivePower() {
+        return this.powerMap.get(Commodity.REACTIVEPOWER);
+    }
 
 }

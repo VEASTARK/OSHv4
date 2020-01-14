@@ -2,40 +2,39 @@ package osh.en50523;
 
 /**
  * 3-bit HEX as BYTE (0 to 7)
- * @author Ingo Mauser
  *
+ * @author Ingo Mauser
  */
 public enum EN50523Cluster {
-	
-	ALL			((byte) 0x3, "all clusters", "allen Clustern gemeinsam"),
-	HOUSEHOLD	((byte) 0x6, "household cluster", "Haushaltscluster");
-	
-	private byte clusterID;
-	private String descriptionEN;
-	private String descriptionDE;
-	
-	
-	EN50523Cluster(byte clusterID, String descriptionEN, String descriptionDE) {
-		this.clusterID = clusterID;
-		this.descriptionEN = descriptionEN;
-		this.descriptionDE = descriptionDE;
-	}
+
+    ALL((byte) 0x3, "all clusters", "allen Clustern gemeinsam"),
+    HOUSEHOLD((byte) 0x6, "household cluster", "Haushaltscluster");
+
+    private final byte clusterID;
+    private final String descriptionEN;
+    private final String descriptionDE;
 
 
-	public byte getClusterID() {
-		return clusterID;
-	}
+    EN50523Cluster(byte clusterID, String descriptionEN, String descriptionDE) {
+        this.clusterID = clusterID;
+        this.descriptionEN = descriptionEN;
+        this.descriptionDE = descriptionDE;
+    }
 
 
-	public String getDescriptionEN() {
-		return descriptionEN;
-	}
+    public byte getClusterID() {
+        return this.clusterID;
+    }
 
 
-	public String getDescriptionDE() {
-		return descriptionDE;
-	}
-	
-	
-	
+    public String getDescriptionEN() {
+        return this.descriptionEN;
+    }
+
+
+    public String getDescriptionDE() {
+        return this.descriptionDE;
+    }
+
+
 }

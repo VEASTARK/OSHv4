@@ -6,24 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class ActivationList implements ISolution {
 
-	List<Activation> list;
-	
-	public ActivationList() {
-		list = new ArrayList<>();
-	}
+    List<Activation> list;
 
-	public List<Activation> getList() {
-		return list;
-	}
+    public ActivationList() {
+        this.list = new ArrayList<>();
+    }
 
-	public void setList(List<Activation> list) {
-		this.list = list;
-	}
-	
+    public List<Activation> getList() {
+        return this.list;
+    }
+
+    public void setList(List<Activation> list) {
+        this.list = list;
+    }
+
 }

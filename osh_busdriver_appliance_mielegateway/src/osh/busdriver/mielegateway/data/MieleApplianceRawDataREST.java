@@ -7,108 +7,107 @@ import java.net.URL;
 
 /**
  * The XML homebus device detail root node
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
-@XmlRootElement(name="device")
+@XmlRootElement(name = "device")
 public class MieleApplianceRawDataREST {
-	@XmlPath("information/key[@name='Appliance Type']/@value")
-	private String applianceTypeName;
-	
-	@XmlPath("information/key[@name='State']/@value")
-	private String stateName;
+    @XmlPath("information/key[@name='Appliance Type']/@value")
+    private String applianceTypeName;
 
-	@XmlPath("information/key[@name='Program']/@value")
-	private String programName;
-	
-	@XmlPath("information/key[@name='Phase']/@value")
-	private String phaseName;
-	
-	@XmlPath("information/key[@name='Start Time']/@value")
-	private MieleDuration startTime;
-	
-	@XmlPath("information/key[@name='Smart Start']/@value")
-	private MieleDuration smartStartTime;
-	
-	@XmlPath("information/key[@name='Remaining Time']/@value")
-	private MieleDuration remainingTime;
-	
-	@XmlPath("information/key[@name='Duration']/@value")
-	private MieleDuration duration;
-	
-	@XmlPath("information/key[@name='End Time']/@value")
-	private MieleDuration endTime;
-	
-	/* SPECIFIC INFORMATION */
-	
-	
-	
-	/* COMMAND URLS */
-	
-	@XmlPath("actions/action[@name='Stop']/@URL")
-	private URL stopCommandUrl;
+    @XmlPath("information/key[@name='State']/@value")
+    private String stateName;
 
-	@XmlPath("actions/action[@name='Start']/@URL")
-	private URL startCommandUrl;
-	
-	@XmlPath("actions/action[@name='Light On']/@URL")
-	private URL lightOnCommandUrl;
+    @XmlPath("information/key[@name='Program']/@value")
+    private String programName;
 
-	@XmlPath("actions/action[@name='Light Off']/@URL")
-	private URL lightOffCommandUrl;
-	
-	/* GETTERS */
-	
-	public String getApplianceTypeName() {
-		return applianceTypeName;
-	}
+    @XmlPath("information/key[@name='Phase']/@value")
+    private String phaseName;
 
-	public String getStateName() {
-		return stateName;
-	}
+    @XmlPath("information/key[@name='Start Time']/@value")
+    private MieleDuration startTime;
 
-	public String getProgramName() {
-		return programName;
-	}
+    @XmlPath("information/key[@name='Smart Start']/@value")
+    private MieleDuration smartStartTime;
 
-	public String getPhaseName() {
-		return phaseName;
-	}
+    @XmlPath("information/key[@name='Remaining Time']/@value")
+    private MieleDuration remainingTime;
 
-	public MieleDuration getStartTime() {
-		return startTime;
-	}
+    @XmlPath("information/key[@name='Duration']/@value")
+    private MieleDuration duration;
 
-	public MieleDuration getSmartStartTime() {
-		return smartStartTime;
-	}
+    @XmlPath("information/key[@name='End Time']/@value")
+    private MieleDuration endTime;
 
-	public MieleDuration getRemainingTime() {
-		return remainingTime;
-	}
+    /* SPECIFIC INFORMATION */
 
-	public MieleDuration getDuration() {
-		return duration;
-	}
 
-	public MieleDuration getEndTime() {
-		return endTime;
-	}
 
-	public URL getStopCommandUrl() {
-		return stopCommandUrl;
-	}
+    /* COMMAND URLS */
 
-	public URL getStartCommandUrl() {
-		return startCommandUrl;
-	}
+    @XmlPath("actions/action[@name='Stop']/@URL")
+    private URL stopCommandUrl;
 
-	public URL getLightOnCommandUrl() {
-		return lightOnCommandUrl;
-	}
+    @XmlPath("actions/action[@name='Start']/@URL")
+    private URL startCommandUrl;
 
-	public URL getLightOffCommandUrl() {
-		return lightOffCommandUrl;
-	}
+    @XmlPath("actions/action[@name='Light On']/@URL")
+    private URL lightOnCommandUrl;
+
+    @XmlPath("actions/action[@name='Light Off']/@URL")
+    private URL lightOffCommandUrl;
+
+    /* GETTERS */
+
+    public String getApplianceTypeName() {
+        return this.applianceTypeName;
+    }
+
+    public String getStateName() {
+        return this.stateName;
+    }
+
+    public String getProgramName() {
+        return this.programName;
+    }
+
+    public String getPhaseName() {
+        return this.phaseName;
+    }
+
+    public MieleDuration getStartTime() {
+        return this.startTime;
+    }
+
+    public MieleDuration getSmartStartTime() {
+        return this.smartStartTime;
+    }
+
+    public MieleDuration getRemainingTime() {
+        return this.remainingTime;
+    }
+
+    public MieleDuration getDuration() {
+        return this.duration;
+    }
+
+    public MieleDuration getEndTime() {
+        return this.endTime;
+    }
+
+    public URL getStopCommandUrl() {
+        return this.stopCommandUrl;
+    }
+
+    public URL getStartCommandUrl() {
+        return this.startCommandUrl;
+    }
+
+    public URL getLightOnCommandUrl() {
+        return this.lightOnCommandUrl;
+    }
+
+    public URL getLightOffCommandUrl() {
+        return this.lightOffCommandUrl;
+    }
 }

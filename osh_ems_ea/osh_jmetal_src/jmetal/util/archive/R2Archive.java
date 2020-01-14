@@ -36,143 +36,142 @@ import java.util.Comparator;
  */
 @SuppressWarnings({"rawtypes", "unused"})
 public class R2Archive extends Archive {
-  
-  /**
-	 * 
-	 */
-  private static final long serialVersionUID = 1L;
 
-  /** 
-   * Stores the maximum size of the archive.
-   */
-  private int maxSize_;
-  
-  /**
-   * stores the number of the objectives.
-   */
-  
-  private int objectives_;    
-  
-  /**
-   * Stores a <code>Comparator</code> for dominance checking.
-   */
-  
-  private Comparator dominance_;
-  
-  /**
-   * Stores a <code>Comparator</code> for equality checking (in the objective
-   * space).
-   */
-  private Comparator equals_; 
-  
-  
-  private Comparator crowdingDistance_; 
-  
-  private R2 r2Indicator_;
-  
-  private PseudoRandom pseudoRandom;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * Constructor. Creates an R2Archive for a problem of 2 objectives
-   * @param maxSize The maximum size of the archive.
-   
-   */
-  public R2Archive(int maxSize, PseudoRandom pseudoRandom) {
-    super(maxSize);
-    this.pseudoRandom = pseudoRandom;
-    maxSize_          = maxSize;
-    objectives_       = 2;        // hardcoded
-    dominance_        = new DominanceComparator();
-    equals_           = new EqualSolutions();
-    crowdingDistance_ = new CrowdingDistanceComparator();
-    r2Indicator_       = new R2();
+    /**
+     * Stores the maximum size of the archive.
+     */
+    private final int maxSize_;
 
-  } // CrowdingArchive
-    
-  
-  
-   /**
-   * Constructor. 
-   * @param maxSize The maximum size of the archive.
-   * @param numberOfObjectives The number of objectives.
-   */
-  public R2Archive(int maxSize, int numberOfObjectives, String file, PseudoRandom pseudoRandom) {
-    super(maxSize);
-    this.pseudoRandom = pseudoRandom;
-    maxSize_          = maxSize;
-    objectives_       = numberOfObjectives;        
-    dominance_        = new DominanceComparator();
-    equals_           = new EqualSolutions();
-    crowdingDistance_ = new CrowdingDistanceComparator();
-    r2Indicator_      = new R2(numberOfObjectives,file);
+    /**
+     * stores the number of the objectives.
+     */
 
-  } // CrowdingArchive
+    private final int objectives_;
 
-  
-  /**
-   * Adds a <code>Solution</code> to the archive. If the <code>Solution</code>
-   * is dominated by any member of the archive, then it is discarded. If the 
-   * <code>Solution</code> dominates some members of the archive, these are
-   * removed. If the archive is full and the <code>Solution</code> has to be
-   * inserted, the solutions are sorted by crowding distance and the one having
-   * the minimum crowding distance value.
-   * @param solution The <code>Solution</code>
-   * @return true if the <code>Solution</code> has been inserted, false 
-   * otherwise.
-   */
-  @SuppressWarnings("unchecked")
-  public boolean add(Solution solution){
-    int flag = 0;
-    int i = 0;
-    Solution aux; //Store an solution temporally
+    /**
+     * Stores a <code>Comparator</code> for dominance checking.
+     */
 
-    while (i < solutionsList_.size()){
-      aux = solutionsList_.get(i);            
-            
-      flag = dominance_.compare(solution,aux);
-      if (flag == 1) {               // The solution to add is dominated
-        return false;                // Discard the new solution
-      } else if (flag == -1) {       // A solution in the archive is dominated
-        solutionsList_.remove(i);    // Remove it from the population            
-      } else {
-          if (equals_.compare(aux,solution)==0) { // There is an equal solution 
-                                                  // in the population
-            return false; // Discard the new solution
-          }  // if
-          i++;
-      }
+    private final Comparator dominance_;
+
+    /**
+     * Stores a <code>Comparator</code> for equality checking (in the objective
+     * space).
+     */
+    private final Comparator equals_;
+
+
+    private final Comparator crowdingDistance_;
+
+    private final R2 r2Indicator_;
+
+    private final PseudoRandom pseudoRandom;
+
+    /**
+     * Constructor. Creates an R2Archive for a problem of 2 objectives
+     *
+     * @param maxSize The maximum size of the archive.
+     */
+    public R2Archive(int maxSize, PseudoRandom pseudoRandom) {
+        super(maxSize);
+        this.pseudoRandom = pseudoRandom;
+        this.maxSize_ = maxSize;
+        this.objectives_ = 2;        // hardcoded
+        this.dominance_ = new DominanceComparator();
+        this.equals_ = new EqualSolutions();
+        this.crowdingDistance_ = new CrowdingDistanceComparator();
+        this.r2Indicator_ = new R2();
+
+    } // CrowdingArchive
+
+
+    /**
+     * Constructor.
+     *
+     * @param maxSize            The maximum size of the archive.
+     * @param numberOfObjectives The number of objectives.
+     */
+    public R2Archive(int maxSize, int numberOfObjectives, String file, PseudoRandom pseudoRandom) {
+        super(maxSize);
+        this.pseudoRandom = pseudoRandom;
+        this.maxSize_ = maxSize;
+        this.objectives_ = numberOfObjectives;
+        this.dominance_ = new DominanceComparator();
+        this.equals_ = new EqualSolutions();
+        this.crowdingDistance_ = new CrowdingDistanceComparator();
+        this.r2Indicator_ = new R2(numberOfObjectives, file);
+
+    } // CrowdingArchive
+
+
+    /**
+     * Adds a <code>Solution</code> to the archive. If the <code>Solution</code>
+     * is dominated by any member of the archive, then it is discarded. If the
+     * <code>Solution</code> dominates some members of the archive, these are
+     * removed. If the archive is full and the <code>Solution</code> has to be
+     * inserted, the solutions are sorted by crowding distance and the one having
+     * the minimum crowding distance value.
+     *
+     * @param solution The <code>Solution</code>
+     * @return true if the <code>Solution</code> has been inserted, false
+     * otherwise.
+     */
+    @SuppressWarnings("unchecked")
+    public boolean add(Solution solution) {
+        int flag;
+        int i = 0;
+        Solution aux; //Store an solution temporally
+
+        while (i < this.solutionsList_.size()) {
+            aux = this.solutionsList_.get(i);
+
+            flag = this.dominance_.compare(solution, aux);
+            if (flag == 1) {               // The solution to add is dominated
+                return false;                // Discard the new solution
+            } else if (flag == -1) {       // A solution in the archive is dominated
+                this.solutionsList_.remove(i);    // Remove it from the population
+            } else {
+                if (this.equals_.compare(aux, solution) == 0) { // There is an equal solution
+                    // in the population
+                    return false; // Discard the new solution
+                }  // if
+                i++;
+            }
+        }
+        // Insert the solution into the archive
+        this.solutionsList_.add(solution);
+        if (this.size() > this.maxSize_) { // The archive is full
+            // Removing the one contributing the less
+            int indexWorst = this.r2Indicator_.getWorst(this);
+            this.remove(indexWorst);
+        }
+        return true;
+    } // add
+
+
+    /**
+     * Returns a solution from the archive based on their contribution to the R2
+     * indicator. The solution is chosen using a binary tournament.
+     */
+    public Solution
+    getSolution() {
+        int index1, index2;
+        index1 = this.pseudoRandom.randInt(0, this.size() - 1);
+        index2 = this.pseudoRandom.randInt(0, this.size() - 1);
+        double aux1 = this.r2Indicator_.R2Without(this, index1);
+        double aux2 = this.r2Indicator_.R2Without(this, index2);
+
+        if (aux1 > aux2) { // means that index1 contributed less than index2
+            return this.get(index1);
+        } else {
+            return this.get(index2);
+        }
     }
-    // Insert the solution into the archive
-    solutionsList_.add(solution);        
-    if (size() > maxSize_) { // The archive is full
-      // Removing the one contributing the less
-      int indexWorst = this.r2Indicator_.getWorst(this);
-      remove(indexWorst);
-    }        
-    return true;
-  } // add
-  
-  
-  /**
-   * Returns a solution from the archive based on their contribution to the R2
-   * indicator. The solution is chosen using a binary tournament.   
-   */
-  public Solution
-  getSolution() {
-      int index1, index2;
-      index1 = pseudoRandom.randInt(0, size()-1);
-      index2 = pseudoRandom.randInt(0, size()-1);
-      double aux1 = this.r2Indicator_.R2Without(this, index1) ;
-      double aux2 = this.r2Indicator_.R2Without(this,index2) ;
-      
-      if (aux1 > aux2) { // means that index1 contributed less than index2          
-          return this.get(index1);
-      } else {          
-          return this.get(index2);
-      }
-  }
-          
-  
-  
-  
+
+
 } // R2Archive

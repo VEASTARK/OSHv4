@@ -10,78 +10,74 @@ import osh.utils.CostCalculator;
 import java.util.EnumMap;
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
- *
  */
 public class Fitness implements IFitness {
-	
-	private IGlobalLogger globalLogger;
 
-	private int epsOptimizationObjective;
-	
-	private int plsOptimizationObjective;
-	private int varOptimizationObjective;
-	private double upperOverlimitFactor;
-	private double lowerOverlimitFactor;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param epsOptimizationObjective
-	 * @param plsOptimizationObjective
-	 * @param overlimitfactor
-	 */
-	public Fitness(
-			IGlobalLogger globalLogger,
-			int epsOptimizationObjective, 
-			int plsOptimizationObjective,
-			int varOptimizationObjective,
-			double upperOverlimitFactor,
-			double lowerOverlimitFactor) {
-		
-		this.globalLogger = globalLogger;
-		
-		// Energy Price Signals
-		this.epsOptimizationObjective = epsOptimizationObjective;
-		
-		// Power Limit Signal
-		this.plsOptimizationObjective = plsOptimizationObjective;
-		this.varOptimizationObjective = varOptimizationObjective;
-		this.upperOverlimitFactor = upperOverlimitFactor;
-		this.lowerOverlimitFactor = lowerOverlimitFactor;
-	}
-	
-	public double getFitnessValue(
-			long beginAt,
-			long endAt,
-			AncillaryCommodityLoadProfile ancillaryMeter,
-			EnumMap<AncillaryCommodity,PriceSignal> priceSignals,
-			EnumMap<AncillaryCommodity,PowerLimitSignal> powerLimitSignals
-			) {
-		
+    private final IGlobalLogger globalLogger;
+
+    private final int epsOptimizationObjective;
+
+    private final int plsOptimizationObjective;
+    private final int varOptimizationObjective;
+    private final double upperOverlimitFactor;
+    private final double lowerOverlimitFactor;
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param epsOptimizationObjective
+     * @param plsOptimizationObjective
+     */
+    public Fitness(
+            IGlobalLogger globalLogger,
+            int epsOptimizationObjective,
+            int plsOptimizationObjective,
+            int varOptimizationObjective,
+            double upperOverlimitFactor,
+            double lowerOverlimitFactor) {
+
+        this.globalLogger = globalLogger;
+
+        // Energy Price Signals
+        this.epsOptimizationObjective = epsOptimizationObjective;
+
+        // Power Limit Signal
+        this.plsOptimizationObjective = plsOptimizationObjective;
+        this.varOptimizationObjective = varOptimizationObjective;
+        this.upperOverlimitFactor = upperOverlimitFactor;
+        this.lowerOverlimitFactor = lowerOverlimitFactor;
+    }
+
+    public double getFitnessValue(
+            long beginAt,
+            long endAt,
+            AncillaryCommodityLoadProfile ancillaryMeter,
+            EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
+            EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals
+    ) {
+
 //		double oldCosts = getFitnessValueOld(beginAt, endAt, ancillaryMeter, priceSignals, powerLimitSignals);
-				
-		double costs2 = CostCalculator.calcRangeCosts(
-				epsOptimizationObjective, 
-				varOptimizationObjective,
-				plsOptimizationObjective, 
-				beginAt, 
-				endAt, 
-				upperOverlimitFactor, 
-				lowerOverlimitFactor, 
-				ancillaryMeter, 
-				priceSignals, 
-				powerLimitSignals, 
-				globalLogger);
-		
-//		if (Math.abs(oldCosts - costs2) > 0.000001) {
+
+        //		if (Math.abs(oldCosts - costs2) > 0.000001) {
 //			globalLogger.logError("WARNING WARNING WARNING");
 //		}
-		
-		return costs2;
-	}
-	
-	
+
+        return CostCalculator.calcRangeCosts(
+                this.epsOptimizationObjective,
+                this.varOptimizationObjective,
+                this.plsOptimizationObjective,
+                beginAt,
+                endAt,
+                this.upperOverlimitFactor,
+                this.lowerOverlimitFactor,
+                ancillaryMeter,
+                priceSignals,
+                powerLimitSignals,
+                this.globalLogger);
+    }
+
+
 //	private double getFitnessValueOld(
 //			long beginAt,
 //			long endAt,

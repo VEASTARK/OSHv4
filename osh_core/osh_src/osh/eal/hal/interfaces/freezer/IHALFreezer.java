@@ -1,35 +1,33 @@
 package osh.eal.hal.interfaces.freezer;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public interface IHALFreezer {
-	
-	public double getSetTemperature();
-	
-	public double getMinTemperature();
-	
-	public double getMaxTemperature();
 
-	public double getCurrentTemperature();
+    double getSetTemperature();
 
-	public int getControlSignal();
+    double getMinTemperature();
 
-	public int getControlSignalCorrectionValue();
-	
-	public long getLastControlSignalCorrectionValueChange();
-	
-	public int getTicksSinceLastCooling();
+    double getMaxTemperature();
 
-	public boolean getCoolingOn();
+    double getCurrentTemperature();
 
-	public boolean getFanOn();
-	
-	public boolean getSuperFrostOn();
-	
-	public int getSuperFrostTicks();
+    int getControlSignal();
 
-	public boolean getNoFrostOn();
+    int getControlSignalCorrectionValue();
+
+    long getLastControlSignalCorrectionValueChange();
+
+    int getTicksSinceLastCooling();
+
+    boolean getCoolingOn();
+
+    boolean getFanOn();
+
+    boolean getSuperFrostOn();
+
+    int getSuperFrostTicks();
+
+    boolean getNoFrostOn();
 }

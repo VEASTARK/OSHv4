@@ -27,40 +27,40 @@ import jmetal.core.Variable;
  * Class implementing a permutation of integer decision encodings.variable
  */
 public class Permutation extends Variable {
-  
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
-/**
-   * Stores a permutation of <code>int</code> values
-   */
-  public int [] vector_;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * Stores the length of the permutation
-   */
-  public int size_;
+    /**
+     * Stores a permutation of <code>int</code> values
+     */
+    public final int[] vector_;
 
-  /**
-   * Constructor
-   */
-  public Permutation() {
-    size_   = 0;
-    vector_ = null;
+    /**
+     * Stores the length of the permutation
+     */
+    public final int size_;
 
-  } //Permutation
+    /**
+     * Constructor
+     */
+    public Permutation() {
+        this.size_ = 0;
+        this.vector_ = null;
 
-  /**
-   * Constructor
-   * @param size Length of the permutation
-   */
+    } //Permutation
+
+    /**
+     * Constructor
+     * @param size Length of the permutation
+     */
   /*
   public Permutation(int size) {
-	  setVariableType(VariableType_.Permutation) ;
+      setVariableType(VariableType_.Permutation) ;
 
-	  size_   = size;
+      size_   = size;
     vector_ = new int[size_];
     
     int [] randomSequence = new int[size_];
@@ -88,69 +88,74 @@ public class Permutation extends Variable {
   } //Permutation
    * */
 
-  /**
-   * Constructor
-   * @param size Length of the permutation
-   * This constructor has been contributed by Madan Sathe
-   */
-  public Permutation(int size) {
-    size_   = size;
-    vector_ = new int[size_];
+    /**
+     * Constructor
+     *
+     * @param size Length of the permutation
+     *             This constructor has been contributed by Madan Sathe
+     */
+    public Permutation(int size) {
+        this.size_ = size;
+        this.vector_ = new int[this.size_];
 
-    java.util.ArrayList<Integer> randomSequence = new
-            java.util.ArrayList<Integer>(size_);
+        java.util.ArrayList<Integer> randomSequence = new
+                java.util.ArrayList<>(this.size_);
 
-    for(int i = 0; i < size_; i++)
-      randomSequence.add(i);
+        for (int i = 0; i < this.size_; i++)
+            randomSequence.add(i);
 
-    java.util.Collections.shuffle(randomSequence);
+        java.util.Collections.shuffle(randomSequence);
 
-    for(int j = 0; j < randomSequence.size(); j++)
-      vector_[j] = randomSequence.get(j);
-  } // Constructor
-
-
-  /**
-   * Copy Constructor
-   * @param permutation The permutation to copy
-   */
-  public Permutation(Permutation permutation) {
-    size_   = permutation.size_;
-    vector_ = new int[size_];
-
-    System.arraycopy(permutation.vector_, 0, vector_, 0, size_);
-  } //Permutation
+        for (int j = 0; j < randomSequence.size(); j++)
+            this.vector_[j] = randomSequence.get(j);
+    } // Constructor
 
 
-  /**
-   * Create an exact copy of the <code>Permutation</code> object.
-   * @return An exact copy of the object.
-   */
-  @Override
-  public Variable deepCopy() {
-    return new Permutation(this);
-  } //deepCopy
+    /**
+     * Copy Constructor
+     *
+     * @param permutation The permutation to copy
+     */
+    public Permutation(Permutation permutation) {
+        this.size_ = permutation.size_;
+        this.vector_ = new int[this.size_];
 
-  /**
-   * Returns the length of the permutation.
-   * @return The length
-   */
-  public int getLength(){
-    return size_;
-  } //getNumberOfBits
+        System.arraycopy(permutation.vector_, 0, this.vector_, 0, this.size_);
+    } //Permutation
 
-  /**
-   * Returns a string representing the object
-   * @return The string
-   */ 
-  @Override
-  public String toString(){
-    String string ;
 
-    string = "" ;
-    for (int i = 0; i < size_ ; i ++)
-      string += vector_[i] + " " ;
+    /**
+     * Create an exact copy of the <code>Permutation</code> object.
+     *
+     * @return An exact copy of the object.
+     */
+    @Override
+    public Variable deepCopy() {
+        return new Permutation(this);
+    } //deepCopy
 
-    return string ;
-  } // toString
+    /**
+     * Returns the length of the permutation.
+     *
+     * @return The length
+     */
+    public int getLength() {
+        return this.size_;
+    } //getNumberOfBits
+
+    /**
+     * Returns a string representing the object
+     *
+     * @return The string
+     */
+    @Override
+    public String toString() {
+        StringBuilder string;
+
+        string = new StringBuilder();
+        for (int i = 0; i < this.size_; i++)
+            string.append(this.vector_[i]).append(" ");
+
+        return string.toString();
+    } // toString
 } // Permutation

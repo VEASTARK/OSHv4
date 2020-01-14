@@ -7,35 +7,33 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Till Schuberth, Ingo Mauser
- *
  */
-public class GUIWaterStorageStateExchange 
-				extends WaterStorageOCSX 
-				implements EqualData<WaterStorageOCSX> {
+public class GUIWaterStorageStateExchange
+        extends WaterStorageOCSX
+        implements EqualData<WaterStorageOCSX> {
 
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7038499626567724690L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7038499626567724690L;
 
 
-	public GUIWaterStorageStateExchange(
-			UUID sender, 
-			long timestamp,
-			double currenttemp, 
-			double mintemp, 
-			double maxtemp,
-			double demand,
-			double supply,
-			UUID tankId) {
-		super(sender, timestamp, currenttemp, mintemp, maxtemp, demand, supply, tankId);
-	}
+    public GUIWaterStorageStateExchange(
+            UUID sender,
+            long timestamp,
+            double currentTemp,
+            double minTemp,
+            double maxTemp,
+            double demand,
+            double supply,
+            UUID tankId) {
+        super(sender, timestamp, currentTemp, minTemp, maxTemp, demand, supply, tankId);
+    }
 
-	
-	public boolean equalData(GUIWaterStorageStateExchange o) {
-		return super.equalData(o);
-	}
+
+    public boolean equalData(GUIWaterStorageStateExchange o) {
+        return super.equalData(o);
+    }
 }

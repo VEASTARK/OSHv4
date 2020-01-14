@@ -1,118 +1,112 @@
 package osh.comdriver.weather;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import osh.comdriver.WeatherPredictionProviderComDriver;
 import osh.comdriver.details.CurrentWeatherDetails;
-import osh.core.exceptions.OSHException;
 import osh.core.logging.IGlobalLogger;
 import osh.openweathermap.current.CurrentWeatherMap;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
- * 
  * @author Jan Mueller
- *
  */
 public class CurrentWeatherRequestThread implements Runnable {
 
-	private IGlobalLogger globalLogger;
-	private WeatherPredictionProviderComDriver comDriver;
-	private String urlCurrentWeather;
-	private String apiKey;
+    private final IGlobalLogger globalLogger;
+    private final WeatherPredictionProviderComDriver comDriver;
+    private final String urlCurrentWeather;
+    private final String apiKey;
+    private final int logEverySeconds = 60;
+    private boolean shutdown;
+    private LocalDateTime lastException = LocalDateTime.now();
+    private int reconnectWait;
+    private long lastLog;
 
-	private boolean shutdown;
-	private Date lastException = new Date();
-	private int reconnectWait;
-	
-	private final int logEverySeconds = 1 * 60;
-	private long lastLog = 0;
-	
 
-	/**
-	 * CONSTRUCTOR
-	 * 
-	 * @param globalLogger
-	 * @param comDriver
-	 * @param urlCurrentWeather
-	 * @param apiKey
-	 */
-	public CurrentWeatherRequestThread(IGlobalLogger globalLogger,
-			WeatherPredictionProviderComDriver comDriver, String urlCurrentWeather,
-			String apiKey) {
-		this.globalLogger = globalLogger;
-		this.comDriver = comDriver;
-		this.urlCurrentWeather = urlCurrentWeather;
-		this.apiKey = apiKey;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param globalLogger
+     * @param comDriver
+     * @param urlCurrentWeather
+     * @param apiKey
+     */
+    public CurrentWeatherRequestThread(IGlobalLogger globalLogger,
+                                       WeatherPredictionProviderComDriver comDriver, String urlCurrentWeather,
+                                       String apiKey) {
+        this.globalLogger = globalLogger;
+        this.comDriver = comDriver;
+        this.urlCurrentWeather = urlCurrentWeather;
+        this.apiKey = apiKey;
+    }
 
-	@Override
-	public void run() {
-		while (!shutdown) {
-			
-			if (comDriver.getTimer().getUnixTime() - lastLog >= logEverySeconds) {
-				try {
-					// get and send to driver
-					CurrentWeatherDetails currentWeatherDetails = new CurrentWeatherDetails(
-							comDriver.getDeviceID(),
-							comDriver.getTimer().getUnixTime(),
-							getCurrentWeather(this.urlCurrentWeather, this.apiKey));
-					comDriver.receiveCurrentDetails(currentWeatherDetails);
-					
-					this.lastLog = comDriver.getTimer().getUnixTime();
-				} 
-				catch (Exception e) {
-					this.globalLogger.logError("Reading current weather info failed", e);
+    @Override
+    public void run() {
+        while (!this.shutdown) {
 
-					long diff = new Date().getTime() - lastException.getTime();
-					if (diff < 0 || diff > 300000) {
-						reconnectWait = 0;
-					} else {
-						if (reconnectWait <= 0) {
-							reconnectWait = 1;
-						}
-						
-						reconnectWait *= 2;
-						if (reconnectWait > 180) {
-							reconnectWait = 180;
-						}
-					}
-					lastException = new Date();
+            if (this.comDriver.getTimer().getUnixTime() - this.lastLog >= this.logEverySeconds) {
+                try {
+                    // get and send to driver
+                    CurrentWeatherDetails currentWeatherDetails = new CurrentWeatherDetails(
+                            this.comDriver.getDeviceID(),
+                            this.comDriver.getTimer().getUnixTime(),
+                            this.getCurrentWeather(this.urlCurrentWeather, this.apiKey));
+                    this.comDriver.receiveCurrentDetails(currentWeatherDetails);
 
-					try {
-						Thread.sleep(reconnectWait * 1000);
-					} catch (InterruptedException e1) {}
-				}
-			}
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-			}
-		}
+                    this.lastLog = this.comDriver.getTimer().getUnixTime();
+                } catch (Exception e) {
+                    this.globalLogger.logError("Reading current weather info failed", e);
 
-	}
+                    long diff = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+                            - this.lastException.toEpochSecond(ZoneOffset.UTC);
+                    if (diff < 0 || diff > 300000) {
+                        this.reconnectWait = 0;
+                    } else {
+                        if (this.reconnectWait <= 0) {
+                            this.reconnectWait = 1;
+                        }
 
-	public void shutdown() {
-		this.shutdown = true;
-	}
+                        this.reconnectWait *= 2;
+                        if (this.reconnectWait > 180) {
+                            this.reconnectWait = 180;
+                        }
+                    }
+                    this.lastException = LocalDateTime.now();
 
-	public CurrentWeatherMap getCurrentWeather(String urlToWeatherAPI, String apiKey) throws OSHException {
+                    try {
+                        Thread.sleep(this.reconnectWait * 1000);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }
 
-		ObjectMapper mapper = new ObjectMapper();
-		CurrentWeatherMap obj = null;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {
+            }
+        }
 
-		try {
-			obj = mapper.readValue(new URL(urlToWeatherAPI + apiKey), CurrentWeatherMap.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    }
+
+    public void shutdown() {
+        this.shutdown = true;
+    }
+
+    public CurrentWeatherMap getCurrentWeather(String urlToWeatherAPI, String apiKey) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        CurrentWeatherMap obj = null;
+
+        try {
+            obj = mapper.readValue(new URL(urlToWeatherAPI + apiKey), CurrentWeatherMap.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return obj;
-	}
+    }
 }

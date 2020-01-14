@@ -30,13 +30,13 @@ import java.util.HashMap;
  * This class represents the super class of all the selection operators
  */
 public abstract class Selection extends Operator {
-	
-	private static final long serialVersionUID = 1L;
-	protected PseudoRandom pseudoRandom;
 
-	public Selection(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
-	  super(parameters);
-	  
-	  this.pseudoRandom = pseudoRandom;
-  }
+    private static final long serialVersionUID = 1L;
+    protected final PseudoRandom pseudoRandom;
+
+    public Selection(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
+        super(parameters);
+
+        this.pseudoRandom = pseudoRandom;
+    }
 } // Selection

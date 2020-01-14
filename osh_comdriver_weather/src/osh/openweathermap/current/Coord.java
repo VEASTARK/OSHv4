@@ -1,4 +1,3 @@
-
 package osh.openweathermap.current;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,26 +10,24 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "lon",
-    "lat"
+        "lon",
+        "lat"
 })
 public class Coord implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 513116768986071383L;
-	@JsonProperty("lon")
+     *
+     */
+    private static final long serialVersionUID = 513116768986071383L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("lon")
     private Double lon;
     @JsonProperty("lat")
     private Integer lat;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The lon
+     * @return The lon
      */
     @JsonProperty("lon")
     public Double getLon() {
@@ -38,9 +35,7 @@ public class Coord implements Serializable {
     }
 
     /**
-     * 
-     * @param lon
-     *     The lon
+     * @param lon The lon
      */
     @JsonProperty("lon")
     public void setLon(Double lon) {
@@ -48,9 +43,7 @@ public class Coord implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The lat
+     * @return The lat
      */
     @JsonProperty("lat")
     public Integer getLat() {
@@ -58,9 +51,7 @@ public class Coord implements Serializable {
     }
 
     /**
-     * 
-     * @param lat
-     *     The lat
+     * @param lat The lat
      */
     @JsonProperty("lat")
     public void setLat(Integer lat) {

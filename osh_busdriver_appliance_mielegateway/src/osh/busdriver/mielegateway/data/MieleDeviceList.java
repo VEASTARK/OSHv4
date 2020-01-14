@@ -7,20 +7,19 @@ import java.util.List;
 
 /**
  * The XML homebus root node
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
-@XmlRootElement(name="DEVICES")
+@XmlRootElement(name = "DEVICES")
 public class MieleDeviceList {
-	@XmlPath("device")
-	private List<MieleDeviceHomeBusDataREST> devices;
-	
-	public List<MieleDeviceHomeBusDataREST> getDevices() {
-		return devices;
-	}
-	
-	public void setDevices(List<MieleDeviceHomeBusDataREST> devices) {
-		this.devices = devices;
-	}
+    @XmlPath("device")
+    private List<MieleDeviceHomeBusDataREST> devices;
+
+    public List<MieleDeviceHomeBusDataREST> getDevices() {
+        return this.devices;
+    }
+
+    public void setDevices(List<MieleDeviceHomeBusDataREST> devices) {
+        this.devices = devices;
+    }
 }

@@ -22,6 +22,7 @@
 package jmetal.util;
 
 public interface IRandomGenerator {
-	int nextInt(int upperLimit) ;
-	double nextDouble() ;
+    int nextInt(int upperLimit);
+
+    double nextDouble();
 }

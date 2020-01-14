@@ -8,34 +8,33 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
-public class PvPredictionExchange 
-				extends HALObserverExchange {
-	
-	private List<SparseLoadProfile> powerPredicitions;
-	private int pastDaysPrediction;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public PvPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredicitions, int pastDaysPrediction) {
-		super(deviceID, timestamp);
-		this.powerPredicitions = powerPredicitions;
-		this.pastDaysPrediction = pastDaysPrediction;
-	}
-	
-	public List<SparseLoadProfile> getPredicitons() {
-		return powerPredicitions;
-	}
+public class PvPredictionExchange
+        extends HALObserverExchange {
 
-	public int getPastDaysPrediction() {
-		return pastDaysPrediction;
-	}
+    private final List<SparseLoadProfile> powerPredictions;
+    private final int pastDaysPrediction;
+
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public PvPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredictions, int pastDaysPrediction) {
+        super(deviceID, timestamp);
+        this.powerPredictions = powerPredictions;
+        this.pastDaysPrediction = pastDaysPrediction;
+    }
+
+    public List<SparseLoadProfile> getPredictions() {
+        return this.powerPredictions;
+    }
+
+    public int getPastDaysPrediction() {
+        return this.pastDaysPrediction;
+    }
 
 }

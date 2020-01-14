@@ -10,141 +10,144 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-@XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement(name="ChpDriverDetails")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "ChpDriverDetails")
 @XmlType
 
 public class ChpDriverDetails extends StateExchange {
-	
-	/** Serial */
-	private static final long serialVersionUID = 4269794621296448446L;
-	
-	// Heating request or power request? Or both?
-	protected boolean powerGenerationRequest;
-	protected boolean heatingRequest;
 
-	// current power
-	protected double currentElectricalPower;
-	protected double currentThermalPower;
-	
-	// total energy
-	protected double generatedElectricalWork;
-	protected double generatedThermalWork;
-	
-	// priorities
-	protected boolean electicalPowerPriorizedControl;
-	protected boolean thermalPowerPriorizedControl;
-	
-	//
-	protected int temperatureIn;
-	protected int temperatureOut;
-	
-	
-	/** for JAXB */
-	@SuppressWarnings("unused")
-	@Deprecated
-	private ChpDriverDetails() {
-		super(null, 0);
-	}
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public ChpDriverDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
+    /**
+     * Serial
+     */
+    private static final long serialVersionUID = 4269794621296448446L;
 
-	
-	public double getCurrentElectricalPower() {
-		return currentElectricalPower;
-	}
+    // Heating request or power request? Or both?
+    protected boolean powerGenerationRequest;
+    protected boolean heatingRequest;
 
-	public void setCurrentElectricalPower(double currentElectricalPower) {
-		this.currentElectricalPower = currentElectricalPower;
-	}
+    // current power
+    protected double currentElectricalPower;
+    protected double currentThermalPower;
 
-	public double getCurrentThermalPower() {
-		return currentThermalPower;
-	}
+    // total energy
+    protected double generatedElectricalWork;
+    protected double generatedThermalWork;
 
-	public void setCurrentThermalPower(double currentThermalPower) {
-		this.currentThermalPower = currentThermalPower;
-	}
-	
-	public double getGeneratedElectricalWork() {
-		return generatedElectricalWork;
-	}
-	public void setGeneratedElectricalWork(double generatedElectricalWork) {
-		this.generatedElectricalWork = generatedElectricalWork;
-	}
-	
-	public double getGeneratedThermalWork() {
-		return generatedThermalWork;
-	}
-	public void setGeneratedThermalWork(double generatedThermalWork) {
-		this.generatedThermalWork = generatedThermalWork;
-	}
-	
-	public boolean getElecticalPowerPriorizedControl() {
-		return electicalPowerPriorizedControl;
-	}
-	public void setElecticalPowerPriorizedControl(boolean electicalPowerPriorizedControl) {
-		this.electicalPowerPriorizedControl = electicalPowerPriorizedControl;
-	}
-	
-	public boolean getThermalPowerPriorizedControl() {
-		return thermalPowerPriorizedControl;
-	}
-	public void setThermalPowerPriorizedControl(boolean thermalPowerPriorizedControl) {
-		this.thermalPowerPriorizedControl = thermalPowerPriorizedControl;
-	}
-	
-	public boolean isHeatingRequest() {
-		return heatingRequest;
-	}
+    // priorities
+    protected boolean electricalPowerPrioritizedControl;
+    protected boolean thermalPowerPrioritizedControl;
 
-	public void setHeatingRequest(boolean heatingRequest) {
-		this.heatingRequest = heatingRequest;
-	}
+    //
+    protected int temperatureIn;
+    protected int temperatureOut;
 
-	public boolean isPowerGenerationRequest() {
-		return powerGenerationRequest;
-	}
 
-	public void setPowerGenerationRequest(boolean powerGenerationRequest) {
-		this.powerGenerationRequest = powerGenerationRequest;
-	}
+    /**
+     * for JAXB
+     */
+    @Deprecated
+    public ChpDriverDetails() {
+        super(null, 0);
+    }
 
-	public int getTemperatureIn() {
-		return temperatureIn;
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public ChpDriverDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
 
-	public void setTemperatureIn(int temperatureIn) {
-		this.temperatureIn = temperatureIn;
-	}
 
-	public int getTemperatureOut() {
-		return temperatureOut;
-	}
+    public double getCurrentElectricalPower() {
+        return this.currentElectricalPower;
+    }
 
-	public void setTemperatureOut(int temperatureOut) {
-		this.temperatureOut = temperatureOut;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("[currentElectricalPower=").append(currentElectricalPower).append(",");
-		builder.append("currentThermalPower=").append(currentThermalPower).append(",");
-		builder.append("generatedElectricalWork=").append(generatedElectricalWork).append(",");
-		builder.append("generatedThermalWork=").append(generatedThermalWork).append(",");
-		builder.append("electicalPowerPriorizedControl=").append(electicalPowerPriorizedControl).append(",");
-		builder.append("thermalPowerPriorizedControl=").append(thermalPowerPriorizedControl).append("]");
-		return builder.toString();
-	}
+    public void setCurrentElectricalPower(double currentElectricalPower) {
+        this.currentElectricalPower = currentElectricalPower;
+    }
+
+    public double getCurrentThermalPower() {
+        return this.currentThermalPower;
+    }
+
+    public void setCurrentThermalPower(double currentThermalPower) {
+        this.currentThermalPower = currentThermalPower;
+    }
+
+    public double getGeneratedElectricalWork() {
+        return this.generatedElectricalWork;
+    }
+
+    public void setGeneratedElectricalWork(double generatedElectricalWork) {
+        this.generatedElectricalWork = generatedElectricalWork;
+    }
+
+    public double getGeneratedThermalWork() {
+        return this.generatedThermalWork;
+    }
+
+    public void setGeneratedThermalWork(double generatedThermalWork) {
+        this.generatedThermalWork = generatedThermalWork;
+    }
+
+    public boolean getElectricalPowerPrioritizedControl() {
+        return this.electricalPowerPrioritizedControl;
+    }
+
+    public void setElectricalPowerPrioritizedControl(boolean electricalPowerPrioritizedControl) {
+        this.electricalPowerPrioritizedControl = electricalPowerPrioritizedControl;
+    }
+
+    public boolean getThermalPowerPrioritizedControl() {
+        return this.thermalPowerPrioritizedControl;
+    }
+
+    public void setThermalPowerPrioritizedControl(boolean thermalPowerPrioritizedControl) {
+        this.thermalPowerPrioritizedControl = thermalPowerPrioritizedControl;
+    }
+
+    public boolean isHeatingRequest() {
+        return this.heatingRequest;
+    }
+
+    public void setHeatingRequest(boolean heatingRequest) {
+        this.heatingRequest = heatingRequest;
+    }
+
+    public boolean isPowerGenerationRequest() {
+        return this.powerGenerationRequest;
+    }
+
+    public void setPowerGenerationRequest(boolean powerGenerationRequest) {
+        this.powerGenerationRequest = powerGenerationRequest;
+    }
+
+    public int getTemperatureIn() {
+        return this.temperatureIn;
+    }
+
+    public void setTemperatureIn(int temperatureIn) {
+        this.temperatureIn = temperatureIn;
+    }
+
+    public int getTemperatureOut() {
+        return this.temperatureOut;
+    }
+
+    public void setTemperatureOut(int temperatureOut) {
+        this.temperatureOut = temperatureOut;
+    }
+
+    @Override
+    public String toString() {
+        return "[currentElectricalPower=" + this.currentElectricalPower + "," +
+                "currentThermalPower=" + this.currentThermalPower + "," +
+                "generatedElectricalWork=" + this.generatedElectricalWork + "," +
+                "generatedThermalWork=" + this.generatedThermalWork + "," +
+                "electricalPowerPrioritizedControl=" + this.electricalPowerPrioritizedControl + "," +
+                "thermalPowerPrioritizedControl=" + this.thermalPowerPrioritizedControl + "]";
+    }
 
 }

@@ -9,32 +9,30 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class SimulationLoggerBusManager extends LoggerBusManager {
 
-	/**
-	 * CONSTRUCTOR
-	 */
-	public SimulationLoggerBusManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-	}
-
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		
-		getTimer().registerComponent(this, 1);
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public SimulationLoggerBusManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+    }
 
 
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		super.onNextTimePeriod();
-		
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+
+        this.getTimer().registerComponent(this, 1);
+    }
+
+
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        super.onNextTimePeriod();
+
 //		// get overall power state and communicate to driver for logging
 //		{
 //			CommodityPowerStateExchange cpse = 
@@ -122,17 +120,17 @@ public class SimulationLoggerBusManager extends LoggerBusManager {
 //				updateOcDataSubscriber(vche);
 //			}
 //		}
-	}
+    }
 
 
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(
-			Class<T> type, T event) throws OSHException {
-		//TODO
-	}
-	
-	private UUID getGlobalOCUnitUUID() {
-		return getOSH().getGlobalObserver().getAssignedOCUnit().getUnitID();
-	}
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T event) {
+        //TODO
+    }
+
+    private UUID getGlobalOCUnitUUID() {
+        return this.getOSH().getGlobalObserver().getAssignedOCUnit().getUnitID();
+    }
 
 }

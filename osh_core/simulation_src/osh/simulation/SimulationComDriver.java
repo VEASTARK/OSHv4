@@ -7,63 +7,63 @@ import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
-import osh.simulation.exception.SimulationSubjectException;
 
 import java.util.UUID;
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
- *
  */
 public abstract class SimulationComDriver extends CALComDriver {
 
-	private ISimulationActionLogger simlogger = null;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param deviceID
-	 * @param driverConfig
-	 * @throws SimulationSubjectException
-	 */
-	public SimulationComDriver(
-			IOSH controllerbox, 
-			UUID deviceID,
-			OSHParameterCollection driverConfig)
-			throws SimulationSubjectException {
-		super(controllerbox, deviceID, driverConfig);
-	}
+    private ISimulationActionLogger simLogger;
 
-	@Override
-	public final UUID getDeviceID() {
-		return super.getDeviceID();
-	}
 
-	@Override
-	public void updateDataFromComManager(ICALExchange exchangeObject) {
-		//NOTHING
-	}
-	
-	
-	/** Please use only for logging stuff */
-	public PriceSignal getPriceSignal(AncillaryCommodity c) {
-		return null;
-	}
-	
-	/** Please use only for logging stuff */
-	public PowerLimitSignal getPowerLimitSignal(AncillaryCommodity c) {
-		return null;
-	}
-	
-	
-	protected ISimulationActionLogger getSimlogger() {
-		return simlogger;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param deviceID
+     * @param driverConfig
+     */
+    public SimulationComDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig) {
+        super(osh, deviceID, driverConfig);
+    }
 
-	public void setSimulationActionLogger(ISimulationActionLogger simulationLogger) {
-		this.simlogger = simulationLogger;
-	}
+    @Override
+    public final UUID getDeviceID() {
+        return super.getDeviceID();
+    }
+
+    @Override
+    public void updateDataFromComManager(ICALExchange exchangeObject) {
+        //NOTHING
+    }
+
+
+    /**
+     * Please use only for logging stuff
+     */
+    public PriceSignal getPriceSignal(AncillaryCommodity c) {
+        return null;
+    }
+
+    /**
+     * Please use only for logging stuff
+     */
+    public PowerLimitSignal getPowerLimitSignal(AncillaryCommodity c) {
+        return null;
+    }
+
+
+    protected ISimulationActionLogger getSimLogger() {
+        return this.simLogger;
+    }
+
+    public void setSimulationActionLogger(ISimulationActionLogger simulationLogger) {
+        this.simLogger = simulationLogger;
+    }
 
 }

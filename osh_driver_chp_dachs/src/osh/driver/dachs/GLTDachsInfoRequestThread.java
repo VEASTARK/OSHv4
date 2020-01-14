@@ -13,21 +13,23 @@ import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.GLTDachsChpDriver;
 
 import java.io.IOException;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
- *
  */
 @SuppressWarnings("deprecation")
 public class GLTDachsInfoRequestThread implements Runnable {
 
-	private IGlobalLogger globalLogger;
-	private GLTDachsChpDriver dachsDriver;
-	
-	private ArrayList<String> parametersToGet = new ArrayList<String>(Arrays.asList(// Betriebsdaten Dachs
+    private final IGlobalLogger globalLogger;
+    private final GLTDachsChpDriver dachsDriver;
+
+    private final ArrayList<String> parametersToGet = new ArrayList<>(Arrays.asList(// Betriebsdaten Dachs
             "Hka_Bd.Anforderung.ModulAnzahl",
             "Hka_Bd.Anforderung.UStromF_Anf.bFlagSF",
             "Hka_Bd.UStromF_Frei.bFreigabe",
@@ -106,160 +108,158 @@ public class GLTDachsInfoRequestThread implements Runnable {
 //			"Wartung_Cache.ulZeitstempel", // quasi-static
             "Wartung_Cache.usIntervall" // quasi-static
     ));
-	
-	private boolean shutdown;
-	private Date lastException = new Date();
-	private int reconnectWait;
-	
-	private String urlToDachs;
-	private String loginName;
-	private String loginPwd;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param globalLogger
-	 * @param dachsDriver
-	 * @param urlToDachs
-	 */
-	public GLTDachsInfoRequestThread(
-			IGlobalLogger globalLogger, 
-			GLTDachsChpDriver dachsDriver, 
-			String urlToDachs,
-			String loginName,
-			String loginPwd) {
-		this.globalLogger = globalLogger;
-		this.dachsDriver = dachsDriver;
-		this.urlToDachs = urlToDachs;
-		this.loginName = loginName;
-		this.loginPwd = loginPwd;
-	}
 
-	
-	@Override
-	public void run() {
-		while (!shutdown) {
-			try {
+    private boolean shutdown;
+    private ZonedDateTime lastException = ZonedDateTime.now();
+    private int reconnectWait;
+
+    private final String urlToDachs;
+    private final String loginName;
+    private final String loginPwd;
+
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param globalLogger
+     * @param dachsDriver
+     * @param urlToDachs
+     */
+    public GLTDachsInfoRequestThread(
+            IGlobalLogger globalLogger,
+            GLTDachsChpDriver dachsDriver,
+            String urlToDachs,
+            String loginName,
+            String loginPwd) {
+        this.globalLogger = globalLogger;
+        this.dachsDriver = dachsDriver;
+        this.urlToDachs = urlToDachs;
+        this.loginName = loginName;
+        this.loginPwd = loginPwd;
+    }
+
+
+    @Override
+    public void run() {
+        while (!this.shutdown) {
+            try {
 //				globalLogger.logDebug("Getting new DACHS data");
-				
-				DachsDriverDetails dachsDetails = new DachsDriverDetails(
-						dachsDriver.getDeviceID(), 
-						dachsDriver.getTimer().getUnixTime());
 
-				// get information from DACHS and save into dachsDetails
-				HashMap<String, String> values = getDataFromDachs(parametersToGet);
-				dachsDetails.setValues(values);
-				
-				this.dachsDriver.processDachsDetails(dachsDetails);
-			} 
-			catch (Exception e) {
-				this.globalLogger.logError("Reading dachs data failed", e);
-				
-				long diff = new Date().getTime() - lastException.getTime();
-				if (diff < 0 || diff > 300000) {
-					reconnectWait = 0;
-				}
-				else {
-					if (reconnectWait <= 0) {
-						reconnectWait = 1;
-					}
-					reconnectWait *= 2;
-					if (reconnectWait > 180) {
-						reconnectWait = 180;
-					}
-				}
-				lastException = new Date();
-				
-				try {
-					Thread.sleep(reconnectWait * 1000);
-				} catch (InterruptedException e1) {}
-			}
-			try {
-				Thread.sleep(1000); // INCREASE???
-			} 
-			catch (InterruptedException e) {}
-		}		
-	}
+                DachsDriverDetails dachsDetails = new DachsDriverDetails(
+                        this.dachsDriver.getDeviceID(),
+                        this.dachsDriver.getTimer().getUnixTime());
 
-	
-	private HashMap<String, String> getDataFromDachs(List<String> keys) throws OSHException {
-		if (keys.size() == 0) return new HashMap<String, String>();
-		
-		HashMap<String,String> fullMap = new HashMap<String, String>();
-		
-		int numberOfKeys = keys.size();
-		int startKey = 0;
-		int endKey = Math.min(4, numberOfKeys);
-		
-		// request only 5 keys at a time
-		while (endKey < numberOfKeys) {
-			StringBuilder reqData = new StringBuilder();
-			boolean first = true;
-			for (int i = startKey; i <= endKey; i++) {
-				if (!first) reqData.append('&');
-				first = false;
-				reqData.append("k=").append(keys.get(i));
-			}
-			
-			DefaultHttpClient client = new DefaultHttpClient();
-			try {
-				HttpGet httpget = new HttpGet(urlToDachs + "getKey?" + reqData);
-				client.getCredentialsProvider().setCredentials(
-						new AuthScope(
-								httpget.getURI().getHost(), 
-								httpget.getURI().getPort()),
-								new UsernamePasswordCredentials(loginName, loginPwd));
-				HttpResponse response = client.execute(httpget);
+                // get information from DACHS and save into dachsDetails
+                HashMap<String, String> values = this.getDataFromDachs(this.parametersToGet);
+                dachsDetails.setValues(values);
 
-				HttpEntity entity = response.getEntity();
-				HashMap<String,String> newMap = parseDachsAnswer(EntityUtils.toString(entity));
+                this.dachsDriver.processDachsDetails(dachsDetails);
+            } catch (Exception e) {
+                this.globalLogger.logError("Reading dachs data failed", e);
 
-				for (Entry<String, String> e : newMap.entrySet()) {
-					fullMap.put(e.getKey(), e.getValue());
-				}
-			} 
-			catch (IOException ex){
-				globalLogger.logWarning("Could not connect to DACHS.");
+                long diff = ZonedDateTime.now().toEpochSecond() - this.lastException.toEpochSecond();
+                if (diff < 0 || diff > 300000) {
+                    this.reconnectWait = 0;
+                } else {
+                    if (this.reconnectWait <= 0) {
+                        this.reconnectWait = 1;
+                    }
+                    this.reconnectWait *= 2;
+                    if (this.reconnectWait > 180) {
+                        this.reconnectWait = 180;
+                    }
+                }
+                this.lastException = ZonedDateTime.now();
+
+                try {
+                    Thread.sleep(this.reconnectWait * 1000);
+                } catch (InterruptedException ignored) {
+                }
             }
-			finally {
-				client.getConnectionManager().shutdown();
-				client.close();
-			}
-			
-			startKey = endKey + 1;
-			endKey = Math.min(endKey + 5, numberOfKeys);
-			
-			try {
-				Thread.sleep(100); // INCREASE???
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return fullMap;
-	}
-		
-	private HashMap<String, String> parseDachsAnswer(String answer) throws OSHException {
-		HashMap<String, String> res = new HashMap<String, String>();
-		
-		for (String item : answer.split("\n")) {
-			if (answer.trim().equals("")) {
-				continue;
-			}
-			String[] keyvalue = item.split("=");
-			
-			if (keyvalue.length != 2) {
-				throw new OSHException("problem parsing dachs answer");
-			}
-			
-			res.put(keyvalue[0].trim(), keyvalue[1].trim());
-		}
-		
-		return res;
-	}
-	
-	public void shutdown() {
-		this.shutdown = true;
-	}
+            try {
+                Thread.sleep(1000); // INCREASE???
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+
+    private HashMap<String, String> getDataFromDachs(List<String> keys) throws OSHException {
+        if (keys.isEmpty()) return new HashMap<>();
+
+        HashMap<String, String> fullMap = new HashMap<>();
+
+        int numberOfKeys = keys.size();
+        int startKey = 0;
+        int endKey = Math.min(4, numberOfKeys);
+
+        // request only 5 keys at a time
+        while (endKey < numberOfKeys) {
+            StringBuilder reqData = new StringBuilder();
+            boolean first = true;
+            for (int i = startKey; i <= endKey; i++) {
+                if (!first) reqData.append('&');
+                first = false;
+                reqData.append("k=").append(keys.get(i));
+            }
+
+            DefaultHttpClient client = new DefaultHttpClient();
+            try {
+                HttpGet httpget = new HttpGet(this.urlToDachs + "getKey?" + reqData);
+                client.getCredentialsProvider().setCredentials(
+                        new AuthScope(
+                                httpget.getURI().getHost(),
+                                httpget.getURI().getPort()),
+                        new UsernamePasswordCredentials(this.loginName, this.loginPwd));
+                HttpResponse response = client.execute(httpget);
+
+                HttpEntity entity = response.getEntity();
+                HashMap<String, String> newMap = this.parseDachsAnswer(EntityUtils.toString(entity));
+
+                for (Entry<String, String> e : newMap.entrySet()) {
+                    fullMap.put(e.getKey(), e.getValue());
+                }
+            } catch (IOException ex) {
+                this.globalLogger.logWarning("Could not connect to DACHS.");
+            } finally {
+                client.getConnectionManager().shutdown();
+                client.close();
+            }
+
+            startKey = endKey + 1;
+            endKey = Math.min(endKey + 5, numberOfKeys);
+
+            try {
+                Thread.sleep(100); // INCREASE???
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return fullMap;
+    }
+
+    private HashMap<String, String> parseDachsAnswer(String answer) throws OSHException {
+        HashMap<String, String> res = new HashMap<>();
+
+        for (String item : answer.split("\n")) {
+            if (answer.trim().isEmpty()) {
+                continue;
+            }
+            String[] keyValue = item.split("=");
+
+            if (keyValue.length != 2) {
+                throw new OSHException("problem parsing dachs answer");
+            }
+
+            res.put(keyValue[0].trim(), keyValue[1].trim());
+        }
+
+        return res;
+    }
+
+    public void shutdown() {
+        this.shutdown = true;
+    }
 
 }

@@ -4,43 +4,41 @@ import osh.cal.CALComExchange;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class PlsComExchange extends CALComExchange {
 
-	 private Map<AncillaryCommodity,PowerLimitSignal> powerLimitSignals;
-	 
-	 /**
-	  * CONSTRUCTOR
-	  * @param deviceID
-	  * @param timestamp
-	  * @param priceSignal
-	  */
-	 public PlsComExchange(
-			 UUID deviceID, 
-			 Long timestamp,
-			 Map<AncillaryCommodity,PowerLimitSignal> powerLimitSignals) {
-		super(deviceID, timestamp);
-		
-		this.powerLimitSignals = new HashMap<>();
-		
-		for (Entry<AncillaryCommodity,PowerLimitSignal> e : powerLimitSignals.entrySet()) {
-			this.powerLimitSignals.put(e.getKey(), e.getValue().clone());
-		}
-	}
+    private final EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals =
+            new EnumMap<>(AncillaryCommodity.class);
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     * @param powerLimitSignals
+     */
+    public PlsComExchange(
+            UUID deviceID,
+            Long timestamp,
+            Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals) {
+        super(deviceID, timestamp);
+
+        for (Entry<AncillaryCommodity, PowerLimitSignal> e : powerLimitSignals.entrySet()) {
+            this.powerLimitSignals.put(e.getKey(), e.getValue().clone());
+        }
+    }
 
 
-	public Map<AncillaryCommodity,PowerLimitSignal> getPowerLimitSignals() {
-		return powerLimitSignals;
-	}
+    public Map<AncillaryCommodity, PowerLimitSignal> getPowerLimitSignals() {
+        return this.powerLimitSignals;
+    }
 
 }

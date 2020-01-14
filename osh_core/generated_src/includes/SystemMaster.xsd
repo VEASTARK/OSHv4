@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://osh/configuration/system" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://osh/configuration/system"
+        elementFormDefault="qualified">
 
-        <include schemaLocation="DeviceTypes.xsd"/>
-        <include schemaLocation="ConfigurationParameter.xsd"/>
+    <include schemaLocation="DeviceTypes.xsd"/>
+    <include schemaLocation="ConfigurationParameter.xsd"/>
 </schema>

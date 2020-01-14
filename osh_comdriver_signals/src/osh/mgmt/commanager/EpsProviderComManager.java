@@ -15,57 +15,54 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class EpsProviderComManager 
-				extends ComManager 
-				implements IHasState {
+public class EpsProviderComManager
+        extends ComManager
+        implements IHasState {
 
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param uuid
-	 */
-	public EpsProviderComManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-	}
-	
-	
-	/**
-	 * Receive data from ComDriver
-	 */
-	@Override
-	public void onDriverUpdate(ICALExchange exchangeObject) {
-		
-		// receive signal from ComDriver as OX-object
-		if (exchangeObject instanceof EpsComExchange) {
-			
-			getGlobalLogger().logInfo("SmartHome received new EPS signal...");
-			EpsComExchange ox = (EpsComExchange) exchangeObject;
-			
-			// set states in oc registry
-			EpsStateExchange pricedetails = new EpsStateExchange(
-					getUUID(), 
-					ox.getTimestamp(),
-					ox.causeScheduling());
-			
-			for (Entry<AncillaryCommodity,PriceSignal> e : ox.getPriceSignals().entrySet()) {
-				pricedetails.setPriceSignal(e.getKey(), e.getValue());
-			}
-			
-			getOCRegistry().setState(EpsStateExchange.class, this, pricedetails);
-		}
-		else {
-			try {
-				throw new OSHException("Signal unknown");
-			} 
-			catch (OSHException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param uuid
+     */
+    public EpsProviderComManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+    }
+
+
+    /**
+     * Receive data from ComDriver
+     */
+    @Override
+    public void onDriverUpdate(ICALExchange exchangeObject) {
+
+        // receive signal from ComDriver as OX-object
+        if (exchangeObject instanceof EpsComExchange) {
+
+            this.getGlobalLogger().logInfo("SmartHome received new EPS signal...");
+            EpsComExchange ox = (EpsComExchange) exchangeObject;
+
+            // set states in oc registry
+            EpsStateExchange priceDetails = new EpsStateExchange(
+                    this.getUUID(),
+                    ox.getTimestamp(),
+                    ox.causeScheduling());
+
+            for (Entry<AncillaryCommodity, PriceSignal> e : ox.getPriceSignals().entrySet()) {
+                priceDetails.setPriceSignal(e.getKey(), e.getValue());
+            }
+
+            this.getOCRegistry().setState(EpsStateExchange.class, this, priceDetails);
+        } else {
+            try {
+                throw new OSHException("Signal unknown");
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

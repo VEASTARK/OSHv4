@@ -8,148 +8,147 @@ import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class GasBoilerObserverExchange
-					extends HALDeviceObserverExchange
-					implements IHALElectricalPowerDetails, IHALHotWaterPowerDetails, IHALGasPowerDetails {
-	
-	private double minTemperature;
-	private double maxTemperature;
-	private double hotWaterTemperature;
-	
-	private boolean currentState;
-	
-	private int hotWaterPower;
-	private int activePower;
-	private int reactivePower;
-	private int gasPower;
-	
-	private int maxHotWaterPower;
-	private int maxGasPower;
-	
-	private int typicalActivePowerOn;
-	private int typicalActivePowerOff;
-	private int typicalReactivePowerOn;
-	private int typicalReactivePowerOff;
-	
-	private int newIppAfter;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public GasBoilerObserverExchange(
-			UUID deviceID, 
-			Long timestamp,
-			
-			double minTemperature,
-			double maxTemperature,
-			double waterTemperature,
-			
-			boolean currentState,
-			
-			int activePower,
-			int reactivePower,
-			int gasPower,
-			int hotWaterPower,
-			int maxHotWaterPower,
-			int maxGasPower,
-			int typicalActivePowerOn,
-			int typicalActivePowerOff,
-			int typicalReactivePowerOn,
-			int typicalReactivePowerOff,
-			int newIppAfter) {
-		
-		super(deviceID, timestamp);
-		
-		this.minTemperature = minTemperature;
-		this.maxTemperature = maxTemperature;
-		this.hotWaterTemperature = waterTemperature;
-		
-		this.currentState = currentState;
-		
-		this.activePower = activePower;
-		this.hotWaterPower = hotWaterPower;
-		this.gasPower = gasPower;
-		
-		this.maxHotWaterPower = maxHotWaterPower;
-		this.maxGasPower = maxGasPower;
-		
-		this.newIppAfter = newIppAfter;
-		this.typicalActivePowerOn = typicalActivePowerOn;
-		this.typicalActivePowerOff = typicalActivePowerOff;
-		this.typicalReactivePowerOn = typicalReactivePowerOn;
-		this.typicalReactivePowerOff = typicalReactivePowerOff;
-	}
+        extends HALDeviceObserverExchange
+        implements IHALElectricalPowerDetails, IHALHotWaterPowerDetails, IHALGasPowerDetails {
 
-	public double getMinTemperature() {
-		return minTemperature;
-	}
-	
-	public double getMaxTemperature() {
-		return maxTemperature;
-	}
-	
-	public boolean getCurrentState() {
-		return currentState;
-	}
+    private final double minTemperature;
+    private final double maxTemperature;
+    private final double hotWaterTemperature;
 
-	@Override
-	public int getHotWaterPower() {
-		return hotWaterPower;
-	}
+    private final boolean currentState;
 
-	@Override
-	public int getActivePower() {
-		return activePower;
-	}
+    private final int hotWaterPower;
+    private final int activePower;
+    private int reactivePower;
+    private final int gasPower;
 
-	@Override
-	public int getReactivePower() {
-		return reactivePower;
-	}
+    private final int maxHotWaterPower;
+    private final int maxGasPower;
 
-	@Override
-	public int getGasPower() {
-		return gasPower;
-	}
+    private final int typicalActivePowerOn;
+    private final int typicalActivePowerOff;
+    private final int typicalReactivePowerOn;
+    private final int typicalReactivePowerOff;
 
-	public int getMaxHotWaterPower() {
-		return maxHotWaterPower;
-	}
+    private final int newIppAfter;
 
-	public int getMaxGasPower() {
-		return maxGasPower;
-	}
 
-	public int getTypicalActivePowerOn() {
-		return typicalActivePowerOn;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public GasBoilerObserverExchange(
+            UUID deviceID,
+            Long timestamp,
 
-	public int getTypicalActivePowerOff() {
-		return typicalActivePowerOff;
-	}
+            double minTemperature,
+            double maxTemperature,
+            double waterTemperature,
 
-	public int getTypicalReactivePowerOn() {
-		return typicalReactivePowerOn;
-	}
+            boolean currentState,
 
-	public int getTypicalReactivePowerOff() {
-		return typicalReactivePowerOff;
-	}
+            int activePower,
+            int reactivePower,
+            int gasPower,
+            int hotWaterPower,
+            int maxHotWaterPower,
+            int maxGasPower,
+            int typicalActivePowerOn,
+            int typicalActivePowerOff,
+            int typicalReactivePowerOn,
+            int typicalReactivePowerOff,
+            int newIppAfter) {
 
-	public int getNewIppAfter() {
-		return newIppAfter;
-	}
+        super(deviceID, timestamp);
 
-	@Override
-	public double getHotWaterTemperature() {
-		return hotWaterTemperature;
-	}
+        this.minTemperature = minTemperature;
+        this.maxTemperature = maxTemperature;
+        this.hotWaterTemperature = waterTemperature;
+
+        this.currentState = currentState;
+
+        this.activePower = activePower;
+        this.hotWaterPower = hotWaterPower;
+        this.gasPower = gasPower;
+
+        this.maxHotWaterPower = maxHotWaterPower;
+        this.maxGasPower = maxGasPower;
+
+        this.newIppAfter = newIppAfter;
+        this.typicalActivePowerOn = typicalActivePowerOn;
+        this.typicalActivePowerOff = typicalActivePowerOff;
+        this.typicalReactivePowerOn = typicalReactivePowerOn;
+        this.typicalReactivePowerOff = typicalReactivePowerOff;
+    }
+
+    public double getMinTemperature() {
+        return this.minTemperature;
+    }
+
+    public double getMaxTemperature() {
+        return this.maxTemperature;
+    }
+
+    public boolean getCurrentState() {
+        return this.currentState;
+    }
+
+    @Override
+    public int getHotWaterPower() {
+        return this.hotWaterPower;
+    }
+
+    @Override
+    public int getActivePower() {
+        return this.activePower;
+    }
+
+    @Override
+    public int getReactivePower() {
+        return this.reactivePower;
+    }
+
+    @Override
+    public int getGasPower() {
+        return this.gasPower;
+    }
+
+    public int getMaxHotWaterPower() {
+        return this.maxHotWaterPower;
+    }
+
+    public int getMaxGasPower() {
+        return this.maxGasPower;
+    }
+
+    public int getTypicalActivePowerOn() {
+        return this.typicalActivePowerOn;
+    }
+
+    public int getTypicalActivePowerOff() {
+        return this.typicalActivePowerOff;
+    }
+
+    public int getTypicalReactivePowerOn() {
+        return this.typicalReactivePowerOn;
+    }
+
+    public int getTypicalReactivePowerOff() {
+        return this.typicalReactivePowerOff;
+    }
+
+    public int getNewIppAfter() {
+        return this.newIppAfter;
+    }
+
+    @Override
+    public double getHotWaterTemperature() {
+        return this.hotWaterTemperature;
+    }
 
 }

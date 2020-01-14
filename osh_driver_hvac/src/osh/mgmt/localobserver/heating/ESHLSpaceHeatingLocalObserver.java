@@ -1,6 +1,5 @@
 package osh.mgmt.localobserver.heating;
 
-import osh.core.exceptions.OCUnitException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
@@ -12,69 +11,65 @@ import osh.hal.exchange.SpaceHeatingPredictionObserverExchange;
 import osh.mgmt.ipp.heating.SpaceHeatingNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
- * 
  * @author Ingo Mauser, Jan Mueller
- *
  */
-public class ESHLSpaceHeatingLocalObserver 
-					extends ThermalDemandLocalObserver {
+public class ESHLSpaceHeatingLocalObserver
+        extends ThermalDemandLocalObserver {
 
-	private SparseLoadProfile predictedDemand;
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public ESHLSpaceHeatingLocalObserver(IOSHOC osh) {
-		super(osh);
-	}
+    private SparseLoadProfile predictedDemand;
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
 
-	
-	@Override
-	public void onDeviceStateUpdate() throws OCUnitException {
-		IHALExchange ihex = getObserverDataObject();
 
-		if (ihex instanceof SpaceHeatingPredictionObserverExchange) {
-			SpaceHeatingPredictionObserverExchange ox = (SpaceHeatingPredictionObserverExchange) ihex;
-			long now = getTimer().getUnixTime();
+    /**
+     * CONSTRUCTOR
+     */
+    public ESHLSpaceHeatingLocalObserver(IOSHOC osh) {
+        super(osh);
+    }
 
-			// create SparseLoadProfile
-			predictedDemand = new SparseLoadProfile();
-			Map<Long, Double> map = ox.getPredictedHeatConsumptionMap();
 
-			for (Iterator<Long> it = map.keySet().iterator(); it.hasNext();) {
-				now = it.next();
-				Double predictedDemadAtTimeStemp = map.get(now);
-				predictedDemand.setLoad(Commodity.HEATINGHOTWATERPOWER, now,
-						(int) Math.round(predictedDemadAtTimeStemp));
-			}
-			predictedDemand.setEndingTimeOfProfile(now);
+    @Override
+    public void onDeviceStateUpdate() {
+        IHALExchange ihex = this.getObserverDataObject();
 
-			// Send new IPP
-			SpaceHeatingNonControllableIPP ipp = 
-					new SpaceHeatingNonControllableIPP(
-							getUUID(),
-							getDeviceType(), 
-							getGlobalLogger(), 
-							now, 
-							false, 
-							predictedDemand.clone(),
-							Commodity.HEATINGHOTWATERPOWER, 
-							compressionType, 
-							compressionValue);
-			getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
-		} 
-		else if (ihex instanceof StaticCompressionExchange) {
-			StaticCompressionExchange _stat = (StaticCompressionExchange) ihex;
-			this.compressionType = _stat.getCompressionType();
-			this.compressionValue = _stat.getCompressionValue();
-		}
-	}
+        if (ihex instanceof SpaceHeatingPredictionObserverExchange) {
+            SpaceHeatingPredictionObserverExchange ox = (SpaceHeatingPredictionObserverExchange) ihex;
+            long now = this.getTimer().getUnixTime();
+
+            // create SparseLoadProfile
+            this.predictedDemand = new SparseLoadProfile();
+            Map<Long, Double> map = ox.getPredictedHeatConsumptionMap();
+
+            for (Long aLong : map.keySet()) {
+                now = aLong;
+                Double predictedDemandAtTimeStamp = map.get(now);
+                this.predictedDemand.setLoad(Commodity.HEATINGHOTWATERPOWER, now,
+                        (int) Math.round(predictedDemandAtTimeStamp));
+            }
+            this.predictedDemand.setEndingTimeOfProfile(now);
+
+            // Send new IPP
+            SpaceHeatingNonControllableIPP ipp =
+                    new SpaceHeatingNonControllableIPP(
+                            this.getUUID(),
+                            this.getDeviceType(),
+                            this.getGlobalLogger(),
+                            now,
+                            false,
+                            this.predictedDemand.clone(),
+                            Commodity.HEATINGHOTWATERPOWER,
+                            this.compressionType,
+                            this.compressionValue);
+            this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        } else if (ihex instanceof StaticCompressionExchange) {
+            StaticCompressionExchange _stat = (StaticCompressionExchange) ihex;
+            this.compressionType = _stat.getCompressionType();
+            this.compressionValue = _stat.getCompressionValue();
+        }
+    }
 
 }

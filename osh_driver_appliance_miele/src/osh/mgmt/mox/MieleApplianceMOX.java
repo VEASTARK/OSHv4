@@ -6,62 +6,58 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.en50523.EN50523DeviceState;
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
 public class MieleApplianceMOX implements IModelOfObservationExchange {
 
-	/**
-	 * SparseLoadProfile containing different profile with different commodities<br>
-	 * IMPORATANT: RELATIVE TIMES!
-	 */
-	private SparseLoadProfile currentProfile;
-	private EN50523DeviceState currentState;
-	
-	private long profileStarted = -1;
-	private long programmedAt = -1;
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	public MieleApplianceMOX(SparseLoadProfile currentProfile, EN50523DeviceState currentState, 
-			long profileStarted, long programmedAt, LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		super();
-		this.currentProfile = currentProfile;
-		this.currentState = currentState;
-		this.profileStarted = profileStarted;
-		this.programmedAt = programmedAt;
-		this.compressionType = compressionType;
-		this.compressionValue = compressionValue;
-	}
+    /**
+     * SparseLoadProfile containing different profile with different commodities<br>
+     * IMPORATANT: RELATIVE TIMES!
+     */
+    private final SparseLoadProfile currentProfile;
+    private final EN50523DeviceState currentState;
 
-	public SparseLoadProfile getCurrentProfile() {
-		return currentProfile;
-	}
+    private final long profileStarted;
+    private final long programmedAt;
 
-	public EN50523DeviceState getCurrentState() {
-		return currentState;
-	}
+    private final LoadProfileCompressionTypes compressionType;
+    private final int compressionValue;
 
-	public long getProfileStarted() {
-		return profileStarted;
-	}
+    public MieleApplianceMOX(SparseLoadProfile currentProfile, EN50523DeviceState currentState,
+                             long profileStarted, long programmedAt, LoadProfileCompressionTypes compressionType,
+                             int compressionValue) {
+        super();
+        this.currentProfile = currentProfile;
+        this.currentState = currentState;
+        this.profileStarted = profileStarted;
+        this.programmedAt = programmedAt;
+        this.compressionType = compressionType;
+        this.compressionValue = compressionValue;
+    }
 
-	public long getProgrammedAt() {
-		return programmedAt;
-	}
+    public SparseLoadProfile getCurrentProfile() {
+        return this.currentProfile;
+    }
 
-	public LoadProfileCompressionTypes getCompressionType() {
-		return compressionType;
-	}
+    public EN50523DeviceState getCurrentState() {
+        return this.currentState;
+    }
 
-	public int getCompressionValue() {
-		return compressionValue;
-	}
-	
-	
+    public long getProfileStarted() {
+        return this.profileStarted;
+    }
+
+    public long getProgrammedAt() {
+        return this.programmedAt;
+    }
+
+    public LoadProfileCompressionTypes getCompressionType() {
+        return this.compressionType;
+    }
+
+    public int getCompressionValue() {
+        return this.compressionValue;
+    }
 
 
 }

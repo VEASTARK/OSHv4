@@ -1,19 +1,16 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlAccessorType( XmlAccessType.PUBLIC_MEMBER )
-@XmlRootElement(name="switchCommand")
+@XmlRootElement(name = "switchCommand")
 public class RestSwitchCommand {
-	protected boolean on;
-	
-	public boolean isTurnOn() {
-		return on;
-	}
+    protected boolean on;
 
-	public void setTurnOn(boolean on) {
-		this.on = on;
-	};
+    public boolean isTurnOn() {
+        return this.on;
+    }
+
+    public void setTurnOn(boolean on) {
+        this.on = on;
+    }
 }

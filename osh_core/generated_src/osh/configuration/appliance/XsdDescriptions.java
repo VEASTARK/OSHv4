@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for XsdDescriptions complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XsdDescriptions">
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XsdDescriptions", propOrder = {
-    "description"
+        "description"
 })
 public class XsdDescriptions {
 
@@ -46,29 +44,27 @@ public class XsdDescriptions {
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the description property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDescription().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link XsdDescription }
-     * 
-     * 
      */
     public List<XsdDescription> getDescription() {
-        if (description == null) {
-            description = new ArrayList<XsdDescription>();
+        if (this.description == null) {
+            this.description = new ArrayList<>();
         }
         return this.description;
     }

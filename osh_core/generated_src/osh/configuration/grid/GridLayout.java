@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -34,14 +34,12 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "connections",
-    "meterUUIDs",
-    "deviceMeterMap"
+        "connections",
+        "meterUUIDs",
+        "deviceMeterMap"
 })
 @XmlRootElement(name = "GridLayout")
 public class GridLayout {
@@ -52,87 +50,81 @@ public class GridLayout {
 
     /**
      * Gets the value of the connections property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the connections property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getConnections().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link LayoutConnection }
-     * 
-     * 
      */
     public List<LayoutConnection> getConnections() {
-        if (connections == null) {
-            connections = new ArrayList<LayoutConnection>();
+        if (this.connections == null) {
+            this.connections = new ArrayList<>();
         }
         return this.connections;
     }
 
     /**
      * Gets the value of the meterUUIDs property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the meterUUIDs property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMeterUUIDs().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
      */
     public List<String> getMeterUUIDs() {
-        if (meterUUIDs == null) {
-            meterUUIDs = new ArrayList<String>();
+        if (this.meterUUIDs == null) {
+            this.meterUUIDs = new ArrayList<>();
         }
         return this.meterUUIDs;
     }
 
     /**
      * Gets the value of the deviceMeterMap property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the deviceMeterMap property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDeviceMeterMap().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link DevicePerMeter }
-     * 
-     * 
      */
     public List<DevicePerMeter> getDeviceMeterMap() {
-        if (deviceMeterMap == null) {
-            deviceMeterMap = new ArrayList<DevicePerMeter>();
+        if (this.deviceMeterMap == null) {
+            this.deviceMeterMap = new ArrayList<>();
         }
         return this.deviceMeterMap;
     }

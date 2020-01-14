@@ -30,134 +30,145 @@ import jmetal.util.PseudoRandom;
  * This class implements an integer decision encodings.variable
  */
 public class Int extends Variable {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private int value_;       //Stores the value of the encodings.variable
-	private int lowerBound_;  //Stores the lower limit of the encodings.variable
-	private int upperBound_;  //Stores the upper limit of the encodings.variable
 
-	/**
-	 * Constructor
-	 */
-	public Int() {
-		lowerBound_ = java.lang.Integer.MIN_VALUE ;
-		upperBound_ = java.lang.Integer.MAX_VALUE ;
-		value_      = 0                           ;
-	} // Int
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    private int value_;       //Stores the value of the encodings.variable
+    private int lowerBound_;  //Stores the lower limit of the encodings.variable
+    private int upperBound_;  //Stores the upper limit of the encodings.variable
 
-	/**
-	 * Constructor
-	 * @param lowerBound Variable lower bound
-	 * @param upperBound Variable upper bound
-	 */
-	public Int(int lowerBound, int upperBound, PseudoRandom pseudoRandom){
-		lowerBound_ = lowerBound;
-		upperBound_ = upperBound;
-		value_ = pseudoRandom.randInt(lowerBound, upperBound) ;
-	} // Int
+    /**
+     * Constructor
+     */
+    public Int() {
+        this.lowerBound_ = java.lang.Integer.MIN_VALUE;
+        this.upperBound_ = java.lang.Integer.MAX_VALUE;
+        this.value_ = 0;
+    } // Int
 
-	/**
-	 * Constructor
-	 * @param value Value of the encodings.variable
-	 * @param lowerBound Variable lower bound
-	 * @param upperBound Variable upper bound
-	 */
-	public Int(int value, int lowerBound, int upperBound) {
-		super();
+    /**
+     * Constructor
+     *
+     * @param lowerBound Variable lower bound
+     * @param upperBound Variable upper bound
+     */
+    public Int(int lowerBound, int upperBound, PseudoRandom pseudoRandom) {
+        this.lowerBound_ = lowerBound;
+        this.upperBound_ = upperBound;
+        this.value_ = pseudoRandom.randInt(lowerBound, upperBound);
+    } // Int
 
-		value_      = value      ;
-		lowerBound_ = lowerBound ;
-		upperBound_ = upperBound ;
-	} // Int
+    /**
+     * Constructor
+     *
+     * @param value      Value of the encodings.variable
+     * @param lowerBound Variable lower bound
+     * @param upperBound Variable upper bound
+     */
+    public Int(int value, int lowerBound, int upperBound) {
+        super();
 
-	/**
-	 * Copy constructor.
-	 * @param variable Variable to be copied.
-	 * @throws JMException 
-	 */
-	public Int(Variable variable) throws JMException{
-		lowerBound_ = (int)variable.getLowerBound();
-		upperBound_ = (int)variable.getUpperBound();
-		value_ = (int)variable.getValue();        
-	} // Int
+        this.value_ = value;
+        this.lowerBound_ = lowerBound;
+        this.upperBound_ = upperBound;
+    } // Int
 
-	/**
-	 * Returns the value of the encodings.variable.
-	 * @return the value.
-	 */
-	@Override
-	public double getValue() {
-		return value_;
-	} // getValue
+    /**
+     * Copy constructor.
+     *
+     * @param variable Variable to be copied.
+     * @throws JMException
+     */
+    public Int(Variable variable) throws JMException {
+        this.lowerBound_ = (int) variable.getLowerBound();
+        this.upperBound_ = (int) variable.getUpperBound();
+        this.value_ = (int) variable.getValue();
+    } // Int
 
-	/**
-	 * Assigns a value to the encodings.variable.
-	 * @param value The value.
-	 */ 
-	@Override
-	public void setValue(double value) {
-		value_ = (int)value;
-	} // setValue
+    /**
+     * Returns the value of the encodings.variable.
+     *
+     * @return the value.
+     */
+    @Override
+    public double getValue() {
+        return this.value_;
+    } // getValue
 
-	/**
-	 * Creates an exact copy of the <code>Int</code> object.
-	 * @return the copy.
-	 */ 
-	@Override
-	public Variable deepCopy(){
-		try {
-			return new Int(this);
-		} catch (JMException e) {
-			Configuration.logger_.severe("Int.deepCopy.execute: JMException");
-			return null ;
-		}
-	} // deepCopy
+    /**
+     * Assigns a value to the encodings.variable.
+     *
+     * @param value The value.
+     */
+    @Override
+    public void setValue(double value) {
+        this.value_ = (int) value;
+    } // setValue
 
-	/**
-	 * Returns the lower bound of the encodings.variable.
-	 * @return the lower bound.
-	 */ 
-	@Override
-	public double getLowerBound() {
-		return lowerBound_;
-	} // getLowerBound
+    /**
+     * Creates an exact copy of the <code>Int</code> object.
+     *
+     * @return the copy.
+     */
+    @Override
+    public Variable deepCopy() {
+        try {
+            return new Int(this);
+        } catch (JMException e) {
+            Configuration.logger_.severe("Int.deepCopy.execute: JMException");
+            return null;
+        }
+    } // deepCopy
 
-	/**
-	 * Returns the upper bound of the encodings.variable.
-	 * @return the upper bound.
-	 */ 
-	@Override
-	public double getUpperBound() {
-		return upperBound_;
-	} // getUpperBound
+    /**
+     * Returns the lower bound of the encodings.variable.
+     *
+     * @return the lower bound.
+     */
+    @Override
+    public double getLowerBound() {
+        return this.lowerBound_;
+    } // getLowerBound
 
-	/**
-	 * Sets the lower bound of the encodings.variable.
-	 * @param lowerBound The lower bound value.
-	 */	    
-	@Override
-	public void setLowerBound(double lowerBound)  {
-		lowerBound_ = (int)lowerBound;
-	} // setLowerBound
+    /**
+     * Sets the lower bound of the encodings.variable.
+     *
+     * @param lowerBound The lower bound value.
+     */
+    @Override
+    public void setLowerBound(double lowerBound) {
+        this.lowerBound_ = (int) lowerBound;
+    } // setLowerBound
 
-	/**
-	 * Sets the upper bound of the encodings.variable.
-	 * @param upperBound The new upper bound value.
-	 */       
-	@Override
-	public void setUpperBound(double upperBound) {
-		upperBound_ = (int)upperBound;
-	} // setUpperBound
+    /**
+     * Returns the upper bound of the encodings.variable.
+     *
+     * @return the upper bound.
+     */
+    @Override
+    public double getUpperBound() {
+        return this.upperBound_;
+    } // getUpperBound
 
-	/**
-	 * Returns a string representing the object
-	 * @return The string
-	 */ 
-	@Override
-	public String toString(){
-		return value_+"";
-	} // toString
+    /**
+     * Sets the upper bound of the encodings.variable.
+     *
+     * @param upperBound The new upper bound value.
+     */
+    @Override
+    public void setUpperBound(double upperBound) {
+        this.upperBound_ = (int) upperBound;
+    } // setUpperBound
+
+    /**
+     * Returns a string representing the object
+     *
+     * @return The string
+     */
+    @Override
+    public String toString() {
+        return this.value_ + "";
+    } // toString
 } // Int

@@ -7,32 +7,30 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
-public class BaseloadStaticExchange 
-				extends HALObserverExchange {
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	
-	public BaseloadStaticExchange(UUID deviceID, Long timestamp, LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		super(deviceID, timestamp);
-		this.compressionType = compressionType;
-		this.compressionValue = compressionValue;
-	}
+public class BaseloadStaticExchange
+        extends HALObserverExchange {
+
+    private final LoadProfileCompressionTypes compressionType;
+    private final int compressionValue;
 
 
-	public LoadProfileCompressionTypes getCompressionType() {
-		return compressionType;
-	}
+    public BaseloadStaticExchange(UUID deviceID, Long timestamp, LoadProfileCompressionTypes compressionType,
+                                  int compressionValue) {
+        super(deviceID, timestamp);
+        this.compressionType = compressionType;
+        this.compressionValue = compressionValue;
+    }
 
 
-	public int getCompressionValue() {
-		return compressionValue;
-	}	
+    public LoadProfileCompressionTypes getCompressionType() {
+        return this.compressionType;
+    }
+
+
+    public int getCompressionValue() {
+        return this.compressionValue;
+    }
 
 }

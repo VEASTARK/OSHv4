@@ -8,58 +8,55 @@ import java.util.Map.Entry;
 
 
 /**
- * 
  * @author Jan Mueller
- *
  */
-@SuppressWarnings("serial")
 class BatteryStateOfChargeDrawer extends AbstractDrawer {
 
-	private List<XYSeries> currentSeries = null;
-	private long lastentry = 0;
-	
-	public BatteryStateOfChargeDrawer(UUID id) {
-		super("StateOfCharge " + id.toString().substring(0, 6), true);
-	}
-	
-	@Override
-	protected String getAxisName() {
-		return "StateOfCharge [W/s]";
-	}
+    private List<XYSeries> currentSeries;
+    private long lastEntry;
 
-	@Override
-	protected List<XYSeries> getSeries(long begin, long end) {
-		return (currentSeries == null ? new LinkedList<XYSeries>() : currentSeries);
-	}
+    public BatteryStateOfChargeDrawer(UUID id) {
+        super("StateOfCharge " + id.toString().substring(0, 6), true);
+    }
 
-	@Override
-	protected long getNumberOfEntries() {
-		return lastentry;
-	}
+    @Override
+    protected String getAxisName() {
+        return "StateOfCharge [W/s]";
+    }
 
-	public void refreshDiagram(TreeMap<Long, GUIBatteryStorageStateExchange> batteryStorageHistory) {
-		List<XYSeries> series = new ArrayList<XYSeries>();
-		
-		XYSeries minStateOfCharge = new XYSeries("minStateOfCharge");
-		XYSeries maxStateOfCharge = new XYSeries("maxStateOfCharge");
-		XYSeries stateOfCharge = new XYSeries("StateOfCharge");
-		
-		for (Entry<Long, GUIBatteryStorageStateExchange> ex : batteryStorageHistory.entrySet()) {
-			minStateOfCharge.add(ex.getKey().doubleValue() * 1000, ex.getValue().getMinStateOfCharge());
-			maxStateOfCharge.add(ex.getKey().doubleValue() * 1000, ex.getValue().getMaxStateOfCharge());
-			stateOfCharge.add(ex.getKey().doubleValue() * 1000, ex.getValue().getStateOfCharge());
-		}
-		
-		series.add(minStateOfCharge);
-		series.add(maxStateOfCharge);
-		series.add(stateOfCharge);
+    @Override
+    protected List<XYSeries> getSeries(long begin, long end) {
+        return (this.currentSeries == null ? new LinkedList<>() : this.currentSeries);
+    }
 
-		this.currentSeries = series;
-		if (batteryStorageHistory.size() > 0) {
-			this.lastentry = batteryStorageHistory.lastKey();
-		}
-		super.refreshDiagram();
-	}
-		
-	
+    @Override
+    protected long getNumberOfEntries() {
+        return this.lastEntry;
+    }
+
+    public void refreshDiagram(TreeMap<Long, GUIBatteryStorageStateExchange> batteryStorageHistory) {
+        List<XYSeries> series = new ArrayList<>();
+
+        XYSeries minStateOfCharge = new XYSeries("minStateOfCharge");
+        XYSeries maxStateOfCharge = new XYSeries("maxStateOfCharge");
+        XYSeries stateOfCharge = new XYSeries("StateOfCharge");
+
+        for (Entry<Long, GUIBatteryStorageStateExchange> ex : batteryStorageHistory.entrySet()) {
+            minStateOfCharge.add(ex.getKey().doubleValue() * 1000, ex.getValue().getMinStateOfCharge());
+            maxStateOfCharge.add(ex.getKey().doubleValue() * 1000, ex.getValue().getMaxStateOfCharge());
+            stateOfCharge.add(ex.getKey().doubleValue() * 1000, ex.getValue().getStateOfCharge());
+        }
+
+        series.add(minStateOfCharge);
+        series.add(maxStateOfCharge);
+        series.add(stateOfCharge);
+
+        this.currentSeries = series;
+        if (!batteryStorageHistory.isEmpty()) {
+            this.lastEntry = batteryStorageHistory.lastKey();
+        }
+        super.refreshDiagram();
+    }
+
+
 }

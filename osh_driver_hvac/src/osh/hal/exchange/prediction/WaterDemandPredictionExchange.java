@@ -8,49 +8,48 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
-public class WaterDemandPredictionExchange 
-				extends HALObserverExchange {
-	
-	List<SparseLoadProfile> powerPredicitions;
-	private int pastDaysPrediction;
-	private float weightForOtherWeekday;
-	private float weightForSameWeekday;
-	
-	
-	/**
-	 * CONSTRUCTOR 1
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public WaterDemandPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredicitions, 
-			int pastDaysPrediction,
-			float weightForOtherWeekday,
-			float weightForSameWeekday) {
-		super(deviceID, timestamp);
-		this.powerPredicitions = powerPredicitions;
-		this.pastDaysPrediction = pastDaysPrediction;
-		this.weightForOtherWeekday = weightForOtherWeekday;
-		this.weightForSameWeekday = weightForSameWeekday;
-	}
-	
-	public List<SparseLoadProfile> getPredicitons() {
-		return powerPredicitions;
-	}
-	
-	public int getPastDaysPrediction() {
-		return pastDaysPrediction;
-	}
+public class WaterDemandPredictionExchange
+        extends HALObserverExchange {
 
-	public float getWeightForOtherWeekday() {
-		return weightForOtherWeekday;
-	}
+    final List<SparseLoadProfile> powerPredictions;
+    private final int pastDaysPrediction;
+    private final float weightForOtherWeekday;
+    private final float weightForSameWeekday;
 
-	public float getWeightForSameWeekday() {
-		return weightForSameWeekday;
-	}
+
+    /**
+     * CONSTRUCTOR 1
+     *
+     * @param deviceID
+     * @param timestamp
+     */
+    public WaterDemandPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredictions,
+                                         int pastDaysPrediction,
+                                         float weightForOtherWeekday,
+                                         float weightForSameWeekday) {
+        super(deviceID, timestamp);
+        this.powerPredictions = powerPredictions;
+        this.pastDaysPrediction = pastDaysPrediction;
+        this.weightForOtherWeekday = weightForOtherWeekday;
+        this.weightForSameWeekday = weightForSameWeekday;
+    }
+
+    public List<SparseLoadProfile> getPredictions() {
+        return this.powerPredictions;
+    }
+
+    public int getPastDaysPrediction() {
+        return this.pastDaysPrediction;
+    }
+
+    public float getWeightForOtherWeekday() {
+        return this.weightForOtherWeekday;
+    }
+
+    public float getWeightForSameWeekday() {
+        return this.weightForSameWeekday;
+    }
 
 }

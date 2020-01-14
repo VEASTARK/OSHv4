@@ -30,484 +30,507 @@ import java.io.Serializable;
 /**
  * Class representing a solution for a problem.
  */
-public class Solution implements Serializable {  
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class Solution implements Serializable {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    /**
+     * Stores the objectives values of the solution.
+     */
+    private final double[] objective_;
+    /**
+     * Stores the problem
+     */
+    private Problem problem_;
+    /**
+     * Stores the type of the encodings.variable
+     */
+    private SolutionType type_;
+    /**
+     * Stores the decision variables of the solution.
+     */
+    private Variable[] variable_;
+    /**
+     * Stores the number of objective values of the solution
+     */
+    private int numberOfObjectives_;
 
-	/**
-	 * Stores the problem 
-	 */
-  private Problem problem_ ;
-	
-  /**
-   * Stores the type of the encodings.variable
-   */	
-  private SolutionType type_ ; 
+    /**
+     * Stores the so called fitness value. Used in some metaheuristics
+     */
+    private double fitness_;
 
-  /**
-   * Stores the decision variables of the solution.
-   */
-  private Variable[] variable_ ;
+    /**
+     * Used in algorithm AbYSS, this field is intended to be used to know
+     * when a <code>Solution</code> is marked.
+     */
+    private boolean marked_;
 
-  /**
-   * Stores the objectives values of the solution.
-   */
-  private final double [] objective_ ;
+    /**
+     * Stores the so called rank of the solution. Used in NSGA-II
+     */
+    private int rank_;
 
-  /**
-   * Stores the number of objective values of the solution
-   */
-  private int numberOfObjectives_ ;
+    /**
+     * Stores the overall constraint violation of the solution.
+     */
+    private double overallConstraintViolation_;
 
-  /**
-   * Stores the so called fitness value. Used in some metaheuristics
-   */
-  private double fitness_ ;
+    /**
+     * Stores the number of constraints violated by the solution.
+     */
+    private int numberOfViolatedConstraints_;
 
-  /**
-   * Used in algorithm AbYSS, this field is intended to be used to know
-   * when a <code>Solution</code> is marked.
-   */
-  private boolean marked_ ;
+    /**
+     * This field is intended to be used to know the location of
+     * a solution into a <code>SolutionSet</code>. Used in MOCell
+     */
+    private int location_;
 
-  /**
-   * Stores the so called rank of the solution. Used in NSGA-II
-   */
-  private int rank_ ;
+    /**
+     * Stores the distance to his k-nearest neighbor into a
+     * <code>SolutionSet</code>. Used in SPEA2.
+     */
+    private double kDistance_;
 
-  /**
-   * Stores the overall constraint violation of the solution.
-   */
-  private double  overallConstraintViolation_ ;
+    /**
+     * Stores the crowding distance of the the solution in a
+     * <code>SolutionSet</code>. Used in NSGA-II.
+     */
+    private double crowdingDistance_;
 
-  /**
-   * Stores the number of constraints violated by the solution.
-   */
-  private int  numberOfViolatedConstraints_ ;
+    /**
+     * Stores the distance between this solution and a <code>SolutionSet</code>.
+     * Used in AbySS.
+     */
+    private double distanceToSolutionSet_;
 
-  /**
-   * This field is intended to be used to know the location of
-   * a solution into a <code>SolutionSet</code>. Used in MOCell
-   */
-  private int location_ ;
+    /**
+     * Constructor.
+     */
+    public Solution() {
+        this.problem_ = null;
+        this.marked_ = false;
+        this.overallConstraintViolation_ = 0.0;
+        this.numberOfViolatedConstraints_ = 0;
+        this.type_ = null;
+        this.variable_ = null;
+        this.objective_ = null;
+    } // Solution
 
-  /**
-   * Stores the distance to his k-nearest neighbor into a 
-   * <code>SolutionSet</code>. Used in SPEA2.
-   */
-  private double kDistance_ ; 
+    /**
+     * Constructor
+     *
+     * @param numberOfObjectives Number of objectives of the solution
+     *                           <p>
+     *                           This constructor is used mainly to read objective values from a file to
+     *                           variables of a SolutionSet to apply quality indicators
+     */
+    public Solution(int numberOfObjectives) {
+        this.numberOfObjectives_ = numberOfObjectives;
+        this.objective_ = new double[numberOfObjectives];
+    }
 
-  /**
-   * Stores the crowding distance of the the solution in a 
-   * <code>SolutionSet</code>. Used in NSGA-II.
-   */
-  private double crowdingDistance_ ; 
+    /**
+     * Constructor.
+     *
+     * @param problem The problem to solve
+     */
+    public Solution(Problem problem) {
+        this.problem_ = problem;
+        this.type_ = problem.getSolutionType();
+        this.numberOfObjectives_ = problem.getNumberOfObjectives();
+        this.objective_ = new double[this.numberOfObjectives_];
 
-  /**
-   * Stores the distance between this solution and a <code>SolutionSet</code>.
-   * Used in AbySS.
-   */
-  private double distanceToSolutionSet_ ;       
+        // Setting initial values
+        this.fitness_ = 0.0;
+        this.kDistance_ = 0.0;
+        this.crowdingDistance_ = 0.0;
+        this.distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+        //<-
 
-  /**
-   * Constructor.
-   */
-  public Solution() {        
-  	problem_                      = null  ;
-    marked_                       = false ;
-    overallConstraintViolation_   = 0.0   ;
-    numberOfViolatedConstraints_  = 0     ;  
-    type_                         = null ;
-    variable_                     = null ;
-    objective_                    = null ;
-  } // Solution
+        //variable_ = problem.solutionType_.createVariables() ;
+        this.variable_ = this.type_.createVariables();
+    } // Solution
 
-  /**
-   * Constructor
-   * @param numberOfObjectives Number of objectives of the solution
-   * 
-   * This constructor is used mainly to read objective values from a file to
-   * variables of a SolutionSet to apply quality indicators
-   */
-  public Solution(int numberOfObjectives) {
-    numberOfObjectives_ = numberOfObjectives;
-    objective_          = new double[numberOfObjectives];
-  }
-  
-  /** 
-   * Constructor.
-   * @param problem The problem to solve
-   * @throws ClassNotFoundException 
-   */
-  public Solution(Problem problem) throws ClassNotFoundException{
-    problem_ = problem ; 
-    type_ = problem.getSolutionType() ;
-    numberOfObjectives_ = problem.getNumberOfObjectives() ;
-    objective_          = new double[numberOfObjectives_] ;
+    /**
+     * Constructor
+     *
+     * @param problem The problem to solve
+     */
+    public Solution(Problem problem, Variable[] variables) {
+        this.problem_ = problem;
+        this.type_ = problem.getSolutionType();
+        this.numberOfObjectives_ = problem.getNumberOfObjectives();
+        this.objective_ = new double[this.numberOfObjectives_];
 
-    // Setting initial values
-    fitness_              = 0.0 ;
-    kDistance_            = 0.0 ;
-    crowdingDistance_     = 0.0 ;        
-    distanceToSolutionSet_ = Double.POSITIVE_INFINITY ;
-    //<-
+        // Setting initial values
+        this.fitness_ = 0.0;
+        this.kDistance_ = 0.0;
+        this.crowdingDistance_ = 0.0;
+        this.distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+        //<-
 
-    //variable_ = problem.solutionType_.createVariables() ; 
-    variable_ = type_.createVariables() ; 
-  } // Solution
-  
-  static public Solution getNewSolution(Problem problem) throws ClassNotFoundException {
-    return new Solution(problem) ;
-  }
-  
-  /** 
-   * Constructor
-   * @param problem The problem to solve
-   */
-  public Solution(Problem problem, Variable [] variables){
-    problem_ = problem ;
-  	type_ = problem.getSolutionType() ;
-    numberOfObjectives_ = problem.getNumberOfObjectives() ;
-    objective_          = new double[numberOfObjectives_] ;
+        this.variable_ = variables;
+    } // Constructor
 
-    // Setting initial values
-    fitness_              = 0.0 ;
-    kDistance_            = 0.0 ;
-    crowdingDistance_     = 0.0 ;        
-    distanceToSolutionSet_ = Double.POSITIVE_INFINITY ;
-    //<-
+    /**
+     * Copy constructor.
+     *
+     * @param solution Solution to copy.
+     */
+    public Solution(Solution solution) {
+        this.problem_ = solution.problem_;
+        this.type_ = solution.type_;
 
-    variable_ = variables ;
-  } // Constructor
-  
-  /** 
-   * Copy constructor.
-   * @param solution Solution to copy.
-   */    
-  public Solution(Solution solution) {            
-    problem_ = solution.problem_ ;
-    type_ = solution.type_;
+        this.numberOfObjectives_ = solution.getNumberOfObjectives();
+        this.objective_ = new double[this.numberOfObjectives_];
+        for (int i = 0; i < this.objective_.length; i++) {
+            this.objective_[i] = solution.getObjective(i);
+        } // for
+        //<-
 
-    numberOfObjectives_ = solution.getNumberOfObjectives();
-    objective_ = new double[numberOfObjectives_];
-    for (int i = 0; i < objective_.length;i++) {
-      objective_[i] = solution.getObjective(i);
-    } // for
-    //<-
+        this.variable_ = this.type_.copyVariables(solution.variable_);
+        this.overallConstraintViolation_ = solution.overallConstraintViolation_;
+        this.numberOfViolatedConstraints_ = solution.numberOfViolatedConstraints_;
+        this.distanceToSolutionSet_ = solution.distanceToSolutionSet_;
+        this.crowdingDistance_ = solution.crowdingDistance_;
+        this.kDistance_ = solution.kDistance_;
+        this.fitness_ = solution.fitness_;
+        this.marked_ = solution.marked_;
+        this.rank_ = solution.rank_;
+        this.location_ = solution.location_;
+    } // Solution
 
-    variable_ = type_.copyVariables(solution.variable_) ;
-    overallConstraintViolation_  = solution.getOverallConstraintViolation();
-    numberOfViolatedConstraints_ = solution.getNumberOfViolatedConstraint();
-    distanceToSolutionSet_ = solution.getDistanceToSolutionSet();
-    crowdingDistance_     = solution.getCrowdingDistance();
-    kDistance_            = solution.getKDistance();                
-    fitness_              = solution.getFitness();
-    marked_               = solution.isMarked();
-    rank_                 = solution.getRank();
-    location_             = solution.getLocation();
-  } // Solution
+    static public Solution getNewSolution(Problem problem) {
+        return new Solution(problem);
+    }
 
-  /**
-   * Sets the distance between this solution and a <code>SolutionSet</code>.
-   * The value is stored in <code>distanceToSolutionSet_</code>.
-   * @param distance The distance to a solutionSet.
-   */
-  public void setDistanceToSolutionSet(double distance){
-    distanceToSolutionSet_ = distance;
-  } // SetDistanceToSolutionSet
+    /**
+     * Gets the distance from the solution to a <code>SolutionSet</code>.
+     * <b> REQUIRE </b>: this method has to be invoked after calling
+     * <code>setDistanceToPopulation</code>.
+     *
+     * @return the distance to a specific solutionSet.
+     */
+    public double getDistanceToSolutionSet() {
+        return this.distanceToSolutionSet_;
+    } // getDistanceToSolutionSet
 
-  /**
-   * Gets the distance from the solution to a <code>SolutionSet</code>. 
-   * <b> REQUIRE </b>: this method has to be invoked after calling 
-   * <code>setDistanceToPopulation</code>.
-   * @return the distance to a specific solutionSet.
-   */
-  public double getDistanceToSolutionSet(){
-    return distanceToSolutionSet_;
-  } // getDistanceToSolutionSet
+    /**
+     * Sets the distance between this solution and a <code>SolutionSet</code>.
+     * The value is stored in <code>distanceToSolutionSet_</code>.
+     *
+     * @param distance The distance to a solutionSet.
+     */
+    public void setDistanceToSolutionSet(double distance) {
+        this.distanceToSolutionSet_ = distance;
+    } // SetDistanceToSolutionSet
 
+    /**
+     * Gets the distance from the solution to his k-nearest nighbor in a
+     * <code>SolutionSet</code>. Returns the value stored in
+     * <code>kDistance_</code>. <b> REQUIRE </b>: this method has to be invoked
+     * after calling <code>setKDistance</code>.
+     *
+     * @return the distance to k-nearest neighbor.
+     */
+    public double getKDistance() {
+        return this.kDistance_;
+    } // getKDistance
 
-  /** 
-   * Sets the distance between the solution and its k-nearest neighbor in 
-   * a <code>SolutionSet</code>. The value is stored in <code>kDistance_</code>.
-   * @param distance The distance to the k-nearest neighbor.
-   */
-  public void setKDistance(double distance){
-    kDistance_ = distance;
-  } // setKDistance
+    /**
+     * Sets the distance between the solution and its k-nearest neighbor in
+     * a <code>SolutionSet</code>. The value is stored in <code>kDistance_</code>.
+     *
+     * @param distance The distance to the k-nearest neighbor.
+     */
+    public void setKDistance(double distance) {
+        this.kDistance_ = distance;
+    } // setKDistance
 
-  /** 
-   * Gets the distance from the solution to his k-nearest nighbor in a 
-   * <code>SolutionSet</code>. Returns the value stored in
-   * <code>kDistance_</code>. <b> REQUIRE </b>: this method has to be invoked 
-   * after calling <code>setKDistance</code>.
-   * @return the distance to k-nearest neighbor.
-   */
-  public double getKDistance(){
-    return kDistance_;
-  } // getKDistance
+    /**
+     * Gets the crowding distance of the solution into a <code>SolutionSet</code>.
+     * Returns the value stored in <code>crowdingDistance_</code>.
+     * <b> REQUIRE </b>: this method has to be invoked after calling
+     * <code>setCrowdingDistance</code>.
+     *
+     * @return the distance crowding distance of the solution.
+     */
+    public double getCrowdingDistance() {
+        return this.crowdingDistance_;
+    } // getCrowdingDistance
 
-  /**
-   * Sets the crowding distance of a solution in a <code>SolutionSet</code>.
-   * The value is stored in <code>crowdingDistance_</code>.
-   * @param distance The crowding distance of the solution.
-   */  
-  public void setCrowdingDistance(double distance){
-    crowdingDistance_ = distance;
-  } // setCrowdingDistance
+    /**
+     * Sets the crowding distance of a solution in a <code>SolutionSet</code>.
+     * The value is stored in <code>crowdingDistance_</code>.
+     *
+     * @param distance The crowding distance of the solution.
+     */
+    public void setCrowdingDistance(double distance) {
+        this.crowdingDistance_ = distance;
+    } // setCrowdingDistance
 
+    /**
+     * Gets the fitness of the solution.
+     * Returns the value of stored in the encodings.variable <code>fitness_</code>.
+     * <b> REQUIRE </b>: This method has to be invoked after calling
+     * <code>setFitness()</code>.
+     *
+     * @return the fitness.
+     */
+    public double getFitness() {
+        return this.fitness_;
+    } // getFitness
 
-  /** 
-   * Gets the crowding distance of the solution into a <code>SolutionSet</code>.
-   * Returns the value stored in <code>crowdingDistance_</code>.
-   * <b> REQUIRE </b>: this method has to be invoked after calling 
-   * <code>setCrowdingDistance</code>.
-   * @return the distance crowding distance of the solution.
-   */
-  public double getCrowdingDistance(){
-    return crowdingDistance_;
-  } // getCrowdingDistance
+    /**
+     * Sets the fitness of a solution.
+     * The value is stored in <code>fitness_</code>.
+     *
+     * @param fitness The fitness of the solution.
+     */
+    public void setFitness(double fitness) {
+        this.fitness_ = fitness;
+    } // setFitness
 
-  /**
-   * Sets the fitness of a solution.
-   * The value is stored in <code>fitness_</code>.
-   * @param fitness The fitness of the solution.
-   */
-  public void setFitness(double fitness) {
-    fitness_ = fitness;
-  } // setFitness
+    /**
+     * Sets the value of the i-th objective.
+     *
+     * @param i     The number identifying the objective.
+     * @param value The value to be stored.
+     */
+    public void setObjective(int i, double value) {
+        this.objective_[i] = value;
+    } // setObjective
 
-  /**
-   * Gets the fitness of the solution.
-   * Returns the value of stored in the encodings.variable <code>fitness_</code>.
-   * <b> REQUIRE </b>: This method has to be invoked after calling 
-   * <code>setFitness()</code>.
-   * @return the fitness.
-   */
-  public double getFitness() {
-    return fitness_;
-  } // getFitness
+    /**
+     * Returns the value of the i-th objective.
+     *
+     * @param i The value of the objective.
+     */
+    public double getObjective(int i) {
+        return this.objective_[i];
+    } // getObjective
 
-  /**
-   * Sets the value of the i-th objective.
-   * @param i The number identifying the objective.
-   * @param value The value to be stored.
-   */
-  public void setObjective(int i, double value) {
-    objective_[i] = value;
-  } // setObjective
+    /**
+     * Returns the number of objectives.
+     *
+     * @return The number of objectives.
+     */
+    public int getNumberOfObjectives() {
+        if (this.objective_ == null)
+            return 0;
+        else
+            return this.numberOfObjectives_;
+    } // getNumberOfObjectives
 
-  /**
-   * Returns the value of the i-th objective.
-   * @param i The value of the objective.
-   */
-  public double getObjective(int i) {
-    return objective_[i];
-  } // getObjective
+    /**
+     * Returns the number of decision variables of the solution.
+     *
+     * @return The number of decision variables.
+     */
+    public int numberOfVariables() {
+        return this.problem_.getNumberOfVariables();
+    } // numberOfVariables
 
-  /**
-   * Returns the number of objectives.
-   * @return The number of objectives.
-   */
-  public int getNumberOfObjectives() {
-    if (objective_ == null)
-      return 0 ;
-    else
-      return numberOfObjectives_;
-  } // getNumberOfObjectives
+    /**
+     * Returns a string representing the solution.
+     *
+     * @return The string.
+     */
+    public String toString() {
+        StringBuilder aux = new StringBuilder();
+        for (int i = 0; i < this.numberOfObjectives_; i++)
+            aux.append(this.getObjective(i)).append(" ");
 
-  /**  
-   * Returns the number of decision variables of the solution.
-   * @return The number of decision variables.
-   */
-  public int numberOfVariables() {
-    return problem_.getNumberOfVariables() ;
-  } // numberOfVariables
+        return aux.toString();
+    } // toString
 
-  /** 
-   * Returns a string representing the solution.
-   * @return The string.
-   */
-  public String toString() {
-    String aux="";
-    for (int i = 0; i < this.numberOfObjectives_; i++)
-      aux = aux + this.getObjective(i) + " ";
+    /**
+     * Returns the decision variables of the solution.
+     *
+     * @return the <code>DecisionVariables</code> object representing the decision
+     * variables of the solution.
+     */
+    public Variable[] getDecisionVariables() {
+        return this.variable_;
+    } // getDecisionVariables
 
-    return aux;
-  } // toString
+    /**
+     * Sets the decision variables for the solution.
+     *
+     * @param variables The <code>DecisionVariables</code> object
+     *                  representing the decision variables of the solution.
+     */
+    public void setDecisionVariables(Variable[] variables) {
+        this.variable_ = variables;
+    } // setDecisionVariables
 
-  /**
-   * Returns the decision variables of the solution.
-   * @return the <code>DecisionVariables</code> object representing the decision
-   * variables of the solution.
-   */
-  public Variable[] getDecisionVariables() {
-    return variable_ ;
-  } // getDecisionVariables
+    public Problem getProblem() {
+        return this.problem_;
+    }
 
-  /**
-   * Sets the decision variables for the solution.
-   * @param variables The <code>DecisionVariables</code> object
-   * representing the decision variables of the solution.
-   */
-  public void setDecisionVariables(Variable [] variables) {
-    variable_ = variables ;
-  } // setDecisionVariables
+    /**
+     * Indicates if the solution is marked.
+     *
+     * @return true if the method <code>marked</code> has been called and, after
+     * that, the method <code>unmarked</code> hasn't been called. False in other
+     * case.
+     */
+    public boolean isMarked() {
+        return this.marked_;
+    } // isMarked
 
-  public Problem getProblem() {
-     return problem_ ;
-  }
+    /**
+     * Establishes the solution as marked.
+     */
+    public void marked() {
+        this.marked_ = true;
+    } // marked
 
-  /**
-   * Indicates if the solution is marked.
-   * @return true if the method <code>marked</code> has been called and, after 
-   * that, the method <code>unmarked</code> hasn't been called. False in other
-   * case.
-   */
-  public boolean isMarked() {
-    return this.marked_;
-  } // isMarked
+    /**
+     * Established the solution as unmarked.
+     */
+    public void unMarked() {
+        this.marked_ = false;
+    } // unMarked
 
-  /**
-   * Establishes the solution as marked.
-   */
-  public void marked() {
-    this.marked_ = true;
-  } // marked
+    /**
+     * Gets the rank of the solution.
+     * <b> REQUIRE </b>: This method has to be invoked after calling
+     * <code>setRank()</code>.
+     *
+     * @return the rank of the solution.
+     */
+    public int getRank() {
+        return this.rank_;
+    } // getRank
 
-  /**
-   * Established the solution as unmarked.
-   */
-  public void unMarked() {
-    this.marked_ = false;
-  } // unMarked
+    /**
+     * Sets the rank of a solution.
+     *
+     * @param value The rank of the solution.
+     */
+    public void setRank(int value) {
+        this.rank_ = value;
+    } // setRank
 
-  /**  
-   * Sets the rank of a solution. 
-   * @param value The rank of the solution.
-   */
-  public void setRank(int value){
-    this.rank_ = value;
-  } // setRank
+    /**
+     * Gets the overall constraint violated by the solution.
+     * <b> REQUIRE </b>: This method has to be invoked after calling
+     * <code>overallConstraintViolation</code>.
+     *
+     * @return the overall constraint violation by the solution.
+     */
+    public double getOverallConstraintViolation() {
+        return this.overallConstraintViolation_;
+    }  //getOverallConstraintViolation
 
-  /**
-   * Gets the rank of the solution.
-   * <b> REQUIRE </b>: This method has to be invoked after calling 
-   * <code>setRank()</code>.
-   * @return the rank of the solution.
-   */
-  public int getRank(){
-    return this.rank_;
-  } // getRank
+    /**
+     * Sets the overall constraints violated by the solution.
+     *
+     * @param value The overall constraints violated by the solution.
+     */
+    public void setOverallConstraintViolation(double value) {
+        this.overallConstraintViolation_ = value;
+    } // setOverallConstraintViolation
 
-  /**
-   * Sets the overall constraints violated by the solution.
-   * @param value The overall constraints violated by the solution.
-   */
-  public void setOverallConstraintViolation(double value) {
-    this.overallConstraintViolation_ = value;
-  } // setOverallConstraintViolation
+    /**
+     * Gets the number of constraint violated by the solution.
+     * <b> REQUIRE </b>: This method has to be invoked after calling
+     * <code>setNumberOfViolatedConstraint</code>.
+     *
+     * @return the number of constraints violated by the solution.
+     */
+    public int getNumberOfViolatedConstraint() {
+        return this.numberOfViolatedConstraints_;
+    } // getNumberOfViolatedConstraint
 
-  /**
-   * Gets the overall constraint violated by the solution.
-   * <b> REQUIRE </b>: This method has to be invoked after calling 
-   * <code>overallConstraintViolation</code>.
-   * @return the overall constraint violation by the solution.
-   */
-  public double getOverallConstraintViolation() {
-    return this.overallConstraintViolation_;
-  }  //getOverallConstraintViolation
+    /**
+     * Sets the number of constraints violated by the solution.
+     *
+     * @param value The number of constraints violated by the solution.
+     */
+    public void setNumberOfViolatedConstraint(int value) {
+        this.numberOfViolatedConstraints_ = value;
+    } //setNumberOfViolatedConstraint
 
+    /**
+     * Gets the location of this solution in a <code>SolutionSet</code>.
+     * <b> REQUIRE </b>: This method has to be invoked after calling
+     * <code>setLocation</code>.
+     *
+     * @return the location of the solution into a solutionSet
+     */
+    public int getLocation() {
+        return this.location_;
+    } // getLocation
 
-  /**
-   * Sets the number of constraints violated by the solution.
-   * @param value The number of constraints violated by the solution.
-   */
-  public void setNumberOfViolatedConstraint(int value) {
-    this.numberOfViolatedConstraints_ = value;
-  } //setNumberOfViolatedConstraint
+    /**
+     * Sets the location of the solution into a solutionSet.
+     *
+     * @param location The location of the solution.
+     */
+    public void setLocation(int location) {
+        this.location_ = location;
+    } // setLocation
 
-  /**
-   * Gets the number of constraint violated by the solution.
-   * <b> REQUIRE </b>: This method has to be invoked after calling
-   * <code>setNumberOfViolatedConstraint</code>.
-   * @return the number of constraints violated by the solution.
-   */
-  public int getNumberOfViolatedConstraint() {
-    return this.numberOfViolatedConstraints_;
-  } // getNumberOfViolatedConstraint
+    /**
+     * Sets the type of the encodings.variable.
+     * @param type The type of the encodings.variable.
+     */
+    //public void setType(String type) {
+    // type_ = Class.forName("") ;
+    //} // setType
 
-  /**
-   * Sets the location of the solution into a solutionSet. 
-   * @param location The location of the solution.
-   */
-  public void setLocation(int location) {
-    this.location_ = location;
-  } // setLocation
+    /**
+     * Gets the type of the encodings.variable
+     *
+     * @return the type of the encodings.variable
+     */
+    public SolutionType getType() {
+        return this.type_;
+    } // getType
 
-  /**
-   * Gets the location of this solution in a <code>SolutionSet</code>.
-   * <b> REQUIRE </b>: This method has to be invoked after calling
-   * <code>setLocation</code>.
-   * @return the location of the solution into a solutionSet
-   */
-  public int getLocation() {
-    return this.location_;
-  } // getLocation
+    /**
+     * Sets the type of the encodings.variable.
+     *
+     * @param type The type of the encodings.variable.
+     */
+    public void setType(SolutionType type) {
+        this.type_ = type;
+    } // setType
 
-  /**
-   * Sets the type of the encodings.variable.
-   * @param type The type of the encodings.variable.
-   */
-  //public void setType(String type) {
-   // type_ = Class.forName("") ;
-  //} // setType
+    /**
+     * Returns the aggregative value of the solution
+     *
+     * @return The aggregative value.
+     */
+    public double getAggregateValue() {
+        double value = 0.0;
+        for (int i = 0; i < this.getNumberOfObjectives(); i++) {
+            value += this.getObjective(i);
+        }
+        return value;
+    } // getAggregativeValue
 
-  /**
-   * Sets the type of the encodings.variable.
-   * @param type The type of the encodings.variable.
-   */
-  public void setType(SolutionType type) {
-    type_ = type ;
-  } // setType
+    /**
+     * Returns the number of bits of the chromosome in case of using a binary
+     * representation
+     *
+     * @return The number of bits if the case of binary variables, 0 otherwise
+     * This method had a bug which was fixed by Rafael Olaechea
+     */
+    public int getNumberOfBits() {
+        int bits = 0;
 
-  /**
-   * Gets the type of the encodings.variable
-   * @return the type of the encodings.variable
-   */
-  public SolutionType getType() {
-    return type_;
-  } // getType
+        for (Variable variable : this.variable_)
+            if ((variable.getVariableType() == Binary.class) ||
+                    (variable.getVariableType() == jmetal.encodings.variable.BinaryReal.class))
 
-  /** 
-   * Returns the aggregative value of the solution
-   * @return The aggregative value.
-   */
-  public double getAggregativeValue() {
-    double value = 0.0;                
-    for (int i = 0; i < getNumberOfObjectives(); i++){
-      value += getObjective(i);
-    }                
-    return value;
-  } // getAggregativeValue
+                bits += ((Binary) variable).getNumberOfBits();
 
-  /**
-   * Returns the number of bits of the chromosome in case of using a binary
-   * representation
-   * @return The number of bits if the case of binary variables, 0 otherwise
-   * This method had a bug which was fixed by Rafael Olaechea
-   */
-  public int getNumberOfBits() {
-    int bits = 0 ;
-
-    for (int i = 0;  i < variable_.length  ; i++)
-      if ((variable_[i].getVariableType() == jmetal.encodings.variable.Binary.class) ||
-          (variable_[i].getVariableType() == jmetal.encodings.variable.BinaryReal.class))
-
-        bits += ((Binary)(variable_[i])).getNumberOfBits() ;
-
-    return bits ;
-  } // getNumberOfBits
+        return bits;
+    } // getNumberOfBits
 } // Solution

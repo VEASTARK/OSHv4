@@ -15,175 +15,174 @@ import osh.registry.interfaces.IEventTypeReceiver;
 import java.util.*;
 
 /**
- * 
  * @author Sebastian Kramer, Ingo Mauser
- *
  */
 public class DataBroker extends OSHComponent implements ILifeCycleListener, IEventTypeReceiver {
 
-	private UUID uuid;
+    private final UUID uuid;
 
-	private Map<Class<? extends Exchange>, List<UUIDRegistryPair>> dataMapping 
-	= new HashMap<Class<? extends Exchange>, List<UUIDRegistryPair>>();
+    private final Map<Class<? extends Exchange>, List<UUIDRegistryPair>> dataMapping
+            = new HashMap<>();
 
-	private Registry comRegistry;
-	private Registry ocRegistry;
-	private Registry driverRegistry;
+    private Registry comRegistry;
+    private Registry ocRegistry;
+    private Registry driverRegistry;
 
-	public DataBroker(UUID uuid, IOSH theOrganicSmartHome) {
-		super(theOrganicSmartHome);
+    public DataBroker(UUID uuid, IOSH theOrganicSmartHome) {
+        super(theOrganicSmartHome);
 
-		this.uuid = uuid;
-	}
+        this.uuid = uuid;
+    }
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		OSH osh = (OSH) getOSH();
-		comRegistry = osh.getComRegistry();
-		ocRegistry = osh.getOCRegistry();
-		driverRegistry = osh.getDriverRegistry();		
-	}
+    @Override
+    public void onSystemIsUp() {
+        OSH osh = (OSH) this.getOSH();
+        this.comRegistry = osh.getComRegistry();
+        this.ocRegistry = osh.getOCRegistry();
+        this.driverRegistry = osh.getDriverRegistry();
+    }
 
-	public void registerDataReachThroughState(UUID reciever, Class<? extends StateExchange> type, 
-			RegistryType source, RegistryType drain) throws OSHException {
+    public void registerDataReachThroughState(UUID receiver, Class<? extends StateExchange> type,
+                                              RegistryType source, RegistryType drain) throws OSHException {
 
-		List<UUIDRegistryPair> typeList = dataMapping.get(type);
+        List<UUIDRegistryPair> typeList = this.dataMapping.get(type);
 
-		if (typeList == null) {
-			typeList = new ArrayList<UUIDRegistryPair>();
-			dataMapping.put(type, typeList);
-		} else {
-			if (!typeList.stream().allMatch(e -> e.source == source)) {
-				throw new OSHException("data custodian does not support reachthrough "
-						+ "for multiple source registrys for the same stateExchange");
-			}
-		}
-		typeList.add(new UUIDRegistryPair(reciever, drain, source));
+        if (typeList == null) {
+            typeList = new ArrayList<>();
+            this.dataMapping.put(type, typeList);
+        } else {
+            if (!typeList.stream().allMatch(e -> e.source == source)) {
+                throw new OSHException("data custodian does not support reach-through "
+                        + "for multiple source registries for the same stateExchange");
+            }
+        }
+        typeList.add(new UUIDRegistryPair(receiver, drain, source));
 
-		Registry toRegister = getRegistryFromType(source);
+        Registry toRegister = this.getRegistryFromType(source);
 
-		try {
-			toRegister.registerStateChangeListener(type, this);
-		}  catch (OSHException e) {
-			// nop. happens.
-			getGlobalLogger().logError("should not happen", e);
-		}
-	}
+        try {
+            toRegister.registerStateChangeListener(type, this);
+        } catch (OSHException e) {
+            // nop. happens.
+            this.getGlobalLogger().logError("should not happen", e);
+        }
+    }
 
-	public void registerDataReachThroughEvent(UUID reciever, Class<? extends EventExchange> type, 
-			RegistryType source, RegistryType drain) {
+    public void registerDataReachThroughEvent(UUID receiver, Class<? extends EventExchange> type,
+                                              RegistryType source, RegistryType drain) {
 
-		List<UUIDRegistryPair> typeList = dataMapping.get(type);
+        List<UUIDRegistryPair> typeList = this.dataMapping.computeIfAbsent(type, k -> new ArrayList<>());
 
-		if (typeList == null) {
-			typeList = new ArrayList<UUIDRegistryPair>();
-			dataMapping.put(type, typeList);
-		}
-		typeList.add(new UUIDRegistryPair(reciever, drain, source));
+        typeList.add(new UUIDRegistryPair(receiver, drain, source));
 
-		Registry toRegister = getRegistryFromType(source);
+        Registry toRegister = this.getRegistryFromType(source);
 
-		try {
-			toRegister.register(type, this);
-		}  catch (OSHException e) {
-			// nop. happens.
-			getGlobalLogger().logError("should not happen", e);
-		}
-	}	
+        try {
+            toRegister.register(type, this);
+        } catch (OSHException e) {
+            // nop. happens.
+            this.getGlobalLogger().logError("should not happen", e);
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) throws OSHException {
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
 
-		if (event instanceof StateChangedExchange) {
+        if (event instanceof StateChangedExchange) {
 
-			Class<? extends StateExchange> stateType = ((StateChangedExchange) event).getType();
-			
-			List<UUIDRegistryPair> listForType = dataMapping.get(stateType);
+            Class<? extends StateExchange> stateType = ((StateChangedExchange) event).getType();
 
-			if (listForType != null && !listForType.isEmpty()) {
+            List<UUIDRegistryPair> listForType = this.dataMapping.get(stateType);
 
-				for(UUIDRegistryPair pair : listForType) {					
+            if (listForType != null && !listForType.isEmpty()) {
 
-					Object state = getRegistryFromType(pair.source).getState(stateType, ((StateChangedExchange) event).getStatefulentity());
+                for (UUIDRegistryPair pair : listForType) {
 
-					StateExchange test = stateType.cast(state);
-					test.setSender(pair.identifier);
+                    Object state = this.getRegistryFromType(pair.source).getState(stateType, ((StateChangedExchange) event).getStatefulEntity());
 
-					getRegistryFromType(pair.drain).setStateOfSender(stateType.asSubclass(StateExchange.class), test);
+                    StateExchange test = stateType.cast(state);
+                    test.setSender(pair.identifier);
 
-					//					getRegistryFromType(pair.drain).setStateOfSender(stateType, stateType.cast(test));
-				}
-			}
-		} else {				
-			List<UUIDRegistryPair> listForType = dataMapping.get(type);
+                    this.getRegistryFromType(pair.drain).setStateOfSender(stateType.asSubclass(StateExchange.class), test);
 
-			if (listForType != null && !listForType.isEmpty()) {
+                    //					getRegistryFromType(pair.drain).setStateOfSender(stateType, stateType.cast(test));
+                }
+            }
+        } else {
+            List<UUIDRegistryPair> listForType = this.dataMapping.get(type);
 
-				for(UUIDRegistryPair pair : listForType) {
+            if (listForType != null && !listForType.isEmpty()) {
 
-					T ex = (T) event.clone();
-					ex.setSender(pair.identifier);
-					getRegistryFromType(pair.drain).sendEvent(type, ex);
+                for (UUIDRegistryPair pair : listForType) {
 
-				}		
-			}
-		}			
-	}		
+                    T ex = (T) event.clone();
+                    ex.setSender(pair.identifier);
+                    this.getRegistryFromType(pair.drain).sendEvent(type, ex);
+
+                }
+            }
+        }
+    }
 
 
-	private Registry getRegistryFromType(RegistryType type) {
-		switch(type) {
-		case COM: return comRegistry;
-		case OC: return ocRegistry;
-		case DRIVER: return driverRegistry;
-		default: return null;
-		}
-	}
+    private Registry getRegistryFromType(RegistryType type) {
+        switch (type) {
+            case COM:
+                return this.comRegistry;
+            case OC:
+                return this.ocRegistry;
+            case DRIVER:
+                return this.driverRegistry;
+            default:
+                return null;
+        }
+    }
 
-	@Override
-	public Object getSyncObject() {
-		return this;
-	}
+    @Override
+    public Object getSyncObject() {
+        return this;
+    }
 
-	@Override
-	public UUID getUUID() {
-		return uuid;
-	}
+    @Override
+    public UUID getUUID() {
+        return this.uuid;
+    }
 
-	@Override
-	public void onSystemRunning() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void onSystemRunning() {
+        //NOTHING
+    }
 
-	@Override
-	public void onSystemShutdown() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void onSystemShutdown() {
+        //NOTHING
+    }
 
-	@Override
-	public void onSystemHalt() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void onSystemHalt() {
+        //NOTHING
+    }
 
-	@Override
-	public void onSystemResume() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void onSystemResume() {
+        //NOTHING
+    }
 
-	@Override
-	public void onSystemError() throws OSHException {
-		//NOTHING
-	}
+    @Override
+    public void onSystemError() {
+        //NOTHING
+    }
 
-	private class UUIDRegistryPair {
-		public UUID identifier;
-		public RegistryType drain;
-		public RegistryType source;
-		public UUIDRegistryPair(UUID identifier, RegistryType type, RegistryType source) {
-			this.identifier = identifier;
-			this.drain = type;
-			this.source = source;
-		}
-	}
+    private static class UUIDRegistryPair {
+        public final UUID identifier;
+        public final RegistryType drain;
+        public final RegistryType source;
+
+        public UUIDRegistryPair(UUID identifier, RegistryType type, RegistryType source) {
+            this.identifier = identifier;
+            this.drain = type;
+            this.source = source;
+        }
+    }
 }

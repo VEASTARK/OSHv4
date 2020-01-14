@@ -7,19 +7,18 @@ import java.util.UUID;
 
 /**
  * Start device now
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 public class StartDeviceRequest extends CommandExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4843814099005430530L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4843814099005430530L;
 
-	public StartDeviceRequest(UUID sender, UUID receiver, long timestamp) {
-		super(sender, receiver, timestamp);
-	}
+    public StartDeviceRequest(UUID sender, UUID receiver, long timestamp) {
+        super(sender, receiver, timestamp);
+    }
 
 }

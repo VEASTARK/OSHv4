@@ -8,33 +8,32 @@ import java.util.List;
 
 /**
  * internal representation for name-value-pairs used by the OSH
- * 
- *@author Florian Allerding
+ *
+ * @author Florian Allerding
  */
 public class OSHParameterCollection {
-	
-	private HashMap<String, String> parameterCollection;
-	
-	public OSHParameterCollection() {
-		this.parameterCollection = new HashMap<String, String>();
-	}
-	
-	public String getParameter(String name){	
-		String _retStr = parameterCollection.get(name);
-		return _retStr;
-	}
-	
-	public void setParameter(String name, String value){
-		
-		parameterCollection.put(name, value);
-	}
-	
-	public void loadCollection(List<ConfigurationParameter> configParam){
 
-		for(int i = 0; i < configParam.size(); i++){
-			parameterCollection.put(configParam.get(i).getParameterName(), configParam.get(i).getParameterValue());
-		}
-		
-	}
+    private final HashMap<String, String> parameterCollection;
+
+    public OSHParameterCollection() {
+        this.parameterCollection = new HashMap<>();
+    }
+
+    public String getParameter(String name) {
+        return this.parameterCollection.get(name);
+    }
+
+    public void setParameter(String name, String value) {
+
+        this.parameterCollection.put(name, value);
+    }
+
+    public void loadCollection(List<ConfigurationParameter> configParam) {
+
+        for (ConfigurationParameter configurationParameter : configParam) {
+            this.parameterCollection.put(configurationParameter.getParameterName(), configurationParameter.getParameterValue());
+        }
+
+    }
 
 }

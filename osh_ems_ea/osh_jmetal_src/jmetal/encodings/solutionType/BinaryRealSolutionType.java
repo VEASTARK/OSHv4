@@ -28,40 +28,41 @@ import jmetal.encodings.variable.BinaryReal;
 import jmetal.util.PseudoRandom;
 
 /**
- *  Class representing the solution type of solutions composed of BinaryReal 
- *  variables
+ * Class representing the solution type of solutions composed of BinaryReal
+ * variables
  */
 public class BinaryRealSolutionType extends SolutionType {
 
-	PseudoRandom pseudoRandom;
-	
-	/**
-	 * Constructor
-	 * @param problem Problem to solve
-	 */
-	public BinaryRealSolutionType(Problem problem) {
-		super(problem) ;
-	} // Constructor
-	
-	/**
-	 * Creates the variables of the solution
-	 */
-	@Override
-	public Variable[] createVariables() {
-		Variable [] variables = new Variable[problem_.getNumberOfVariables()];
-	  
-    for (int var = 0; var < problem_.getNumberOfVariables(); var++) {
-      if (problem_.getPrecision() == null) {
-        int [] precision = new int[problem_.getNumberOfVariables()] ;
-        for (int i = 0; i < problem_.getNumberOfVariables(); i++)
-          precision[i] = jmetal.encodings.variable.BinaryReal.DEFAULT_PRECISION ;
-        problem_.setPrecision(precision) ;
-      } // if
-      variables[var] = new BinaryReal(problem_.getPrecision(var),
-                                      problem_.getLowerLimit(var),
-                                      problem_.getUpperLimit(var),
-                                      this.pseudoRandom);   
-    } // for 
-    return variables ;    
-	} // createVariables
+    PseudoRandom pseudoRandom;
+
+    /**
+     * Constructor
+     *
+     * @param problem Problem to solve
+     */
+    public BinaryRealSolutionType(Problem problem) {
+        super(problem);
+    } // Constructor
+
+    /**
+     * Creates the variables of the solution
+     */
+    @Override
+    public Variable[] createVariables() {
+        Variable[] variables = new Variable[this.problem_.getNumberOfVariables()];
+
+        for (int var = 0; var < this.problem_.getNumberOfVariables(); var++) {
+            if (this.problem_.getPrecision() == null) {
+                int[] precision = new int[this.problem_.getNumberOfVariables()];
+                for (int i = 0; i < this.problem_.getNumberOfVariables(); i++)
+                    precision[i] = jmetal.encodings.variable.BinaryReal.DEFAULT_PRECISION;
+                this.problem_.setPrecision(precision);
+            } // if
+            variables[var] = new BinaryReal(this.problem_.getPrecision(var),
+                    this.problem_.getLowerLimit(var),
+                    this.problem_.getUpperLimit(var),
+                    this.pseudoRandom);
+        } // for
+        return variables;
+    } // createVariables
 } // BinaryRealSolutionType

@@ -28,43 +28,45 @@ import jmetal.encodings.variable.ArrayInt;
 import jmetal.util.PseudoRandom;
 
 /**
-* Class representing the solution type of solutions composed of an ArrayInt 
-* encodings.variable
-*/
+ * Class representing the solution type of solutions composed of an ArrayInt
+ * encodings.variable
+ */
 public class ArrayIntSolutionType extends SolutionType {
 
-	/**
-	 * Constructor
-	 * @param problem Problem being solved
-	 */
-	public ArrayIntSolutionType(Problem problem, PseudoRandom pseudoRandom) {
-		super(problem);
-	}
-	
-	/**
-	 * Creates the variables of the solution
-	 */
-	public Variable[] createVariables() {
-		Variable [] variables = new Variable[1];
-		
-    variables[0] = new ArrayInt(
-    		problem_.getNumberOfVariables(), 
-    		problem_,
-    		pseudoRandom); 
-    return variables ;
-	} // createVariables
-	
-	/**
-	 * Copy the variables
-	 * @param vars Variables to copy
-	 * @return An array of variables
-	 */
-	public Variable[] copyVariables(Variable[] vars) {
-		Variable[] variables ;
-		
-		variables = new Variable[1];
-	  variables[0] = vars[0].deepCopy();
-		
-		return variables ;
-	} // copyVariables
+    /**
+     * Constructor
+     *
+     * @param problem Problem being solved
+     */
+    public ArrayIntSolutionType(Problem problem, PseudoRandom pseudoRandom) {
+        super(problem);
+    }
+
+    /**
+     * Creates the variables of the solution
+     */
+    public Variable[] createVariables() {
+        Variable[] variables = new Variable[1];
+
+        variables[0] = new ArrayInt(
+                this.problem_.getNumberOfVariables(),
+                this.problem_,
+                this.pseudoRandom);
+        return variables;
+    } // createVariables
+
+    /**
+     * Copy the variables
+     *
+     * @param vars Variables to copy
+     * @return An array of variables
+     */
+    public Variable[] copyVariables(Variable[] vars) {
+        Variable[] variables;
+
+        variables = new Variable[1];
+        variables[0] = vars[0].deepCopy();
+
+        return variables;
+    } // copyVariables
 } // ArrayIntSolutionType

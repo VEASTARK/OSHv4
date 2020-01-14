@@ -5,25 +5,23 @@ import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class HotWaterDemandObserverExchange extends HALDeviceObserverExchange {
 
-	private int power;
-	
+    private final int power;
 
-	public HotWaterDemandObserverExchange(
-			UUID deviceID, 
-			Long timestamp, 
-			int power) {
-		super(deviceID, timestamp);
 
-		this.power = power;
-	}
+    public HotWaterDemandObserverExchange(
+            UUID deviceID,
+            Long timestamp,
+            int power) {
+        super(deviceID, timestamp);
 
-	public int getHotWaterPower() {
-		return power;
-	}
+        this.power = power;
+    }
+
+    public int getHotWaterPower() {
+        return this.power;
+    }
 }

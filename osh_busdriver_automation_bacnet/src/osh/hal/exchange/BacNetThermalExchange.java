@@ -9,53 +9,52 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class BacNetThermalExchange 
-				extends HALDeviceObserverExchange 
-				implements ITemperatureDetails {
+public class BacNetThermalExchange
+        extends HALDeviceObserverExchange
+        implements ITemperatureDetails {
 
-	private TemperatureDetails temperatureDetails;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public BacNetThermalExchange(UUID deviceID, Long timestamp) {
-		super(deviceID, timestamp);
-		temperatureDetails = new TemperatureDetails(deviceID, timestamp);
-	}
-	
-	public double getTemperature() {
-		return temperatureDetails.getTemperature();
-	}
+    private TemperatureDetails temperatureDetails;
 
-	public void setTemperature(double temperature) {
-		this.temperatureDetails.setTemperature(temperature);
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID  unique identifier for this element
+     * @param timestamp timestamp of this exchange
+     */
+    public BacNetThermalExchange(UUID deviceID, Long timestamp) {
+        super(deviceID, timestamp);
+        this.temperatureDetails = new TemperatureDetails(deviceID, timestamp);
+    }
 
-	
-	public HashMap<String, Double> getAuxiliaryTemperatures() {
-		return temperatureDetails.getAuxiliaryTemperatures();
-	}
+    public double getTemperature() {
+        return this.temperatureDetails.getTemperature();
+    }
 
-	public void setAuxiliaryTemperatures(HashMap<String, Double> auxiliaryTemperatures) {
-		temperatureDetails.setAuxiliaryTemperatures(auxiliaryTemperatures);
-	}
+    public void setTemperature(double temperature) {
+        this.temperatureDetails.setTemperature(temperature);
+    }
 
-	@Override
-	public String toString() {
-		return temperatureDetails.toString();
-	}
-	
-	public TemperatureDetails getTemperatureDetails() {
-		return temperatureDetails;
-	}
-	
-	public void setTemperatureDetails(TemperatureDetails temperatureDetails) {
-		this.temperatureDetails = temperatureDetails;
-	}
+
+    public HashMap<String, Double> getAuxiliaryTemperatures() {
+        return this.temperatureDetails.getAuxiliaryTemperatures();
+    }
+
+    public void setAuxiliaryTemperatures(HashMap<String, Double> auxiliaryTemperatures) {
+        this.temperatureDetails.setAuxiliaryTemperatures(auxiliaryTemperatures);
+    }
+
+    @Override
+    public String toString() {
+        return this.temperatureDetails.toString();
+    }
+
+    public TemperatureDetails getTemperatureDetails() {
+        return this.temperatureDetails;
+    }
+
+    public void setTemperatureDetails(TemperatureDetails temperatureDetails) {
+        this.temperatureDetails = temperatureDetails;
+    }
 }

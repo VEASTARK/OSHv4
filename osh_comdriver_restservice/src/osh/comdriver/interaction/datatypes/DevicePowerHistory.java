@@ -1,46 +1,42 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
-@XmlRootElement(name="def")
+@XmlRootElement(name = "def")
 public class DevicePowerHistory {
-	
-	@XmlElement(name="label")
-	private String label;
-	
-	@XmlElement(name="data")
-	private DevicePowerEntry[] data;
-	
-	public void setData(DevicePowerEntry[] data) {
-		this.data = data;
-	}
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    @XmlElement(name = "label")
+    private String label;
 
-	public void setDataLong(Long[][] lData) {
-		
-		data = new DevicePowerEntry[lData.length];
-		for(int i = 0; i< lData.length; i++)
-		{
-			data[i] = new DevicePowerEntry();
-			data[i].setItem(lData[i]);
-		}
-		
-	}
+    @XmlElement(name = "data")
+    private DevicePowerEntry[] data;
 
-	public String getLabel() {
-		return label;
-	}
+    public void setDataLong(Long[][] lData) {
 
-	public DevicePowerEntry[] getData() {
-		return data;
-	}
-	
+        this.data = new DevicePowerEntry[lData.length];
+        for (int i = 0; i < lData.length; i++) {
+            this.data[i] = new DevicePowerEntry();
+            this.data[i].setItem(lData[i]);
+        }
+
+    }
+
+    public String getLabel() {
+        return this.label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public DevicePowerEntry[] getData() {
+        return this.data;
+    }
+
+    public void setData(DevicePowerEntry[] data) {
+        this.data = data;
+    }
+
 
 }

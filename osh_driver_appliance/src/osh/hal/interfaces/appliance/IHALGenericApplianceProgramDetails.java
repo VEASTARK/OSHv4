@@ -5,12 +5,12 @@ import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public interface IHALGenericApplianceProgramDetails {
-	ApplianceProgramConfigurationStatus getApplianceConfigurationProfile();
-	UUID getAcpID();
-	Long getAcpReferenceTime();
+    ApplianceProgramConfigurationStatus getApplianceConfigurationProfile();
+
+    UUID getAcpID();
+
+    Long getAcpReferenceTime();
 }

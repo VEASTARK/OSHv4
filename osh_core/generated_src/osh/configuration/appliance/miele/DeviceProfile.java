@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.*;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -32,17 +32,15 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "deviceUUID",
-    "deviceType",
-    "deviceDescription",
-    "hasProfile",
-    "intelligent",
-    "profileTicks"
+        "deviceUUID",
+        "deviceType",
+        "deviceDescription",
+        "hasProfile",
+        "intelligent",
+        "profileTicks"
 })
 @XmlRootElement(name = "DeviceProfile")
 public class DeviceProfile {
@@ -61,23 +59,19 @@ public class DeviceProfile {
 
     /**
      * Gets the value of the deviceUUID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceUUID() {
-        return deviceUUID;
+        return this.deviceUUID;
     }
 
     /**
      * Sets the value of the deviceUUID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceUUID(String value) {
         this.deviceUUID = value;
@@ -85,23 +79,19 @@ public class DeviceProfile {
 
     /**
      * Gets the value of the deviceType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceType() {
-        return deviceType;
+        return this.deviceType;
     }
 
     /**
      * Sets the value of the deviceType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceType(String value) {
         this.deviceType = value;
@@ -109,23 +99,19 @@ public class DeviceProfile {
 
     /**
      * Gets the value of the deviceDescription property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceDescription() {
-        return deviceDescription;
+        return this.deviceDescription;
     }
 
     /**
      * Sets the value of the deviceDescription property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceDescription(String value) {
         this.deviceDescription = value;
@@ -133,15 +119,13 @@ public class DeviceProfile {
 
     /**
      * Gets the value of the hasProfile property.
-     * 
      */
     public boolean isHasProfile() {
-        return hasProfile;
+        return this.hasProfile;
     }
 
     /**
      * Sets the value of the hasProfile property.
-     * 
      */
     public void setHasProfile(boolean value) {
         this.hasProfile = value;
@@ -149,15 +133,13 @@ public class DeviceProfile {
 
     /**
      * Gets the value of the intelligent property.
-     * 
      */
     public boolean isIntelligent() {
-        return intelligent;
+        return this.intelligent;
     }
 
     /**
      * Sets the value of the intelligent property.
-     * 
      */
     public void setIntelligent(boolean value) {
         this.intelligent = value;
@@ -165,23 +147,19 @@ public class DeviceProfile {
 
     /**
      * Gets the value of the profileTicks property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ProfileTicks }
-     *     
+     *
+     * @return possible object is
+     * {@link ProfileTicks }
      */
     public ProfileTicks getProfileTicks() {
-        return profileTicks;
+        return this.profileTicks;
     }
 
     /**
      * Sets the value of the profileTicks property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ProfileTicks }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ProfileTicks }
      */
     public void setProfileTicks(ProfileTicks value) {
         this.profileTicks = value;

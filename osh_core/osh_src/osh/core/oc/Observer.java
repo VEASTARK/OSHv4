@@ -11,84 +11,87 @@ import osh.datatypes.mox.IModelOfObservationType;
 
 /**
  * superclass for all observer
+ *
  * @author florian
  * abstract superclass for all observers
  */
-public abstract class Observer extends OCComponent implements IRealTimeSubscriber, ILifeCycleListener { 
-	
-	protected IModelOfObservationType modelOfObservationType; 
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 */
-	public Observer(IOSH controllerbox) {
-		super(controllerbox);
-	}
-	
-	/**
-	 * For the communication between the observer and the controller
-	 * The observer (controller?) can invoke this method to get some observed data.
-	 * Only an interface will be communicated, so feel free to create some own classes...
-	 * @return
-	 */
-	public abstract IModelOfObservationExchange getObservedModelData(IModelOfObservationType type);
-	
-	public final IModelOfObservationExchange getObservedModelData() {
-		synchronized (getSyncObject()) {
-			return getObservedModelData(modelOfObservationType);
-		}
-	}
+public abstract class Observer extends OCComponent implements IRealTimeSubscriber, ILifeCycleListener {
 
-	public IModelOfObservationType getModelOfObservationType() {
-		return modelOfObservationType;
-	}
+    protected IModelOfObservationType modelOfObservationType;
 
-	public void setModelOfObservationType(
-			IModelOfObservationType modelOfObservationType) {
-		this.modelOfObservationType = modelOfObservationType;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     */
+    public Observer(IOSH osh) {
+        super(osh);
+    }
 
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		//...in case of use please override
-	}
+    /**
+     * For the communication between the observer and the controller
+     * The observer (controller?) can invoke this method to get some observed data.
+     * Only an interface will be communicated, so feel free to create some own classes...
+     *
+     * @return
+     */
+    public abstract IModelOfObservationExchange getObservedModelData(IModelOfObservationType type);
 
-	@Override
-	public void onSystemError() throws OSHException {
-		//...in case of use please override
-	}
+    public final IModelOfObservationExchange getObservedModelData() {
+        synchronized (this.getSyncObject()) {
+            return this.getObservedModelData(this.modelOfObservationType);
+        }
+    }
 
-	@Override
-	public void onSystemHalt() throws OSHException {
-		//...in case of use please override
-	}
+    public IModelOfObservationType getModelOfObservationType() {
+        return this.modelOfObservationType;
+    }
 
-	@Override
-	public void onSystemRunning() throws OSHException {
-		//...in case of use please override
-	}
+    public void setModelOfObservationType(
+            IModelOfObservationType modelOfObservationType) {
+        this.modelOfObservationType = modelOfObservationType;
+    }
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		//...in case of use please override
-	}
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        //...in case of use please override
+    }
 
-	@Override
-	public void onSystemResume() throws OSHException {
-		//...in case of use please override
-	}
+    @Override
+    public void onSystemError() {
+        //...in case of use please override
+    }
 
-	@Override
-	public void onSystemShutdown() throws OSHException {
-		//...in case of use please override
-	}
+    @Override
+    public void onSystemHalt() {
+        //...in case of use please override
+    }
 
-	
-	@Override
-	public OSHComponent getSyncObject() {
-		return this;
-	}
+    @Override
+    public void onSystemRunning() {
+        //...in case of use please override
+    }
 
-	
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onSystemResume() {
+        //...in case of use please override
+    }
+
+    @Override
+    public void onSystemShutdown() {
+        //...in case of use please override
+    }
+
+
+    @Override
+    public OSHComponent getSyncObject() {
+        return this;
+    }
+
+
 }

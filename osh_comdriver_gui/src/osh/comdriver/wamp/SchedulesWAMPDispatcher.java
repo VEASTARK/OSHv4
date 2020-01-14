@@ -15,64 +15,54 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
 public class SchedulesWAMPDispatcher {
 
-	private IGlobalLogger logger;
-
-//	private String url = "ws://wamp-router:8080/ws";
+    // Scheduler
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    final Scheduler rxScheduler = Schedulers.from(this.executor);
+    private final IGlobalLogger logger;
+    //	private String url = "ws://wamp-router:8080/ws";
 //	private String realm = "eshl";
-	private String url = "ws://localhost:8080/ws";
-	private String realm = "realm1";
-	
-	private WampClient client;
+    private final String url = "ws://localhost:8080/ws";
+    private final String realm = "realm1";
+    private WampClient client;
 
 
-	// Scheduler
-	ExecutorService executor = Executors.newSingleThreadExecutor();
-	Scheduler rxScheduler = Schedulers.from(executor);
+    /**
+     * CONSTRUCTOR
+     *
+     * @param logger
+     * @throws MalformedURLException
+     */
+    public SchedulesWAMPDispatcher(IGlobalLogger logger) {
+        super();
 
+        this.logger = logger;
 
-	/**
-	 * CONSTRUCTOR
-	 * 
-	 * @param logger
-	 * @param address
-	 * @throws MalformedURLException
-	 */
-	public SchedulesWAMPDispatcher(IGlobalLogger logger) {
-		super();
-
-		this.logger = logger;
-		
         WampClientBuilder builder = new WampClientBuilder();
         try {
-        	IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
+            IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
             builder.withConnectorProvider(connectorProvider)
-            .withUri(url)
-            .withRealm(realm)
-            .withInfiniteReconnects()
-            .withReconnectInterval(3, TimeUnit.SECONDS);
-            
-            client = builder.build();
+                    .withUri(this.url)
+                    .withRealm(this.realm)
+                    .withInfiniteReconnects()
+                    .withReconnectInterval(3, TimeUnit.SECONDS);
+
+            this.client = builder.build();
         } catch (Exception e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             return;
         }
-        
-        client.open();
-	}	
-	
-	public void sendSchedules(SchedulesWAMPExchangeObject sweo) {
-		client.publish("eshl.optimisation.results", sweo, new TypeReference<SchedulesWAMPExchangeObject>(){})
-		      .observeOn(rxScheduler)
-		      .subscribe( response -> {
-		    	  logger.logInfo(response);
-		      }, err -> {
-		    	  logger.logError("publishing schedules failed", err);
-		      });
-	}
+
+        this.client.open();
+    }
+
+    public void sendSchedules(SchedulesWAMPExchangeObject sweo) {
+        this.client.publish("eshl.optimisation.results", sweo, new TypeReference<SchedulesWAMPExchangeObject>() {
+        })
+                .observeOn(this.rxScheduler)
+                .subscribe(this.logger::logInfo, err -> this.logger.logError("publishing schedules failed", err));
+    }
 }

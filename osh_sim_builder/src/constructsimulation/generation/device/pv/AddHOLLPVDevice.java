@@ -10,42 +10,42 @@ import java.util.UUID;
 
 public class AddHOLLPVDevice {
 
-	public static void addRealPvDevice(
-			EALConfiguration ealConfiguration,
-			
-			DeviceTypes deviceType,
-			DeviceClassification classification,
-			UUID deviceId, 
-			
-			String driverClassName,
-			String localObserverClass,
-			boolean isControllable,
-			String localControllerClass,
-			
-			ScreenplayType screenplayType,
-			
-			String nominalPower,
-			String complexpowermax,
-			String cosphimax,
-			String usedcommodities) {
-		
-		
-		AssignedDevice device = CreateHOLLPvDevice.createRealPvDevice(
-				deviceType, 
-				classification, 
-				deviceId, 
-				driverClassName, 
-				localObserverClass, 
-				isControllable, 
-				localControllerClass, 
-				screenplayType,
-				nominalPower,
-				complexpowermax,
-				cosphimax,
-				usedcommodities);
-		
-		ealConfiguration.getAssignedDevices().add(device);
-		
-	}
-	
+    public static void addRealPvDevice(
+            EALConfiguration ealConfiguration,
+
+            DeviceTypes deviceType,
+            DeviceClassification classification,
+            UUID deviceId,
+
+            String driverClassName,
+            String localObserverClass,
+            boolean isControllable,
+            String localControllerClass,
+
+            ScreenplayType screenplayType,
+
+            String nominalPower,
+            String complexPowerMax,
+            String cosPhiMax,
+            String usedCommodities) {
+
+
+        AssignedDevice device = CreateHOLLPvDevice.createRealPvDevice(
+                deviceType,
+                classification,
+                deviceId,
+                driverClassName,
+                localObserverClass,
+                isControllable,
+                localControllerClass,
+                screenplayType,
+                nominalPower,
+                complexPowerMax,
+                cosPhiMax,
+                usedCommodities);
+
+        ealConfiguration.getAssignedDevices().add(device);
+
+    }
+
 }

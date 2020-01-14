@@ -24,293 +24,288 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
- *
  */
 @Deprecated
 public class WagoTCPUDPBusDriver extends HALBusDriver implements UpdateListener, IEventTypeReceiver {
 
-	private WagoTCPUDPDispatcher wagoControllerDispatcher;
-	
-	private long wagoControllerIdPart;
-	
-	private String controllerHostname;
-	
-	private Set<UUID> knownUUIDs;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param deviceID
-	 * @param driverConfig
-	 * @throws OSHException 
-	 */
-	public WagoTCPUDPBusDriver(
-			IOSH controllerbox,
-			UUID deviceID, 
-			OSHParameterCollection driverConfig) throws OSHException {
-		super(controllerbox, deviceID, driverConfig);
+    private final String controllerHostname;
+    private WagoTCPUDPDispatcher wagoControllerDispatcher;
+    private long wagoControllerIdPart;
+    private Set<UUID> knownUUIDs;
 
-		controllerHostname = driverConfig.getParameter("hostname");
-		
-		if( controllerHostname == null )
-			throw new OSHException("bus driver config parameter hostname not set!");
-		
-		knownUUIDs = new HashSet<>();
-		
-		//TODO devices from variable... ?!?
-	}
-	
-	private void connectToWagoController() throws OSHException {
-		try {
-			InetAddress addr = InetAddress.getByName(controllerHostname);
-			
-			// Port of Wago 750-860 Protocol is 9155
-			wagoControllerIdPart = UUIDGenerationHelperWago.getUUIDLowerPart(addr, UUIDGenerationHelperWago.WAGO_750_860_DEFAULT_PORT);
-			
-			wagoControllerDispatcher = new WagoTCPUDPDispatcher(getGlobalLogger(), addr);
-			wagoControllerDispatcher.registerUpdateListener(this);
-		} catch (Exception e) {
-			throw new OSHException(e);
-		}
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param deviceID
+     * @param driverConfig
+     * @throws OSHException
+     */
+    public WagoTCPUDPBusDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig) throws OSHException {
+        super(osh, deviceID, driverConfig);
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		
-		connectToWagoController();
+        this.controllerHostname = driverConfig.getParameter("hostname");
 
-		getDriverRegistry().register(SwitchRequest.class, this);
-	}
+        if (this.controllerHostname == null)
+            throw new OSHException("bus driver config parameter hostname not set!");
 
-	@Override
-	public void updateDataFromBusManager(IHALExchange exchangeObject) {
-		// currently NOTHING
-	}
+        this.knownUUIDs = new HashSet<>();
 
-	public void checkUUID(final UUID uuid, Wago750860ModuleType type)
-			throws OSHException {
-		if (!knownUUIDs.contains(uuid)) {
-			knownUUIDs.add(uuid);
+        //TODO devices from variable... ?!?
+    }
 
-			BusDeviceStatusDetails bs = new BusDeviceStatusDetails(uuid,
-					getTimer().getUnixTime(),
-					wagoControllerDispatcher.isConnected() ? ConnectionStatus.ATTACHED
-							: ConnectionStatus.ERROR);
-			getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class,
-					bs);
+    private void connectToWagoController() throws OSHException {
+        try {
+            InetAddress addr = InetAddress.getByName(this.controllerHostname);
 
-			getDriverRegistry().register(SwitchRequest.class,
-					new IEventTypeReceiver() {
-						@Override
-						public Object getSyncObject() {
-							return WagoTCPUDPBusDriver.this.getSyncObject();
-						}
+            // Port of Wago 750-860 Protocol is 9155
+            this.wagoControllerIdPart = UUIDGenerationHelperWago.getUUIDLowerPart(addr, UUIDGenerationHelperWago.WAGO_750_860_DEFAULT_PORT);
 
-						@Override
-						public <T extends EventExchange> void onQueueEventTypeReceived(
-								Class<T> type, T event) throws OSHException {
-							WagoTCPUDPBusDriver.this
-									.onQueueEventTypeReceived(type, event);
-						}
+            this.wagoControllerDispatcher = new WagoTCPUDPDispatcher(this.getGlobalLogger(), addr);
+            this.wagoControllerDispatcher.registerUpdateListener(this);
+        } catch (Exception e) {
+            throw new OSHException(e);
+        }
+    }
 
-						@Override
-						public UUID getUUID() {
-							return uuid;
-						}
-					});
-		}
-	}
-	
-	@Override
-	public void wagoUpdateEvent() {
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
 
-		long now = getTimer().getUnixTime();
-		boolean connected = wagoControllerDispatcher.isConnected(); 
-		
-		for ( UUID uuid : knownUUIDs ) {
-			BusDeviceStatusDetails bs = new BusDeviceStatusDetails(uuid, now, connected?ConnectionStatus.ATTACHED:ConnectionStatus.ERROR);
-			getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
-		}
-		
-		// set metering data
-		for (WagoPowerMeter meterData : wagoControllerDispatcher.getPowerData()) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart(
-									Wago750860ModuleType.METER,
-									(short) meterData.getGroupId(), 
-									(short) meterData.getMeterId() ),
-					wagoControllerIdPart );
-		
-			try {
-				checkUUID(uuid, Wago750860ModuleType.METER);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		// set switch data
-		for( WagoRelayData relay : wagoControllerDispatcher.getSwitchData() ) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.SWITCH,
-					(short)relay.getId(), (short) 0 ),
-					wagoControllerIdPart );
-			
-			try {
-				checkUUID(uuid, Wago750860ModuleType.SWITCH);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}			
-		}
+        this.connectToWagoController();
 
-		// set virtual switch data
-		for( WagoVirtualSwitch vswitch : wagoControllerDispatcher.getVirtualSwitchData() ) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.VIRTUALSWITCH,
-					(short)vswitch.getGroupId(), (short)vswitch.getId() ),
-					wagoControllerIdPart );
-			
-			try {
-				checkUUID(uuid, Wago750860ModuleType.VIRTUALSWITCH);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		// set vs data group
-		for( WagoVirtualGroup vsg : wagoControllerDispatcher.getVirtualSwitchGroupData()) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.VIRTUALSWITCH,
-					(short)vsg.getGroupId(), (short) UUIDGenerationHelperWago.WAGO_750_860_GROUP_ID ),
-					wagoControllerIdPart );
+        this.getDriverRegistry().register(SwitchRequest.class, this);
+    }
 
-			try {
-				checkUUID(uuid, Wago750860ModuleType.VIRTUALSWITCH);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
+    @Override
+    public void updateDataFromBusManager(IHALExchange exchangeObject) {
+        // currently NOTHING
+    }
 
-			LowLevelWagoByteDetails llDetail = new LowLevelWagoByteDetails(uuid, getTimer().getUnixTime());
+    public void checkUUID(final UUID uuid, Wago750860ModuleType type)
+            throws OSHException {
+        if (!this.knownUUIDs.contains(uuid)) {
+            this.knownUUIDs.add(uuid);
 
-			llDetail.setData(vsg.getByte());
+            BusDeviceStatusDetails bs = new BusDeviceStatusDetails(uuid,
+                    this.getTimer().getUnixTime(),
+                    this.wagoControllerDispatcher.isConnected() ? ConnectionStatus.ATTACHED
+                            : ConnectionStatus.ERROR);
+            this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class,
+                    bs);
 
-			getDriverRegistry().setStateOfSender(LowLevelWagoByteDetails.class, llDetail);
-		}
+            this.getDriverRegistry().register(SwitchRequest.class,
+                    new IEventTypeReceiver() {
+                        @Override
+                        public Object getSyncObject() {
+                            return WagoTCPUDPBusDriver.this.getSyncObject();
+                        }
 
-		// set digital in data
-		for( WagoDiData di : wagoControllerDispatcher.getDigitalInData()) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.DIGITALINPUT,
-					(short)di.getGroupId(), (short) di.getId() ),
-					wagoControllerIdPart );
+                        @Override
+                        public <T extends EventExchange> void onQueueEventTypeReceived(
+                                Class<T> type, T event) throws OSHException {
+                            WagoTCPUDPBusDriver.this
+                                    .onQueueEventTypeReceived(type, event);
+                        }
 
-			try {
-				checkUUID(uuid, Wago750860ModuleType.DIGITALINPUT);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
-		}
+                        @Override
+                        public UUID getUUID() {
+                            return uuid;
+                        }
+                    });
+        }
+    }
 
-		// set digital in data group
-		for( WagoDiGroup dig : wagoControllerDispatcher.getDigitalInGroup()) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.DIGITALINPUT,
-					(short)dig.getGroupId(), (short) UUIDGenerationHelperWago.WAGO_750_860_GROUP_ID ),
-					wagoControllerIdPart );
+    @Override
+    public void wagoUpdateEvent() {
 
-			try {
-				checkUUID(uuid, Wago750860ModuleType.DIGITALINPUT);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
+        long now = this.getTimer().getUnixTime();
+        boolean connected = this.wagoControllerDispatcher.isConnected();
 
-			LowLevelWagoByteDetails llDetail = new LowLevelWagoByteDetails(uuid, getTimer().getUnixTime());
+        for (UUID uuid : this.knownUUIDs) {
+            BusDeviceStatusDetails bs = new BusDeviceStatusDetails(uuid, now, connected ? ConnectionStatus.ATTACHED : ConnectionStatus.ERROR);
+            this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+        }
 
-			llDetail.setData(dig.getByte());
+        // set metering data
+        for (WagoPowerMeter meterData : this.wagoControllerDispatcher.getPowerData()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(
+                    Wago750860ModuleType.METER,
+                    (short) meterData.getGroupId(),
+                    (short) meterData.getMeterId()),
+                    this.wagoControllerIdPart);
 
-			getDriverRegistry().setStateOfSender(LowLevelWagoByteDetails.class, llDetail);
-		}
-		
-		
-		// set digital out data
-		for( WagoDoData do8 : wagoControllerDispatcher.getDigitalOutData() ) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.DIGITALOUTPUT,
-					(short)do8.getGroupId(), (short)do8.getId() ),
-					wagoControllerIdPart );
-			
-			try {
-				checkUUID(uuid, Wago750860ModuleType.DIGITALOUTPUT);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		// set do8 data group
-		for( WagoDoGroup vsg : wagoControllerDispatcher.getDigitalOutGroup()) {
-			UUID uuid = new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart( Wago750860ModuleType.DIGITALOUTPUT,
-					(short)vsg.getGroupId(), (short) UUIDGenerationHelperWago.WAGO_750_860_GROUP_ID ),
-					wagoControllerIdPart );
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.METER);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
 
-			try {
-				checkUUID(uuid, Wago750860ModuleType.DIGITALOUTPUT);
-			} catch (OSHException e) {
-				e.printStackTrace();
-			}
+        // set switch data
+        for (WagoRelayData relay : this.wagoControllerDispatcher.getSwitchData()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.SWITCH,
+                    (short) relay.getId(), (short) 0),
+                    this.wagoControllerIdPart);
 
-			LowLevelWagoByteDetails llDetail = new LowLevelWagoByteDetails(uuid, getTimer().getUnixTime());
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.SWITCH);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
 
-			llDetail.setData(vsg.getByte());
+        // set virtual switch data
+        for (WagoVirtualSwitch vSwitch : this.wagoControllerDispatcher.getVirtualSwitchData()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.VIRTUAL_SWITCH,
+                    (short) vSwitch.getGroupId(), (short) vSwitch.getId()),
+                    this.wagoControllerIdPart);
 
-			getDriverRegistry().setStateOfSender(LowLevelWagoByteDetails.class, llDetail);
-		}
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.VIRTUAL_SWITCH);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
 
-		// TODO: handle analog input, digital output, etc...
-	}
+        // set vs data group
+        for (WagoVirtualGroup vsg : this.wagoControllerDispatcher.getVirtualSwitchGroupData()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.VIRTUAL_SWITCH,
+                    (short) vsg.getGroupId(), UUIDGenerationHelperWago.WAGO_750_860_GROUP_ID),
+                    this.wagoControllerIdPart);
 
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(
-			Class<T> type, T event) throws OSHException {
-		
-		if (event instanceof SwitchRequest) {
-			SwitchRequest switchreq = (SwitchRequest) event;
-			
-			// sanity checks...
-			UUID targetId = switchreq.getReceiver();
-			if( targetId.getLeastSignificantBits() != wagoControllerIdPart )
-				throw new OSHException( "received command with wrong controller id" );
-			
-			// extract wago target ids
-			long higherPart = targetId.getMostSignificantBits();
-			short moduleId = (short) ((higherPart >> 16) & 0xffff);
-			short portId = (short) ((higherPart) & 0xffff);
-			byte moduleType = (byte) ((higherPart >> 32) & 0xff);
-			int uuidPrefix = (int) ((higherPart >> 32) & 0xffffff00);
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.VIRTUAL_SWITCH);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
 
-			// further sanity checks
-			if( portId > 7 || (portId != 0 && moduleType == Wago750860ModuleType.SWITCH.value()))
-				throw new OSHException( "received command with wrong port id" );
-			if( moduleType != Wago750860ModuleType.SWITCH.value() &&
-				moduleType != Wago750860ModuleType.VIRTUALSWITCH.value() &&
-				moduleType != Wago750860ModuleType.DIGITALOUTPUT.value())
-				throw new OSHException( "received command with wrong module type" );
-			if( uuidPrefix != UUIDGenerationHelperWago.WAGO_750_860_UUID_PREFIX )
-				throw new OSHException( "received command with invalid uuid" );
-			
-			try {
-				if( moduleType == Wago750860ModuleType.SWITCH.value() )
-					wagoControllerDispatcher.setSwitch(moduleId, switchreq.getTurnOn());
-				else if ( moduleType == Wago750860ModuleType.VIRTUALSWITCH.value() )
-					wagoControllerDispatcher.setVirtualSwitch(moduleId, portId, switchreq.getTurnOn());
-				else if ( moduleType == Wago750860ModuleType.DIGITALOUTPUT.value() )
-					wagoControllerDispatcher.setDigitalOutput(moduleId, portId, switchreq.getTurnOn());
-			} catch (SmartPlugException e) {
-				// pass on exception
-				throw new OSHException(e);
-			}
-		}
-	}
+            LowLevelWagoByteDetails llDetail = new LowLevelWagoByteDetails(uuid, this.getTimer().getUnixTime());
 
-	@Override
-	public UUID getUUID() {
-		// construct own UUID
-		return new UUID( UUIDGenerationHelperWago.getWago750860UUIDHigherPart(
-				Wago750860ModuleType.CONTROLLER, (short) 0, (short) 0), wagoControllerIdPart);
-	}
+            llDetail.setData(vsg.getByte());
+
+            this.getDriverRegistry().setStateOfSender(LowLevelWagoByteDetails.class, llDetail);
+        }
+
+        // set digital in data
+        for (WagoDiData di : this.wagoControllerDispatcher.getDigitalInData()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.DIGITAL_INPUT,
+                    (short) di.getGroupId(), (short) di.getId()),
+                    this.wagoControllerIdPart);
+
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.DIGITAL_INPUT);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // set digital in data group
+        for (WagoDiGroup dig : this.wagoControllerDispatcher.getDigitalInGroup()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.DIGITAL_INPUT,
+                    (short) dig.getGroupId(), UUIDGenerationHelperWago.WAGO_750_860_GROUP_ID),
+                    this.wagoControllerIdPart);
+
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.DIGITAL_INPUT);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+
+            LowLevelWagoByteDetails llDetail = new LowLevelWagoByteDetails(uuid, this.getTimer().getUnixTime());
+
+            llDetail.setData(dig.getByte());
+
+            this.getDriverRegistry().setStateOfSender(LowLevelWagoByteDetails.class, llDetail);
+        }
+
+
+        // set digital out data
+        for (WagoDoData do8 : this.wagoControllerDispatcher.getDigitalOutData()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.DIGITAL_OUTPUT,
+                    (short) do8.getGroupId(), (short) do8.getId()),
+                    this.wagoControllerIdPart);
+
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.DIGITAL_OUTPUT);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // set do8 data group
+        for (WagoDoGroup vsg : this.wagoControllerDispatcher.getDigitalOutGroup()) {
+            UUID uuid = new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(Wago750860ModuleType.DIGITAL_OUTPUT,
+                    (short) vsg.getGroupId(), UUIDGenerationHelperWago.WAGO_750_860_GROUP_ID),
+                    this.wagoControllerIdPart);
+
+            try {
+                this.checkUUID(uuid, Wago750860ModuleType.DIGITAL_OUTPUT);
+            } catch (OSHException e) {
+                e.printStackTrace();
+            }
+
+            LowLevelWagoByteDetails llDetail = new LowLevelWagoByteDetails(uuid, this.getTimer().getUnixTime());
+
+            llDetail.setData(vsg.getByte());
+
+            this.getDriverRegistry().setStateOfSender(LowLevelWagoByteDetails.class, llDetail);
+        }
+
+        // TODO: handle analog input, digital output, etc...
+    }
+
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T event) throws OSHException {
+
+        if (event instanceof SwitchRequest) {
+            SwitchRequest switchReq = (SwitchRequest) event;
+
+            // sanity checks...
+            UUID targetId = switchReq.getReceiver();
+            if (targetId.getLeastSignificantBits() != this.wagoControllerIdPart)
+                throw new OSHException("received command with wrong controller id");
+
+            // extract wago target ids
+            long higherPart = targetId.getMostSignificantBits();
+            short moduleId = (short) ((higherPart >> 16) & 0xffff);
+            short portId = (short) ((higherPart) & 0xffff);
+            byte moduleType = (byte) ((higherPart >> 32) & 0xff);
+            int uuidPrefix = (int) ((higherPart >> 32) & 0xffffff00);
+
+            // further sanity checks
+            if (portId > 7 || (portId != 0 && moduleType == Wago750860ModuleType.SWITCH.value()))
+                throw new OSHException("received command with wrong port id");
+            if (moduleType != Wago750860ModuleType.SWITCH.value() &&
+                    moduleType != Wago750860ModuleType.VIRTUAL_SWITCH.value() &&
+                    moduleType != Wago750860ModuleType.DIGITAL_OUTPUT.value())
+                throw new OSHException("received command with wrong module type");
+            if (uuidPrefix != UUIDGenerationHelperWago.WAGO_750_860_UUID_PREFIX)
+                throw new OSHException("received command with invalid uuid");
+
+            try {
+                if (moduleType == Wago750860ModuleType.SWITCH.value())
+                    this.wagoControllerDispatcher.setSwitch(moduleId, switchReq.getTurnOn());
+                else if (moduleType == Wago750860ModuleType.VIRTUAL_SWITCH.value())
+                    this.wagoControllerDispatcher.setVirtualSwitch(moduleId, portId, switchReq.getTurnOn());
+                else this.wagoControllerDispatcher.setDigitalOutput(moduleId, portId, switchReq.getTurnOn());
+            } catch (SmartPlugException e) {
+                // pass on exception
+                throw new OSHException(e);
+            }
+        }
+    }
+
+    @Override
+    public UUID getUUID() {
+        // construct own UUID
+        return new UUID(UUIDGenerationHelperWago.getWago750860UUIDHigherPart(
+                Wago750860ModuleType.CONTROLLER, (short) 0, (short) 0), this.wagoControllerIdPart);
+    }
 
 }

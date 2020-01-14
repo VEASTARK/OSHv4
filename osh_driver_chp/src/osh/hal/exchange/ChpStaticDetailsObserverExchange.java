@@ -7,174 +7,172 @@ import osh.hal.interfaces.chp.IHALChpStaticDetails;
 import java.util.UUID;
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
 public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
-													implements IHALChpStaticDetails{	
+        implements IHALChpStaticDetails {
 
-	// ### IHALChpStaticDetails ###
-	private int minRuntime;
-	private ChpOperationMode operationMode;
-	private int typicalActivePower;
-	private int typicalReactivePower;
-	private int typicalGasPower;
-	private int typicalThermalPower;
-	private int rescheduleAfter;
-	private long newIPPAfter;
-	private int relativeHorizonIPP;
-	private double currentHotWaterStorageMinTemp;
-	private double currentHotWaterStorageMaxTemp;
-	private double forcedOnHysteresis;
-	private UUID hotWaterTankUuid;
-	
-	private double fixedCostPerStart;	
-	private double forcedOnOffStepMultiplier;
-	private int forcedOffAdditionalCost;	
-	private double chpOnCervisiaStepSizeMultiplier;
-	
-	public ChpStaticDetailsObserverExchange(UUID deviceID, Long timestamp) {
-		super(deviceID, timestamp);
-	}
-	
-	@Override
-	public int getMinRuntime() {
-		return minRuntime;
-	}
+    // ### IHALChpStaticDetails ###
+    private int minRuntime;
+    private ChpOperationMode operationMode;
+    private int typicalActivePower;
+    private int typicalReactivePower;
+    private int typicalGasPower;
+    private int typicalThermalPower;
+    private int rescheduleAfter;
+    private long newIPPAfter;
+    private int relativeHorizonIPP;
+    private double currentHotWaterStorageMinTemp;
+    private double currentHotWaterStorageMaxTemp;
+    private double forcedOnHysteresis;
+    private UUID hotWaterTankUuid;
 
-	public void setMinRuntime(int minRuntime) {
-		this.minRuntime = minRuntime;
-	}
-	
-	public ChpOperationMode getOperationMode() {
-		return operationMode;
-	}
-	
-	public void setOperationMode(ChpOperationMode operationMode) {
-		this.operationMode = operationMode;
-	}
-	
-	@Override
-	public int getTypicalActivePower() {
-		return typicalActivePower;
-	}
-	
-	public void setTypicalActivePower(int typicalActivePower) {
-		this.typicalActivePower = typicalActivePower;
-	}
+    private double fixedCostPerStart;
+    private double forcedOnOffStepMultiplier;
+    private int forcedOffAdditionalCost;
+    private double chpOnCervisiaStepSizeMultiplier;
 
-	public int getTypicalReactivePower() {
-		return typicalReactivePower;
-	}
+    public ChpStaticDetailsObserverExchange(UUID deviceID, Long timestamp) {
+        super(deviceID, timestamp);
+    }
 
-	public void setTypicalReactivePower(int typicalReactivePower) {
-		this.typicalReactivePower = typicalReactivePower;
-	}
+    @Override
+    public int getMinRuntime() {
+        return this.minRuntime;
+    }
 
-	@Override
-	public int getTypicalGasPower() {
-		return typicalGasPower;
-	}
-	
-	public void setTypicalGasPower(int typicalGasPower) {
-		this.typicalGasPower = typicalGasPower;
-	}
+    public void setMinRuntime(int minRuntime) {
+        this.minRuntime = minRuntime;
+    }
 
-	@Override
-	public int getTypicalThermalPower() {
-		return typicalThermalPower;
-	}
-	
-	public void setTypicalThermalPower(int typicalThermalPower) {
-		this.typicalThermalPower = typicalThermalPower;
-	}
+    public ChpOperationMode getOperationMode() {
+        return this.operationMode;
+    }
 
-	public int getRescheduleAfter() {
-		return rescheduleAfter;
-	}
+    public void setOperationMode(ChpOperationMode operationMode) {
+        this.operationMode = operationMode;
+    }
 
-	public void setRescheduleAfter(int rescheduleAfter) {
-		this.rescheduleAfter = rescheduleAfter;
-	}
+    @Override
+    public int getTypicalActivePower() {
+        return this.typicalActivePower;
+    }
 
-	public long getNewIPPAfter() {
-		return newIPPAfter;
-	}
+    public void setTypicalActivePower(int typicalActivePower) {
+        this.typicalActivePower = typicalActivePower;
+    }
 
-	public void setNewIPPAfter(long newIPPAfter) {
-		this.newIPPAfter = newIPPAfter;
-	}
+    public int getTypicalReactivePower() {
+        return this.typicalReactivePower;
+    }
 
-	public int getRelativeHorizonIPP() {
-		return relativeHorizonIPP;
-	}
+    public void setTypicalReactivePower(int typicalReactivePower) {
+        this.typicalReactivePower = typicalReactivePower;
+    }
 
-	public void setRelativeHorizonIPP(int relativeHorizonIPP) {
-		this.relativeHorizonIPP = relativeHorizonIPP;
-	}
+    @Override
+    public int getTypicalGasPower() {
+        return this.typicalGasPower;
+    }
 
-	public double getCurrentHotWaterStorageMinTemp() {
-		return currentHotWaterStorageMinTemp;
-	}
+    public void setTypicalGasPower(int typicalGasPower) {
+        this.typicalGasPower = typicalGasPower;
+    }
 
-	public void setCurrentHotWaterStorageMinTemp(double currentHotWaterStorageMinTemp) {
-		this.currentHotWaterStorageMinTemp = currentHotWaterStorageMinTemp;
-	}
+    @Override
+    public int getTypicalThermalPower() {
+        return this.typicalThermalPower;
+    }
 
-	public double getCurrentHotWaterStorageMaxTemp() {
-		return currentHotWaterStorageMaxTemp;
-	}
+    public void setTypicalThermalPower(int typicalThermalPower) {
+        this.typicalThermalPower = typicalThermalPower;
+    }
 
-	public void setCurrentHotWaterStorageMaxTemp(double currentHotWaterStorageMaxTemp) {
-		this.currentHotWaterStorageMaxTemp = currentHotWaterStorageMaxTemp;
-	}
+    public int getRescheduleAfter() {
+        return this.rescheduleAfter;
+    }
 
-	public double getForcedOnHysteresis() {
-		return forcedOnHysteresis;
-	}
+    public void setRescheduleAfter(int rescheduleAfter) {
+        this.rescheduleAfter = rescheduleAfter;
+    }
 
-	public void setForcedOnHysteresis(double forcedOnHysteresis) {
-		this.forcedOnHysteresis = forcedOnHysteresis;
-	}
+    public long getNewIPPAfter() {
+        return this.newIPPAfter;
+    }
 
-	public UUID getHotWaterTankUuid() {
-		return hotWaterTankUuid;
-	}
+    public void setNewIPPAfter(long newIPPAfter) {
+        this.newIPPAfter = newIPPAfter;
+    }
 
-	public void setHotWaterTankUuid(UUID hotWaterTankUuid) {
-		this.hotWaterTankUuid = hotWaterTankUuid;
-	}
+    public int getRelativeHorizonIPP() {
+        return this.relativeHorizonIPP;
+    }
 
-	public double getFixedCostPerStart() {
-		return fixedCostPerStart;
-	}
+    public void setRelativeHorizonIPP(int relativeHorizonIPP) {
+        this.relativeHorizonIPP = relativeHorizonIPP;
+    }
 
-	public void setFixedCostPerStart(double fixedCostPerStart) {
-		this.fixedCostPerStart = fixedCostPerStart;
-	}
+    public double getCurrentHotWaterStorageMinTemp() {
+        return this.currentHotWaterStorageMinTemp;
+    }
 
-	public double getForcedOnOffStepMultiplier() {
-		return forcedOnOffStepMultiplier;
-	}
+    public void setCurrentHotWaterStorageMinTemp(double currentHotWaterStorageMinTemp) {
+        this.currentHotWaterStorageMinTemp = currentHotWaterStorageMinTemp;
+    }
 
-	public void setForcedOnOffStepMultiplier(double forcedOnOffStepMultiplier) {
-		this.forcedOnOffStepMultiplier = forcedOnOffStepMultiplier;
-	}
+    public double getCurrentHotWaterStorageMaxTemp() {
+        return this.currentHotWaterStorageMaxTemp;
+    }
 
-	public int getForcedOffAdditionalCost() {
-		return forcedOffAdditionalCost;
-	}
+    public void setCurrentHotWaterStorageMaxTemp(double currentHotWaterStorageMaxTemp) {
+        this.currentHotWaterStorageMaxTemp = currentHotWaterStorageMaxTemp;
+    }
 
-	public void setForcedOffAdditionalCost(int forcedOffAdditionalCost) {
-		this.forcedOffAdditionalCost = forcedOffAdditionalCost;
-	}
+    public double getForcedOnHysteresis() {
+        return this.forcedOnHysteresis;
+    }
 
-	public double getChpOnCervisiaStepSizeMultiplier() {
-		return chpOnCervisiaStepSizeMultiplier;
-	}
+    public void setForcedOnHysteresis(double forcedOnHysteresis) {
+        this.forcedOnHysteresis = forcedOnHysteresis;
+    }
 
-	public void setChpOnCervisiaStepSizeMultiplier(double chpOnCervisiaStepSizeMultiplier) {
-		this.chpOnCervisiaStepSizeMultiplier = chpOnCervisiaStepSizeMultiplier;
-	}
+    public UUID getHotWaterTankUuid() {
+        return this.hotWaterTankUuid;
+    }
+
+    public void setHotWaterTankUuid(UUID hotWaterTankUuid) {
+        this.hotWaterTankUuid = hotWaterTankUuid;
+    }
+
+    public double getFixedCostPerStart() {
+        return this.fixedCostPerStart;
+    }
+
+    public void setFixedCostPerStart(double fixedCostPerStart) {
+        this.fixedCostPerStart = fixedCostPerStart;
+    }
+
+    public double getForcedOnOffStepMultiplier() {
+        return this.forcedOnOffStepMultiplier;
+    }
+
+    public void setForcedOnOffStepMultiplier(double forcedOnOffStepMultiplier) {
+        this.forcedOnOffStepMultiplier = forcedOnOffStepMultiplier;
+    }
+
+    public int getForcedOffAdditionalCost() {
+        return this.forcedOffAdditionalCost;
+    }
+
+    public void setForcedOffAdditionalCost(int forcedOffAdditionalCost) {
+        this.forcedOffAdditionalCost = forcedOffAdditionalCost;
+    }
+
+    public double getChpOnCervisiaStepSizeMultiplier() {
+        return this.chpOnCervisiaStepSizeMultiplier;
+    }
+
+    public void setChpOnCervisiaStepSizeMultiplier(double chpOnCervisiaStepSizeMultiplier) {
+        this.chpOnCervisiaStepSizeMultiplier = chpOnCervisiaStepSizeMultiplier;
+    }
 }

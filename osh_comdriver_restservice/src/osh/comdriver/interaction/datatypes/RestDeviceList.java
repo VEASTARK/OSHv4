@@ -1,38 +1,33 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
  * @author Kaibin Bao
- *
  */
-@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
-@XmlRootElement(name="DeviceList")
+@XmlRootElement(name = "DeviceList")
 public class RestDeviceList {
-	private List<RestDevice> devicelist;
+    private List<RestDevice> deviceList;
 
-	public RestDeviceList() {
-		devicelist = new ArrayList<>();
-	}
-	
-	@XmlElement(name="Device")
-	public List<RestDevice> getDeviceList() {
-		if( devicelist == null )
-			devicelist = new ArrayList<RestDevice>();
-		return devicelist;
-	}
-	
-	public void setDeviceList(List<RestDevice> device) {
-		this.devicelist = device;
-	}
+    public RestDeviceList() {
+        this.deviceList = new ArrayList<>();
+    }
 
-	public void add(RestDevice device) {
-		devicelist.add(device);
-	}
+    @XmlElement(name = "Device")
+    public List<RestDevice> getDeviceList() {
+        if (this.deviceList == null)
+            this.deviceList = new ArrayList<>();
+        return this.deviceList;
+    }
+
+    public void setDeviceList(List<RestDevice> device) {
+        this.deviceList = device;
+    }
+
+    public void add(RestDevice device) {
+        this.deviceList.add(device);
+    }
 }

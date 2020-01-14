@@ -1,4 +1,3 @@
-
 package osh.openweathermap.current;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,26 +10,24 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "speed",
-    "deg"
+        "speed",
+        "deg"
 })
 public class Wind implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -5612005358345183626L;
-	@JsonProperty("speed")
+     *
+     */
+    private static final long serialVersionUID = -5612005358345183626L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("speed")
     private Double speed;
     @JsonProperty("deg")
     private Double deg;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The speed
+     * @return The speed
      */
     @JsonProperty("speed")
     public Double getSpeed() {
@@ -38,9 +35,7 @@ public class Wind implements Serializable {
     }
 
     /**
-     * 
-     * @param speed
-     *     The speed
+     * @param speed The speed
      */
     @JsonProperty("speed")
     public void setSpeed(Double speed) {
@@ -48,9 +43,7 @@ public class Wind implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The deg
+     * @return The deg
      */
     @JsonProperty("deg")
     public Double getDeg() {
@@ -58,9 +51,7 @@ public class Wind implements Serializable {
     }
 
     /**
-     * 
-     * @param deg
-     *     The deg
+     * @param deg The deg
      */
     @JsonProperty("deg")
     public void setDeg(Double deg) {

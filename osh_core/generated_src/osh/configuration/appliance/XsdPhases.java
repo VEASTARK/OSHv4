@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for XsdPhases complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XsdPhases">
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XsdPhases", propOrder = {
-    "phase"
+        "phase"
 })
 public class XsdPhases {
 
@@ -46,29 +44,27 @@ public class XsdPhases {
 
     /**
      * Gets the value of the phase property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the phase property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getPhase().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link XsdPhase }
-     * 
-     * 
      */
     public List<XsdPhase> getPhase() {
-        if (phase == null) {
-            phase = new ArrayList<XsdPhase>();
+        if (this.phase == null) {
+            this.phase = new ArrayList<>();
         }
         return this.phase;
     }

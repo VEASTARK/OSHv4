@@ -14,62 +14,65 @@ import java.io.OutputStream;
 
 public class ActionSimulationLogger implements ISimulationActionLogger {
 
-	private IGlobalLogger logger;
-	private OutputStream stream;
-	
-	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(name = "", propOrder = {
-	    "element"
-	})
-	@XmlRootElement(name = "root")
-	public static class RootElement {
-		
-		
-		@XmlElement(name = "element")
-		private SubjectAction element;
+    private final IGlobalLogger logger;
+    private OutputStream stream;
 
-		public RootElement() {}
-		
-		public RootElement(SubjectAction element) {
-			super();
-			this.element = element;
-		}
+    public ActionSimulationLogger(IGlobalLogger logger, String filename) throws FileNotFoundException {
+        this.logger = logger;
+        this.stream = new FileOutputStream(filename);
+    }
 
-		public SubjectAction getElement() {
-			return element;
-		}
+    @Override
+    public void logAction(SubjectAction action) {
+        if (this.stream == null) {
+            this.logger.logError("logger stream was closed", new Exception());
+            return;
+        }
 
-		public void setElement(SubjectAction element) {
-			this.element = element;
-		}
-		
-	}
-	
-	public ActionSimulationLogger(IGlobalLogger logger, String filename) throws FileNotFoundException {
-		this.logger = logger;
-		stream = new FileOutputStream(filename);
-	}
-	@Override
-	public void logAction(SubjectAction action) {
-		if (stream == null) {
-			logger.logError("logger stream was closed", new Exception());
-			return;
-		}
-		
-		try {
-			Screenplay sp = new Screenplay();
-			sp.getSIMActions().add(action);
-			XMLSerialization.marshal(stream, sp);
-		} catch (JAXBException e) {
-			logger.logError("could not log action", e);
-		}
-	}
-	
-	public void closeStream() {
-		try {
-			if (stream != null) stream.close();
-		} catch (IOException e) {}
-		stream = null;
-	}
+        try {
+            Screenplay sp = new Screenplay();
+            sp.getSIMActions().add(action);
+            XMLSerialization.marshal(this.stream, sp);
+        } catch (JAXBException e) {
+            this.logger.logError("could not log action", e);
+        }
+    }
+
+    public void closeStream() {
+        try {
+            if (this.stream != null) this.stream.close();
+        } catch (IOException ignored) {
+        }
+        this.stream = null;
+    }
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = {
+            "element"
+    })
+    @XmlRootElement(name = "root")
+    public static class RootElement {
+
+
+        @XmlElement(name = "element")
+        private SubjectAction element;
+
+        public RootElement() {
+        }
+
+        public RootElement(SubjectAction element) {
+            super();
+            this.element = element;
+        }
+
+        public SubjectAction getElement() {
+            return this.element;
+        }
+
+        public void setElement(SubjectAction element) {
+            this.element = element;
+        }
+
+    }
 
 }

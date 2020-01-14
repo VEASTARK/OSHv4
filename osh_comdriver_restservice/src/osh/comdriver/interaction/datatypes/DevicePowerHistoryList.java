@@ -1,27 +1,23 @@
 package osh.comdriver.interaction.datatypes;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
-@XmlRootElement(name="abc")
+@XmlRootElement(name = "abc")
 public class DevicePowerHistoryList {
 
-	@XmlElement(name="List")
-	private List<DevicePowerHistory> listDevicePowerHistory;
+    @XmlElement(name = "List")
+    private List<DevicePowerHistory> listDevicePowerHistory;
 
-	public List<DevicePowerHistory> getListDevicePowerHistory() {
-		return listDevicePowerHistory;
-	}
+    public List<DevicePowerHistory> getListDevicePowerHistory() {
+        return this.listDevicePowerHistory;
+    }
 
-	public void setListDevicePowerHistory(
-			List<DevicePowerHistory> listDevicePowerHistory) {
-		this.listDevicePowerHistory = listDevicePowerHistory;
-	}
-	
-	
-	
+    public void setListDevicePowerHistory(
+            List<DevicePowerHistory> listDevicePowerHistory) {
+        this.listDevicePowerHistory = listDevicePowerHistory;
+    }
+
+
 }

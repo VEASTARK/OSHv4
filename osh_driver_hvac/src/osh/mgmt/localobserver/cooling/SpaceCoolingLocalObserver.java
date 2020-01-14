@@ -1,7 +1,6 @@
 package osh.mgmt.localobserver.cooling;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.exceptions.OCUnitException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
@@ -18,70 +17,68 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * 
  * @author Ingo Mauser, Julian Feder
- *
  */
 public class SpaceCoolingLocalObserver
-					extends ThermalDemandLocalObserver {
-	
-	private ArrayList<ChillerCalendarDate> dates;
-	private Map<Long, Double> temperaturePrediction;
-	private int coldWaterPower;
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
+        extends ThermalDemandLocalObserver {
 
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public SpaceCoolingLocalObserver(IOSHOC osh) {
-		super(osh);
-	}
+    private ArrayList<ChillerCalendarDate> dates;
+    private Map<Long, Double> temperaturePrediction;
+    private int coldWaterPower;
 
-	
-	@Override
-	public void onDeviceStateUpdate() throws OCUnitException {
-		IHALExchange hx = getObserverDataObject();
-		
-		if (hx instanceof SpaceCoolingObserverExchange) {
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
 
-			SpaceCoolingObserverExchange ox = (SpaceCoolingObserverExchange) hx;
-			dates = ox.getDates();
-			temperaturePrediction = ox.getTemperaturePrediction();
-			coldWaterPower = ox.getColdWaterPower();
 
-			ChilledWaterDemandNonControllableIPP ipp = 
-					new ChilledWaterDemandNonControllableIPP(
-							getDeviceID(), 
-							getGlobalLogger(), 
-							getTimer().getUnixTime(), 
-							false, 
-							dates, 
-							temperaturePrediction,
-							compressionType,
-							compressionValue);
-			getOCRegistry().setState(
-					InterdependentProblemPart.class, this, ipp);
+    /**
+     * CONSTRUCTOR
+     */
+    public SpaceCoolingLocalObserver(IOSHOC osh) {
+        super(osh);
+    }
 
-			// set current power state
-			CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-					getDeviceID(), 
-					getTimer().getUnixTime(),
-					DeviceTypes.SPACECOOLING);
-			cpse.addPowerState(Commodity.COLDWATERPOWER, coldWaterPower);
-			this.getOCRegistry().setState(
-					CommodityPowerStateExchange.class,
-					this,
-					cpse);
 
-		} else if (hx instanceof StaticCompressionExchange) {
+    @Override
+    public void onDeviceStateUpdate() {
+        IHALExchange hx = this.getObserverDataObject();
 
-			StaticCompressionExchange _stat = (StaticCompressionExchange) hx;
-			this.compressionType = _stat.getCompressionType();
-			this.compressionValue = _stat.getCompressionValue();
-		}
-	}
+        if (hx instanceof SpaceCoolingObserverExchange) {
+
+            SpaceCoolingObserverExchange ox = (SpaceCoolingObserverExchange) hx;
+            this.dates = ox.getDates();
+            this.temperaturePrediction = ox.getTemperaturePrediction();
+            this.coldWaterPower = ox.getColdWaterPower();
+
+            ChilledWaterDemandNonControllableIPP ipp =
+                    new ChilledWaterDemandNonControllableIPP(
+                            this.getDeviceID(),
+                            this.getGlobalLogger(),
+                            this.getTimer().getUnixTime(),
+                            false,
+                            this.dates,
+                            this.temperaturePrediction,
+                            this.compressionType,
+                            this.compressionValue);
+            this.getOCRegistry().setState(
+                    InterdependentProblemPart.class, this, ipp);
+
+            // set current power state
+            CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
+                    this.getDeviceID(),
+                    this.getTimer().getUnixTime(),
+                    DeviceTypes.SPACECOOLING);
+            cpse.addPowerState(Commodity.COLDWATERPOWER, this.coldWaterPower);
+            this.getOCRegistry().setState(
+                    CommodityPowerStateExchange.class,
+                    this,
+                    cpse);
+
+        } else if (hx instanceof StaticCompressionExchange) {
+
+            StaticCompressionExchange _stat = (StaticCompressionExchange) hx;
+            this.compressionType = _stat.getCompressionType();
+            this.compressionValue = _stat.getCompressionValue();
+        }
+    }
 
 }

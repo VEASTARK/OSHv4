@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for ProfileTick complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ProfileTick">
  *   &lt;complexContent>
@@ -56,14 +56,12 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ProfileTick", propOrder = {
-    "load",
-    "deviceStateName",
-    "parameters"
+        "load",
+        "deviceStateName",
+        "parameters"
 })
 public class ProfileTick {
 
@@ -75,52 +73,46 @@ public class ProfileTick {
 
     /**
      * Gets the value of the load property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the load property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLoad().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ProfileTick.Load }
-     * 
-     * 
      */
     public List<ProfileTick.Load> getLoad() {
-        if (load == null) {
-            load = new ArrayList<ProfileTick.Load>();
+        if (this.load == null) {
+            this.load = new ArrayList<>();
         }
         return this.load;
     }
 
     /**
      * Gets the value of the deviceStateName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceStateName() {
-        return deviceStateName;
+        return this.deviceStateName;
     }
 
     /**
      * Sets the value of the deviceStateName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceStateName(String value) {
         this.deviceStateName = value;
@@ -128,29 +120,27 @@ public class ProfileTick {
 
     /**
      * Gets the value of the parameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the parameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ProfileTick.Parameters }
-     * 
-     * 
      */
     public List<ProfileTick.Parameters> getParameters() {
-        if (parameters == null) {
-            parameters = new ArrayList<ProfileTick.Parameters>();
+        if (this.parameters == null) {
+            this.parameters = new ArrayList<>();
         }
         return this.parameters;
     }
@@ -158,9 +148,9 @@ public class ProfileTick {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -173,13 +163,11 @@ public class ProfileTick {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "commodity",
-        "value"
+            "commodity",
+            "value"
     })
     public static class Load {
 
@@ -189,23 +177,19 @@ public class ProfileTick {
 
         /**
          * Gets the value of the commodity property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         * {@link String }
          */
         public String getCommodity() {
-            return commodity;
+            return this.commodity;
         }
 
         /**
          * Sets the value of the commodity property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setCommodity(String value) {
             this.commodity = value;
@@ -213,15 +197,13 @@ public class ProfileTick {
 
         /**
          * Gets the value of the value property.
-         * 
          */
         public int getValue() {
-            return value;
+            return this.value;
         }
 
         /**
          * Sets the value of the value property.
-         * 
          */
         public void setValue(int value) {
             this.value = value;
@@ -232,9 +214,9 @@ public class ProfileTick {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -247,13 +229,11 @@ public class ProfileTick {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "parameterName",
-        "parameterValue"
+            "parameterName",
+            "parameterValue"
     })
     public static class Parameters {
 
@@ -264,23 +244,19 @@ public class ProfileTick {
 
         /**
          * Gets the value of the parameterName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Object }
-         *     
+         *
+         * @return possible object is
+         * {@link Object }
          */
         public Object getParameterName() {
-            return parameterName;
+            return this.parameterName;
         }
 
         /**
          * Sets the value of the parameterName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Object }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link Object }
          */
         public void setParameterName(Object value) {
             this.parameterName = value;
@@ -288,23 +264,19 @@ public class ProfileTick {
 
         /**
          * Gets the value of the parameterValue property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Object }
-         *     
+         *
+         * @return possible object is
+         * {@link Object }
          */
         public Object getParameterValue() {
-            return parameterValue;
+            return this.parameterValue;
         }
 
         /**
          * Sets the value of the parameterValue property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Object }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link Object }
          */
         public void setParameterValue(Object value) {
             this.parameterValue = value;

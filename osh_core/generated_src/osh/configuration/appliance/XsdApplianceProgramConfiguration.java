@@ -18,9 +18,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * <p>Java class for xsd.ApplianceProgramConfiguration complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="xsd.ApplianceProgramConfiguration">
  *   &lt;complexContent>
@@ -36,16 +36,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "xsd.ApplianceProgramConfiguration", propOrder = {
-    "configurationID",
-    "configurationName",
-    "program",
-    "parameters",
-    "loadProfiles"
+        "configurationID",
+        "configurationName",
+        "program",
+        "parameters",
+        "loadProfiles"
 })
 public class XsdApplianceProgramConfiguration {
 
@@ -63,15 +61,13 @@ public class XsdApplianceProgramConfiguration {
 
     /**
      * Gets the value of the configurationID property.
-     * 
      */
     public int getConfigurationID() {
-        return configurationID;
+        return this.configurationID;
     }
 
     /**
      * Sets the value of the configurationID property.
-     * 
      */
     public void setConfigurationID(int value) {
         this.configurationID = value;
@@ -79,23 +75,19 @@ public class XsdApplianceProgramConfiguration {
 
     /**
      * Gets the value of the configurationName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getConfigurationName() {
-        return configurationName;
+        return this.configurationName;
     }
 
     /**
      * Sets the value of the configurationName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setConfigurationName(String value) {
         this.configurationName = value;
@@ -103,23 +95,19 @@ public class XsdApplianceProgramConfiguration {
 
     /**
      * Gets the value of the program property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XsdProgram }
-     *     
+     *
+     * @return possible object is
+     * {@link XsdProgram }
      */
     public XsdProgram getProgram() {
-        return program;
+        return this.program;
     }
 
     /**
      * Sets the value of the program property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XsdProgram }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XsdProgram }
      */
     public void setProgram(XsdProgram value) {
         this.program = value;
@@ -127,23 +115,19 @@ public class XsdApplianceProgramConfiguration {
 
     /**
      * Gets the value of the parameters property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XsdConfigurationParameters }
-     *     
+     *
+     * @return possible object is
+     * {@link XsdConfigurationParameters }
      */
     public XsdConfigurationParameters getParameters() {
-        return parameters;
+        return this.parameters;
     }
 
     /**
      * Sets the value of the parameters property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XsdConfigurationParameters }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XsdConfigurationParameters }
      */
     public void setParameters(XsdConfigurationParameters value) {
         this.parameters = value;
@@ -151,23 +135,19 @@ public class XsdApplianceProgramConfiguration {
 
     /**
      * Gets the value of the loadProfiles property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XsdLoadProfiles }
-     *     
+     *
+     * @return possible object is
+     * {@link XsdLoadProfiles }
      */
     public XsdLoadProfiles getLoadProfiles() {
-        return loadProfiles;
+        return this.loadProfiles;
     }
 
     /**
      * Sets the value of the loadProfiles property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XsdLoadProfiles }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XsdLoadProfiles }
      */
     public void setLoadProfiles(XsdLoadProfiles value) {
         this.loadProfiles = value;

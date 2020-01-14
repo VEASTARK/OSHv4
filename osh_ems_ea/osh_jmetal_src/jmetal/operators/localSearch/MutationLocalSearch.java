@@ -34,158 +34,148 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 /**
- * This class implements an local search operator based in the use of a 
+ * This class implements an local search operator based in the use of a
  * mutation operator. An archive is used to store the non-dominated solutions
  * found during the search.
  */
 @SuppressWarnings("rawtypes")
 public class MutationLocalSearch extends LocalSearch {
-    
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
-/**
-   * Stores the problem to solve
-   */
-  private Problem problem_;
-    
-  /**
-  * Stores a reference to the archive in which the non-dominated solutions are
-  * inserted
-  */
-  private SolutionSet archive_;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    /**
+     * Stores the number of evaluations_ carried out
+     */
+    int evaluations_;
+    /**
+     * Stores the problem to solve
+     */
+    private Problem problem_;
+    /**
+     * Stores a reference to the archive in which the non-dominated solutions are
+     * inserted
+     */
+    private SolutionSet archive_;
+    private int improvementRounds_;
+    /**
+     * Stores comparators for dealing with constraints and dominance checking,
+     * respectively.
+     */
+    private final Comparator constraintComparator_;
+    private final Comparator dominanceComparator_;
+    /**
+     * Stores the mutation operator
+     */
+    private Operator mutationOperator_;
 
-  private int improvementRounds_ ; 
+    /**
+     * Constructor.
+     * Creates a new local search object.
+     *
+     * @param parameters The parameters
+     */
+    public MutationLocalSearch(HashMap<String, Object> parameters) {
+        super(parameters);
+        if (parameters.get("problem") != null)
+            this.problem_ = (Problem) parameters.get("problem");
+        if (parameters.get("improvementRounds") != null)
+            this.improvementRounds_ = (Integer) parameters.get("improvementRounds");
+        if (parameters.get("mutation") != null)
+            this.mutationOperator_ = (Mutation) parameters.get("mutation");
 
-  /**
-   * Stores comparators for dealing with constraints and dominance checking, 
-   * respectively.
-   */
-  private Comparator constraintComparator_ ;
-  private Comparator dominanceComparator_ ;
-  
-  /**
-   * Stores the mutation operator 
-   */
-  private Operator mutationOperator_;
-  
-  /**
-   * Stores the number of evaluations_ carried out
-   */
-  int evaluations_ ;  
-  
-  /**
-  * Constructor. 
-  * Creates a new local search object.
-  * @param parameters The parameters
-
-  */
-  public MutationLocalSearch(HashMap<String, Object> parameters) {
-  	super(parameters) ;
-  	if (parameters.get("problem") != null)
-  		problem_ = (Problem) parameters.get("problem") ;  		
-  	if (parameters.get("improvementRounds") != null)
-  		improvementRounds_ = (Integer) parameters.get("improvementRounds") ;  		
-  	if (parameters.get("mutation") != null)
-  	  mutationOperator_ = (Mutation) parameters.get("mutation") ;  		
-
-    evaluations_          = 0      ;
-    archive_              = null;
-    dominanceComparator_  = new DominanceComparator();
-    constraintComparator_ = new OverallConstraintViolationComparator();
-  } //Mutation improvement
+        this.evaluations_ = 0;
+        this.archive_ = null;
+        this.dominanceComparator_ = new DominanceComparator();
+        this.constraintComparator_ = new OverallConstraintViolationComparator();
+    } //Mutation improvement
 
 
-  /**
-  * Constructor. 
-  * Creates a new local search object.
-  * @param problem The problem to solve
-  * @param mutationOperator The mutation operator 
-  */
-  //public MutationLocalSearch(Problem problem, Operator mutationOperator) {
-  //  evaluations_ = 0 ;
-  //  problem_ = problem;
-  //  mutationOperator_ = mutationOperator;
-  //  dominanceComparator_ = new DominanceComparator();
-  //  constraintComparator_ = new OverallConstraintViolationComparator();
-  //} // MutationLocalSearch
-  
- /**
-   * Executes the local search. The maximum number of iterations is given by 
-   * the param "improvementRounds", which is in the parameter list of the 
-   * operator. The archive to store the non-dominated solutions is also in the 
-   * parameter list.
-   * @param object Object representing a solution
-   * @return An object containing the new improved solution
- * @throws JMException 
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public Object execute(Object object) throws JMException {
-    int i = 0;
-    int best = 0;
-    evaluations_ = 0;        
-    Solution solution = (Solution)object;
+    /**
+     * Constructor.
+     * Creates a new local search object.
+     * @param problem The problem to solve
+     * @param mutationOperator The mutation operator
+     */
+    //public MutationLocalSearch(Problem problem, Operator mutationOperator) {
+    //  evaluations_ = 0 ;
+    //  problem_ = problem;
+    //  mutationOperator_ = mutationOperator;
+    //  dominanceComparator_ = new DominanceComparator();
+    //  constraintComparator_ = new OverallConstraintViolationComparator();
+    //} // MutationLocalSearch
 
-    int rounds = improvementRounds_;
-    archive_ = (SolutionSet)getParameter("archive");
+    /**
+     * Executes the local search. The maximum number of iterations is given by
+     * the param "improvementRounds", which is in the parameter list of the
+     * operator. The archive to store the non-dominated solutions is also in the
+     * parameter list.
+     *
+     * @param object Object representing a solution
+     * @return An object containing the new improved solution
+     * @throws JMException
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object execute(Object object) throws JMException {
+        int i = 0;
+        int best;
+        this.evaluations_ = 0;
+        Solution solution = (Solution) object;
 
-    if (rounds <= 0)
-      return new Solution(solution);
-        
-    do 
-    {
-      i++;
-      Solution mutatedSolution = new Solution(solution);
-      mutationOperator_.execute(mutatedSolution);
-            
-      // Evaluate the getNumberOfConstraints
-      if (problem_.getNumberOfConstraints() > 0)
-      {
-        problem_.evaluateConstraints(mutatedSolution);
-        best = constraintComparator_.compare(mutatedSolution,solution);
-        if (best == 0) //none of then is better that the other one
-        {
-          problem_.evaluate(mutatedSolution);
-          evaluations_++;
-          best = dominanceComparator_.compare(mutatedSolution,solution);
-        } 
-        else if (best == -1) //mutatedSolution is best
-        {
-          problem_.evaluate(mutatedSolution);
-          evaluations_++;
+        int rounds = this.improvementRounds_;
+        this.archive_ = (SolutionSet) this.getParameter("archive");
+
+        if (rounds <= 0)
+            return new Solution(solution);
+
+        do {
+            i++;
+            Solution mutatedSolution = new Solution(solution);
+            this.mutationOperator_.execute(mutatedSolution);
+
+            // Evaluate the getNumberOfConstraints
+            if (this.problem_.getNumberOfConstraints() > 0) {
+                this.problem_.evaluateConstraints(mutatedSolution);
+                best = this.constraintComparator_.compare(mutatedSolution, solution);
+                if (best == 0) //none of then is better that the other one
+                {
+                    this.problem_.evaluate(mutatedSolution);
+                    this.evaluations_++;
+                    best = this.dominanceComparator_.compare(mutatedSolution, solution);
+                } else if (best == -1) //mutatedSolution is best
+                {
+                    this.problem_.evaluate(mutatedSolution);
+                    this.evaluations_++;
+                }
+            } else {
+                this.problem_.evaluate(mutatedSolution);
+                this.evaluations_++;
+                best = this.dominanceComparator_.compare(mutatedSolution, solution);
+            }
+            if (best == -1) // This is: Mutated is best
+                solution = mutatedSolution;
+            else if (best == 1) // This is: Original is best
+                //delete mutatedSolution
+                ;
+            else // This is mutatedSolution and original are non-dominated
+            {
+                //this.archive_.addIndividual(new Solution(solution));
+                //solution = mutatedSolution;
+                if (this.archive_ != null)
+                    this.archive_.add(mutatedSolution);
+            }
         }
-      }
-      else
-      {
-        problem_.evaluate(mutatedSolution);
-        evaluations_++;
-        best = dominanceComparator_.compare(mutatedSolution,solution);
-      }
-      if (best == -1) // This is: Mutated is best
-        solution = mutatedSolution;
-      else if (best == 1) // This is: Original is best
-        //delete mutatedSolution
-        ;
-      else // This is mutatedSolution and original are non-dominated
-      {
-        //this.archive_.addIndividual(new Solution(solution));                
-        //solution = mutatedSolution;
-        if (archive_ != null)
-          archive_.add(mutatedSolution);
-      }                            
-    }
-    while (i < rounds);
-    return new Solution(solution);
-  } // execute
-  
-   
-  /** 
-   * Returns the number of evaluations maded
-   */
-  public int getEvaluations() {
-    return evaluations_;
-  } // evaluations
+        while (i < rounds);
+        return new Solution(solution);
+    } // execute
+
+
+    /**
+     * Returns the number of evaluations maded
+     */
+    public int getEvaluations() {
+        return this.evaluations_;
+    } // evaluations
 } // MutationLocalSearch

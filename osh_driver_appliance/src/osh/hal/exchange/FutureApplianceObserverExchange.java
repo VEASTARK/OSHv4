@@ -16,181 +16,176 @@ import osh.hal.interfaces.appliance.IHALGenericApplianceProgramDetails;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class FutureApplianceObserverExchange 
-				extends HALDeviceObserverExchange
-				implements  IHALElectricalPowerDetails,
-							IHALGasPowerDetails,
-							IHALGenericApplianceDetails,
-							IHALGenericApplianceProgramDetails,
-							IHALGenericApplianceDOF,
-							IHALGenericApplianceIsCurrentlyControllable,
-							IHALThermalPowerDetails {
+public class FutureApplianceObserverExchange
+        extends HALDeviceObserverExchange
+        implements IHALElectricalPowerDetails,
+        IHALGasPowerDetails,
+        IHALGenericApplianceDetails,
+        IHALGenericApplianceProgramDetails,
+        IHALGenericApplianceDOF,
+        IHALGenericApplianceIsCurrentlyControllable,
+        IHALThermalPowerDetails {
 
-	// ### IHALElectricPowerDetails ###
-	private int activePower;
-	private int reactivePower;
-	
-	// ### IHALGasPowerDetails ###
-	private int gasPower;
-	
-	// ### IHALThermalPowerDetails ###
-	private int hotWaterPower;
-	private int domesticHotWaterPower;
-	
-	
-	// ### IHALGenericApplianceDetails ###
-	private EN50523DeviceState en50523DeviceState;
-	
-	// ### IHALGenericApplianceProgramDetails ###
-	private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
-	private UUID acpID;
-	private Long acpReferenceTime;
-	
-	// ### IHALGenericApplianceDOF ###
-	private Long dof;
-	
-	// ### IHALGenericApplianceIsCurrentlyControllable ###
-	private boolean currentlyControllable;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public FutureApplianceObserverExchange(
-			UUID deviceID, 
-			Long timestamp,
-			int activePower,
-			int reactivePower,
-			int hotWaterPower,
-			int domesticHotWaterPower,
-			int gasPower) {
-		super(deviceID, timestamp);
-		
-		this.activePower = activePower;
-		this.reactivePower = reactivePower;
-		this.hotWaterPower = hotWaterPower;
-		this.domesticHotWaterPower = domesticHotWaterPower;
-		this.gasPower = gasPower;
-	}
+    // ### IHALElectricPowerDetails ###
+    private final int activePower;
+    private final int reactivePower;
 
-	@Override
-	public int getActivePower() {
-		return activePower;
-	}
+    // ### IHALGasPowerDetails ###
+    private final int gasPower;
 
-	@Override
-	public int getReactivePower() {
-		return reactivePower;
-	}
-
-	@Override
-	public int getGasPower() {
-		return gasPower;
-	}
+    // ### IHALThermalPowerDetails ###
+    private final int hotWaterPower;
+    private final int domesticHotWaterPower;
 
 
-	@Override
-	public EN50523DeviceState getEN50523DeviceState() {
-		return en50523DeviceState;
-	}
-	
+    // ### IHALGenericApplianceDetails ###
+    private EN50523DeviceState en50523DeviceState;
 
-	public void setEn50523DeviceState(EN50523DeviceState en50523DeviceState) {
-		this.en50523DeviceState = en50523DeviceState;
-	}
+    // ### IHALGenericApplianceProgramDetails ###
+    private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
+    private UUID acpID;
+    private Long acpReferenceTime;
 
+    // ### IHALGenericApplianceDOF ###
+    private Long dof;
 
-	@Override
-	public ApplianceProgramConfigurationStatus getApplianceConfigurationProfile() {
-		return applianceConfigurationProfile;
-	}
+    // ### IHALGenericApplianceIsCurrentlyControllable ###
+    private boolean currentlyControllable;
 
 
-	public void setApplianceConfigurationProfile(
-			ApplianceProgramConfigurationStatus applianceConfigurationProfile,
-			LoadProfileCompressionTypes profileType,
-			final int powerEps,
-			final int timeSlotDuration) {
-		// clone and compress
-		
-		if (applianceConfigurationProfile != null) {
-			SparseLoadProfile[][] dynamicLoadProfiles = applianceConfigurationProfile.getDynamicLoadProfiles();
-			SparseLoadProfile[][] compressedDynamicLoadProfiles = 
-					SparseLoadProfile.getCompressedProfile(
-							profileType,
+    /**
+     * CONSTRUCTOR
+     */
+    public FutureApplianceObserverExchange(
+            UUID deviceID,
+            Long timestamp,
+            int activePower,
+            int reactivePower,
+            int hotWaterPower,
+            int domesticHotWaterPower,
+            int gasPower) {
+        super(deviceID, timestamp);
+
+        this.activePower = activePower;
+        this.reactivePower = reactivePower;
+        this.hotWaterPower = hotWaterPower;
+        this.domesticHotWaterPower = domesticHotWaterPower;
+        this.gasPower = gasPower;
+    }
+
+    @Override
+    public int getActivePower() {
+        return this.activePower;
+    }
+
+    @Override
+    public int getReactivePower() {
+        return this.reactivePower;
+    }
+
+    @Override
+    public int getGasPower() {
+        return this.gasPower;
+    }
+
+
+    @Override
+    public EN50523DeviceState getEN50523DeviceState() {
+        return this.en50523DeviceState;
+    }
+
+
+    public void setEn50523DeviceState(EN50523DeviceState en50523DeviceState) {
+        this.en50523DeviceState = en50523DeviceState;
+    }
+
+
+    @Override
+    public ApplianceProgramConfigurationStatus getApplianceConfigurationProfile() {
+        return this.applianceConfigurationProfile;
+    }
+
+
+    public void setApplianceConfigurationProfile(
+            ApplianceProgramConfigurationStatus applianceConfigurationProfile,
+            LoadProfileCompressionTypes profileType,
+            final int powerEps,
+            final int timeSlotDuration) {
+        // clone and compress
+
+        if (applianceConfigurationProfile != null) {
+            SparseLoadProfile[][] dynamicLoadProfiles = applianceConfigurationProfile.getDynamicLoadProfiles();
+            SparseLoadProfile[][] compressedDynamicLoadProfiles =
+                    SparseLoadProfile.getCompressedProfile(
+                            profileType,
                             dynamicLoadProfiles,
-							powerEps, 
-							timeSlotDuration);
-			
-			ApplianceProgramConfigurationStatus acp = new ApplianceProgramConfigurationStatus(
-					applianceConfigurationProfile.getAcpID(), 
-					compressedDynamicLoadProfiles,
-					applianceConfigurationProfile.getMinMaxDurations(),
-					applianceConfigurationProfile.getAcpReferenceTime(),
-					applianceConfigurationProfile.isDoNotReschedule());
-			
-			this.applianceConfigurationProfile = acp;
-		}
-		else {
-			this.applianceConfigurationProfile = null;
-		}
-			
-	}
+                            powerEps,
+                            timeSlotDuration);
+
+            this.applianceConfigurationProfile = new ApplianceProgramConfigurationStatus(
+                    applianceConfigurationProfile.getAcpID(),
+                    compressedDynamicLoadProfiles,
+                    applianceConfigurationProfile.getMinMaxDurations(),
+                    applianceConfigurationProfile.getAcpReferenceTime(),
+                    applianceConfigurationProfile.isDoNotReschedule());
+        } else {
+            this.applianceConfigurationProfile = null;
+        }
+
+    }
 
 
-	@Override
-	public UUID getAcpID() {
-		return acpID;
-	}
-	
-	public void setAcpID(UUID acpID) {
-		this.acpID = acpID;
-	}
-	
-	@Override
-	public Long getAcpReferenceTime() {
-		return acpReferenceTime;
-	}
-	
-	public void setAcpReferenceTime(long acpReferenceTime) {
-		this.acpReferenceTime = acpReferenceTime;
-	}
+    @Override
+    public UUID getAcpID() {
+        return this.acpID;
+    }
+
+    public void setAcpID(UUID acpID) {
+        this.acpID = acpID;
+    }
+
+    @Override
+    public Long getAcpReferenceTime() {
+        return this.acpReferenceTime;
+    }
+
+    public void setAcpReferenceTime(long acpReferenceTime) {
+        this.acpReferenceTime = acpReferenceTime;
+    }
 
 
-	@Override
-	public boolean isCurrentlyControllable() {
-		return currentlyControllable;
-	}
+    @Override
+    public boolean isCurrentlyControllable() {
+        return this.currentlyControllable;
+    }
 
 
-	public void setCurrentlyControllable(boolean currentlyControllable) {
-		this.currentlyControllable = currentlyControllable;
-	}
+    public void setCurrentlyControllable(boolean currentlyControllable) {
+        this.currentlyControllable = currentlyControllable;
+    }
 
 
-	@Override
-	public int getHotWaterPower() {
-		return hotWaterPower;
-	}
+    @Override
+    public int getHotWaterPower() {
+        return this.hotWaterPower;
+    }
 
 
-	@Override
-	public int getDomesticHotWaterPower() {
-		return domesticHotWaterPower;
-	}
+    @Override
+    public int getDomesticHotWaterPower() {
+        return this.domesticHotWaterPower;
+    }
 
-	@Override
-	public Long getDOF() {
-		return dof;
-	}
-	
-	public void setDOF(long dof) {
-		this.dof = dof;
-	}
-	
-	
+    @Override
+    public Long getDOF() {
+        return this.dof;
+    }
+
+    public void setDOF(long dof) {
+        this.dof = dof;
+    }
+
+
 }

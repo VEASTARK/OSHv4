@@ -19,36 +19,30 @@ import java.util.Map.Entry;
 
 
 /**
- *
  * @author Till Schuberth, Kaibin Bao, Ingo Mauser, Jan Mueller, Sebastian Kramer
- *
  */
 public class GuiDataCollector {
 
-    private GuiMain driver;
-
-    private List<Schedule> schedules;
-    private EnumMap<AncillaryCommodity,PriceSignal> ps;
-    private EnumMap<AncillaryCommodity,PowerLimitSignal> pwrLimit;
-    private HashMap<UUID, EnumMap<Commodity, Double>> powerStates;
     private final HashMap<UUID, TreeMap<Long, Double>> tankTemps = new HashMap<>();
     private final HashMap<UUID, TreeMap<Long, Double>> hotWaterDemands = new HashMap<>();
     private final HashMap<UUID, TreeMap<Long, Double>> hotWaterSupplies = new HashMap<>();
-
     //			new OptimizedDataStorage<GUIWaterStorageStateExchange>();
     private final HashMap<UUID, OptimizedDataStorage<GUIBatteryStorageStateExchange>> batteryStorageHistories =
             new HashMap<>();
     //			new OptimizedDataStorage<GUIWaterStorageStateExchange>();
-    private final EnumMap<Commodity,OptimizedDataStorage<PowerSum>> powerHistory = new EnumMap<>(Commodity.class);
+    private final EnumMap<Commodity, OptimizedDataStorage<PowerSum>> powerHistory = new EnumMap<>(Commodity.class);
+    private final HashMap<UUID, Long> lastWaterRefresh = new HashMap<>();
+    private final HashMap<UUID, Long> lastBatteryRefresh = new HashMap<>();
+    private final int removeOlderThan = 4 * 86400;
+    private GuiMain driver;
+    private List<Schedule> schedules;
+    private EnumMap<AncillaryCommodity, PriceSignal> ps;
+    private EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
+    private HashMap<UUID, EnumMap<Commodity, Double>> powerStates;
     private boolean saveGraph;
     private TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
     private TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
     private TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
-
-    private HashMap<UUID, Long> lastWaterRefresh = new HashMap<>();
-    private HashMap<UUID, Long> lastBatteryRefresh = new HashMap<>();
-
-    private final int removeOlderThan = 4 * 86400;
 
     public GuiDataCollector(GuiMain driver, boolean saveGraph) {
         if (driver == null) throw new NullPointerException("driver is null");
@@ -58,72 +52,72 @@ public class GuiDataCollector {
     }
 
     public void updateEADeviceList(Set<DeviceTableEntry> deviceList) {
-        driver.refreshDeviceTable(deviceList);
+        this.driver.refreshDeviceTable(deviceList);
     }
 
     public void updateStateView(Set<Class<? extends StateExchange>> types, Map<UUID, ? extends StateExchange> states) {
-        driver.refreshStateTable(types, states);
+        this.driver.refreshStateTable(types, states);
     }
 
-    private void waitforuser(long timestamp) {
+    private void waitForUser(long timestamp) {
         //in case we are waiting deliver an updated water diagram
         //this is a dirty hack, but who cares
         //SEKR: the one getting a nullpointerexception at the start, another dirty hack:
         //check if a powerhistory exists before updating
-        if (powerHistory.containsKey(Commodity.ACTIVEPOWER))
-            doRealPastUpdate(timestamp,"water");
+        if (this.powerHistory.containsKey(Commodity.ACTIVEPOWER))
+            this.doRealPastUpdate(timestamp, "water");
 
-        driver.waitForUserIfRequested();
+        this.driver.waitForUserIfRequested();
     }
 
     public void updateGlobalSchedule(
-            EnumMap<AncillaryCommodity,PriceSignal> ps,
+            EnumMap<AncillaryCommodity, PriceSignal> ps,
             long timestamp) {
         this.ps = ps;
-        driver.refreshDiagram(this.schedules, ps, this.pwrLimit, timestamp, this.saveGraph);
-        waitforuser(timestamp);
+        this.driver.refreshDiagram(this.schedules, ps, this.pwrLimit, timestamp, this.saveGraph);
+        this.waitForUser(timestamp);
 
     }
 
     public void updateGlobalSchedule(
             long timestamp,
-            EnumMap<AncillaryCommodity,PowerLimitSignal> pwrLimit) {
+            EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit) {
         this.pwrLimit = pwrLimit;
-        driver.refreshDiagram(schedules, ps, pwrLimit, timestamp, saveGraph);
-        waitforuser(timestamp);
+        this.driver.refreshDiagram(this.schedules, this.ps, pwrLimit, timestamp, this.saveGraph);
+        this.waitForUser(timestamp);
     }
 
     public void updateGlobalSchedule(
             List<Schedule> schedules,
             long timestamp) {
         this.schedules = schedules;
-        driver.refreshDiagram(schedules, ps, pwrLimit, timestamp, saveGraph);
-        waitforuser(timestamp);
+        this.driver.refreshDiagram(schedules, this.ps, this.pwrLimit, timestamp, this.saveGraph);
+        this.waitForUser(timestamp);
     }
 
     public void updateAncillaryMeter(
             AncillaryCommodityLoadProfile ancillaryMeter,
             long timestamp) {
-        driver.refreshMeter(ancillaryMeter, timestamp);
-        waitforuser(timestamp);
+        this.driver.refreshMeter(ancillaryMeter, timestamp);
+        this.waitForUser(timestamp);
     }
 
     public synchronized void updateWaterStorageData(WaterStorageOCSX exws) {
         UUID tankId = exws.getTankId();
 
-        if (tankTemps.get(tankId) == null) {
-            tankTemps.put(tankId, new TreeMap<>());
-            lastWaterRefresh.put(tankId, 0L);
+        if (this.tankTemps.get(tankId) == null) {
+            this.tankTemps.put(tankId, new TreeMap<>());
+            this.lastWaterRefresh.put(tankId, 0L);
         }
-        tankTemps.get(tankId).put(exws.getTimestamp(), exws.getCurrenttemp());
+        this.tankTemps.get(tankId).put(exws.getTimestamp(), exws.getCurrentTemp());
 
-        hotWaterDemands.computeIfAbsent(tankId, k -> new TreeMap<>());
-        hotWaterDemands.get(tankId).put(exws.getTimestamp(), exws.getDemand());
+        this.hotWaterDemands.computeIfAbsent(tankId, k -> new TreeMap<>());
+        this.hotWaterDemands.get(tankId).put(exws.getTimestamp(), exws.getDemand());
 
-        hotWaterSupplies.computeIfAbsent(tankId, k -> new TreeMap<>());
-        hotWaterSupplies.get(tankId).put(exws.getTimestamp(), exws.getSupply());
+        this.hotWaterSupplies.computeIfAbsent(tankId, k -> new TreeMap<>());
+        this.hotWaterSupplies.get(tankId).put(exws.getTimestamp(), exws.getSupply());
 
-        checkForPastUpdateOfWater(exws.getTimestamp());
+        this.checkForPastUpdateOfWater(exws.getTimestamp());
     }
 
     public synchronized void updateWaterPredictionData(
@@ -133,24 +127,24 @@ public class GuiDataCollector {
             long timestamp) {
 
         if (!predictedTankTemp.isEmpty()) {
-            long predicitionStart = predictedTankTemp.firstKey();
-            this.predictedTankTemp.tailMap(predicitionStart).clear();
+            long predictionStart = predictedTankTemp.firstKey();
+            this.predictedTankTemp.tailMap(predictionStart).clear();
             this.predictedTankTemp.putAll(predictedTankTemp);
         }
         if (!predictedHotWaterDemand.isEmpty()) {
-            long predicitionStart = predictedHotWaterDemand.firstKey();
-            this.predictedHotWaterDemand.tailMap(predicitionStart).clear();
+            long predictionStart = predictedHotWaterDemand.firstKey();
+            this.predictedHotWaterDemand.tailMap(predictionStart).clear();
             this.predictedHotWaterDemand.putAll(predictedHotWaterDemand);
         }
         if (!predictedHotWaterSupply.isEmpty()) {
-            long predicitionStart = predictedHotWaterSupply.firstKey();
-            this.predictedHotWaterSupply.tailMap(predicitionStart).clear();
+            long predictionStart = predictedHotWaterSupply.firstKey();
+            this.predictedHotWaterSupply.tailMap(predictionStart).clear();
             this.predictedHotWaterSupply.putAll(predictedHotWaterSupply);
         }
 
-        checkForWaterPredictionHistoryCleanup(timestamp);
-        driver.refreshWaterPredictionDiagram(this.predictedTankTemp, this.predictedHotWaterDemand, this.predictedHotWaterSupply);
-        waitforuser(timestamp);
+        this.checkForWaterPredictionHistoryCleanup(timestamp);
+        this.driver.refreshWaterPredictionDiagram(this.predictedTankTemp, this.predictedHotWaterDemand, this.predictedHotWaterSupply);
+        this.waitForUser(timestamp);
     }
 
     public synchronized void updateBatteryStorageData(BatteryStorageOCSX exbs) {
@@ -164,19 +158,19 @@ public class GuiDataCollector {
                         exbs.getMinStateOfCharge(),
                         exbs.getMaxStateOfCharge(),
                         batteryId);
-        if (batteryStorageHistories.get(batteryId) == null) {
-            batteryStorageHistories.put(batteryId, new OptimizedDataStorage<>());
-            lastBatteryRefresh.put(batteryId, 0L);
+        if (this.batteryStorageHistories.get(batteryId) == null) {
+            this.batteryStorageHistories.put(batteryId, new OptimizedDataStorage<>());
+            this.lastBatteryRefresh.put(batteryId, 0L);
         }
-        batteryStorageHistories.get(batteryId).add(exbs.getTimestamp(), guiBatteryStorageStateExchange);
-        checkForPastUpdateOfBattery(exbs.getTimestamp());
+        this.batteryStorageHistories.get(batteryId).add(exbs.getTimestamp(), guiBatteryStorageStateExchange);
+        this.checkForPastUpdateOfBattery(exbs.getTimestamp());
     }
 
 
     public void updatePowerStates(
             Long timestamp,
             HashMap<UUID, EnumMap<Commodity, Double>> powerStates) {
-        EnumMap<Commodity,PowerSum> commodityPowerSum = new EnumMap<>(Commodity.class);
+        EnumMap<Commodity, PowerSum> commodityPowerSum = new EnumMap<>(Commodity.class);
 
         this.powerStates = powerStates;
 
@@ -184,7 +178,7 @@ public class GuiDataCollector {
             for (Entry<UUID, EnumMap<Commodity, Double>> e : powerStates.entrySet()) {
                 EnumMap<Commodity, Double> comMap = e.getValue();
 
-                for (Entry<Commodity,Double> f : comMap.entrySet()) {
+                for (Entry<Commodity, Double> f : comMap.entrySet()) {
                     PowerSum existingSum = commodityPowerSum.get(f.getKey());
                     if (existingSum == null) {
                         existingSum = new PowerSum(0, 0, 0);
@@ -203,8 +197,7 @@ public class GuiDataCollector {
 
                     if (value > 0) {
                         posSum += value;
-                    }
-                    else if (value < 0) {
+                    } else if (value < 0) {
                         negSum += value;
                     }
 
@@ -213,42 +206,42 @@ public class GuiDataCollector {
                 } /* for( ... Commodity ... ) */
             } /* for( ... UUID ... ) */
 
-            for( Entry<Commodity, PowerSum> ent : commodityPowerSum.entrySet() ) {
-                OptimizedDataStorage<PowerSum> timeseries = powerHistory.get(ent.getKey());
-                if( timeseries == null ) {
-                    timeseries = new OptimizedDataStorage<>();
-                    powerHistory.put(ent.getKey(), timeseries);
+            for (Entry<Commodity, PowerSum> ent : commodityPowerSum.entrySet()) {
+                OptimizedDataStorage<PowerSum> timeSeries = this.powerHistory.get(ent.getKey());
+                if (timeSeries == null) {
+                    timeSeries = new OptimizedDataStorage<>();
+                    this.powerHistory.put(ent.getKey(), timeSeries);
                 }
-                timeseries.add(timestamp, ent.getValue());
+                timeSeries.add(timestamp, ent.getValue());
             }
         }
 
-        checkForPastUpdateOfWater(timestamp);
-        checkForPastUpdateOfBattery(timestamp);
-        checkForPowerHistoryCleanup(timestamp);
-        checkForWaterStorageHistoryCleanup(timestamp);
-        checkForBatteryStorageHistoryCleanup(timestamp);
+        this.checkForPastUpdateOfWater(timestamp);
+        this.checkForPastUpdateOfBattery(timestamp);
+        this.checkForPowerHistoryCleanup(timestamp);
+        this.checkForWaterStorageHistoryCleanup(timestamp);
+        this.checkForBatteryStorageHistoryCleanup(timestamp);
     }
 
     private void checkForPastUpdateOfWater(long now) {
-        if (!lastWaterRefresh.isEmpty()) {
-            for (Entry<UUID, Long> e : lastWaterRefresh.entrySet()) {
+        if (!this.lastWaterRefresh.isEmpty()) {
+            for (Entry<UUID, Long> e : this.lastWaterRefresh.entrySet()) {
                 //refresh only every hour
                 if (Math.abs(e.getValue() - now) > 3600) {
-                    lastWaterRefresh.put(e.getKey(), now);
-                    doRealPastUpdate(now, "water");
+                    this.lastWaterRefresh.put(e.getKey(), now);
+                    this.doRealPastUpdate(now, "water");
                 }
             }
         }
     }
 
     private void checkForPastUpdateOfBattery(long now) {
-        if (!lastBatteryRefresh.isEmpty()) {
-            for (Entry<UUID,Long> e : lastBatteryRefresh.entrySet()) {
+        if (!this.lastBatteryRefresh.isEmpty()) {
+            for (Entry<UUID, Long> e : this.lastBatteryRefresh.entrySet()) {
                 //refresh only every hour
                 if (Math.abs(e.getValue() - now) > 3600) {
-                    lastBatteryRefresh.put(e.getKey(), now);
-                    doRealPastUpdate(now,"battery");
+                    this.lastBatteryRefresh.put(e.getKey(), now);
+                    this.doRealPastUpdate(now, "battery");
                 }
             }
         }
@@ -258,35 +251,35 @@ public class GuiDataCollector {
     private synchronized void doRealPastUpdate(long timestamp, String type) {
         // WaterStorage
         if (type.equals("water")) {
-            driver.refreshWaterDiagram(tankTemps, hotWaterDemands, hotWaterSupplies);
+            this.driver.refreshWaterDiagram(this.tankTemps, this.hotWaterDemands, this.hotWaterSupplies);
         }
         // BatteryStorage
         else if (type.equals("battery")) {
-            HashMap<UUID,TreeMap<Long, GUIBatteryStorageStateExchange>> optimizedBatteryStorageHistories = new HashMap<>();
-            for (Entry<UUID, OptimizedDataStorage<GUIBatteryStorageStateExchange>> e : batteryStorageHistories.entrySet()) {
+            HashMap<UUID, TreeMap<Long, GUIBatteryStorageStateExchange>> optimizedBatteryStorageHistories = new HashMap<>();
+            for (Entry<UUID, OptimizedDataStorage<GUIBatteryStorageStateExchange>> e : this.batteryStorageHistories.entrySet()) {
                 optimizedBatteryStorageHistories.put(e.getKey(), e.getValue().getMap());
             }
-            driver.refreshBatteryDiagram(optimizedBatteryStorageHistories);
+            this.driver.refreshBatteryDiagram(optimizedBatteryStorageHistories);
         }
 
 
         // PowerSum History
-        EnumMap<Commodity,TreeMap<Long,PowerSum>> commodityPowerSum = new EnumMap<>(Commodity.class);
+        EnumMap<Commodity, TreeMap<Long, PowerSum>> commodityPowerSum = new EnumMap<>(Commodity.class);
 
-        for( Commodity c : powerHistory.keySet() ) {
-            TreeMap<Long,PowerSum> powersumseries = powerHistory.get(c).getMap();
-            commodityPowerSum.put(c,powersumseries);
+        for (Entry<Commodity, OptimizedDataStorage<PowerSum>> entry : this.powerHistory.entrySet()) {
+            TreeMap<Long, PowerSum> powerSumSeries = entry.getValue().getMap();
+            commodityPowerSum.put(entry.getKey(), powerSumSeries);
         }
 
-        driver.refreshPowerSumDiagram(timestamp, commodityPowerSum);
+        this.driver.refreshPowerSumDiagram(timestamp, commodityPowerSum);
     }
 
     private void checkForPowerHistoryCleanup(long timestamp) {
-        if ( timestamp % 3600 == 0 ) {
+        if (timestamp % 3600 == 0) {
 
-            synchronized (powerHistory) {
-                for( Commodity c : powerHistory.keySet() ) {
-                    Map<Long,PowerSum> map = powerHistory.get(c).getMap();
+            synchronized (this.powerHistory) {
+                for (OptimizedDataStorage<PowerSum> powerSumOptimizedDataStorage : this.powerHistory.values()) {
+                    Map<Long, PowerSum> map = powerSumOptimizedDataStorage.getMap();
 
                     map.entrySet().removeIf(e -> e.getKey() < (timestamp - this.removeOlderThan));
                 }
@@ -297,47 +290,47 @@ public class GuiDataCollector {
 
 
     private void checkForWaterStorageHistoryCleanup(long timestamp) {
-        if ( timestamp % 86400 == 0 ) {
-            synchronized (tankTemps) {
-                for (UUID key : tankTemps.keySet()) {
-                    TreeMap<Long, Double> newerValues = new TreeMap<>(tankTemps.get(key).tailMap(timestamp - this.removeOlderThan));
-                    tankTemps.put(key, newerValues);
+        if (timestamp % 86400 == 0) {
+            synchronized (this.tankTemps) {
+                for (Entry<UUID, TreeMap<Long, Double>> entry : this.tankTemps.entrySet()) {
+                    TreeMap<Long, Double> newerValues = new TreeMap<>(entry.getValue().tailMap(timestamp - this.removeOlderThan));
+                    this.tankTemps.put(entry.getKey(), newerValues);
                 }
             }
-            synchronized (hotWaterDemands) {
-                for (UUID key : hotWaterDemands.keySet()) {
-                    TreeMap<Long, Double> newerValues = new TreeMap<>(hotWaterDemands.get(key).tailMap(timestamp - this.removeOlderThan));
-                    hotWaterDemands.put(key, newerValues);
+            synchronized (this.hotWaterDemands) {
+                for (Entry<UUID, TreeMap<Long, Double>> entry : this.hotWaterDemands.entrySet()) {
+                    TreeMap<Long, Double> newerValues = new TreeMap<>(entry.getValue().tailMap(timestamp - this.removeOlderThan));
+                    this.hotWaterDemands.put(entry.getKey(), newerValues);
                 }
             }
-            synchronized (hotWaterSupplies) {
-                for (UUID key : hotWaterSupplies.keySet()) {
-                    TreeMap<Long, Double> newerValues = new TreeMap<>(hotWaterSupplies.get(key).tailMap(timestamp - this.removeOlderThan));
-                    hotWaterSupplies.put(key, newerValues);
+            synchronized (this.hotWaterSupplies) {
+                for (Entry<UUID, TreeMap<Long, Double>> entry : this.hotWaterSupplies.entrySet()) {
+                    TreeMap<Long, Double> newerValues = new TreeMap<>(entry.getValue().tailMap(timestamp - this.removeOlderThan));
+                    this.hotWaterSupplies.put(entry.getKey(), newerValues);
                 }
             }
         }
     }
 
     private void checkForWaterPredictionHistoryCleanup(long timestamp) {
-        if ( timestamp % 86400 == 0 ) {
-            synchronized (predictedTankTemp) {
-                predictedTankTemp = new TreeMap<>(predictedTankTemp.tailMap(timestamp - this.removeOlderThan));
+        if (timestamp % 86400 == 0) {
+            synchronized (this.predictedTankTemp) {
+                this.predictedTankTemp = new TreeMap<>(this.predictedTankTemp.tailMap(timestamp - this.removeOlderThan));
             }
-            synchronized (predictedHotWaterDemand) {
-                predictedHotWaterDemand = new TreeMap<>(predictedHotWaterDemand.tailMap(timestamp - this.removeOlderThan));
+            synchronized (this.predictedHotWaterDemand) {
+                this.predictedHotWaterDemand = new TreeMap<>(this.predictedHotWaterDemand.tailMap(timestamp - this.removeOlderThan));
             }
-            synchronized (predictedHotWaterSupply) {
-                predictedHotWaterSupply = new TreeMap<>(predictedHotWaterSupply.tailMap(timestamp - this.removeOlderThan));
+            synchronized (this.predictedHotWaterSupply) {
+                this.predictedHotWaterSupply = new TreeMap<>(this.predictedHotWaterSupply.tailMap(timestamp - this.removeOlderThan));
             }
         }
     }
 
     private void checkForBatteryStorageHistoryCleanup(long timestamp) {
-        if ( timestamp % 3600 == 0 ) {
-            synchronized (batteryStorageHistories) {
+        if (timestamp % 3600 == 0) {
+            synchronized (this.batteryStorageHistories) {
                 TreeMap<Long, GUIBatteryStorageStateExchange> optimizedBatteryStorageHistories;
-                for (Entry<UUID, OptimizedDataStorage<GUIBatteryStorageStateExchange>> e : batteryStorageHistories.entrySet()) {
+                for (Entry<UUID, OptimizedDataStorage<GUIBatteryStorageStateExchange>> e : this.batteryStorageHistories.entrySet()) {
                     optimizedBatteryStorageHistories = (e.getValue().getMap());
                     optimizedBatteryStorageHistories.entrySet().removeIf(ex -> ex.getKey() < (timestamp - this.removeOlderThan));
                 }

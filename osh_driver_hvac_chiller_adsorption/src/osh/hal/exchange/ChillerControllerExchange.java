@@ -5,55 +5,52 @@ import osh.eal.hal.exchange.HALControllerExchange;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
-public class ChillerControllerExchange 
-				extends HALControllerExchange {
-	
-	private boolean stopGenerationFlag;
-	
-	private boolean coolingRequest;
-	
-	private int scheduledRuntime;
+public class ChillerControllerExchange
+        extends HALControllerExchange {
 
-	/**
-	 * 
-	 * @param deviceID
-	 * @param timestamp
-	 */
-	public ChillerControllerExchange(
-			UUID deviceID, 
-			Long timestamp, 
-			boolean stopGenerationFlag, 
-			boolean coolingRequest,
-			int scheduledRuntime) {
-		super(deviceID, timestamp);
-		
-		this.stopGenerationFlag = stopGenerationFlag;
-		this.coolingRequest = coolingRequest;
-		this.scheduledRuntime = scheduledRuntime;
-	}
+    private boolean stopGenerationFlag;
 
-	
-	public boolean isStopGenerationFlag() {
-		return stopGenerationFlag;
-	}
+    private boolean coolingRequest;
 
-	public boolean isCoolingRequest() {
-		return coolingRequest;
-	}
+    private final int scheduledRuntime;
 
-	public int getScheduledRuntime() {
-		return scheduledRuntime;
-	}
+    /**
+     * @param deviceID
+     * @param timestamp
+     */
+    public ChillerControllerExchange(
+            UUID deviceID,
+            Long timestamp,
+            boolean stopGenerationFlag,
+            boolean coolingRequest,
+            int scheduledRuntime) {
+        super(deviceID, timestamp);
 
-	public void setCoolingRequest(boolean heatingRequest) {
-		this.coolingRequest = heatingRequest;
-	}
-	
-	public void setStopGenerationFlag(boolean stopGenerationFlag) {
-		this.stopGenerationFlag = stopGenerationFlag;
-	}	
+        this.stopGenerationFlag = stopGenerationFlag;
+        this.coolingRequest = coolingRequest;
+        this.scheduledRuntime = scheduledRuntime;
+    }
+
+
+    public boolean isStopGenerationFlag() {
+        return this.stopGenerationFlag;
+    }
+
+    public void setStopGenerationFlag(boolean stopGenerationFlag) {
+        this.stopGenerationFlag = stopGenerationFlag;
+    }
+
+    public boolean isCoolingRequest() {
+        return this.coolingRequest;
+    }
+
+    public void setCoolingRequest(boolean heatingRequest) {
+        this.coolingRequest = heatingRequest;
+    }
+
+    public int getScheduledRuntime() {
+        return this.scheduledRuntime;
+    }
 }

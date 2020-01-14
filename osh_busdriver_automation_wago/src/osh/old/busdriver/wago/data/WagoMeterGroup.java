@@ -7,23 +7,22 @@ import java.util.List;
 
 /**
  * wago xml interface
- * 
- * @author Kaibin Bao
  *
+ * @author Kaibin Bao
  */
 @XmlType
 public class WagoMeterGroup {
-	@XmlPath("@id")
-	private int groupId;
+    @XmlPath("@id")
+    private int groupId;
 
-	@XmlPath("input")
-	private List<WagoPowerMeter> meters;
+    @XmlPath("input")
+    private List<WagoPowerMeter> meters;
 
-	public int getGroupId() {
-		return groupId;
-	}
+    public int getGroupId() {
+        return this.groupId;
+    }
 
-	public List<WagoPowerMeter> getMeters() {
-		return meters;
-	}
+    public List<WagoPowerMeter> getMeters() {
+        return this.meters;
+    }
 }

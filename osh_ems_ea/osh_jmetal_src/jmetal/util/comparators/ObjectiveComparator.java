@@ -32,60 +32,48 @@ import java.util.Comparator;
 @SuppressWarnings("rawtypes")
 public class ObjectiveComparator implements Comparator {
 
-  /**
-   * Stores the index of the objective to compare
-   */
-  private int nObj;
-  private boolean ascendingOrder_;
+    /**
+     * Stores the index of the objective to compare
+     */
+    private final int nObj;
+    private final boolean ascendingOrder_;
 
-  /**
-   * Constructor.
-   *
-   * @param nObj The index of the objective to compare
-   */
-  public ObjectiveComparator(int nObj) {
-    this.nObj = nObj;
-    ascendingOrder_ = true;
-  } // ObjectiveComparator
+    /**
+     * Constructor.
+     *
+     * @param nObj The index of the objective to compare
+     */
+    public ObjectiveComparator(int nObj) {
+        this.nObj = nObj;
+        this.ascendingOrder_ = true;
+    } // ObjectiveComparator
 
-  public ObjectiveComparator(int nObj, boolean descendingOrder) {
-    this.nObj = nObj;
-      ascendingOrder_ = !descendingOrder;
-  } // ObjectiveComparator
+    public ObjectiveComparator(int nObj, boolean descendingOrder) {
+        this.nObj = nObj;
+        this.ascendingOrder_ = !descendingOrder;
+    } // ObjectiveComparator
 
-  /**
-   * Compares two solutions.
-   *
-   * @param o1 Object representing the first <code>Solution</code>.
-   * @param o2 Object representing the second <code>Solution</code>.
-   * @return -1, or 0, or 1 if o1 is less than, equal, or greater than o2,
-   *         respectively.
-   */
-  @Override
-  public int compare(Object o1, Object o2) {
-    if (o1 == null)
-      return 1;
-    else if (o2 == null)
-      return -1;
+    /**
+     * Compares two solutions.
+     *
+     * @param o1 Object representing the first <code>Solution</code>.
+     * @param o2 Object representing the second <code>Solution</code>.
+     * @return -1, or 0, or 1 if o1 is less than, equal, or greater than o2,
+     * respectively.
+     */
+    @Override
+    public int compare(Object o1, Object o2) {
+        if (o1 == null)
+            return 1;
+        else if (o2 == null)
+            return -1;
 
-    double objetive1 = ((Solution) o1).getObjective(this.nObj);
-    double objetive2 = ((Solution) o2).getObjective(this.nObj);
-    if (ascendingOrder_) {
-      if (objetive1 < objetive2) {
-        return -1;
-      } else if (objetive1 > objetive2) {
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      if (objetive1 < objetive2) {
-        return 1;
-      } else if (objetive1 > objetive2) {
-        return -1;
-      } else {
-        return 0;
-      }
-    }
-  } // compare
+        double objective1 = ((Solution) o1).getObjective(this.nObj);
+        double objective2 = ((Solution) o2).getObjective(this.nObj);
+        if (this.ascendingOrder_) {
+            return Double.compare(objective1, objective2);
+        } else {
+            return Double.compare(objective2, objective1);
+        }
+    } // compare
 } // ObjectiveComparator

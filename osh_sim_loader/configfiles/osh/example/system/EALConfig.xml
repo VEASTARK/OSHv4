@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<EALConfiguration xmlns="http://osh/configuration/eal" xmlns:ns2="http://osh/configuration/system">
+<EALConfiguration xmlns:ns2="http://osh/configuration/system" xmlns="http://osh/configuration/eal">
     <assignedDevices deviceID="00000000-0000-5348-424c-000000000000">
         <deviceType>BASELOAD</deviceType>
         <deviceClassification>BASELOAD</deviceClassification>
@@ -719,7 +719,8 @@
         <controllable>false</controllable>
         <observable>true</observable>
         <assignedLocalOCUnit>
-            <localObserverClassName>osh.mgmt.localobserver.dhw.VDI6002DomesticHotWaterLocalObserver</localObserverClassName>
+            <localObserverClassName>osh.mgmt.localobserver.dhw.VDI6002DomesticHotWaterLocalObserver
+            </localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
     <assignedDevices deviceID="00000000-0000-5348-5348-000000000000">
@@ -846,7 +847,8 @@
         <controllable>false</controllable>
         <observable>true</observable>
         <assignedLocalOCUnit>
-            <localObserverClassName>osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver</localObserverClassName>
+            <localObserverClassName>osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver
+            </localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
     <assignedBusDevices>

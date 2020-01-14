@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for ComDeviceClassification.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -27,7 +27,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "ComDeviceClassification")
 @XmlEnum
@@ -38,12 +37,12 @@ public enum ComDeviceClassification {
     LOGGER,
     OTHER;
 
-    public String value() {
-        return name();
-    }
-
     public static ComDeviceClassification fromValue(String v) {
         return valueOf(v);
+    }
+
+    public String value() {
+        return this.name();
     }
 
 }

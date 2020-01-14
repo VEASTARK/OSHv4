@@ -1,4 +1,3 @@
-
 package osh.openweathermap.current;
 
 import com.fasterxml.jackson.annotation.*;
@@ -13,27 +12,29 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "coord",
-    "weather",
-    "base",
-    "main",
-    "wind",
-    "clouds",
-    "rain",
-    "snow",
-    "dt",
-    "sys",
-    "id",
-    "name",
-    "cod"
+        "coord",
+        "weather",
+        "base",
+        "main",
+        "wind",
+        "clouds",
+        "rain",
+        "snow",
+        "dt",
+        "sys",
+        "id",
+        "name",
+        "cod"
 })
 public class CurrentWeatherMap implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -4773418625215068417L;
-	@JsonProperty("coord")
+     *
+     */
+    private static final long serialVersionUID = -4773418625215068417L;
+    @JsonIgnore
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("coord")
     private Coord coord;
     @JsonProperty("weather")
     private List<Weather> weather = new ArrayList<Weather>();
@@ -59,13 +60,9 @@ public class CurrentWeatherMap implements Serializable {
     private String name;
     @JsonProperty("cod")
     private Integer cod;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The coord
+     * @return The coord
      */
     @JsonProperty("coord")
     public Coord getCoord() {
@@ -73,9 +70,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param coord
-     *     The coord
+     * @param coord The coord
      */
     @JsonProperty("coord")
     public void setCoord(Coord coord) {
@@ -83,9 +78,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The weather
+     * @return The weather
      */
     @JsonProperty("weather")
     public List<Weather> getWeather() {
@@ -93,9 +86,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param weather
-     *     The weather
+     * @param weather The weather
      */
     @JsonProperty("weather")
     public void setWeather(List<Weather> weather) {
@@ -103,9 +94,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The base
+     * @return The base
      */
     @JsonProperty("base")
     public String getBase() {
@@ -113,9 +102,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param base
-     *     The base
+     * @param base The base
      */
     @JsonProperty("base")
     public void setBase(String base) {
@@ -123,9 +110,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The main
+     * @return The main
      */
     @JsonProperty("main")
     public Main getMain() {
@@ -133,9 +118,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param main
-     *     The main
+     * @param main The main
      */
     @JsonProperty("main")
     public void setMain(Main main) {
@@ -143,9 +126,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The wind
+     * @return The wind
      */
     @JsonProperty("wind")
     public Wind getWind() {
@@ -153,9 +134,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param wind
-     *     The wind
+     * @param wind The wind
      */
     @JsonProperty("wind")
     public void setWind(Wind wind) {
@@ -163,9 +142,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The clouds
+     * @return The clouds
      */
     @JsonProperty("clouds")
     public Clouds getClouds() {
@@ -173,9 +150,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param clouds
-     *     The clouds
+     * @param clouds The clouds
      */
     @JsonProperty("clouds")
     public void setClouds(Clouds clouds) {
@@ -183,9 +158,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The rain
+     * @return The rain
      */
     @JsonProperty("rain")
     public Rain getRain() {
@@ -193,19 +166,15 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param rain
-     *     The rain
+     * @param rain The rain
      */
     @JsonProperty("rain")
     public void setRain(Rain rain) {
         this.rain = rain;
     }
-    
+
     /**
-     * 
-     * @return
-     *     The snow
+     * @return The snow
      */
     @JsonProperty("snow")
     public Snow getSnow() {
@@ -213,19 +182,15 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param snow
-     *     The snow
+     * @param snow The snow
      */
     @JsonProperty("snow")
     public void setSnow(Snow snow) {
         this.snow = snow;
     }
-    
+
     /**
-     * 
-     * @return
-     *     The dt
+     * @return The dt
      */
     @JsonProperty("dt")
     public Integer getDt() {
@@ -233,9 +198,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param dt
-     *     The dt
+     * @param dt The dt
      */
     @JsonProperty("dt")
     public void setDt(Integer dt) {
@@ -243,9 +206,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The sys
+     * @return The sys
      */
     @JsonProperty("sys")
     public Sys getSys() {
@@ -253,9 +214,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param sys
-     *     The sys
+     * @param sys The sys
      */
     @JsonProperty("sys")
     public void setSys(Sys sys) {
@@ -263,9 +222,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The id
+     * @return The id
      */
     @JsonProperty("id")
     public Integer getId() {
@@ -273,9 +230,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param id
-     *     The id
+     * @param id The id
      */
     @JsonProperty("id")
     public void setId(Integer id) {
@@ -283,9 +238,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The name
+     * @return The name
      */
     @JsonProperty("name")
     public String getName() {
@@ -293,9 +246,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param name
-     *     The name
+     * @param name The name
      */
     @JsonProperty("name")
     public void setName(String name) {
@@ -303,9 +254,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @return
-     *     The cod
+     * @return The cod
      */
     @JsonProperty("cod")
     public Integer getCod() {
@@ -313,9 +262,7 @@ public class CurrentWeatherMap implements Serializable {
     }
 
     /**
-     * 
-     * @param cod
-     *     The cod
+     * @param cod The cod
      */
     @JsonProperty("cod")
     public void setCod(Integer cod) {

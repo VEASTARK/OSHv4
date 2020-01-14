@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -33,13 +33,11 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "assignedDevices",
-    "assignedBusDevices"
+        "assignedDevices",
+        "assignedBusDevices"
 })
 @XmlRootElement(name = "EALConfiguration")
 public class EALConfiguration {
@@ -49,58 +47,54 @@ public class EALConfiguration {
 
     /**
      * Gets the value of the assignedDevices property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the assignedDevices property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAssignedDevices().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link AssignedDevice }
-     * 
-     * 
      */
     public List<AssignedDevice> getAssignedDevices() {
-        if (assignedDevices == null) {
-            assignedDevices = new ArrayList<AssignedDevice>();
+        if (this.assignedDevices == null) {
+            this.assignedDevices = new ArrayList<>();
         }
         return this.assignedDevices;
     }
 
     /**
      * Gets the value of the assignedBusDevices property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the assignedBusDevices property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAssignedBusDevices().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link AssignedBusDevice }
-     * 
-     * 
      */
     public List<AssignedBusDevice> getAssignedBusDevices() {
-        if (assignedBusDevices == null) {
-            assignedBusDevices = new ArrayList<AssignedBusDevice>();
+        if (this.assignedBusDevices == null) {
+            this.assignedBusDevices = new ArrayList<>();
         }
         return this.assignedBusDevices;
     }

@@ -16,121 +16,118 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Ingo Mauser, Till Schuberth
- *
  */
-public class ColdWaterTankNonControllableIPP 
-					extends NonControllableIPP<ISolution, IPrediction> {
-	
-	private static final long serialVersionUID = -7475173612656137600L;
-	
-	private SimpleColdWaterTank waterTank;
-	
-	private final double initialTemperature;
-	private final double tankCapacity = 3000.0;
-	private final double tankDiameter = 1.0;
-	private final double ambientTemperature = 20.0;
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public ColdWaterTankNonControllableIPP(
-			UUID deviceId, 
-			IGlobalLogger logger,
-			long now,
-			double initialTemperature,
-			LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		super(
-				deviceId, 
-				logger,
-				false, //does not cause scheduling
-				false, //does not need ancillary meter state as Input State
-				true, // reacts to input states
-				false, //is not static
-				now,
-				DeviceTypes.COLDWATERSTORAGE,
-				new Commodity[]{Commodity.COLDWATERPOWER},
-				compressionType,
-				compressionValue);
-		
-		this.initialTemperature = initialTemperature;
-		this.allInputCommodities = new Commodity[]{Commodity.COLDWATERPOWER};
-	}
-	
-	/** 
-	 * CONSTRUCTOR 
-	 * for serialization only, do NOT use */
-	@Deprecated
-	protected ColdWaterTankNonControllableIPP() {
-		super();
-		initialTemperature = 0;
-	}
+public class ColdWaterTankNonControllableIPP
+        extends NonControllableIPP<ISolution, IPrediction> {
+
+    private static final long serialVersionUID = -7475173612656137600L;
+    private final double initialTemperature;
+    private final double tankCapacity = 3000.0;
+    private final double tankDiameter = 1.0;
+    private final double ambientTemperature = 20.0;
+    private SimpleColdWaterTank waterTank;
+
+    /**
+     * CONSTRUCTOR
+     */
+    public ColdWaterTankNonControllableIPP(
+            UUID deviceId,
+            IGlobalLogger logger,
+            long now,
+            double initialTemperature,
+            LoadProfileCompressionTypes compressionType,
+            int compressionValue) {
+        super(
+                deviceId,
+                logger,
+                false, //does not cause scheduling
+                false, //does not need ancillary meter state as Input State
+                true, // reacts to input states
+                false, //is not static
+                now,
+                DeviceTypes.COLDWATERSTORAGE,
+                new Commodity[]{Commodity.COLDWATERPOWER},
+                compressionType,
+                compressionValue);
+
+        this.initialTemperature = initialTemperature;
+        this.allInputCommodities = new Commodity[]{Commodity.COLDWATERPOWER};
+    }
+
+    /**
+     * CONSTRUCTOR
+     * for serialization only, do NOT use
+     */
+    @Deprecated
+    protected ColdWaterTankNonControllableIPP() {
+        super();
+        this.initialTemperature = 0;
+    }
 
 
-	@Override
-	public void recalculateEncoding(long currentTime, long maxHorizon) {
-		// get new temperature of tank
-		//  better not...new IPP instead
-	}
+    @Override
+    public void recalculateEncoding(long currentTime, long maxHorizon) {
+        // get new temperature of tank
+        //  better not...new IPP instead
+    }
 
-	
-	// ### interdependent problem part stuff ###
 
-	@Override
-	public void initializeInterdependentCalculation(
-			long maxReferenceTime,
-			BitSet solution,
-			int stepSize,
-			boolean createLoadProfile,
-			boolean keepPrediction) {
-		
-		this.stepSize = stepSize;
-		setOutputStates(null);
-		this.interdependentInputStates = null;
-		
-		this.waterTank = new SimpleColdWaterTank(
-				tankCapacity, 
-				tankDiameter, 
-				initialTemperature, 
-				ambientTemperature);
-		
-		this.waterTank.reduceByStandingHeatLoss(maxReferenceTime - this.getTimestamp());
-	}
+    // ### interdependent problem part stuff ###
 
-	@Override
-	public void calculateNextStep() {
-		
-		if (this.interdependentInputStates != null) {
+    @Override
+    public void initializeInterdependentCalculation(
+            long maxReferenceTime,
+            BitSet solution,
+            int stepSize,
+            boolean createLoadProfile,
+            boolean keepPrediction) {
 
-			// update tank according to interdependentInputStates
-			double coldWaterPower = this.interdependentInputStates.getPower(Commodity.COLDWATERPOWER);
-			if (coldWaterPower != 0) {
-				this.waterTank.addPowerOverTime(coldWaterPower, stepSize, null, null);
-			}
+        this.stepSize = stepSize;
+        this.setOutputStates(null);
+        this.interdependentInputStates = null;
 
-			// update interdependentOutputStates
-			this.internalInterdependentOutputStates.setTemperature(Commodity.COLDWATERPOWER, this.waterTank.getCurrentWaterTemperature());
-			setOutputStates(internalInterdependentOutputStates);
-		}
+        this.waterTank = new SimpleColdWaterTank(
+                this.tankCapacity,
+                this.tankDiameter,
+                this.initialTemperature,
+                this.ambientTemperature);
 
-		// reduce by standing loss
-		this.waterTank.reduceByStandingHeatLoss(stepSize);
+        this.waterTank.reduceByStandingHeatLoss(maxReferenceTime - this.getTimestamp());
+    }
 
-	}
-	
-	
-	@Override
-	public Schedule getFinalInterdependentSchedule() {
-		return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
-	}
+    @Override
+    public void calculateNextStep() {
 
-	// ### to string ###
-	
-	@Override
-	public String problemToString() {
-		return "FIXME FIRST !!!! [" + getReferenceTime() + "] ColdWaterTank current temperature = " + (waterTank != null ? waterTank.getCurrentWaterTemperature() : null);
-	}
+        if (this.interdependentInputStates != null) {
+
+            // update tank according to interdependentInputStates
+            double coldWaterPower = this.interdependentInputStates.getPower(Commodity.COLDWATERPOWER);
+            if (coldWaterPower != 0) {
+                this.waterTank.addPowerOverTime(coldWaterPower, this.stepSize, null, null);
+            }
+
+            // update interdependentOutputStates
+            this.internalInterdependentOutputStates.setTemperature(Commodity.COLDWATERPOWER, this.waterTank.getCurrentWaterTemperature());
+            this.setOutputStates(this.internalInterdependentOutputStates);
+        }
+
+        // reduce by standing loss
+        this.waterTank.reduceByStandingHeatLoss(this.stepSize);
+
+    }
+
+
+    @Override
+    public Schedule getFinalInterdependentSchedule() {
+        return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
+    }
+
+    // ### to string ###
+
+    @Override
+    public String problemToString() {
+        return "FIXME FIRST !!!! [" + this.getReferenceTime() + "] ColdWaterTank current temperature = " + (this.waterTank != null ? this.waterTank.getCurrentWaterTemperature() : null);
+    }
 
 }

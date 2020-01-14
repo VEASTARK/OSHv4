@@ -7,94 +7,93 @@ import osh.datatypes.registry.StateExchange;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser
- *
  */
 public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6362041571466196750L;
-	protected String name;
-	protected String location;
-	
-	protected DeviceTypes deviceType;
-	protected DeviceClassification deviceClassification;
-	
-	protected boolean configured;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param sender
-	 * @param timestamp
-	 */
-	public DeviceMetaOCDetails(UUID sender, long timestamp) {
-		super(sender, timestamp);
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = -6362041571466196750L;
+    protected String name;
+    protected String location;
 
-	public String getName() {
-		return name;
-	}
+    protected DeviceTypes deviceType;
+    protected DeviceClassification deviceClassification;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    protected boolean configured;
 
-	public String getLocation() {
-		return location;
-	}
 
-	public void setLocation(String location) {
-		this.location = location;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param sender
+     * @param timestamp
+     */
+    public DeviceMetaOCDetails(UUID sender, long timestamp) {
+        super(sender, timestamp);
+    }
 
-	public DeviceTypes getDeviceType() {
-		return deviceType;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public void setDeviceType(DeviceTypes deviceType) {
-		this.deviceType = deviceType;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public DeviceClassification getDeviceClassification() {
-		return deviceClassification;
-	}
+    public String getLocation() {
+        return this.location;
+    }
 
-	public void setDeviceClassification(DeviceClassification deviceClassification) {
-		this.deviceClassification = deviceClassification;
-	}
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
-	public boolean isConfigured() {
-		return configured;
-	}
+    public DeviceTypes getDeviceType() {
+        return this.deviceType;
+    }
 
-	public void setConfigured(boolean configured) {
-		this.configured = configured;
-	}
-	
-	@Override
-	public String toString() {
-		return "Device \"" + name + "\" in " + location + " type: " + deviceType + "(" + deviceClassification + ")";
-	}
+    public void setDeviceType(DeviceTypes deviceType) {
+        this.deviceType = deviceType;
+    }
 
-	@Override
-	public DeviceMetaOCDetails clone() {
-		long uuidSenderLSB = this.sender.getLeastSignificantBits();
-		long uuidSenderMSB = this.sender.getMostSignificantBits();
-		DeviceMetaOCDetails clone = new DeviceMetaOCDetails(new UUID(uuidSenderMSB, uuidSenderLSB), this.getTimestamp());
-		
-		clone.name = this.name;
-		clone.location = this.location;
-		
-		clone.deviceType = this.deviceType;
-		clone.deviceClassification = this.deviceClassification;
-		
-		clone.configured = this.configured;
-		
-		return clone;
-	}
+    public DeviceClassification getDeviceClassification() {
+        return this.deviceClassification;
+    }
+
+    public void setDeviceClassification(DeviceClassification deviceClassification) {
+        this.deviceClassification = deviceClassification;
+    }
+
+    public boolean isConfigured() {
+        return this.configured;
+    }
+
+    public void setConfigured(boolean configured) {
+        this.configured = configured;
+    }
+
+    @Override
+    public String toString() {
+        return "Device \"" + this.name + "\" in " + this.location + " type: " + this.deviceType + "(" + this.deviceClassification + ")";
+    }
+
+    @Override
+    public DeviceMetaOCDetails clone() {
+        long uuidSenderLSB = this.sender.getLeastSignificantBits();
+        long uuidSenderMSB = this.sender.getMostSignificantBits();
+        DeviceMetaOCDetails clone = new DeviceMetaOCDetails(new UUID(uuidSenderMSB, uuidSenderLSB), this.getTimestamp());
+
+        clone.name = this.name;
+        clone.location = this.location;
+
+        clone.deviceType = this.deviceType;
+        clone.deviceClassification = this.deviceClassification;
+
+        clone.configured = this.configured;
+
+        return clone;
+    }
 
 }

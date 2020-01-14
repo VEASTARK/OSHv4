@@ -10,35 +10,36 @@ import java.util.UUID;
 
 /**
  * Dummy busdriver manager for future use
- * @author Ingo Mauser
  *
+ * @author Ingo Mauser
  */
 public class MieleGatewayBusManager extends BusManager {
 
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param uuid
-	 */
-	public MieleGatewayBusManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-		// NOTHING
-	}
-	
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param uuid
+     */
+    public MieleGatewayBusManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+        // NOTHING
+    }
+
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+
 //		getTimer().registerComponent(this, 1);
-		
+
 //		this.ocRegistry.register(NAME.class, this);
 //		this.ocRegistry.registerStateChangeListener(NAME.class, this);
-	}
+    }
 
-	@Override
-	public void onDriverUpdate(IHALExchange exchangeObject) {
-		// NOTHING
-	}
+    @Override
+    public void onDriverUpdate(IHALExchange exchangeObject) {
+        // NOTHING
+    }
 
 }

@@ -19,9 +19,9 @@ import java.util.List;
 
 /**
  * <p>Java class for AssignedDevice complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="AssignedDevice">
  *   &lt;complexContent>
@@ -41,19 +41,17 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AssignedDevice", propOrder = {
-    "deviceType",
-    "deviceClassification",
-    "deviceDescription",
-    "driverClassName",
-    "driverParameters",
-    "controllable",
-    "observable",
-    "assignedLocalOCUnit"
+        "deviceType",
+        "deviceClassification",
+        "deviceDescription",
+        "driverClassName",
+        "driverParameters",
+        "controllable",
+        "observable",
+        "assignedLocalOCUnit"
 })
 public class AssignedDevice {
 
@@ -75,23 +73,19 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the deviceType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DeviceTypes }
-     *     
+     *
+     * @return possible object is
+     * {@link DeviceTypes }
      */
     public DeviceTypes getDeviceType() {
-        return deviceType;
+        return this.deviceType;
     }
 
     /**
      * Sets the value of the deviceType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DeviceTypes }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DeviceTypes }
      */
     public void setDeviceType(DeviceTypes value) {
         this.deviceType = value;
@@ -99,23 +93,19 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the deviceClassification property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DeviceClassification }
-     *     
+     *
+     * @return possible object is
+     * {@link DeviceClassification }
      */
     public DeviceClassification getDeviceClassification() {
-        return deviceClassification;
+        return this.deviceClassification;
     }
 
     /**
      * Sets the value of the deviceClassification property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DeviceClassification }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DeviceClassification }
      */
     public void setDeviceClassification(DeviceClassification value) {
         this.deviceClassification = value;
@@ -123,23 +113,19 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the deviceDescription property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceDescription() {
-        return deviceDescription;
+        return this.deviceDescription;
     }
 
     /**
      * Sets the value of the deviceDescription property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceDescription(String value) {
         this.deviceDescription = value;
@@ -147,23 +133,19 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the driverClassName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDriverClassName() {
-        return driverClassName;
+        return this.driverClassName;
     }
 
     /**
      * Sets the value of the driverClassName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDriverClassName(String value) {
         this.driverClassName = value;
@@ -171,44 +153,40 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the driverParameters property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the driverParameters property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDriverParameters().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfigurationParameter }
-     * 
-     * 
      */
     public List<ConfigurationParameter> getDriverParameters() {
-        if (driverParameters == null) {
-            driverParameters = new ArrayList<ConfigurationParameter>();
+        if (this.driverParameters == null) {
+            this.driverParameters = new ArrayList<>();
         }
         return this.driverParameters;
     }
 
     /**
      * Gets the value of the controllable property.
-     * 
      */
     public boolean isControllable() {
-        return controllable;
+        return this.controllable;
     }
 
     /**
      * Sets the value of the controllable property.
-     * 
      */
     public void setControllable(boolean value) {
         this.controllable = value;
@@ -216,15 +194,13 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the observable property.
-     * 
      */
     public boolean isObservable() {
-        return observable;
+        return this.observable;
     }
 
     /**
      * Sets the value of the observable property.
-     * 
      */
     public void setObservable(boolean value) {
         this.observable = value;
@@ -232,23 +208,19 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the assignedLocalOCUnit property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AssignedLocalOCUnit }
-     *     
+     *
+     * @return possible object is
+     * {@link AssignedLocalOCUnit }
      */
     public AssignedLocalOCUnit getAssignedLocalOCUnit() {
-        return assignedLocalOCUnit;
+        return this.assignedLocalOCUnit;
     }
 
     /**
      * Sets the value of the assignedLocalOCUnit property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AssignedLocalOCUnit }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AssignedLocalOCUnit }
      */
     public void setAssignedLocalOCUnit(AssignedLocalOCUnit value) {
         this.assignedLocalOCUnit = value;
@@ -256,23 +228,19 @@ public class AssignedDevice {
 
     /**
      * Gets the value of the deviceID property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getDeviceID() {
-        return deviceID;
+        return this.deviceID;
     }
 
     /**
      * Sets the value of the deviceID property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDeviceID(String value) {
         this.deviceID = value;

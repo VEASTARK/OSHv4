@@ -8,8 +8,8 @@ sourceSets {
 }
 
 dependencies {
-    compile project(":osh_core")
-    compile project(":osh_busdriver_appliance_mielegateway")
-    compile project(":osh_driver_appliance")
-    compile project(":osh_en50523")
+    implementation project(":osh_core")
+    implementation project(":osh_busdriver_appliance_mielegateway")
+    implementation project(":osh_driver_appliance")
+    implementation project(":osh_en50523")
 }

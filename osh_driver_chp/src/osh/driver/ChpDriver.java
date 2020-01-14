@@ -4,7 +4,6 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.driver.details.chp.ChpDriverDetails;
 import osh.eal.hal.HALDeviceDriver;
-import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.registry.interfaces.IEventTypeReceiver;
 import osh.registry.interfaces.IHasState;
@@ -13,108 +12,104 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser, Jan M�ller
- *
  */
-public abstract class ChpDriver 
-						extends HALDeviceDriver 
-						implements IEventTypeReceiver, IHasState {
+public abstract class ChpDriver
+        extends HALDeviceDriver
+        implements IEventTypeReceiver, IHasState {
 
-	protected int minimumRuntime;
-	protected int runtime;
-	
-	private boolean electricityRequest;
-	private boolean heatingRequest;
-	
-	protected ChpDriverDetails chpDriverDetails = null;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 * @param deviceID
-	 * @param driverConfig
-	 * @throws HALException 
-	 */
-	public ChpDriver(
-			IOSH controllerbox, 
-			UUID deviceID,
-			OSHParameterCollection driverConfig) throws HALException {
-		super(controllerbox, deviceID, driverConfig);
-		//NOTHING
-	}
+    protected int minimumRuntime;
+    protected int runtime;
+    protected ChpDriverDetails chpDriverDetails;
+    private boolean electricityRequest;
+    private boolean heatingRequest;
 
-	
-	protected abstract void sendPowerRequestToChp();
-	
-	public synchronized void processChpDetailsAndNotify(ChpDriverDetails chpDetails) {
-		ChpObserverExchange _ox = new ChpObserverExchange(getDeviceID(), getTimer().getUnixTime());
-		_ox.setActivePower((int) Math.round(chpDetails.getCurrentElectricalPower()));
-		_ox.setThermalPower((int) Math.round(chpDetails.getCurrentThermalPower()));
-		_ox.setElectricityRequest(electricityRequest);
-		_ox.setHeatingRequest(heatingRequest);
-		_ox.setMinRuntime(minimumRuntime);
-		_ox.setMinRuntimeRemaining(getMinimumRuntimeRemaining());
-		
-		// Current state of CHP is sometimes not given to Observer directly
-		if (_ox.getActivePower() != 0) {
-			_ox.setRunning(true);
-		}
-		
-		this.notifyObserver(_ox);
-	}
 
-	public int getMinimumRuntime() {
-		return minimumRuntime;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     * @param deviceID
+     * @param driverConfig
+     */
+    public ChpDriver(
+            IOSH osh,
+            UUID deviceID,
+            OSHParameterCollection driverConfig) {
+        super(osh, deviceID, driverConfig);
+        //NOTHING
+    }
 
-	protected void setMinimumRuntime(int minimumRuntime) {
-		this.minimumRuntime = minimumRuntime;
-	}
 
-	public int getMinimumRuntimeRemaining() {
-		int returValue = getMinimumRuntime() - getRuntime();
-		if (returValue < 0) returValue = 0;
-		return returValue;
-	}
-	
-	public int getRuntime() {
-		return runtime;
-	}
+    protected abstract void sendPowerRequestToChp();
 
-	public boolean isElectricityRequest() {
-		return electricityRequest;
-	}
+    public synchronized void processChpDetailsAndNotify(ChpDriverDetails chpDetails) {
+        ChpObserverExchange _ox = new ChpObserverExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        _ox.setActivePower((int) Math.round(chpDetails.getCurrentElectricalPower()));
+        _ox.setThermalPower((int) Math.round(chpDetails.getCurrentThermalPower()));
+        _ox.setElectricityRequest(this.electricityRequest);
+        _ox.setHeatingRequest(this.heatingRequest);
+        _ox.setMinRuntime(this.minimumRuntime);
+        _ox.setMinRuntimeRemaining(this.getMinimumRuntimeRemaining());
 
-	protected void setElectricityRequest(boolean electricityRequest) {
-		if ( chpDriverDetails != null ) {
-			chpDriverDetails.setPowerGenerationRequest(electricityRequest);
-			getDriverRegistry().setState(ChpDriverDetails.class, this, chpDriverDetails);			
-		}
+        // Current state of CHP is sometimes not given to Observer directly
+        if (_ox.getActivePower() != 0) {
+            _ox.setRunning(true);
+        }
 
-		this.electricityRequest = electricityRequest;
-	}
+        this.notifyObserver(_ox);
+    }
 
-	public boolean isHeatingRequest() {
-		return heatingRequest;
-	}
+    public int getMinimumRuntime() {
+        return this.minimumRuntime;
+    }
 
-	protected void setHeatingRequest(boolean heatingRequest) {
-		if ( chpDriverDetails != null ) {
-			chpDriverDetails.setHeatingRequest(heatingRequest);
-			getDriverRegistry().setState(ChpDriverDetails.class, this, chpDriverDetails);			
-		}
-		this.heatingRequest = heatingRequest;
-	}
+    protected void setMinimumRuntime(int minimumRuntime) {
+        this.minimumRuntime = minimumRuntime;
+    }
 
-	public boolean isOperationRequest() {
-		return heatingRequest || electricityRequest;
-	}
-	
-	@Override
-	public UUID getUUID() {
-		return getDeviceID();
-	}
+    public int getMinimumRuntimeRemaining() {
+        int returnValue = this.minimumRuntime - this.runtime;
+        if (returnValue < 0) returnValue = 0;
+        return returnValue;
+    }
+
+    public int getRuntime() {
+        return this.runtime;
+    }
+
+    public boolean isElectricityRequest() {
+        return this.electricityRequest;
+    }
+
+    protected void setElectricityRequest(boolean electricityRequest) {
+        if (this.chpDriverDetails != null) {
+            this.chpDriverDetails.setPowerGenerationRequest(electricityRequest);
+            this.getDriverRegistry().setState(ChpDriverDetails.class, this, this.chpDriverDetails);
+        }
+
+        this.electricityRequest = electricityRequest;
+    }
+
+    public boolean isHeatingRequest() {
+        return this.heatingRequest;
+    }
+
+    protected void setHeatingRequest(boolean heatingRequest) {
+        if (this.chpDriverDetails != null) {
+            this.chpDriverDetails.setHeatingRequest(heatingRequest);
+            this.getDriverRegistry().setState(ChpDriverDetails.class, this, this.chpDriverDetails);
+        }
+        this.heatingRequest = heatingRequest;
+    }
+
+    public boolean isOperationRequest() {
+        return this.heatingRequest || this.electricityRequest;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
 
 }

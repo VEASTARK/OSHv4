@@ -10,54 +10,53 @@ import osh.mgmt.ipp.HotWaterDemandNonControllableIPP;
 import java.util.UUID;
 
 /**
- * 
  * @author Ingo Mauser, Jan Mueller
- *
  */
-public class SpaceHeatingNonControllableIPP 
-					extends HotWaterDemandNonControllableIPP {
-	
-	private static final long serialVersionUID = -1011574853269626608L;
-	
-	
-	/**
-	 * CONSTRUCTOR
-	 */
-	public SpaceHeatingNonControllableIPP(
-			UUID deviceId, 
-			DeviceTypes deviceType,
-			IGlobalLogger logger,
-			long now,
-			boolean toBeScheduled,
-			SparseLoadProfile powerPrediction,
-			Commodity usedCommodity,
-			LoadProfileCompressionTypes compressionType,
-			int compressionValue) {
-		super( 
-				deviceId, 
-				deviceType,
-				logger,
-				now,
-				toBeScheduled,
-				powerPrediction,
-				usedCommodity,
-				compressionType,
-				compressionValue); 
-	}
-	
-	/** 
-	 * CONSTRUCTOR 
-	 * for serialization only, do NOT use */
-	@Deprecated
-	protected SpaceHeatingNonControllableIPP() {
-		super();
-	}	
+public class SpaceHeatingNonControllableIPP
+        extends HotWaterDemandNonControllableIPP {
+
+    private static final long serialVersionUID = -1011574853269626608L;
 
 
-	// ### to string ###
-	
-	@Override
-	public String problemToString() {
-		return "[" + getTimestamp() + "] SpaceHeatingDemandNonControllableIPP";
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public SpaceHeatingNonControllableIPP(
+            UUID deviceId,
+            DeviceTypes deviceType,
+            IGlobalLogger logger,
+            long now,
+            boolean toBeScheduled,
+            SparseLoadProfile powerPrediction,
+            Commodity usedCommodity,
+            LoadProfileCompressionTypes compressionType,
+            int compressionValue) {
+        super(
+                deviceId,
+                deviceType,
+                logger,
+                now,
+                toBeScheduled,
+                powerPrediction,
+                usedCommodity,
+                compressionType,
+                compressionValue);
+    }
+
+    /**
+     * CONSTRUCTOR
+     * for serialization only, do NOT use
+     */
+    @Deprecated
+    protected SpaceHeatingNonControllableIPP() {
+        super();
+    }
+
+
+    // ### to string ###
+
+    @Override
+    public String problemToString() {
+        return "[" + this.getTimestamp() + "] SpaceHeatingDemandNonControllableIPP";
+    }
 }

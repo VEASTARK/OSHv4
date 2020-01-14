@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for ComDeviceTypes.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
@@ -34,7 +34,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "ComDeviceTypes")
 @XmlEnum
@@ -52,12 +51,12 @@ public enum ComDeviceTypes {
     DATABASELOGGER,
     OTHER;
 
-    public String value() {
-        return name();
-    }
-
     public static ComDeviceTypes fromValue(String v) {
         return valueOf(v);
+    }
+
+    public String value() {
+        return this.name();
     }
 
 }

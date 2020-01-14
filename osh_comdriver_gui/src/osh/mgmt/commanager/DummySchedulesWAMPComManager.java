@@ -18,56 +18,52 @@ import osh.registry.interfaces.IHasState;
 import java.util.UUID;
 
 /**
- * 
  * @author Sebastian Kramer
- *
  */
-public class DummySchedulesWAMPComManager extends ComManager implements IHasState, IEventTypeReceiver{
+public class DummySchedulesWAMPComManager extends ComManager implements IHasState, IEventTypeReceiver {
 
-	public DummySchedulesWAMPComManager(IOSHOC controllerbox, UUID uuid) {
-		super(controllerbox, uuid);
-	}
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();		
-		
-		getOCRegistry().registerStateChangeListener(EpsStateExchange.class, this);
-		getOCRegistry().registerStateChangeListener(PlsStateExchange.class, this);
-		getOCRegistry().registerStateChangeListener(GUIScheduleStateExchange.class, this);
-		
-	}
+    public DummySchedulesWAMPComManager(IOSHOC osh, UUID uuid) {
+        super(osh, uuid);
+    }
 
-	@Override
-	public void onDriverUpdate(ICALExchange exchangeObject) {
-		//NOTHING
-	}
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
 
-	@Override
-	public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) throws OSHException {
-		if (event instanceof StateChangedExchange) {
-			StateChangedExchange exsc = (StateChangedExchange) event;
-			
-			if (exsc.getType().equals(GUIScheduleStateExchange.class)) {
-				GUIScheduleStateExchange se = 
-						(GUIScheduleStateExchange) getOCRegistry().getState(GUIScheduleStateExchange.class, exsc.getStatefulentity());
-				GUIScheduleComExchange gsce = new GUIScheduleComExchange(
-						getUUID(), se.getTimestamp(), se.getDebugGetSchedules(), se.getStepSize());
-				updateOcDataSubscriber(gsce);
-			}	
-			else if (exsc.getType().equals(EpsStateExchange.class)) {
-				EpsStateExchange eee = getOCRegistry().getState(EpsStateExchange.class, exsc.getStatefulentity());
-				GUIEpsComExchange gece = new GUIEpsComExchange(getUUID(), eee.getTimestamp());
-				gece.setPriceSignals(eee.getPriceSignals());
-				updateOcDataSubscriber(gece);
-			}
-			else if (exsc.getType().equals(PlsStateExchange.class)) {
-				PlsStateExchange pse = getOCRegistry().getState(PlsStateExchange.class, exsc.getStatefulentity());
-				GUIPlsComExchange gpce = new GUIPlsComExchange(getUUID(), pse.getTimestamp());
-				gpce.setPowerLimitSignals(pse.getPowerLimitSignals());
-				updateOcDataSubscriber(gpce);
-			}
-		} 	
-	}
+        this.getOCRegistry().registerStateChangeListener(EpsStateExchange.class, this);
+        this.getOCRegistry().registerStateChangeListener(PlsStateExchange.class, this);
+        this.getOCRegistry().registerStateChangeListener(GUIScheduleStateExchange.class, this);
+
+    }
+
+    @Override
+    public void onDriverUpdate(ICALExchange exchangeObject) {
+        //NOTHING
+    }
+
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) throws OSHException {
+        if (event instanceof StateChangedExchange) {
+            StateChangedExchange exsc = (StateChangedExchange) event;
+
+            if (exsc.getType().equals(GUIScheduleStateExchange.class)) {
+                GUIScheduleStateExchange se =
+                        this.getOCRegistry().getState(GUIScheduleStateExchange.class, exsc.getStatefulEntity());
+                GUIScheduleComExchange gsce = new GUIScheduleComExchange(
+                        this.getUUID(), se.getTimestamp(), se.getDebugGetSchedules(), se.getStepSize());
+                this.updateOcDataSubscriber(gsce);
+            } else if (exsc.getType().equals(EpsStateExchange.class)) {
+                EpsStateExchange eee = this.getOCRegistry().getState(EpsStateExchange.class, exsc.getStatefulEntity());
+                GUIEpsComExchange gece = new GUIEpsComExchange(this.getUUID(), eee.getTimestamp());
+                gece.setPriceSignals(eee.getPriceSignals());
+                this.updateOcDataSubscriber(gece);
+            } else if (exsc.getType().equals(PlsStateExchange.class)) {
+                PlsStateExchange pse = this.getOCRegistry().getState(PlsStateExchange.class, exsc.getStatefulEntity());
+                GUIPlsComExchange gpce = new GUIPlsComExchange(this.getUUID(), pse.getTimestamp());
+                gpce.setPowerLimitSignals(pse.getPowerLimitSignals());
+                this.updateOcDataSubscriber(gpce);
+            }
+        }
+    }
 
 }

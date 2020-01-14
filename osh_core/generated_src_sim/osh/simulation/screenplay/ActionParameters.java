@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for ActionParameters complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ActionParameters">
  *   &lt;complexContent>
@@ -33,13 +33,11 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ActionParameters", propOrder = {
-    "parametersName",
-    "parameter"
+        "parametersName",
+        "parameter"
 })
 public class ActionParameters {
 
@@ -49,23 +47,19 @@ public class ActionParameters {
 
     /**
      * Gets the value of the parametersName property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getParametersName() {
-        return parametersName;
+        return this.parametersName;
     }
 
     /**
      * Sets the value of the parametersName property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setParametersName(String value) {
         this.parametersName = value;
@@ -73,29 +67,27 @@ public class ActionParameters {
 
     /**
      * Gets the value of the parameter property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the parameter property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParameter().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ActionParameter }
-     * 
-     * 
      */
     public List<ActionParameter> getParameter() {
-        if (parameter == null) {
-            parameter = new ArrayList<ActionParameter>();
+        if (this.parameter == null) {
+            this.parameter = new ArrayList<>();
         }
         return this.parameter;
     }

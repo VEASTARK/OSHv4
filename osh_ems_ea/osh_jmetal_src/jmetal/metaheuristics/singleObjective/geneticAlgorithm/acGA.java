@@ -35,120 +35,121 @@ import java.util.HashMap;
  */
 public class acGA extends Algorithm {
 
-  /**
-	 * 
-	 */
-  private static final long serialVersionUID = 1L;
-	
-  /**
-   * Stores the problem to solve
-   */
-  private Problem problem_;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-  /** 
-   * Constructor
-   * @param problem Problem to solve
-   */
-  public acGA(Problem problem){
-    super(problem) ;
-  } // sMOCell1
+    /**
+     * Stores the problem to solve
+     */
+    private Problem problem_;
+
+    /**
+     * Constructor
+     *
+     * @param problem Problem to solve
+     */
+    public acGA(Problem problem) {
+        super(problem);
+    } // sMOCell1
 
 
-  /**   
-   * Runs of the acGA algorithm.
-   * @return a <code>SolutionSet</code> that contains the best found solution  
-   * @throws JMException 
-   */ 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-public SolutionSet execute() throws JMException, ClassNotFoundException {
-    int populationSize, maxEvaluations, evaluations ;
-    Operator mutationOperator  = null ;
-    Operator crossoverOperator = null ;
-    Operator selectionOperator = null ;
+    /**
+     * Runs of the acGA algorithm.
+     *
+     * @return a <code>SolutionSet</code> that contains the best found solution
+     * @throws JMException
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public SolutionSet execute() throws JMException {
+        int populationSize, maxEvaluations, evaluations;
+        Operator mutationOperator;
+        Operator crossoverOperator;
+        Operator selectionOperator;
 
-    SolutionSet [] neighbors;    
-    SolutionSet population ;
-    Neighborhood neighborhood;
+        SolutionSet[] neighbors;
+        SolutionSet population;
+        Neighborhood neighborhood;
 
-    Comparator  comparator      ;
-    comparator = new ObjectiveComparator(0) ; // Single objective comparator
-    
-    Operator findBestSolution ;
-    HashMap  parameters ; // Operator parameters
-    parameters = new HashMap() ;
-    parameters.put("comparator", comparator) ;
-    findBestSolution = new BestSolutionSelection(parameters, problem_.getPseudoRandom()) ;
+        Comparator comparator;
+        comparator = new ObjectiveComparator(0); // Single objective comparator
 
-    //Read the params
-    populationSize    = ((Integer)getInputParameter("populationSize")).intValue();
-    maxEvaluations    = ((Integer)getInputParameter("maxEvaluations")).intValue();                
+        Operator findBestSolution;
+        HashMap parameters; // Operator parameters
+        parameters = new HashMap();
+        parameters.put("comparator", comparator);
+        findBestSolution = new BestSolutionSelection(parameters, this.problem_.getPseudoRandom());
 
-    //Read the operators
-    mutationOperator  = operators_.get("mutation");
-    crossoverOperator = operators_.get("crossover");
-    selectionOperator = operators_.get("selection");        
+        //Read the params
+        populationSize = (Integer) this.getInputParameter("populationSize");
+        maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
 
-    //Initialize the variables    
-    evaluations        = 0;                        
-    neighborhood       = new Neighborhood(populationSize);
-    neighbors          = new SolutionSet[populationSize];
+        //Read the operators
+        mutationOperator = this.operators_.get("mutation");
+        crossoverOperator = this.operators_.get("crossover");
+        selectionOperator = this.operators_.get("selection");
 
-    population = new SolutionSet(populationSize) ;
-    //Create the initial population
-    for (int i = 0; i < populationSize; i++){
-      Solution solution = new Solution(problem_);
-      problem_.evaluate(solution);  
-      population.add(solution);
-      solution.setLocation(i);
-      evaluations++;
-    }         
-  	
-    boolean solutionFound = false ;
-    while ((evaluations < maxEvaluations) && !solutionFound) {              
-      for (int ind = 0; ind < population.size(); ind++){      	
-        Solution individual = new Solution(population.get(ind));
+        //Initialize the variables
+        evaluations = 0;
+        neighborhood = new Neighborhood(populationSize);
+        neighbors = new SolutionSet[populationSize];
 
-        Solution [] parents = new Solution[2];
-        Solution [] offSpring = null ;
-
-        neighbors[ind] = neighborhood.getEightNeighbors(population,ind);                                                           
-        neighbors[ind].add(individual);
-
-        //parents
-        parents[0] = (Solution)selectionOperator.execute(neighbors[ind]);
-        parents[1] = (Solution)selectionOperator.execute(neighbors[ind]);
-
-        //Create a new solution, using genetic operators mutation and crossover
-        if (crossoverOperator != null)
-          offSpring = (Solution [])crossoverOperator.execute(parents);        
-        else {
-        	offSpring = new Solution[1] ;
-        	offSpring[0] = new Solution(parents[0]) ;
+        population = new SolutionSet(populationSize);
+        //Create the initial population
+        for (int i = 0; i < populationSize; i++) {
+            Solution solution = new Solution(this.problem_);
+            this.problem_.evaluate(solution);
+            population.add(solution);
+            solution.setLocation(i);
+            evaluations++;
         }
-        mutationOperator.execute(offSpring[0]);
 
-        //->Evaluate offspring and constraints
-        problem_.evaluate(offSpring[0]);
-        //problem_.evaluateConstraints(offSpring[0]);
-        evaluations++;
+        while (evaluations < maxEvaluations) {
+            for (int ind = 0; ind < population.size(); ind++) {
+                Solution individual = new Solution(population.get(ind));
 
-        if (comparator.compare(individual, offSpring[0]) > 0)
-        	population.replace(ind, offSpring[0]) ;          
-        
-        if ((evaluations % 1000) == 0) {
-          int bestSolution = (Integer)findBestSolution.execute(population) ;
-         	System.out.println ("Evals: " + evaluations + "\t Fitness: " + 
-          	  population.get(bestSolution).getObjective(0)) ;
-        } // if
-      } // for                     
-    } // while
-    
-    Solution bestSolution = population.best(comparator) ;
-    SolutionSet resultPopulation = new SolutionSet(1) ;
-    resultPopulation.add(bestSolution) ;
-    
-    System.out.println("Evaluations: " + evaluations ) ;
-    return resultPopulation ;
-  } // execute        
+                Solution[] parents = new Solution[2];
+                Solution[] offSpring;
+
+                neighbors[ind] = neighborhood.getEightNeighbors(population, ind);
+                neighbors[ind].add(individual);
+
+                //parents
+                parents[0] = (Solution) selectionOperator.execute(neighbors[ind]);
+                parents[1] = (Solution) selectionOperator.execute(neighbors[ind]);
+
+                //Create a new solution, using genetic operators mutation and crossover
+                if (crossoverOperator != null)
+                    offSpring = (Solution[]) crossoverOperator.execute(parents);
+                else {
+                    offSpring = new Solution[1];
+                    offSpring[0] = new Solution(parents[0]);
+                }
+                mutationOperator.execute(offSpring[0]);
+
+                //->Evaluate offspring and constraints
+                this.problem_.evaluate(offSpring[0]);
+                //problem_.evaluateConstraints(offSpring[0]);
+                evaluations++;
+
+                if (comparator.compare(individual, offSpring[0]) > 0)
+                    population.replace(ind, offSpring[0]);
+
+                if ((evaluations % 1000) == 0) {
+                    int bestSolution = (Integer) findBestSolution.execute(population);
+                    System.out.println("Evals: " + evaluations + "\t Fitness: " +
+                            population.get(bestSolution).getObjective(0));
+                } // if
+            } // for
+        } // while
+
+        Solution bestSolution = population.best(comparator);
+        SolutionSet resultPopulation = new SolutionSet(1);
+        resultPopulation.add(bestSolution);
+
+        System.out.println("Evaluations: " + evaluations);
+        return resultPopulation;
+    } // execute
 } // acGA
 

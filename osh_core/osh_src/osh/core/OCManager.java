@@ -22,308 +22,305 @@ import java.util.UUID;
 
 /**
  * for initialization an management of the Organic Smart Home
- * 
+ *
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth, Sebastian Kramer
- * 
  */
 public class OCManager extends OSHComponent implements ILifeCycleListener {
-	
-	private OSHParameterCollection globalObserverParameterCollection;
-	private OSHParameterCollection globalControllerParameterCollection;
-	
-	private GlobalOCUnit globalOCunit;
 
-	private ArrayList<LocalOCUnit> localOCUnits;
+    private OSHParameterCollection globalObserverParameterCollection;
+    private OSHParameterCollection globalControllerParameterCollection;
 
-	public OCManager(OSH theOrganicSmartHome) {
-		super(theOrganicSmartHome);
-	}
-	
-	@Override
-	public IOSHOC getOSH() {
-		return (IOSHOC) super.getOSH();
-	}
-	
-	/**
-	 * initialize the Organic Smart Home based on the given configuration objects
-	 * 
-	 * @param ealConfig
-	 * @param ocConfig
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void loadConfiguration(
-			OCConfiguration ocConfig,
-			List<GridConfig> gridConfigurations,
-			String meterUUID,
-			List<HALDeviceDriver> deviceDrivers,
-			Long optimizationMainRandomSeed,
-			String logDir) throws OCManagerException {
+    private GlobalOCUnit globalOCunit;
 
-		/*
-		 * if a optimisation-random seed is given from external it will override the optimisation-random seed in the configuration package
-		 */
-		if (optimizationMainRandomSeed == null && ocConfig.getOptimizationMainRandomSeed() != null) {
-			optimizationMainRandomSeed = Long.valueOf(ocConfig.getOptimizationMainRandomSeed());
-		}
-		if (optimizationMainRandomSeed == null) {
-			getLogger()
-					.logError(
-							"No optimizationMainRandomSeed available: neither in OCConfig nor as Startup parameter - using default random seed!");
-			getLogger()
-					.printDebugMessage(
-							"No optimizationMainRandomSeed available: Using default seed \"0xd1ce5bL\"");
-			optimizationMainRandomSeed = 0xd1ce5bL;
-		}
-		
-		ocConfig.setOptimizationMainRandomSeed(optimizationMainRandomSeed.toString());
+    private ArrayList<LocalOCUnit> localOCUnits;
 
-		
-		getLogger().logInfo("...initializing OC Manager of Organic Smart Home");
-		
-		// create OCEnergySimulationCore
-		OCEnergySimulationCore ocESC;
-		try {
-			ocESC = new OCEnergySimulationCore(gridConfigurations, meterUUID);
-		} catch (HALManagerException e) {
-			throw new OCManagerException(e);
-		}
-		
+    public OCManager(OSH theOrganicSmartHome) {
+        super(theOrganicSmartHome);
+    }
 
-		// create local OC-Unit connected with the specific HAL-driver
-		localOCUnits = createLocalOCUnits(deviceDrivers);
+    @Override
+    public IOSHOC getOSH() {
+        return (IOSHOC) super.getOSH();
+    }
 
-		// load global o/c-unit
-		ocConfig.getGlobalControllerClass();
-		GlobalObserver globalObserver = null;
-		GlobalController globalController = null;
-		getLogger().logInfo("...creating global O/C-units");
-		Class globalObserverClass = null;
-		Class globalControllerClass = null;
+    /**
+     * initialize the Organic Smart Home based on the given configuration objects
+     *
+     * @param ocConfig
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void loadConfiguration(
+            OCConfiguration ocConfig,
+            List<GridConfig> gridConfigurations,
+            String meterUUID,
+            List<HALDeviceDriver> deviceDrivers,
+            Long optimizationMainRandomSeed,
+            String logDir) throws OCManagerException {
 
-		globalObserverParameterCollection = new OSHParameterCollection();
-		globalObserverParameterCollection.loadCollection(ocConfig
-				.getGlobalObserverParameters());
+        /*
+         * if a optimisation-random seed is given from external it will override the optimisation-random seed in the configuration package
+         */
+        if (optimizationMainRandomSeed == null && ocConfig.getOptimizationMainRandomSeed() != null) {
+            optimizationMainRandomSeed = Long.valueOf(ocConfig.getOptimizationMainRandomSeed());
+        }
+        if (optimizationMainRandomSeed == null) {
+            this.getLogger()
+                    .logError(
+                            "No optimizationMainRandomSeed available: neither in OCConfig nor as Startup parameter - using default random seed!");
+            this.getLogger()
+                    .printDebugMessage(
+                            "No optimizationMainRandomSeed available: Using default seed \"0xd1ce5bL\"");
+            optimizationMainRandomSeed = 0xd1ce5bL;
+        }
 
-		globalControllerParameterCollection = new OSHParameterCollection();
-		globalControllerParameterCollection.loadCollection(ocConfig
-				.getGlobalControllerParameters());
-		
-		globalControllerParameterCollection.setParameter("optimizationMainRandomSeed", ocConfig.getOptimizationMainRandomSeed());
+        ocConfig.setOptimizationMainRandomSeed(optimizationMainRandomSeed.toString());
 
-		try {
-			globalObserverClass = Class.forName(ocConfig.getGlobalObserverClass());
-			globalControllerClass = Class.forName(ocConfig.getGlobalControllerClass());
-		} catch (Exception ex) {
-			throw new OCManagerException(ex);
-		}
 
-		try {
-			globalObserver = (GlobalObserver) globalObserverClass
-					.getConstructor(IOSHOC.class,
-							OSHParameterCollection.class).newInstance(
-							getOSH(),
-							globalObserverParameterCollection);
-		} catch (Exception ex) {
-			throw new OCManagerException(ex);
-		}
+        this.getLogger().logInfo("...initializing OC Manager of Organic Smart Home");
 
-		try {
-			globalController = (GlobalController) globalControllerClass
-					.getConstructor(IOSHOC.class,
-							OSHParameterCollection.class,
-							GAConfiguration.class,
-							OCEnergySimulationCore.class).newInstance(
-							getOSH(),
-							globalControllerParameterCollection,
-							ocConfig.getGaConfiguration(),
-							ocESC);
-		} catch (Exception ex) {
-			throw new OCManagerException(ex);
-		}
-		((OSH) getOSH()).setGlobalObserver(globalObserver);
-		((OSH) getOSH()).setGlobalController(globalController);
-		
-		
-		// create global O/C-unit
-		this.globalOCunit = new GlobalOCUnit(
-				UUID.fromString(ocConfig.getGlobalOcUuid()),
-				getOSH(), 
-				globalObserver, 
-				globalController);
+        // create OCEnergySimulationCore
+        OCEnergySimulationCore ocESC;
+        try {
+            ocESC = new OCEnergySimulationCore(gridConfigurations, meterUUID);
+        } catch (HALManagerException e) {
+            throw new OCManagerException(e);
+        }
 
-		registerLocalUnits();
-	}
-	
-	/**
-	 * get all members of the lifecycle-process. Used to trigger lifecycle-changes
-	 * 
-	 * @return
-	 */
-	private ArrayList<ILifeCycleListener> getLifeCycleMembers() {
 
-		ArrayList<ILifeCycleListener> boxLifeCycleMembers = new ArrayList<ILifeCycleListener>();
+        // create local OC-Unit connected with the specific HAL-driver
+        this.localOCUnits = this.createLocalOCUnits(deviceDrivers);
 
-		// OC-units for device drivers
-		for (LocalOCUnit localOCUnit : localOCUnits) {
+        // load global o/c-unit
+        GlobalObserver globalObserver;
+        GlobalController globalController;
+        this.getLogger().logInfo("...creating global O/C-units");
+        Class globalObserverClass;
+        Class globalControllerClass;
 
-			if (localOCUnit.localObserver != null) {
-				boxLifeCycleMembers
-						.add(localOCUnit.localObserver);
-			}
-			if (localOCUnit.localController != null) {
-				boxLifeCycleMembers
-						.add(localOCUnit.localController);
-			}
-		}
+        this.globalObserverParameterCollection = new OSHParameterCollection();
+        this.globalObserverParameterCollection.loadCollection(ocConfig
+                .getGlobalObserverParameters());
 
-		boxLifeCycleMembers.add(globalOCunit.getObserver());
-		boxLifeCycleMembers.add(globalOCunit.getController());
+        this.globalControllerParameterCollection = new OSHParameterCollection();
+        this.globalControllerParameterCollection.loadCollection(ocConfig
+                .getGlobalControllerParameters());
 
-		return boxLifeCycleMembers;
-	}
+        this.globalControllerParameterCollection.setParameter("optimizationMainRandomSeed", ocConfig.getOptimizationMainRandomSeed());
 
-	/**
-	 * creates local o/c-unit based on the driver information. Only for devices
-	 * witch are at least "Observable" such an instance will be created
-	 * 
-	 * @param deviceDrivers
-	 * @return
-	 */
-	private ArrayList<LocalOCUnit> createLocalOCUnits(
-			List<HALDeviceDriver> deviceDrivers)
-			throws OCManagerException {
+        try {
+            globalObserverClass = Class.forName(ocConfig.getGlobalObserverClass());
+            globalControllerClass = Class.forName(ocConfig.getGlobalControllerClass());
+        } catch (Exception ex) {
+            throw new OCManagerException(ex);
+        }
 
-		ArrayList<LocalOCUnit> _localOCUnits = new ArrayList<LocalOCUnit>();
+        try {
+            globalObserver = (GlobalObserver) globalObserverClass
+                    .getConstructor(IOSHOC.class,
+                            OSHParameterCollection.class).newInstance(
+                            this.getOSH(),
+                            this.globalObserverParameterCollection);
+        } catch (Exception ex) {
+            throw new OCManagerException(ex);
+        }
 
-		getLogger().logInfo("...creating local units");
+        try {
+            globalController = (GlobalController) globalControllerClass
+                    .getConstructor(IOSHOC.class,
+                            OSHParameterCollection.class,
+                            GAConfiguration.class,
+                            OCEnergySimulationCore.class).newInstance(
+                            this.getOSH(),
+                            this.globalControllerParameterCollection,
+                            ocConfig.getGaConfiguration(),
+                            ocESC);
+        } catch (Exception ex) {
+            throw new OCManagerException(ex);
+        }
+        ((OSH) this.getOSH()).setGlobalObserver(globalObserver);
+        ((OSH) this.getOSH()).setGlobalController(globalController);
 
-		for (HALDeviceDriver deviceDriver : deviceDrivers) {
 
-			// is this device able to be observed or controlled?
-			// ...then build an o/c-unit
-			// otherwise do nothing ;-)
-			LocalObserver localObserver = null;
+        // create global O/C-unit
+        this.globalOCunit = new GlobalOCUnit(
+                UUID.fromString(ocConfig.getGlobalOcUuid()),
+                this.getOSH(),
+                globalObserver,
+                globalController);
 
-			if (deviceDriver.isObservable()) {
-				// getting the class for the local oc unit
-				try {
-					localObserver = (LocalObserver) deviceDriver
-							.getRequiredLocalObserverClass()
-							.getConstructor(IOSHOC.class)
-							.newInstance(getOSH());
-				} catch (Exception ex) {
-					throw new OCManagerException(ex);
-				}
+        this.registerLocalUnits();
+    }
 
-				LocalController localController = null;
+    /**
+     * get all members of the lifecycle-process. Used to trigger lifecycle-changes
+     *
+     * @return
+     */
+    private ArrayList<ILifeCycleListener> getLifeCycleMembers() {
 
-				if (deviceDriver.isControllable()) {
-					try {
-						localController = (LocalController) deviceDriver
-								.getRequiredLocalControllerClass()
-								.getConstructor(IOSHOC.class)
-								.newInstance(getOSH());
-					} catch (Exception ex) {
-						throw new OCManagerException(ex);
-					}
+        ArrayList<ILifeCycleListener> boxLifeCycleMembers = new ArrayList<>();
 
-				}
-				// init localunit and refer the realtime module
+        // OC-units for device drivers
+        for (LocalOCUnit localOCUnit : this.localOCUnits) {
 
-				// UUID id = _driver.getDeviceID();
+            if (localOCUnit.localObserver != null) {
+                boxLifeCycleMembers
+                        .add(localOCUnit.localObserver);
+            }
+            if (localOCUnit.localController != null) {
+                boxLifeCycleMembers
+                        .add(localOCUnit.localController);
+            }
+        }
 
-				LocalOCUnit _localOCUnit = new LocalOCUnit(
-						getOSH(),
-						deviceDriver.getDeviceID(), 
-						localObserver,
-						localController);
+        boxLifeCycleMembers.add(this.globalOCunit.getObserver());
+        boxLifeCycleMembers.add(this.globalOCunit.getController());
 
-				// assign the type of the device an it's classification
-				_localOCUnit.setDeviceType(deviceDriver.getDeviceType());
-				_localOCUnit.setDeviceClassification(deviceDriver
-						.getDeviceClassification());
+        return boxLifeCycleMembers;
+    }
 
-				// register the local observer at the specific HAL-driver
-				// (Observer Pattern/publish-subscribe)
-				deviceDriver.setOcDataSubscriber(_localOCUnit.localObserver);
+    /**
+     * creates local o/c-unit based on the driver information. Only for devices
+     * witch are at least "Observable" such an instance will be created
+     *
+     * @param deviceDrivers
+     * @return
+     */
+    private ArrayList<LocalOCUnit> createLocalOCUnits(
+            List<HALDeviceDriver> deviceDrivers)
+            throws OCManagerException {
 
-				// do the same with the local controller
-				// Before check if the controller is available
-				// (it's not available when the device is not controllable)
-				if (_localOCUnit.localController != null) {
-					_localOCUnit.localController.setOcDataSubscriber(deviceDriver);
-				}
+        ArrayList<LocalOCUnit> _localOCUnits = new ArrayList<>();
 
-				// add the new unit
-				_localOCUnits.add(_localOCUnit);
-			}
-		}
+        this.getLogger().logInfo("...creating local units");
 
-		return _localOCUnits;
-	}
-	
-	/**
-	 * register local o/c-units at the Organic Smart Home (global o/c-unit)
-	 */
-	private void registerLocalUnits() {
-		for (LocalOCUnit _localunit : localOCUnits) {
-			try {
-				globalOCunit.registerLocalUnit(_localunit);
-			} catch (OSHException e) {
-				getGlobalLogger().logError("", e);
-			}
-		}
-	}
-	
-	/**
-	 * get the global logger => here the configuration of the logger can be done
-	 * during the runtime.
-	 * 
-	 * @return
-	 */
-	public IGlobalLogger getLogger() {
-		return getOSH().getLogger();
-	}
+        for (HALDeviceDriver deviceDriver : deviceDrivers) {
 
-	@Override
-	public void onSystemRunning() throws OSHException {
-		for (ILifeCycleListener listener : getLifeCycleMembers()) {
-			listener.onSystemRunning();
-		}
-	}
+            // is this device able to be observed or controlled?
+            // ...then build an o/c-unit
+            // otherwise do nothing ;-)
+            LocalObserver localObserver;
 
-	@Override
-	public void onSystemShutdown() throws OSHException {
-		for (ILifeCycleListener listener : getLifeCycleMembers()) {
-			listener.onSystemShutdown();
-		}
-	}
+            if (deviceDriver.isObservable()) {
+                // getting the class for the local oc unit
+                try {
+                    localObserver = deviceDriver
+                            .getRequiredLocalObserverClass()
+                            .getConstructor(IOSHOC.class)
+                            .newInstance(this.getOSH());
+                } catch (Exception ex) {
+                    throw new OCManagerException(ex);
+                }
 
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		for (ILifeCycleListener listener : getLifeCycleMembers()) {
-			listener.onSystemIsUp();
-		}
-	}
+                LocalController localController = null;
 
-	@Override
-	public void onSystemHalt() throws OSHException {
-		for (ILifeCycleListener listener : getLifeCycleMembers()) {
-			listener.onSystemHalt();
-		}
-	}
+                if (deviceDriver.isControllable()) {
+                    try {
+                        localController = deviceDriver
+                                .getRequiredLocalControllerClass()
+                                .getConstructor(IOSHOC.class)
+                                .newInstance(this.getOSH());
+                    } catch (Exception ex) {
+                        throw new OCManagerException(ex);
+                    }
 
-	@Override
-	public void onSystemResume() throws OSHException {
-		for (ILifeCycleListener listener : getLifeCycleMembers()) {
-			listener.onSystemResume();
-		}
-	}
+                }
+                // init localunit and refer the realtime module
 
-	@Override
-	public void onSystemError() throws OSHException {
-		for (ILifeCycleListener listener : getLifeCycleMembers()) {
-			listener.onSystemError();
-		}
-	}
+                // UUID id = _driver.getDeviceID();
+
+                LocalOCUnit _localOCUnit = new LocalOCUnit(
+                        this.getOSH(),
+                        deviceDriver.getDeviceID(),
+                        localObserver,
+                        localController);
+
+                // assign the type of the device an it's classification
+                _localOCUnit.setDeviceType(deviceDriver.getDeviceType());
+                _localOCUnit.setDeviceClassification(deviceDriver
+                        .getDeviceClassification());
+
+                // register the local observer at the specific HAL-driver
+                // (Observer Pattern/publish-subscribe)
+                deviceDriver.setOcDataSubscriber(_localOCUnit.localObserver);
+
+                // do the same with the local controller
+                // Before check if the controller is available
+                // (it's not available when the device is not controllable)
+                if (_localOCUnit.localController != null) {
+                    _localOCUnit.localController.setOcDataSubscriber(deviceDriver);
+                }
+
+                // add the new unit
+                _localOCUnits.add(_localOCUnit);
+            }
+        }
+
+        return _localOCUnits;
+    }
+
+    /**
+     * register local o/c-units at the Organic Smart Home (global o/c-unit)
+     */
+    private void registerLocalUnits() {
+        for (LocalOCUnit _localUnit : this.localOCUnits) {
+            try {
+                this.globalOCunit.registerLocalUnit(_localUnit);
+            } catch (OSHException e) {
+                this.getGlobalLogger().logError("", e);
+            }
+        }
+    }
+
+    /**
+     * get the global logger => here the configuration of the logger can be done
+     * during the runtime.
+     *
+     * @return
+     */
+    public IGlobalLogger getLogger() {
+        return this.getOSH().getLogger();
+    }
+
+    @Override
+    public void onSystemRunning() throws OSHException {
+        for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
+            listener.onSystemRunning();
+        }
+    }
+
+    @Override
+    public void onSystemShutdown() throws OSHException {
+        for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
+            listener.onSystemShutdown();
+        }
+    }
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
+            listener.onSystemIsUp();
+        }
+    }
+
+    @Override
+    public void onSystemHalt() throws OSHException {
+        for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
+            listener.onSystemHalt();
+        }
+    }
+
+    @Override
+    public void onSystemResume() throws OSHException {
+        for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
+            listener.onSystemResume();
+        }
+    }
+
+    @Override
+    public void onSystemError() throws OSHException {
+        for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
+            listener.onSystemError();
+        }
+    }
 }

@@ -2,8 +2,6 @@ package osh.old.busdriver.wago;
 
 import osh.core.exceptions.OSHException;
 import osh.core.logging.IGlobalLogger;
-import osh.old.busdriver.wago.TCPUDPConnectionHandler.ConnectionStatusListener;
-import osh.old.busdriver.wago.TCPUDPConnectionHandler.DocumentParsedListener;
 import osh.old.busdriver.wago.data.*;
 import osh.old.busdriver.wago.parser.SwitchCommand;
 
@@ -16,195 +14,190 @@ import java.util.Set;
 
 /**
  * This class organizes all necessary steps to receive data from a Wago controller.
+ *
  * @author Kaibin Bao, Till Schuberth, Florian Allerding, Ingo Mauser
  */
 @Deprecated
 public class WagoTCPUDPDispatcher {
-	private TCPUDPConnectionHandler connhandler = null;
-	
-	public HashMap<Integer, WagoRelayData> switchData = new HashMap<>();
-	public HashMap<Integer, WagoPowerMeter> powerData = new HashMap<>();
-	public HashMap<Integer, WagoVirtualSwitch> vsdata = new HashMap<>();
-	public HashMap<Integer, WagoVirtualGroup> vsgdata = new HashMap<>();
-	public HashMap<Integer, WagoDiData> didata = new HashMap<>();
-	public HashMap<Integer, WagoDiGroup> digdata = new HashMap<>();
-	public HashMap<Integer, WagoDoData> dodata = new HashMap<>();
-	public HashMap<Integer, WagoDoGroup> dogdata = new HashMap<>();
-	
-	public boolean connected = false;
-	
-	private Set<UpdateListener> updatelisteners = new HashSet<UpdateListener>();
-		
-	public interface UpdateListener {
-		public void wagoUpdateEvent();
-	}
-	
-	public WagoTCPUDPDispatcher(IGlobalLogger logger, InetAddress address) throws OSHException {
-		try {
-			connhandler = new TCPUDPConnectionHandler(logger, address);
-			connhandler.setConnectionListener(new ConnectionStatusListener() {
-				@Override
-				public void connectionEvent(boolean isConnected) {
-					connected = isConnected;
-					
-					notifyUpdateListeners();
-				}
-			});
-			connhandler.setListener(new DocumentParsedListener() {
-				@Override
-				public void documentParsedEvent(WagoDeviceList devicelist) {
-					// convert power data
-					if( devicelist.getInputs() != null ) {
-						for( WagoMeterGroup meterGroup : devicelist.getInputs() ) {
-							int gid = meterGroup.getGroupId();
-							for( WagoPowerMeter meter : meterGroup.getMeters() ) {
-								meter.setGroupId(gid);
-								int uid = gid * 10 + meter.getMeterId();
-								powerData.put(uid, meter);
-							}
-						}
-					}
+    public final HashMap<Integer, WagoRelayData> switchData = new HashMap<>();
+    public final HashMap<Integer, WagoPowerMeter> powerData = new HashMap<>();
+    public final HashMap<Integer, WagoVirtualSwitch> vsData = new HashMap<>();
+    public final HashMap<Integer, WagoVirtualGroup> vsgData = new HashMap<>();
+    public final HashMap<Integer, WagoDiData> diData = new HashMap<>();
+    public final HashMap<Integer, WagoDiGroup> digData = new HashMap<>();
+    public final HashMap<Integer, WagoDoData> doData = new HashMap<>();
+    public final HashMap<Integer, WagoDoGroup> dogData = new HashMap<>();
+    private final Set<UpdateListener> updateListeners = new HashSet<>();
+    public boolean connected;
+    private TCPUDPConnectionHandler connHandler;
 
-					// convert switch data
-					if( devicelist.getRelays() != null ) {
-						for( WagoRelayData relay : devicelist.getRelays() ) {
-							int uid = relay.getId();
-							switchData.put(uid, relay);
-						}
-					}
+    public WagoTCPUDPDispatcher(IGlobalLogger logger, InetAddress address) throws OSHException {
+        try {
+            this.connHandler = new TCPUDPConnectionHandler(logger, address);
+            this.connHandler.setConnectionListener(isConnected -> {
+                WagoTCPUDPDispatcher.this.connected = isConnected;
 
-					// convert vs data
-					if( devicelist.getVsGroups() != null ) {
-						for( WagoVirtualGroup vsGroup : devicelist.getVsGroups() ) {
-							int gid = vsGroup.getGroupId();
-							for( WagoVirtualSwitch vs : vsGroup.getVswitches() ) {
-								vs.setGroupId(gid);
-								int uid = gid * 10 + vs.getId();
-								vsdata.put(uid, vs);
-							}
-							vsgdata.put(gid, vsGroup);
-						}
-					}
-					
-					// convert digital in data
-					if ( devicelist.getDi8Groups() != null ) {
-						for( WagoDiGroup diGroup : devicelist.getDi8Groups() ) {
-							int gid = diGroup.getGroupId();
-							for( WagoDiData di : diGroup.getDigitalIns() ) {
-								di.setGroupId(gid);
-								int uid = gid * 10 + di.getId();
-								didata.put(uid, di);
-							}
-							digdata.put(gid, diGroup);
-						}
-					}
+                WagoTCPUDPDispatcher.this.notifyUpdateListeners();
+            });
+            this.connHandler.setListener(deviceList -> {
+                // convert power data
+                if (deviceList.getInputs() != null) {
+                    for (WagoMeterGroup meterGroup : deviceList.getInputs()) {
+                        int gid = meterGroup.getGroupId();
+                        for (WagoPowerMeter meter : meterGroup.getMeters()) {
+                            meter.setGroupId(gid);
+                            int uid = gid * 10 + meter.getMeterId();
+                            WagoTCPUDPDispatcher.this.powerData.put(uid, meter);
+                        }
+                    }
+                }
 
-					// convert digital out data
-					if ( devicelist.getDo8Groups() != null ) {
-						for( WagoDoGroup doGroup : devicelist.getDo8Groups() ) {
-							int gid = doGroup.getGroupId();
-							for( WagoDoData do8 : doGroup.getDigitalOuts() ) {
-								do8.setGroupId(gid);
-								int uid = gid * 10 + do8.getId();
-								dodata.put(uid, do8);
-							}
-							dogdata.put(gid, doGroup);
-						}
-					}
+                // convert switch data
+                if (deviceList.getRelays() != null) {
+                    for (WagoRelayData relay : deviceList.getRelays()) {
+                        int uid = relay.getId();
+                        WagoTCPUDPDispatcher.this.switchData.put(uid, relay);
+                    }
+                }
 
-					notifyUpdateListeners();
-				}
-			});
-		} catch (SmartPlugException e) {
-			throw new OSHException(e);
-		}
-	}
-	
-	public boolean isConnected() {
-		return connected;
-	}
+                // convert vs data
+                if (deviceList.getVsGroups() != null) {
+                    for (WagoVirtualGroup vsGroup : deviceList.getVsGroups()) {
+                        int gid = vsGroup.getGroupId();
+                        for (WagoVirtualSwitch vs : vsGroup.getVSwitches()) {
+                            vs.setGroupId(gid);
+                            int uid = gid * 10 + vs.getId();
+                            WagoTCPUDPDispatcher.this.vsData.put(uid, vs);
+                        }
+                        WagoTCPUDPDispatcher.this.vsgData.put(gid, vsGroup);
+                    }
+                }
 
-	public Collection<WagoPowerMeter> getPowerData () {
-		synchronized (powerData) {
-			return powerData.values();
-		}
-	}
-	
-	public Collection<WagoRelayData> getSwitchData() {
-		synchronized (switchData) {
-			return switchData.values();
-		}
-	}
-	
-	public Collection<WagoDiData> getDigitalInData() {
-		synchronized (didata) {
-			return didata.values();
-		}
-	}
-	
-	public Collection<WagoDiGroup> getDigitalInGroup() {
-		synchronized (digdata) {
-			return digdata.values();
-		}
-	}
+                // convert digital in data
+                if (deviceList.getDi8Groups() != null) {
+                    for (WagoDiGroup diGroup : deviceList.getDi8Groups()) {
+                        int gid = diGroup.getGroupId();
+                        for (WagoDiData di : diGroup.getDigitalIns()) {
+                            di.setGroupId(gid);
+                            int uid = gid * 10 + di.getId();
+                            WagoTCPUDPDispatcher.this.diData.put(uid, di);
+                        }
+                        WagoTCPUDPDispatcher.this.digData.put(gid, diGroup);
+                    }
+                }
 
-	public Collection<WagoDoData> getDigitalOutData() {
-		synchronized (dodata) {
-			return dodata.values();
-		}
-	}
-	
-	public Collection<WagoDoGroup> getDigitalOutGroup() {
-		synchronized (dogdata) {
-			return dogdata.values();
-		}
-	}
+                // convert digital out data
+                if (deviceList.getDo8Groups() != null) {
+                    for (WagoDoGroup doGroup : deviceList.getDo8Groups()) {
+                        int gid = doGroup.getGroupId();
+                        for (WagoDoData do8 : doGroup.getDigitalOuts()) {
+                            do8.setGroupId(gid);
+                            int uid = gid * 10 + do8.getId();
+                            WagoTCPUDPDispatcher.this.doData.put(uid, do8);
+                        }
+                        WagoTCPUDPDispatcher.this.dogData.put(gid, doGroup);
+                    }
+                }
 
-	public Collection<WagoVirtualSwitch> getVirtualSwitchData() {
-		synchronized (vsdata) {
-			return vsdata.values();
-		}
-	}
+                WagoTCPUDPDispatcher.this.notifyUpdateListeners();
+            });
+        } catch (SmartPlugException e) {
+            throw new OSHException(e);
+        }
+    }
 
-	public Collection<WagoVirtualGroup> getVirtualSwitchGroupData() {
-		synchronized (vsdata) {
-			return vsgdata.values();
-		}
-	}
+    public boolean isConnected() {
+        return this.connected;
+    }
 
-	public void setSwitch(int id, boolean state) throws SmartPlugException {
-		SwitchCommand.Command cmd;
-		if (state) cmd = SwitchCommand.Command.CMD_ON; else cmd = SwitchCommand.Command.CMD_OFF;
-		
-		new SwitchCommand("relay", id, cmd, connhandler).sendCommand();
-	}
-	
-	public void setVirtualSwitch(int moduleid, int portid, boolean state) throws SmartPlugException {
-		SwitchCommand.Command cmd;
-		if (state) cmd = SwitchCommand.Command.CMD_ON; else cmd = SwitchCommand.Command.CMD_OFF;
-		
-		new SwitchCommand("vs", moduleid, portid, cmd, connhandler).sendCommand();
-	}
+    public Collection<WagoPowerMeter> getPowerData() {
+        synchronized (this.powerData) {
+            return this.powerData.values();
+        }
+    }
 
-	public void setDigitalOutput(int moduleid, int portid, boolean state) throws SmartPlugException {
-		SwitchCommand.Command cmd;
-		if (state) cmd = SwitchCommand.Command.CMD_ON; else cmd = SwitchCommand.Command.CMD_OFF;
-		
-		new SwitchCommand("do8", moduleid, portid, cmd, connhandler).sendCommand();
-	}
+    public Collection<WagoRelayData> getSwitchData() {
+        synchronized (this.switchData) {
+            return this.switchData.values();
+        }
+    }
 
-	public void registerUpdateListener(UpdateListener l) {
-		updatelisteners.add(l);
-	}
+    public Collection<WagoDiData> getDigitalInData() {
+        synchronized (this.diData) {
+            return this.diData.values();
+        }
+    }
 
-	public void unregisterUpdateListener(UpdateListener l) {
-		updatelisteners.remove(l);
-	}
-	
-	protected void notifyUpdateListeners() {
-		for (UpdateListener l : updatelisteners) {
-			l.wagoUpdateEvent();
-		}
-	}
+    public Collection<WagoDiGroup> getDigitalInGroup() {
+        synchronized (this.digData) {
+            return this.digData.values();
+        }
+    }
+
+    public Collection<WagoDoData> getDigitalOutData() {
+        synchronized (this.doData) {
+            return this.doData.values();
+        }
+    }
+
+    public Collection<WagoDoGroup> getDigitalOutGroup() {
+        synchronized (this.dogData) {
+            return this.dogData.values();
+        }
+    }
+
+    public Collection<WagoVirtualSwitch> getVirtualSwitchData() {
+        synchronized (this.vsData) {
+            return this.vsData.values();
+        }
+    }
+
+    public Collection<WagoVirtualGroup> getVirtualSwitchGroupData() {
+        synchronized (this.vsData) {
+            return this.vsgData.values();
+        }
+    }
+
+    public void setSwitch(int id, boolean state) throws SmartPlugException {
+        SwitchCommand.Command cmd;
+        if (state) cmd = SwitchCommand.Command.CMD_ON;
+        else cmd = SwitchCommand.Command.CMD_OFF;
+
+        new SwitchCommand("relay", id, cmd, this.connHandler).sendCommand();
+    }
+
+    public void setVirtualSwitch(int moduleId, int portId, boolean state) throws SmartPlugException {
+        SwitchCommand.Command cmd;
+        if (state) cmd = SwitchCommand.Command.CMD_ON;
+        else cmd = SwitchCommand.Command.CMD_OFF;
+
+        new SwitchCommand("vs", moduleId, portId, cmd, this.connHandler).sendCommand();
+    }
+
+    public void setDigitalOutput(int moduleId, int portId, boolean state) throws SmartPlugException {
+        SwitchCommand.Command cmd;
+        if (state) cmd = SwitchCommand.Command.CMD_ON;
+        else cmd = SwitchCommand.Command.CMD_OFF;
+
+        new SwitchCommand("do8", moduleId, portId, cmd, this.connHandler).sendCommand();
+    }
+
+    public void registerUpdateListener(UpdateListener l) {
+        this.updateListeners.add(l);
+    }
+
+    public void unregisterUpdateListener(UpdateListener l) {
+        this.updateListeners.remove(l);
+    }
+
+    protected void notifyUpdateListeners() {
+        for (UpdateListener l : this.updateListeners) {
+            l.wagoUpdateEvent();
+        }
+    }
+
+    public interface UpdateListener {
+        void wagoUpdateEvent();
+    }
 
 }

@@ -1,7 +1,6 @@
 package osh.mgmt.localobserver;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.exceptions.OCUnitException;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalObserver;
@@ -23,178 +22,176 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Ingo Mauser, Sebastian Kramer
- *
  */
-public class NonControllableDachsChpLocalObserver 
-					extends LocalObserver
-					implements IHasState {
-	
-	// data from WaterTank
-	private double waterTemperature;
+public class NonControllableDachsChpLocalObserver
+        extends LocalObserver
+        implements IHasState {
+
+    // data from WaterTank
+    private double waterTemperature;
 //	private INeededEnergy neededEnergy;
-	
-	// data from CHP
-	private int activePower;
-	private int reactivePower;
-	private int hotWaterPower;
-	private int gasPower;
-	
-	private int runtimeRemaining;
-	private boolean running;
-	
-	// quasi static values
-	private ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
-	private int typicalActivePower;
-	private int typicalReactivePower;
-	private int typicalGasPower;
-	private int typicalThermalPower;
-	private UUID hotWaterTankUuid;
-	
-	private int rescheduleAfter;
-	private long newIPPAfter;
-	private int relativeHorizonIPP;
-	private double currentHotWaterStorageMinTemp;
-	private double currentHotWaterStorageMaxTemp;
-	private double forcedOnHysteresis;
 
-	private double fixedCostPerStart;	
-	private double forcedOnOffStepMultiplier;
-	private int forcedOffAdditionalCost;	
-	private double chpOnCervisiaStepSizeMultiplier;
-	private int minRuntime;
-	
-	private LoadProfileCompressionTypes compressionType;
-	private int compressionValue;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param controllerbox
-	 */
-	public NonControllableDachsChpLocalObserver(IOSHOC controllerbox) {
-		super(controllerbox);
-	}
-	
-	
-	@Override
-	public void onSystemIsUp() throws OSHException {
-		super.onSystemIsUp();
-		
-		getTimer().registerComponent(this, 1);
-	}
-	
+    // data from CHP
+    private int activePower;
+    private int reactivePower;
+    private int hotWaterPower;
+    private int gasPower;
 
-	@Override
-	public void onNextTimePeriod() throws OSHException {
-		super.onNextTimePeriod();
+    private int runtimeRemaining;
+    private boolean running;
 
-		WaterStorageOCSX sx = getOCRegistry().getState(
-				WaterStorageOCSX.class, 
-				hotWaterTankUuid);
-		this.waterTemperature = sx.getCurrenttemp();
-	}
-	
-	
-	@Override
-	public void onDeviceStateUpdate() throws OCUnitException{
-		IHALExchange ihex = getObserverDataObject();
-		
-		if (ihex instanceof ChpObserverExchange) {
-			ChpObserverExchange dox = (ChpObserverExchange) ihex;
-			
-			// current values...
-			this.activePower = dox.getActivePower();
-			this.reactivePower = dox.getReactivePower();
-			this.hotWaterPower = dox.getHotWaterPower();
-			this.gasPower = dox.getGasPower();
-			
-			this.running = dox.isRunning();
-			this.runtimeRemaining = dox.getMinRuntimeRemaining();
-			
-			
-			CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-					getDeviceID(), 
-					getTimer().getUnixTime(),
-					DeviceTypes.CHPPLANT);
-			
-			cpse.addPowerState(Commodity.ACTIVEPOWER, activePower);
-			cpse.addPowerState(Commodity.REACTIVEPOWER, reactivePower);
-			cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, hotWaterPower);
-			cpse.addPowerState(Commodity.NATURALGASPOWER, gasPower);
-			
-			this.getOCRegistry().setState(
-					CommodityPowerStateExchange.class,
-					this,
-					cpse);
-			
-		} else if (ihex instanceof ChpStaticDetailsObserverExchange) {
-			ChpStaticDetailsObserverExchange diox = (ChpStaticDetailsObserverExchange) ihex;
-			
-			// static details...
-			this.typicalActivePower = diox.getTypicalActivePower();
-			this.typicalReactivePower = diox.getTypicalReactivePower();
-			this.typicalGasPower = diox.getTypicalGasPower();
-			this.typicalThermalPower = diox.getTypicalThermalPower();
-			this.hotWaterTankUuid = diox.getHotWaterTankUuid();
-			this.rescheduleAfter = diox.getRescheduleAfter();
-			this.newIPPAfter = diox.getNewIPPAfter();
-			this.currentHotWaterStorageMinTemp = diox.getCurrentHotWaterStorageMinTemp();
-			this.currentHotWaterStorageMaxTemp = diox.getCurrentHotWaterStorageMaxTemp();
-			this.forcedOnHysteresis = diox.getForcedOnHysteresis();
-			this.relativeHorizonIPP = diox.getRelativeHorizonIPP();
-			
-			this.fixedCostPerStart = diox.getFixedCostPerStart();
-			this.forcedOnOffStepMultiplier = diox.getForcedOnOffStepMultiplier();
-			this.forcedOffAdditionalCost = diox.getForcedOffAdditionalCost();
-			this.chpOnCervisiaStepSizeMultiplier = diox.getChpOnCervisiaStepSizeMultiplier();
-			this.minRuntime = diox.getMinRuntime();
-		} else if (ihex instanceof StaticCompressionExchange) {
-			StaticCompressionExchange _stat = (StaticCompressionExchange) ihex;
-			this.compressionType = _stat.getCompressionType();
-			this.compressionValue = _stat.getCompressionValue();
-		}
-	}
-	
-	
-	@Override
-	public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
-		DachsChpMOX newMox = new DachsChpMOX(
-				waterTemperature, 
-				running, 
-				runtimeRemaining, 
-				activePower,
-				reactivePower,
-				hotWaterPower, 
-				gasPower,
-				operationMode,
-				typicalActivePower,
-				typicalReactivePower,
-				typicalGasPower,
-				typicalThermalPower,
-				rescheduleAfter,
-				newIPPAfter,
-				relativeHorizonIPP,
-				currentHotWaterStorageMinTemp,
-				currentHotWaterStorageMaxTemp,
-				forcedOnHysteresis,
-				fixedCostPerStart,
-				forcedOnOffStepMultiplier,
-				forcedOffAdditionalCost,
-				chpOnCervisiaStepSizeMultiplier,
-				minRuntime,
-				compressionType,
-				compressionValue);
-		return newMox;
-	}
+    // quasi static values
+    private final ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
+    private int typicalActivePower;
+    private int typicalReactivePower;
+    private int typicalGasPower;
+    private int typicalThermalPower;
+    private UUID hotWaterTankUuid;
+
+    private int rescheduleAfter;
+    private long newIPPAfter;
+    private int relativeHorizonIPP;
+    private double currentHotWaterStorageMinTemp;
+    private double currentHotWaterStorageMaxTemp;
+    private double forcedOnHysteresis;
+
+    private double fixedCostPerStart;
+    private double forcedOnOffStepMultiplier;
+    private int forcedOffAdditionalCost;
+    private double chpOnCervisiaStepSizeMultiplier;
+    private int minRuntime;
+
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     */
+    public NonControllableDachsChpLocalObserver(IOSHOC osh) {
+        super(osh);
+    }
 
 
-	@Override
-	public UUID getUUID() {
-		return getDeviceID();
-	}
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+
+        this.getTimer().registerComponent(this, 1);
+    }
 
 
-	// HELPER
-	
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        super.onNextTimePeriod();
+
+        WaterStorageOCSX sx = this.getOCRegistry().getState(
+                WaterStorageOCSX.class,
+                this.hotWaterTankUuid);
+        this.waterTemperature = sx.getCurrentTemp();
+    }
+
+
+    @Override
+    public void onDeviceStateUpdate() {
+        IHALExchange ihex = this.getObserverDataObject();
+
+        if (ihex instanceof ChpObserverExchange) {
+            ChpObserverExchange dox = (ChpObserverExchange) ihex;
+
+            // current values...
+            this.activePower = dox.getActivePower();
+            this.reactivePower = dox.getReactivePower();
+            this.hotWaterPower = dox.getHotWaterPower();
+            this.gasPower = dox.getGasPower();
+
+            this.running = dox.isRunning();
+            this.runtimeRemaining = dox.getMinRuntimeRemaining();
+
+
+            CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
+                    this.getDeviceID(),
+                    this.getTimer().getUnixTime(),
+                    DeviceTypes.CHPPLANT);
+
+            cpse.addPowerState(Commodity.ACTIVEPOWER, this.activePower);
+            cpse.addPowerState(Commodity.REACTIVEPOWER, this.reactivePower);
+            cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, this.hotWaterPower);
+            cpse.addPowerState(Commodity.NATURALGASPOWER, this.gasPower);
+
+            this.getOCRegistry().setState(
+                    CommodityPowerStateExchange.class,
+                    this,
+                    cpse);
+
+        } else if (ihex instanceof ChpStaticDetailsObserverExchange) {
+            ChpStaticDetailsObserverExchange diox = (ChpStaticDetailsObserverExchange) ihex;
+
+            // static details...
+            this.typicalActivePower = diox.getTypicalActivePower();
+            this.typicalReactivePower = diox.getTypicalReactivePower();
+            this.typicalGasPower = diox.getTypicalGasPower();
+            this.typicalThermalPower = diox.getTypicalThermalPower();
+            this.hotWaterTankUuid = diox.getHotWaterTankUuid();
+            this.rescheduleAfter = diox.getRescheduleAfter();
+            this.newIPPAfter = diox.getNewIPPAfter();
+            this.currentHotWaterStorageMinTemp = diox.getCurrentHotWaterStorageMinTemp();
+            this.currentHotWaterStorageMaxTemp = diox.getCurrentHotWaterStorageMaxTemp();
+            this.forcedOnHysteresis = diox.getForcedOnHysteresis();
+            this.relativeHorizonIPP = diox.getRelativeHorizonIPP();
+
+            this.fixedCostPerStart = diox.getFixedCostPerStart();
+            this.forcedOnOffStepMultiplier = diox.getForcedOnOffStepMultiplier();
+            this.forcedOffAdditionalCost = diox.getForcedOffAdditionalCost();
+            this.chpOnCervisiaStepSizeMultiplier = diox.getChpOnCervisiaStepSizeMultiplier();
+            this.minRuntime = diox.getMinRuntime();
+        } else if (ihex instanceof StaticCompressionExchange) {
+            StaticCompressionExchange _stat = (StaticCompressionExchange) ihex;
+            this.compressionType = _stat.getCompressionType();
+            this.compressionValue = _stat.getCompressionValue();
+        }
+    }
+
+
+    @Override
+    public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
+        return new DachsChpMOX(
+                this.waterTemperature,
+                this.running,
+                this.runtimeRemaining,
+                this.activePower,
+                this.reactivePower,
+                this.hotWaterPower,
+                this.gasPower,
+                this.operationMode,
+                this.typicalActivePower,
+                this.typicalReactivePower,
+                this.typicalGasPower,
+                this.typicalThermalPower,
+                this.rescheduleAfter,
+                this.newIPPAfter,
+                this.relativeHorizonIPP,
+                this.currentHotWaterStorageMinTemp,
+                this.currentHotWaterStorageMaxTemp,
+                this.forcedOnHysteresis,
+                this.fixedCostPerStart,
+                this.forcedOnOffStepMultiplier,
+                this.forcedOffAdditionalCost,
+                this.chpOnCervisiaStepSizeMultiplier,
+                this.minRuntime,
+                this.compressionType,
+                this.compressionValue);
+    }
+
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
+
+
+    // HELPER
+
 }

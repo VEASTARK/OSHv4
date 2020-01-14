@@ -8,5 +8,5 @@ sourceSets {
 }
 
 dependencies {
-    compile project(":osh_core")
+    implementation project(":osh_core")
 }

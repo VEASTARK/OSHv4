@@ -10,69 +10,70 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
- *
  */
-@XmlAccessorType( XmlAccessType.FIELD )
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class MieleAction implements IAction {
 
-	private UUID deviceID;
-	private long programmedAt;
-	private MieleApplianceIPP ipp;
+    private UUID deviceID;
+    private long programmedAt;
+    private MieleApplianceIPP ipp;
 
-	
-	/** for JAXB */
-	@SuppressWarnings("unused")
-	@Deprecated
-	private MieleAction() {}
 
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param programmedAt
-	 * @param eapart
-	 */
-	public MieleAction(
-			UUID deviceID, 
-			long programmedAt, 
-			MieleApplianceIPP ipp) {
-		this.deviceID = deviceID;
-		this.programmedAt = programmedAt;
-		this.ipp = ipp;
-	}
-
-	@Override
-	public UUID getDeviceId() {
-		return deviceID;
-	}
-
-	@Override
-	public long getTimestamp() {
-		return programmedAt;
-	}
-
-	public MieleApplianceIPP getIPP() {
-		return ipp;
-	}
-	
-	@Override
-	public boolean equals(IAction other) {
-		if( !(other instanceof MieleAction) )
-			return false;
-		
-		MieleAction otherMieleAction = (MieleAction) other;
-
-        return deviceID.equals(otherMieleAction.getDeviceId());
+    /**
+     * for JAXB
+     */
+    @SuppressWarnings("unused")
+    @Deprecated
+    private MieleAction() {
     }
-	
-	@Override
-	public int hashCode() {
-		return deviceID.hashCode();
-	}
 
-	// TODO: keep for prediction
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param programmedAt
+     */
+    public MieleAction(
+            UUID deviceID,
+            long programmedAt,
+            MieleApplianceIPP ipp) {
+        this.deviceID = deviceID;
+        this.programmedAt = programmedAt;
+        this.ipp = ipp;
+    }
+
+    @Override
+    public UUID getDeviceId() {
+        return this.deviceID;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return this.programmedAt;
+    }
+
+    public MieleApplianceIPP getIPP() {
+        return this.ipp;
+    }
+
+    @Override
+    public boolean equals(IAction other) {
+        if (!(other instanceof MieleAction))
+            return false;
+
+        MieleAction otherMieleAction = (MieleAction) other;
+
+        return this.deviceID.equals(otherMieleAction.deviceID);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.deviceID.hashCode();
+    }
+
+    // TODO: keep for prediction
 //	@Override
 //	public IAction createAction(long newTimestamp) {
 //		MieleEAPart newEAPart = new MieleEAPart(deviceID,newTimestamp,newTimestamp,newTimestamp+eapart.getOriginalDof(),eapart.getProfile(), true);

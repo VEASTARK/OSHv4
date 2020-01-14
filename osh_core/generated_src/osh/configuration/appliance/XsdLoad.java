@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.*;
 
 /**
  * <p>Java class for XsdLoad complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XsdLoad">
  *   &lt;complexContent>
@@ -30,14 +30,12 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XsdLoad", propOrder = {
-    "value",
-    "minValue",
-    "maxValue"
+        "value",
+        "minValue",
+        "maxValue"
 })
 public class XsdLoad {
 
@@ -52,15 +50,13 @@ public class XsdLoad {
 
     /**
      * Gets the value of the value property.
-     * 
      */
     public int getValue() {
-        return value;
+        return this.value;
     }
 
     /**
      * Sets the value of the value property.
-     * 
      */
     public void setValue(int value) {
         this.value = value;
@@ -68,23 +64,19 @@ public class XsdLoad {
 
     /**
      * Gets the value of the minValue property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getMinValue() {
-        return minValue;
+        return this.minValue;
     }
 
     /**
      * Sets the value of the minValue property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setMinValue(Integer value) {
         this.minValue = value;
@@ -92,23 +84,19 @@ public class XsdLoad {
 
     /**
      * Gets the value of the maxValue property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     * {@link Integer }
      */
     public Integer getMaxValue() {
-        return maxValue;
+        return this.maxValue;
     }
 
     /**
      * Sets the value of the maxValue property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setMaxValue(Integer value) {
         this.maxValue = value;
@@ -116,23 +104,19 @@ public class XsdLoad {
 
     /**
      * Gets the value of the commodity property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getCommodity() {
-        return commodity;
+        return this.commodity;
     }
 
     /**
      * Sets the value of the commodity property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setCommodity(String value) {
         this.commodity = value;

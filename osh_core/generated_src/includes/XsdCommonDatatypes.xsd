@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:osh="http://osh/configuration/appliance" 
-	targetNamespace="http://osh/configuration/appliance"
-	
-	elementFormDefault="qualified">
+           xmlns:osh="http://osh/configuration/appliance"
+           targetNamespace="http://osh/configuration/appliance"
 
-	<!--==================================================================================================================================== -->
-	<!--simpleTypes -->
+           elementFormDefault="qualified">
 
-	<!-- 1 Byte as of DIN EN 50523 -->
-	<xs:simpleType name="byte">
-		<xs:restriction base="osh:nonNegativeInt">
-			<xs:maxInclusive value="255" />
-		</xs:restriction>
-	</xs:simpleType>
+    <!--==================================================================================================================================== -->
+    <!--simpleTypes -->
 
-	<xs:simpleType name="nonNegativeInt">
-		<xs:restriction base="xs:int">
-			<xs:minInclusive value="0" />
-		</xs:restriction>
-	</xs:simpleType>
+    <!-- 1 Byte as of DIN EN 50523 -->
+    <xs:simpleType name="byte">
+        <xs:restriction base="osh:nonNegativeInt">
+            <xs:maxInclusive value="255"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-	<xs:simpleType name="name">
-		<xs:restriction base="xs:token">
-		</xs:restriction>
-	</xs:simpleType>
+    <xs:simpleType name="nonNegativeInt">
+        <xs:restriction base="xs:int">
+            <xs:minInclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-	<!--==================================================================================================================================== -->
-	<!--complexTypes -->
+    <xs:simpleType name="name">
+        <xs:restriction base="xs:token">
+        </xs:restriction>
+    </xs:simpleType>
 
-	<xs:complexType name="XsdDescription">
-		<xs:sequence>
-			<xs:element name="Value" type="xs:string"/>
-		</xs:sequence>
-		<xs:attribute name="language" type="xs:string" use="required" />
-	</xs:complexType>
+    <!--==================================================================================================================================== -->
+    <!--complexTypes -->
 
-	<xs:complexType name="XsdDescriptions">
-		<xs:sequence>
-			<xs:element name="description" type="osh:XsdDescription" maxOccurs="255" />
-		</xs:sequence>
-	</xs:complexType>
+    <xs:complexType name="XsdDescription">
+        <xs:sequence>
+            <xs:element name="Value" type="xs:string"/>
+        </xs:sequence>
+        <xs:attribute name="language" type="xs:string" use="required"/>
+    </xs:complexType>
 
-	<!--==================================================================================================================================== -->
+    <xs:complexType name="XsdDescriptions">
+        <xs:sequence>
+            <xs:element name="description" type="osh:XsdDescription" maxOccurs="255"/>
+        </xs:sequence>
+    </xs:complexType>
 
-	<!--Load contains the energy consumption for one commodity in one tick -->
-	<xs:complexType name="XsdLoad">
-		<xs:sequence>
-			<xs:element name="Value" type="xs:int"/>
-			<xs:element name="MinValue" type="xs:int" minOccurs="0"/>
-			<xs:element name="MaxValue" type="xs:int" minOccurs="0"/>
-		</xs:sequence>
-		<xs:attribute name="commodity" type="xs:string" use="required" />
-	</xs:complexType>
+    <!--==================================================================================================================================== -->
 
-	<!--==================================================================================================================================== -->
+    <!--Load contains the energy consumption for one commodity in one tick -->
+    <xs:complexType name="XsdLoad">
+        <xs:sequence>
+            <xs:element name="Value" type="xs:int"/>
+            <xs:element name="MinValue" type="xs:int" minOccurs="0"/>
+            <xs:element name="MaxValue" type="xs:int" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="commodity" type="xs:string" use="required"/>
+    </xs:complexType>
 
-	<!--1 Tick of a loadProfile (e.g. 1 sec, 15 sec, 1 min, ...). Contains 1 
-		element for each commodity -->
-	<xs:complexType name="XsdTick">
-		<xs:sequence>
-			<xs:element name="Load" type="osh:XsdLoad" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
+    <!--==================================================================================================================================== -->
+
+    <!--1 Tick of a loadProfile (e.g. 1 sec, 15 sec, 1 min, ...). Contains 1
+        element for each commodity -->
+    <xs:complexType name="XsdTick">
+        <xs:sequence>
+            <xs:element name="Load" type="osh:XsdLoad" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
 
 
-	<!--==================================================================================================================================== -->
+    <!--==================================================================================================================================== -->
 
-	<!--Phase of a loadProfile. Can be an actual phase or a pause -->
-	<xs:complexType name="XsdPhase">
-		<xs:sequence>
-			<xs:element name="Tick" type="osh:XsdTick" maxOccurs="unbounded" />
-		</xs:sequence>
-		<xs:attribute name="id" type="osh:nonNegativeInt" use="required" />
-		<xs:attribute name="name" type="osh:name"/>
-		<xs:attribute name="minLength" type="osh:nonNegativeInt" use="required" />
-		<xs:attribute name="maxLength" type="osh:nonNegativeInt" use="required" />
-	</xs:complexType>
+    <!--Phase of a loadProfile. Can be an actual phase or a pause -->
+    <xs:complexType name="XsdPhase">
+        <xs:sequence>
+            <xs:element name="Tick" type="osh:XsdTick" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="osh:nonNegativeInt" use="required"/>
+        <xs:attribute name="name" type="osh:name"/>
+        <xs:attribute name="minLength" type="osh:nonNegativeInt" use="required"/>
+        <xs:attribute name="maxLength" type="osh:nonNegativeInt" use="required"/>
+    </xs:complexType>
 
-	<xs:complexType name="XsdPhases">
-		<xs:sequence>
-			<xs:element name="Phase" type="osh:XsdPhase" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
+    <xs:complexType name="XsdPhases">
+        <xs:sequence>
+            <xs:element name="Phase" type="osh:XsdPhase" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
 
-	<!--==================================================================================================================================== -->
+    <!--==================================================================================================================================== -->
 
-	<!--LoadProfile contains all phases for one commodity consumption mode -->
-	<xs:complexType name="XsdLoadProfile">
-		<xs:sequence>
-			<xs:element name="Phases" type="osh:XsdPhases"/>
-		</xs:sequence>
-		<xs:attribute name="id" type="osh:nonNegativeInt" use="required" />
-		<xs:attribute name="name" type="osh:name"/>
-	</xs:complexType>
+    <!--LoadProfile contains all phases for one commodity consumption mode -->
+    <xs:complexType name="XsdLoadProfile">
+        <xs:sequence>
+            <xs:element name="Phases" type="osh:XsdPhases"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="osh:nonNegativeInt" use="required"/>
+        <xs:attribute name="name" type="osh:name"/>
+    </xs:complexType>
 
-	<!--==================================================================================================================================== -->
+    <!--==================================================================================================================================== -->
 
-	<!-- LoadProfiles contains all LoadProfile elements of ONE program. Contains 
-		one LoadProfile for each commodity consumption mode (e.g. electrical, gas, 
-		hybrid, hot water, ...) -->
-	<xs:complexType name="XsdLoadProfiles">
-		<xs:sequence>
-			<xs:element name="LoadProfile" type="osh:XsdLoadProfile" maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
+    <!-- LoadProfiles contains all LoadProfile elements of ONE program. Contains
+        one LoadProfile for each commodity consumption mode (e.g. electrical, gas,
+        hybrid, hot water, ...) -->
+    <xs:complexType name="XsdLoadProfiles">
+        <xs:sequence>
+            <xs:element name="LoadProfile" type="osh:XsdLoadProfile" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
 
 </xs:schema>

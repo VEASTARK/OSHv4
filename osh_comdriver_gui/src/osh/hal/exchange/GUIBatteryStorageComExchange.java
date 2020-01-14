@@ -6,58 +6,55 @@ import java.util.UUID;
 
 
 /**
- * 
  * @author Jan Mueller
- *
  */
 public class GUIBatteryStorageComExchange extends CALComExchange {
-	
-	private double currentStateOfCharge;
-	private double minStateOfCharge;
-	private double maxStateOfCharge;
 
-	private UUID batteryId;
-	
-	/**
-	 * CONSTRUCTOR
-	 * @param deviceID
-	 * @param timestamp
-	 * @param currentStateOfCharge
-	 * @param minStateOfCharge
-	 * @param maxStateOfCharge
-	 */
-	public GUIBatteryStorageComExchange(
-			UUID deviceID, 
-			Long timestamp,
-			double currentStateOfCharge, 
-			double minStateOfCharge, 
-			double maxStateOfCharge,
-			UUID batteryId) {
-		super(deviceID, timestamp);
-		
-		this.currentStateOfCharge = currentStateOfCharge;
-		this.minStateOfCharge = minStateOfCharge;
-		this.maxStateOfCharge = maxStateOfCharge;
-		this.batteryId = batteryId;
-	}
+    private final double currentStateOfCharge;
+    private final double minStateOfCharge;
+    private final double maxStateOfCharge;
 
-	public double getCurrentStateOfCharge() {
-		return currentStateOfCharge;
-	}
+    private final UUID batteryId;
 
-	public double getMinStateOfCharge() {
-		return minStateOfCharge;
-	}
+    /**
+     * CONSTRUCTOR
+     *
+     * @param deviceID
+     * @param timestamp
+     * @param currentStateOfCharge
+     * @param minStateOfCharge
+     * @param maxStateOfCharge
+     */
+    public GUIBatteryStorageComExchange(
+            UUID deviceID,
+            Long timestamp,
+            double currentStateOfCharge,
+            double minStateOfCharge,
+            double maxStateOfCharge,
+            UUID batteryId) {
+        super(deviceID, timestamp);
 
-	public double getMaxStateOfCharge() {
-		return maxStateOfCharge;
-	}
+        this.currentStateOfCharge = currentStateOfCharge;
+        this.minStateOfCharge = minStateOfCharge;
+        this.maxStateOfCharge = maxStateOfCharge;
+        this.batteryId = batteryId;
+    }
 
-	public UUID getBatteryId() {
-		return batteryId;
-	}
+    public double getCurrentStateOfCharge() {
+        return this.currentStateOfCharge;
+    }
 
+    public double getMinStateOfCharge() {
+        return this.minStateOfCharge;
+    }
 
-	
+    public double getMaxStateOfCharge() {
+        return this.maxStateOfCharge;
+    }
+
+    public UUID getBatteryId() {
+        return this.batteryId;
+    }
+
 
 }

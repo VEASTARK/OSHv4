@@ -33,109 +33,113 @@ import jmetal.util.JMException;
  * Wrapper class for accessing integer-coded solutions
  */
 public class XInt {
-	private Solution solution_ ;
-	private SolutionType type_ ;
+    private Solution solution_;
+    private SolutionType type_;
 
-	/**
-	 * Constructor
-	 */
-  private XInt() {
-	} // Constructor
+    /**
+     * Constructor
+     */
+    private XInt() {
+    } // Constructor
 
-	/**
-	 * Constructor
-	 * @param solution
-	 */
-	public XInt(Solution solution) {
-		this() ;
-		type_ = solution.getType() ;
-		solution_ = solution ;
-	}
+    /**
+     * Constructor
+     *
+     * @param solution
+     */
+    public XInt(Solution solution) {
+        this();
+        this.type_ = solution.getType();
+        this.solution_ = solution;
+    }
 
-	/**
-	 * Gets value of a encodings.variable
-	 * @param index Index of the encodings.variable
-	 * @return The value of the encodings.variable
-	 * @throws JMException
-	 */
-	public int getValue(int index) throws JMException {
-		if (type_.getClass() == IntSolutionType.class){
-			return (int)solution_.getDecisionVariables()[index].getValue() ;			
-		} 
-		else if (type_.getClass() == ArrayIntSolutionType.class) {
-			return ((ArrayInt)(solution_.getDecisionVariables()[0])).array_[index] ;
-		}
-		else {
-			Configuration.logger_.severe("jmetal.util.wrapper.XInt.getValue, solution type " +
-					type_ + "+ invalid") ;		
-		}
-		return 0;
-	} // Get value
+    /**
+     * Gets value of a encodings.variable
+     *
+     * @param index Index of the encodings.variable
+     * @return The value of the encodings.variable
+     * @throws JMException
+     */
+    public int getValue(int index) throws JMException {
+        if (this.type_.getClass() == IntSolutionType.class) {
+            return (int) this.solution_.getDecisionVariables()[index].getValue();
+        } else if (this.type_.getClass() == ArrayIntSolutionType.class) {
+            return ((ArrayInt) (this.solution_.getDecisionVariables()[0])).array_[index];
+        } else {
+            Configuration.logger_.severe("jmetal.util.wrapper.XInt.getValue, solution type " +
+                    this.type_ + "+ invalid");
+        }
+        return 0;
+    } // Get value
 
-	/**
-	 * Sets the value of a encodings.variable
-	 * @param index Index of the encodings.variable
-	 * @param value Value to be assigned
-	 * @throws JMException
-	 */
-	public void setValue(int index, int value) throws JMException {
-		if (type_.getClass() == IntSolutionType.class)
-			solution_.getDecisionVariables()[index].setValue(value) ;
-		else if (type_.getClass() == ArrayIntSolutionType.class)
-			((ArrayInt)(solution_.getDecisionVariables()[0])).array_[index]=value ;
-		else
-			Configuration.logger_.severe("jmetal.util.wrapper.XInt.setValue, solution type " +
-					type_ + "+ invalid") ;		
-	} // setValue	
+    /**
+     * Sets the value of a encodings.variable
+     *
+     * @param index Index of the encodings.variable
+     * @param value Value to be assigned
+     * @throws JMException
+     */
+    public void setValue(int index, int value) throws JMException {
+        if (this.type_.getClass() == IntSolutionType.class)
+            this.solution_.getDecisionVariables()[index].setValue(value);
+        else if (this.type_.getClass() == ArrayIntSolutionType.class)
+            ((ArrayInt) (this.solution_.getDecisionVariables()[0])).array_[index] = value;
+        else
+            Configuration.logger_.severe("jmetal.util.wrapper.XInt.setValue, solution type " +
+                    this.type_ + "+ invalid");
+    } // setValue
 
-	/**
-	 * Gets the lower bound of a encodings.variable
-	 * @param index Index of the encodings.variable
-	 * @return The lower bound of the encodings.variable
-	 * @throws JMException
-	 */
-	public int getLowerBound(int index) throws JMException {
-		if (type_.getClass() == IntSolutionType.class)
-			return (int)solution_.getDecisionVariables()[index].getLowerBound() ;
-		else if (type_.getClass() == ArrayIntSolutionType.class) 
-			return (int)((ArrayInt)(solution_.getDecisionVariables()[0])).getLowerBound(index) ;
-		else {
-			Configuration.logger_.severe("jmetal.util.wrapper.XInt.getLowerBound, solution type " +
-					type_ + "+ invalid") ;		
-		}
-		return 0 ;
-	} // getLowerBound
+    /**
+     * Gets the lower bound of a encodings.variable
+     *
+     * @param index Index of the encodings.variable
+     * @return The lower bound of the encodings.variable
+     * @throws JMException
+     */
+    public int getLowerBound(int index) throws JMException {
+        if (this.type_.getClass() == IntSolutionType.class)
+            return (int) this.solution_.getDecisionVariables()[index].getLowerBound();
+        else if (this.type_.getClass() == ArrayIntSolutionType.class)
+            return (int) ((ArrayInt) (this.solution_.getDecisionVariables()[0])).getLowerBound(index);
+        else {
+            Configuration.logger_.severe("jmetal.util.wrapper.XInt.getLowerBound, solution type " +
+                    this.type_ + "+ invalid");
+        }
+        return 0;
+    } // getLowerBound
 
-	/**
-	 * Gets the upper bound of a encodings.variable
-	 * @param index Index of the encodings.variable
-	 * @return The upper bound of the encodings.variable
-	 * @throws JMException
-	 */
-	public int getUpperBound(int index) throws JMException {
-		if (type_.getClass() == IntSolutionType.class)		
-			return (int)solution_.getDecisionVariables()[index].getUpperBound() ;
-		else if (type_.getClass() == ArrayIntSolutionType.class) 
-			return (int)((ArrayInt)(solution_.getDecisionVariables()[0])).getUpperBound(index) ;
-		else
-			Configuration.logger_.severe("jmetal.util.wrapper.XInt.getUpperBound, solution type " +
-					type_ + "+ invalid") ;		
+    /**
+     * Gets the upper bound of a encodings.variable
+     *
+     * @param index Index of the encodings.variable
+     * @return The upper bound of the encodings.variable
+     * @throws JMException
+     */
+    public int getUpperBound(int index) throws JMException {
+        if (this.type_.getClass() == IntSolutionType.class)
+            return (int) this.solution_.getDecisionVariables()[index].getUpperBound();
+        else if (this.type_.getClass() == ArrayIntSolutionType.class)
+            return (int) ((ArrayInt) (this.solution_.getDecisionVariables()[0])).getUpperBound(index);
+        else
+            Configuration.logger_.severe("jmetal.util.wrapper.XInt.getUpperBound, solution type " +
+                    this.type_ + "+ invalid");
 
-		return 0 ;
-	} // getUpperBound
+        return 0;
+    } // getUpperBound
 
-	/**
-	 * Returns the number of variables of the solution
-	 * @return
-	 */
-	public int getNumberOfDecisionVariables() {
-		if (type_.getClass() == IntSolutionType.class)		
-			return solution_.getDecisionVariables().length ;
-		else if (type_.getClass() == ArrayIntSolutionType.class) 
-			return ((ArrayInt)(solution_.getDecisionVariables()[0])).getLength() ;
-		else
-			Configuration.logger_.severe("jmetal.util.wrapper.XInt.size, solution type " +
-					type_ + "+ invalid") ;		
-		return 0 ;
-	} // size
+    /**
+     * Returns the number of variables of the solution
+     *
+     * @return
+     */
+    public int getNumberOfDecisionVariables() {
+        if (this.type_.getClass() == IntSolutionType.class)
+            return this.solution_.getDecisionVariables().length;
+        else if (this.type_.getClass() == ArrayIntSolutionType.class)
+            return ((ArrayInt) (this.solution_.getDecisionVariables()[0])).getLength();
+        else
+            Configuration.logger_.severe("jmetal.util.wrapper.XInt.size, solution type " +
+                    this.type_ + "+ invalid");
+        return 0;
+    } // size
 } // XInt

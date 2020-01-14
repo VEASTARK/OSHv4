@@ -15,9 +15,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * <p>Java class for XsdLoadProfile complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XsdLoadProfile">
  *   &lt;complexContent>
@@ -31,12 +31,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XsdLoadProfile", propOrder = {
-    "phases"
+        "phases"
 })
 public class XsdLoadProfile {
 
@@ -50,23 +48,19 @@ public class XsdLoadProfile {
 
     /**
      * Gets the value of the phases property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XsdPhases }
-     *     
+     *
+     * @return possible object is
+     * {@link XsdPhases }
      */
     public XsdPhases getPhases() {
-        return phases;
+        return this.phases;
     }
 
     /**
      * Sets the value of the phases property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XsdPhases }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XsdPhases }
      */
     public void setPhases(XsdPhases value) {
         this.phases = value;
@@ -74,15 +68,13 @@ public class XsdLoadProfile {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
-        return id;
+        return this.id;
     }
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;
@@ -90,23 +82,19 @@ public class XsdLoadProfile {
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getName() {
-        return name;
+        return this.name;
     }
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setName(String value) {
         this.name = value;

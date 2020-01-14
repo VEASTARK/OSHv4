@@ -13,24 +13,24 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GUIAncillaryMeterStateExchange extends StateExchange {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 9104434585663750101L;
-	private AncillaryCommodityLoadProfile ancillaryMeter;
-	
-	@Deprecated
-	public GUIAncillaryMeterStateExchange() {
-		super(null, 0L);
-	}
-	
-	public GUIAncillaryMeterStateExchange(UUID sender, long timestamp, AncillaryCommodityLoadProfile ancillaryMeter) {
-		super(sender, timestamp);
-		this.ancillaryMeter = ancillaryMeter;
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = 9104434585663750101L;
+    private AncillaryCommodityLoadProfile ancillaryMeter;
 
-	public AncillaryCommodityLoadProfile getAncillaryMeter() {
-		return ancillaryMeter;
-	}
+    @Deprecated
+    public GUIAncillaryMeterStateExchange() {
+        super(null, 0L);
+    }
+
+    public GUIAncillaryMeterStateExchange(UUID sender, long timestamp, AncillaryCommodityLoadProfile ancillaryMeter) {
+        super(sender, timestamp);
+        this.ancillaryMeter = ancillaryMeter;
+    }
+
+    public AncillaryCommodityLoadProfile getAncillaryMeter() {
+        return this.ancillaryMeter;
+    }
 
 }

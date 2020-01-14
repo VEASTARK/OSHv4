@@ -1,4 +1,3 @@
-
 package osh.openweathermap.prediction;
 
 import com.fasterxml.jackson.annotation.*;
@@ -11,24 +10,21 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "population"
+        "population"
 })
 public class Sys implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -5143705462140967057L;
-	
-	@JsonProperty("population")
-    private Integer population;
+     *
+     */
+    private static final long serialVersionUID = -5143705462140967057L;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("population")
+    private Integer population;
 
     /**
-     * 
-     * @return
-     *     The population
+     * @return The population
      */
     @JsonProperty("population")
     public Integer getPopulation() {
@@ -36,9 +32,7 @@ public class Sys implements Serializable {
     }
 
     /**
-     * 
-     * @param population
-     *     The population
+     * @param population The population
      */
     @JsonProperty("population")
     public void setPopulation(Integer population) {

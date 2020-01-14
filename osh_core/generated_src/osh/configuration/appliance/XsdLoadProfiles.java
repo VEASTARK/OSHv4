@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for XsdLoadProfiles complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XsdLoadProfiles">
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XsdLoadProfiles", propOrder = {
-    "loadProfile"
+        "loadProfile"
 })
 public class XsdLoadProfiles {
 
@@ -46,29 +44,27 @@ public class XsdLoadProfiles {
 
     /**
      * Gets the value of the loadProfile property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the loadProfile property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLoadProfile().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link XsdLoadProfile }
-     * 
-     * 
      */
     public List<XsdLoadProfile> getLoadProfile() {
-        if (loadProfile == null) {
-            loadProfile = new ArrayList<XsdLoadProfile>();
+        if (this.loadProfile == null) {
+            this.loadProfile = new ArrayList<>();
         }
         return this.loadProfile;
     }

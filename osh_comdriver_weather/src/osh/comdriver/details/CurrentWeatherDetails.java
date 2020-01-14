@@ -8,28 +8,30 @@ import java.util.UUID;
 
 /**
  * http://openweathermap.org/current
- * @author Jan Mueller
  *
+ * @author Jan Mueller
  */
 
 public class CurrentWeatherDetails extends StateExchange {
 
-	/** SERIAL */
-	private static final long serialVersionUID = -2129466555073434421L;
+    /**
+     * SERIAL
+     */
+    private static final long serialVersionUID = -2129466555073434421L;
 
-	private CurrentWeatherMap currentWeatherMap;
+    private final CurrentWeatherMap currentWeatherMap;
 
-	/**
-	 * CONSTRUCTOR
-	 */
-	public CurrentWeatherDetails(UUID sender, long timestamp, CurrentWeatherMap currentWeatherMap) {
-		super(sender, timestamp);
-		
-		this.currentWeatherMap = (CurrentWeatherMap) DeepCopy.copy(currentWeatherMap);
-	}
+    /**
+     * CONSTRUCTOR
+     */
+    public CurrentWeatherDetails(UUID sender, long timestamp, CurrentWeatherMap currentWeatherMap) {
+        super(sender, timestamp);
 
-	public CurrentWeatherMap getTemperatureForecastList() {
-		return currentWeatherMap;
-	}
+        this.currentWeatherMap = (CurrentWeatherMap) DeepCopy.copy(currentWeatherMap);
+    }
+
+    public CurrentWeatherMap getTemperatureForecastList() {
+        return this.currentWeatherMap;
+    }
 
 }
