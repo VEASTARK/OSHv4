@@ -25,9 +25,7 @@ import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
-import osh.simulation.exception.SimulationEngineException;
 import osh.utils.DeepCopy;
 
 import java.util.*;
@@ -441,55 +439,51 @@ public class EnergyManagementProblem extends Problem {
             passiveArray = passive.toArray(passiveArray);
 
             // go through in steps of STEP_SIZE (in ticks)
-            try {
-                //init the maps for the commodity states
-                UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActiveArray, this.uuidIntMap, true);
+            //init the maps for the commodity states
+            UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActiveArray, this.uuidIntMap, true);
 
-                UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passiveArray, this.uuidIntMap, true);
+            UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passiveArray, this.uuidIntMap, true);
 
-                long t;
+            long t;
 
-                //let all passive states calculate their first state
+            //let all passive states calculate their first state
+            for (InterdependentProblemPart<?, ?> part : passiveArray) {
+                part.calculateNextStep();
+                passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
+            }
+
+            //dummy AncillaryMeterState, we don't know the state of the ancillaryMeter at t=t_start, thus set all to zero
+            AncillaryMeterState meterState = new AncillaryMeterState();
+
+            //send the first passive state to active nodes
+            ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
+
+            // iterate
+            for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
+
+                //let all active states calculate their next step
+                for (InterdependentProblemPart<?, ?> part : allActiveArray) {
+                    part.calculateNextStep();
+                    activeToPassiveMap.put(part.getId(), part.getCommodityOutputStates());
+                }
+
+                //send active state to passive nodes, save meter state
+                ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passiveArray, this.passiveUUIDs, meterState);
+
+                //send loads to the ancillary meter profile
+                ancillaryMeter.setLoadSequential(meterState, t);
+
+                //let all passive states calculate their next step
                 for (InterdependentProblemPart<?, ?> part : passiveArray) {
                     part.calculateNextStep();
                     passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
                 }
 
-                //dummy AncillaryMeterState, we don't know the state of the ancillaryMeter at t=t_start, thus set all to zero
-                AncillaryMeterState meterState = new AncillaryMeterState();
-
-                //send the first passive state to active nodes
+                //send new passive states to active nodes
                 ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
 
-                // iterate
-                for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
-
-                    //let all active states calculate their next step
-                    for (InterdependentProblemPart<?, ?> part : allActiveArray) {
-                        part.calculateNextStep();
-                        activeToPassiveMap.put(part.getId(), part.getCommodityOutputStates());
-                    }
-
-                    //send active state to passive nodes, save meter state
-                    ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passiveArray, this.passiveUUIDs, meterState);
-
-                    //send loads to the ancillary meter profile
-                    ancillaryMeter.setLoadSequential(meterState, t);
-
-                    //let all passive states calculate their next step
-                    for (InterdependentProblemPart<?, ?> part : passiveArray) {
-                        part.calculateNextStep();
-                        passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
-                    }
-
-                    //send new passive states to active nodes
-                    ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
-
-                }
-
-            } catch (EnergySimulationException ex) {
-                throw new SimulationEngineException(ex);
             }
+
             ancillaryMeter.endSequential();
             ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
 
@@ -585,117 +579,113 @@ public class EnergyManagementProblem extends Problem {
             passiveArray = passive.toArray(passiveArray);
 
             // go through in steps of STEP_SIZE (in ticks)
-            try {
-                long t;
+            long t;
 
-                //init the maps for the commodity states
-                UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActive, this.uuidIntMap);
-                UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passive, this.uuidIntMap);
+            //init the maps for the commodity states
+            UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActive, this.uuidIntMap);
+            UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passive, this.uuidIntMap);
 
-                //let all passive states calculate their first state
+            //let all passive states calculate their first state
+            for (InterdependentProblemPart<?, ?> part : passive) {
+                part.calculateNextStep();
+                passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
+            }
+
+            for (IOCEnergySubject simSub : passive) {
+                LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
+                if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
+                    if (simSub.getDeviceID().equals(hotWaterTankID)) {
+                        predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
+                    }
+                } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
+                    if (simSub.getDeviceID().equals(hotWaterTankID)) {
+                        predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
+                    }
+                }
+            }
+
+            //dummy AncillaryMeterState, we dont know the state of the ancillaryMeter at t=start, so set all to zero
+
+            AncillaryMeterState meterState = new AncillaryMeterState();
+
+            //send the first passive state to active nodes
+            this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
+
+            for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
+
+                activeToPassiveMap.clearInnerStates();
+
+                //let all active states calculate their next step
+                for (InterdependentProblemPart<?, ?> part : allActive) {
+                    part.calculateNextStep();
+                    activeToPassiveMap.put(part.getDeviceID(), part.getCommodityOutputStates());
+                }
+
+                //generally setting demand to 0, will add to this if there is really a demand
+                predictedHotWaterDemand.put(t, 0.0);
+                predictedHotWaterSupply.put(t, 0.0);
+
+                for (IOCEnergySubject simSub : allActive) {
+                    LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
+
+                    if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
+                        double demand = outputStates.getPower(Commodity.HEATINGHOTWATERPOWER);
+                        if (demand > 0.0) {
+                            Double current = predictedHotWaterDemand.get(t);
+                            predictedHotWaterDemand.put(t, current + demand);
+                        } else if (demand < 0.0) {
+                            Double current = predictedHotWaterSupply.get(t);
+                            predictedHotWaterSupply.put(t, current + demand);
+                        }
+                    } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
+                        double demand = outputStates.getPower(Commodity.DOMESTICHOTWATERPOWER);
+                        if (demand > 0.0) {
+                            Double current = predictedHotWaterDemand.get(t);
+                            predictedHotWaterDemand.put(t, current + demand);
+                        } else if (demand < 0.0) {
+                            Double current = predictedHotWaterSupply.get(t);
+                            predictedHotWaterSupply.put(t, current + demand);
+                        }
+                    }
+                }
+
+                //send active state to passive nodes, save meterstate
+                this.ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passiveArray, this.passiveUUIDs, meterState);
+
+                ancillaryMeter.setLoadSequential(meterState, t);
+
+                passiveToActiveMap.clearInnerStates();
+                //let all passive states calculate their next step
                 for (InterdependentProblemPart<?, ?> part : passive) {
                     part.calculateNextStep();
-                    passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
+                    passiveToActiveMap.put(part.getDeviceID(), part.getCommodityOutputStates());
                 }
 
                 for (IOCEnergySubject simSub : passive) {
+
                     LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
                     if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
                         if (simSub.getDeviceID().equals(hotWaterTankID)) {
-                            predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
+                            predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
                         }
                     } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
                         if (simSub.getDeviceID().equals(hotWaterTankID)) {
-                            predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
+                            predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
                         }
                     }
                 }
 
-                //dummy AncillaryMeterState, we dont know the state of the ancillaryMeter at t=start, so set all to zero
-
-                AncillaryMeterState meterState = new AncillaryMeterState();
-
-                //send the first passive state to active nodes
+                //send new passive states to active nodes
                 this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
-
-                for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
-
-                    activeToPassiveMap.clearInnerStates();
-
-                    //let all active states calculate their next step
-                    for (InterdependentProblemPart<?, ?> part : allActive) {
-                        part.calculateNextStep();
-                        activeToPassiveMap.put(part.getDeviceID(), part.getCommodityOutputStates());
-                    }
-
-                    //generally setting demand to 0, will add to this if there is really a demand
-                    predictedHotWaterDemand.put(t, 0.0);
-                    predictedHotWaterSupply.put(t, 0.0);
-
-                    for (IOCEnergySubject simSub : allActive) {
-                        LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
-
-                        if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                            double demand = outputStates.getPower(Commodity.HEATINGHOTWATERPOWER);
-                            if (demand > 0.0) {
-                                Double current = predictedHotWaterDemand.get(t);
-                                predictedHotWaterDemand.put(t, current + demand);
-                            } else if (demand < 0.0) {
-                                Double current = predictedHotWaterSupply.get(t);
-                                predictedHotWaterSupply.put(t, current + demand);
-                            }
-                        } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                            double demand = outputStates.getPower(Commodity.DOMESTICHOTWATERPOWER);
-                            if (demand > 0.0) {
-                                Double current = predictedHotWaterDemand.get(t);
-                                predictedHotWaterDemand.put(t, current + demand);
-                            } else if (demand < 0.0) {
-                                Double current = predictedHotWaterSupply.get(t);
-                                predictedHotWaterSupply.put(t, current + demand);
-                            }
-                        }
-                    }
-
-                    //send active state to passive nodes, save meterstate
-                    this.ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passiveArray, this.passiveUUIDs, meterState);
-
-                    ancillaryMeter.setLoadSequential(meterState, t);
-
-                    passiveToActiveMap.clearInnerStates();
-                    //let all passive states calculate their next step
-                    for (InterdependentProblemPart<?, ?> part : passive) {
-                        part.calculateNextStep();
-                        passiveToActiveMap.put(part.getDeviceID(), part.getCommodityOutputStates());
-                    }
-
-                    for (IOCEnergySubject simSub : passive) {
-
-                        LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
-                        if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                            if (simSub.getDeviceID().equals(hotWaterTankID)) {
-                                predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
-                            }
-                        } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                            if (simSub.getDeviceID().equals(hotWaterTankID)) {
-                                predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
-                            }
-                        }
-                    }
-
-                    //send new passive states to active nodes
-                    this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
-                }
-                ancillaryMeter.endSequential();
-                ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
-
-                //add final schedules
-                for (InterdependentProblemPart<?, ?> part : allIPPs) {
-                    schedules.add(part.getFinalInterdependentSchedule());
-                }
-
-            } catch (EnergySimulationException ex) {
-                throw new SimulationEngineException(ex);
             }
+            ancillaryMeter.endSequential();
+            ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
+
+            //add final schedules
+            for (InterdependentProblemPart<?, ?> part : allIPPs) {
+                schedules.add(part.getFinalInterdependentSchedule());
+            }
+
 
         } catch (Exception ex) {
             ex.printStackTrace();

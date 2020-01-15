@@ -14,4 +14,9 @@ dependencies {
     implementation project(":osh_driver_pv")
     implementation project(":osh_en50523")
     implementation project(":osh_busdriver_appliance_mielegateway")
+
+    implementation group: 'javax.persistence', name: 'javax.persistence-api'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'log4j', name: 'log4j'
+    implementation group: 'org.eclipse.persistence', name: 'eclipselink'
 }

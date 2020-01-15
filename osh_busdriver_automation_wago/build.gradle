@@ -8,4 +8,7 @@ sourceSets {
 
 dependencies {
     implementation project(":osh_core")
+
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'org.eclipse.persistence', name: 'eclipselink'
 }

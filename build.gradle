@@ -2,196 +2,136 @@ plugins {
     id 'java'
     id 'eclipse'
     id 'idea'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+}
+
+allprojects {
+    group 'de.edu.veastark'
+    version '4.1-RC'
 }
 
 jar.enabled = false
 compileTestJava.enabled = false
 processTestResources.enabled = false
 
-repositories {
-    mavenCentral()
-    maven { url "https://clojars.org/repo" }
-}
-
-allprojects {
-    group 'de.edu.veastark'
-    version '5.0-SNAPSHOT'
-}
-
-sourceCompatibility = 12
-targetCompatibility = 12
-
 subprojects {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven { url "https://clojars.org/repo" }
-        maven { url "https://maven.mangoautomation.net/repository/ias-release" }
-    }
 
     apply plugin: 'java'
     apply plugin: 'eclipse'
     apply plugin: 'idea'
+    apply plugin: 'io.spring.dependency-management'
 
     compileTestJava.enabled = false
     processTestResources.enabled = false
 
     sourceCompatibility = 12
     targetCompatibility = 12
-}
 
-allprojects {
-    dependencies {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url 'https://clojars.org/repo' }
+        maven { url 'https://maven.mangoautomation.net/repository/ias-release' }
+    }
 
-        // https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
-        implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.+'
+    dependencyManagement {
+        dependencies {
 
-        // https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api
-        implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.+'
+            dependency group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.+'
+            dependency group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.+'
+            dependency group: 'com.sun.xml.bind', name: 'jaxb-xjc', version: '2.+'
 
-        // https://mvnrepository.com/artifact/javax.activation/javax.activation-api
-        implementation group: 'javax.activation', name: 'javax.activation-api', version: '1.+'
+            dependency group: 'javax.annotation', name: 'javax.annotation-api', version: '1.+'
+            dependency group: 'javax.persistence', name: 'javax.persistence-api', version: '2.+'
+            dependency group: 'javax.activation', name: 'javax.activation-api', version: '1.+'
+            dependency group: 'javax.xml.bind', name: 'jaxb-api', version: '2.+'
 
-        // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-        implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.+'
+            dependency group: 'it.unimi.dsi', name: 'fastutil', version: '8.+'
 
 
-        // https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-core
-        implementation group: 'org.glassfish.jaxb', name: 'jaxb-core', version: '2.+'
+            dependency group: 'org.apache.poi', name: 'poi', version: '4.+'
 
-        // https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
-        implementation group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.+'
 
+            dependency group: 'log4j', name: 'log4j', version: '1.+'
 
-        // https://mvnrepository.com/artifact/it.unimi.dsi/fastutil
-        implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.+'
 
+            dependency group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.+'
 
-        // https://mvnrepository.com/artifact/org.apache.poi/poi
-        implementation group: 'org.apache.poi', name: 'poi', version: '4.+'
+            dependency group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.+'
 
+            dependency group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.+'
 
-        // https://mvnrepository.com/artifact/log4j/log4j
-        implementation group: 'log4j', name: 'log4j', version: '1.+'
+            dependency group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.+'
 
 
-        // https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client
-        implementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.+'
+            dependency group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.+'
 
-        // https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-common
-        implementation group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.+'
+            dependency group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.+'
 
-        // https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-server
-        implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.+'
 
-        // https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-servlet-core
-        implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.+'
+            dependency group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.+'
 
+            dependency group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.+'
 
-        // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
-        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.+'
+            dependency group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.+'
 
-        // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.+'
+            dependency group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.+'
 
 
-        // https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server
-        implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.+'
+            dependency group: 'com.jcraft', name: 'jsch', version: '0.+'
 
-        // https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet
-        implementation group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.+'
 
-        // https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-servlet
-        implementation group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.+'
+            dependency group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.+'
 
-        // https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-api
-        implementation group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.+'
+            dependency group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.+'
 
 
-        // https://mvnrepository.com/artifact/com.jcraft/jsch
-        implementation group: 'com.jcraft', name: 'jsch', version: '0.+'
+            dependency group: 'ws.wamp.jawampa', name: 'jawampa-core', version: '0.+'
 
+            dependency group: 'ws.wamp.jawampa', name: 'jawampa-netty', version: '0.+'
 
-        // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-        implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.+'
 
-        // https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc
-        implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.+'
+            dependency group: 'mysql', name: 'mysql-connector-java', version: '8.+'
 
 
-        // https://mvnrepository.com/artifact/ws.wamp.jawampa/jawampa-core
-        implementation group: 'ws.wamp.jawampa', name: 'jawampa-core', version: '0.+'
+            dependency group: 'io.reactivex', name: 'rxjava', version: '1.+'
 
-        // https://mvnrepository.com/artifact/ws.wamp.jawampa/jawampa-netty
-        implementation group: 'ws.wamp.jawampa', name: 'jawampa-netty', version: '0.+'
 
+            dependency group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
 
-        // https://mvnrepository.com/artifact/mysql/mysql-connector-java
-        implementation group: 'mysql', name: 'mysql-connector-java', version: '8.+'
+            dependency group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
 
+            dependency group: 'commons-io', name: 'commons-io', version: '2.+'
 
-        // https://mvnrepository.com/artifact/io.reactivex/rxjava
-        implementation group: 'io.reactivex', name: 'rxjava', version: '1.+'
 
+            dependency group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.+'
 
-        // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
-        implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
 
-        // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
+            dependency group: 'org.rrd4j', name: 'rrd4j', version: '3.+'
 
-        // https://mvnrepository.com/artifact/commons-io/commons-io
-        implementation group: 'commons-io', name: 'commons-io', version: '2.+'
 
+            dependency group: 'com.fuzzylite', name: 'jfuzzylite', version: '5.+'
 
-        // https://mvnrepository.com/artifact/org.eclipse.persistence/eclipselink
-        implementation group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.+'
 
+            dependency group: 'org.jfree', name: 'jfreechart', version: '1.+'
 
-        // https://mvnrepository.com/artifact/org.rrd4j/rrd4j
-        implementation group: 'org.rrd4j', name: 'rrd4j', version: '3.+'
+            dependency group: 'gov.nist.math', name: 'jama', version: '1.+'
 
+            dependency group: 'org.jfree', name: 'jcommon', version: '1.+'
 
-        // https://mvnrepository.com/artifact/com.fuzzylite/jfuzzylite
-        implementation group: 'com.fuzzylite', name: 'jfuzzylite', version: '5.+'
+            dependency group: 'com.microsoft.ews-java-api', name: 'ews-java-api', version: '2.+'
 
+            dependency group: 'kephale', name: 'matlabcontrol', version: '4.+'
 
-        // https://mvnrepository.com/artifact/org.jfree/jfreechart
-        implementation group: 'org.jfree', name: 'jfreechart', version: '1.+'
+            dependency group: 'org.dockingframes', name: 'docking-frames-common', version: '1.1.1'
 
-        // https://mvnrepository.com/artifact/gov.nist.math/jama
-        implementation group: 'gov.nist.math', name: 'jama', version: '1.+'
+            dependency group: 'org.dockingframes', name: 'docking-frames-core', version: '1.1.1'
 
-        // https://mvnrepository.com/artifact/org.jfree/jcommon
-        implementation group: 'org.jfree', name: 'jcommon', version: '1.+'
+            dependency group: 'net.wimpi', name: 'jamod', version: '1.+'
 
-        // https://mvnrepository.com/artifact/com.microsoft.ews-java-api/ews-java-api
-        implementation group: 'com.microsoft.ews-java-api', name: 'ews-java-api', version: '2.+'
+            dependency group: 'org.clojars.jarpiain', name: 'bacnet4j', version: '1.+'
 
-        // https://mvnrepository.com/artifact/kephale/matlabcontrol
-        implementation group: 'kephale', name: 'matlabcontrol', version: '4.+'
-
-        // https://mvnrepository.com/artifact/org.dockingframes/docking-frames-common
-        implementation group: 'org.dockingframes', name: 'docking-frames-common', version: '1.1.1'
-
-        // https://mvnrepository.com/artifact/org.dockingframes/docking-frames-core
-        implementation group: 'org.dockingframes', name: 'docking-frames-core', version: '1.1.1'
-
-        // https://mvnrepository.com/artifact/net.wimpi/jamod
-        implementation group: 'net.wimpi', name: 'jamod', version: '1.+'
-
-//     https://mvnrepository.com/artifact/gnu.io/rxtx
-//    implementation group: 'gnu.io', name: 'rxtx', version: '2.1.7'
-
-//        implementation group: 'com.serotonin', name: 'bacnet4j', version: '4.0.0'
-
-        // https://mvnrepository.com/artifact/org.clojars.jarpiain/bacnet4j
-        implementation group: 'org.clojars.jarpiain', name: 'bacnet4j', version: '1.+'
-
-        // https://mvnrepository.com/artifact/org.clojars.jarpiain/sero-utils
-        implementation group: 'org.clojars.jarpiain', name: 'sero-utils', version: '1.+'
-
-
-
+            dependency group: 'org.clojars.jarpiain', name: 'sero-utils', version: '1.+'
+        }
     }
 }
