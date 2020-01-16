@@ -17,8 +17,6 @@ dependencies {
     implementation group: 'log4j', name: 'log4j'
     implementation group: 'org.dockingframes', name: 'docking-frames-common'
     implementation group: 'org.dockingframes', name: 'docking-frames-core'
-    implementation group: 'org.eclipse.jetty', name: 'jetty-server'
-    implementation group: 'org.eclipse.jetty', name: 'jetty-servlet'
     implementation group: 'org.jfree', name: 'jcommon'
     implementation group: 'org.jfree', name: 'jfreechart'
     implementation group: 'ws.wamp.jawampa', name: 'jawampa-core'

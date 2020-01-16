@@ -36,102 +36,35 @@ subprojects {
 
     dependencyManagement {
         dependencies {
-
-            dependency group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.+'
-            dependency group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.+'
-            dependency group: 'com.sun.xml.bind', name: 'jaxb-xjc', version: '2.+'
-
+            dependency group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.+'
+            dependency group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.+'
+            dependency group: 'com.jcraft', name: 'jsch', version: '0.+'
+            dependency group: 'org.glassfish.jaxb', name: 'jaxb-core', version: '2.+'
+            dependency group: 'org.glassfish.jaxb', name: 'jaxb-xjc', version: '2.+'
+            dependency group: 'io.reactivex', name: 'rxjava', version: '1.+'
+            dependency group: 'it.unimi.dsi', name: 'fastutil', version: '8.+'
+            dependency group: 'javax.activation', name: 'javax.activation-api', version: '1.+'
             dependency group: 'javax.annotation', name: 'javax.annotation-api', version: '1.+'
             dependency group: 'javax.persistence', name: 'javax.persistence-api', version: '2.+'
-            dependency group: 'javax.activation', name: 'javax.activation-api', version: '1.+'
             dependency group: 'javax.xml.bind', name: 'jaxb-api', version: '2.+'
-
-            dependency group: 'it.unimi.dsi', name: 'fastutil', version: '8.+'
-
-
-            dependency group: 'org.apache.poi', name: 'poi', version: '4.+'
-
-
             dependency group: 'log4j', name: 'log4j', version: '1.+'
-
-
-            dependency group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.+'
-
-            dependency group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.+'
-
-            dependency group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.+'
-
-            dependency group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.+'
-
-
-            dependency group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.+'
-
-            dependency group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.+'
-
-
-            dependency group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.+'
-
-            dependency group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.+'
-
-            dependency group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.+'
-
-            dependency group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.+'
-
-
-            dependency group: 'com.jcraft', name: 'jsch', version: '0.+'
-
-
-            dependency group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.+'
-
-            dependency group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.+'
-
-
-            dependency group: 'ws.wamp.jawampa', name: 'jawampa-core', version: '0.+'
-
-            dependency group: 'ws.wamp.jawampa', name: 'jawampa-netty', version: '0.+'
-
-
             dependency group: 'mysql', name: 'mysql-connector-java', version: '8.+'
-
-
-            dependency group: 'io.reactivex', name: 'rxjava', version: '1.+'
-
-
             dependency group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
-
-            dependency group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
-
-            dependency group: 'commons-io', name: 'commons-io', version: '2.+'
-
-
-            dependency group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.+'
-
-
-            dependency group: 'org.rrd4j', name: 'rrd4j', version: '3.+'
-
-
-            dependency group: 'com.fuzzylite', name: 'jfuzzylite', version: '5.+'
-
-
-            dependency group: 'org.jfree', name: 'jfreechart', version: '1.+'
-
-            dependency group: 'gov.nist.math', name: 'jama', version: '1.+'
-
-            dependency group: 'org.jfree', name: 'jcommon', version: '1.+'
-
-            dependency group: 'com.microsoft.ews-java-api', name: 'ews-java-api', version: '2.+'
-
-            dependency group: 'kephale', name: 'matlabcontrol', version: '4.+'
-
-            dependency group: 'org.dockingframes', name: 'docking-frames-common', version: '1.1.1'
-
-            dependency group: 'org.dockingframes', name: 'docking-frames-core', version: '1.1.1'
-
-            dependency group: 'net.wimpi', name: 'jamod', version: '1.+'
-
+            dependency group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.+'
             dependency group: 'org.clojars.jarpiain', name: 'bacnet4j', version: '1.+'
-
             dependency group: 'org.clojars.jarpiain', name: 'sero-utils', version: '1.+'
+            dependency group: 'org.dockingframes', name: 'docking-frames-common', version: '1.1.1'
+            dependency group: 'org.dockingframes', name: 'docking-frames-core', version: '1.1.1'
+            dependency group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.+'
+            dependency group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.+'
+            dependency group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.+'
+            dependency group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.+'
+            dependency group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.+'
+            dependency group: 'org.jfree', name: 'jcommon', version: '1.+'
+            dependency group: 'org.jfree', name: 'jfreechart', version: '1.+'
+            dependency group: 'org.rrd4j', name: 'rrd4j', version: '3.+'
+            dependency group: 'ws.wamp.jawampa', name: 'jawampa-core', version: '0.+'
+            dependency group: 'ws.wamp.jawampa', name: 'jawampa-netty', version: '0.+'
         }
     }
 }
