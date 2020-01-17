@@ -1,7 +1,7 @@
-# OSHv4, Version 4.0
+# OSHv4, Version 4.1
 
 Framework for Multi-commodity Energy Management in intelligent buildings.
-Copyright (C) 2016
+Copyright © 2020
 
 [Organic Smart Home](http://www.organicsmarthome.com) (OSH) is a free and open source energy management framework, which optimizes the energy provision, distribution, storage, conversion, and utilization in intelligent buildings, such as smart buildings and smart homes.
 
@@ -11,43 +11,60 @@ The building energy management system is based on the Extended Observer/Controll
 
 It aims at realizing a mostly self-organizing and automated energy management system, reducing the need for interaction between the users (e.g., occupants) and the building's devices and systems (e.g., appliances, distributed generation, and building energy management system). However, the system still allows for explicit interference--if desired--and the users remain always in the loop.
 
-
 ## Technical Information
 
-* Java 8+
-* Eclipse Mars+
+* Java 11+
+* Gradle 6.1
 
 
 ## Overview
 
-* <b>source</b> : source code of the Organic Smart Home
-* <b>source/osh_sim_builder</b> : OSH tools for the generation of XML configuration files (simulation mode) 
-  * <code>constructSimulationPackage</code> : OSH configuration file generator
-    * Output : OSH configuration files in <b>source/osh_sim_builder/configfiles/simulationPackages/[timestamp]</b> (has to be copied to <b>source/osh_sim_loader/configfiles/osh/</b>)
-* <b>source/osh_sim_loader</b> : OSH in simulation mode
-  * <code>runSimulationPackage</code> : OSH simulation launcher (simulation mode)
-    * Input : OSH configuration files in <b>source/osh_sim_loader/configfiles/osh/[timestamp]</b>
-* <b>source/osh_core</b> : core components of the OSH (e.g. generic components of the Observer/Controller architecture, Communication Registries, Energy Simulation Core)
-* <b>source/osh_ems_ea</b> : components of the optimization layer (partly based on [jMetal 4.x](https://github.com/jMetal/jMetal))
-* <b>source/osh_busdriver*</b> : bus drivers (Miele XGW2000 gateway, BacNet, EnOcean, WAGO 750-820*)
-* <b>source/osh_comdriver*</b> : communication drivers (user interaction, logging, REST service, external signals, weather prediction)
-* <b>source/osh_driver*</b> : device drivers (home appliances, baseload, battery storage, microCHP, HVAC, PV system, smart meter)
-* <b>source/xbin_lib</b> : required libraries (not provided, please see README for list of libraries)
+* **osh_sim_builder** : OSH tools for the generation of XML configuration files (simulation mode) 
+  * `constructSimulationPackage` : OSH configuration file generator
+    * Output : OSH configuration files in **source/osh_sim_builder/configfiles/simulationPackages/[timestamp]** (has to be copied to **source/osh_sim_loader/configfiles/osh/**)
+* **osh_sim_loader** : OSH in simulation mode
+  * `runSimulationPackage` : OSH simulation launcher (simulation mode)
+    * Input : OSH configuration files in **source/osh_sim_loader/configfiles/osh/[name]**
+* **osh_core** : core components of the OSH (e.g. generic components of the Observer/Controller architecture, Communication Registries, Energy Simulation Core)
+* **osh_ems_ea** : components of the optimization layer (partly based on [jMetal 4.5](https://github.com/jMetal/jMetal))
+* **osh_busdriver*** : bus drivers (Miele XGW2000 gateway, BacNet, EnOcean, WAGO 750-820*)
+* **osh_comdriver*** : communication drivers (user interaction, logging, REST service, external signals, weather prediction)
+* **osh_driver*** : device drivers (home appliances, baseload, battery storage, microCHP, HVAC, PV system, smart meter)
+* **xbin_lib** : required libraries (not provided, please see README for list of libraries)
 
 
-## How 2 Use
+## Getting started
 
 * Check out
-* Get libraries, see <b>source/xbin_lib/README.md</b>
-* Run <code>runSimulationPackage</code> in <b>source/osh_sim_loader</b>
+* Run <code>./gradlew build</code>
+
+#### Gradle tasks
+
+* **runSingleHHLocal** runs the simulation with the currently defined configuration files in 
+`osh.runsimulation.runSimulationPackage`
+* **constructSingleHHConfig** constructs simulation configuration profiles with the current settings in  
+`constructsimulation.constructSimulationPackage` and saves them in a folder under 
+*osh_sim_builder/configfiles[timestamp]* 
+  * to run the simulation with this configuration copy the created files to *osh_sim_loader/configfiles/osh* and edit
+   the `configID` property in `osh.runsimulation.runSimulationPackage`
+* **construct[type]ApplianceProfiles** creates the appliance profiles of the specific device as defined in the
+ generation classes at *osh_driver_appliance/src_toolbox*
+  * replace the existing appliance profiles in *osh_sim_loader/configfiles/[type]* if you want to run the simnulation
+   with the newly created profiles
+* **constructGridConfiguration** creates a new energy grid profile as defined in `osh.esc.instances.GridInstance`
+  * to use the newly created grid profiles copy them to *osh_sim_loader/configfiles/grids*
+* **generateXSDClasses** generates java classes from the xsd-schema we use for configuration files   
+
+
+
 
 
 ## Contact and Main Contributors
 
 * Kaibin Bao (bao@kit.edu)
 * Sebastian Kochanneck (kochanneck@kit.edu)
-* Sebastian Kramer
-* Ingo Mauser (mauser@kit.edu) - <b>main contact</b>
+* Sebastian Kramer (sbs.kramer@gmail.com)
+* Ingo Mauser (mauser@kit.edu) - **main contact**
 * Jan Müller (jan.mueller@kit.edu)
 
 
@@ -96,3 +113,4 @@ The Organic Smart Home is licensed under the GPL.
 If you have licensed this product under the GPL, please see the LICENSE file for more information and the GPL version. 
 
 The adapted version of jMetal is licensed under the LGPL as the original version of jMetal 4.5.
+

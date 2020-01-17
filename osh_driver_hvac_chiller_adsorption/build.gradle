@@ -11,4 +11,6 @@ dependencies {
     implementation project(":osh_core")
     implementation project(":osh_driver_hvac_watertank")
     implementation project(":osh_driver_hvac")
+
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
 }

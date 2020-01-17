@@ -13,7 +13,8 @@ dependencies {
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
-    implementation group: 'io.reactivex', name: 'rxjava'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
     implementation group: 'log4j', name: 'log4j'
     implementation group: 'org.dockingframes', name: 'docking-frames-common'
     implementation group: 'org.dockingframes', name: 'docking-frames-core'

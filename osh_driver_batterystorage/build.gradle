@@ -9,4 +9,6 @@ sourceSets {
 
 dependencies {
     implementation project(":osh_core")
+
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
 }

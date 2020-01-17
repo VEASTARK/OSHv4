@@ -41,7 +41,7 @@ subprojects {
             dependency group: 'com.jcraft', name: 'jsch', version: '0.+'
             dependency group: 'org.glassfish.jaxb', name: 'jaxb-core', version: '2.+'
             dependency group: 'org.glassfish.jaxb', name: 'jaxb-xjc', version: '2.+'
-            dependency group: 'io.reactivex', name: 'rxjava', version: '1.+'
+            dependency group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.+'
             dependency group: 'it.unimi.dsi', name: 'fastutil', version: '8.+'
             dependency group: 'javax.activation', name: 'javax.activation-api', version: '1.+'
             dependency group: 'javax.annotation', name: 'javax.annotation-api', version: '1.+'

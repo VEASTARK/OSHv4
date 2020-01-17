@@ -14,4 +14,5 @@ dependencies {
     implementation project(":osh_core")
 
     implementation group: 'it.unimi.dsi', name: 'fastutil'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
 }
