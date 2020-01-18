@@ -44,24 +44,24 @@ class CruiseControl extends JPanel {
         this.l_time.setText("-- time --");
         this.add(this.l_time);
 
-        final Checkbox c_wait = new Checkbox("wait (global scheduler)");
-        c_wait.setState(true);
-        c_wait.addItemListener(e -> CruiseControl.this.wait = c_wait.getState());
+        final JCheckBox  c_wait = new JCheckBox ("wait (global scheduler)");
+        c_wait.setSelected(true);
+        c_wait.addItemListener(e -> this.wait = c_wait.isSelected());
         if (!waitAllowed) {
             c_wait.setEnabled(false);
-            c_wait.setState(false);
+            c_wait.setSelected(false);
             this.wait = false;
         }
         this.add(c_wait);
 
 
-        final Checkbox c_update = new Checkbox("update");
-        c_update.setState(true);
+        final JCheckBox  c_update = new JCheckBox ("update");
+        c_update.setSelected(true);
         c_update.addItemListener(e -> {
-            CruiseControl.this.update = c_update.getState();
-            if (CruiseControl.this.update) {
-                c_wait.setState(true);
-                CruiseControl.this.wait = true;
+            this.update = c_update.isSelected();
+            if (this.update) {
+                c_wait.setSelected(true);
+                this.wait = true;
             }
         });
         this.add(c_update);
@@ -69,7 +69,7 @@ class CruiseControl extends JPanel {
         JButton b = new JButton("go");
         b.addActionListener(e -> {
             this.goWriteLock.lock();
-            CruiseControl.this.go = -1;
+            this.go = -1;
             this.goWriteLock.unlock();
         });
         this.add(b);
@@ -109,7 +109,7 @@ class CruiseControl extends JPanel {
         b.addActionListener(e -> {
             this.goWriteLock.lock();
             try {
-                CruiseControl.this.go = Long.parseLong(tf.getText());
+                this.go = Long.parseLong(tf.getText());
             } catch (NumberFormatException ignored) {
             }
             c_wait.setEnabled(true);
