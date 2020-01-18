@@ -21,16 +21,15 @@ It aims at realizing a mostly self-organizing and automated energy management sy
 
 * **osh_sim_builder** : OSH tools for the generation of XML configuration files (simulation mode) 
   * `constructSimulationPackage` : OSH configuration file generator
-    * Output : OSH configuration files in **source/osh_sim_builder/configfiles/simulationPackages/[timestamp]** (has to be copied to **source/osh_sim_loader/configfiles/osh/**)
+    * Output : OSH configuration files in **osh_sim_builder/configfiles/simulationPackages/[timestamp]** (has to be copied to **osh_sim_loader/configfiles/osh/**)
 * **osh_sim_loader** : OSH in simulation mode
   * `runSimulationPackage` : OSH simulation launcher (simulation mode)
-    * Input : OSH configuration files in **source/osh_sim_loader/configfiles/osh/[name]**
+    * Input : OSH configuration files in **osh_sim_loader/configfiles/osh/[name]**
 * **osh_core** : core components of the OSH (e.g. generic components of the Observer/Controller architecture, Communication Registries, Energy Simulation Core)
 * **osh_ems_ea** : components of the optimization layer (partly based on [jMetal 4.5](https://github.com/jMetal/jMetal))
 * **osh_busdriver*** : bus drivers (Miele XGW2000 gateway, BacNet, EnOcean, WAGO 750-820*)
 * **osh_comdriver*** : communication drivers (user interaction, logging, REST service, external signals, weather prediction)
 * **osh_driver*** : device drivers (home appliances, baseload, battery storage, microCHP, HVAC, PV system, smart meter)
-* **xbin_lib** : required libraries (not provided, please see README for list of libraries)
 
 
 ## Getting started
@@ -52,7 +51,7 @@ The output directory will be *[projectRoot]/out/runSingleHH* and all configfiles
    the `configID` property in `osh.runsimulation.runSimulationPackage`
 * **construct[type]ApplianceProfiles** creates the appliance profiles of the specific device as defined in the
  generation classes at *osh_driver_appliance/src_toolbox*
-  * replace the existing appliance profiles in *osh_sim_loader/configfiles/[type]* if you want to run the simnulation
+  * replace the existing appliance profiles in *osh_sim_loader/configfiles/[type]* if you want to run the simulation
    with the newly created profiles
 * **constructGridConfiguration** creates a new energy grid profile as defined in `osh.esc.instances.GridInstance`
   * to use the newly created grid profiles copy them to *osh_sim_loader/configfiles/grids*
