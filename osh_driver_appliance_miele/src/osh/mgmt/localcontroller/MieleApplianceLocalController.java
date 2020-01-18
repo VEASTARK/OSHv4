@@ -1,0 +1,390 @@
+package osh.mgmt.localcontroller;
+
+import osh.OSHComponent;
+import osh.core.exceptions.OSHException;
+import osh.core.interfaces.IOSHOC;
+import osh.core.oc.LocalController;
+import osh.datatypes.dof.DofStateExchange;
+import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.power.SparseLoadProfile;
+import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
+import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;
+import osh.datatypes.registry.oc.state.IAction;
+import osh.datatypes.registry.oc.state.LastActionExchange;
+import osh.datatypes.registry.oc.state.MieleDofStateExchange;
+import osh.en50523.EN50523DeviceState;
+import osh.en50523.EN50523OIDExecutionOfACommandCommands;
+import osh.hal.exchange.GenericApplianceStartTimesControllerExchange;
+import osh.hal.exchange.MieleApplianceControllerExchange;
+import osh.mgmt.localobserver.ipp.MieleApplianceIPP;
+import osh.mgmt.localobserver.ipp.MieleApplianceNonControllableIPP;
+import osh.mgmt.localobserver.ipp.MieleSolution;
+import osh.mgmt.localobserver.miele.MieleAction;
+import osh.mgmt.mox.MieleApplianceMOX;
+import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IHasState;
+
+import java.util.UUID;
+
+
+/**
+ * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
+ */
+public class MieleApplianceLocalController
+        extends LocalController
+        implements IEventTypeReceiver, IHasState {
+
+
+    /**
+     * SparseLoadProfile containing different profile with different commodities<br>
+     * IMPORATANT: RELATIVE TIMES!
+     */
+    private SparseLoadProfile currentProfile;
+
+    private EN50523DeviceState currentState;
+
+    /**
+     * use private setter setStartTime()
+     */
+    private long startTime = -1;
+
+    // used for EA planning
+    private final long expectedStartTime = -1;
+    private long profileStarted = -1;
+    private long programmedAt = -1;
+
+    /**
+     * Never change this by hand, use setDof()
+     */
+    private int firstDof;
+    /**
+     * Never change this by hand, use setDof()
+     */
+    private int secondDof;
+    /**
+     * Never change this by hand, use setDof()
+     */
+    private long latestStart;
+
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
+
+    /**
+     * CONSTRUCTOR
+     *
+     * @param osh
+     */
+    public MieleApplianceLocalController(IOSHOC osh) {
+        super(osh);
+    }
+
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+
+        // register for onNextTimePeriod()
+        this.getTimer().registerComponent(this, 1);
+
+        this.getOCRegistry().register(EASolutionCommandExchange.class, this);
+        this.getOCRegistry().registerStateChangeListener(DofStateExchange.class, this);
+
+        //workaround bc this controller may not have this data from the driver->observer chain
+        if (this.compressionType == null) {
+            this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
+            this.compressionValue = 100;
+        }
+        this.updateIPPExchange();
+    }
+
+    private void callDevice() {
+        MieleApplianceControllerExchange halControllerExchangeObject
+                = new MieleApplianceControllerExchange(
+                this.getDeviceID(),
+                this.getTimer().getUnixTime(),
+                EN50523OIDExecutionOfACommandCommands.START);
+        this.updateOcDataSubscriber(halControllerExchangeObject);
+    }
+
+    @Override
+    public <T extends EventExchange> void onQueueEventTypeReceived(
+            Class<T> type, T ex) {
+        if (ex instanceof EASolutionCommandExchange) {
+            @SuppressWarnings("unchecked")
+            EASolutionCommandExchange<MieleSolution> solution = (EASolutionCommandExchange<MieleSolution>) ex;
+            if (!solution.getReceiver().equals(this.getDeviceID()) || solution.getPhenotype() == null) return;
+            this.getGlobalLogger().logDebug("getting new starttime: " + solution.getPhenotype().startTime);
+            this.setStartTime(solution.getPhenotype().startTime);
+            this.setWAMPStartTime(solution.getPhenotype().startTime);
+            this.updateDofExchange();
+
+            //System.out.println(getDeviceID() + " got new start time: " + startTime);
+        }
+        if (ex instanceof StateChangedExchange && ((StateChangedExchange) ex).getStatefulEntity().equals(this.getDeviceID())) {
+            StateChangedExchange exsc = (StateChangedExchange) ex;
+
+            // 1st DoF and 2nd DoF may be NULL
+            // (no DoF for device available yet and the change is because of another device)
+            // DoF from Com Manager
+            if (exsc.getType().equals(DofStateExchange.class)) {
+                DofStateExchange dse = this.getOCRegistry().getState(
+                        DofStateExchange.class, exsc.getStatefulEntity());
+                this.setDof(
+                        dse.getDevice1stDegreeOfFreedom(),
+                        dse.getDevice2ndDegreeOfFreedom());
+            }
+        }
+    }
+
+    @Override
+    public void onNextTimePeriod() {
+
+        long now = this.getTimer().getUnixTime();
+
+        EN50523DeviceState oldState = this.currentState;
+        this.updateMOX();
+
+        if (oldState != this.currentState) {
+            this.getGlobalLogger().logDebug(this.getLocalObserver().getDeviceType() + " statechange from: " + oldState + " to : " + this.currentState);
+            switch (this.currentState) {
+                case PROGRAMMED:
+                case PROGRAMMEDWAITINGTOSTART: {
+                    this.updateIPPExchange();
+                }
+                break;
+                case RUNNING: {
+                    this.setStartTime(this.profileStarted);
+                    this.updateIPPExchange();
+                }
+                break;
+                default: {
+                    this.startTime = -1;
+                }
+            }
+        }
+
+        if ((this.currentState == EN50523DeviceState.PROGRAMMED
+                || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART)
+                && this.startTime != -1 && this.startTime <= now) {
+            this.callDevice();
+        }
+
+//		if (( currentState == EN50523DeviceState.PROGRAMMED 
+//				|| currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART )
+//				&& getStartTime() == -1) {
+//			setStartTime(Long.MAX_VALUE);
+//			
+//		}		
+//		else if ( ( currentState == EN50523DeviceState.PROGRAMMED 
+//				|| currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART )
+//				&& getStartTime() > 0 ) {
+//			if (getStartTime() <= now) { //already to be started?
+//				//start device
+//				callDevice();
+//				setStartTime(-1);
+//			}
+//		}
+//		//IMA @2016-05-13
+//		else if ( currentState == EN50523DeviceState.RUNNING
+//				&& getStartTime() == -1) {
+//			setStartTime(profileStarted);
+//			updateIPPExchange();
+//		}
+//		//IMA @2016-05-13
+//		else if ( currentState == EN50523DeviceState.RUNNING
+//				&& getStartTime() >= 0) {
+////			setStartTime(profileStarted);
+////			updateIPPExchange();
+//		}
+//		else {
+//			setStartTime(-1);
+//			if (oldState != currentState) { //IMA @2016-05-20
+//				updateIPPExchange(); //IMA @2016-05-20
+//			}
+//			
+//		}
+    }
+
+    /**
+     * Get MOX from Observer
+     */
+    private void updateMOX() {
+        MieleApplianceMOX mox = (MieleApplianceMOX) this.getDataFromLocalObserver();
+        this.currentProfile = mox.getCurrentProfile();
+        this.currentState = mox.getCurrentState();
+        this.profileStarted = mox.getProfileStarted();
+        this.programmedAt = mox.getProgrammedAt();
+        this.compressionType = mox.getCompressionType();
+        this.compressionValue = mox.getCompressionValue();
+    }
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
+
+    private long getStartTime() {
+        return this.startTime;
+    }
+
+    private void setStartTime(long startTime) {
+        this.startTime = startTime;
+
+        this.getOCRegistry().setState(
+                ExpectedStartTimeExchange.class,
+                this,
+                new ExpectedStartTimeExchange(
+                        this.getUUID(),
+                        this.getTimer().getUnixTime(),
+                        startTime));
+
+        this.getOCRegistry().sendEvent(
+                ExpectedStartTimeChangedExchange.class,
+                new ExpectedStartTimeChangedExchange(
+                        this.getUUID(),
+                        this.getTimer().getUnixTime(),
+                        startTime));
+
+
+    }
+
+    private void setWAMPStartTime(long startTime) {
+        GenericApplianceStartTimesControllerExchange halControllerExchangeObject
+                = new GenericApplianceStartTimesControllerExchange(
+                this.getDeviceID(),
+                this.getTimer().getUnixTime(),
+                startTime);
+        this.updateOcDataSubscriber(halControllerExchangeObject);
+    }
+
+    @Override
+    public OSHComponent getSyncObject() {
+        return this;
+    }
+
+    public void setDof(Integer firstDof, Integer secondDof) {
+
+        boolean dofChanged = false;
+
+        if ((firstDof != null && firstDof < 0)
+                || (secondDof != null && secondDof < 0)) {
+            throw new IllegalArgumentException("firstDof or secondDof < 0");
+        }
+
+        if (firstDof == null && secondDof == null) {
+            throw new IllegalArgumentException("firstDof and secondDof == null");
+        }
+
+        if (firstDof != null && this.firstDof != firstDof) {
+            this.firstDof = firstDof;
+            dofChanged = true;
+        }
+
+        if (secondDof != null && this.secondDof != secondDof) {
+            this.secondDof = secondDof;
+            dofChanged = true;
+        }
+
+        if (dofChanged && (this.currentState == EN50523DeviceState.PROGRAMMED
+                || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART)) {
+            this.updateIPPExchange();
+        }
+
+    }
+
+
+    public void updateDofExchange() {
+        // state for REST and logging
+        this.getOCRegistry().setState(
+                MieleDofStateExchange.class,
+                this,
+                new MieleDofStateExchange(
+                        this.getDeviceID(),
+                        this.getTimer().getUnixTime(),
+                        this.firstDof,
+                        Math.min(this.getTimer().getUnixTime(), this.latestStart),
+                        this.latestStart,
+                        this.expectedStartTime));
+    }
+
+
+    protected void updateIPPExchange() {
+        InterdependentProblemPart<?, ?> ipp;
+
+        long now = this.getTimer().getUnixTime();
+
+        if (this.currentState == EN50523DeviceState.PROGRAMMED
+                || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART) {
+            assert this.programmedAt >= 0;
+
+//			if( deviceStartTime != -1 )
+//				latestStart = deviceStartTime;
+//			else
+            this.latestStart = this.programmedAt + this.firstDof;
+
+            ipp = new MieleApplianceIPP(
+                    this.getDeviceID(),
+                    this.getGlobalLogger(),
+                    now, //now
+                    now, //earliest starting time
+                    this.latestStart,
+                    this.currentProfile.clone(),
+                    true, //reschedule
+                    false,
+                    this.latestStart + this.currentProfile.getEndingTimeOfProfile(),
+                    this.getLocalObserver().getDeviceType(),
+                    this.compressionType,
+                    this.compressionValue);
+
+            IAction mieleAction = new MieleAction(
+                    this.getDeviceID(),
+                    this.programmedAt,
+                    (MieleApplianceIPP) ipp);
+
+            this.getOCRegistry().setState(
+                    LastActionExchange.class,
+                    this,
+                    new LastActionExchange(
+                            this.getUUID(),
+                            this.getTimer().getUnixTime(),
+                            mieleAction));
+        } else {
+            if (this.profileStarted > 0) {
+                ipp = new MieleApplianceNonControllableIPP(
+                        this.getDeviceID(),
+                        this.getGlobalLogger(),
+                        now,
+                        new SparseLoadProfile().merge(this.currentProfile, this.profileStarted),
+                        true, // reschedule
+                        this.getLocalObserver().getDeviceType(),
+                        this.compressionType,
+                        this.compressionValue
+                );
+            } else {
+                // for a real Smart Home we should reschedule, because the user
+                // could have aborted an action.
+                // for a simulation we don't need that, because nobody will (at
+                // the moment) abort anything
+
+                // IMA: StaticEAProblemPartExchange causes rescheduling
+
+
+                ipp = new MieleApplianceNonControllableIPP(
+                        this.getDeviceID(),
+                        this.getGlobalLogger(),
+                        now,
+                        new SparseLoadProfile(),
+                        true, // reschedule
+                        this.getLocalObserver().getDeviceType(),
+                        this.compressionType,
+                        this.compressionValue
+                );
+            }
+        }
+        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        this.updateDofExchange();
+    }
+}

@@ -1,0 +1,23 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+    implementation project(":osh_busdriver_appliance_mielegateway")
+    implementation project(":osh_driver_appliance")
+    implementation project(":osh_en50523")
+
+    implementation group: 'javax.persistence', name: 'javax.persistence-api'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-server'
+    implementation group: 'org.eclipse.jetty', name: 'jetty-servlet'
+    implementation group: 'org.eclipse.persistence', name: 'eclipselink'
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core'
+    implementation group: 'org.glassfish.jersey.core', name: 'jersey-server'
+    implementation group: 'org.rrd4j', name: 'rrd4j'
+}

@@ -1,0 +1,174 @@
+package osh.mgmt.localobserver;
+
+import osh.configuration.system.DeviceTypes;
+import osh.core.exceptions.OSHException;
+import osh.core.interfaces.IOSHOC;
+import osh.core.oc.LocalObserver;
+import osh.datatypes.commodity.Commodity;
+import osh.datatypes.mox.IModelOfObservationExchange;
+import osh.datatypes.mox.IModelOfObservationType;
+import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
+import osh.eal.hal.exchange.IHALExchange;
+import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.hal.exchange.GasBoilerObserverExchange;
+import osh.mgmt.ipp.GasBoilerNonControllableIPP;
+import osh.registry.interfaces.IHasState;
+
+import java.util.UUID;
+
+/**
+ * @author Ingo Mauser
+ */
+public class NonControllableGasBoilerLocalObserver
+        extends LocalObserver
+        implements IHasState {
+
+    private int NEW_IPP_AFTER;
+    private long lastTimeIPPSent = Long.MIN_VALUE;
+    private boolean initialStateLastIPP;
+    private double lastIPPMinTemperature = 60;
+    private double lastIPPMaxTemperature = 80;
+
+    private double minTemperature = 60;
+    private double maxTemperature = 80;
+    private boolean initialState;
+
+    private int maxHotWaterPower = 15000;
+    private int maxGasPower = 15000;
+
+    private int typicalActivePowerOn = 100;
+    private int typicalActivePowerOff;
+    private int typicalReactivePowerOn;
+    private int typicalReactivePowerOff;
+
+    private LoadProfileCompressionTypes compressionType;
+    private int compressionValue;
+
+
+    /**
+     * CONSTRUCTOR
+     */
+    public NonControllableGasBoilerLocalObserver(IOSHOC osh) {
+        super(osh);
+        //NOTHING
+    }
+
+
+    @Override
+    public void onSystemIsUp() throws OSHException {
+        super.onSystemIsUp();
+
+        this.getTimer().registerComponent(this, 1);
+    }
+
+    @Override
+    public void onNextTimePeriod() throws OSHException {
+        super.onNextTimePeriod();
+
+        long now = this.getTimer().getUnixTime();
+
+        if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
+            GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
+                    this.getDeviceID(),
+                    this.getGlobalLogger(),
+                    now,
+                    this.minTemperature,
+                    this.maxTemperature,
+                    this.initialState,
+                    this.maxHotWaterPower,
+                    this.maxGasPower,
+                    this.typicalActivePowerOn,
+                    this.typicalActivePowerOff,
+                    this.typicalReactivePowerOn,
+                    this.typicalReactivePowerOff,
+                    this.compressionType,
+                    this.compressionValue);
+            this.getOCRegistry().setState(
+                    InterdependentProblemPart.class, this, sipp);
+            this.lastTimeIPPSent = now;
+            this.lastIPPMaxTemperature = this.maxTemperature;
+            this.lastIPPMinTemperature = this.minTemperature;
+        }
+
+    }
+
+
+    @Override
+    public void onDeviceStateUpdate() {
+        long now = this.getTimer().getUnixTime();
+
+        IHALExchange _ihal = this.getObserverDataObject();
+
+        if (_ihal instanceof GasBoilerObserverExchange) {
+            GasBoilerObserverExchange ox = (GasBoilerObserverExchange) _ihal;
+
+            this.minTemperature = ox.getMinTemperature();
+            this.maxTemperature = ox.getMaxTemperature();
+            this.initialState = ox.getCurrentState();
+            this.maxHotWaterPower = ox.getMaxHotWaterPower();
+            this.maxGasPower = ox.getMaxGasPower();
+            this.typicalActivePowerOn = ox.getTypicalActivePowerOn();
+            this.typicalActivePowerOff = ox.getTypicalActivePowerOff();
+            this.typicalReactivePowerOn = ox.getTypicalReactivePowerOn();
+            this.typicalReactivePowerOff = ox.getTypicalReactivePowerOff();
+            this.NEW_IPP_AFTER = ox.getNewIppAfter();
+
+            if (this.initialStateLastIPP != this.initialState || this.lastIPPMaxTemperature != this.maxTemperature || this.lastIPPMinTemperature != this.minTemperature) {
+                // build SIPP
+                GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
+                        this.getDeviceID(),
+                        this.getGlobalLogger(),
+                        now,
+                        this.minTemperature,
+                        this.maxTemperature,
+                        this.initialState,
+                        this.maxHotWaterPower,
+                        this.maxGasPower,
+                        this.typicalActivePowerOn,
+                        this.typicalActivePowerOff,
+                        this.typicalReactivePowerOn,
+                        this.typicalReactivePowerOff,
+                        this.compressionType,
+                        this.compressionValue);
+                this.getOCRegistry().setState(
+                        InterdependentProblemPart.class, this, sipp);
+                this.initialStateLastIPP = this.initialState;
+                this.lastIPPMaxTemperature = this.maxTemperature;
+                this.lastIPPMinTemperature = this.minTemperature;
+            }
+
+            // build SX
+            CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
+                    this.getDeviceID(),
+                    this.getTimer().getUnixTime(),
+                    DeviceTypes.INSERTHEATINGELEMENT);
+
+            cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
+            cpse.addPowerState(Commodity.REACTIVEPOWER, ox.getReactivePower());
+            cpse.addPowerState(Commodity.NATURALGASPOWER, ox.getGasPower());
+            cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, ox.getHotWaterPower());
+            this.getOCRegistry().setState(
+                    CommodityPowerStateExchange.class,
+                    this,
+                    cpse);
+        } else if (_ihal instanceof StaticCompressionExchange) {
+            StaticCompressionExchange _stat = (StaticCompressionExchange) _ihal;
+            this.compressionType = _stat.getCompressionType();
+            this.compressionValue = _stat.getCompressionValue();
+        }
+    }
+
+    @Override
+    public IModelOfObservationExchange getObservedModelData(
+            IModelOfObservationType type) {
+        return null;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return this.getDeviceID();
+    }
+
+}

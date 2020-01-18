@@ -1,0 +1,23 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+    implementation project(":osh_driver_chp")
+    implementation project(":osh_driver_hvac_watertank")
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'log4j', name: 'log4j'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient'
+    implementation group: 'ws.wamp.jawampa', name: 'jawampa-core'
+    implementation group: 'ws.wamp.jawampa', name: 'jawampa-netty'
+}

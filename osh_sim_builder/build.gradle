@@ -1,0 +1,55 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+    implementation project(":osh_comdriver_gui")
+    implementation project(":osh_comdriver_signals")
+    implementation project(":osh_driver_appliance")
+    implementation project(":osh_driver_baseload")
+    implementation project(":osh_en50523")
+    implementation project(":osh_driver_chp")
+    implementation project(":osh_driver_hvac_heater_ihe")
+    implementation project(":osh_ems_ea")
+    implementation project(":osh_driver_pv")
+    implementation project(":osh_driver_batterystorage")
+    implementation project(":osh_busdriver_appliance_mielegateway")
+    implementation project(":osh_busdriver_automation_bacnet")
+    implementation project(":osh_busdriver_automation_wago")
+    implementation project(":osh_comdriver_dof")
+    implementation project(":osh_comdriver_logger")
+    implementation project(":osh_comdriver_restservice")
+    implementation project(":osh_driver_appliance_miele")
+    implementation project(":osh_driver_hvac")
+    implementation project(":osh_driver_hvac_watertank")
+    implementation project(":osh_driver_smartmeter")
+    implementation project(":osh_driver_smartmeter_bcontrol")
+    implementation project(":osh_driver_smartplug")
+    implementation project(":osh_driver_chp_dachs")
+    implementation project(":osh_driver_hvac_heater_gas")
+
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'org.glassfish.jaxb', name: 'jaxb-core'
+    implementation group: 'org.glassfish.jaxb', name: 'jaxb-xjc'
+}
+
+task constructSingleHHConfig(type: JavaExec) {
+    dependsOn compileJava
+    group = "Construction"
+    description = "constructs the configuration files for a single HH simlation"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "constructsimulation.constructSimulationPackage"
+}
+
+task constructMultipleSingleHHConfig(type: JavaExec) {
+    dependsOn compileJava
+    group = "Construction"
+    description = "constructs multiple configuration files for single HH simulations"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "constructMultiple.constructMultiplePackages"
+}

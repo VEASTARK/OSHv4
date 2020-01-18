@@ -1,0 +1,17 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+        resources {
+            srcDir 'data'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+}

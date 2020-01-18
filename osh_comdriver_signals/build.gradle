@@ -1,0 +1,24 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava'
+    implementation group: 'javax.activation', name: 'javax.activation-api'
+    implementation group: 'javax.persistence', name: 'javax.persistence-api'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'log4j', name: 'log4j'
+    implementation group: 'mysql', name: 'mysql-connector-java'
+    implementation group: 'org.apache.commons', name: 'commons-math3'
+    implementation group: 'ws.wamp.jawampa', name: 'jawampa-core'
+    implementation group: 'ws.wamp.jawampa', name: 'jawampa-netty'
+}

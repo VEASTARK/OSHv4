@@ -1,0 +1,18 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+    implementation project(":osh_busdriver_appliance_mielegateway")
+    implementation project(":osh_driver_appliance")
+    implementation project(":osh_en50523")
+
+    implementation group: 'it.unimi.dsi', name: 'fastutil'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+}

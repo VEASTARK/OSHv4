@@ -1,0 +1,19 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+//    implementation project(":osh_en50523")
+    implementation project(":osh_comdriver_weather")
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+    implementation group: 'it.unimi.dsi', name: 'fastutil'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+}

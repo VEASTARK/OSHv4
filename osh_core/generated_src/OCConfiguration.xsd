@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns:ins="http://osh/configuration/system"
+        xmlns:tns="http://osh/configuration/oc"
+        targetNamespace="http://osh/configuration/oc"
+        elementFormDefault="qualified"
+        xmlns="http://www.w3.org/2001/XMLSchema">
+
+    <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system"/>
+
+    <include schemaLocation="GAConfiguration.xsd"/>
+
+
+    <element name="OCConfiguration">
+        <complexType>
+            <sequence>
+                <element name="globalOcUuid" type="string"/>
+                <element name="globalControllerClass" type="string"/>
+                <element minOccurs="0" maxOccurs="unbounded" name="globalControllerParameters"
+                         type="ins:ConfigurationParameter"/>
+                <element name="globalObserverClass" type="string"/>
+                <element minOccurs="0" maxOccurs="unbounded" name="globalObserverParameters"
+                         type="ins:ConfigurationParameter"/>
+                <element name="optimizationMainRandomSeed" type="string"/>
+                <element name="gaConfiguration" type="tns:GAConfiguration"/>
+            </sequence>
+        </complexType>
+    </element>
+
+</schema>

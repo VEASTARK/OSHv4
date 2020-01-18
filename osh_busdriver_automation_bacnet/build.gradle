@@ -1,0 +1,14 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+
+    implementation group: 'org.clojars.jarpiain', name: 'bacnet4j'
+    implementation group: 'org.clojars.jarpiain', name: 'sero-utils'
+}

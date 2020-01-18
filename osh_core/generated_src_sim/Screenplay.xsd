@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns:tns="http://osh/Simulation/Screenplay" targetNamespace="http://osh/Simulation/Screenplay"
+        elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema">
+
+    <simpleType name="ScreenplayType">
+        <restriction base="string">
+            <enumeration value="STATIC"/>
+            <enumeration value="DYNAMIC"/>
+            <enumeration value="GUI"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ActionType">
+        <restriction base="string">
+            <enumeration value="IDeviceAction"/>
+            <enumeration value="EvAction"/>
+            <enumeration value="UserAction"/>
+            <enumeration value="ProviderSPSAction"/>
+            <enumeration value="ProviderShortTimeAction"/>
+        </restriction>
+    </simpleType>
+
+    <element name="Screenplay">
+        <complexType>
+            <sequence>
+                <element name="SIMActions" minOccurs="0" maxOccurs="unbounded" type="tns:SubjectAction"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <complexType name="SubjectAction">
+        <sequence>
+            <element name="tick" type="long"/>
+            <element name="periodicAction" type="boolean" default="false"/>
+            <element name="periodicRefresh" type="int" default="0"/>
+            <element name="actionType" type="tns:ActionType"/>
+            <element name="deviceID" type="string"/>
+            <element name="nextState" type="boolean"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="performAction" type="tns:PerformAction"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="PerformAction">
+        <sequence>
+            <element maxOccurs="unbounded" name="actionParameterCollection" type="tns:ActionParameters"/>
+            <element name="appendAction" minOccurs="0" maxOccurs="unbounded" type="tns:SubjectAction"/>
+        </sequence>
+    </complexType>
+
+
+    <complexType name="ActionParameters">
+        <sequence>
+            <element name="parametersName" type="string"/>
+            <element name="parameter" minOccurs="0" maxOccurs="unbounded" type="tns:ActionParameter"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ActionParameter">
+        <sequence>
+            <element name="name" type="string"/>
+            <element name="value" type="string"/>
+        </sequence>
+    </complexType>
+
+</schema>

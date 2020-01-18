@@ -1,0 +1,36 @@
+rootProject.name = 'osh'
+
+
+include 'osh_busdriver_appliance_mielegateway'
+include 'osh_busdriver_automation_bacnet'
+include 'osh_busdriver_automation_wago'
+include 'osh_comdriver_dof'
+include 'osh_comdriver_gui'
+include 'osh_comdriver_logger'
+include 'osh_comdriver_restservice'
+include 'osh_comdriver_signals'
+include 'osh_comdriver_weather'
+include 'osh_driver_appliance'
+include 'osh_driver_appliance_miele'
+include 'osh_driver_baseload'
+include 'osh_driver_batterystorage'
+include 'osh_driver_chp'
+include 'osh_driver_chp_dachs'
+include 'osh_driver_hvac'
+include 'osh_driver_hvac_chiller_adsorption'
+include 'osh_driver_hvac_heater_gas'
+include 'osh_driver_hvac_heater_ihe'
+include 'osh_driver_hvac_watertank'
+include 'osh_driver_pv'
+include 'osh_driver_smartmeter'
+include 'osh_driver_smartmeter_bcontrol'
+include 'osh_driver_smartplug'
+include 'osh_ems_ea'
+include 'osh_en50523'
+include 'osh_sim_builder'
+include 'osh_sim_loader'
+
+
+
+include 'osh_core'
+

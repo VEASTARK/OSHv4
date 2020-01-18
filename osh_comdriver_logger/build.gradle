@@ -1,0 +1,21 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src_sim'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+    implementation project(":osh_driver_appliance")
+    implementation project(":osh_driver_chp")
+    implementation project(":osh_driver_pv")
+//    implementation project(":osh_en50523")
+    implementation project(":osh_busdriver_appliance_mielegateway")
+
+    implementation group: 'javax.persistence', name: 'javax.persistence-api'
+    implementation group: 'log4j', name: 'log4j'
+    implementation group: 'org.eclipse.persistence', name: 'eclipselink'
+}

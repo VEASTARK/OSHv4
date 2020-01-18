@@ -1,0 +1,15 @@
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'osh_jmetal_src'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":osh_core")
+
+    implementation group: 'it.unimi.dsi', name: 'fastutil'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api'
+}
