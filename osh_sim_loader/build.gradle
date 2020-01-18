@@ -35,10 +35,38 @@ dependencies {
     implementation group: 'org.glassfish.jaxb', name: 'jaxb-xjc'
 }
 
-task runSingleHHLocal(type: JavaExec) {
+task runSingleHH(type: JavaExec) {
     dependsOn compileJava
-    group = "Execution"
-    description = "starts the single houshold local simulation"
+    group = 'Execution'
+    description = 'starts the single houshold local simulation'
     classpath = sourceSets.main.runtimeClasspath
-    main = "osh.runsimulation.runSimulationPackage"
+    main = 'osh.runsimulation.runSimulationPackage'
+}
+
+task jarForRunSingleHH(type: Jar) {
+    dependsOn configurations.runtimeClasspath
+    group = 'Construction.Jar'
+    description = 'creates an executable jar that runs the simulation and copies all configfiles to the output ' +
+            'directory'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    doFirst {
+        mkdir "$rootDir/out/runSingleHH"
+
+        copy {
+            from ("$rootDir/osh_sim_loader") {
+                include "configfiles/**"
+            }
+            into "$rootDir/out/runSingleHH"
+
+        }
+    }
+
+    manifest {
+        attributes 'Main-Class': 'osh.runsimulation.runSimulationPackage'
+    }
+    archiveBaseName = 'runSingleHH'
+    destinationDirectory = file("$rootDir/out/runSingleHH")
+    from {configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }}
+    with jar
 }

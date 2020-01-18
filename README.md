@@ -13,7 +13,7 @@ It aims at realizing a mostly self-organizing and automated energy management sy
 
 ## Technical Information
 
-* Java 11+
+* Java 12+
 * Gradle 6.1
 
 
@@ -40,8 +40,11 @@ It aims at realizing a mostly self-organizing and automated energy management sy
 
 #### Gradle tasks
 
-* **runSingleHHLocal** runs the simulation with the currently defined configuration files in 
+* **runSingleHH** runs the simulation with the currently defined configuration files in 
 `osh.runsimulation.runSimulationPackage`
+* **jarForRunSingleHH** creates an executable jar that runs the simulation in the currently defined configuration.
+The output directory will be *[projectRoot]/out/runSingleHH* and all configfiles from *osh_sim_loader* will be
+ copied to this directory
 * **constructSingleHHConfig** constructs simulation configuration profiles with the current settings in  
 `constructsimulation.constructSimulationPackage` and saves them in a folder under 
 *osh_sim_builder/configfiles[timestamp]* 
