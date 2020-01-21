@@ -1,15 +1,11 @@
 package osh.comdriver.logger;
 
 import org.eclipse.persistence.exceptions.DatabaseException;
-import osh.core.exceptions.OSHException;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.registry.StateExchange;
 
 import javax.persistence.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -47,11 +43,8 @@ public abstract class ValueDatabaseLogger extends ValueLogger {
     }
 
     @Override
-    public void log(long timestamp, Object entity) throws OSHException {
-
-        if (entity == null) {
-            throw new OSHException("Persisting NULL does not make sense...");
-        }
+    public void log(long timestamp, Object entity) {
+        Objects.requireNonNull(entity, "Persisting NULL does not make sense...");
 
         this.put(entity);
     }

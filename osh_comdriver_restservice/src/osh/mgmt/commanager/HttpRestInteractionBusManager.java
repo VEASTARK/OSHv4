@@ -3,7 +3,7 @@ package osh.mgmt.commanager;
 import osh.core.bus.BusManager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 import osh.datatypes.registry.commands.SwitchCommandExchange;
 import osh.datatypes.registry.commands.SwitchRequest;
@@ -13,7 +13,7 @@ import osh.datatypes.registry.oc.state.MieleDofStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.hal.exchange.HttpRestInteractionComManagerExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
@@ -25,7 +25,7 @@ import java.util.UUID;
  *
  * @author Kaibin Bao
  */
-public class HttpRestInteractionBusManager extends BusManager implements IEventTypeReceiver {
+public class HttpRestInteractionBusManager extends BusManager implements IDataRegistryListener {
 
     public HttpRestInteractionBusManager(
             IOSHOC osh,
@@ -39,7 +39,7 @@ public class HttpRestInteractionBusManager extends BusManager implements IEventT
                 element,
                 this.getTimer().getUnixTime(),
                 sd.getTurnOn());
-        this.getOCRegistry().sendCommand(SwitchCommandExchange.class, swcmd);
+        this.getOCRegistry().publish(SwitchCommandExchange.class, swcmd);
 
         return true;
     }
@@ -58,35 +58,32 @@ public class HttpRestInteractionBusManager extends BusManager implements IEventT
 
     // push states to com driver {
 
-    private void initializeStatePushToDriver(ArrayList<Class<? extends StateExchange>> stateTypesPushedToDriver) throws OSHException {
+    private void initializeStatePushToDriver(ArrayList<Class<? extends StateExchange>> stateTypesPushedToDriver) {
         // register to future state changes
         for (Class<? extends StateExchange> type : stateTypesPushedToDriver) {
-            this.getOCRegistry().registerStateChangeListener(type, this);
+            this.getOCRegistry().subscribe(type, this);
         }
 
         // push current states to driver
         for (Class<? extends StateExchange> type : stateTypesPushedToDriver) {
-            for (Entry<UUID, ? extends StateExchange> ent : this.getOCRegistry().getStates(type).entrySet()) {
-                HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
-                        this.getUUID(), this.getTimer().getUnixTime(), ent.getValue());
+            for (Entry<UUID, ? extends AbstractExchange> ent : this.getOCRegistry().getData(type).entrySet()) {
+                if (ent.getValue() instanceof StateExchange) {
+                    HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
+                            this.getUUID(), this.getTimer().getUnixTime(), (StateExchange) ent.getValue());
 
-                this.updateOcDataSubscriber(toDriverExchange);
+                    this.updateOcDataSubscriber(toDriverExchange);
+                }
             }
         }
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        if (event instanceof StateChangedExchange) {
-            UUID uuid = ((StateChangedExchange) event).getStatefulEntity();
-            Class<? extends StateExchange> typeOfObj = ((StateChangedExchange) event).getType();
-            StateExchange sx = this.getOCRegistry().getState(typeOfObj, uuid);
-
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof StateExchange) {
             HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
                     this.getUUID(),
                     this.getTimer().getUnixTime(),
-                    sx);
+                    (StateExchange) exchange);
 
             this.updateOcDataSubscriber(toDriverExchange);
         }
@@ -95,7 +92,7 @@ public class HttpRestInteractionBusManager extends BusManager implements IEventT
     // }
 
     public MieleDofStateExchange getDof(UUID uuid) {
-        return this.getOCRegistry().getState(MieleDofStateExchange.class, uuid);
+        return (MieleDofStateExchange) this.getOCRegistry().getData(MieleDofStateExchange.class, uuid);
     }
 
     @Override

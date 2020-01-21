@@ -64,7 +64,7 @@ public class ESHLSpaceHeatingLocalObserver
                             Commodity.HEATINGHOTWATERPOWER,
                             this.compressionType,
                             this.compressionValue);
-            this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+            this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
         } else if (ihex instanceof StaticCompressionExchange) {
             StaticCompressionExchange _stat = (StaticCompressionExchange) ihex;
             this.compressionType = _stat.getCompressionType();

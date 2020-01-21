@@ -59,7 +59,7 @@ public class SpaceCoolingLocalObserver
                             this.temperaturePrediction,
                             this.compressionType,
                             this.compressionValue);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, ipp);
 
             // set current power state
@@ -68,7 +68,7 @@ public class SpaceCoolingLocalObserver
                     this.getTimer().getUnixTime(),
                     DeviceTypes.SPACECOOLING);
             cpse.addPowerState(Commodity.COLDWATERPOWER, this.coldWaterPower);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);

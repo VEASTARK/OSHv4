@@ -103,7 +103,7 @@ public class GLTDachsChpDriver
         }
 
         // ### save DachsDetails into DB ###
-        this.getDriverRegistry().setStateOfSender(DachsDriverDetails.class, dachsDetails);
+        this.getDriverRegistry().publish(DachsDriverDetails.class, dachsDetails);
 
         // ### transform DachsDetails to ChpDetails ###
         HashMap<String, String> values = dachsDetails.getValues();
@@ -176,11 +176,11 @@ public class GLTDachsChpDriver
             td.setTemperature(waterStorageTemperature);
 //			getDriverRegistry().setState(TemperatureDetails.class, this, td);
 //			getDriverRegistry().setState(TemperatureDetails.class, UUID.fromString("268ea9bd-572c-46dd-a383-960b4ed65337"), td);
-            this.getDriverRegistry().setStateOfSender(TemperatureDetails.class, td);
+            this.getDriverRegistry().publish(TemperatureDetails.class, td);
         }
 
         this.chpDriverDetails = chpDetails;
-        this.getDriverRegistry().setState(ChpDriverDetails.class, this, this.chpDriverDetails);
+        this.getDriverRegistry().publish(ChpDriverDetails.class, this, this.chpDriverDetails);
         this.processChpDetailsAndNotify(this.chpDriverDetails);
     }
 

@@ -75,7 +75,7 @@ public class NonControllableAdsorptionChillerLocalObserver extends LocalObserver
             cpse.addPowerState(Commodity.REACTIVEPOWER, this.reactivePower);
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, this.hotWaterPower);
             cpse.addPowerState(Commodity.COLDWATERPOWER, this.coldWaterPower);
-            this.getOCRegistry().setStateOfSender(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     cpse);
         } else if (hx instanceof StaticCompressionExchange) {
@@ -89,12 +89,12 @@ public class NonControllableAdsorptionChillerLocalObserver extends LocalObserver
     public IModelOfObservationExchange getObservedModelData(
             IModelOfObservationType type) {
 
-        WaterStorageOCSX wssx = this.getOCRegistry().getState(WaterStorageOCSX.class, this.coldWaterTankUuid);
+        WaterStorageOCSX wssx = (WaterStorageOCSX) this.getOCRegistry().getData(WaterStorageOCSX.class, this.coldWaterTankUuid);
         if (wssx != null) {
             this.coldWaterTemperature = wssx.getCurrentTemp();
         }
 
-        WaterStorageOCSX hwssx = this.getOCRegistry().getState(WaterStorageOCSX.class, this.hotWaterTankUuid);
+        WaterStorageOCSX hwssx = (WaterStorageOCSX) this.getOCRegistry().getData(WaterStorageOCSX.class, this.hotWaterTankUuid);
         if (hwssx != null) {
             this.hotWaterTemperature = hwssx.getCurrentTemp();
         }

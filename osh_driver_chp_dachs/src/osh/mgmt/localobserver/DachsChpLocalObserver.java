@@ -87,7 +87,7 @@ public class DachsChpLocalObserver
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        WaterStorageOCSX sx = this.getOCRegistry().getState(
+        WaterStorageOCSX sx = (WaterStorageOCSX) this.getOCRegistry().getData(
                 WaterStorageOCSX.class,
                 this.hotWaterTankUuid);
         this.waterTemperature = sx.getCurrentTemp();
@@ -121,7 +121,7 @@ public class DachsChpLocalObserver
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, this.hotWaterPower);
             cpse.addPowerState(Commodity.NATURALGASPOWER, this.gasPower);
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);

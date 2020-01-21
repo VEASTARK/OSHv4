@@ -5,15 +5,14 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.driver.model.BuildingThermalModel;
 import osh.driver.model.ESHLThermalModel;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.SpaceHeatingPredictionObserverExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.physics.TemperatureUtil;
 
 import java.util.HashMap;
@@ -25,7 +24,7 @@ import java.util.UUID;
  */
 public class SpaceHeatingDriver
         extends HALDeviceDriver
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
     private final BuildingThermalModel model;
     private WeatherPredictionDetails weatherPredictionDetails;
@@ -74,7 +73,7 @@ public class SpaceHeatingDriver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getDriverRegistry().registerStateChangeListener(WeatherPredictionDetails.class, this);
+        this.getDriverRegistry().subscribe(WeatherPredictionDetails.class, this.getDeviceID(), this);
 
         StaticCompressionExchange observerExchange =
                 new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
@@ -90,38 +89,23 @@ public class SpaceHeatingDriver
 
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
-        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.weatherPredictionProviderUUID)) {
-            StateChangedExchange exsc = (StateChangedExchange) event;
-            boolean updateOx = false;
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof WeatherPredictionDetails) {
+            this.weatherPredictionDetails = (WeatherPredictionDetails) exchange;
 
-            if (exsc.getType().equals(WeatherPredictionDetails.class)) {
-                this.weatherPredictionDetails = this.getDriverRegistry().getState(WeatherPredictionDetails.class, exsc.getStatefulEntity());
-
-                for (int index = 0; index < this.weatherPredictionDetails.getTemperatureForecastList().getList().size(); index++) {
-                    double temperaturePrediction = TemperatureUtil.convertKelvinToCelsius(
-                            this.weatherPredictionDetails.getTemperatureForecastList().getList().get(index).getMain().getTemp());
-                    long timeOfPrediction = this.weatherPredictionDetails.getTemperatureForecastList().getList().get(index).getDt();
-                    this.predictedHeatConsumptionMap.put(timeOfPrediction, this.model.calculateHeatingDemand(temperaturePrediction));
-                }
-                updateOx = true;
+            for (int index = 0; index < this.weatherPredictionDetails.getTemperatureForecastList().getList().size(); index++) {
+                double temperaturePrediction = TemperatureUtil.convertKelvinToCelsius(
+                        this.weatherPredictionDetails.getTemperatureForecastList().getList().get(index).getMain().getTemp());
+                long timeOfPrediction = this.weatherPredictionDetails.getTemperatureForecastList().getList().get(index).getDt();
+                this.predictedHeatConsumptionMap.put(timeOfPrediction, this.model.calculateHeatingDemand(temperaturePrediction));
             }
 
-            if (updateOx) {
-                SpaceHeatingPredictionObserverExchange observerExchange =
-                        new SpaceHeatingPredictionObserverExchange(
-                                this.getDeviceID(),
-                                this.getTimer().getUnixTime(),
-                                this.predictedHeatConsumptionMap);
-                this.notifyObserver(observerExchange);
-            }
+            SpaceHeatingPredictionObserverExchange observerExchange =
+                    new SpaceHeatingPredictionObserverExchange(
+                            this.getDeviceID(),
+                            this.getTimer().getUnixTime(),
+                            this.predictedHeatConsumptionMap);
+            this.notifyObserver(observerExchange);
         }
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

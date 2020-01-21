@@ -86,7 +86,7 @@ public class NonControllableAdsorptionChillerLocalController
                 temperaturePrediction,
                 this.compressionType,
                 this.compressionValue);
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this, ipp);
 
         //build CX

@@ -7,7 +7,7 @@ import osh.core.oc.LocalController;
 import osh.datatypes.dof.DofStateExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;
@@ -23,10 +23,7 @@ import osh.mgmt.localobserver.ipp.MieleApplianceNonControllableIPP;
 import osh.mgmt.localobserver.ipp.MieleSolution;
 import osh.mgmt.localobserver.miele.MieleAction;
 import osh.mgmt.mox.MieleApplianceMOX;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
+import osh.registry.interfaces.IDataRegistryListener;
 
 
 /**
@@ -34,7 +31,7 @@ import java.util.UUID;
  */
 public class MieleApplianceLocalController
         extends LocalController
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
 
     /**
@@ -88,8 +85,8 @@ public class MieleApplianceLocalController
         // register for onNextTimePeriod()
         this.getTimer().registerComponent(this, 1);
 
-        this.getOCRegistry().register(EASolutionCommandExchange.class, this);
-        this.getOCRegistry().registerStateChangeListener(DofStateExchange.class, this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getDeviceID(), this);
+        this.getOCRegistry().subscribe(DofStateExchange.class, this.getDeviceID(), this);
 
         //workaround bc this controller may not have this data from the driver->observer chain
         if (this.compressionType == null) {
@@ -109,11 +106,10 @@ public class MieleApplianceLocalController
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T ex) {
-        if (ex instanceof EASolutionCommandExchange) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof EASolutionCommandExchange) {
             @SuppressWarnings("unchecked")
-            EASolutionCommandExchange<MieleSolution> solution = (EASolutionCommandExchange<MieleSolution>) ex;
+            EASolutionCommandExchange<MieleSolution> solution = (EASolutionCommandExchange<MieleSolution>) exchange;
             if (!solution.getReceiver().equals(this.getDeviceID()) || solution.getPhenotype() == null) return;
             this.getGlobalLogger().logDebug("getting new starttime: " + solution.getPhenotype().startTime);
             this.setStartTime(solution.getPhenotype().startTime);
@@ -121,20 +117,14 @@ public class MieleApplianceLocalController
             this.updateDofExchange();
 
             //System.out.println(getDeviceID() + " got new start time: " + startTime);
-        }
-        if (ex instanceof StateChangedExchange && ((StateChangedExchange) ex).getStatefulEntity().equals(this.getDeviceID())) {
-            StateChangedExchange exsc = (StateChangedExchange) ex;
-
+        } else if (exchange instanceof DofStateExchange) {
             // 1st DoF and 2nd DoF may be NULL
             // (no DoF for device available yet and the change is because of another device)
             // DoF from Com Manager
-            if (exsc.getType().equals(DofStateExchange.class)) {
-                DofStateExchange dse = this.getOCRegistry().getState(
-                        DofStateExchange.class, exsc.getStatefulEntity());
-                this.setDof(
-                        dse.getDevice1stDegreeOfFreedom(),
-                        dse.getDevice2ndDegreeOfFreedom());
-            }
+            DofStateExchange dse = (DofStateExchange) exchange;
+            this.setDof(
+                    dse.getDevice1stDegreeOfFreedom(),
+                    dse.getDevice2ndDegreeOfFreedom());
         }
     }
 
@@ -220,11 +210,6 @@ public class MieleApplianceLocalController
         this.compressionValue = mox.getCompressionValue();
     }
 
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
     private long getStartTime() {
         return this.startTime;
     }
@@ -232,18 +217,18 @@ public class MieleApplianceLocalController
     private void setStartTime(long startTime) {
         this.startTime = startTime;
 
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 ExpectedStartTimeExchange.class,
-                this,
+                this.getDeviceID(),
                 new ExpectedStartTimeExchange(
-                        this.getUUID(),
+                        this.getDeviceID(),
                         this.getTimer().getUnixTime(),
                         startTime));
 
-        this.getOCRegistry().sendEvent(
+        this.getOCRegistry().publish(
                 ExpectedStartTimeChangedExchange.class,
                 new ExpectedStartTimeChangedExchange(
-                        this.getUUID(),
+                        this.getDeviceID(),
                         this.getTimer().getUnixTime(),
                         startTime));
 
@@ -297,9 +282,9 @@ public class MieleApplianceLocalController
 
     public void updateDofExchange() {
         // state for REST and logging
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 MieleDofStateExchange.class,
-                this,
+                this.getDeviceID(),
                 new MieleDofStateExchange(
                         this.getDeviceID(),
                         this.getTimer().getUnixTime(),
@@ -343,11 +328,11 @@ public class MieleApplianceLocalController
                     this.programmedAt,
                     (MieleApplianceIPP) ipp);
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     LastActionExchange.class,
-                    this,
+                    this.getDeviceID(),
                     new LastActionExchange(
-                            this.getUUID(),
+                            this.getDeviceID(),
                             this.getTimer().getUnixTime(),
                             mieleAction));
         } else {
@@ -383,7 +368,7 @@ public class MieleApplianceLocalController
                 );
             }
         }
-        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        this.getOCRegistry().publish(InterdependentProblemPart.class, this.getDeviceID(), ipp);
         this.updateDofExchange();
     }
 }

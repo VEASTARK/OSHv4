@@ -108,7 +108,7 @@ public class NonControllableDachsChpLocalController
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, sIPP);
 
             this.lastTimeIppSent = now;

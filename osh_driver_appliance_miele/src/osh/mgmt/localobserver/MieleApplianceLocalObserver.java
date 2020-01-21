@@ -117,7 +117,7 @@ public class MieleApplianceLocalObserver
                         this.getDeviceType());
                 cpse.addPowerState(Commodity.ACTIVEPOWER, currentActivePower);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, currentReactivePower);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         CommodityPowerStateExchange.class,
                         this,
                         cpse);
@@ -206,7 +206,7 @@ public class MieleApplianceLocalObserver
             _devDetails.setDeviceClassification(ihdmd.getDeviceClassification());
             _devDetails.setConfigured(ihdmd.isConfigured());
 
-            this.getOCRegistry().setState(DeviceMetaOCDetails.class, this, _devDetails);
+            this.getOCRegistry().publish(DeviceMetaOCDetails.class, this, _devDetails);
         }
 
         if (_hx instanceof StaticCompressionExchange) {
@@ -223,7 +223,7 @@ public class MieleApplianceLocalObserver
             dse.setDevice1stDegreeOfFreedom(gadoe.getDevice1stDegreeOfFreedom());
             dse.setDevice2ndDegreeOfFreedom(gadoe.getDevice2ndDegreeOfFreedom());
 
-            this.getOCRegistry().setState(DofStateExchange.class, this, dse);
+            this.getOCRegistry().publish(DofStateExchange.class, this, dse);
         }
     }
 

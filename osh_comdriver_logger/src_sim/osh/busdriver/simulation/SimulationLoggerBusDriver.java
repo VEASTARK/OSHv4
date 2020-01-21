@@ -414,10 +414,4 @@ public class SimulationLoggerBusDriver extends LoggerBusDriver {
             entryLine.append(value).append(";");
         }
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
 }
