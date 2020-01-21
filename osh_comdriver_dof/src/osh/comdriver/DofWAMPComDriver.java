@@ -102,7 +102,7 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable, IHasStat
                     DofStateExchange dse = new DofStateExchange(mieleUUID, timestamp);
                     dse.setDevice1stDegreeOfFreedom(dof.getValue());
                     dse.setDevice2ndDegreeOfFreedom(dof.getValue());
-                    this.getComRegistry().setStateOfSender(DofStateExchange.class, dse);
+                    this.getComRegistry().publish(DofStateExchange.class, dse);
 
                     this.lastSentValues.put(mieleUUID, dof.getValue());
                 }

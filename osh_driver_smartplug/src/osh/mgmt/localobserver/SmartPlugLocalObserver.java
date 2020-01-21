@@ -41,7 +41,7 @@ public class SmartPlugLocalObserver extends LocalObserver implements IHasState {
                 || plugObserverExchange.getDeviceType() == DeviceTypes.METERSWITCHPLUG) {
             SwitchOCDetails switchDetails = new SwitchOCDetails(uuid, timestamp);
             switchDetails.setOn(plugObserverExchange.isOn());
-            this.getOCRegistry().setState(SwitchOCDetails.class, this, switchDetails);
+            this.getOCRegistry().publish(SwitchOCDetails.class, this, switchDetails);
         }
 
         CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -50,7 +50,7 @@ public class SmartPlugLocalObserver extends LocalObserver implements IHasState {
                 DeviceTypes.METERSWITCHPLUG);
         cpse.addPowerState(Commodity.ACTIVEPOWER, plugObserverExchange.getActivePower());
         cpse.addPowerState(Commodity.REACTIVEPOWER, plugObserverExchange.getReactivePower());
-        this.getOCRegistry().setState(CommodityPowerStateExchange.class, this, cpse);
+        this.getOCRegistry().publish(CommodityPowerStateExchange.class, this, cpse);
 
         DeviceMetaOCDetails metaDetails = new DeviceMetaOCDetails(uuid, timestamp);
         metaDetails.setName(plugObserverExchange.getName());
@@ -58,7 +58,7 @@ public class SmartPlugLocalObserver extends LocalObserver implements IHasState {
         metaDetails.setDeviceType(plugObserverExchange.getDeviceType());
         metaDetails.setDeviceClassification(plugObserverExchange.getDeviceClassification());
         metaDetails.setConfigured(plugObserverExchange.isConfigured());
-        this.getOCRegistry().setState(DeviceMetaOCDetails.class, this, metaDetails);
+        this.getOCRegistry().publish(DeviceMetaOCDetails.class, this, metaDetails);
     }
 
     @Override

@@ -9,7 +9,7 @@ import osh.comdriver.simulation.cruisecontrol.stateviewer.StateViewerRegistryEnu
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.StateExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 import osh.hal.exchange.*;
@@ -75,12 +75,12 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
             if (exgse.isOcMode()) {
                 this.collector.updateStateView(exgse.getTypes(), exgse.getStates());
             } else {
-                Map<UUID, ? extends StateExchange> states = null;
+                Map<UUID, ? extends AbstractExchange> states = null;
                 if (exgse.getDriverStateType() != null) {
-                    states = ((OSH) this.getOSH()).getDriverRegistry().getStates(exgse.getDriverStateType());
+                    states = ((OSH) this.getOSH()).getDriverRegistry().getData(exgse.getDriverStateType());
                 }
 
-                this.collector.updateStateView(((OSH) this.getOSH()).getDriverRegistry().getTypes(), states);
+                this.collector.updateStateView(((OSH) this.getOSH()).getDriverRegistry().getDataTypes(), states);
             }
         } else if (exchangeObject instanceof GUIEpsComExchange) {
             GUIEpsComExchange gece = (GUIEpsComExchange) exchangeObject;
@@ -127,7 +127,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
     }
 
     @Override
-    public void stateViewerClassChanged(Class<? extends StateExchange> cls) {
+    public void stateViewerClassChanged(Class<? extends AbstractExchange> cls) {
         this.notifyComManager(
                 new GUIStateSelectedComExchange(
                         this.getDeviceID(),

@@ -1,6 +1,6 @@
 package osh.registry.interfaces;
 
-import osh.datatypes.registry.AExchange;
+import osh.datatypes.registry.AbstractExchange;
 
 /**
  * Interface that privides the onListen method for the data-registry
@@ -16,5 +16,5 @@ public interface IDataRegistryListener {
      *                 implementing class is subscribed to
      * @param <T> the type of the exchange
      */
-    <T extends AExchange> void onExchange (T exchange);
+    <T extends AbstractExchange> void onExchange(T exchange);
 }

@@ -148,7 +148,7 @@ public class BaseloadLocalObserver
                 cpse.addPowerState(c, power);
             }
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -193,7 +193,7 @@ public class BaseloadLocalObserver
                 this.compressionType,
                 this.compressionValue);
 
-        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
     }
 
 

@@ -87,7 +87,7 @@ public class PvLocalObserver extends LocalObserver implements IHasState {
                 cpse.addPowerState(Commodity.ACTIVEPOWER, this.lastActivePowerLevel);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, this.lastReactivePowerLevel);
 
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         CommodityPowerStateExchange.class,
                         this,
                         cpse);
@@ -126,7 +126,7 @@ public class PvLocalObserver extends LocalObserver implements IHasState {
 
         PvNonControllableIPP ipp = new PvNonControllableIPP(this.getDeviceID(), this.getGlobalLogger(), now, optimizationProfile, this.compressionType, this.compressionValue);
 
-        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
     }
 
     private void runPvProfilePredictor(ElectricPowerOCDetails powerDetails) {

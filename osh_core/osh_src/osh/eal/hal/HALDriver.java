@@ -7,7 +7,7 @@ import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHDriver;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.eal.EALDriver;
-import osh.registry.DriverRegistry;
+import osh.registry.DataRegistry.DriverRegistry;
 import osh.utils.uuid.UUIDLists;
 
 import java.util.ArrayList;

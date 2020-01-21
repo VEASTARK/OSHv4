@@ -81,8 +81,8 @@ public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
 
     @Override
     public DeviceMetaOCDetails clone() {
-        long uuidSenderLSB = this.sender.getLeastSignificantBits();
-        long uuidSenderMSB = this.sender.getMostSignificantBits();
+        long uuidSenderLSB = this.getSender().getLeastSignificantBits();
+        long uuidSenderMSB = this.getSender().getMostSignificantBits();
         DeviceMetaOCDetails clone = new DeviceMetaOCDetails(new UUID(uuidSenderMSB, uuidSenderLSB), this.getTimestamp());
 
         clone.name = this.name;

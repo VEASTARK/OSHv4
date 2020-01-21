@@ -12,9 +12,9 @@ import osh.core.logging.IGlobalLogger;
 import osh.core.oc.GlobalController;
 import osh.core.oc.GlobalObserver;
 import osh.eal.hal.HALRealTimeDriver;
-import osh.registry.ComRegistry;
-import osh.registry.DriverRegistry;
-import osh.registry.OCRegistry;
+import osh.registry.DataRegistry.ComRegistry;
+import osh.registry.DataRegistry.DriverRegistry;
+import osh.registry.DataRegistry.OCRegistry;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
@@ -56,7 +56,7 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
         return this.externalRegistry;
     }
 
-    public void setExternalRegistry(ComRegistry externalRegistry) {
+    public void setComRegistry(ComRegistry externalRegistry) {
         this.externalRegistry = externalRegistry;
     }
 

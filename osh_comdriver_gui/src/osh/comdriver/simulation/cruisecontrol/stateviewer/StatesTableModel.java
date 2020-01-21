@@ -1,5 +1,6 @@
 package osh.comdriver.simulation.cruisecontrol.stateviewer;
 
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 
 import javax.swing.event.TableModelEvent;
@@ -121,14 +122,14 @@ class StatesTableModel implements TableModel {
     }
 
     @SuppressWarnings("unchecked")
-    public void setData(Map<UUID, ? extends StateExchange> data) {
+    public void setData(Map<UUID, ? extends AbstractExchange> data) {
 
         if (data == null) {
             this.data = DEFAULT_DATA;
         } else {
-            Map<UUID, StateExchange> strData = new HashMap<>();
-            for (Entry<UUID, ? extends StateExchange> e : data.entrySet()) {
-                strData.put(e.getKey(), e.getValue());
+            Map<UUID, AbstractExchange> strData = new HashMap<>();
+            for (Entry<UUID, ? extends AbstractExchange> e : data.entrySet()) {
+                if (e.getValue() instanceof StateExchange) strData.put(e.getKey(), e.getValue());
             }
             this.data = strData.entrySet().toArray(DEFAULT_DATA);
             Arrays.sort(this.data, Entry.comparingByKey());

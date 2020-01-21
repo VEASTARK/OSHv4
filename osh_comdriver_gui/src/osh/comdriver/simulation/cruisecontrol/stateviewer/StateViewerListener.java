@@ -1,6 +1,6 @@
 package osh.comdriver.simulation.cruisecontrol.stateviewer;
 
-import osh.datatypes.registry.StateExchange;
+import osh.datatypes.registry.AbstractExchange;
 
 
 /**
@@ -9,5 +9,5 @@ import osh.datatypes.registry.StateExchange;
 public interface StateViewerListener {
     void stateViewerRegistryChanged(StateViewerRegistryEnum registry);
 
-    void stateViewerClassChanged(Class<? extends StateExchange> cls);
+    void stateViewerClassChanged(Class<? extends AbstractExchange> cls);
 }

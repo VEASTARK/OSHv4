@@ -13,7 +13,6 @@ import osh.datatypes.dof.DofStateExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.PowerProfileTick;
 import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
 import osh.datatypes.registry.commands.StartDeviceRequest;
 import osh.datatypes.registry.commands.StopDeviceRequest;
 import osh.datatypes.registry.driver.details.appliance.GenericApplianceDriverDetails;

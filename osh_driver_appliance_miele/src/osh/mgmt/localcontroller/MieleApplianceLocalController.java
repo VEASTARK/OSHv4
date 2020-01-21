@@ -8,7 +8,6 @@ import osh.datatypes.dof.DofStateExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;

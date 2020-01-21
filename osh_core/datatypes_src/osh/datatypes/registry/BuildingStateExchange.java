@@ -26,14 +26,13 @@ public class BuildingStateExchange extends StateExchange {
     double currentActivePowerExternal;
     double currentReactivePowerExternal;
     double currentGasPowerExternal;
-    private long timestamp;
 
     public BuildingStateExchange() {
     }
 
 
     public BuildingStateExchange(BuildingStateExchange other) {
-        super(other.sender, other.timestamp);
+        super(other.getSender(), other.getTimestamp());
 
 
         this.currentTick = other.currentTick;
@@ -116,22 +115,6 @@ public class BuildingStateExchange extends StateExchange {
 
     public void setCurrentTick(long currentTick) {
         this.currentTick = currentTick;
-    }
-
-    public UUID getSender() {
-        return this.sender;
-    }
-
-    public void setSender(UUID sender) {
-        this.sender = sender;
-    }
-
-    public long getTimestamp() {
-        return this.timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public double getCurrentActivePower() {
@@ -232,7 +215,7 @@ public class BuildingStateExchange extends StateExchange {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + ": Sender " + this.sender + ", time: " + this.timestamp;
+        return this.getClass().getName() + ": Sender " + this.getSender() + ", time: " + this.getTimestamp();
     }
 
     public BuildingStateExchange clone() {

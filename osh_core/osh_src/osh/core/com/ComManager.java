@@ -10,7 +10,7 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.oc.IOCCALDataPublisher;
 import osh.core.oc.IOCCALDataSubscriber;
-import osh.registry.OCRegistry;
+import osh.registry.DataRegistry.OCRegistry;
 
 import java.util.UUID;
 
@@ -72,13 +72,13 @@ public abstract class ComManager
 
 
     @Override
-    public void updateOcDataSubscriber(ICALExchange calExchange) throws OSHException {
+    public void updateOcDataSubscriber(ICALExchange calExchange) {
         if (this.comDriver != null) {
             this.comDriver.onDataFromOcComponent(calExchange);
         } else {
             //NOTHING
             //TODO: error message/exception
-            throw new OSHException("No ComDriver available.");
+            throw new IllegalArgumentException("No ComDriver available.");
         }
     }
 

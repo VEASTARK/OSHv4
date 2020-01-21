@@ -137,7 +137,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver implements 
         synchronized (currentWeatherDetails) {
             //TODO: this was changed from driverRegistry to ComRegistry please fix all other classes depending on recieveing this on the driverRegistry (via DataBroker)
             // set raw details
-            this.getComRegistry().setStateOfSender(CurrentWeatherDetails.class, currentWeatherDetails);
+            this.getComRegistry().publish(CurrentWeatherDetails.class, currentWeatherDetails);
             this.getGlobalLogger().logDebug("set new state" + currentWeatherDetails);
         }
     }
@@ -146,7 +146,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver implements 
         synchronized (weatherDetails) {
             //TODO: see above
             // set raw details
-            this.getComRegistry().setStateOfSender(WeatherPredictionDetails.class, weatherDetails);
+            this.getComRegistry().publish(WeatherPredictionDetails.class, weatherDetails);
             this.getGlobalLogger().logDebug("set new state" + weatherDetails);
         }
     }

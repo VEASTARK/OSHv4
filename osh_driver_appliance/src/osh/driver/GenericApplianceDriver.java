@@ -706,7 +706,7 @@ public abstract class GenericApplianceDriver
 
     protected void updateGenericApplianceDriverDetails(long now) {
         GenericApplianceDriverDetails driverDetails = this.createApplianceDetails(now);
-        this.getDriverRegistry().setStateOfSender(GenericApplianceDriverDetails.class, driverDetails);
+        this.getDriverRegistry().publish(GenericApplianceDriverDetails.class, driverDetails);
     }
 
 
@@ -720,7 +720,7 @@ public abstract class GenericApplianceDriver
 
     protected void updateGenericApplianceProgramDriverDetails(long now) {
         GenericApplianceProgramDriverDetails pdd = this.createGenericApplianceProgramDriverDetails(now);
-        this.getDriverRegistry().setStateOfSender(GenericApplianceProgramDriverDetails.class, pdd);
+        this.getDriverRegistry().publish(GenericApplianceProgramDriverDetails.class, pdd);
     }
 
 

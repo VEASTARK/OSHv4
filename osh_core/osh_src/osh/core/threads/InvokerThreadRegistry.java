@@ -7,9 +7,7 @@ import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.logging.IGlobalLogger;
 import osh.core.threads.exceptions.InvokerThreadException;
 import osh.core.threads.exceptions.SubscriberNotFoundException;
-import osh.registry.EventQueue;
 import osh.registry.EventReceiverWrapper;
-import osh.registry.StateChangedEventSet;
 import osh.registry.interfaces.IEventTypeReceiver;
 
 import java.util.ArrayList;
@@ -94,20 +92,6 @@ public class InvokerThreadRegistry extends OSHComponent {
         }
     }
 
-    public void addQueueSubscriber(EventReceiverWrapper subscriber, EventQueue queue) throws OSHException {
-        if (subscriber == null) throw new NullPointerException("subscriber is null");
-
-        EventQueueSubscriberInvoker subscriberInvoker
-                = new EventQueueSubscriberInvoker(subscriber, queue);
-
-        synchronized (this) {
-            if (this.invokers.containsKey(subscriberInvoker))
-                throw new OSHException("IEventReceiver is already registered");
-
-            this.createThread(subscriberInvoker, Thread.NORM_PRIORITY);
-        }
-    }
-
     /**
      * Invokes one specific {@link IEventTypeReceiver}
      *
@@ -131,40 +115,6 @@ public class InvokerThreadRegistry extends OSHComponent {
 
             notifyInvokerThread(realSubscriberInvoker);
         }
-    }
-
-
-    /* ********* */
-
-    public void addStateSubscriber(EventReceiverWrapper subscriber, StateChangedEventSet eventSet) throws OSHException {
-        if (subscriber == null) throw new NullPointerException("subscriber is null");
-
-        StateSubscriberInvoker subscriberInvoker
-                = new StateSubscriberInvoker(subscriber, eventSet);
-
-        synchronized (this) {
-            if (this.invokers.containsKey(subscriberInvoker))
-                throw new OSHException("IEventReceiver is already registered");
-
-            this.createThread(subscriberInvoker, Thread.NORM_PRIORITY);
-        }
-    }
-
-    public void notifyStateSubscriber(EventReceiverWrapper subscriber) throws SubscriberNotFoundException, InvokerThreadException {
-        if (subscriber == null) throw new SubscriberNotFoundException("argument is null");
-
-        InvokerEntry<?> realSubscriberInvoker;
-
-        synchronized (this) {
-            realSubscriberInvoker = this.invokers.get(new StateSubscriberInvoker(subscriber, null));
-
-            if (realSubscriberInvoker == null)
-                throw new SubscriberNotFoundException("subscriber not in list. UUID: " + subscriber.getUUID());
-            if (realSubscriberInvoker.isThreadDead())
-                throw new InvokerThreadException("queue thread for subscriber " + subscriber.getUUID() + " died some time ago.");
-        }
-
-        notifyInvokerThread(realSubscriberInvoker);
     }
 
     /* INVOCATION */

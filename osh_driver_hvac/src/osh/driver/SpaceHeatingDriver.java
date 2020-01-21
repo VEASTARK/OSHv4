@@ -6,7 +6,6 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
 import osh.driver.model.BuildingThermalModel;
 import osh.driver.model.ESHLThermalModel;
 import osh.eal.hal.HALDeviceDriver;

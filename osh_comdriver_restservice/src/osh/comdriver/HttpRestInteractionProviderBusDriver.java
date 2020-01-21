@@ -21,7 +21,6 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
 import osh.datatypes.registry.StateExchange;
 import osh.datatypes.registry.commands.StartDeviceRequest;
 import osh.datatypes.registry.commands.StopDeviceRequest;
@@ -39,7 +38,7 @@ import osh.eal.hal.HALDriver;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.hal.exchange.HttpRestInteractionComManagerExchange;
 import osh.mgmt.commanager.HttpRestInteractionBusManager;
-import osh.registry.DriverRegistry;
+import osh.registry.DataRegistry.DriverRegistry;
 import osh.registry.interfaces.IEventTypeReceiver;
 
 import java.util.Collections;

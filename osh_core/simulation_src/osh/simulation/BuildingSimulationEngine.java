@@ -370,7 +370,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
             long currentTick) {
 
         // GET EPS and PLS FROM REGISTRY
-        EpsPlsStateExchange epse = this.ocRegistry.getState(
+        EpsPlsStateExchange epse = (EpsPlsStateExchange) this.ocRegistry.getData(
                 EpsPlsStateExchange.class,
                 UUID.fromString("e5ad4b36-d417-4be6-a1c8-c3ad68e52977"));
 

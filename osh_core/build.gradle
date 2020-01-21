@@ -29,6 +29,7 @@ dependencies {
     implementation group: 'log4j', name: 'log4j'
     implementation group: 'mysql', name: 'mysql-connector-java'
     implementation group: 'org.eclipse.persistence', name: 'eclipselink'
+    implementation group: 'org.reflections', name: 'reflections'
 
     jaxb(
             'org.glassfish.jaxb:jaxb-core',

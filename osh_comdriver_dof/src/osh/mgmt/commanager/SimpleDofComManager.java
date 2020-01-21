@@ -38,7 +38,7 @@ public class SimpleDofComManager extends ComManager {
                     dse.setDevice1stDegreeOfFreedom(FirstDegree);
                     dse.setDevice2ndDegreeOfFreedom(SecondDegree);
 
-                    this.getOCRegistry().setStateOfSender(DofStateExchange.class, dse);
+                    this.getOCRegistry().publish(DofStateExchange.class, dse);
                 }
             }
         }

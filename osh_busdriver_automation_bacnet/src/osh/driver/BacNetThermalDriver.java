@@ -133,7 +133,7 @@ public class BacNetThermalDriver extends HALDeviceDriver {
         this.notifyObserver(_ox);
 
         // create TemperatureDetails and save to DriverRegistry
-        this.getDriverRegistry().setStateOfSender(TemperatureDetails.class, _ox.getTemperatureDetails());
+        this.getDriverRegistry().publish(TemperatureDetails.class, _ox.getTemperatureDetails());
 
     }
 

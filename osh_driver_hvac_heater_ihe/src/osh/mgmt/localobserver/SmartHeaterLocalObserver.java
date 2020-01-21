@@ -74,7 +74,7 @@ public class SmartHeaterLocalObserver
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, ox.getHotWaterPower());
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -99,7 +99,7 @@ public class SmartHeaterLocalObserver
                 this.timestampOfLastChangePerSubElement,
                 this.compressionType,
                 this.compressionValue);
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this, sipp);
         this.lastTimeIppSent = now;
         this.lastIppTempSetting = this.temperatureSetting;

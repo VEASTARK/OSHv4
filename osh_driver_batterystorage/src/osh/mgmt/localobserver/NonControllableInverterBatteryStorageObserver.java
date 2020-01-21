@@ -69,7 +69,7 @@ public class NonControllableInverterBatteryStorageObserver
                     ox.getCompressionType(),
                     ox.getCompressionValue()
             );
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, sipp);
             this.lastTimeIPPSent = now;
             this.lastSOCIPP = ox.getBatteryStateOfCharge();
@@ -83,7 +83,7 @@ public class NonControllableInverterBatteryStorageObserver
 
         cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
         cpse.addPowerState(Commodity.REACTIVEPOWER, ox.getReactivePower());
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 CommodityPowerStateExchange.class,
                 this,
                 cpse);
@@ -97,7 +97,7 @@ public class NonControllableInverterBatteryStorageObserver
                 ox.getBatteryMinChargingState(),
                 ox.getBatteryMaxChargingState(),
                 this.getDeviceID());
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 BatteryStorageOCSX.class,
                 this,
                 sx);

@@ -85,7 +85,7 @@ public abstract class ChpDriver
     protected void setElectricityRequest(boolean electricityRequest) {
         if (this.chpDriverDetails != null) {
             this.chpDriverDetails.setPowerGenerationRequest(electricityRequest);
-            this.getDriverRegistry().setState(ChpDriverDetails.class, this, this.chpDriverDetails);
+            this.getDriverRegistry().publish(ChpDriverDetails.class, this, this.chpDriverDetails);
         }
 
         this.electricityRequest = electricityRequest;
@@ -98,7 +98,7 @@ public abstract class ChpDriver
     protected void setHeatingRequest(boolean heatingRequest) {
         if (this.chpDriverDetails != null) {
             this.chpDriverDetails.setHeatingRequest(heatingRequest);
-            this.getDriverRegistry().setState(ChpDriverDetails.class, this, this.chpDriverDetails);
+            this.getDriverRegistry().publish(ChpDriverDetails.class, this, this.chpDriverDetails);
         }
         this.heatingRequest = heatingRequest;
     }

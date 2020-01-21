@@ -55,7 +55,7 @@ public class PlsProviderComManager
                 priceDetails.setPowerLimitSignal(e.getKey(), e.getValue());
             }
 
-            this.getOCRegistry().setState(PlsStateExchange.class, this, priceDetails);
+            this.getOCRegistry().publish(PlsStateExchange.class, this, priceDetails);
         } else {
             try {
                 throw new OSHException("Signal unknown");

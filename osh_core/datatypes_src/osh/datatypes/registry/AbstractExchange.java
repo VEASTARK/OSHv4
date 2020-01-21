@@ -11,7 +11,7 @@ import java.util.UUID;
  *
  * @author Sebastian Kramer
  */
-public abstract class AExchange implements Serializable, Cloneable {
+public abstract class AbstractExchange implements Serializable, Cloneable {
 
 
     private static final long serialVersionUID = -461398001884824433L;
@@ -22,7 +22,7 @@ public abstract class AExchange implements Serializable, Cloneable {
      * Public no-argument constructor for cloning.
      */
     @Deprecated
-    public AExchange() {
+    public AbstractExchange() {
         this.timestamp = 0L;
     }
 
@@ -32,7 +32,7 @@ public abstract class AExchange implements Serializable, Cloneable {
      * @param sender identity of the sender of this exchange
      * @param timestamp timestamp at which this exchange object was created
      */
-    public AExchange(UUID sender, long timestamp) {
+    public AbstractExchange(UUID sender, long timestamp) {
         this.sender = sender;
         this.timestamp = timestamp;
     }
@@ -74,9 +74,9 @@ public abstract class AExchange implements Serializable, Cloneable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        AExchange aExchange = (AExchange) o;
-        return this.timestamp == aExchange.timestamp &&
-                this.sender.equals(aExchange.sender);
+        AbstractExchange abstractExchange = (AbstractExchange) o;
+        return this.timestamp == abstractExchange.timestamp &&
+                this.sender.equals(abstractExchange.sender);
     }
 
     @Override

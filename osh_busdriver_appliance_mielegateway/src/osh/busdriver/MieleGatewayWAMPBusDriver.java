@@ -7,9 +7,8 @@ import osh.busdriver.mielegateway.data.MieleDuration;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.CommandExchange;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
 import osh.datatypes.registry.commands.StartDeviceRequest;
 import osh.datatypes.registry.commands.StopDeviceRequest;
 import osh.datatypes.registry.commands.SwitchRequest;
@@ -23,7 +22,7 @@ import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;
 import osh.eal.hal.HALBusDriver;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.en50523.EN50523DeviceState;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.uuid.UUIDGenerationHelperMiele;
 
 import java.net.InetAddress;
@@ -40,7 +39,7 @@ import java.util.UUID;
  *
  * @author Kaibin Bao, Ingo Mauser
  */
-public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable {
+public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable, IDataRegistryListener {
 
     private final String mieleGatewayHost;
     private MieleGatewayWAMPDispatcher mieleGatewayDispatcher;
@@ -152,7 +151,7 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable 
                 if (this.mieleGatewayDispatcher.getDeviceData().isEmpty()) { // an error has occurred
                     for (UUID uuid : this.deviceIds.keySet()) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(uuid, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                     }
                 }
 
@@ -172,36 +171,13 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable 
 
                     // register UUID as command receiver to the registry
                     if (!this.deviceIds.containsKey(devUUID)) { // device already known?
-                        IEventTypeReceiver eventReceiver = new IEventTypeReceiver() {
-                            @Override
-                            public Object getSyncObject() {
-                                return MieleGatewayWAMPBusDriver.this;
-                            }
-
-                            @Override
-                            public UUID getUUID() {
-                                return devUUID;
-                            }
-
-                            @Override
-                            public <T extends EventExchange> void onQueueEventTypeReceived(
-                                    Class<T> type, T event) {
-//								this.onQueueEventTypeReceived(type, event);
-                                driver.onQueueEventReceived(event, devUUID);
-                            }
-                        };
 
                         // register device
-                        try {
-                            this.getDriverRegistry().register(StartDeviceRequest.class, eventReceiver);
-                            this.getDriverRegistry().register(StopDeviceRequest.class, eventReceiver);
-                            this.getDriverRegistry().register(SwitchRequest.class, eventReceiver);
-                            this.getDriverRegistry().registerStateChangeListener(ExpectedStartTimeExchange.class, eventReceiver);
-                            this.deviceIds.put(devUUID, dev.getUid());
-                        } catch (OSHException e) {
-                            // nop. happens.
-                            this.getGlobalLogger().logError("should not happen", e);
-                        }
+                        this.getDriverRegistry().subscribe(StartDeviceRequest.class, devUUID, this);
+                        this.getDriverRegistry().subscribe(StopDeviceRequest.class, devUUID, this);
+                        this.getDriverRegistry().subscribe(SwitchRequest.class, devUUID, this);
+                        this.getDriverRegistry().subscribe(ExpectedStartTimeExchange.class, devUUID, this);
+                        this.deviceIds.put(devUUID, dev.getUid());
                     }
                 }
 
@@ -212,18 +188,18 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable 
                     // check if device is published by gateway at the moment
                     if (dev == null) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                         continue;
                     }
 
                     // check if all data is available
                     if (dev.getDeviceDetails() == null) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                         continue;
                     } else {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ATTACHED);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                     }
 
                     // create program details
@@ -268,22 +244,22 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable 
 
                     // set state of the UUID
                     try {
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 GenericApplianceDriverDetails.class,
                                 createApplianceDetails(devUUID, timestamp, dev));
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 StartTimeDetails.class,
                                 createStartTimeDetails(devUUID, timestamp, dev));
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 GenericApplianceProgramDriverDetails.class,
                                 programDetails);
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 MieleApplianceDriverDetails.class,
                                 mieleDetails);
 
                     } catch (OSHException e1) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                         this.getGlobalLogger().logError(e1);
                     }
                 }
@@ -296,34 +272,30 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable 
         // NOTHING
     }
 
-    public void onQueueEventReceived(EventExchange event, UUID deviceUUID) {
-        if (event instanceof CommandExchange) {
-            UUID devUUID = ((CommandExchange) event).getReceiver();
+    @Override
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof CommandExchange) {
+            UUID devUUID = ((CommandExchange) exchange).getReceiver();
             Integer uid = this.deviceIds.get(devUUID);
 
             if (uid != null) { // known device?
-                if (event instanceof StartDeviceRequest) {
+                if (exchange instanceof StartDeviceRequest) {
                     this.mieleGatewayDispatcher.sendCommand("start", uid);
-                } else if (event instanceof StopDeviceRequest) {
+                } else if (exchange instanceof StopDeviceRequest) {
                     this.mieleGatewayDispatcher.sendCommand("stop", uid);
-                } else if (event instanceof SwitchRequest) {
-                    if (((SwitchRequest) event).isTurnOn()) {
+                } else if (exchange instanceof SwitchRequest) {
+                    if (((SwitchRequest) exchange).isTurnOn()) {
                         this.mieleGatewayDispatcher.sendCommand("lighton", uid);
                     } else {
                         this.mieleGatewayDispatcher.sendCommand("lightoff", uid);
                     }
                 }
             }
-        } else if (event instanceof StateChangedExchange) {
-            if (deviceUUID.equals(((StateChangedExchange) event).getStatefulEntity())) {
-                if (((StateChangedExchange) event).getType().equals(ExpectedStartTimeExchange.class)) {
-
-                    ExpectedStartTimeExchange este = this.getDriverRegistry().getState(ExpectedStartTimeExchange.class, ((StateChangedExchange) event).getStatefulEntity());
-                    UUID devUUID = este.getSender();
-                    Integer uid = this.deviceIds.get(devUUID);
-                    this.mieleGatewayDispatcher.sendStartTimes(este.getExpectedStartTime(), uid);
-                }
-            }
+        } else if (exchange instanceof ExpectedStartTimeExchange) {
+            ExpectedStartTimeExchange este = (ExpectedStartTimeExchange) exchange;
+            UUID devUUID = este.getSender();
+            Integer uid = this.deviceIds.get(devUUID);
+            this.mieleGatewayDispatcher.sendStartTimes(este.getExpectedStartTime(), uid);
         }
     }
 

@@ -44,7 +44,7 @@ public class GUIHotWaterPredictionStateExchange extends StateExchange {
     public GUIHotWaterPredictionStateExchange clone() {
         //TODO: do proper cloning
         return new GUIHotWaterPredictionStateExchange(
-                this.sender,
+                this.getSender(),
                 this.getTimestamp(),
                 new TreeMap<>(this.predictedTankTemp),
                 new TreeMap<>(this.predictedHotWaterDemand),

@@ -6,11 +6,8 @@ import java.util.UUID;
 /**
  * @author Till Schuberth
  */
-public abstract class EventExchange extends Exchange implements Cloneable {
+public abstract class EventExchange extends AbstractExchange {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -7069547228943707389L;
 
     public EventExchange(UUID sender, long timestamp) {
@@ -19,11 +16,7 @@ public abstract class EventExchange extends Exchange implements Cloneable {
 
     @Override
     public EventExchange clone() {
-        try {
-            return (EventExchange) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("subclass doesn't provide proper cloning functionality", e);
-        }
+        return (EventExchange) super.clone();
     }
 
     /**

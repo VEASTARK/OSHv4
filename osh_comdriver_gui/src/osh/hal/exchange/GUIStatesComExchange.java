@@ -1,6 +1,7 @@
 package osh.hal.exchange;
 
 import osh.cal.CALComExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 
 import java.util.*;
@@ -13,9 +14,9 @@ import java.util.Map.Entry;
 public class GUIStatesComExchange extends CALComExchange {
 
     private final boolean ocMode;
-    private Set<Class<? extends StateExchange>> types;
-    private Map<UUID, ? extends StateExchange> states;
-    private Class<? extends StateExchange> driverStateType;
+    private Set<Class<? extends AbstractExchange>> types;
+    private Map<UUID, ? extends AbstractExchange> states;
+    private Class<? extends AbstractExchange> driverStateType;
 
 
     /**
@@ -27,8 +28,8 @@ public class GUIStatesComExchange extends CALComExchange {
     public GUIStatesComExchange(
             UUID deviceID,
             Long timestamp,
-            Set<Class<? extends StateExchange>> types,
-            Map<UUID, ? extends StateExchange> states) {
+            Set<Class<? extends AbstractExchange>> types,
+            Map<UUID, ? extends AbstractExchange> states) {
         super(deviceID, timestamp);
 
         this.ocMode = true;
@@ -37,9 +38,9 @@ public class GUIStatesComExchange extends CALComExchange {
         } else {
             synchronized (types) {
                 @SuppressWarnings("unchecked")
-                Class<? extends StateExchange>[] dte = (Class<? extends StateExchange>[]) types.toArray(new Class<?>[0]);
+                Class<? extends AbstractExchange>[] dte = (Class<? extends StateExchange>[]) types.toArray(new Class<?>[0]);
 
-                Set<Class<? extends StateExchange>> clonedTypes = new HashSet<>();
+                Set<Class<? extends AbstractExchange>> clonedTypes = new HashSet<>();
 
                 Collections.addAll(clonedTypes, dte);
 
@@ -68,22 +69,22 @@ public class GUIStatesComExchange extends CALComExchange {
     public GUIStatesComExchange(
             UUID deviceID,
             Long timestamp,
-            Class<? extends StateExchange> driverStateType) {
+            Class<? extends AbstractExchange> driverStateType) {
         super(deviceID, timestamp);
 
         this.ocMode = false;
         this.driverStateType = driverStateType; //cloning not possible
     }
 
-    public Set<Class<? extends StateExchange>> getTypes() {
+    public Set<Class<? extends AbstractExchange>> getTypes() {
         return this.types;
     }
 
-    public Map<UUID, ? extends StateExchange> getStates() {
+    public Map<UUID, ? extends AbstractExchange> getStates() {
         return this.states;
     }
 
-    public Class<? extends StateExchange> getDriverStateType() {
+    public Class<? extends AbstractExchange> getDriverStateType() {
         return this.driverStateType;
     }
 

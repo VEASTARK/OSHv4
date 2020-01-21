@@ -131,7 +131,7 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements IEventTyp
         synchronized (currentWeatherDetails) {
             //TODO: this was changed from driverRegistry to ComRegistry please fix all other classes depending on receiving this on the driverRegistry (via DataBroker)
             // set raw details
-            this.getComRegistry().setState(CurrentWeatherDetails.class, this, currentWeatherDetails);
+            this.getComRegistry().publish(CurrentWeatherDetails.class, this, currentWeatherDetails);
             this.getGlobalLogger().logDebug("set new state" + currentWeatherDetails);
         }
     }
@@ -140,7 +140,7 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements IEventTyp
         synchronized (weatherDetails) {
             //TODO: see above
             // set raw details
-            this.getComRegistry().setState(WeatherPredictionDetails.class, this, weatherDetails);
+            this.getComRegistry().publish(WeatherPredictionDetails.class, this, weatherDetails);
             this.getGlobalLogger().logDebug("set new state" + weatherDetails);
         }
     }

@@ -85,7 +85,7 @@ public class NonControllableGasBoilerLocalObserver
                     this.typicalReactivePowerOff,
                     this.compressionType,
                     this.compressionValue);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, sipp);
             this.lastTimeIPPSent = now;
             this.lastIPPMaxTemperature = this.maxTemperature;
@@ -132,7 +132,7 @@ public class NonControllableGasBoilerLocalObserver
                         this.typicalReactivePowerOff,
                         this.compressionType,
                         this.compressionValue);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         InterdependentProblemPart.class, this, sipp);
                 this.initialStateLastIPP = this.initialState;
                 this.lastIPPMaxTemperature = this.maxTemperature;
@@ -149,7 +149,7 @@ public class NonControllableGasBoilerLocalObserver
             cpse.addPowerState(Commodity.REACTIVEPOWER, ox.getReactivePower());
             cpse.addPowerState(Commodity.NATURALGASPOWER, ox.getGasPower());
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, ox.getHotWaterPower());
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);

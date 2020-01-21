@@ -1,5 +1,6 @@
 package osh.mgmt.globalobserver;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.system.DeviceTypes;
 import osh.core.exceptions.OSHException;
@@ -14,13 +15,12 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.mox.IModelOfObservationType;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.*;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IHasState;
 import osh.utils.uuid.UUIDLists;
 
@@ -33,7 +33,7 @@ import java.util.Map.Entry;
  */
 public class OSHGlobalObserver
         extends GlobalObserver
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener, IHasState {
 
     List<UUID> totalPowerMeter;
     private final Map<UUID, InterdependentProblemPart<?, ?>> iProblempart;
@@ -71,11 +71,10 @@ public class OSHGlobalObserver
 
         this.getTimer().registerComponent(this, 1);
 
-        this.getOCRegistry().registerStateChangeListener(InterdependentProblemPart.class, this);
-        this.getOCRegistry().register(StateChangedExchange.class, this);
+        this.getOCRegistry().subscribe(InterdependentProblemPart.class, this);
 
-        this.getOCRegistry().registerStateChangeListener(EpsStateExchange.class, this);
-        this.getOCRegistry().registerStateChangeListener(PlsStateExchange.class, this);
+        this.getOCRegistry().subscribe(EpsStateExchange.class, this);
+        this.getOCRegistry().subscribe(PlsStateExchange.class, this);
     }
 
     @Override
@@ -85,31 +84,23 @@ public class OSHGlobalObserver
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T ex) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
         boolean problemPartListChanged = false;
 
-        if (ex instanceof StateChangedExchange) {
-            StateChangedExchange sce = (StateChangedExchange) ex;
-
-            if (sce.getType().equals(EpsStateExchange.class)) {
-                EpsStateExchange eee = this.getOCRegistry().getState(EpsStateExchange.class, sce.getStatefulEntity());
-                this.priceSignals = eee.getPriceSignals();
-            } else if (sce.getType().equals(PlsStateExchange.class)) {
-                PlsStateExchange eee = this.getOCRegistry().getState(PlsStateExchange.class, sce.getStatefulEntity());
-                this.powerLimitSignals = eee.getPowerLimitSignals();
-            } else if (sce.getType().equals(InterdependentProblemPart.class)) {
-                UUID entity = sce.getStatefulEntity();
-                InterdependentProblemPart<?, ?> ppex = (InterdependentProblemPart<?, ?>) this.getOCRegistry().getState(InterdependentProblemPart.class, entity);
-                this.iProblempart.put(entity, ppex);
-                if (ppex.isToBeScheduled()) {
-                    this.reschedule = true;
-                }
-                problemPartListChanged = true;
+        if (exchange instanceof EpsStateExchange) {
+            this.priceSignals = ((EpsStateExchange) exchange).getPriceSignals();
+        } else if (exchange instanceof PlsStateExchange) {
+            this.powerLimitSignals = ((PlsStateExchange) exchange).getPowerLimitSignals();
+        } else if (exchange instanceof InterdependentProblemPart) {
+            InterdependentProblemPart<?, ?> ppex = (InterdependentProblemPart<?, ?>) exchange;
+            this.iProblempart.put(exchange.getSender(), ppex);
+            if (ppex.isToBeScheduled()) {
+                this.reschedule = true;
             }
+            problemPartListChanged = true;
         }
         if (problemPartListChanged && this.getControllerBoxStatus().hasGUI()) {
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     GUIDeviceListStateExchange.class, this,
                     new GUIDeviceListStateExchange(
                             this.getUUID(),
@@ -161,8 +152,10 @@ public class OSHGlobalObserver
 
     private void getCurrentPowerOfDevices() {
         // get new power values
-        Map<UUID, CommodityPowerStateExchange> powerStatesMap =
-                this.getOCRegistry().getStates(CommodityPowerStateExchange.class);
+        Map<UUID, AbstractExchange> dataMap = this.getOCRegistry().getData(CommodityPowerStateExchange.class);
+
+        Map<UUID, CommodityPowerStateExchange> powerStatesMap = new Object2ObjectOpenHashMap<>();
+        dataMap.forEach((k, v) -> powerStatesMap.put(k, (CommodityPowerStateExchange) v));
 
 //		if (powerStatesMap.size() > 2) {
 //			@SuppressWarnings("unused")
@@ -200,7 +193,7 @@ public class OSHGlobalObserver
             cpse.addPowerState(e.getKey(), e.getValue());
         }
 
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 CommodityPowerStateExchange.class,
                 this,
                 cpse);
@@ -226,7 +219,7 @@ public class OSHGlobalObserver
         } /* if( totalPowerMeter != null ) */
 
         // save as state
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 DevicesPowerStateExchange.class,
                 this,
                 dpse);
@@ -396,7 +389,7 @@ public class OSHGlobalObserver
                     now,
                     vcMap);
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     AncillaryCommodityPowerStateExchange.class,
                     this,
                     vcpse);
@@ -407,7 +400,7 @@ public class OSHGlobalObserver
                     vcMap,
                     this.priceSignals,
                     this.powerLimitSignals);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     DetailedCostsLoggingStateExchange.class,
                     this,
                     dclse);

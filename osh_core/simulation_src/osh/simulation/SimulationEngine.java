@@ -1,10 +1,10 @@
 package osh.simulation;
 
 import osh.eal.hal.HALRealTimeDriver;
-import osh.registry.ComRegistry;
-import osh.registry.DriverRegistry;
-import osh.registry.OCRegistry;
-import osh.registry.Registry;
+import osh.registry.DataRegistry;
+import osh.registry.DataRegistry.ComRegistry;
+import osh.registry.DataRegistry.DriverRegistry;
+import osh.registry.DataRegistry.OCRegistry;
 import osh.simulation.exception.SimulationEngineException;
 
 import java.util.HashSet;
@@ -134,17 +134,15 @@ public abstract class SimulationEngine {
         return allQueuesWereEmpty;
     }
 
-    private boolean processRegistry(Registry registry) {
-        // empty all event/state queues
+    private boolean processRegistry(DataRegistry registry) {
+        // empty all queues
         if (registry != null) {
-            registry.flushAllQueues();
+            return registry.flushQueue();
         } else {
             System.out.println("ERROR: No Registry available!");
             System.exit(0); // shutdown
             return true;
         }
-
-        return registry.areAllQueuesEmpty();
     }
 
     /**

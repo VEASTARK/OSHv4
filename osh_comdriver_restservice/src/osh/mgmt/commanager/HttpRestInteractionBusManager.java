@@ -4,7 +4,6 @@ import osh.core.bus.BusManager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
 import osh.datatypes.registry.StateExchange;
 import osh.datatypes.registry.commands.SwitchCommandExchange;
 import osh.datatypes.registry.commands.SwitchRequest;

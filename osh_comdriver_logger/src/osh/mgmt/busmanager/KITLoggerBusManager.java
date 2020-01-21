@@ -2,9 +2,8 @@ package osh.mgmt.busmanager;
 
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.Exchange;
-import osh.datatypes.registry.StateChangedExchange;
 
 import java.util.UUID;
 
@@ -42,7 +41,7 @@ public class KITLoggerBusManager extends LoggerBusManager {
             Class<T> type, T event) throws OSHException {
         super.onQueueEventTypeReceived(type, event);
 
-        Exchange toSend = null;
+        AbstractExchange toSend = null;
 
         if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getUUID())) {
 //			StateChangedExchange exsc = (StateChangedExchange) ex;

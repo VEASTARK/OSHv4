@@ -105,7 +105,7 @@ public abstract class HALDeviceDriver
         deviceMetaDriverDetails.setDeviceType(this.deviceType);
         deviceMetaDriverDetails.setConfigured(this.configured);
 
-        this.getDriverRegistry().setStateOfSender(DeviceMetaDriverDetails.class, deviceMetaDriverDetails);
+        this.getDriverRegistry().publish(DeviceMetaDriverDetails.class, deviceMetaDriverDetails);
     }
 
 
@@ -181,7 +181,7 @@ public abstract class HALDeviceDriver
         for (UUID uuid : uuids) {
             ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimer().getUnixTime());
             cd.setConfigurationStatus(ConfigurationStatus.CONFIGURED);
-            this.getDriverRegistry().setStateOfSender(ConfigurationDetails.class, cd);
+            this.getDriverRegistry().publish(ConfigurationDetails.class, cd);
         }
     }
 
@@ -190,7 +190,7 @@ public abstract class HALDeviceDriver
             ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimer().getUnixTime());
             cd.setConfigurationStatus(ConfigurationStatus.USED);
             cd.setUsedBy(this.getDeviceID());
-            this.getDriverRegistry().setStateOfSender(ConfigurationDetails.class, cd);
+            this.getDriverRegistry().publish(ConfigurationDetails.class, cd);
         }
     }
 

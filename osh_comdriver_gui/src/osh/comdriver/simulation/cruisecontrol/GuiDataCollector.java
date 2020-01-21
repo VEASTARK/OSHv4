@@ -10,7 +10,7 @@ import osh.datatypes.gui.DeviceTableEntry;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.registry.StateExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 
@@ -55,7 +55,7 @@ public class GuiDataCollector {
         this.driver.refreshDeviceTable(deviceList);
     }
 
-    public void updateStateView(Set<Class<? extends StateExchange>> types, Map<UUID, ? extends StateExchange> states) {
+    public void updateStateView(Set<Class<? extends AbstractExchange>> types, Map<UUID, ? extends AbstractExchange> states) {
         this.driver.refreshStateTable(types, states);
     }
 

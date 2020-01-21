@@ -3,8 +3,7 @@ package osh.driver;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.commands.SwitchRequest;
 import osh.datatypes.registry.details.common.DeviceMetaDriverDetails;
 import osh.datatypes.registry.details.common.SwitchDriverDetails;
@@ -15,7 +14,7 @@ import osh.eal.hal.exchange.HALControllerExchange;
 import osh.en50523.EN50523DeviceState;
 import osh.hal.exchange.SmartPlugObserverExchange;
 import osh.hal.interfaces.ISwitchRequest;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IHasState;
 
 import java.util.*;
@@ -30,7 +29,7 @@ import java.util.*;
  *
  * @author Kaibin Bao, Ingo Mauser
  */
-public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEventTypeReceiver {
+public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IDataRegistryListener {
 
     private DeviceMetaDriverDetails deviceMetaDetails;
     private List<UUID> meterDataSources;
@@ -65,8 +64,8 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
         super.onSystemIsUp();
         this.initSmartPlug(this.getDriverConfig());
 
-        this.getDriverRegistry().registerStateChangeListener(ElectricPowerDriverDetails.class, this);
-        this.getDriverRegistry().registerStateChangeListener(SwitchDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(ElectricPowerDriverDetails.class, this.getDeviceID(),this);
+        this.getDriverRegistry().subscribe(SwitchDriverDetails.class, this.getDeviceID(), this);
     }
 
     private void initSmartPlug(OSHParameterCollection config) throws OSHException {
@@ -108,7 +107,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
             this.switchDataSources = Collections.emptyList();
 
         // set device meta details in driver registry
-        this.getDriverRegistry().setStateOfSender(DeviceMetaDriverDetails.class, this.deviceMetaDetails);
+        this.getDriverRegistry().publish(DeviceMetaDriverDetails.class, this.deviceMetaDetails);
 
         // set configuration details for meter and switch sources
         this.setDataSourcesUsed(this.meterDataSources);
@@ -121,7 +120,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
         if (controllerRequest instanceof ISwitchRequest) {
             for (UUID switchUUID : this.switchDataSources) {
                 SwitchRequest switchReq = new SwitchRequest(controllerRequest.getDeviceID(), switchUUID, controllerRequest.getTimestamp());
-                this.getDriverRegistry().sendCommand(SwitchRequest.class, switchReq);
+                this.getDriverRegistry().publish(SwitchRequest.class, switchReq);
             }
         }
     }
@@ -139,7 +138,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
             UUID meterUUID = null;
 
             for (UUID sourceUUID : this.meterDataSources) {
-                ElectricPowerDriverDetails p = this.getDriverRegistry().getState(
+                ElectricPowerDriverDetails p = (ElectricPowerDriverDetails) this.getDriverRegistry().getData(
                         ElectricPowerDriverDetails.class, sourceUUID);
 
                 if (p == null) {
@@ -162,7 +161,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
             _ox.setReactivePower((int) Math.round(aggregated.getReactivePower()));
 
             if (this.updateElectricPowerDriverState) {
-                this.getDriverRegistry().setStateOfSender(ElectricPowerDriverDetails.class, aggregated);
+                this.getDriverRegistry().publish(ElectricPowerDriverDetails.class, aggregated);
             }
         }
 
@@ -173,7 +172,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
             SwitchDriverDetails _sd = new SwitchDriverDetails(_ox.getDeviceID(), _ox.getTimestamp());
 
             for (UUID sourceUUID : this.switchDataSources) {
-                SwitchDriverDetails s = this.getDriverRegistry().getState(SwitchDriverDetails.class, sourceUUID);
+                SwitchDriverDetails s = (SwitchDriverDetails) this.getDriverRegistry().getData(SwitchDriverDetails.class, sourceUUID);
                 if (s == null) {
                     // unable to fetch state
                     if (this.incompleteCounter == 0) {
@@ -225,24 +224,21 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IEven
                 appDetails.setState(EN50523DeviceState.OFF);
             }
             appDetails.setStateTextDE(appDetails.getState().getDescriptionDE());
-            this.getDriverRegistry().setState(GenericApplianceDriverDetails.class, this, appDetails);
+            this.getDriverRegistry().publish(GenericApplianceDriverDetails.class, this, appDetails);
         }
 
         return _ox;
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getDeviceID())) {
-            if (this.meterDataSources.contains(((StateChangedExchange) event).getStatefulEntity())
-                    || this.switchDataSources.contains(((StateChangedExchange) event).getStatefulEntity())) {
-                try {
-                    this.updateHALExchange();
-                } catch (OSHException e) {
-                    this.getGlobalLogger().logWarning(e);
-                    e.printStackTrace();
-                }
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (this.meterDataSources.contains(exchange.getSender())
+                || this.switchDataSources.contains(exchange.getSender())) {
+            try {
+                this.updateHALExchange();
+            } catch (OSHException e) {
+                this.getGlobalLogger().logWarning(e);
+                e.printStackTrace();
             }
         }
     }

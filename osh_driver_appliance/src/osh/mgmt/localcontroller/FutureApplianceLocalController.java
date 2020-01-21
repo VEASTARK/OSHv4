@@ -7,7 +7,7 @@ import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.en50523.EN50523DeviceState;
@@ -16,7 +16,7 @@ import osh.mgmt.localcontroller.ipp.FutureApplianceIPP;
 import osh.mgmt.localcontroller.ipp.FutureAppliancesStaticIPP;
 import osh.mgmt.localcontroller.ipp.GenericApplianceSolution;
 import osh.mgmt.mox.GenericApplianceMOX;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
@@ -26,7 +26,7 @@ import java.util.UUID;
  */
 public class FutureApplianceLocalController
         extends LocalController
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener, IHasState {
 
     /**
      * State of the device as EN 50523 state
@@ -83,7 +83,7 @@ public class FutureApplianceLocalController
         // register to be called every time step
         this.getTimer().registerComponent(this, 1);
         // register for solutions of the optimization
-        this.getOCRegistry().register(EASolutionCommandExchange.class, this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getDeviceID(),this);
 
         this.lastTimeSchedulingCaused = this.getTimer().getUnixTime() - 61;
     }
@@ -370,20 +370,20 @@ public class FutureApplianceLocalController
 //				lastTimeSchedulingCaused = now;
 //				this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
 //			} else if (!toBeScheduled) {
-            this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+            this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
 //			}
         }
     }
 
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T ex) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
         // EAP Solution
-        if (ex instanceof EASolutionCommandExchange) {
+        if (exchange instanceof EASolutionCommandExchange) {
             try {
                 @SuppressWarnings("unchecked")
                 EASolutionCommandExchange<GenericApplianceSolution> solution =
-                        (EASolutionCommandExchange<GenericApplianceSolution>) ex;
+                        (EASolutionCommandExchange<GenericApplianceSolution>) exchange;
 
                 // must be for somebody else... or solution is empty...
                 if (!solution.getReceiver().equals(this.getDeviceID())
@@ -428,7 +428,6 @@ public class FutureApplianceLocalController
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 

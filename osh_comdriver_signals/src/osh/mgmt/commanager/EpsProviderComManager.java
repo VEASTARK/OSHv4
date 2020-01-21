@@ -55,7 +55,7 @@ public class EpsProviderComManager
                 priceDetails.setPriceSignal(e.getKey(), e.getValue());
             }
 
-            this.getOCRegistry().setState(EpsStateExchange.class, this, priceDetails);
+            this.getOCRegistry().publish(EpsStateExchange.class, this, priceDetails);
         } else {
             try {
                 throw new OSHException("Signal unknown");

@@ -8,13 +8,11 @@ import java.util.UUID;
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
 
-public abstract class StateExchange extends Exchange implements Cloneable, Serializable {
+public abstract class StateExchange extends AbstractExchange implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -701677297851327328L;
 
+    @Deprecated
     protected StateExchange() {
         super();
     }
@@ -31,11 +29,7 @@ public abstract class StateExchange extends Exchange implements Cloneable, Seria
 
     @Override
     public StateExchange clone() {
-        try {
-            return (StateExchange) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("clone for StateExchange not correctly implemented", e);
-        }
+        return (StateExchange) super.clone();
     }
 
     @Override

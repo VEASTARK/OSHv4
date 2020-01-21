@@ -63,7 +63,7 @@ public class ColdWaterTankLocalObserver
                     this.currentTemperature,
                     this.compressionType,
                     this.compressionValue);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class,
                     this,
                     ex);
@@ -92,7 +92,7 @@ public class ColdWaterTankLocalObserver
                         this.currentTemperature,
                         this.compressionType,
                         this.compressionValue);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         InterdependentProblemPart.class,
                         this,
                         ex);
@@ -110,7 +110,7 @@ public class ColdWaterTankLocalObserver
                     ox.getColdWaterDemand(),
                     ox.getColdWaterSupply(),
                     this.getDeviceID());
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     WaterStorageOCSX.class,
                     this,
                     sx);

@@ -121,20 +121,14 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
 
         // Retrieve JSON responses from controller and build Jackson Tree
         // Model with package de.fzi.iik.habiteq.jackson
-        BcontrolMeterData bcmd = null;
         try {
-            bcmd = om.readValue(msg, BcontrolMeterData.class);
+            BcontrolMeterData bcmd = om.readValue(msg, BcontrolMeterData.class);
+            this.getDriverRegistry().publish(
+                    BcontrolMeterDriverRawLogDetails.class,
+                    this.convertJsonToRawDetails(bcmd));
         } catch (IOException e) {
             this.getGlobalLogger().logWarning(e.getStackTrace(), e);
         }
-
-//		getGlobalLogger().logDebug(msg);
-//		getGlobalLogger().logDebug(bcmd);
-
-        // save to registry
-        this.getDriverRegistry().setStateOfSender(
-                BcontrolMeterDriverRawLogDetails.class,
-                this.convertJsonToRawDetails(bcmd));
     }
 
 
@@ -214,7 +208,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
 //		getGlobalLogger().logDebug(bcmd);
 
         // save to registry
-        this.getDriverRegistry().setStateOfSender(
+        this.getDriverRegistry().publish(
                 BcontrolHeaterDriverRawLogDetails.class,
                 this.convertJsonToRawDetails(bchd));
     }

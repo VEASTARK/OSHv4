@@ -92,7 +92,7 @@ public class InverterBatteryStorageObserver
 
         cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
         cpse.addPowerState(Commodity.REACTIVEPOWER, ox.getReactivePower());
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 CommodityPowerStateExchange.class,
                 this,
                 cpse);
@@ -106,7 +106,7 @@ public class InverterBatteryStorageObserver
                 ox.getBatteryMinChargingState(),
                 ox.getBatteryMaxChargingState(),
                 this.getDeviceID());
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 BatteryStorageOCSX.class,
                 this,
                 sx);
