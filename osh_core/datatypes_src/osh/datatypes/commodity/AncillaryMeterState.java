@@ -12,6 +12,10 @@ import java.util.Arrays;
 public class AncillaryMeterState {
 
     private static final int enumValCount = AncillaryCommodity.values().length;
+    private static final double[] EMPTY_POWER = new double[enumValCount];
+    static {
+        Arrays.fill(EMPTY_POWER, 0.0);
+    }
     private double[] powerStates = new double[enumValCount];
 
     public AncillaryMeterState() {

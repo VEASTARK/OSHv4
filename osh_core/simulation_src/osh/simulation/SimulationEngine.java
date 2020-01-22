@@ -1,10 +1,10 @@
 package osh.simulation;
 
 import osh.eal.hal.HALRealTimeDriver;
-import osh.registry.DataRegistry;
-import osh.registry.DataRegistry.ComRegistry;
-import osh.registry.DataRegistry.DriverRegistry;
-import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.Registry;
+import osh.registry.Registry.ComRegistry;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.Registry.OCRegistry;
 import osh.simulation.exception.SimulationEngineException;
 
 import java.util.HashSet;
@@ -134,7 +134,7 @@ public abstract class SimulationEngine {
         return allQueuesWereEmpty;
     }
 
-    private boolean processRegistry(DataRegistry registry) {
+    private boolean processRegistry(Registry registry) {
         // empty all queues
         if (registry != null) {
             return registry.flushQueue();

@@ -10,7 +10,7 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.oc.IOCCALDataPublisher;
 import osh.core.oc.IOCCALDataSubscriber;
-import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.Registry.OCRegistry;
 import osh.registry.interfaces.IProvidesIdentity;
 
 import java.util.UUID;

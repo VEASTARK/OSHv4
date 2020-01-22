@@ -19,10 +19,10 @@ import osh.core.logging.OSHGlobalLogger;
 import osh.datatypes.logger.SystemLoggerConfiguration;
 import osh.eal.hal.HALManager;
 import osh.eal.hal.exceptions.HALManagerException;
-import osh.registry.DataRegistry;
-import osh.registry.DataRegistry.ComRegistry;
-import osh.registry.DataRegistry.DriverRegistry;
-import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.Registry;
+import osh.registry.Registry.ComRegistry;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.Registry.OCRegistry;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
@@ -426,7 +426,7 @@ public class OSHLifeCycleManager {
         } while (!allQueuesEmpty);
     }
 
-    protected boolean processRegistry(DataRegistry registry) {
+    protected boolean processRegistry(Registry registry) {
         // empty all queues
         if (registry != null) {
             return registry.flushQueue();

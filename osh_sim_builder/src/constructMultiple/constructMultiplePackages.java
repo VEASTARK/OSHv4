@@ -128,7 +128,7 @@ public class constructMultiplePackages {
             constructSimulationPackage.stepSizeESCinOptimization = (Integer) config.get("escResolution");
         }
         if (config.containsKey("autoProbFactor")) {
-            constructSimulationPackage.autoProbMuatationFactor = (Double) config.get("autoProbFactor");
+            constructSimulationPackage.autoProbMutationFactor = (Double) config.get("autoProbFactor");
         }
         if (config.containsKey("crossoverProb")) {
             constructSimulationPackage.crossoverProbability = (Double) config.get("crossoverProb");
@@ -175,7 +175,7 @@ public class constructMultiplePackages {
     private static void setLogValues() {
         constructSimulationPackage.logH0 = constructMultipleData.logH0;
         constructSimulationPackage.logEpsPls = constructMultipleData.logEpsPls;
-        constructSimulationPackage.logIntervalls = constructMultipleData.logIntervals;
+        constructSimulationPackage.logIntervals = constructMultipleData.logIntervals;
         constructSimulationPackage.logDevices = constructMultipleData.logDevices;
         constructSimulationPackage.logDetailedPower = constructMultipleData.logDetailedPower;
         constructSimulationPackage.logHotWater = constructMultipleData.logHotWater;

@@ -7,7 +7,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.AbstractExchange;
-import osh.registry.DataRegistry;
+import osh.registry.Registry;
 import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.*;
@@ -25,9 +25,9 @@ public class DataBroker extends OSHComponent implements ILifeCycleListener, IDat
     private final Map<Class<? extends AbstractExchange>, List<UUIDRegistryPair>> dataMapping
             = new Object2ObjectOpenHashMap<>();
 
-    private DataRegistry comRegistry;
-    private DataRegistry ocRegistry;
-    private DataRegistry driverRegistry;
+    private Registry comRegistry;
+    private Registry ocRegistry;
+    private Registry driverRegistry;
 
     /**
      * Generates this data broker with the given the organic management entity and the given identifer
@@ -77,6 +77,7 @@ public class DataBroker extends OSHComponent implements ILifeCycleListener, IDat
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends AbstractExchange> void onExchange(T exchange) {
         List<UUIDRegistryPair> listForType = this.dataMapping.get(exchange.getClass());
 
@@ -85,7 +86,7 @@ public class DataBroker extends OSHComponent implements ILifeCycleListener, IDat
             for (UUIDRegistryPair pair : listForType) {
 
                 if (pair.setSenderToIdentifier) exchange.setSender(pair.identifier);
-                this.getRegistryFromType(pair.drain).publish(exchange.getClass(), exchange);
+                this.getRegistryFromType(pair.drain).publish((Class<T>) exchange.getClass(), exchange);
             }
         }
     }
@@ -96,7 +97,7 @@ public class DataBroker extends OSHComponent implements ILifeCycleListener, IDat
      * @param type the type of the registry
      * @return the registry corresponding to the given type
      */
-    private DataRegistry getRegistryFromType(RegistryType type) {
+    private Registry getRegistryFromType(RegistryType type) {
         switch (type) {
             case COM:
                 return this.comRegistry;

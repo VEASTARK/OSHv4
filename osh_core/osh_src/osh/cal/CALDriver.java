@@ -7,7 +7,7 @@ import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHCom;
 import osh.core.interfaces.IRealTimeSubscriber;
-import osh.registry.DataRegistry.ComRegistry;
+import osh.registry.Registry.ComRegistry;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.uuid.UUIDLists;
 

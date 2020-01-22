@@ -12,9 +12,9 @@ import osh.core.logging.IGlobalLogger;
 import osh.core.oc.GlobalController;
 import osh.core.oc.GlobalObserver;
 import osh.eal.hal.HALRealTimeDriver;
-import osh.registry.DataRegistry.ComRegistry;
-import osh.registry.DataRegistry.DriverRegistry;
-import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.Registry.ComRegistry;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.Registry.OCRegistry;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
@@ -31,7 +31,7 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
     /**
      * ExternalRegistry (communication to external units (e.g. REMS and other OSH))
      */
-    private ComRegistry externalRegistry;
+    private ComRegistry comRegistry;
     /**
      * OCRegistry (O/C communication above HAL)
      */
@@ -53,11 +53,11 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
 
     @Override
     public ComRegistry getComRegistry() {
-        return this.externalRegistry;
+        return this.comRegistry;
     }
 
     public void setComRegistry(ComRegistry externalRegistry) {
-        this.externalRegistry = externalRegistry;
+        this.comRegistry = externalRegistry;
     }
 
 

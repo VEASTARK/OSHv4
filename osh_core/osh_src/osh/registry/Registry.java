@@ -1,11 +1,12 @@
 package osh.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
+import org.reflections.Reflections;
 import osh.OSHComponent;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.AbstractExchange;
+import osh.datatypes.registry.CommandExchange;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.Triple;
@@ -16,44 +17,49 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Generic registry for communication between different modules of the OSH.
+ * Registry for communication between different modules of the OSH.
  * This registry works with the publish/subscribe architecture and enables subscription either for specific senders
  * (identified by their supplied UUID) of for any published exchanges of a sepcific type.
  *
  * @author Sebastian Kramer
  *
- * @param <I> the identifier of the objects to be exchanged in this registry
- * @param <L> the listener interface all subscriber need to implement to use this registry
  */
-public abstract class AbstractRegistry<I, L> extends OSHComponent {
+public class Registry extends OSHComponent {
+
+    /**
+     * Information provided through the {@link org.reflections} package about the classpath of which all exchange
+     * object lie.
+     */
+    private static final Reflections reflections = new Reflections(AbstractExchange.class.getPackageName());
 
     /**
      * A map containing all data currently known to this registry.
      */
-    private final Map<I, Map<UUID, AbstractExchange>> data = new Object2ObjectOpenHashMap<>();
+    private final Map<Class<? extends AbstractExchange>, Map<UUID, AbstractExchange>> data =
+            new Object2ObjectOpenHashMap<>();
 
     /**
      * The optional queue of exchange objects to publish to subscribers if this step is to only be completed
      * by a specific call and not directly after each publish call
      */
-    private final ConcurrentLinkedQueue<Triple<I, UUID, AbstractExchange>> deferQueue = new  ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Triple<Class<? extends AbstractExchange>, UUID, AbstractExchange>> deferQueue = new  ConcurrentLinkedQueue<>();
 
     /**
      * A mapping of each listener to it's wrapper object
      */
-    private final Map<L, AbstractListenerWrapper<L>> wrapperMap = new Object2ObjectOpenHashMap<>();
+    private final Map<IDataRegistryListener, DataListenerWrapper> wrapperMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * A map of each object identifier and publisher identity to the subscribers of this specific identifier and
      * publisher
      */
-    private final Map<I, Map<UUID, List<AbstractListenerWrapper<L>>>> singleSubscribers =
+    private final Map<Class<? extends AbstractExchange>, Map<UUID, List<DataListenerWrapper>>> singleSubscribers =
             new Object2ObjectOpenHashMap<>();
 
     /**
      * A map of object identifiers to subscribers who wish to be notified regardless of the publisher's identity
      */
-    private final Map<I, List<AbstractListenerWrapper<L>>> manySubscribers =
+    private final Map<Class<? extends AbstractExchange>, List<DataListenerWrapper>> manySubscribers =
             new Object2ObjectOpenHashMap<>();
 
     /**
@@ -74,7 +80,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param entity the organic management entity
      * @param isSimulation flag if this registry is run in a simulation
      */
-    public AbstractRegistry(IOSH entity, boolean isSimulation) {
+    public Registry(IOSH entity, boolean isSimulation) {
         super(entity);
         this.deferCallbacks = isSimulation;
 
@@ -88,23 +94,16 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
         this.subscriberWriteLock = listenerLock.writeLock();
     }
 
-    /**
-     * Abstract method signature for converting the explicit listener to a wrapper used in this registry
-     *
-     * @param listener the explicit listener
-     * @return a wrapper around the listener
-     */
-    abstract AbstractListenerWrapper<L> convertCallback(L listener);
 
     /**
-     * Looks up and retrieves the the wrapper for a given explicit listener or if not already existing calls the
-     * conversion method to create one and returns it
+     * Looks up and retrieves the the wrapper for a given explicit listener or if not already existing creates a new
+     * one and stores it in the map.
      *
      * @param listener the explicit listener
      * @return the retrieved listener wrapper or a newly constructed one if not existing
      */
-    private AbstractListenerWrapper<L> retrieveCallback(L listener) {
-        return this.wrapperMap.computeIfAbsent(listener, l -> this.convertCallback(listener));
+    private DataListenerWrapper retrieveCallback(IDataRegistryListener listener) {
+        return this.wrapperMap.computeIfAbsent(listener, l -> new DataListenerWrapper(listener));
     }
 
     /**
@@ -118,7 +117,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param sender the sender under which the exchange object will be published
      * @param exchange the exchange object
      */
-    public void publish(I identifier, UUID sender, AbstractExchange exchange) {
+    public <T extends AbstractExchange, U extends T> void publish(Class<T> identifier, UUID sender, U exchange) {
         assert exchange != null;
         this.dataWriteLock.lock();
         try {
@@ -137,13 +136,17 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
 
     /**
      * Publishes the given exchange object under the given identifier with the sender defined in the exchange object
-     * itself.
+     * itself. Will automatically set the sender of a command exchange to it's intended recipient,
      *
      * @param identifier the identifier under wich the exchange object will be published
      * @param exchange the exchange object
      */
-    public void publish(I identifier, AbstractExchange exchange) {
-        this.publish(identifier, exchange.getSender(), exchange);
+    public <T extends AbstractExchange, U extends T> void publish(Class<T> identifier, U exchange) {
+        if (CommandExchange.class.isAssignableFrom(identifier)) {
+            this.publish(identifier, ((CommandExchange) exchange).getReceiver(), exchange);
+        } else {
+            this.publish(identifier, exchange.getSender(), exchange);
+        }
     }
 
     /**
@@ -154,7 +157,8 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param sender the sender under which the exchange object will be published as an IHasState object
      * @param exchange the exchange object
      */
-    public void publish(I identifier, IProvidesIdentity sender, AbstractExchange exchange) {
+    public <T extends AbstractExchange, U extends T> void publish(Class<T> identifier, IProvidesIdentity sender,
+                                                                  U exchange) {
         this.publish(identifier, sender.getUUID(), exchange);
     }
 
@@ -165,15 +169,24 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param sender the given sender
      * @return a list of all subscriber to the specific given configuration
      */
-    private List<AbstractListenerWrapper<L>> getListeners(I identifier, UUID sender) {
+    private List<DataListenerWrapper> getListeners(Class<? extends AbstractExchange> identifier, UUID sender) {
 
         this.subscriberReadLock.lock();
         try {
-            List<AbstractListenerWrapper<L>> allListeners =
-                    new ObjectArrayList<>(this.manySubscribers.getOrDefault(identifier, ObjectLists.emptyList()));
-            if (this.singleSubscribers.containsKey(identifier)) {
-                allListeners.addAll(this.singleSubscribers.get(identifier).getOrDefault(sender, ObjectLists.emptyList()));
+            List<DataListenerWrapper> allListeners = new ArrayList<>();
+            Class<?> currentClass = identifier;
+
+            while (AbstractExchange.class.isAssignableFrom(currentClass)) {
+
+                if (this.singleSubscribers.containsKey(currentClass) && this.singleSubscribers.get(currentClass).containsKey(sender)) {
+                    allListeners.addAll(this.singleSubscribers.get(currentClass).get(sender));
+                }
+                if (this.manySubscribers.containsKey(currentClass)) {
+                    allListeners.addAll(this.manySubscribers.get(currentClass));
+                }
+                currentClass = currentClass.getSuperclass();
             }
+
             return allListeners;
         } finally {
             this.subscriberReadLock.unlock();
@@ -189,7 +202,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param sender the given sender
      * @param listener the given listener interface
      */
-    public void subscribe(I identifier, UUID sender, L listener) {
+    public void subscribe(Class<? extends AbstractExchange> identifier, UUID sender, IDataRegistryListener listener) {
         Objects.requireNonNull(identifier);
         Objects.requireNonNull(sender);
         Objects.requireNonNull(listener);
@@ -222,7 +235,15 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
         }
     }
 
-    public void subscribe(I identifier, IProvidesIdentity sender, L listener) {
+    /**
+     *  Helper-method to automatically extract the sender identity from {@link IProvidesIdentity} interface and then
+     *  delegate to the normal subscription process.
+     *
+     * @param identifier the given identifier
+     * @param sender the identitiy of the sender as an {@link IProvidesIdentity} interface
+     * @param listener the listener interface
+     */
+    public void subscribe(Class<? extends AbstractExchange> identifier, IProvidesIdentity sender, IDataRegistryListener listener) {
         this.subscribe(identifier, sender.getUUID(), listener);
     }
 
@@ -231,12 +252,19 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * also publish all currently existing exchanges to the given listener for the given identifier if their
      * timestamp matches the current time.
      *
+     * Will automatically reject subscribing to all command exchanges as these are  only intended for a specific recipient.
+     *
      * @param identifier the given identifier
      * @param listener the given listener interface
      */
-    public void subscribe(I identifier, L listener) {
+    public void subscribe(Class<? extends AbstractExchange> identifier, IDataRegistryListener listener) {
         Objects.requireNonNull(identifier);
         Objects.requireNonNull(listener);
+
+        if (CommandExchange.class.isAssignableFrom(identifier)) {
+            throw new IllegalArgumentException("it is not possible to subscribe to all command exchanges, please " +
+                    "provide a sender UUID");
+        }
 
         this.subscriberWriteLock.lock();
         try {
@@ -274,7 +302,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param listener the listener to unsubscribe
      * @return true if the unsubscription was successfull
      */
-    public boolean unSubscribe(I identifier, UUID sender, L listener) {
+    public boolean unSubscribe(Class<? extends AbstractExchange> identifier, UUID sender, IDataRegistryListener listener) {
         Objects.requireNonNull(identifier);
         Objects.requireNonNull(sender);
         Objects.requireNonNull(listener);
@@ -297,7 +325,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param listener the listener to unsubscribe
      * @return true if the unsubscription was successfull
      */
-    public boolean unSubscribe(I identifier, L listener) {
+    public boolean unSubscribe(Class<? extends AbstractExchange> identifier, IDataRegistryListener listener) {
         Objects.requireNonNull(identifier);
         Objects.requireNonNull(listener);
 
@@ -317,7 +345,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param sender the sender of the exchange to retrieve
      * @return the stored exchange matching the given configuration or null if it does not exist
      */
-    public AbstractExchange getData(I identifier, UUID sender) {
+    public AbstractExchange getData(Class<? extends AbstractExchange> identifier, UUID sender) {
 
         this.dataReadLock.lock();
         try {
@@ -338,7 +366,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      * @param identifier the identifier of all exchanges to be retrieved
      * @return a map of all the stored exchanges matching the given identifier mapped to their sender
      */
-    public Map<UUID, AbstractExchange> getData(I identifier) {
+    public Map<UUID, AbstractExchange> getData(Class<? extends AbstractExchange> identifier) {
 
         this.dataReadLock.lock();
         try {
@@ -361,7 +389,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      *
      * @return a set of all currently used exchange identifiers
      */
-    public Set<I> getDataTypes() {
+    public Set<Class<? extends AbstractExchange>> getDataTypes() {
         return this.data.keySet();
     }
 
@@ -372,7 +400,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
      */
     public boolean flushQueue() {
         while (!this.deferQueue.isEmpty()) {
-            Triple<I, UUID, AbstractExchange> queueItem = this.deferQueue.poll();
+            Triple<Class<? extends AbstractExchange>, UUID, AbstractExchange> queueItem = this.deferQueue.poll();
             this.getListeners(queueItem.getFirst(), queueItem.getSecond()).forEach(t -> t.onListen(
                     queueItem.getThird() instanceof IPromiseToBeImmutable ?
                             queueItem.getThird() :
@@ -394,9 +422,62 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
 
     /**
      * Changes the behaviour of this registry to first collect all published exchanges in a queue and only notify
-     * subscribers if {@link AbstractRegistry#flushQueue()} is called.
+     * subscribers if {@link Registry#flushQueue()} is called.
      */
     public void stopContinuousRegistryFlush() {
         this.deferCallbacks = true;
     }
+
+    /**
+     * Registry for the exchange of objects in the Com-layer of the organic architecture
+     */
+    public static class ComRegistry extends Registry {
+
+        /**
+         * Generates a registry with the given organic management entity and the flag if this registry supports a
+         * simulation or real-world use
+         *
+         * @param entity       the organic management entity
+         * @param isSimulation flag if this registry is run in a simulation
+         */
+        public ComRegistry(IOSH entity, boolean isSimulation) {
+            super(entity, isSimulation);
+        }
+    }
+
+    /**
+     * Registry for the exchange of objects in the EAL-layer of the organic architecture
+     */
+    public static class DriverRegistry extends Registry {
+
+        /**
+         * Generates a registry with the given organic management entity and the flag if this registry supports a
+         * simulation or real-world use
+         *
+         * @param entity       the organic management entity
+         * @param isSimulation flag if this registry is run in a simulation
+         */
+        public DriverRegistry(IOSH entity, boolean isSimulation) {
+            super(entity, isSimulation);
+        }
+    }
+
+    /**
+     * Registry for the exchange of objects in the OC-layer of the organic architecture
+     */
+    public static class OCRegistry extends Registry {
+
+        /**
+         * Generates a registry with the given organic management entity and the flag if this registry supports a
+         * simulation or real-world use
+         *
+         * @param entity       the organic management entity
+         * @param isSimulation flag if this registry is run in a simulation
+         */
+        public OCRegistry(IOSH entity, boolean isSimulation) {
+            super(entity, isSimulation);
+        }
+    }
 }
+
+

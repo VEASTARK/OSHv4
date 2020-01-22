@@ -4,7 +4,7 @@ import osh.OSHComponent;
 import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHOC;
 import osh.core.interfaces.IOSHStatus;
-import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.Registry.OCRegistry;
 
 /**
  * Global superclass for all O/C-components in the Organic Smart Home

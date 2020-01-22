@@ -14,9 +14,9 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.eal.hal.HALRealTimeDriver;
-import osh.registry.DataRegistry.ComRegistry;
-import osh.registry.DataRegistry.DriverRegistry;
-import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.Registry.ComRegistry;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.Registry.OCRegistry;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 
