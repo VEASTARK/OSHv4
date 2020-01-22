@@ -145,7 +145,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         }
 
         BaseloadPredictionExchange _ox = new BaseloadPredictionExchange(
-                this.getDeviceID(), this.getTimer().getUnixTime(),
+                this.getUUID(), this.getTimer().getUnixTime(),
                 predictions,
                 this.pastDaysPrediction, this.weightForOtherWeekday, this.weightForSameWeekday);
         this.notifyObserver(_ox);
@@ -167,7 +167,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
         BaseloadObserverExchange blox =
                 new BaseloadObserverExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime());
 
         blox.setPower(Commodity.ACTIVEPOWER, this.getPower(Commodity.ACTIVEPOWER));

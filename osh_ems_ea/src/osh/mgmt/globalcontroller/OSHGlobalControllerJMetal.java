@@ -34,7 +34,7 @@ import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
 
 import java.util.*;
@@ -44,7 +44,7 @@ import java.util.*;
  */
 public class OSHGlobalControllerJMetal
         extends GlobalController
-        implements IDataRegistryListener, IHasState {
+        implements IDataRegistryListener, IProvidesIdentity {
 
     UUID hotWaterTankID;
     private OSHGlobalObserver oshGlobalObserver;
@@ -441,7 +441,7 @@ public class OSHGlobalControllerJMetal
 
         for (int i = 0; i < min; i++) {
             InterdependentProblemPart<?, ?> part = problemParts.get(i);
-            LocalController lc = this.getLocalController(part.getDeviceID());
+            LocalController lc = this.getLocalController(part.getUUID());
             BitSet bits = solutions.get(i);
 
             if (lc != null) {
@@ -449,11 +449,11 @@ public class OSHGlobalControllerJMetal
                         EASolutionCommandExchange.class,
                         part.transformToFinalInterdependentPhenotype(
                                 null,
-                                part.getDeviceID(),
+                                part.getUUID(),
                                 this.getTimer().getUnixTime(),
                                 bits));
             } else if (/* lc == null && */ part.getBitCount() > 0) {
-                throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getDeviceID() + ")");
+                throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
             }
 //			this sends a prediction of the waterTemperatures to the waterTankObserver, so the waterTank can trigger a reschedule
 //			when the actual temperatures are too different to the prediction
@@ -462,7 +462,7 @@ public class OSHGlobalControllerJMetal
                         EAPredictionCommandExchange.class,
                         part.transformToFinalInterdependentPrediction(
                                 null,
-                                part.getDeviceID(),
+                                part.getUUID(),
                                 this.getTimer().getUnixTime(),
                                 bits));
             }

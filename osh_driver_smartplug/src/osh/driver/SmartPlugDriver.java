@@ -15,7 +15,6 @@ import osh.en50523.EN50523DeviceState;
 import osh.hal.exchange.SmartPlugObserverExchange;
 import osh.hal.interfaces.ISwitchRequest;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.registry.interfaces.IHasState;
 
 import java.util.*;
 
@@ -29,7 +28,7 @@ import java.util.*;
  *
  * @author Kaibin Bao, Ingo Mauser
  */
-public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IDataRegistryListener {
+public class SmartPlugDriver extends HALDeviceDriver implements IDataRegistryListener {
 
     private DeviceMetaDriverDetails deviceMetaDetails;
     private List<UUID> meterDataSources;
@@ -64,13 +63,13 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
         super.onSystemIsUp();
         this.initSmartPlug(this.getDriverConfig());
 
-        this.getDriverRegistry().subscribe(ElectricPowerDriverDetails.class, this.getDeviceID(),this);
-        this.getDriverRegistry().subscribe(SwitchDriverDetails.class, this.getDeviceID(), this);
+        this.getDriverRegistry().subscribe(ElectricPowerDriverDetails.class, this,this);
+        this.getDriverRegistry().subscribe(SwitchDriverDetails.class, this, this);
     }
 
     private void initSmartPlug(OSHParameterCollection config) throws OSHException {
         // prepare device details
-        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getDeviceID(), this.getTimer().getUnixTime());
+        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
         this.deviceMetaDetails.setName(config.getParameter("name"));
         this.deviceMetaDetails.setLocation(config.getParameter("location"));
         if (this.getDeviceType() != null) {
@@ -94,8 +93,8 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
         else
             this.meterDataSources = Collections.emptyList();
 
-        if (this.meterDataSources.contains(this.getDeviceID())) {
-            this.getGlobalLogger().logWarning("metersources can not contain own UUID! smart plug uuid: " + this.getDeviceID());
+        if (this.meterDataSources.contains(this.getUUID())) {
+            this.getGlobalLogger().logWarning("metersources can not contain own UUID! smart plug uuid: " + this.getUUID());
             this.updateElectricPowerDriverState = false;
         }
 
@@ -112,7 +111,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
         // set configuration details for meter and switch sources
         this.setDataSourcesUsed(this.meterDataSources);
         this.setDataSourcesUsed(this.switchDataSources);
-        this.setDataSourcesConfigured(Collections.singleton(this.getDeviceID()));
+        this.setDataSourcesConfigured(Collections.singleton(this.getUUID()));
     }
 
     @Override
@@ -127,7 +126,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
 
     public SmartPlugObserverExchange updateHALExchange() throws OSHException {
         SmartPlugObserverExchange _ox
-                = new SmartPlugObserverExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+                = new SmartPlugObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
 
         // Set DeviceMetaDetails
         _ox.setDeviceMetaDetails(this.deviceMetaDetails);
@@ -144,7 +143,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
                 if (p == null) {
                     // unable to fetch state
                     if (this.incompleteCounter == 0) {
-                        this.getGlobalLogger().logWarning("incomplete data source(s) (device: " + this.getDeviceID() + " meterDataSource: " + sourceUUID + ")");
+                        this.getGlobalLogger().logWarning("incomplete data source(s) (device: " + this.getUUID() + " meterDataSource: " + sourceUUID + ")");
                     }
                     this.incompleteCounter++;
                     return null;
@@ -176,7 +175,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
                 if (s == null) {
                     // unable to fetch state
                     if (this.incompleteCounter == 0) {
-                        this.getGlobalLogger().logWarning("incomplete data source(s) (device: " + this.getDeviceID() + " switchDataSources: " + sourceUUID + ")");
+                        this.getGlobalLogger().logWarning("incomplete data source(s) (device: " + this.getUUID() + " switchDataSources: " + sourceUUID + ")");
                     }
                     this.incompleteCounter++;
                     return null;
@@ -206,7 +205,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
 
         //all data is available, reset incomplete counter
         if (this.incompleteCounter > 0) {
-            this.getGlobalLogger().logWarning("data source(s) for device: " + this.getDeviceID() + " are available again after " + this.incompleteCounter);
+            this.getGlobalLogger().logWarning("data source(s) for device: " + this.getUUID() + " are available again after " + this.incompleteCounter);
         }
         this.incompleteCounter = 0;
 
@@ -214,7 +213,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
 
         // generate appliance data
         if (this.generateApplianceData) {
-            GenericApplianceDriverDetails appDetails = new GenericApplianceDriverDetails(this.getDeviceID(), _ox.getTimestamp());
+            GenericApplianceDriverDetails appDetails = new GenericApplianceDriverDetails(this.getUUID(), _ox.getTimestamp());
             if (_ox.isOn()) {
                 if (_ox.getActivePower() > 5)
                     appDetails.setState(EN50523DeviceState.RUNNING);
@@ -241,10 +240,5 @@ public class SmartPlugDriver extends HALDeviceDriver implements IHasState, IData
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
     }
 }

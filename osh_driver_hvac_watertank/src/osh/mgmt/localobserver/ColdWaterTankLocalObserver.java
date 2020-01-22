@@ -9,16 +9,12 @@ import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.ColdWaterTankObserverExchange;
 import osh.mgmt.ipp.ColdWaterTankNonControllableIPP;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class ColdWaterTankLocalObserver
-        extends WaterTankLocalObserver
-        implements IHasState {
+        extends WaterTankLocalObserver {
 
     private static final long NEW_IPP_AFTER = 3600; // at least send new IPP every hour
     private long lastTimeIPPSent = Long.MIN_VALUE;
@@ -57,7 +53,7 @@ public class ColdWaterTankLocalObserver
         if (now > this.lastTimeIPPSent + NEW_IPP_AFTER) {
             ColdWaterTankNonControllableIPP ex;
             ex = new ColdWaterTankNonControllableIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     this.currentTemperature,
@@ -86,7 +82,7 @@ public class ColdWaterTankLocalObserver
             if (Math.abs(this.temperatureInLastIPP - this.currentTemperature) >= 0.1) {
                 ColdWaterTankNonControllableIPP ex;
                 ex = new ColdWaterTankNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         this.getTimer().getUnixTime(),
                         this.currentTemperature,
@@ -102,14 +98,14 @@ public class ColdWaterTankLocalObserver
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,
                     ox.getColdWaterDemand(),
                     ox.getColdWaterSupply(),
-                    this.getDeviceID());
+                    this.getUUID());
             this.getOCRegistry().publish(
                     WaterStorageOCSX.class,
                     this,
@@ -120,10 +116,4 @@ public class ColdWaterTankLocalObserver
             this.compressionValue = _stat.getCompressionValue();
         }
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

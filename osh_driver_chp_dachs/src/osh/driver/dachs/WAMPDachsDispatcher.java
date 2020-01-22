@@ -61,7 +61,7 @@ public class WAMPDachsDispatcher {
         this.subscribeForWampUpdates();
 
         this.dachsDetails = new DachsDriverDetails(
-                dachsDriver.getDeviceID(),
+                dachsDriver.getUUID(),
                 dachsDriver.getTimer().getUnixTime());
     }
 

@@ -16,7 +16,6 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
 import osh.mgmt.mox.DachsChpMOX;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
@@ -24,8 +23,7 @@ import java.util.UUID;
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class DachsChpLocalObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
     // TODO move into config
     // data from WaterTank
@@ -112,7 +110,7 @@ public class DachsChpLocalObserver
 
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     DeviceTypes.CHPPLANT);
 
@@ -186,11 +184,4 @@ public class DachsChpLocalObserver
                 this.compressionType,
                 this.compressionValue);
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

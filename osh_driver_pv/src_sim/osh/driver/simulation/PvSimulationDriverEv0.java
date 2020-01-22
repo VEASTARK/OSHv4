@@ -3,7 +3,6 @@ package osh.driver.simulation;
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.pv.PvProfile;
 import osh.eal.hal.exchange.HALControllerExchange;
@@ -75,20 +74,6 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
         }
 
-        try {
-            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter("compressionType"));
-        } catch (Exception e) {
-            this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
-            this.getGlobalLogger().logWarning("Can't get compressionType, using the default value: " + this.compressionType);
-        }
-
-        try {
-            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter("compressionValue"));
-        } catch (Exception e) {
-            this.compressionValue = 100;
-            this.getGlobalLogger().logWarning("Can't get compressionValue, using the default value: " + this.compressionValue);
-        }
-
         this.profile = new PvProfile(profileSourceName, this.nominalPower);
         this.reactivePowerMax =
                 (int) ComplexPowerUtil.convertComplexToReactivePower(
@@ -155,7 +140,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             predictions.add(prof);
         }
 
-        PvPredictionExchange _ox = new PvPredictionExchange(this.getDeviceID(), this.getTimer().getUnixTime(), predictions, this.pastDaysPrediction);
+        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimer().getUnixTime(), predictions, this.pastDaysPrediction);
         this.notifyObserver(_ox);
     }
 
@@ -187,7 +172,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             }
         }
 
-        PvObserverExchange _ox = new PvObserverExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
         _ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
         _ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));
         this.notifyObserver(_ox);

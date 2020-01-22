@@ -11,6 +11,7 @@ import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.oc.IOCCALDataPublisher;
 import osh.core.oc.IOCCALDataSubscriber;
 import osh.registry.DataRegistry.OCRegistry;
+import osh.registry.interfaces.IProvidesIdentity;
 
 import java.util.UUID;
 
@@ -23,7 +24,8 @@ public abstract class ComManager
         implements IRealTimeSubscriber,
         ILifeCycleListener,
         IComDataSubscriber,
-        IOCCALDataPublisher {
+        IOCCALDataPublisher,
+        IProvidesIdentity {
 
     private CALComDriver comDriver;
     private final UUID uuid;
@@ -66,6 +68,7 @@ public abstract class ComManager
         return this.comDriver;
     }
 
+    @Override
     public UUID getUUID() {
         return this.uuid;
     }
@@ -127,15 +130,6 @@ public abstract class ComManager
     @Override
     public void onNextTimePeriod() throws OSHException {
         //...in case of use please override
-    }
-
-    /**
-     * please avoid usage
-     *
-     * @return
-     */
-    public UUID getGlobalOCUnitUUID() {
-        return this.getOSH().getGlobalObserver().getAssignedOCUnit().getUnitID();
     }
 
     protected OCRegistry getOCRegistry() {

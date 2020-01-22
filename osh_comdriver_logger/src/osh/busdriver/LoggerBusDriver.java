@@ -94,7 +94,7 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IDataRegis
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getDriverRegistry().subscribe(LogThis.class, this.getDeviceID(),this);
+        this.getDriverRegistry().subscribe(LogThis.class, this.getUUID(),this);
     }
 
     /**

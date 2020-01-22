@@ -10,14 +10,13 @@ import osh.datatypes.registry.oc.details.DeviceMetaOCDetails;
 import osh.datatypes.registry.oc.details.SwitchOCDetails;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.hal.exchange.SmartPlugObserverExchange;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
  */
-public class SmartPlugLocalObserver extends LocalObserver implements IHasState {
+public class SmartPlugLocalObserver extends LocalObserver {
 
 
     /**
@@ -65,10 +64,4 @@ public class SmartPlugLocalObserver extends LocalObserver implements IHasState {
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
         return null;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

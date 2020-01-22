@@ -146,7 +146,7 @@ public class GLTDachsInfoRequestThread implements Runnable {
 //				globalLogger.logDebug("Getting new DACHS data");
 
                 DachsDriverDetails dachsDetails = new DachsDriverDetails(
-                        this.dachsDriver.getDeviceID(),
+                        this.dachsDriver.getUUID(),
                         this.dachsDriver.getTimer().getUnixTime());
 
                 // get information from DACHS and save into dachsDetails

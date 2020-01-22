@@ -97,19 +97,19 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         super.onSystemIsUp();
 
         StaticCompressionExchange _stat =
-                new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+                new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
         _stat.setCompressionType(this.compressionType);
         _stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(_stat);
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimer().getUnixTime());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
 
         HotWaterTankObserverExchange observerExchange =
                 new HotWaterTankObserverExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
@@ -130,7 +130,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
 
             HotWaterTankObserverExchange observerExchange =
                     new HotWaterTankObserverExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getTimer().getUnixTime(),
                             this.waterTank.getCurrentWaterTemperature(),
                             this.waterTank.getTankCapacity(),
@@ -143,13 +143,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
     }
 
     @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-    @Override
     protected void onControllerRequest(HALControllerExchange controllerRequest) {
         //NOTHING
     }
-
 }

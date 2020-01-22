@@ -11,16 +11,12 @@ import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.hal.exchange.BatteryStorageOX;
 import osh.mgmt.mox.BatteryStorageMOX;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
 
 /**
  * @author Jan Mueller, Matthias Maerz
  */
 public class InverterBatteryStorageObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
     private double batteryStateOfCharge;
     private double batteryStateOfHealth;
@@ -86,7 +82,7 @@ public class InverterBatteryStorageObserver
 
         // build SX
         CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 DeviceTypes.BATTERYSTORAGE);
 
@@ -99,13 +95,13 @@ public class InverterBatteryStorageObserver
 
         // save current state in OCRegistry (for e.g. GUI)
         BatteryStorageOCSX sx = new BatteryStorageOCSX(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 ox.getBatteryStateOfCharge(),
 //				ox.getBatteryStateOfHealth(),
                 ox.getBatteryMinChargingState(),
                 ox.getBatteryMaxChargingState(),
-                this.getDeviceID());
+                this.getUUID());
         this.getOCRegistry().publish(
                 BatteryStorageOCSX.class,
                 this,
@@ -115,7 +111,7 @@ public class InverterBatteryStorageObserver
     @Override
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
         return new BatteryStorageMOX(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 this.activePower,
                 this.reactivePower,
@@ -138,11 +134,4 @@ public class InverterBatteryStorageObserver
                 this.compressionType,
                 this.compressionValue);
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

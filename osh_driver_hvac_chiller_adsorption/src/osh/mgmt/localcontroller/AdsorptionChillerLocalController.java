@@ -63,7 +63,7 @@ public class AdsorptionChillerLocalController
         super.onSystemIsUp();
 
         this.getTimer().registerComponent(this, 1);
-        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getDeviceID(), this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AdsorptionChillerLocalController
 
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -119,7 +119,7 @@ public class AdsorptionChillerLocalController
 
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -153,7 +153,7 @@ public class AdsorptionChillerLocalController
 
             //TURN ON Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     false,
                     true,
@@ -189,7 +189,7 @@ public class AdsorptionChillerLocalController
 
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         true,
@@ -219,7 +219,7 @@ public class AdsorptionChillerLocalController
                     || (this.startTimes.isEmpty() && this.currentActivation == null)
                     || (this.currentActivation != null && this.currentActivation.startTime + this.currentActivation.duration < now)) {
                 cx = new ChillerControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         false,
@@ -258,7 +258,7 @@ public class AdsorptionChillerLocalController
                     this.currentActivation = this.startTimes.get(0);
                     this.startTimes.remove(0);
                     cx = new ChillerControllerExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getTimer().getUnixTime(),
                             false,
                             true,
@@ -318,7 +318,7 @@ public class AdsorptionChillerLocalController
         ChillerIPP ex;
 
         ex = new ChillerIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 now,
                 toBeScheduled,
@@ -328,7 +328,7 @@ public class AdsorptionChillerLocalController
                 this.compressionValue);
 
         this.getOCRegistry().publish(
-                InterdependentProblemPart.class, this.getDeviceID(), ex);
+                InterdependentProblemPart.class, this.getUUID(), ex);
         this.lastTimeIppSent = this.getTimer().getUnixTime();
         if (toBeScheduled) {
             this.lastTimeReschedulingTriggered = this.getTimer().getUnixTime();

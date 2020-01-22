@@ -17,7 +17,6 @@ import osh.en50523.EN50523DeviceState;
 import osh.en50523.EN50523DeviceStateRemoteControl;
 import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
-import osh.registry.interfaces.IHasState;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
 import osh.utils.time.TimeConversion;
@@ -36,8 +35,7 @@ import java.util.*;
  * @author Ingo Mauser
  */
 public class GenericFutureApplianceSimulationDriver
-        extends ApplianceSimulationDriver
-        implements IHasState {
+        extends ApplianceSimulationDriver {
 
 
     public static final int[] DEFAULT_CORRECTION_IDS = new int[0];
@@ -241,7 +239,7 @@ public class GenericFutureApplianceSimulationDriver
         // notify observer about current power states
         FutureApplianceObserverExchange observerObj
                 = new FutureApplianceObserverExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.getPower(Commodity.ACTIVEPOWER), // IHALElectricPowerDetails
                 this.getPower(Commodity.REACTIVEPOWER), // IHALElectricPowerDetails
@@ -496,7 +494,7 @@ public class GenericFutureApplianceSimulationDriver
         this.getGlobalLogger().logDebug(
                 this.getDeviceType()
                         + " : performAction: change from " + this.currentEn50523State
-                        + " to " + newState + " (" + this.getDeviceID() + ")");
+                        + " to " + newState + " (" + this.getUUID() + ")");
 
         this.currentEn50523State = newState;
     }
@@ -672,7 +670,7 @@ public class GenericFutureApplianceSimulationDriver
             this.getGlobalLogger().logDebug(
                     this.getDeviceType()
                             + " performAction: change from " + this.currentEn50523State.toString()
-                            + " to OFF (" + this.getDeviceID() + ")");
+                            + " to OFF (" + this.getUUID() + ")");
             this.turnOff();
         }
     }
@@ -796,7 +794,7 @@ public class GenericFutureApplianceSimulationDriver
                                 runsToday = i;
                                 selectedStartTimeAndDofs = Arrays.copyOf(selectedStartTimeAndDofs, runsToday);
 
-                                this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Cannot possibly schedule for last day");
+                                this.getGlobalLogger().logError("UUID=" + this.getUUID() + " DeviceType=" + this.getDeviceType() + " Cannot possibly schedule for last day");
                                 break;
                             }
 
@@ -810,7 +808,7 @@ public class GenericFutureApplianceSimulationDriver
 
                     } else {
 
-                        this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Unable to schedule a run, correcting now");
+                        this.getGlobalLogger().logError("UUID=" + this.getUUID() + " DeviceType=" + this.getDeviceType() + " Unable to schedule a run, correcting now");
                         errorCount = 0;
                         //move last selected run to tomorrow
                         this.runCorrection++;
@@ -822,7 +820,7 @@ public class GenericFutureApplianceSimulationDriver
                         selectedProfileLengths = Arrays.copyOf(selectedProfileLengths, runsToday);
                         //no way to schedule even 1 run
                         if (runsToday == 0) {
-                            this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Cannot even schedule a single run for this day");
+                            this.getGlobalLogger().logError("UUID=" + this.getUUID() + " DeviceType=" + this.getDeviceType() + " Cannot even schedule a single run for this day");
                             break;
                         }
                     }
@@ -837,7 +835,7 @@ public class GenericFutureApplianceSimulationDriver
                 long tDof = selectedStartTimeAndDofs[i][1];
 
                 // Log it to console for debugging...
-                this.getGlobalLogger().logDebug("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " Start=" + startTime + " DoF=" + tDof);
+                this.getGlobalLogger().logDebug("UUID=" + this.getUUID() + " DeviceType=" + this.getDeviceType() + " Start=" + startTime + " DoF=" + tDof);
                 this.generateAndSetActions(startTime, generatedConfigurationIDs[i], tDof);
             }
         }
@@ -902,7 +900,7 @@ public class GenericFutureApplianceSimulationDriver
 
         SubjectAction action = new SubjectAction();
         action.setTick(startTime);
-        action.setDeviceID(this.getDeviceID().toString());
+        action.setDeviceID(this.getUUID().toString());
         action.setNextState(true);
         action.setActionType(ActionType.I_DEVICE_ACTION);
 
@@ -922,7 +920,7 @@ public class GenericFutureApplianceSimulationDriver
         //create now the new action
         SubjectAction dofAction = new SubjectAction();
         dofAction.setTick(startTime - 1); // Do 1 sec in advance!
-        dofAction.setDeviceID(this.getDeviceID().toString());
+        dofAction.setDeviceID(this.getUUID().toString());
         dofAction.setActionType(ActionType.USER_ACTION);
         dofAction.setNextState(false);
         PerformAction dofAction2Perform = new PerformAction();
@@ -1008,7 +1006,7 @@ public class GenericFutureApplianceSimulationDriver
 
                 maxBlock = Math.max(maxBlock, a.getTick() + maxDur + tDof + 100);
             }
-            this.getGlobalLogger().logError("UUID=" + this.getDeviceID() + " DeviceType=" + this.getDeviceType() + " SubjectActions still remaining at the start of the day");
+            this.getGlobalLogger().logError("UUID=" + this.getUUID() + " DeviceType=" + this.getDeviceType() + " SubjectActions still remaining at the start of the day");
         }
 
         // check if overlapping with scheduled/running action from the other day (day before)
@@ -1073,10 +1071,4 @@ public class GenericFutureApplianceSimulationDriver
 
 
     // ### GETTER ###
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

@@ -21,7 +21,7 @@ import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.*;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.uuid.UUIDLists;
 
 import java.util.*;
@@ -33,7 +33,7 @@ import java.util.Map.Entry;
  */
 public class OSHGlobalObserver
         extends GlobalObserver
-        implements IDataRegistryListener, IHasState {
+        implements IDataRegistryListener, IProvidesIdentity {
 
     List<UUID> totalPowerMeter;
     private final Map<UUID, InterdependentProblemPart<?, ?>> iProblempart;
@@ -118,12 +118,12 @@ public class OSHGlobalObserver
         for (InterdependentProblemPart<?, ?> p : problemParts) {
             String type = null;
             try {
-                LocalObserver lo = this.getLocalObserver(p.getDeviceID());
+                LocalObserver lo = this.getLocalObserver(p.getUUID());
                 LocalOCUnit ocUnit = lo.getAssignedOCUnit();
                 type = ocUnit.getDeviceType().toString() + "(" + ocUnit.getDeviceClassification().toString() + ")";
             } catch (NullPointerException ignored) {
             }
-            DeviceTableEntry e = new DeviceTableEntry(i, p.getDeviceID(), type, p.getBitCount(), "[" + p.getTimestamp() + "] " + p.isToBeScheduled(), p.problemToString());
+            DeviceTableEntry e = new DeviceTableEntry(i, p.getUUID(), type, p.getBitCount(), "[" + p.getTimestamp() + "] " + p.isToBeScheduled(), p.problemToString());
             entries.add(e);
             i++;
         }
@@ -456,7 +456,7 @@ public class OSHGlobalObserver
 
         @Override
         public int compare(InterdependentProblemPart<?, ?> o1, InterdependentProblemPart<?, ?> o2) {
-            return o1.getDeviceID().compareTo(o2.getDeviceID());
+            return o1.getUUID().compareTo(o2.getUUID());
         }
 
     }

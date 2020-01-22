@@ -64,7 +64,7 @@ public class SpaceHeatingLocalObserver
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     DeviceTypes.SPACEHEATING);
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, this.hotWaterPower);

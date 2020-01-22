@@ -8,6 +8,7 @@ import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHCom;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.registry.DataRegistry.ComRegistry;
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.uuid.UUIDLists;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser, Sebastian Kramer
  */
-public class CALDriver extends OSHComponent implements IRealTimeSubscriber, ILifeCycleListener {
+public class CALDriver extends OSHComponent implements IRealTimeSubscriber, ILifeCycleListener, IProvidesIdentity {
 
     private final UUID deviceID;
     private OSHParameterCollection comConfig;
@@ -47,12 +48,8 @@ public class CALDriver extends OSHComponent implements IRealTimeSubscriber, ILif
         return (IOSHCom) super.getOSH();
     }
 
-    /**
-     * The UUID of the device.
-     *
-     * @return Device-UUID
-     */
-    public UUID getDeviceID() {
+    @Override
+    public UUID getUUID() {
         return this.deviceID;
     }
 

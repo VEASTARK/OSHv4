@@ -18,7 +18,7 @@ import osh.registry.DataRegistry.ComRegistry;
 import osh.registry.DataRegistry.DriverRegistry;
 import osh.registry.DataRegistry.OCRegistry;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IProvidesIdentity;
 
 import java.time.ZoneId;
 import java.util.UUID;
@@ -89,7 +89,7 @@ public final class DataTester {
     }
 
 
-    public static class driverCom extends OSHComponent implements IDataRegistryListener, IHasState {
+    public static class driverCom extends OSHComponent implements IDataRegistryListener, IProvidesIdentity {
 
         final UUID uuid = UUID.randomUUID();
 
@@ -127,7 +127,7 @@ public final class DataTester {
 
     }
 
-    public static class ocCom extends OSHComponent implements IDataRegistryListener, IHasState {
+    public static class ocCom extends OSHComponent implements IDataRegistryListener, IProvidesIdentity {
 
         final UUID uuid = UUID.randomUUID();
 

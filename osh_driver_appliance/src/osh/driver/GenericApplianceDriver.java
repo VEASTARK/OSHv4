@@ -208,7 +208,7 @@ public abstract class GenericApplianceDriver
         // notify observer about current power states
         FutureApplianceObserverExchange observerObj
                 = new FutureApplianceObserverExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 (this.getPower(Commodity.ACTIVEPOWER) != null ? this.getPower(Commodity.ACTIVEPOWER) : 0),            // IHALElectricPowerDetails
                 (this.getPower(Commodity.REACTIVEPOWER) != null ? this.getPower(Commodity.REACTIVEPOWER) : 0),            // IHALElectricPowerDetails
@@ -711,7 +711,7 @@ public abstract class GenericApplianceDriver
 
 
     private GenericApplianceDriverDetails createApplianceDetails(long now) {
-        GenericApplianceDriverDetails details = new GenericApplianceDriverDetails(this.getDeviceID(), now);
+        GenericApplianceDriverDetails details = new GenericApplianceDriverDetails(this.getUUID(), now);
         details.setState(this.currentEn50523State);
         details.setStateTextDE(this.currentEn50523State.getDescriptionDE());
         return details;
@@ -725,7 +725,7 @@ public abstract class GenericApplianceDriver
 
 
     private GenericApplianceProgramDriverDetails createGenericApplianceProgramDriverDetails(long now) {
-        GenericApplianceProgramDriverDetails details = new GenericApplianceProgramDriverDetails(this.getDeviceID(), now);
+        GenericApplianceProgramDriverDetails details = new GenericApplianceProgramDriverDetails(this.getUUID(), now);
 
         if (this.selectedConfigurationID == null
                 || this.selectedConfigurationID == -1) {

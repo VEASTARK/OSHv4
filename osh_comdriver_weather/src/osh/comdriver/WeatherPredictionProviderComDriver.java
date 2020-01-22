@@ -9,17 +9,14 @@ import osh.comdriver.weather.WeatherPredictionRequestThread;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.EventExchange;
 import osh.eal.hal.exceptions.HALException;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Jan Mueller
  */
-public class WeatherPredictionProviderComDriver extends CALComDriver implements IEventTypeReceiver, IHasState {
+public class WeatherPredictionProviderComDriver extends CALComDriver {
 
     // Current weather
     // http://api.openweathermap.org/data/2.5/weather?id=ID&APPID=APPID
@@ -115,17 +112,6 @@ public class WeatherPredictionProviderComDriver extends CALComDriver implements 
 
         this.reqPredictionRunnable.shutdown();
         this.reqCurrentRunnable.shutdown();
-    }
-
-
-    @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
-        //NOTHING
-    }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
     }
 
     @Override

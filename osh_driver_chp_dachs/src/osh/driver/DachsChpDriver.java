@@ -4,7 +4,7 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.commands.ChpElectricityRequest;
 import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.chp.ChpOperationMode;
@@ -12,7 +12,6 @@ import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
-import osh.registry.interfaces.IHasState;
 import osh.utils.physics.ComplexPowerUtil;
 
 import java.util.UUID;
@@ -20,7 +19,8 @@ import java.util.UUID;
 /**
  * @author Kaibin Bao, Ingo Mauser, Jan Mueller
  */
-public abstract class DachsChpDriver extends ChpDriver implements IHasState {
+public abstract class DachsChpDriver extends ChpDriver
+{
 
     private String dachsURL;
 
@@ -235,7 +235,7 @@ public abstract class DachsChpDriver extends ChpDriver implements IHasState {
         super.onSystemIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -257,7 +257,7 @@ public abstract class DachsChpDriver extends ChpDriver implements IHasState {
 
         this.notifyObserver(observerExchange);
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
@@ -319,11 +319,10 @@ public abstract class DachsChpDriver extends ChpDriver implements IHasState {
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
 
-        if (event instanceof ChpElectricityRequest) {
-            ChpElectricityRequest ceq = (ChpElectricityRequest) event;
+        if (exchange instanceof ChpElectricityRequest) {
+            ChpElectricityRequest ceq = (ChpElectricityRequest) exchange;
 
             this.getGlobalLogger().logDebug("onQueueEventReceived(ChpElectricityRequest)");
             this.getGlobalLogger().logDebug("sendPowerRequestToChp(" + ceq.isOn() + ")");

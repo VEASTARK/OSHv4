@@ -17,7 +17,6 @@ import osh.mgmt.localcontroller.ipp.FutureAppliancesStaticIPP;
 import osh.mgmt.localcontroller.ipp.GenericApplianceSolution;
 import osh.mgmt.mox.GenericApplianceMOX;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
@@ -26,7 +25,7 @@ import java.util.UUID;
  */
 public class FutureApplianceLocalController
         extends LocalController
-        implements IDataRegistryListener, IHasState {
+        implements IDataRegistryListener {
 
     /**
      * State of the device as EN 50523 state
@@ -83,7 +82,7 @@ public class FutureApplianceLocalController
         // register to be called every time step
         this.getTimer().registerComponent(this, 1);
         // register for solutions of the optimization
-        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getDeviceID(),this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(),this);
 
         this.lastTimeSchedulingCaused = this.getTimer().getUnixTime() - 61;
     }
@@ -239,7 +238,7 @@ public class FutureApplianceLocalController
 //			if (toBeScheduled) {
             // IPP for OFF or ENDPROGAMMED
             ipp = new FutureAppliancesStaticIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     toBeScheduled,
@@ -342,7 +341,7 @@ public class FutureApplianceLocalController
 
             // construct EAPart
             ipp = new FutureApplianceIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     FutureApplianceIPP.calculateBitCount(
@@ -386,7 +385,7 @@ public class FutureApplianceLocalController
                         (EASolutionCommandExchange<GenericApplianceSolution>) exchange;
 
                 // must be for somebody else... or solution is empty...
-                if (!solution.getReceiver().equals(this.getDeviceID())
+                if (!solution.getReceiver().equals(this.getUUID())
                         || solution.getPhenotype() == null) {
                     return;
                 }
@@ -414,7 +413,7 @@ public class FutureApplianceLocalController
                 //should never be NULL...
                 if (this.acp != null) {
                     FutureApplianceControllerExchange cx = new FutureApplianceControllerExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             now, //TODo: maybe change to cx.getTimeStamp() (should be irrelevant, because of absolute times)
                             this.acp.getAcpID(),
                             selectedProfileId,
@@ -461,11 +460,4 @@ public class FutureApplianceLocalController
                 this.updateIPP(true);
         }
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

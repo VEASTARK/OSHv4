@@ -86,7 +86,7 @@ public class VDI6002DomesticHotWaterLocalObserver
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     DeviceTypes.DOMESTICHOTWATER);
             cpse.addPowerState(Commodity.DOMESTICHOTWATERPOWER, this.hotWaterPower);

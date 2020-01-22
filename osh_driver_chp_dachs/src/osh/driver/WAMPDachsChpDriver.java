@@ -7,7 +7,6 @@ import osh.datatypes.registry.details.common.TemperatureDetails;
 import osh.datatypes.registry.driver.details.chp.ChpDriverDetails;
 import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.dachs.WAMPDachsDispatcher;
-import osh.registry.interfaces.IHasState;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -17,7 +16,7 @@ import java.util.UUID;
  */
 public class WAMPDachsChpDriver
         extends DachsChpDriver
-        implements IHasState, Runnable {
+        implements Runnable {
 
     protected WAMPDachsDispatcher dachsInformationWAMPDispatcher;
 
@@ -97,7 +96,7 @@ public class WAMPDachsChpDriver
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getDeviceID(), this.getTimer().getUnixTime());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());
@@ -168,5 +167,4 @@ public class WAMPDachsChpDriver
         this.getDriverRegistry().publish(ChpDriverDetails.class, this, this.chpDriverDetails);
         this.processChpDetailsAndNotify(this.chpDriverDetails);
     }
-
 }

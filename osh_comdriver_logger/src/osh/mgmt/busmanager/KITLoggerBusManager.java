@@ -3,7 +3,6 @@ package osh.mgmt.busmanager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.registry.AbstractExchange;
-import osh.datatypes.registry.EventExchange;
 
 import java.util.UUID;
 
@@ -37,9 +36,7 @@ public class KITLoggerBusManager extends LoggerBusManager {
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) throws OSHException {
-        super.onQueueEventTypeReceived(type, event);
+    public <T extends AbstractExchange> void onExchange(T exchange) {
 
         AbstractExchange toSend = null;
 

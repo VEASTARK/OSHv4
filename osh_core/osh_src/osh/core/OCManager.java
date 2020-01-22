@@ -231,7 +231,7 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
 
                 LocalOCUnit _localOCUnit = new LocalOCUnit(
                         this.getOSH(),
-                        deviceDriver.getDeviceID(),
+                        deviceDriver.getUUID(),
                         localObserver,
                         localController);
 

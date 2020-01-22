@@ -75,7 +75,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
         this.lastSignalSent = now;
 
         PlsComExchange ex = new PlsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.powerLimitSignals);
         this.notifyComManager(ex);
@@ -97,7 +97,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
             this.lastSignalSent = now;
 
             PlsComExchange ex = new PlsComExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     this.powerLimitSignals);
             this.notifyComManager(ex);

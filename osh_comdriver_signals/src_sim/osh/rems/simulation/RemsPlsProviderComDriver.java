@@ -101,7 +101,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
 
         long now = this.getTimer().getUnixTime();
         this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
-        PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, this.remsPowerLimitSignals);
+        PlsComExchange ex = new PlsComExchange(this.getUUID(), now, this.remsPowerLimitSignals);
         this.notifyComManager(ex);
 
         this.lastTimeSignalSent = now;
@@ -133,7 +133,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
         if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
             // PLS
             this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
-            PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, this.remsPowerLimitSignals);
+            PlsComExchange ex = new PlsComExchange(this.getUUID(), now, this.remsPowerLimitSignals);
             this.notifyComManager(ex);
 
             this.lastTimeSignalSent = now;
@@ -146,7 +146,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
                 this.remsPowerLimitSignals.put(pls.getKey(), pls.getValue());
             }
 
-            PlsComExchange ex = new PlsComExchange(this.getDeviceID(), now, this.remsPowerLimitSignals);
+            PlsComExchange ex = new PlsComExchange(this.getUUID(), now, this.remsPowerLimitSignals);
             this.notifyComManager(ex);
 
             this.newSignalReceived = false;

@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import osh.OSHComponent;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.AbstractExchange;
-import osh.registry.interfaces.IHasState;
 import osh.registry.interfaces.IPromiseToBeImmutable;
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.Triple;
 
 import java.util.*;
@@ -147,14 +147,14 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
     }
 
     /**
-     * Publishes the given exchange object under the given identifier with the given sender as an {@link IHasState}
+     * Publishes the given exchange object under the given identifier with the given sender as an {@link IProvidesIdentity}
      * object
      *
      * @param identifier the identifier under wich the exchange object will be published
      * @param sender the sender under which the exchange object will be published as an IHasState object
      * @param exchange the exchange object
      */
-    public void publish(I identifier, IHasState sender, AbstractExchange exchange) {
+    public void publish(I identifier, IProvidesIdentity sender, AbstractExchange exchange) {
         this.publish(identifier, sender.getUUID(), exchange);
     }
 
@@ -222,7 +222,7 @@ public abstract class AbstractRegistry<I, L> extends OSHComponent {
         }
     }
 
-    public void subscribe(I identifier, IHasState sender, L listener) {
+    public void subscribe(I identifier, IProvidesIdentity sender, L listener) {
         this.subscribe(identifier, sender.getUUID(), listener);
     }
 

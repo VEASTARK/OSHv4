@@ -122,7 +122,7 @@ public class FutureApplianceLocalObserver
 
         this.getOCRegistry().publish(
                 CommodityPowerStateExchange.class,
-                this.getDeviceID(),
+                this.getUUID(),
                 cpse);
 
 
@@ -158,7 +158,7 @@ public class FutureApplianceLocalObserver
             _devDetails.setDeviceType(ihdmd.getDeviceType());
             _devDetails.setDeviceClassification(ihdmd.getDeviceClassification());
             _devDetails.setConfigured(ihdmd.isConfigured());
-            this.getOCRegistry().publish(DeviceMetaDriverDetails.class, this.getDeviceID(), _devDetails);
+            this.getOCRegistry().publish(DeviceMetaDriverDetails.class, this.getUUID(), _devDetails);
         }
         if (_hx instanceof StaticCompressionExchange) {
             StaticCompressionExchange _stat = (StaticCompressionExchange) _hx;
@@ -183,7 +183,7 @@ public class FutureApplianceLocalObserver
     @Override
     public String toString() {
         return this.getClass().getCanonicalName()
-                + " for " + this.getDeviceID()
+                + " for " + this.getUUID()
                 + " (" + this.getDeviceType() + ")";
     }
 }

@@ -125,7 +125,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
 
         // EPS
         EpsComExchange ex = new EpsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.currentPriceSignal);
         this.notifyComManager(ex);
@@ -178,7 +178,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
 
             // EPS
             EpsComExchange ex = new EpsComExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     this.currentPriceSignal,
                     true);
@@ -221,7 +221,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
 
             // EPS
             EpsComExchange ex = new EpsComExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     this.currentPriceSignal,
                     true);

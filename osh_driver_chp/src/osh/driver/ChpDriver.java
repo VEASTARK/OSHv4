@@ -5,8 +5,7 @@ import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.driver.details.chp.ChpDriverDetails;
 import osh.eal.hal.HALDeviceDriver;
 import osh.hal.exchange.ChpObserverExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.UUID;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
  */
 public abstract class ChpDriver
         extends HALDeviceDriver
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
     protected int minimumRuntime;
     protected int runtime;
@@ -44,7 +43,7 @@ public abstract class ChpDriver
     protected abstract void sendPowerRequestToChp();
 
     public synchronized void processChpDetailsAndNotify(ChpDriverDetails chpDetails) {
-        ChpObserverExchange _ox = new ChpObserverExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        ChpObserverExchange _ox = new ChpObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
         _ox.setActivePower((int) Math.round(chpDetails.getCurrentElectricalPower()));
         _ox.setThermalPower((int) Math.round(chpDetails.getCurrentThermalPower()));
         _ox.setElectricityRequest(this.electricityRequest);
@@ -106,10 +105,4 @@ public abstract class ChpDriver
     public boolean isOperationRequest() {
         return this.heatingRequest || this.electricityRequest;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

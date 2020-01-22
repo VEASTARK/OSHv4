@@ -92,7 +92,7 @@ public class DachsChpLocalController
 //		createNewEaPart(false, 0);
 
         this.getTimer().registerComponent(this, 1);
-        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getDeviceID(), this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
 
         long start = this.getTimer().getUnixTimeAtStart();
         this.lastTimeIppSent = start - 86400;
@@ -181,7 +181,7 @@ public class DachsChpLocalController
 
             // force on
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     false,
                     false,
@@ -216,7 +216,7 @@ public class DachsChpLocalController
 
             // force on (still...CHP should be running anyway)
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     false,
                     false,
@@ -299,7 +299,7 @@ public class DachsChpLocalController
                             scheduledRuntime);
 
                     cx = new ChpControllerExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getTimer().getUnixTime(),
                             false,
                             false,
@@ -312,7 +312,7 @@ public class DachsChpLocalController
                     || (this.currentActivation == null && this.startTimes.get(0).startTime > now)) {
                 // switch off (has only been on because of forced on or scheduled runtime is over)
                 cx = new ChpControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         false,
@@ -369,7 +369,7 @@ public class DachsChpLocalController
 
             // force off
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -457,7 +457,7 @@ public class DachsChpLocalController
         }
 
         ex = new DachsChpIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 now,
                 toBeScheduled,
@@ -479,7 +479,7 @@ public class DachsChpLocalController
                 this.compressionValue); //initial tank temperature for optimization
         this.lastTimeIppSent = now;
         this.getOCRegistry().publish(
-                InterdependentProblemPart.class, this.getDeviceID(), ex);
+                InterdependentProblemPart.class, this.getUUID(), ex);
 
 
         // IMPORTANT: update of variable is done via onQueueEventTypeReceived()

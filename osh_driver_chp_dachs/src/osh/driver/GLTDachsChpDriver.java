@@ -8,7 +8,6 @@ import osh.datatypes.registry.driver.details.chp.ChpDriverDetails;
 import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.dachs.GLTDachsInfoRequestThread;
 import osh.driver.dachs.GLTDachsPowerRequestThread;
-import osh.registry.interfaces.IHasState;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -17,8 +16,7 @@ import java.util.UUID;
  * @author Ingo Mauser, Jan Mueller
  */
 public class GLTDachsChpDriver
-        extends DachsChpDriver
-        implements IHasState {
+        extends DachsChpDriver {
 
     protected String loginName;
     protected String loginPwd;
@@ -109,7 +107,7 @@ public class GLTDachsChpDriver
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getDeviceID(), this.getTimer().getUnixTime());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());

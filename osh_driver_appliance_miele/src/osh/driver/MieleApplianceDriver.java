@@ -115,12 +115,12 @@ public class MieleApplianceDriver
         // register for changes of different details...
         this.getDriverRegistry().subscribe(GenericApplianceDriverDetails.class, this.applianceBusDriverUUID,this);
         this.getDriverRegistry().subscribe(GenericApplianceProgramDriverDetails.class, this.applianceBusDriverUUID, this);
-        this.getDriverRegistry().subscribe(DofStateExchange.class, this.getDeviceID(), this);
+        this.getDriverRegistry().subscribe(DofStateExchange.class, this.getUUID(), this);
         this.getDriverRegistry().subscribe(MieleApplianceDriverDetails.class, this.applianceBusDriverUUID, this);
 
         //DofStateExchange will only be published to the com registry, we need a data reach through for this
         this.getOSH().getDataBroker().registerDataReachThrough(
-                this.getDeviceID(),
+                this.getUUID(),
                 DofStateExchange.class,
                 RegistryType.COM,
                 RegistryType.DRIVER);
@@ -137,7 +137,7 @@ public class MieleApplianceDriver
                         synchronized (this) {
                             if (MieleApplianceDriver.this.pendingCommand == EN50523OIDExecutionOfACommandCommands.START) {
                                 StartDeviceRequest req = new StartDeviceRequest(
-                                        MieleApplianceDriver.this.getDeviceID(),
+                                        MieleApplianceDriver.this.getUUID(),
                                         MieleApplianceDriver.this.applianceBusDriverUUID,
                                         MieleApplianceDriver.this.getTimer().getUnixTime());
                                 MieleApplianceDriver.this.getDriverRegistry().publish(StartDeviceRequest.class, req);
@@ -148,7 +148,7 @@ public class MieleApplianceDriver
                 1
         );
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
@@ -226,12 +226,12 @@ public class MieleApplianceDriver
                 MieleApplianceControllerExchange controllerExchange = (MieleApplianceControllerExchange) controllerRequest;
 
                 if (controllerExchange.getApplianceCommand() == EN50523OIDExecutionOfACommandCommands.START) {
-                    StartDeviceRequest req = new StartDeviceRequest(this.getDeviceID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
+                    StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
                     this.getDriverRegistry().publish(StartDeviceRequest.class, req);
                     this.pendingCommand = EN50523OIDExecutionOfACommandCommands.START;
                 }
                 if (controllerExchange.getApplianceCommand() == EN50523OIDExecutionOfACommandCommands.STOP) {
-                    StopDeviceRequest req = new StopDeviceRequest(this.getDeviceID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
+                    StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
                     this.getDriverRegistry().publish(StopDeviceRequest.class, req);
                 }
             } else if (controllerRequest instanceof GenericApplianceStartTimesControllerExchange) {
@@ -265,7 +265,7 @@ public class MieleApplianceDriver
                     if (this.firstDof < 0 || this.secondDof < 0) {
                         this.getGlobalLogger().logError("Received illegal dof, not sending to o/c");
                     } else {
-                        GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getDeviceID(),
+                        GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getUUID(),
                                 this.getTimer().getUnixTime());
                         gadoe.setDevice1stDegreeOfFreedom(this.firstDof);
                         gadoe.setDevice1stDegreeOfFreedom(this.secondDof);
@@ -292,25 +292,25 @@ public class MieleApplianceDriver
             // generate ox object
             if (updateOx) {
                 MieleApplianceObserverExchange _ox = new MieleApplianceObserverExchange(
-                        this.getDeviceID(), this.getTimer().getUnixTime());
+                        this.getUUID(), this.getTimer().getUnixTime());
 
                 // check for incomplete data
                 if (this.currentAppDetails == null) {
                     if (this.incompleteData == 0)
-                        this.getGlobalLogger().logWarning("appDetails not available. Wait for data... UUID: " + this.getDeviceID());
+                        this.getGlobalLogger().logWarning("appDetails not available. Wait for data... UUID: " + this.getUUID());
                     this.incompleteData++;
                     return;
                 }
                 if (this.appProgramDetails == null) {
                     if (this.incompleteData == 0)
-                        this.getGlobalLogger().logWarning("appProgramDetails not available. Wait for data... UUID: " + this.getDeviceID());
+                        this.getGlobalLogger().logWarning("appProgramDetails not available. Wait for data... UUID: " + this.getUUID());
                     this.incompleteData++;
                     return;
                 }
 
                 if (this.mieleApplianceDriverDetails == null) {
                     if (this.incompleteData == 0)
-                        this.getGlobalLogger().logWarning("mieleApplianceDriverDetails not available. Wait for data... UUID: " + this.getDeviceID());
+                        this.getGlobalLogger().logWarning("mieleApplianceDriverDetails not available. Wait for data... UUID: " + this.getUUID());
                     this.incompleteData++;
                     return;
                 }
@@ -399,7 +399,7 @@ public class MieleApplianceDriver
 
                 //all data available -> reset error counter
                 if (this.incompleteData > 0) {
-                    this.getGlobalLogger().logWarning("data source(s) for device: " + this.getDeviceID() + " are available again after " + this.incompleteData + " missing");
+                    this.getGlobalLogger().logWarning("data source(s) for device: " + this.getUUID() + " are available again after " + this.incompleteData + " missing");
                 }
                 this.incompleteData = 0;
 

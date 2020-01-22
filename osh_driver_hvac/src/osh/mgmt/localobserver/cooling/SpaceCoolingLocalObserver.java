@@ -51,7 +51,7 @@ public class SpaceCoolingLocalObserver
 
             ChilledWaterDemandNonControllableIPP ipp =
                     new ChilledWaterDemandNonControllableIPP(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getGlobalLogger(),
                             this.getTimer().getUnixTime(),
                             false,
@@ -64,7 +64,7 @@ public class SpaceCoolingLocalObserver
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     DeviceTypes.SPACECOOLING);
             cpse.addPowerState(Commodity.COLDWATERPOWER, this.coldWaterPower);

@@ -85,8 +85,8 @@ public class MieleApplianceLocalController
         // register for onNextTimePeriod()
         this.getTimer().registerComponent(this, 1);
 
-        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getDeviceID(), this);
-        this.getOCRegistry().subscribe(DofStateExchange.class, this.getDeviceID(), this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
+        this.getOCRegistry().subscribe(DofStateExchange.class, this.getUUID(), this);
 
         //workaround bc this controller may not have this data from the driver->observer chain
         if (this.compressionType == null) {
@@ -99,7 +99,7 @@ public class MieleApplianceLocalController
     private void callDevice() {
         MieleApplianceControllerExchange halControllerExchangeObject
                 = new MieleApplianceControllerExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 EN50523OIDExecutionOfACommandCommands.START);
         this.updateOcDataSubscriber(halControllerExchangeObject);
@@ -110,7 +110,7 @@ public class MieleApplianceLocalController
         if (exchange instanceof EASolutionCommandExchange) {
             @SuppressWarnings("unchecked")
             EASolutionCommandExchange<MieleSolution> solution = (EASolutionCommandExchange<MieleSolution>) exchange;
-            if (!solution.getReceiver().equals(this.getDeviceID()) || solution.getPhenotype() == null) return;
+            if (!solution.getReceiver().equals(this.getUUID()) || solution.getPhenotype() == null) return;
             this.getGlobalLogger().logDebug("getting new starttime: " + solution.getPhenotype().startTime);
             this.setStartTime(solution.getPhenotype().startTime);
             this.setWAMPStartTime(solution.getPhenotype().startTime);
@@ -219,16 +219,16 @@ public class MieleApplianceLocalController
 
         this.getOCRegistry().publish(
                 ExpectedStartTimeExchange.class,
-                this.getDeviceID(),
+                this.getUUID(),
                 new ExpectedStartTimeExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         startTime));
 
         this.getOCRegistry().publish(
                 ExpectedStartTimeChangedExchange.class,
                 new ExpectedStartTimeChangedExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         startTime));
 
@@ -238,7 +238,7 @@ public class MieleApplianceLocalController
     private void setWAMPStartTime(long startTime) {
         GenericApplianceStartTimesControllerExchange halControllerExchangeObject
                 = new GenericApplianceStartTimesControllerExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 startTime);
         this.updateOcDataSubscriber(halControllerExchangeObject);
@@ -284,9 +284,9 @@ public class MieleApplianceLocalController
         // state for REST and logging
         this.getOCRegistry().publish(
                 MieleDofStateExchange.class,
-                this.getDeviceID(),
+                this.getUUID(),
                 new MieleDofStateExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         this.firstDof,
                         Math.min(this.getTimer().getUnixTime(), this.latestStart),
@@ -310,7 +310,7 @@ public class MieleApplianceLocalController
             this.latestStart = this.programmedAt + this.firstDof;
 
             ipp = new MieleApplianceIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now, //now
                     now, //earliest starting time
@@ -324,21 +324,21 @@ public class MieleApplianceLocalController
                     this.compressionValue);
 
             IAction mieleAction = new MieleAction(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.programmedAt,
                     (MieleApplianceIPP) ipp);
 
             this.getOCRegistry().publish(
                     LastActionExchange.class,
-                    this.getDeviceID(),
+                    this.getUUID(),
                     new LastActionExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getTimer().getUnixTime(),
                             mieleAction));
         } else {
             if (this.profileStarted > 0) {
                 ipp = new MieleApplianceNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         now,
                         new SparseLoadProfile().merge(this.currentProfile, this.profileStarted),
@@ -357,7 +357,7 @@ public class MieleApplianceLocalController
 
 
                 ipp = new MieleApplianceNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         now,
                         new SparseLoadProfile(),
@@ -368,7 +368,7 @@ public class MieleApplianceLocalController
                 );
             }
         }
-        this.getOCRegistry().publish(InterdependentProblemPart.class, this.getDeviceID(), ipp);
+        this.getOCRegistry().publish(InterdependentProblemPart.class, this.getUUID(), ipp);
         this.updateDofExchange();
     }
 }

@@ -120,7 +120,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
                     this.simSubjectsList.add(_simSubj);
 
                     //do the same for the HashMap (better direct Access)
-                    this.simSubjectsMap.put(_simSubj.getDeviceID(), _simSubj);
+                    this.simSubjectsMap.put(_simSubj.getUUID(), _simSubj);
                 }
             }
         } catch (Exception ex) {
@@ -138,7 +138,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
                     this.energySimSubjectsList.add(_simSubj);
 
                     //do the same for the HashMap (better direct Access)
-                    this.energySimSubjectsMap.put(_simSubj.getDeviceID(), _simSubj);
+                    this.energySimSubjectsMap.put(_simSubj.getUUID(), _simSubj);
                 }
             }
         } catch (Exception ex) {
@@ -247,7 +247,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
         for (ISimulationSubject _simSubj : this.simSubjectsList) {
             for (int i = 0; i < currentScreenplay.getSIMActions().size(); i++) {
                 //Search for an action for a specific device
-                if (currentScreenplay.getSIMActions().get(i).getDeviceID().compareTo(_simSubj.getDeviceID().toString()) == 0) {
+                if (currentScreenplay.getSIMActions().get(i).getDeviceID().compareTo(_simSubj.getUUID().toString()) == 0) {
                     _simSubj.setAction(currentScreenplay.getSIMActions().get(i));
                 }
             }

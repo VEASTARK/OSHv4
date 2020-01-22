@@ -9,17 +9,14 @@ import osh.comdriver.weather.WeatherPredictionProviderWAMPDispatcher;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.EventExchange;
 import osh.eal.hal.exceptions.HALException;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
 /**
  * @author Jan Mueller
  */
-public class WeatherProviderWAMPDriver extends CALComDriver implements IEventTypeReceiver, IHasState, Runnable {
+public class WeatherProviderWAMPDriver extends CALComDriver implements Runnable {
 
     private WeatherPredictionProviderWAMPDispatcher weatherPredictionProviderWAMPDispatcher;
 
@@ -109,17 +106,6 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements IEventTyp
                 // }
             }
         }
-    }
-
-
-    @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
-        //NOTHING
-    }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
     }
 
     @Override

@@ -130,7 +130,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
     public void stateViewerClassChanged(Class<? extends AbstractExchange> cls) {
         this.notifyComManager(
                 new GUIStateSelectedComExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         cls));
     }
@@ -139,7 +139,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
     public void stateViewerRegistryChanged(StateViewerRegistryEnum registry) {
         this.notifyComManager(
                 new GUIStateRegistrySelectedComExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         registry));
     }

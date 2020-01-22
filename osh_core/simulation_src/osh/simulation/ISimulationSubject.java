@@ -1,5 +1,6 @@
 package osh.simulation;
 
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Ingo Mauser
  */
-public interface ISimulationSubject {
+public interface ISimulationSubject extends IProvidesIdentity {
 
     /**
      * is invoked when the complete simulation environment has been set up
@@ -63,8 +64,6 @@ public interface ISimulationSubject {
     // ### GETTERS and SETTERS ###
 
     void setSimulationEngine(BuildingSimulationEngine simulationEngine);
-
-    UUID getDeviceID();
 
     ISimulationSubject getAppendingSubject(UUID SubjectID);
 

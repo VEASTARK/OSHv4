@@ -27,7 +27,8 @@ public class BuildingStateExchange extends StateExchange {
     double currentReactivePowerExternal;
     double currentGasPowerExternal;
 
-    public BuildingStateExchange() {
+    @Deprecated
+    protected BuildingStateExchange() {
     }
 
 

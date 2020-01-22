@@ -36,16 +36,16 @@ public class PvLocalController extends LocalController implements IDataRegistryL
 
         this.getTimer().registerComponent(this, 1);
 
-        this.getOCRegistry().subscribe(PvCommandExchange.class, this.getDeviceID(), this);
+        this.getOCRegistry().subscribe(PvCommandExchange.class, this.getUUID(), this);
     }
 
     @Override
     public <T extends AbstractExchange> void onExchange(T exchange) {
         PvCommandExchange _cmd = (PvCommandExchange) exchange;
-        if (!_cmd.getReceiver().equals(this.getDeviceID())) return;
+        if (!_cmd.getReceiver().equals(this.getUUID())) return;
 
         PvControllerExchange _cx = new PvControllerExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 _cmd.getNewPvSwitchedOn(),
                 (int) Math.round(_cmd.getReactivePowerTargetValue()));

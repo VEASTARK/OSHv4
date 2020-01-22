@@ -96,7 +96,7 @@ public abstract class HALDeviceDriver
 
         // set data sources as configured
         DeviceMetaDriverDetails deviceMetaDriverDetails = new DeviceMetaDriverDetails(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime());
         deviceMetaDriverDetails.setName(this.name);
         deviceMetaDriverDetails.setLocation(this.location);
@@ -189,7 +189,7 @@ public abstract class HALDeviceDriver
         for (UUID uuid : uuids) {
             ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimer().getUnixTime());
             cd.setConfigurationStatus(ConfigurationStatus.USED);
-            cd.setUsedBy(this.getDeviceID());
+            cd.setUsedBy(this.getUUID());
             this.getDriverRegistry().publish(ConfigurationDetails.class, cd);
         }
     }

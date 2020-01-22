@@ -121,7 +121,7 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
             predictions.add(this.profile.getPowerForDay(pastDay));
         }
 
-        PvPredictionExchange _ox = new PvPredictionExchange(this.getDeviceID(), this.getTimer().getUnixTime(), predictions, this.pastDaysPrediction);
+        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimer().getUnixTime(), predictions, this.pastDaysPrediction);
         this.notifyObserver(_ox);
     }
 
@@ -151,7 +151,7 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
         }
 
         PvObserverExchange _ox = new PvObserverExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now);
         _ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
         _ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));

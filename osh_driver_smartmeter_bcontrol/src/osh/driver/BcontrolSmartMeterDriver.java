@@ -13,7 +13,6 @@ import osh.driver.meter.BcontrolHeaterData;
 import osh.driver.meter.BcontrolMeterData;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.HALControllerExchange;
-import osh.registry.interfaces.IHasState;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -21,7 +20,7 @@ import java.util.UUID;
 /**
  * @author Ingo Mauser
  */
-public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasState {
+public class BcontrolSmartMeterDriver extends HALDeviceDriver {
 
     private int phase;
     private String meterURL;
@@ -135,7 +134,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
     private BcontrolMeterDriverRawLogDetails convertJsonToRawDetails(BcontrolMeterData bcmd) {
         // convert to raw details object for logging
         BcontrolMeterDriverRawLogDetails rawDetails = new BcontrolMeterDriverRawLogDetails(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime());
 
         rawDetails.setPhase(this.phase);
@@ -215,7 +214,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
 
     private BcontrolHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
         BcontrolHeaterDriverRawLogDetails rawDetails = new BcontrolHeaterDriverRawLogDetails(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime());
 
         rawDetails.setMode(bcmd.getMode());
@@ -358,10 +357,4 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
         super.onSystemShutdown();
         this.runnable.shutdown();
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

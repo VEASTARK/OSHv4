@@ -295,7 +295,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     }
 
     @Override
-    public UUID getDeviceID() {
+    public UUID getUUID() {
         return this.deviceID;
     }
 

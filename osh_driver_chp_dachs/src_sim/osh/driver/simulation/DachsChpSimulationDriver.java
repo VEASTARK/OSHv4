@@ -233,7 +233,7 @@ public class DachsChpSimulationDriver
         super.onSimulationIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -320,7 +320,7 @@ public class DachsChpSimulationDriver
 
         // send ObserverExchange
         ChpObserverExchange observerExchange = new ChpObserverExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime());
 
         observerExchange.setActivePower(Math.round(this.getPower(Commodity.ACTIVEPOWER)));

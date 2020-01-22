@@ -16,18 +16,16 @@ import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.registry.interfaces.IHasState;
 
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Jan Mueller
  */
 public class ESHLHotWaterTankLocalObserver
         extends WaterTankLocalObserver
-        implements IHasState, IDataRegistryListener {
+        implements IDataRegistryListener {
 
     private final double defaultPunishmentFactorPerWsPowerLost = 6.0 / 3600000.0;
     TreeMap<Long, Double> temperaturePrediction = new TreeMap<>();
@@ -59,8 +57,8 @@ public class ESHLHotWaterTankLocalObserver
         super.onSystemIsUp();
 
         this.getTimer().registerComponent(this, 1);
-        this.getOCRegistry().subscribe(EAPredictionCommandExchange.class,this.getDeviceID(), this);
-        this.getOCRegistry().subscribe(EpsStateExchange.class, this.getDeviceID(), this);
+        this.getOCRegistry().subscribe(EAPredictionCommandExchange.class,this.getUUID(), this);
+        this.getOCRegistry().subscribe(EpsStateExchange.class, this.getUUID(), this);
     }
 
 
@@ -72,7 +70,7 @@ public class ESHLHotWaterTankLocalObserver
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     this.currentTemperature,
@@ -93,7 +91,7 @@ public class ESHLHotWaterTankLocalObserver
             Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(now);
             if (predEntry != null && Math.abs(predEntry.getValue() - this.currentTemperature) > 2) {
                 HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         now,
                         this.currentTemperature,
@@ -137,7 +135,7 @@ public class ESHLHotWaterTankLocalObserver
 
                 HotWaterTankNonControllableIPP ex;
                 ex = new HotWaterTankNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         this.getTimer().getUnixTime(),
                         this.currentTemperature,
@@ -158,14 +156,14 @@ public class ESHLHotWaterTankLocalObserver
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,
                     0,
                     0,
-                    this.getDeviceID());
+                    this.getUUID());
             this.getOCRegistry().publish(
                     WaterStorageOCSX.class,
                     this,
@@ -180,12 +178,6 @@ public class ESHLHotWaterTankLocalObserver
             this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER = _ise.getTriggerIfDeltaX();
         }
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -205,5 +197,4 @@ public class ESHLHotWaterTankLocalObserver
             this.temperaturePrediction = exs.getPrediction().getTemperatureStates();
         }
     }
-
 }
