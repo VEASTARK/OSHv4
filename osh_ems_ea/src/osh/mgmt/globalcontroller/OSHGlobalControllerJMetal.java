@@ -20,7 +20,6 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.state.GUIScheduleDebugExchange;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
@@ -437,8 +436,6 @@ public class OSHGlobalControllerJMetal
             this.getGlobalLogger().logDebug("jmetal: problem list and solution list don't have the same size");
         }
 
-        GUIScheduleDebugExchange debug = new GUIScheduleDebugExchange(this.getUUID(), this.getTimer().getUnixTime());
-
         for (int i = 0; i < min; i++) {
             InterdependentProblemPart<?, ?> part = problemParts.get(i);
             LocalController lc = this.getLocalController(part.getUUID());
@@ -466,26 +463,9 @@ public class OSHGlobalControllerJMetal
                                 this.getTimer().getUnixTime(),
                                 bits));
             }
-
-            if (hasGUI) {
-                StringBuilder debugStr = new StringBuilder();
-                debugStr.append(this.getTimer().getUnixTime()).append(";");
-                debugStr.append(part.getSender()).append(";");
-                debugStr.append(part.problemToString()).append(";");
-                if (part instanceof ControllableIPP<?, ?>) {
-                    debugStr.append(((ControllableIPP<?, ?>) part)
-                            .solutionToString(bits));
-                }
-                debug.addString(part.getSender(), debugStr.toString());
-            }
         }
 
-        if (hasGUI && usedBits != 0)
-            this.getOCRegistry().publish(GUIScheduleDebugExchange.class, debug);
-
         this.getGlobalLogger().logDebug("===    EA done    ===");
-
-        //lasttimeScheduled = getTimer().getUnixTime();
     }
 
     @Override

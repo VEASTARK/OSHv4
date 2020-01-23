@@ -15,13 +15,13 @@ public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
      *
      */
     private static final long serialVersionUID = -6362041571466196750L;
-    protected String name;
-    protected String location;
+    private String name;
+    private String location;
 
-    protected DeviceTypes deviceType;
-    protected DeviceClassification deviceClassification;
+    private DeviceTypes deviceType;
+    private DeviceClassification deviceClassification;
 
-    protected boolean configured;
+    private boolean configured;
 
 
     /**

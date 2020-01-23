@@ -1,6 +1,7 @@
 package osh.datatypes.registry.commands;
 
 import osh.datatypes.registry.CommandExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
  *
  * @author Kaibin Bao
  */
-public class StopDeviceRequest extends CommandExchange {
+public class StopDeviceRequest extends CommandExchange implements IPromiseToBeImmutable {
 
     /**
      *

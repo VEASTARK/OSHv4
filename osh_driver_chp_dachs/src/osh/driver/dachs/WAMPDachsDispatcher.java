@@ -134,10 +134,13 @@ public class WAMPDachsDispatcher {
                                                                 });
 
                                                         this.dachsDetailsLock.lock();
-                                                        this.dachsDetails.setValues(map);
-                                                        this.dachsDriver.processDachsDetails(this.dachsDetails);
-                                                        this.notifyAll();
-                                                        this.dachsDetailsLock.lock();
+                                                        try {
+                                                            this.dachsDetails.setValues(map);
+                                                            this.dachsDriver.processDachsDetails(this.dachsDetails);
+                                                            this.notifyAll();
+                                                        } finally {
+                                                            this.dachsDetailsLock.unlock();
+                                                        }
                                                     } catch (IllegalArgumentException e) {
                                                         // error
                                                     }

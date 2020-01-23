@@ -1,6 +1,7 @@
 package osh.datatypes.registry.oc.localobserver;
 
 import osh.datatypes.registry.StateExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import java.util.UUID;
 
@@ -8,7 +9,7 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Till Schuberth, Ingo Mauser
  */
-public class WaterStorageOCSX extends StateExchange {
+public class WaterStorageOCSX extends StateExchange implements IPromiseToBeImmutable {
 
     /**
      *

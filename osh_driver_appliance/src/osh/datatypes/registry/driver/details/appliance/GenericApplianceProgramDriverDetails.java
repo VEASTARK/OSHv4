@@ -3,6 +3,7 @@ package osh.datatypes.registry.driver.details.appliance;
 import osh.configuration.appliance.XsdLoadProfiles;
 import osh.datatypes.registry.StateExchange;
 
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -106,26 +107,47 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         this.loadProfiles = originalLoadProfiles;
     }
 
-    //TODO equals
-//	@Override
-//	public boolean equals(Object obj) {
-//
-//		if(this.programName == null) {
-//			if(other.programName != null)
-//				return false;
-//		} else if(!this.programName.equals(other.programName)) {
-//				return false;
-//		}
-//		
-//		if(this.phaseName == null) {
-//			if(other.phaseName != null)
-//				return false;
-//		} else if(!this.phaseName.equals(other.phaseName)) {
-//			return false;
-//		}
-//		
-//		return super.equals(obj);
-//	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
-    // TODO cloning
+        GenericApplianceProgramDriverDetails that = (GenericApplianceProgramDriverDetails) o;
+
+        if (this.startTime != that.startTime) return false;
+        if (this.endTime != that.endTime) return false;
+        if (this.remainingTime != that.remainingTime) return false;
+        if (this.finishTime != that.finishTime) return false;
+        if (!Objects.equals(this.programName, that.programName)) return false;
+        if (!Objects.equals(this.phaseName, that.phaseName)) return false;
+        return Objects.equals(this.loadProfiles, that.loadProfiles);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (this.programName != null ? this.programName.hashCode() : 0);
+        result = 31 * result + (this.phaseName != null ? this.phaseName.hashCode() : 0);
+        result = 31 * result + (int) (this.startTime ^ (this.startTime >>> 32));
+        result = 31 * result + (int) (this.endTime ^ (this.endTime >>> 32));
+        result = 31 * result + this.remainingTime;
+        result = 31 * result + (int) (this.finishTime ^ (this.finishTime >>> 32));
+        result = 31 * result + (this.loadProfiles != null ? this.loadProfiles.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public GenericApplianceProgramDriverDetails clone() {
+        GenericApplianceProgramDriverDetails clone = new GenericApplianceProgramDriverDetails(this.getSender(),
+                this.getTimestamp());
+        clone.programName = this.programName;
+        clone.phaseName = this.phaseName;
+        clone.startTime = this.startTime;
+        clone.endTime = this.endTime;
+        clone.remainingTime = this.remainingTime;
+        clone.finishTime = this.finishTime;
+
+        return clone;
+    }
 }

@@ -62,9 +62,9 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public AbstractExchange clone() {
         try {
-            return super.clone();
+            return (AbstractExchange) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException("subclass doesn't provide proper cloning functionality", e);
         }

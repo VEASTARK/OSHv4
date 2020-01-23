@@ -106,10 +106,11 @@ public class MieleGatewayRESTDispatcher implements Runnable {
         MieleDeviceHomeBusDataREST dev;
 
         this.deviceDataLock.readLock().lock();
-        dev = this.deviceData.get(id);
-        this.deviceDataLock.readLock().unlock();
-
-        return dev;
+        try {
+            return this.deviceData.get(id);
+        } finally {
+            this.deviceDataLock.readLock().unlock();
+        }
     }
 
     /**
@@ -121,10 +122,11 @@ public class MieleGatewayRESTDispatcher implements Runnable {
     public Collection<MieleDeviceHomeBusDataREST> getDeviceData() {
 
         this.deviceDataLock.readLock().lock();
-        ArrayList<MieleDeviceHomeBusDataREST> devices = new ArrayList<>(this.deviceData.values());
-        this.deviceDataLock.readLock().unlock();
-
-        return devices;
+        try {
+            return new ArrayList<>(this.deviceData.values());
+        } finally {
+            this.deviceDataLock.readLock().unlock();
+        }
     }
 
     public void sendCommand(String url) {
@@ -243,11 +245,14 @@ public class MieleGatewayRESTDispatcher implements Runnable {
 
             // store device state
             this.deviceDataLock.writeLock().lock();
-            this.deviceData.clear();
-            for (MieleDeviceHomeBusDataREST dev : deviceList.getDevices()) {
-                this.deviceData.put(dev.getUid(), dev);
+            try {
+                this.deviceData.clear();
+                for (MieleDeviceHomeBusDataREST dev : deviceList.getDevices()) {
+                    this.deviceData.put(dev.getUid(), dev);
+                }
+            } finally {
+                this.deviceDataLock.writeLock().unlock();
             }
-            this.deviceDataLock.writeLock().unlock();
 
             this.notifyAll();
 

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.driver.details.metering.raw.BcontrolHeaterDriverRawLogDetails;
-import osh.datatypes.registry.driver.details.metering.raw.BcontrolMeterDriverRawLogDetails;
+import osh.datatypes.registry.driver.details.metering.raw.BControlHeaterDriverRawLogDetails;
+import osh.datatypes.registry.driver.details.metering.raw.BControlMeterDriverRawLogDetails;
 import osh.driver.meter.BcontrolConnectorThread;
 import osh.driver.meter.BcontrolHeaterData;
 import osh.driver.meter.BcontrolMeterData;
@@ -123,7 +123,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
         try {
             BcontrolMeterData bcmd = om.readValue(msg, BcontrolMeterData.class);
             this.getDriverRegistry().publish(
-                    BcontrolMeterDriverRawLogDetails.class,
+                    BControlMeterDriverRawLogDetails.class,
                     this.convertJsonToRawDetails(bcmd));
         } catch (IOException e) {
             this.getGlobalLogger().logWarning(e.getStackTrace(), e);
@@ -131,9 +131,9 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
     }
 
 
-    private BcontrolMeterDriverRawLogDetails convertJsonToRawDetails(BcontrolMeterData bcmd) {
+    private BControlMeterDriverRawLogDetails convertJsonToRawDetails(BcontrolMeterData bcmd) {
         // convert to raw details object for logging
-        BcontrolMeterDriverRawLogDetails rawDetails = new BcontrolMeterDriverRawLogDetails(
+        BControlMeterDriverRawLogDetails rawDetails = new BControlMeterDriverRawLogDetails(
                 this.getUUID(),
                 this.getTimer().getUnixTime());
 
@@ -208,12 +208,12 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
 
         // save to registry
         this.getDriverRegistry().publish(
-                BcontrolHeaterDriverRawLogDetails.class,
+                BControlHeaterDriverRawLogDetails.class,
                 this.convertJsonToRawDetails(bchd));
     }
 
-    private BcontrolHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
-        BcontrolHeaterDriverRawLogDetails rawDetails = new BcontrolHeaterDriverRawLogDetails(
+    private BControlHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
+        BControlHeaterDriverRawLogDetails rawDetails = new BControlHeaterDriverRawLogDetails(
                 this.getUUID(),
                 this.getTimer().getUnixTime());
 

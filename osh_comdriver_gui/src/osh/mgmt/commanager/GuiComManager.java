@@ -10,7 +10,6 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
-import osh.datatypes.registry.oc.state.GUIScheduleDebugExchange;
 import osh.datatypes.registry.oc.state.globalobserver.*;
 import osh.hal.exchange.*;
 import osh.registry.interfaces.IDataRegistryListener;
@@ -56,10 +55,6 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
         this.getOCRegistry().subscribe(WaterStorageOCSX.class, this);
         this.getOCRegistry().subscribe(BatteryStorageOCSX.class, this);
         this.getOCRegistry().subscribe(DevicesPowerStateExchange.class, this);
-
-
-        // schedule to visualize
-        this.getOCRegistry().subscribe(GUIScheduleDebugExchange.class, this);
 
         this.getTimer().registerComponent(this, 1);
     }
@@ -135,13 +130,19 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
         if (exchangeObject instanceof GUIStateSelectedComExchange) {
             GUIStateSelectedComExchange gssce = (GUIStateSelectedComExchange) exchangeObject;
             this.modifierLock.lock();
-            this.stateViewerType = gssce.getSelected();
-            this.modifierLock.lock();
+            try {
+                this.stateViewerType = gssce.getSelected();
+            } finally {
+                this.modifierLock.unlock();
+            }
         } else if (exchangeObject instanceof GUIStateRegistrySelectedComExchange) {
             osh.hal.exchange.GUIStateRegistrySelectedComExchange gssrce = (GUIStateRegistrySelectedComExchange) exchangeObject;
             this.modifierLock.lock();
-            this.stateViewerRegistry = gssrce.getSelected();
-            this.modifierLock.lock();
+            try {
+                this.stateViewerRegistry = gssrce.getSelected();
+            } finally {
+                this.modifierLock.unlock();
+            }
         }
     }
 

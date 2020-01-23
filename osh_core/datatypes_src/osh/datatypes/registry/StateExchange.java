@@ -36,6 +36,4 @@ public abstract class StateExchange extends AbstractExchange implements Serializ
     public String toString() {
         return this.getClass().getName() + ": Sender " + this.getSender() + ", time: " + this.getTimestamp();
     }
-
-
 }

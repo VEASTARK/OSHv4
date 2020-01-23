@@ -10,22 +10,22 @@ public class BuildingStateExchange extends StateExchange {
 
     private static final long serialVersionUID = -6624430081473462447L;
 
-    long currentTick;
-    double currentActivePower;
-    double currentActivePowerConsumption;
-    double currentActivePowerChp;
-    double currentActivePowerChpFeedIn;
-    double currentActivePowerChpAutoConsumption;
-    double currentActivePowerPv;
-    double currentActivePowerPvFeedIn;
-    double currentActivePowerPvAutoConsumption;
-    double currentActivePowerBatteryCharging;
-    double currentActivePowerBatteryDischarging;
-    double currentActivePowerBatteryAutoConsumption;
-    double currentActivePowerBatteryFeedIn;
-    double currentActivePowerExternal;
-    double currentReactivePowerExternal;
-    double currentGasPowerExternal;
+    private long currentTick;
+    private double currentActivePower;
+    private double currentActivePowerConsumption;
+    private double currentActivePowerChp;
+    private double currentActivePowerChpFeedIn;
+    private double currentActivePowerChpAutoConsumption;
+    private double currentActivePowerPv;
+    private double currentActivePowerPvFeedIn;
+    private double currentActivePowerPvAutoConsumption;
+    private double currentActivePowerBatteryCharging;
+    private double currentActivePowerBatteryDischarging;
+    private double currentActivePowerBatteryAutoConsumption;
+    private double currentActivePowerBatteryFeedIn;
+    private double currentActivePowerExternal;
+    private double currentReactivePowerExternal;
+    private double currentGasPowerExternal;
 
     @Deprecated
     protected BuildingStateExchange() {

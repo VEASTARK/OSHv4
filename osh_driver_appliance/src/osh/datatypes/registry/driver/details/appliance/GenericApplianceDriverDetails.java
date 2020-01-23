@@ -18,8 +18,8 @@ public class GenericApplianceDriverDetails extends StateExchange {
      *
      */
     private static final long serialVersionUID = -8899173740986326637L;
-    protected EN50523DeviceState state;
-    protected String stateTextDE;
+    private EN50523DeviceState state;
+    private String stateTextDE;
 
 
     /**

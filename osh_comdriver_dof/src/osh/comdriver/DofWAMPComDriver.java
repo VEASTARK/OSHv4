@@ -84,8 +84,10 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable {
                 this.dofDispatcher.wait();
             } catch (InterruptedException e) {
                 this.getGlobalLogger().logError("should not happen", e);
-                this.dispatcherWriteLock.unlock();
+
                 break;
+            } finally {
+                this.dispatcherWriteLock.unlock();
             }
 
             long timestamp = this.getTimer().getUnixTime();

@@ -1,6 +1,7 @@
 package osh.datatypes.registry.commands;
 
 import osh.datatypes.registry.CommandExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import java.util.UUID;
 
@@ -8,7 +9,7 @@ import java.util.UUID;
 /**
  * @author Till Schuberth
  */
-public class SwitchCommandExchange extends CommandExchange {
+public class SwitchCommandExchange extends CommandExchange implements IPromiseToBeImmutable {
 
     /**
      *

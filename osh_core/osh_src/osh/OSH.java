@@ -29,7 +29,7 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
     /* default */ GlobalObserver globalobserver;
     private OSHLifeCycleManager lifeCycleManager;
     /**
-     * ExternalRegistry (communication to external units (e.g. REMS and other OSH))
+     * ComRegistry (communication to external units (e.g. REMS and other OSH))
      */
     private ComRegistry comRegistry;
     /**

@@ -98,23 +98,32 @@ class StatesTableModel implements TableModel {
     @Override
     public void addTableModelListener(TableModelListener l) {
         this.modelLock.writeLock().lock();
-        if (l != null) this.modelListeners.add(l);
-        this.modelLock.writeLock().lock();
+        try {
+            if (l != null) this.modelListeners.add(l);
+        } finally {
+            this.modelLock.writeLock().unlock();
+        }
     }
 
     @Override
     public void removeTableModelListener(TableModelListener l) {
         this.modelLock.writeLock().lock();
-        if (l != null) this.modelListeners.remove(l);
-        this.modelLock.writeLock().unlock();
+        try {
+            if (l != null) this.modelListeners.remove(l);
+        } finally {
+            this.modelLock.writeLock().unlock();
+        }
     }
 
     private void notifyTableModelListener() {
         HashSet<TableModelListener> listeners;
 
         this.modelLock.readLock().lock();
-        listeners = new HashSet<>(this.modelListeners);
-        this.modelLock.readLock().unlock();
+        try {
+            listeners = new HashSet<>(this.modelListeners);
+        } finally {
+            this.modelLock.readLock().unlock();
+        }
 
         for (TableModelListener l : listeners) {
             l.tableChanged(new TableModelEvent(this));
