@@ -11,6 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.chp.model.GenericChpModel;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ public class DachsChpNonControllableIPP
     public DachsChpNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime now,
             boolean toBeScheduled,
             int minRuntime,
             GenericChpModel chpModel,

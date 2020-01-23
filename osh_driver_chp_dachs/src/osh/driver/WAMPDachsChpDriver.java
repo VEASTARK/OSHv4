@@ -37,7 +37,7 @@ public class WAMPDachsChpDriver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 300);
+        this.getTimeDriver().registerComponent(this, 300);
 
         this.dachsInformationWAMPDispatcher = new WAMPDachsDispatcher(this.getGlobalLogger(), this);
         new Thread(this, "pull proxy of dachs driver to WAMP").start();
@@ -96,7 +96,7 @@ public class WAMPDachsChpDriver
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());
@@ -158,7 +158,7 @@ public class WAMPDachsChpDriver
         // convert to TemperatureDetails
         Double waterStorageTemperature = this.parseDoubleStatus(values.get("Hka_Mw1.Temp.sbFuehler1"));
         if (waterStorageTemperature != null) {
-            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimer().getUnixTime());
+            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimeDriver().getUnixTime());
             td.setTemperature(waterStorageTemperature);
             this.getDriverRegistry().publish(TemperatureDetails.class, td);
         }

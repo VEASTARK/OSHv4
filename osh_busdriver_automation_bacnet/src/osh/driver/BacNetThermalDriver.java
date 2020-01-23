@@ -51,14 +51,14 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     }
 
     private void init(OSHParameterCollection config) throws OSHException {
-        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
+        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
         this.deviceMetaDetails.setName(config.getParameter("name"));
         this.deviceMetaDetails.setLocation(config.getParameter("location"));
         // deviceDetails.setDeviceType(getDeviceType().toString());
         // deviceDetails.setDeviceClass(getDeviceClassification().toString());
 
         if (dispatcher == null) {
-            dispatcher = new BacNetDispatcher(this.getTimer(), this.getGlobalLogger());
+            dispatcher = new BacNetDispatcher(this.getTimeDriver(), this.getGlobalLogger());
             try {
                 dispatcher.init();
             } catch (IOException e) {
@@ -120,7 +120,7 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     @Override
     public void onSystemIsUp() throws OSHException {
         this.init(this.getDriverConfig());
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
         super.onSystemIsUp();
     }
 
@@ -143,11 +143,11 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     }
 
     private BacNetThermalExchange buildObserverExchange() {
-        BacNetThermalExchange _ox = new BacNetThermalExchange(this.getUUID(), this.getTimer().getUnixTime());
+        BacNetThermalExchange _ox = new BacNetThermalExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
 
         _ox.setDeviceMetaDetails(this.deviceMetaDetails);
 
-        TemperatureDetails _td = new TemperatureDetails(this.getUUID(), this.getTimer().getUnixTime());
+        TemperatureDetails _td = new TemperatureDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
 
         _td.setTemperature(dispatcher.getAnalogInputState(this.sensorObject));
 

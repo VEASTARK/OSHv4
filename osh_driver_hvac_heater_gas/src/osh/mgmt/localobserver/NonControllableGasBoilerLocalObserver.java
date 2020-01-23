@@ -56,14 +56,14 @@ public class NonControllableGasBoilerLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
@@ -93,7 +93,7 @@ public class NonControllableGasBoilerLocalObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         IHALExchange _ihal = this.getObserverDataObject();
 
@@ -138,7 +138,7 @@ public class NonControllableGasBoilerLocalObserver
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());

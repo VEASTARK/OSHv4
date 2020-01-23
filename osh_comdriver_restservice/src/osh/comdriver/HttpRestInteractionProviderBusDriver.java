@@ -121,7 +121,7 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
         rcAC.registerInstances(new RestApplianceControlResource(
                 busManager,
                 this,
-                this.getTimer(),
+                this.getTimeDriver(),
                 this.getUUID(),
                 this.getDriverRegistry()));
         ServletHolder shAC = new ServletHolder(new ServletContainer(rcAC));
@@ -409,17 +409,17 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
     }
 
     public void sendStartRequest(UUID device) {
-        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimeDriver().getUnixTime());
         this.getDriverRegistry().publish(StartDeviceRequest.class, req);
     }
 
     public void sendStopRequest(UUID device) {
-        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimeDriver().getUnixTime());
         this.getDriverRegistry().publish(StopDeviceRequest.class, req);
     }
 
     public void sendSwitchRequest(UUID device, boolean turnOn) {
-        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimeDriver().getUnixTime());
         req.setTurnOn(turnOn);
         this.getDriverRegistry().publish(SwitchRequest.class, req);
     }

@@ -99,7 +99,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
         PlsComExchange ex = new PlsComExchange(this.getUUID(), now, this.remsPowerLimitSignals);
         this.notifyComManager(ex);
@@ -107,7 +107,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
         this.lastTimeSignalSent = now;
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     // TODO: better signal
@@ -127,7 +127,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // generate new PriceSignal and send it
         if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {

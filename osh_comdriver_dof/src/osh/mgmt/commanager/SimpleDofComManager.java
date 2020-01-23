@@ -24,7 +24,7 @@ public class SimpleDofComManager extends ComManager {
             DofComExchange dce = (DofComExchange) exchangeObject;
 
 
-            long now = this.getTimer().getUnixTime();
+            long now = this.getTimeDriver().getUnixTime();
 
             for (Entry<UUID, Integer> en : dce.getDevice1stDegreeOfFreedom().entrySet()) {
 

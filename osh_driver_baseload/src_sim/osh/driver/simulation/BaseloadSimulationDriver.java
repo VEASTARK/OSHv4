@@ -102,7 +102,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
             Class h0Class = Class.forName(h0ClassName);
 
             this.baseload = (IH0Profile) h0Class.getConstructor(int.class, String.class, double.class)
-                    .newInstance(TimeConversion.convertUnixTime2Year(this.getTimer().getUnixTime()),
+                    .newInstance(TimeConversion.convertUnixTime2Year(this.getTimeDriver().getUnixTime()),
                             h0ProfileFileName,
                             yearlyElectricityConsumptionOfHousehold);
 
@@ -114,7 +114,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
     @Override
     public void onSimulationIsUp() {
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimer().getUnixTimeAtStart();
+        long startTime = this.getTimeDriver().getUnixTimeAtStart();
 
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
@@ -145,7 +145,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         }
 
         BaseloadPredictionExchange _ox = new BaseloadPredictionExchange(
-                this.getUUID(), this.getTimer().getUnixTime(),
+                this.getUUID(), this.getTimeDriver().getUnixTime(),
                 predictions,
                 this.pastDaysPrediction, this.weightForOtherWeekday, this.weightForSameWeekday);
         this.notifyObserver(_ox);
@@ -155,7 +155,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
     public void onNextTimeTick() {
         this.setPower(
                 Commodity.ACTIVEPOWER,
-                this.baseload.getActivePowerAt(this.getTimer().getUnixTime()));
+                this.baseload.getActivePowerAt(this.getTimeDriver().getUnixTime()));
         try {
             this.setPower(
                     Commodity.REACTIVEPOWER,
@@ -168,7 +168,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         BaseloadObserverExchange blox =
                 new BaseloadObserverExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime());
+                        this.getTimeDriver().getUnixTime());
 
         blox.setPower(Commodity.ACTIVEPOWER, this.getPower(Commodity.ACTIVEPOWER));
         blox.setPower(Commodity.REACTIVEPOWER, this.getPower(Commodity.REACTIVEPOWER));

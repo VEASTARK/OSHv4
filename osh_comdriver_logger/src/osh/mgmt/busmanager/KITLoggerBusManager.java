@@ -27,7 +27,7 @@ public class KITLoggerBusManager extends LoggerBusManager {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
 //		this.ocRegistry.registerStateChangeListener(LoggerScheduleStateExchange.class, this);
 //		this.ocRegistry.registerStateChangeListener(LoggerPriceAndLimitStateExchange.class, this);

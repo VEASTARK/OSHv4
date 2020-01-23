@@ -34,7 +34,7 @@ public class PvLocalController extends LocalController implements IDataRegistryL
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
         this.getOCRegistry().subscribe(PvCommandExchange.class, this.getUUID(), this);
     }
@@ -46,7 +46,7 @@ public class PvLocalController extends LocalController implements IDataRegistryL
 
         PvControllerExchange _cx = new PvControllerExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 _cmd.getNewPvSwitchedOn(),
                 (int) Math.round(_cmd.getReactivePowerTargetValue()));
         this.updateOcDataSubscriber(_cx);

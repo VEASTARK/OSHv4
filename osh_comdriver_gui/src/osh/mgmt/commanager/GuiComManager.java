@@ -56,7 +56,7 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
         this.getOCRegistry().subscribe(BatteryStorageOCSX.class, this);
         this.getOCRegistry().subscribe(DevicesPowerStateExchange.class, this);
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
@@ -164,14 +164,14 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
                 this.updateOcDataSubscriber(
                         new GUIStatesComExchange(
                                 this.getUUID(),
-                                this.getTimer().getUnixTime(),
+                                this.getTimeDriver().getUnixTime(),
                                 this.getOCRegistry().getDataTypes(),
                                 states));
             } else if (this.stateViewerRegistry == StateViewerRegistryEnum.DRIVER) {
                 this.updateOcDataSubscriber(
                         new GUIStatesComExchange(
                                 this.getUUID(),
-                                this.getTimer().getUnixTime(),
+                                this.getTimeDriver().getUnixTime(),
                                 this.stateViewerType));
             }
         } finally {

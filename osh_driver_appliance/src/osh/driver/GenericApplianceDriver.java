@@ -154,9 +154,9 @@ public abstract class GenericApplianceDriver
         super.onSystemIsUp();
 
         // update status etc every second
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // set initial device state
         this.updateGenericApplianceDriverDetails(now);
@@ -170,7 +170,7 @@ public abstract class GenericApplianceDriver
         super.onNextTimePeriod();
 
         // get current time
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // if not OFF -> device logic for running etc
         if (this.currentEn50523State == EN50523DeviceState.OFF) {
@@ -387,7 +387,7 @@ public abstract class GenericApplianceDriver
         if (!oldState.name().equals(this.currentEn50523State.name())) {
             this.getGlobalLogger().logDebug(this.getDeviceType()
                     + " : changed from : " + oldState.name() + " to " + this.currentEn50523State.name()
-                    + " @" + this.getTimer().getUnixTime() + ", waiting for optimization...");
+                    + " @" + this.getTimeDriver().getUnixTime() + ", waiting for optimization...");
         }
     }
 
@@ -597,7 +597,7 @@ public abstract class GenericApplianceDriver
                 UUID.randomUUID(),
                 dynamicLoadProfiles,
                 minMaxTimes,
-                this.getTimer().getUnixTime());
+                this.getTimeDriver().getUnixTime());
         this.acpChanged = true;
     }
 
@@ -651,7 +651,7 @@ public abstract class GenericApplianceDriver
                     && this.selectedProfileID != null) {
 
                 //TODO calculate ending time
-                return this.getTimer().getUnixTime();
+                return this.getTimeDriver().getUnixTime();
             } else {
                 return -1;
             }

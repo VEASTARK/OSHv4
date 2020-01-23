@@ -7,6 +7,7 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -38,32 +39,32 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
     public ControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
-            long optimizationHorizon,
-            long referenceTime,
+            ZonedDateTime optimizationHorizon,
+            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId, logger, timestamp, bitCount, toBeScheduled, needsAncillaryMeterState,
                 reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities, compressionType, compressionValue);
-        this.optimizationHorizon = optimizationHorizon;
+        this.optimizationHorizon = optimizationHorizon.toEpochSecond();
     }
 
     public ControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
-            long optimizationHorizon,
-            long referenceTime,
+            ZonedDateTime optimizationHorizon,
+            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             Commodity[] allInputCommodities,
@@ -72,7 +73,7 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
         super(deviceId, logger, timestamp, bitCount, toBeScheduled, needsAncillaryMeterState,
                 reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities, allInputCommodities,
                 compressionType, compressionValue);
-        this.optimizationHorizon = optimizationHorizon;
+        this.optimizationHorizon = optimizationHorizon.toEpochSecond();
     }
 
     @Override

@@ -58,7 +58,7 @@ public class HotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
         this.getOCRegistry().subscribe(EAPredictionCommandExchange.class, this.getUUID(),this);
         this.getOCRegistry().subscribe(EpsStateExchange.class, this.getUUID(),this);
     }
@@ -68,7 +68,7 @@ public class HotWaterTankLocalObserver
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
@@ -149,7 +149,7 @@ public class HotWaterTankLocalObserver
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
@@ -162,14 +162,14 @@ public class HotWaterTankLocalObserver
                         InterdependentProblemPart.class,
                         this,
                         ex);
-                this.lastTimeIPPSent = this.getTimer().getUnixTime();
+                this.lastTimeIPPSent = this.getTimeDriver().getUnixTime();
                 this.temperatureInLastIPP = this.currentTemperature;
             }
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,
@@ -197,7 +197,7 @@ public class HotWaterTankLocalObserver
         if (exchange instanceof EpsStateExchange) {
             EpsStateExchange eee = (EpsStateExchange) exchange;
 
-            long now = this.getTimer().getUnixTime();
+            long now = this.getTimeDriver().getUnixTime();
             double firstPrice = eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPrice(now);
             double lastPrice = eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPrice(
                     eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPriceUnknownAtAndAfter() - 1);

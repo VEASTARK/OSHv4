@@ -4,7 +4,7 @@ import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.core.exceptions.OCUnitException;
 import osh.core.interfaces.IOSH;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 import osh.eal.hal.IDriverDataSubscriber;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.registry.interfaces.IProvidesIdentity;
@@ -75,8 +75,8 @@ public abstract class LocalObserver extends Observer implements IDriverDataSubsc
         return this.observerDataObject;
     }
 
-    public HALRealTimeDriver getSystemTimer() {
-        return this.getOSH().getTimer();
+    public EALTimeDriver getSystemTimer() {
+        return this.getOSH().getTimeDriver();
     }
 
     /**

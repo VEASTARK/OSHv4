@@ -3,6 +3,7 @@ package osh.datatypes.registry.details.common;
 import osh.datatypes.registry.StateExchange;
 import osh.utils.DeepCopy;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -31,10 +32,10 @@ public class TemperatureDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private TemperatureDetails() {
-        super(null, 0);
+        super(null, null);
     }
 
-    public TemperatureDetails(UUID deviceId, long timestamp) {
+    public TemperatureDetails(UUID deviceId, ZonedDateTime timestamp) {
         super(deviceId, timestamp);
     }
 

@@ -80,11 +80,11 @@ public class FutureApplianceLocalController
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
         // register to be called every time step
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
         // register for solutions of the optimization
         this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(),this);
 
-        this.lastTimeSchedulingCaused = this.getTimer().getUnixTime() - 61;
+        this.lastTimeSchedulingCaused = this.getTimeDriver().getUnixTime() - 61;
     }
 
     @Override
@@ -227,7 +227,7 @@ public class FutureApplianceLocalController
     protected void updateIPP(boolean toBeScheduled) {
 
         InterdependentProblemPart<?, ?> ipp = null;
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // no profile to be scheduled...and no profile has been scheduled...
         if (this.acp == null && this.acpIDForScheduledTimes == null) {
@@ -400,7 +400,7 @@ public class FutureApplianceLocalController
                     this.getGlobalLogger().logDebug(e);
                 }
 
-                long now = this.getTimer().getUnixTime();
+                long now = this.getTimeDriver().getUnixTime();
 
                 // ### transform solution to phenotype ###
 

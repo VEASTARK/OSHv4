@@ -106,7 +106,7 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IDataRegis
 
         ArrayList<ValueLogger> activeLoggers = new ArrayList<>();
 
-        long currentTime = this.getTimer().getUnixTime();
+        long currentTime = this.getTimeDriver().getUnixTime();
 
         if (this.consoleLog != null
                 && (currentTime - this.lastLoggingToConsoleAt) >= this.valueLoggerConfiguration.getValueLoggingToConsoleResolution()) {
@@ -171,7 +171,7 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IDataRegis
 
             ArrayList<ValueLogger> activeLoggers = new ArrayList<>();
 
-            long currentTime = this.getTimer().getUnixTime();
+            long currentTime = this.getTimeDriver().getUnixTime();
 
             if (this.consoleLog != null) {
                 activeLoggers.add(this.consoleLog);

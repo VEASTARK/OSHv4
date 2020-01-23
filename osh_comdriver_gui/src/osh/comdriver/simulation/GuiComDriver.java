@@ -52,13 +52,13 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
-        this.driver.updateTime(this.getTimer().getUnixTime());
+        this.driver.updateTime(this.getTimeDriver().getUnixTime());
     }
 
     @Override
@@ -131,7 +131,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         this.notifyComManager(
                 new GUIStateSelectedComExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         cls));
     }
 
@@ -140,7 +140,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         this.notifyComManager(
                 new GUIStateRegistrySelectedComExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         registry));
     }
 }

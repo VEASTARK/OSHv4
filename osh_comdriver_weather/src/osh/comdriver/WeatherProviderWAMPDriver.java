@@ -49,7 +49,7 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements Runnable 
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 3600);
+        this.getTimeDriver().registerComponent(this, 3600);
 
         this.currentWeatherProviderWAMPDispatcher = new CurrentWeatherProviderWAMPDispatcher(this.getGlobalLogger(), this);
         this.weatherPredictionProviderWAMPDispatcher = new WeatherPredictionProviderWAMPDispatcher(this.getGlobalLogger(), this);
@@ -63,7 +63,7 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements Runnable 
         super.onNextTimePeriod();
 
         // still alive message
-        if (this.getTimer().getUnixTime() % 60 == 0) {
+        if (this.getTimeDriver().getUnixTime() % 60 == 0) {
             this.getGlobalLogger().logDebug("onNextTimePeriod() (getTimer().getUnixTime() % 60 == 0) - I'm still alive");
         }
 

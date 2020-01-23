@@ -12,6 +12,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class MieleApplianceNonControllableIPP extends NonControllableIPP<ISoluti
     public MieleApplianceNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             SparseLoadProfile profile,
             boolean toBeScheduled,
             DeviceTypes deviceType,
@@ -64,7 +65,8 @@ public class MieleApplianceNonControllableIPP extends NonControllableIPP<ISoluti
                 compressionType,
                 compressionValue);
 
-        this.profile = profile.cloneAfter(timestamp).getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
+        this.profile = profile.cloneAfter(timestamp.toEpochSecond()).getCompressedProfile(this.compressionType,
+                this.compressionValue, this.compressionValue);
 
     }
 

@@ -82,7 +82,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
 
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
         this.generatePriceSignal(rand);
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         this.lastSignalSent = now;
 
         // EPS
@@ -93,13 +93,13 @@ public class RandomEpsProviderComDriver extends CALComDriver {
         this.notifyComManager(ex);
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
     public void onNextTimePeriod() {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         OSHRandomGenerator rand = new OSHRandomGenerator(
                 new Random(this.getOSH().getRandomGenerator().getNextLong()));
 
@@ -127,7 +127,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
 
     private void generatePriceSignal(OSHRandomGenerator randomGen) {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         for (int i = 0; i < this.pricesToSet.length; i++) {
             AncillaryCommodity ac = this.pricesToSet[i];

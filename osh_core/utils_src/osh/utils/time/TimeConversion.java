@@ -4,15 +4,21 @@ import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 
 /**
- * Requires Java 8
  *
  * @author Florian Allerding, Kaibin Bao, Sebastian Kramer, Ingo Mauser, Till Schuberth
  */
 public class TimeConversion {
 
     //Theoretically this should be adjusted for where the system is running
-    private final static ZoneId zone = ZoneId.of("UTC");
+    private static ZoneId zone = ZoneId.of("UTC");
 
+    /**
+     * Sets the time-zone for all future calculation to the procided time-zone
+     * @param zone the new time-zone
+     */
+    public static void setZone(ZoneId zone) {
+        TimeConversion.zone = zone;
+    }
 
     public static int convertUnixTime2Year(long unixTime) {
         Instant time = Instant.ofEpochSecond(unixTime);
@@ -63,11 +69,16 @@ public class TimeConversion {
      * @return 01.01. 00:01 = 60
      */
     public static int convertUnixTime2SecondsFromYearStart(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
+        ZonedDateTime zdt = Instant.ofEpochSecond(unixTime).atZone(zone);
         ZonedDateTime yearStart =
                 zdt.with(TemporalAdjusters.firstDayOfYear()).withHour(0).withMinute(0).withSecond(0).withNano(0);
         return (int) (unixTime - yearStart.toEpochSecond());
+    }
+
+    public static long getSecondsSinceYearStart(ZonedDateTime time) {
+        ZonedDateTime yearStart =
+                time.with(TemporalAdjusters.firstDayOfYear()).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        return time.toEpochSecond() - yearStart.toEpochSecond();
     }
 
     /**

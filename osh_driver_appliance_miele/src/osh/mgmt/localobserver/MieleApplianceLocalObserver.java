@@ -70,7 +70,7 @@ public class MieleApplianceLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
 
@@ -216,7 +216,7 @@ public class MieleApplianceLocalObserver
         if (_hx instanceof GenericApplianceDofObserverExchange) {
             GenericApplianceDofObserverExchange gadoe = ((GenericApplianceDofObserverExchange) _hx);
 
-            DofStateExchange dse = new DofStateExchange(this.getUUID(), this.getTimer().getUnixTime());
+            DofStateExchange dse = new DofStateExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
             dse.setDevice1stDegreeOfFreedom(gadoe.getDevice1stDegreeOfFreedom());
             dse.setDevice2ndDegreeOfFreedom(gadoe.getDevice2ndDegreeOfFreedom());
 

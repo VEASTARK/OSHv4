@@ -44,7 +44,7 @@ public class NonControllableDachsChpLocalController
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class NonControllableDachsChpLocalController
         // get new MOX
         DachsChpMOX mox = (DachsChpMOX) this.getDataFromLocalObserver();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         this.newIPPAfter = mox.getNewIPPAfter();
         this.currentHotWaterStorageMinTemp = mox.getCurrentHotWaterStorageMinTemp();
         this.currentHotWaterStorageMaxTemp = mox.getCurrentHotWaterStorageMaxTemp();
@@ -81,7 +81,7 @@ public class NonControllableDachsChpLocalController
                 sIPP = new DachsChpNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         toBeScheduled,
                         mox.getMinRuntime(),
                         new GenericChpModel(
@@ -128,7 +128,7 @@ public class NonControllableDachsChpLocalController
             this.stoppedSince = now;
             cx = new ChpControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     true,
                     false,
                     false,

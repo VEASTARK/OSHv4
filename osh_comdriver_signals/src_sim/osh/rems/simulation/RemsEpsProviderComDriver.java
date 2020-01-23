@@ -69,7 +69,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     //PS needs to be relative from now
     public void setNewSignal(PriceSignal signal) {
         this.newSignals = new ArrayList<>();
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         PriceSignal ps = new PriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL);
         ps.setKnownPriceInterval(now, now + signal.getPriceUnknownAtAndAfter());
         for (Entry<Long, Double> en : signal.getPrices().entrySet()) {
@@ -81,7 +81,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
 
     public void setNewSignals(ArrayList<PriceSignal> signals) {
         this.newSignals = new ArrayList<>(signals.size());
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         for (PriceSignal signal : signals) {
             PriceSignal ps = new PriceSignal(signal.getCommodity());
@@ -100,7 +100,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         {
             PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
@@ -133,13 +133,13 @@ public class RemsEpsProviderComDriver extends CALComDriver {
         this.lastSignalSent = now;
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
     public void onNextTimePeriod() {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (this.newSignalReceived) {
             ArrayList<AncillaryCommodity> allRelevantCommodities = new ArrayList<>();
@@ -243,8 +243,8 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     private PriceSignal generatePriceSignal(AncillaryCommodity commodity, double price) {
         PriceSignal priceSignal;
 
-        long now = this.getTimer().getUnixTime();
-        if (now == this.getTimer().getUnixTimeAtStart()) {
+        long now = this.getTimeDriver().getUnixTime();
+        if (now == this.getTimeDriver().getUnixTimeAtStart()) {
             // initial price signal
             long timeSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
             long timeTillEndOfDay = 86400 - timeSinceMidnight;

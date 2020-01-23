@@ -3,6 +3,7 @@ package osh.datatypes.registry.oc.localobserver;
 import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 //import osh.datatypes.energy.INeededEnergy;
@@ -24,7 +25,7 @@ public class BatteryStorageOCSX extends StateExchange implements IPromiseToBeImm
      */
     public BatteryStorageOCSX(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             double stateOfCharge,
             double minStateOfCharge,
             double maxStateOfCharge,

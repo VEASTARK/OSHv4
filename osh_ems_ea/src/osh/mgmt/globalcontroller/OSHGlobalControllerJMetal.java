@@ -158,7 +158,7 @@ public class OSHGlobalControllerJMetal
             throw new OSHException("this global controller only works with global observers of type " + OSHGlobalObserver.class.getName());
         }
 
-        this.getOSH().getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeDriver().registerComponent(this, 1);
 //		
 //		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), EpsStateExchange.class, RegistryType.COM, RegistryType.OC);
 //		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), PlsStateExchange.class, RegistryType.COM, RegistryType.OC);
@@ -168,7 +168,7 @@ public class OSHGlobalControllerJMetal
 
 //		CostChecker.init(epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective, upperOverlimitFactor, lowerOverlimitFactor);
 
-        this.lastTimeSchedulingStarted = this.getTimer().getUnixTimeAtStart() + 60;
+        this.lastTimeSchedulingStarted = this.getTimeDriver().getUnixTimeAtStart() + 60;
     }
 
     @Override
@@ -198,7 +198,7 @@ public class OSHGlobalControllerJMetal
     @Override
     public void onNextTimePeriod() throws OSHException {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // check whether rescheduling is required and if so do rescheduling
         this.handleScheduling();
@@ -245,7 +245,7 @@ public class OSHGlobalControllerJMetal
         }
 
         if (reschedulingRequired) {
-            this.lastTimeSchedulingStarted = this.getTimer().getUnixTime();
+            this.lastTimeSchedulingStarted = this.getTimeDriver().getUnixTime();
             this.startScheduling();
         }
 
@@ -309,7 +309,7 @@ public class OSHGlobalControllerJMetal
                 optimisationRunRandomGenerator,
                 showSolverDebugMessages,
                 this.gaparameters,
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 this.stepSize,
                 this.logDir);
 
@@ -323,7 +323,7 @@ public class OSHGlobalControllerJMetal
 
         // debug print
         this.getGlobalLogger().logDebug("=== scheduling... ===");
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         int[][] bitPositions = new int[problemParts.size()][2];
         int bitPosStart = 0;
@@ -374,7 +374,7 @@ public class OSHGlobalControllerJMetal
                     bitPositions,
                     tempPriceSignals,
                     tempPowerLimitSignals,
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     fitnessFunction);
             solutions = resultWithAll.getBitSet();
 
@@ -408,19 +408,19 @@ public class OSHGlobalControllerJMetal
                         GUIHotWaterPredictionStateExchange.class,
                         this,
                         new GUIHotWaterPredictionStateExchange(this.getUUID(),
-                                this.getTimer().getUnixTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
+                                this.getTimeDriver().getUnixTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
 
                 this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
-                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimer().getUnixTime(), ancillaryMeter));
+                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), ancillaryMeter));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)
                 this.getOCRegistry().publish(
                         GUIScheduleStateExchange.class,
                         this,
-                        new GUIScheduleStateExchange(this.getUUID(), this.getTimer()
+                        new GUIScheduleStateExchange(this.getUUID(), this.getTimeDriver()
                                 .getUnixTime(), schedules, this.stepSize));
 
             }
@@ -447,7 +447,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPhenotype(
                                 null,
                                 part.getUUID(),
-                                this.getTimer().getUnixTime(),
+                                this.getTimeDriver().getUnixTime(),
                                 bits));
             } else if (/* lc == null && */ part.getBitCount() > 0) {
                 throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
@@ -460,7 +460,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPrediction(
                                 null,
                                 part.getUUID(),
-                                this.getTimer().getUnixTime(),
+                                this.getTimeDriver().getUnixTime(),
                                 bits));
             }
         }

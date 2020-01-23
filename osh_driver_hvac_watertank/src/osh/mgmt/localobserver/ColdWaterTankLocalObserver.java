@@ -40,7 +40,7 @@ public class ColdWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
 
@@ -48,7 +48,7 @@ public class ColdWaterTankLocalObserver
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (now > this.lastTimeIPPSent + NEW_IPP_AFTER) {
             ColdWaterTankNonControllableIPP ex;
@@ -84,7 +84,7 @@ public class ColdWaterTankLocalObserver
                 ex = new ColdWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         this.currentTemperature,
                         this.compressionType,
                         this.compressionValue);
@@ -93,13 +93,13 @@ public class ColdWaterTankLocalObserver
                         this,
                         ex);
                 this.temperatureInLastIPP = this.currentTemperature;
-                this.lastTimeIPPSent = this.getTimer().getUnixTime();
+                this.lastTimeIPPSent = this.getTimeDriver().getUnixTime();
             }
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,

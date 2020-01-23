@@ -1,7 +1,7 @@
 package osh.core.oc;
 
 import osh.core.interfaces.IOSHOC;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 
 import java.util.UUID;
 
@@ -22,8 +22,8 @@ public abstract class OCUnit {
     }
 
 
-    protected HALRealTimeDriver getSystemTimer() {
-        return this.osh.getTimer();
+    protected EALTimeDriver getSystemTimer() {
+        return this.osh.getTimeDriver();
     }
 
     public UUID getUnitID() {

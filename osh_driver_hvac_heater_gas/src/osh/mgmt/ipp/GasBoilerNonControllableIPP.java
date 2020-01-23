@@ -11,6 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.gasboiler.GasBoilerModel;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -46,7 +47,7 @@ public class GasBoilerNonControllableIPP
     public GasBoilerNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime now,
             double minTemperature,
             double maxTemperature,
             boolean initialState,

@@ -56,7 +56,7 @@ public class SimulationLoggerBusDriver extends LoggerBusDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     /**
@@ -67,7 +67,7 @@ public class SimulationLoggerBusDriver extends LoggerBusDriver {
     @SuppressWarnings("unused")
     @Override
     public void updateDataFromBusManager(IHALExchange exchangeObject) {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (this.valueLoggerConfiguration != null && this.valueLoggerConfiguration.getIsValueLoggingToFileActive()) {
             if (exchangeObject instanceof LoggerCommodityPowerHALExchange) {

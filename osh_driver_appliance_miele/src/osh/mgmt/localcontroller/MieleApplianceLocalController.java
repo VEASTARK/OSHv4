@@ -83,7 +83,7 @@ public class MieleApplianceLocalController
         super.onSystemIsUp();
 
         // register for onNextTimePeriod()
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
         this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
         this.getOCRegistry().subscribe(DofStateExchange.class, this.getUUID(), this);
@@ -100,7 +100,7 @@ public class MieleApplianceLocalController
         MieleApplianceControllerExchange halControllerExchangeObject
                 = new MieleApplianceControllerExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 EN50523OIDExecutionOfACommandCommands.START);
         this.updateOcDataSubscriber(halControllerExchangeObject);
     }
@@ -131,7 +131,7 @@ public class MieleApplianceLocalController
     @Override
     public void onNextTimePeriod() {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         EN50523DeviceState oldState = this.currentState;
         this.updateMOX();
@@ -222,14 +222,14 @@ public class MieleApplianceLocalController
                 this.getUUID(),
                 new ExpectedStartTimeExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         startTime));
 
         this.getOCRegistry().publish(
                 ExpectedStartTimeChangedExchange.class,
                 new ExpectedStartTimeChangedExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         startTime));
 
 
@@ -239,7 +239,7 @@ public class MieleApplianceLocalController
         GenericApplianceStartTimesControllerExchange halControllerExchangeObject
                 = new GenericApplianceStartTimesControllerExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 startTime);
         this.updateOcDataSubscriber(halControllerExchangeObject);
     }
@@ -287,9 +287,9 @@ public class MieleApplianceLocalController
                 this.getUUID(),
                 new MieleDofStateExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         this.firstDof,
-                        Math.min(this.getTimer().getUnixTime(), this.latestStart),
+                        Math.min(this.getTimeDriver().getUnixTime(), this.latestStart),
                         this.latestStart,
                         this.expectedStartTime));
     }
@@ -298,7 +298,7 @@ public class MieleApplianceLocalController
     protected void updateIPPExchange() {
         InterdependentProblemPart<?, ?> ipp;
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (this.currentState == EN50523DeviceState.PROGRAMMED
                 || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART) {
@@ -333,7 +333,7 @@ public class MieleApplianceLocalController
                     this.getUUID(),
                     new LastActionExchange(
                             this.getUUID(),
-                            this.getTimer().getUnixTime(),
+                            this.getTimeDriver().getUnixTime(),
                             mieleAction));
         } else {
             if (this.profileStarted > 0) {

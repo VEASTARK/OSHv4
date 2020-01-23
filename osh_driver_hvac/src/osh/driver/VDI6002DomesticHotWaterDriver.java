@@ -161,26 +161,26 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
         //initially give LocalObserver load data of past days
         VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 VDI6002DomesticHotWaterStatistics.monthlyCorrection,
                 VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection,
                 this.weekDayHourProbabilities,
                 this.avgYearlyDemand);
         this.notifyObserver(_pred);
 
-        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
+        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), this.compressionType, this.compressionValue);
         this.notifyObserver(_stat);
     }
 
     @Override
     public void onNextTimePeriod() {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if (this.dayProfile == null || now % 86400 == 0) {
             if (this.dayProfile == null)

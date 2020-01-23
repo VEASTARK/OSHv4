@@ -3,6 +3,7 @@ package osh.datatypes.registry.oc.commands.globalcontroller;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.registry.CommandExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -21,7 +22,7 @@ public class EAPredictionCommandExchange<PredictionType extends IPrediction> ext
     public EAPredictionCommandExchange(
             UUID sender,
             UUID receiver,
-            long timestamp,
+            ZonedDateTime timestamp,
             PredictionType prediction) {
         super(sender, receiver, timestamp);
 

@@ -5,7 +5,6 @@ import osh.comdriver.interaction.datatypes.RestDevice;
 import osh.comdriver.interaction.datatypes.RestDeviceList;
 import osh.comdriver.interaction.datatypes.RestDeviceMetaDetails;
 import osh.comdriver.interaction.datatypes.fzi.appliancecontrol.RestApplianceControlApplianceStatusDetails;
-import osh.eal.hal.HALRealTimeDriver;
 import osh.mgmt.commanager.HttpRestInteractionBusManager;
 import osh.registry.Registry.DriverRegistry;
 
@@ -24,7 +23,6 @@ import java.util.UUID;
 @Path("/applianceControl/")
 public class RestApplianceControlResource {
 
-    private final HALRealTimeDriver timer;
     private final UUID restUUID;
     private final DriverRegistry registry;
     private final HttpRestInteractionProviderBusDriver interactionDriver;
@@ -39,12 +37,11 @@ public class RestApplianceControlResource {
      */
     public RestApplianceControlResource(HttpRestInteractionBusManager comMgr,
                                         HttpRestInteractionProviderBusDriver driver,
-                                        HALRealTimeDriver timer, UUID restUUID, DriverRegistry registry) {
+                                        UUID restUUID, DriverRegistry registry) {
         super();
 
         this.interactionComManager = comMgr;
         this.interactionDriver = driver;
-        this.timer = timer;
         this.restUUID = restUUID;
         this.registry = registry;
     }

@@ -124,7 +124,7 @@ public abstract class ApplianceSimulationDriver
                             Class h0Class = Class.forName(h0ProfileClass);
 
                             h0Profile = (IH0Profile) h0Class.getConstructor(int.class, String.class, double.class)
-                                    .newInstance(TimeConversion.convertUnixTime2Year(this.getTimer().getUnixTime()),
+                                    .newInstance(TimeConversion.convertUnixTime2Year(this.getTimeDriver().getUnixTime()),
                                             h0ProfileFileName,
                                             1000);
 
@@ -229,7 +229,7 @@ public abstract class ApplianceSimulationDriver
         } else if (deviatedHour >= 24) {
             deviatedHour -= 24;
         }
-        return (long) (this.getTimer().getUnixTime() + deviatedHour * 3600.0);
+        return (long) (this.getTimeDriver().getUnixTime() + deviatedHour * 3600.0);
     }
 
 
@@ -252,7 +252,7 @@ public abstract class ApplianceSimulationDriver
         //if dynamic screenplay then generate daily screenplay
         if (this.getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
             //FIXME: this can go very wrong, because the step size can be greater than 1
-            if (this.getTimer().getUnixTime() % 86400 == 0) {
+            if (this.getTimeDriver().getUnixTime() % 86400 == 0) {
                 try {
                     this.generateDynamicDailyScreenplay();
                 } catch (OSHException e) {
@@ -281,7 +281,7 @@ public abstract class ApplianceSimulationDriver
         }
 
         // run on last day immediately
-        if ((this.getTimer().getUnixTime() - this.getTimer().getUnixTimeAtStart()) / 86400
+        if ((this.getTimeDriver().getUnixTime() - this.getTimeDriver().getUnixTimeAtStart()) / 86400
                 == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1)) {
             maxDof = 0;
         }

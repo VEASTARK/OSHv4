@@ -166,16 +166,16 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 
         this.readCsvPriceSignal();
         this.generateNewPriceSignal();
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
-        this.lastTimeSignalSent = this.getTimer().getUnixTime();
+        this.lastTimeSignalSent = this.getTimeDriver().getUnixTime();
     }
 
     /**
      * Generate PriceSignal
      */
     private void generateNewPriceSignal() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         int relativeTimeFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(now);
         long yearStart = now - relativeTimeFromYearStart;
 
@@ -265,7 +265,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         //now sending priceSignal
         EpsComExchange ex = new EpsComExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 priceSignals);
         this.updateComDataSubscriber(ex);
     }
@@ -275,10 +275,10 @@ public class CsvEpsProviderComDriver extends CALComDriver {
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        if ((this.getTimer().getUnixTime() - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if ((this.getTimeDriver().getUnixTime() - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
             this.generateNewPriceSignal();
 
-            this.lastTimeSignalSent = this.getTimer().getUnixTime();
+            this.lastTimeSignalSent = this.getTimeDriver().getUnixTime();
         }
     }
 

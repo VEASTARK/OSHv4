@@ -106,7 +106,7 @@ public class AdsorptionChillerSimulationDriver
         // notify Observer about current status
         ChillerObserverExchange ox = new ChillerObserverExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 this.running,
                 this.outdoorTemperature);
         ox.setColdWaterPower(this.currentCoolingPower);
@@ -121,7 +121,7 @@ public class AdsorptionChillerSimulationDriver
 
         if (this.running) {
             // get outdoor temperature
-            this.currentOutdoorTemperature = this.outdoorTemperature.getTemperature(this.getTimer().getUnixTime());
+            this.currentOutdoorTemperature = this.outdoorTemperature.getTemperature(this.getTimeDriver().getUnixTime());
 
             // CALCULATE COP AND DYNAMIC COOLING POWER
             this.currentCoolingPower = AdsorptionChillerModel.chilledWaterPower(this.observedWaterTemperature, this.currentOutdoorTemperature);
@@ -133,7 +133,7 @@ public class AdsorptionChillerSimulationDriver
 //			getGlobalLogger().logDebug("observedWaterTemperature: " + observedWaterTemperature);
 //			getGlobalLogger().logDebug("currentCoolingPower: " + currentCoolingPower);
 //			getGlobalLogger().logDebug("currentCop: " + c  urrentCop);
-            if (this.getTimer().getUnixTime() % 3600 == 0) {
+            if (this.getTimeDriver().getUnixTime() % 3600 == 0) {
                 this.getGlobalLogger().logDebug(
                         "outdoorTemperature: " + this.currentOutdoorTemperature
                                 + " | hotwaterdemand: " + (int) ((-1) * (this.currentCoolingPower / this.currentCop))

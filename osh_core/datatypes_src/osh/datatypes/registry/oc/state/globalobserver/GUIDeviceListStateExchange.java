@@ -6,6 +6,7 @@ import osh.datatypes.registry.StateExchange;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,10 +23,10 @@ public class GUIDeviceListStateExchange extends StateExchange {
 
     @Deprecated
     public GUIDeviceListStateExchange() {
-        super(null, 0L);
+        super(null, null);
     }
 
-    public GUIDeviceListStateExchange(UUID sender, long timestamp, Set<DeviceTableEntry> deviceList) {
+    public GUIDeviceListStateExchange(UUID sender, ZonedDateTime timestamp, Set<DeviceTableEntry> deviceList) {
         super(sender, timestamp);
         this.deviceList = deviceList;
     }

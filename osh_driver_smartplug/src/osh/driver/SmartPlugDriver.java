@@ -69,7 +69,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IDataRegistryLis
 
     private void initSmartPlug(OSHParameterCollection config) throws OSHException {
         // prepare device details
-        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
+        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
         this.deviceMetaDetails.setName(config.getParameter("name"));
         this.deviceMetaDetails.setLocation(config.getParameter("location"));
         if (this.getDeviceType() != null) {
@@ -126,7 +126,7 @@ public class SmartPlugDriver extends HALDeviceDriver implements IDataRegistryLis
 
     public SmartPlugObserverExchange updateHALExchange() throws OSHException {
         SmartPlugObserverExchange _ox
-                = new SmartPlugObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
+                = new SmartPlugObserverExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
 
         // Set DeviceMetaDetails
         _ox.setDeviceMetaDetails(this.deviceMetaDetails);

@@ -104,11 +104,11 @@ public class CurrentWeatherProviderWAMPDispatcher {
                                                         try {
                                                             this.currentWeatherDetails = new CurrentWeatherDetails(
                                                                     this.comDriver.getUUID(),
-                                                                    this.comDriver.getTimer().getUnixTime(),
+                                                                    this.comDriver.getTimeDriver().getUnixTime(),
                                                                     currentWeatherData);
                                                             this.comDriver.receiveCurrentDetails(this.currentWeatherDetails);
 
-                                                            this.lastLog = this.comDriver.getTimer().getUnixTime();
+                                                            this.lastLog = this.comDriver.getTimeDriver().getUnixTime();
                                                         } finally {
                                                             this.weatherWriteLock.unlock();
                                                         }

@@ -38,7 +38,7 @@ public class NonControllableAdsorptionChillerLocalController
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class NonControllableAdsorptionChillerLocalController
         this.compressionValue = mox.getCompressionValue();
         Map<Long, Double> temperaturePrediction = mox.getTemperatureMap();
 
-        if (this.getTimer().getUnixTime() % 900 == 0) {
+        if (this.getTimeDriver().getUnixTime() % 900 == 0) {
             //getGlobalLogger().logDebug("Cold Water Temperature: " + currentColdWaterTemp);
             //getGlobalLogger().logDebug("Hot Water Temperature: " + currentHotWaterTemp);
         }
@@ -77,7 +77,7 @@ public class NonControllableAdsorptionChillerLocalController
         ChillerNonControllableIPP ipp = new ChillerNonControllableIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 toBeScheduled,
                 currentState,
                 temperaturePrediction,
@@ -92,7 +92,7 @@ public class NonControllableAdsorptionChillerLocalController
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     true,
                     false,
                     0);
@@ -103,7 +103,7 @@ public class NonControllableAdsorptionChillerLocalController
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         false,
                         true,
                         15 * 60);

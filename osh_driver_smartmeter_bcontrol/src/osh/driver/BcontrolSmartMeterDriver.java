@@ -83,11 +83,11 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
         this.runnable = new BcontrolConnectorThread(
                 this.getGlobalLogger(),
-                this.getTimer(),
+                this.getTimeDriver(),
                 this,
                 this.meterURL,
                 this.meterNumber,
@@ -135,7 +135,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
         // convert to raw details object for logging
         BControlMeterDriverRawLogDetails rawDetails = new BControlMeterDriverRawLogDetails(
                 this.getUUID(),
-                this.getTimer().getUnixTime());
+                this.getTimeDriver().getUnixTime());
 
         rawDetails.setPhase(this.phase);
 
@@ -215,7 +215,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
     private BControlHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
         BControlHeaterDriverRawLogDetails rawDetails = new BControlHeaterDriverRawLogDetails(
                 this.getUUID(),
-                this.getTimer().getUnixTime());
+                this.getTimeDriver().getUnixTime());
 
         rawDetails.setMode(bcmd.getMode());
         rawDetails.setOrder(bcmd.getOrder());

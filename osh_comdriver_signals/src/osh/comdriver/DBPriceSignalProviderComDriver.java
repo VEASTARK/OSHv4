@@ -89,7 +89,7 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
      */
     public void processPriceSignal(PriceSignal pricesignal, PowerLimitSignal powerLimit) {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
 //		HashMap<VirtualCommodity,PriceSignal> map = new HashMap<>();
 //		map.put(VirtualCommodity.ACTIVEPOWEREXTERNAL, pricesignal);
@@ -137,9 +137,9 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
     private PriceSignal generatePriceSignal(AncillaryCommodity commodity, double price) {
         PriceSignal priceSignal;
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
-        if (now == this.getTimer().getUnixTimeAtStart()) {
+        if (now == this.getTimeDriver().getUnixTimeAtStart()) {
             // initial price signal
             //			long diff = now % 3600;
 //			if (diff < 60) {

@@ -138,7 +138,7 @@ public class BaseloadLocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     DeviceTypes.OTHER);
 
             for (Commodity c : _ox.getCommodities()) {
@@ -152,7 +152,7 @@ public class BaseloadLocalObserver
                     cpse);
 
             long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimer().getUnixTime());
+            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimeDriver().getUnixTime());
 
             //monitor the baseload
             this.monitorBaseloadProfile(_ox.getActivePower(), _ox.getReactivePower());
@@ -178,7 +178,7 @@ public class BaseloadLocalObserver
 
 
     private void updateIPP() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         BaseloadIPP ipp = new BaseloadIPP(
                 this.getUUID(),

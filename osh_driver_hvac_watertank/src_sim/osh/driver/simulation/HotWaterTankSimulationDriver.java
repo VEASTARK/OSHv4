@@ -101,7 +101,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimer().getUnixTime());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
@@ -170,7 +170,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
         HotWaterTankObserverExchange observerExchange =
                 new HotWaterTankObserverExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
                         this.waterTank.getTankDiameter(),

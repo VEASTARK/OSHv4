@@ -2,6 +2,7 @@ package osh.datatypes.registry.driver.details.appliance;
 
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -36,7 +37,7 @@ public class GenericApplianceDofDriverDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private GenericApplianceDofDriverDetails() {
-        this(null, 0);
+        this(null, null);
     }
 
 
@@ -45,7 +46,7 @@ public class GenericApplianceDofDriverDetails extends StateExchange {
      */
     public GenericApplianceDofDriverDetails(
             UUID sender,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

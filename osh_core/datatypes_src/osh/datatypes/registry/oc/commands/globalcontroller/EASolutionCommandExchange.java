@@ -3,6 +3,7 @@ package osh.datatypes.registry.oc.commands.globalcontroller;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.registry.CommandExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -21,7 +22,7 @@ public class EASolutionCommandExchange<PhenotypeType extends ISolution> extends 
     public EASolutionCommandExchange(
             UUID sender,
             UUID receiver,
-            long timestamp,
+            ZonedDateTime timestamp,
             PhenotypeType phenotype) {
         super(sender, receiver, timestamp);
 

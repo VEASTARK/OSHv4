@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -28,7 +29,7 @@ public class StartTimeDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     protected StartTimeDetails() {
-        super(null, 0);
+        super(null, null);
     }
 
     /**
@@ -37,7 +38,7 @@ public class StartTimeDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public StartTimeDetails(UUID sender, long timestamp) {
+    public StartTimeDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
 
     }

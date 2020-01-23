@@ -14,6 +14,7 @@ import osh.driver.simulation.batterylogic.SimpleBatteryLogic;
 import osh.driver.simulation.batterystorage.SimpleBatteryStorageModel;
 import osh.driver.simulation.inverter.SimpleInverterModel;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class BatteryStorageNonControllableIPP
     public BatteryStorageNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime now,
             double batteryInitialStateOfCharge,
             double batteryInitialStateOfHealth,
             int batteryStandingLoss,

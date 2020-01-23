@@ -5,6 +5,7 @@ import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -27,10 +28,10 @@ public class BusDeviceStatusDetails extends StateExchange implements IPromiseToB
     @SuppressWarnings("unused")
     @Deprecated
     protected BusDeviceStatusDetails() {
-        this(null, 0, ConnectionStatus.UNDEFINED);
+        this(null, null, ConnectionStatus.UNDEFINED);
     }
 
-    public BusDeviceStatusDetails(UUID sender, long timestamp, ConnectionStatus state) {
+    public BusDeviceStatusDetails(UUID sender, ZonedDateTime timestamp, ConnectionStatus state) {
         super(sender, timestamp);
 
         this.state = state;

@@ -40,7 +40,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.logging.IGlobalLogger;
 import osh.driver.BacNetThermalDriver;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.registry.TimeRegistry;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -57,7 +57,7 @@ import java.util.Map.Entry;
 public class BacNetDispatcher implements IRealTimeSubscriber {
 
     private final IGlobalLogger logger;
-    private final HALRealTimeDriver timer;
+    private final TimeRegistry timeRegistry;
     private final Map<BacNetObject, Double> analogInputStates;
     private final Map<BacNetObject, Double> analogValueStates;
     private final Set<String> devices;
@@ -65,8 +65,8 @@ public class BacNetDispatcher implements IRealTimeSubscriber {
     private LocalDevice bacNetDevice;
     private int rediscover_countdown = this.REDISCOVER_INTERVAL;
     private boolean STANDALONE;
-    public BacNetDispatcher(HALRealTimeDriver timer, IGlobalLogger logger) {
-        this.timer = timer;
+    public BacNetDispatcher(TimeRegistry timeRegistry, IGlobalLogger logger) {
+        this.timeRegistry = timeRegistry;
         this.logger = logger;
         this.analogInputStates = new HashMap<>();
         this.analogValueStates = new HashMap<>();

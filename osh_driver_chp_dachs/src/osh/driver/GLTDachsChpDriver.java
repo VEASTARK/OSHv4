@@ -41,7 +41,7 @@ public class GLTDachsChpDriver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 300);
+        this.getTimeDriver().registerComponent(this, 300);
 
         // init request thread
         this.reqRunnable = new GLTDachsInfoRequestThread(
@@ -80,7 +80,7 @@ public class GLTDachsChpDriver
     protected void sendPowerRequestToChp() {
         // Start new thread and send power request to CHP
         // (Has to be resend at least every 10 minutes)
-        if (this.isOperationRequest() && this.getTimer().getUnixTime() - this.lastRequest > 60) {
+        if (this.isOperationRequest() && this.getTimeDriver().getUnixTime() - this.lastRequest > 60) {
             GLTDachsPowerRequestThread powerRequestThread = new GLTDachsPowerRequestThread(
                     this.getGlobalLogger(),
                     this.isOperationRequest(),
@@ -89,7 +89,7 @@ public class GLTDachsChpDriver
                     this.loginPwd
             );
             new Thread(powerRequestThread, "DachsPowerRequestThread").start();
-            this.lastRequest = this.getTimer().getUnixTime();
+            this.lastRequest = this.getTimeDriver().getUnixTime();
         }
     }
 
@@ -107,7 +107,7 @@ public class GLTDachsChpDriver
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());
@@ -170,7 +170,7 @@ public class GLTDachsChpDriver
         Double waterStorageTemperature = this.parseDoubleStatus(values.get("Hka_Mw1.Temp.sbFuehler1"));
         if (waterStorageTemperature != null) {
 //			TemperatureDetails td = new TemperatureDetails(getDeviceID(), getTimer().getUnixTime());
-            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimer().getUnixTime());
+            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimeDriver().getUnixTime());
             td.setTemperature(waterStorageTemperature);
 //			getDriverRegistry().setState(TemperatureDetails.class, this, td);
 //			getDriverRegistry().setState(TemperatureDetails.class, UUID.fromString("268ea9bd-572c-46dd-a383-960b4ed65337"), td);

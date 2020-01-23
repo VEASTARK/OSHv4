@@ -235,7 +235,7 @@ public abstract class DachsChpDriver extends ChpDriver
         super.onSystemIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -257,7 +257,7 @@ public abstract class DachsChpDriver extends ChpDriver
 
         this.notifyObserver(observerExchange);
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
@@ -268,7 +268,7 @@ public abstract class DachsChpDriver extends ChpDriver
         super.onNextTimePeriod();
 
         // still alive message
-        if (this.getTimer().getUnixTime() % 60 == 0) {
+        if (this.getTimeDriver().getUnixTime() % 60 == 0) {
             this.getGlobalLogger().logDebug("onNextTimePeriod() (getTimer().getUnixTime() % 60 == 0) - I'm still alive");
         }
     }

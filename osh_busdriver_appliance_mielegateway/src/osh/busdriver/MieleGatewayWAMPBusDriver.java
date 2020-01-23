@@ -146,7 +146,7 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
                     break;
                 }
 
-                long timestamp = this.getTimer().getUnixTime();
+                long timestamp = this.getTimeDriver().getUnixTime();
 
                 if (this.mieleGatewayDispatcher.getDeviceData().isEmpty()) { // an error has occurred
                     for (UUID uuid : this.deviceIds.keySet()) {
@@ -224,11 +224,11 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
 
                     // start time
                     if (dev.getStartTime() != null) {
-                        long now = this.getTimer().getUnixTime();
+                        long now = this.getTimeDriver().getUnixTime();
 
                         ZonedDateTime time =
                                 ZonedDateTime.ofInstant(Instant.ofEpochSecond(now),
-                                        this.getTimer().getHostTimeZone());
+                                        this.getTimeDriver().getHostTimeZone());
 
                         time.withHour(dev.getStartTime().hour());
                         time.withMinute(dev.getStartTime().minute());

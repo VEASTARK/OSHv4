@@ -13,20 +13,24 @@ import osh.datatypes.registry.commands.StopDeviceRequest;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.Registry.OCRegistry;
+import osh.registry.TimeRegistry;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
  * @author Sebastian Kramer
  */
 public final class DataTester {
+
+    private static final ZonedDateTime EPOCH = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
 
     private DataTester() {
 
@@ -49,14 +53,15 @@ public final class DataTester {
 
         osh.getOSHStatusObj().setIsSimulation(true);
 
-        HALRealTimeDriver realTimeDriver = new HALRealTimeDriver(
+        TimeRegistry timeRegistry = new TimeRegistry(osh, true);
+        osh.setTimeRegistry(timeRegistry);
+
+        EALTimeDriver realTimeDriver = new EALTimeDriver(
+                EPOCH,
+                true,
                 globalLogger,
-                ZoneId.of("UTC"),
-                true,
-                true,
-                1,
-                0);
-        osh.setTimer(realTimeDriver);
+                osh.getTimeRegistry());
+        osh.setTimeDriver(realTimeDriver);
 
         ComRegistry comRegistry = new ComRegistry(osh, true);
         OCRegistry ocRegistry = new OCRegistry(osh, true);
@@ -103,14 +108,14 @@ public final class DataTester {
         }
 
         public void sendEvent() {
-            StopDeviceRequest sdr = new StopDeviceRequest(this.uuid, UUID.randomUUID(), 0);
+            StopDeviceRequest sdr = new StopDeviceRequest(this.uuid, UUID.randomUUID(), EPOCH);
             ((OSH) this.getOSH()).getDriverRegistry().publish(StopDeviceRequest.class, sdr);
         }
 
         public void sendState() {
-            EpsStateExchange pls = new EpsStateExchange(this.uuid, 0);
+            EpsStateExchange pls = new EpsStateExchange(this.uuid, EPOCH);
             ((OSH) this.getOSH()).getDriverRegistry().publish(EpsStateExchange.class, this, pls);
-            EpsPlsStateExchange epsPls = new EpsPlsStateExchange(this.uuid, 0, null, null, 0, 0, 0, 0, 0, false);
+            EpsPlsStateExchange epsPls = new EpsPlsStateExchange(this.uuid, EPOCH, null, null, 0, 0, 0, 0, 0, false);
             ((OSH) this.getOSH()).getDriverRegistry().publish(EpsPlsStateExchange.class, this, epsPls);
         }
 
@@ -144,12 +149,12 @@ public final class DataTester {
         }
 
         public void sendEvent() {
-            StartDeviceRequest sdr = new StartDeviceRequest(this.uuid, UUID.randomUUID(), 0);
+            StartDeviceRequest sdr = new StartDeviceRequest(this.uuid, UUID.randomUUID(), EPOCH);
             ((OSH) this.getOSH()).getOCRegistry().publish(StartDeviceRequest.class, sdr);
         }
 
         public void sendState() {
-            PlsStateExchange pls = new PlsStateExchange(this.uuid, 0);
+            PlsStateExchange pls = new PlsStateExchange(this.uuid, EPOCH);
             ((OSH) this.getOSH()).getOCRegistry().publish(PlsStateExchange.class, this, pls);
         }
 

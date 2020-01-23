@@ -59,7 +59,7 @@ public abstract class WaterTankDriver
         this.getDriverRegistry().subscribe(TemperatureDetails.class, this.getUUID(),this);
 
         StaticCompressionExchange observerExchange =
-                new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
+                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), this.compressionType, this.compressionValue);
         this.notifyObserver(observerExchange);
     }
 }

@@ -4,6 +4,7 @@ import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class CommodityPowerStateExchange extends StateExchange {
      */
     public CommodityPowerStateExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             DeviceTypes deviceType) {
         this(
                 sender,
@@ -50,7 +51,7 @@ public class CommodityPowerStateExchange extends StateExchange {
      */
     public CommodityPowerStateExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             EnumMap<Commodity, Double> powerState,
             DeviceTypes deviceType) {
         super(sender, timestamp);

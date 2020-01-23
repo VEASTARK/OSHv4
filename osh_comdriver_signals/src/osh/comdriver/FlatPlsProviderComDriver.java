@@ -101,7 +101,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         this.powerLimitSignals = this.generateNewPowerLimitSignal(now);
         PlsComExchange ex = new PlsComExchange(
                 this.getUUID(),
@@ -112,7 +112,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
         this.lastTimeSignalSent = now;
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
 
@@ -133,7 +133,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         // generate new PriceSignal and send it
         if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
             // PLS

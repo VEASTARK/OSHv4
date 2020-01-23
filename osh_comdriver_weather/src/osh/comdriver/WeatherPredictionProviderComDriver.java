@@ -61,7 +61,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 3600);
+        this.getTimeDriver().registerComponent(this, 3600);
 
         // init weather prediction request thread
         this.reqPredictionRunnable = new WeatherPredictionRequestThread(this.getGlobalLogger(), this, this.urlToWeatherPrediction,
@@ -82,7 +82,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver {
         super.onNextTimePeriod();
 
         // still alive message
-        if (this.getTimer().getUnixTime() % 60 == 0) {
+        if (this.getTimeDriver().getUnixTime() % 60 == 0) {
             this.getGlobalLogger().logDebug("onNextTimePeriod() (getTimer().getUnixTime() % 60 == 0) - I'm still alive");
         }
 

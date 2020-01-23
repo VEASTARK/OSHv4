@@ -118,7 +118,7 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
 
     @Override
     public void onNextTimeTick() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // LOGIC
         double waterTemperature = this.commodityInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);

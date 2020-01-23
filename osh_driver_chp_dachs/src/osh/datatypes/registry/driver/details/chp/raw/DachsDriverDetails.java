@@ -3,6 +3,7 @@ package osh.datatypes.registry.driver.details.chp.raw;
 import osh.datatypes.registry.StateExchange;
 
 import javax.xml.bind.annotation.*;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -91,13 +92,13 @@ public class DachsDriverDetails extends StateExchange {
      */
     @Deprecated
     public DachsDriverDetails() {
-        super(null, 0);
+        super(null, null);
     }
 
     /**
      * CONSTRUCTOR
      */
-    public DachsDriverDetails(UUID sender, long timestamp) {
+    public DachsDriverDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

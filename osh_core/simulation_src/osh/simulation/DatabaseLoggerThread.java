@@ -12,6 +12,7 @@ import osh.utils.sql.SQLConnectionProvider;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
@@ -39,7 +40,7 @@ public final class DatabaseLoggerThread extends Thread {
     private static String gaTableName;
     private static String smartHeaterTableName;
     private static String runName;
-    private static long startTime;
+    private static ZonedDateTime startTime;
     private static int[] preferredConnection;
     private static Connection[] conn;
     private static boolean running = true;
@@ -55,7 +56,7 @@ public final class DatabaseLoggerThread extends Thread {
     private DatabaseLoggerThread() {
     }
 
-    public static void initLogger(String tableName, String runName, long startTime,
+    public static void initLogger(String tableName, String runName, ZonedDateTime startTime,
                                   int[] preferredConnection) {
         DatabaseLoggerThread.tableName = tableName;
         DatabaseLoggerThread.runName = runName;

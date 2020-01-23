@@ -2,6 +2,7 @@ package osh.datatypes.registry.oc.details;
 
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -23,7 +24,7 @@ public class SwitchOCDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public SwitchOCDetails(UUID sender, long timestamp) {
+    public SwitchOCDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

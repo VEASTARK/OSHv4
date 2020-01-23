@@ -10,12 +10,10 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.screenplay.ScreenplayType;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * @author Ingo Mauser, Florian Allerding, Sebastian Kramer
@@ -43,7 +41,7 @@ public class runSimulationPackage {
     static protected final int day = 1; // 1 = 1.
     static protected final int month = 1; // 7 = July
     static protected final int year = 1970;
-    static protected final int simulationDuration = 3 * 86400; //simulate 31 days
+    static protected final int simulationDuration = 31 * 86400; //simulate 31 days
     //	static private String configID = "oshsimconfig";
     static protected final String[] configIDs = {
             "example",
@@ -66,7 +64,7 @@ public class runSimulationPackage {
             //		{0xd1ce63L, 0xd1ce63L},
             //		{0xd1ce64L, 0xd1ce64L},
     };
-    static private long forcedStartTime; // 1.1.1970
+    static private ZonedDateTime forcedStartTime; // 1.1.1970
 
     // logger for exceptions etc.
     /**
@@ -85,15 +83,7 @@ public class runSimulationPackage {
     public static void main(String[] args) {
 
         // reset starting time
-        forcedStartTime = 0;
-        try {
-            XMLGregorianCalendar simulationStartTime = DatatypeFactory.newInstance()
-                    .newXMLGregorianCalendar(year, month, day, 0, 0, 0, 0, 0);
-            //					.newXMLGregorianCalendar(year, month, day, 0, 0, 0, 0, 0);
-            forcedStartTime = simulationStartTime.toGregorianCalendar().getTimeInMillis() / 1000L;
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+        forcedStartTime = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, ZoneId.of("UTC"));
 
         // iterate all configs
         for (String configID : configIDs) {
@@ -180,7 +170,6 @@ public class runSimulationPackage {
                             currentOCConfigFileName,
                             currentEalConfigFileName,
                             currentCALConfigFileName,
-                            ZoneId.of("UTC"),
                             forcedStartTime,
                             randomSeed,
                             optimizationMainRandomSeed,

@@ -82,7 +82,7 @@ public abstract class MieleApplianceSimulationDriver
                 return;
             }
 
-            long currentTime = this.getTimer().getUnixTime();
+            long currentTime = this.getTimeDriver().getUnixTime();
             int currentDurationSinceStart = (int) (currentTime - this.programStart);
             if (currentDurationSinceStart < 0) {
                 this.getGlobalLogger().logError("timewarp: currentDurationSinceStart is negative", new Exception());
@@ -148,7 +148,7 @@ public abstract class MieleApplianceSimulationDriver
 
     public void setSystemState(boolean systemState) {
         if (!this.systemState && systemState) {
-            this.programStart = this.getTimer().getUnixTime();
+            this.programStart = this.getTimeDriver().getUnixTime();
         }
 
         this.systemState = systemState;

@@ -159,7 +159,7 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         this.generatePriceSignals();
 
@@ -173,13 +173,13 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
         this.lastSignalSent = now - this.newSignalAfterThisPeriod;
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
     public void onNextTimePeriod() {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
             this.generatePriceSignals();
@@ -237,8 +237,8 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
         PriceSignal priceSignal;
 
 
-        long now = this.getTimer().getUnixTime();
-        if (now == this.getTimer().getUnixTimeAtStart()) {
+        long now = this.getTimeDriver().getUnixTime();
+        if (now == this.getTimeDriver().getUnixTimeAtStart()) {
             // initial price signal
             long timeSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
             long timeTillEndOfDay = 86400 - timeSinceMidnight;

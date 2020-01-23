@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.*;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -252,7 +253,7 @@ public class BControlHeaterDriverRawLogDetails extends StateExchange {
      */
     @Deprecated
     public BControlHeaterDriverRawLogDetails() {
-        super(null, 0L);
+        super(null, null);
     }
 
     /**
@@ -261,7 +262,7 @@ public class BControlHeaterDriverRawLogDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public BControlHeaterDriverRawLogDetails(UUID sender, long timestamp) {
+    public BControlHeaterDriverRawLogDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

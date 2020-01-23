@@ -41,8 +41,8 @@ public class July2013HollSpaceCoolingSimulationDriver
     public void onNextTimeTick() {
         if (!this.dates.isEmpty()) {
             ChillerCalendarDate date = this.dates.get(0);
-            if (date.getStartTimestamp() <= this.getTimer().getUnixTime()
-                    && date.getStartTimestamp() + date.getLength() >= this.getTimer().getUnixTime()) {
+            if (date.getStartTimestamp() <= this.getTimeDriver().getUnixTime()
+                    && date.getStartTimestamp() + date.getLength() >= this.getTimeDriver().getUnixTime()) {
 
 //				getGlobalLogger().logDebug("start: " + date.startTimestamp);
 //				getGlobalLogger().logDebug("length: " + date.length);
@@ -54,7 +54,7 @@ public class July2013HollSpaceCoolingSimulationDriver
 //				if (demand < 0) {
 //					getGlobalLogger().logDebug("Demand:" + demand + "outdoor: " + currentOutdoorTemperature);
 //				}
-            } else if (date.getStartTimestamp() + date.getLength() < this.getTimer().getUnixTime()) {
+            } else if (date.getStartTimestamp() + date.getLength() < this.getTimeDriver().getUnixTime()) {
                 this.dates.remove(0);
                 this.coldWaterPowerDemand = 0;
             }
@@ -67,7 +67,7 @@ public class July2013HollSpaceCoolingSimulationDriver
         SpaceCoolingObserverExchange ox =
                 new SpaceCoolingObserverExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getUnixTime(),
                         this.dates,
                         this.outdoorTemperature.getMap(),
                         (int) Math.round(this.coldWaterPowerDemand));

@@ -36,7 +36,7 @@ public class NonControllableInverterBatteryStorageObserver
     @Override
     public void onDeviceStateUpdate() {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // get OX
         BatteryStorageOX ox = (BatteryStorageOX) this.getObserverDataObject();
@@ -87,7 +87,7 @@ public class NonControllableInverterBatteryStorageObserver
         // save current state in OCRegistry (for e.g. GUI)
         BatteryStorageOCSX sx = new BatteryStorageOCSX(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getUnixTime(),
                 ox.getBatteryStateOfCharge(),
 //						ox.getBatteryStateOfHealth(),
                 ox.getBatteryMinChargingState(),

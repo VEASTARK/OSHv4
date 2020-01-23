@@ -224,7 +224,7 @@ public class Registry extends OSHComponent {
             try {
                 if (this.data.containsKey(identifier) && this.data.get(identifier).containsKey(sender)) {
                     AbstractExchange toPublish = this.data.get(identifier).get(sender);
-                    if (toPublish.getTimestamp() == this.getTimer().getUnixTime()) {
+                    if (toPublish.getTimestamp().isEqual(this.getTimeDriver().getCurrentTime())) {
                         this.retrieveCallback(listener).onListen(toPublish instanceof IPromiseToBeImmutable ?
                                 toPublish : (AbstractExchange) toPublish.clone());
                     }
@@ -282,7 +282,7 @@ public class Registry extends OSHComponent {
             try {
                 if (this.data.containsKey(identifier)) {
                     this.data.get(identifier).forEach((u, l) -> {
-                        if (l.getTimestamp() == this.getTimer().getUnixTime()) {
+                        if (l.getTimestamp().isEqual(this.getTimeDriver().getCurrentTime())) {
                             this.retrieveCallback(listener).onListen(l instanceof IPromiseToBeImmutable ?
                                     l : (AbstractExchange) l.clone());
                         }

@@ -77,7 +77,7 @@ public class DachsChpLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
 
@@ -111,7 +111,7 @@ public class DachsChpLocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     DeviceTypes.CHPPLANT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, this.activePower);

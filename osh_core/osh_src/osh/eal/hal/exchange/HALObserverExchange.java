@@ -1,5 +1,6 @@
 package osh.eal.hal.exchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -15,7 +16,7 @@ public abstract class HALObserverExchange extends HALExchange {
      * @param deviceID
      * @param timestamp
      */
-    public HALObserverExchange(UUID deviceID, Long timestamp) {
+    public HALObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

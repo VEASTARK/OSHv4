@@ -12,6 +12,7 @@ import osh.driver.thermal.SimpleHotWaterTank;
 import osh.esc.LimitedCommodityStateMap;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public class HotWaterTankNonControllableIPP
     public HotWaterTankNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime now,
             double initialTemperature,
             double tankCapacity,
             double tankDiameter,
@@ -123,7 +124,7 @@ public class HotWaterTankNonControllableIPP
                 this.initialTemperature,
                 this.ambientTemperature);
 
-        this.waterTank.reduceByStandingHeatLoss(this.interdependentTime - this.getTimestamp());
+        this.waterTank.reduceByStandingHeatLoss(this.interdependentTime - this.getTimestamp().toEpochSecond());
         this.firstTemperature = this.waterTank.getCurrentWaterTemperature();
 //		this.internalInterdependentOutputStates = new EnumMap<Commodity, RealCommodityState>(Commodity.class);
         this.internalInterdependentOutputStates.clear();

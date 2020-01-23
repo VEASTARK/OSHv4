@@ -92,7 +92,7 @@ public class DatabaseDofProviderComDriver extends CALComDriver {
         // add here some fancy code...
 
         ScheduledApplianceUIExchange applianceUIExchange = new ScheduledApplianceUIExchange(
-                this.getUUID(), this.getTimer().getUnixTime());
+                this.getUUID(), this.getTimeDriver().getUnixTime());
         return applianceUIExchange.getCurrentApplianceSchedules();
     }
 
@@ -106,7 +106,7 @@ public class DatabaseDofProviderComDriver extends CALComDriver {
             this.device2ndDegreeOfFreedom.put(e.getKey(), e.getValue());
         }
 
-        DofComExchange dce = new DofComExchange(this.getUUID(), this.getTimer().getUnixTime());
+        DofComExchange dce = new DofComExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
         dce.setDevice1stDegreeOfFreedom(this.device1stDegreeOfFreedom);
         dce.setDevice2ndDegreeOfFreedom(this.device2ndDegreeOfFreedom);
 

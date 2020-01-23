@@ -3,6 +3,7 @@ package osh.datatypes.registry.oc.state.globalobserver;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class GUIScheduleStateExchange extends StateExchange {
 
     public GUIScheduleStateExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             List<Schedule> schedules,
             int stepSize) {
         super(sender, timestamp);

@@ -4,6 +4,7 @@ import osh.datatypes.registry.StateExchange;
 import osh.openweathermap.current.CurrentWeatherMap;
 import osh.utils.DeepCopy;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -24,7 +25,7 @@ public class CurrentWeatherDetails extends StateExchange {
     /**
      * CONSTRUCTOR
      */
-    public CurrentWeatherDetails(UUID sender, long timestamp, CurrentWeatherMap currentWeatherMap) {
+    public CurrentWeatherDetails(UUID sender, ZonedDateTime timestamp, CurrentWeatherMap currentWeatherMap) {
         super(sender, timestamp);
 
         this.currentWeatherMap = (CurrentWeatherMap) DeepCopy.copy(currentWeatherMap);

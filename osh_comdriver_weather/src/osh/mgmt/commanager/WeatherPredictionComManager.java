@@ -31,7 +31,7 @@ public class WeatherPredictionComManager extends ComManager {
 
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override

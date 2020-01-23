@@ -71,7 +71,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
 
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
         this.generateLimitSignal(rand);
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         this.lastSignalSent = now;
 
         PlsComExchange ex = new PlsComExchange(
@@ -81,14 +81,14 @@ public class RandomPlsProviderComDriver extends CALComDriver {
         this.notifyComManager(ex);
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
     }
 
     @Override
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
 
         if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
@@ -107,7 +107,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
 
     private void generateLimitSignal(OSHRandomGenerator randomGen) {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         for (int i = 0; i < this.limitsToSet.length; i++) {
             AncillaryCommodity ac = this.limitsToSet[i];

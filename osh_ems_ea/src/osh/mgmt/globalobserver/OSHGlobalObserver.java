@@ -69,7 +69,7 @@ public class OSHGlobalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getTimeDriver().registerComponent(this, 1);
 
         this.getOCRegistry().subscribe(InterdependentProblemPart.class, this);
 
@@ -104,7 +104,7 @@ public class OSHGlobalObserver
                     GUIDeviceListStateExchange.class, this,
                     new GUIDeviceListStateExchange(
                             this.getUUID(),
-                            this.getTimer().getUnixTime(),
+                            this.getTimeDriver().getUnixTime(),
                             this.getDeviceList(this.getProblemParts())
                     )
             );
@@ -182,7 +182,7 @@ public class OSHGlobalObserver
             }
         }
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         // Export Commodity powerStates
         CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(

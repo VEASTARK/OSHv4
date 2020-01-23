@@ -12,6 +12,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class PvNonControllableIPP extends NonControllableIPP<ISolution, IPredict
     /**
      * CONSTRUCTOR
      */
-    public PvNonControllableIPP(UUID deviceId, IGlobalLogger logger, long timestamp, SparseLoadProfile predictedPVProfile,
+    public PvNonControllableIPP(UUID deviceId, IGlobalLogger logger, ZonedDateTime timestamp, SparseLoadProfile predictedPVProfile,
                                 LoadProfileCompressionTypes compressionType,
                                 int compressionValue) {
 

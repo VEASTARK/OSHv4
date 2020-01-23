@@ -45,7 +45,7 @@ public class SmartHeaterLocalObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getUnixTime();
 
         IHALExchange _ihal = this.getObserverDataObject();
 
@@ -65,7 +65,7 @@ public class SmartHeaterLocalObserver
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getUnixTime(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());

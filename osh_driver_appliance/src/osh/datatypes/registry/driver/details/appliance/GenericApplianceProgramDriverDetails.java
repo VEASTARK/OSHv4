@@ -3,6 +3,7 @@ package osh.datatypes.registry.driver.details.appliance;
 import osh.configuration.appliance.XsdLoadProfiles;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
      */
     @SuppressWarnings("unused")
     private GenericApplianceProgramDriverDetails() {
-        this(null, 0);
+        this(null, null);
     }
 
     /**
@@ -46,7 +47,7 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
      */
     public GenericApplianceProgramDriverDetails(
             UUID sender,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

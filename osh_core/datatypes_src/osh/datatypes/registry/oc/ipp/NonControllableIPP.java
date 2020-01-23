@@ -7,6 +7,7 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            long referenceTime,
+            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
@@ -66,7 +67,7 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            long referenceTime,
+            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             Commodity[] allInputCommodities,
