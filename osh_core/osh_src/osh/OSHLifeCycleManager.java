@@ -7,6 +7,7 @@ import osh.configuration.eal.EALConfiguration;
 import osh.configuration.oc.OCConfiguration;
 import osh.configuration.system.ComDeviceTypes;
 import osh.configuration.system.OSHConfiguration;
+import osh.configuration.system.RunningType;
 import osh.core.DataBroker;
 import osh.core.LifeCycleStates;
 import osh.core.OCManager;
@@ -18,9 +19,10 @@ import osh.core.logging.OSHGlobalLogger;
 import osh.datatypes.logger.SystemLoggerConfiguration;
 import osh.eal.hal.HALManager;
 import osh.eal.hal.exceptions.HALManagerException;
-import osh.registry.ComRegistry;
-import osh.registry.DriverRegistry;
-import osh.registry.OCRegistry;
+import osh.registry.Registry;
+import osh.registry.Registry.ComRegistry;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.Registry.OCRegistry;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
@@ -119,8 +121,6 @@ public class OSHLifeCycleManager {
             String logDir) throws LifeCycleManagerException {
 
         this.hasSimEngine = false;
-        ComRegistry comRegistry = new ComRegistry(this.theOrganicSmartHome);
-
         this.initOSHReadInFiles(
                 oshConfigFile,
                 ocConfigFile,
@@ -132,82 +132,7 @@ public class OSHLifeCycleManager {
                 optimizationMainRandomSeed,
                 runID,
                 configurationID,
-                logDir,
-                comRegistry);
-    }
-
-    /**
-     * Initialise the Organic Smart Home based on the given configuration files,
-     * - without a SimEngine (real)
-     * - with an external ComRegistry
-     */
-    public void initRealOSHFirstStep(
-            String oshConfigFile,
-            String ocConfigFile,
-            String ealConfigFile,
-            String calConfigFile,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
-            Long randomSeed,
-            Long optimizationMainRandomSeed,
-            String runID,
-            String configurationID,
-            String logDir,
-            ComRegistry comRegistry) throws LifeCycleManagerException {
-
-        this.hasSimEngine = false;
-
-        this.initOSHReadInFiles(
-                oshConfigFile,
-                ocConfigFile,
-                ealConfigFile,
-                calConfigFile,
-                hostTimeZone,
-                forcedStartTime,
-                randomSeed,
-                optimizationMainRandomSeed,
-                runID,
-                configurationID,
-                logDir,
-                comRegistry);
-    }
-
-    /**
-     * Initialise the Organic Smart Home based on the given configuration files,
-     * - with an external SimEngine
-     * - with an external ComRegistry
-     */
-    public void initOSHFirstStep(
-            String oshConfigFile,
-            String ocConfigFile,
-            String ealConfigFile,
-            String calConfigFile,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
-            Long randomSeed,
-            Long optimizationMainRandomSeed,
-            String runID,
-            String configurationID,
-            String logDir,
-            SimulationEngine simEngine,
-            ComRegistry comRegistry) throws LifeCycleManagerException {
-
-        this.simEngine = simEngine;
-        this.hasSimEngine = true;
-
-        this.initOSHReadInFiles(
-                oshConfigFile,
-                ocConfigFile,
-                ealConfigFile,
-                calConfigFile,
-                hostTimeZone,
-                forcedStartTime,
-                randomSeed,
-                optimizationMainRandomSeed,
-                runID,
-                configurationID,
-                logDir,
-                comRegistry);
+                logDir);
     }
 
     /**
@@ -231,7 +156,6 @@ public class OSHLifeCycleManager {
 
         this.hasSimEngine = true;
         this.screenPlayType = screenPlayType;
-        ComRegistry comRegistry = new ComRegistry(this.theOrganicSmartHome);
 
         this.initOSHReadInFiles(
                 oshConfigFile,
@@ -244,46 +168,7 @@ public class OSHLifeCycleManager {
                 optimizationMainRandomSeed,
                 runID,
                 configurationID,
-                logDir,
-                comRegistry);
-    }
-
-    /**
-     * Initialise the Organic Smart Home based on the given configuration files,
-     * - with a SimEngine instantiated in the EAL-Manager
-     * - with an external ComRegistry
-     */
-    public void initOSHFirstStep(
-            String oshConfigFile,
-            String ocConfigFile,
-            String ealConfigFile,
-            String calConfigFile,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
-            Long randomSeed,
-            Long optimizationMainRandomSeed,
-            String runID,
-            String configurationID,
-            String logDir,
-            ComRegistry comRegistry,
-            ScreenplayType screenPlayType) throws LifeCycleManagerException {
-
-        this.hasSimEngine = true;
-        this.screenPlayType = screenPlayType;
-
-        this.initOSHReadInFiles(
-                oshConfigFile,
-                ocConfigFile,
-                ealConfigFile,
-                calConfigFile,
-                hostTimeZone,
-                forcedStartTime,
-                randomSeed,
-                optimizationMainRandomSeed,
-                runID,
-                configurationID,
-                logDir,
-                comRegistry);
+                logDir);
     }
 
     /**
@@ -301,8 +186,7 @@ public class OSHLifeCycleManager {
             Long optimizationMainRandomSeed,
             String runID,
             String configurationID,
-            String logDir,
-            ComRegistry comRegistry) throws LifeCycleManagerException {
+            String logDir) throws LifeCycleManagerException {
 
         // load from files:
         Long usedRandomSeed = randomSeed;
@@ -370,19 +254,22 @@ public class OSHLifeCycleManager {
 
         //assigning Registries
 
+        boolean isSimulation = oshConfig.getRunningType() == RunningType.SIMULATION;
+
         // assign OCRegistry (O/C communication above HAL)
-        OCRegistry ocRegistry = new OCRegistry(this.theOrganicSmartHome);
+        OCRegistry ocRegistry = new OCRegistry(this.theOrganicSmartHome, isSimulation);
         this.theOrganicSmartHome.setOCRegistry(ocRegistry);
 
         // assign DriverRegistry (DeviceDriver, ComDriver and BusDriver communication below HAL)
-        DriverRegistry driverRegistry = new DriverRegistry(this.theOrganicSmartHome);
+        DriverRegistry driverRegistry = new DriverRegistry(this.theOrganicSmartHome, isSimulation);
         this.theOrganicSmartHome.setDriverRegistry(driverRegistry);
 
         // assign ComRegistry (communication to SignalProviders, REMS etc.)
-        this.theOrganicSmartHome.setExternalRegistry(comRegistry);
+        ComRegistry comRegistry = new ComRegistry(this.theOrganicSmartHome, isSimulation);
+        this.theOrganicSmartHome.setComRegistry(comRegistry);
 
         //instantiating the data broker and assiging it to the osh
-        this.dataBroker = new DataBroker(UUID.randomUUID(), this.theOrganicSmartHome);
+        this.dataBroker = new DataBroker(this.theOrganicSmartHome, UUID.randomUUID());
         this.theOrganicSmartHome.setDataBroker(this.dataBroker);
 
         this.initOSHSetupStatus(
@@ -524,98 +411,31 @@ public class OSHLifeCycleManager {
             throw new LifeCycleManagerException(ex);
         }
 
-        //start all component threads (do not start earlier, otherwise components
-        //get callbacks before the system is up. This can lead to evil race conditions.
-        this.theOrganicSmartHome.getComRegistry().startQueueProcessingThreads();
-        this.theOrganicSmartHome.getOCRegistry().startQueueProcessingThreads();
-        this.theOrganicSmartHome.getComRegistry().startQueueProcessingThreads();
-
         this.theOrganicSmartHome.getTimer().startTimerProcessingThreads();
     }
 
-//	private void handleSimEngine(
-//			String runID,
-//			String configurationID,
-//			String logDir) {
-//		
-//		//if sim engine is not from external, instantiate it now
-//		if (simEngine == null) {
-//
-//			ISimulationActionLogger simlogger = null;
-//			try {
-//				File theDir = new File(logDir);
-//
-//				// if the directory does not exist, create it
-//				if (!theDir.exists()) {
-//					theDir.mkdir();  
-//				}
-//
-//				simlogger = new ActionSimulationLogger( 
-//						globalLogger, 
-//						logDir + "/" + configurationID + "_" + oshConfiguration.getRandomSeed() + "_actionlog.mxml");
-//			} 
-//			catch (FileNotFoundException e) {
-//				e.printStackTrace();
-//			}
-//
-//			// MINUTEWISE POWER LOGGER
-//			PrintWriter powerWriter = null;
-//			try {
-//				powerWriter = new PrintWriter(new File("" + logDir + "/" + configurationID + "_" + oshConfiguration.getRandomSeed() + "_powerlog" + ".csv"));
-//				powerWriter.println("currentTick" 
-//						+ ";" + "currentActivePowerConsumption"
-//						+ ";" + "currentActivePowerPv"
-//						+ ";" + "currentActivePowerPvAutoConsumption" 
-//						+ ";" + "currentActivePowerPvFeedIn"
-//						+ ";" + "currentActivePowerChp"
-//						+ ";" + "currentActivePowerChpAutoConsumption" 
-//						+ ";" + "currentActivePowerChpFeedIn"
-//						+ ";" + "currentActivePowerBatteryCharging"
-//						+ ";" + "currentActivePowerBatteryDischarging"
-//						+ ";" + "currentActivePowerBatteryAutoConsumption" 
-//						+ ";" + "currentActivePowerBatteryFeedIn"
-//						+ ";" + "currentActivePowerExternal"
-//						+ ";" + "currentReactivePowerExternal" 
-//						+ ";" + "currentGasPowerExternal"
-//						+ ";" + "epsCosts"
-//						+ ";" + "plsCosts"
-//						+ ";" + "gasCosts"
-//						+ ";" + "feedInCostsPV"
-//						+ ";" + "feedInCostsCHP"
-//						+ ";" + "autoConsumptionCosts"
-//						+ ";" + "currentPvFeedInPrice");
-//			} 
-//			catch (FileNotFoundException e2) {
-//				e2.printStackTrace();
-//			}
-//			
-//			ArrayList<OSHComponent> allDrivers = new ArrayList<>();
-//			
-//			allDrivers.addAll(ealManager.getConnectedBusManagers());
-//			allDrivers.addAll(ealManager.getConnectedDevices());
-//
-//			simEngine = new BuildingSimulationEngine(
-//					allDrivers,
-//					oshConfiguration.getEngineParameters(),
-//					ocManager.getESC(),
-//					currentScreenplayType,
-//					simlogger,
-//					powerWriter);
-//
-//			//assign time base
-//			simEngine.assignTimerDriver(ealManager.getRealTimeDriver());
-//		}
-//		
-//		//assign Com-Registry
-//		simEngine.assignComRegistry(theOrganicSmartHome.getComRegistry());
-//
-//		//assign OC-Registry
-//		simEngine.assignOCRegistry(theOrganicSmartHome.getOCRegistry());
-//
-//		//assign Driver-Registry
-//		simEngine.assignDriverRegistry(theOrganicSmartHome.getDriverRegistry());
-//	}
+    protected void prepareSystemShutdown() {
+        this.globalLogger.logInfo("...Shutting down registries!");
+        boolean allQueuesEmpty = true;
 
+        do {
+            allQueuesEmpty &= this.processRegistry(this.theOrganicSmartHome.getComRegistry());
+            allQueuesEmpty &= this.processRegistry(this.theOrganicSmartHome.getDriverRegistry());
+            allQueuesEmpty &= this.processRegistry(this.theOrganicSmartHome.getOCRegistry());
+
+        } while (!allQueuesEmpty);
+    }
+
+    protected boolean processRegistry(Registry registry) {
+        // empty all queues
+        if (registry != null) {
+            return registry.flushQueue();
+        } else {
+            System.out.println("ERROR: No Registry available!");
+            System.exit(0); // shutdown
+            return true;
+        }
+    }
 
     public void switchToLifeCycleState(LifeCycleStates nextState) throws OSHException {
         this.currentState = nextState;
@@ -645,6 +465,7 @@ public class OSHLifeCycleManager {
                 this.ocManager.onSystemShutdown();
                 this.ealManager.onSystemShutdown();
                 this.calManager.onSystemShutdown();
+                this.prepareSystemShutdown();
                 DatabaseLoggerThread.shutDown();
                 this.globalLogger.logInfo("...switching to SYSTEM_SHUTDOWN");
                 break;

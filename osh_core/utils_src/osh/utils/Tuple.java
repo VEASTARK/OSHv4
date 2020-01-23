@@ -4,36 +4,58 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * represents a generic tuple of objects
+ * A generic tuple of elements
  *
- * @author Sebastian Kramer
+ * @param <T> the type of the first element
+ * @param <U> the type of the second element
  */
-public class Tuple<K, V> implements Serializable {
+public class Tuple<T, U> implements Serializable {
 
-    private static final long serialVersionUID = -520076694436184937L;
+    private static final long serialVersionUID = -6742311460616489454L;
+    private T t;
+    private U u;
 
-    private K k;
-    private V v;
-
-    public Tuple(K k, V v) {
-        this.k = k;
-        this.v = v;
+    /**
+     * Generates a tuple of the given elements.
+     *
+     * @param t the first element of this tuple
+     * @param u the second element of this tuple
+     */
+    public Tuple(T t, U u) {
+        this.t = t;
+        this.u = u;
     }
 
-    public K getFirst() {
-        return this.k;
+    /**
+     * Returns the first element of this tuple.
+     * @return the first element of the tuple
+     */
+    public T getFirst() {
+        return this.t;
     }
 
-    public void setFirst(K k) {
-        this.k = k;
+    /**
+     * Sets the first element of this tuple to the given value.
+     * @param t the new first element
+     */
+    public void setFirst(T t) {
+        this.t = t;
     }
 
-    public V getSecond() {
-        return this.v;
+    /**
+     * Returns the second element of this tuple.
+     * @return the second element of the tuple
+     */
+    public U getSecond() {
+        return this.u;
     }
 
-    public void setSecond(V v) {
-        this.v = v;
+    /**
+     * Sets the second element of this tuple to the given value.
+     * @param u the new second element
+     */
+    public void setSecond(U u) {
+        this.u = u;
     }
 
     @Override
@@ -41,13 +63,12 @@ public class Tuple<K, V> implements Serializable {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
         Tuple<?, ?> tuple = (Tuple<?, ?>) o;
-        return Objects.equals(this.k, tuple.k) &&
-                Objects.equals(this.v, tuple.v);
+        return Objects.equals(this.t, tuple.t) &&
+                Objects.equals(this.u, tuple.u);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(this.k, this.v);
+        return Objects.hash(this.t, this.u);
     }
 }

@@ -156,23 +156,32 @@ class DeviceTable extends JPanel {
         @Override
         public void addTableModelListener(TableModelListener l) {
             this.listenerWriteLock.lock();
-            if (l != null) this.modelListeners.add(l);
-            this.listenerWriteLock.unlock();
+            try {
+                if (l != null) this.modelListeners.add(l);
+            } finally {
+                this.listenerWriteLock.unlock();
+            }
         }
 
         @Override
         public void removeTableModelListener(TableModelListener l) {
             this.listenerWriteLock.lock();
-            if (l != null) this.modelListeners.remove(l);
-            this.listenerWriteLock.unlock();
+            try {
+                if (l != null) this.modelListeners.remove(l);
+            } finally {
+                this.listenerWriteLock.unlock();
+            }
         }
 
         private void notifyTableModelListener() {
             HashSet<TableModelListener> listeners;
 
             this.listenerWriteLock.lock();
-            listeners = new HashSet<>(this.modelListeners);
-            this.listenerWriteLock.unlock();
+            try {
+                listeners = new HashSet<>(this.modelListeners);
+            } finally {
+                this.listenerWriteLock.unlock();
+            }
 
             for (TableModelListener l : listeners) {
                 l.tableChanged(new TableModelEvent(this));

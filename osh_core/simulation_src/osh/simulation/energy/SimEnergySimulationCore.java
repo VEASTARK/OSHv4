@@ -65,7 +65,7 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
 //				EnumMap<Commodity,RealCommodityState> commodityList = _simSubject.getCommodityOutputStates();
             LimitedCommodityStateMap commodityList = _simSubject.getCommodityOutputStates();
 
-            UUID simSubjID = _simSubject.getDeviceID();
+            UUID simSubjID = _simSubject.getUUID();
             simSubjCommodityStates.put(simSubjID, commodityList);
 
             //for SimulationDevices
@@ -88,7 +88,7 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
         // Inform subjects about input states (total flow)
         try {
             for (IEnergySubject _simSubject : energySimulationSubjects) {
-                UUID simSubjID = _simSubject.getDeviceID();
+                UUID simSubjID = _simSubject.getUUID();
 //				EnumMap<Commodity,RealCommodityState> simSubjState = totalInputStates.get(simSubjID);
                 LimitedCommodityStateMap simSubjState = totalInputStates.get(simSubjID);
 

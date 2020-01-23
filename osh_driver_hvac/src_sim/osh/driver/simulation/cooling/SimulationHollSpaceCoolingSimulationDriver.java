@@ -70,7 +70,7 @@ public class SimulationHollSpaceCoolingSimulationDriver
 
         SpaceCoolingObserverExchange ox =
                 new SpaceCoolingObserverExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         this.dates,
                         this.outdoorTemperature.getMap(),

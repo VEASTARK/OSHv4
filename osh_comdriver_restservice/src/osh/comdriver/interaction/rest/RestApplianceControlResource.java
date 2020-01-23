@@ -7,7 +7,7 @@ import osh.comdriver.interaction.datatypes.RestDeviceMetaDetails;
 import osh.comdriver.interaction.datatypes.fzi.appliancecontrol.RestApplianceControlApplianceStatusDetails;
 import osh.eal.hal.HALRealTimeDriver;
 import osh.mgmt.commanager.HttpRestInteractionBusManager;
-import osh.registry.DriverRegistry;
+import osh.registry.Registry.DriverRegistry;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

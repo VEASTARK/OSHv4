@@ -7,7 +7,6 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.dof.DofStateExchange;
-import osh.registry.interfaces.IHasState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * @author Sebastian Kramer
  */
-public class DofWAMPComDriver extends CALComDriver implements Runnable, IHasState {
+public class DofWAMPComDriver extends CALComDriver implements Runnable {
 
     private final Lock dispatcherWriteLock = new ReentrantReadWriteLock().writeLock();
     private final Map<Integer, UUID> mieleUUIDMap = new HashMap<>();
@@ -85,8 +84,10 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable, IHasStat
                 this.dofDispatcher.wait();
             } catch (InterruptedException e) {
                 this.getGlobalLogger().logError("should not happen", e);
-                this.dispatcherWriteLock.unlock();
+
                 break;
+            } finally {
+                this.dispatcherWriteLock.unlock();
             }
 
             long timestamp = this.getTimer().getUnixTime();
@@ -102,18 +103,12 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable, IHasStat
                     DofStateExchange dse = new DofStateExchange(mieleUUID, timestamp);
                     dse.setDevice1stDegreeOfFreedom(dof.getValue());
                     dse.setDevice2ndDegreeOfFreedom(dof.getValue());
-                    this.getComRegistry().setStateOfSender(DofStateExchange.class, dse);
+                    this.getComRegistry().publish(DofStateExchange.class, dse);
 
                     this.lastSentValues.put(mieleUUID, dof.getValue());
                 }
             }
             this.dispatcherWriteLock.unlock();
         }
-    }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
     }
 }

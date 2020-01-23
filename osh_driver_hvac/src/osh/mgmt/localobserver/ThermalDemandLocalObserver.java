@@ -4,16 +4,12 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalObserver;
 import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.mox.IModelOfObservationType;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser
  */
 public abstract class ThermalDemandLocalObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
 
     /**
@@ -29,10 +25,4 @@ public abstract class ThermalDemandLocalObserver
             IModelOfObservationType type) {
         return null;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

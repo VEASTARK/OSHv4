@@ -20,8 +20,8 @@ public class CommodityPowerStateExchange extends StateExchange {
      *
      */
     private static final long serialVersionUID = 2451111383309555786L;
-    final EnumMap<Commodity, Double> powerState;
-    final DeviceTypes deviceType;
+    private final EnumMap<Commodity, Double> powerState;
+    private final DeviceTypes deviceType;
 
 
     /**

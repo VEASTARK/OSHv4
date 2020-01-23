@@ -62,6 +62,7 @@ subprojects {
             dependency group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.+'
             dependency group: 'org.jfree', name: 'jcommon', version: '1.+'
             dependency group: 'org.jfree', name: 'jfreechart', version: '1.+'
+            dependency group: 'org.reflections', name: 'reflections', version: '0.+'
             dependency group: 'org.rrd4j', name: 'rrd4j', version: '3.+'
             dependency group: 'ws.wamp.jawampa', name: 'jawampa-core', version: '0.+'
             dependency group: 'ws.wamp.jawampa', name: 'jawampa-netty', version: '0.+'

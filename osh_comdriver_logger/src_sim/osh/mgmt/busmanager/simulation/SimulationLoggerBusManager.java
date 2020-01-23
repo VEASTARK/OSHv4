@@ -2,7 +2,7 @@ package osh.mgmt.busmanager.simulation;
 
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.mgmt.busmanager.LoggerBusManager;
 
 import java.util.UUID;
@@ -124,8 +124,7 @@ public class SimulationLoggerBusManager extends LoggerBusManager {
 
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
         //TODO
     }
 

@@ -9,8 +9,8 @@ import osh.busdriver.mielegateway.data.MieleDuration;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.CommandExchange;
-import osh.datatypes.registry.EventExchange;
 import osh.datatypes.registry.commands.StartDeviceRequest;
 import osh.datatypes.registry.commands.StopDeviceRequest;
 import osh.datatypes.registry.commands.SwitchRequest;
@@ -23,7 +23,7 @@ import osh.datatypes.registry.driver.details.appliance.miele.MieleApplianceDrive
 import osh.eal.hal.HALBusDriver;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.en50523.EN50523DeviceState;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.uuid.UUIDGenerationHelperMiele;
 
 import java.net.InetAddress;
@@ -41,7 +41,7 @@ import java.util.UUID;
  * @author Kaibin Bao, Ingo Mauser
  */
 //FIXME: Error handling, if device is (temporarily not found by Miele GW)
-public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable {
+public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable, IDataRegistryListener {
 
     private final String mieleGatewayHost;
     private MieleGatewayRESTDispatcher mieleGatewayDispatcher;
@@ -161,7 +161,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable 
                 if (this.mieleGatewayDispatcher.getDeviceData().isEmpty()) { // an error has occurred
                     for (UUID uuid : this.deviceProperties.keySet()) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(uuid, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                     }
                 }
 
@@ -177,49 +177,24 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable 
                     }
                     final UUID devUUID = new UUID(uuidHigh, uuidLow);
 
-                    MieleGatewayRESTBusDriver driver = this;
 
                     // register UUID as command receiver to the registry
                     if (!this.deviceProperties.containsKey(devUUID)) { // device already known?
-                        IEventTypeReceiver eventReceiver = new IEventTypeReceiver() {
-                            @Override
-                            public Object getSyncObject() {
-                                return MieleGatewayRESTBusDriver.this;
-                            }
-
-                            @Override
-                            public UUID getUUID() {
-                                return devUUID;
-                            }
-
-                            @Override
-                            public <T extends EventExchange> void onQueueEventTypeReceived(
-                                    Class<T> type, T event) {
-//								this.onQueueEventTypeReceived(type, event);
-                                driver.onQueueEventReceived(event);
-                            }
-                        };
-
                         // register device
-                        try {
-                            this.getDriverRegistry().register(StartDeviceRequest.class, eventReceiver);
-                            this.getDriverRegistry().register(StopDeviceRequest.class, eventReceiver);
-                            this.getDriverRegistry().register(SwitchRequest.class, eventReceiver);
-                            this.deviceProperties.put(devUUID, new HashMap<>());
-                        } catch (OSHException e) {
-                            // nop. happens.
-                            this.getGlobalLogger().logError("should not happen", e);
-                        }
+                        this.getDriverRegistry().subscribe(StartDeviceRequest.class, devUUID, this);
+                        this.getDriverRegistry().subscribe(StopDeviceRequest.class, devUUID, this);
+                        this.getDriverRegistry().subscribe(SwitchRequest.class, devUUID, this);
+                        this.deviceProperties.put(devUUID, new HashMap<>());
                     }
 
                     // check if all data is available
                     if (dev.getDeviceDetails() == null) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                         continue;
                     } else {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ATTACHED);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                     }
 
                     // create program details
@@ -264,22 +239,22 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable 
 
                     // set state of the UUID
                     try {
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 GenericApplianceDriverDetails.class,
                                 createApplianceDetails(devUUID, timestamp, dev));
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 StartTimeDetails.class,
                                 createStartTimeDetails(devUUID, timestamp, dev));
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 GenericApplianceProgramDriverDetails.class,
                                 programDetails);
-                        this.getDriverRegistry().setStateOfSender(
+                        this.getDriverRegistry().publish(
                                 MieleApplianceDriverDetails.class,
                                 mieleDetails);
 
                     } catch (OSHException e1) {
                         BusDeviceStatusDetails bs = new BusDeviceStatusDetails(devUUID, timestamp, ConnectionStatus.ERROR);
-                        this.getDriverRegistry().setStateOfSender(BusDeviceStatusDetails.class, bs);
+                        this.getDriverRegistry().publish(BusDeviceStatusDetails.class, bs);
                         this.getGlobalLogger().logError(e1);
                     }
 
@@ -310,15 +285,18 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable 
         // NOTHING
     }
 
-    public void onQueueEventReceived(EventExchange event) {
-        if (event instanceof CommandExchange) {
-            UUID devUUID = ((CommandExchange) event).getReceiver();
+
+
+    @Override
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof CommandExchange) {
+            UUID devUUID = ((CommandExchange) exchange).getReceiver();
             Map<String, String> devProps = this.deviceProperties.get(devUUID);
 
             if (devProps != null) { // known device?
                 if (devProps.containsKey("type") && devProps.containsKey("id")) {
                     URIBuilder builder = new URIBuilder();
-                    if (event instanceof StartDeviceRequest) {
+                    if (exchange instanceof StartDeviceRequest) {
                         builder
                                 .setScheme("http")
                                 .setHost(this.mieleGatewayHost)
@@ -329,7 +307,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable 
                         //						.setParameter("actionId", "start")
                         //						.setParameter("argumentCount", "0");
                     } else {
-                        if (event instanceof StopDeviceRequest) {
+                        if (exchange instanceof StopDeviceRequest) {
                             builder
                                     .setScheme("http")
                                     .setHost(this.mieleGatewayHost)
@@ -338,14 +316,14 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable 
                                     .setParameter("id", devProps.get("id"))
                                     .setParameter("action", "stop");
                         } else {
-                            if (event instanceof SwitchRequest) {
+                            if (exchange instanceof SwitchRequest) {
                                 builder
                                         .setScheme("http")
                                         .setHost(this.mieleGatewayHost)
                                         .setPath("/homebus/device")
                                         .setParameter("type", devProps.get("type"))
                                         .setParameter("id", devProps.get("id"))
-                                        .setParameter("action", ((SwitchRequest) event).isTurnOn() ? "switchOn" : "switchOff");
+                                        .setParameter("action", ((SwitchRequest) exchange).isTurnOn() ? "switchOn" : "switchOff");
                             } else {
                                 return;
                             }

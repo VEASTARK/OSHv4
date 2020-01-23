@@ -7,6 +7,7 @@ import osh.core.interfaces.IOSH;
 import osh.eal.hal.HALRealTimeDriver;
 import osh.eal.hal.IDriverDataSubscriber;
 import osh.eal.hal.exchange.IHALExchange;
+import osh.registry.interfaces.IProvidesIdentity;
 
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ import java.util.UUID;
  *
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
-public abstract class LocalObserver extends Observer implements IDriverDataSubscriber {
+public abstract class LocalObserver extends Observer implements IDriverDataSubscriber, IProvidesIdentity {
 
     // the local O/C-Unit
     private LocalOCUnit assignedOCUnit;
@@ -51,7 +52,8 @@ public abstract class LocalObserver extends Observer implements IDriverDataSubsc
         return this.assignedOCUnit.localController;
     }
 
-    public UUID getDeviceID() {
+    @Override
+    public UUID getUUID() {
         return this.assignedOCUnit.getUnitID();
     }
 

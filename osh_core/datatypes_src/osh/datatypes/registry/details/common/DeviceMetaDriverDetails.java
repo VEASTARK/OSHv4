@@ -99,8 +99,8 @@ public class DeviceMetaDriverDetails extends StateExchange {
 
     @Override
     public DeviceMetaDriverDetails clone() {
-        long uuidSenderLSB = this.sender.getLeastSignificantBits();
-        long uuidSenderMSB = this.sender.getMostSignificantBits();
+        long uuidSenderLSB = this.getSender().getLeastSignificantBits();
+        long uuidSenderMSB = this.getSender().getMostSignificantBits();
         DeviceMetaDriverDetails clone = new DeviceMetaDriverDetails(new UUID(uuidSenderMSB, uuidSenderLSB), this.getTimestamp());
 
         clone.name = this.name;

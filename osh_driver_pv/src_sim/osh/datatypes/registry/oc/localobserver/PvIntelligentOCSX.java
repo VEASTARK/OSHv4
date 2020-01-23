@@ -1,6 +1,7 @@
 package osh.datatypes.registry.oc.localobserver;
 
 import osh.datatypes.registry.StateExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 /**
  * @author Jan Mueller, Sebastian Kochanneck
  */
-public class PvIntelligentOCSX extends StateExchange {
+public class PvIntelligentOCSX extends StateExchange implements IPromiseToBeImmutable {
 
     /**
      *

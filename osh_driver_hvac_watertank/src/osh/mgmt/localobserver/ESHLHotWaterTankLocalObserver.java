@@ -4,8 +4,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
@@ -16,19 +15,17 @@ import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Jan Mueller
  */
 public class ESHLHotWaterTankLocalObserver
         extends WaterTankLocalObserver
-        implements IHasState, IEventTypeReceiver {
+        implements IDataRegistryListener {
 
     private final double defaultPunishmentFactorPerWsPowerLost = 6.0 / 3600000.0;
     TreeMap<Long, Double> temperaturePrediction = new TreeMap<>();
@@ -60,8 +57,8 @@ public class ESHLHotWaterTankLocalObserver
         super.onSystemIsUp();
 
         this.getTimer().registerComponent(this, 1);
-        this.getOCRegistry().register(EAPredictionCommandExchange.class, this);
-        this.getOCRegistry().registerStateChangeListener(EpsStateExchange.class, this);
+        this.getOCRegistry().subscribe(EAPredictionCommandExchange.class,this.getUUID(), this);
+        this.getOCRegistry().subscribe(EpsStateExchange.class, this.getUUID(), this);
     }
 
 
@@ -73,7 +70,7 @@ public class ESHLHotWaterTankLocalObserver
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     this.currentTemperature,
@@ -84,7 +81,7 @@ public class ESHLHotWaterTankLocalObserver
                     false,
                     this.compressionType,
                     this.compressionValue);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class,
                     this,
                     ex);
@@ -94,7 +91,7 @@ public class ESHLHotWaterTankLocalObserver
             Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(now);
             if (predEntry != null && Math.abs(predEntry.getValue() - this.currentTemperature) > 2) {
                 HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         now,
                         this.currentTemperature,
@@ -105,7 +102,7 @@ public class ESHLHotWaterTankLocalObserver
                         true,
                         this.compressionType,
                         this.compressionValue);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         InterdependentProblemPart.class,
                         this,
                         ex);
@@ -138,7 +135,7 @@ public class ESHLHotWaterTankLocalObserver
 
                 HotWaterTankNonControllableIPP ex;
                 ex = new HotWaterTankNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         this.getTimer().getUnixTime(),
                         this.currentTemperature,
@@ -149,7 +146,7 @@ public class ESHLHotWaterTankLocalObserver
                         false,
                         this.compressionType,
                         this.compressionValue);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         InterdependentProblemPart.class,
                         this,
                         ex);
@@ -159,15 +156,15 @@ public class ESHLHotWaterTankLocalObserver
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,
                     0,
                     0,
-                    this.getDeviceID());
-            this.getOCRegistry().setState(
+                    this.getUUID());
+            this.getOCRegistry().publish(
                     WaterStorageOCSX.class,
                     this,
                     sx);
@@ -182,20 +179,11 @@ public class ESHLHotWaterTankLocalObserver
         }
     }
 
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-
-    @Override
     @SuppressWarnings("unchecked")
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
-        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getDeviceID())) {
-            StateChangedExchange exsc = (StateChangedExchange) event;
-
-            if (exsc.getType().equals(EpsStateExchange.class)) {
-                EpsStateExchange eee = this.getOCRegistry().getState(EpsStateExchange.class, exsc.getStatefulEntity());
+    @Override
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof EpsStateExchange) {
+                EpsStateExchange eee = (EpsStateExchange) exchange;
 
                 long now = this.getTimer().getUnixTime();
                 double firstPrice = eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPrice(now);
@@ -203,12 +191,10 @@ public class ESHLHotWaterTankLocalObserver
                         eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPriceUnknownAtAndAfter() - 1);
 
                 this.lastKnownGasPrice = (firstPrice + lastPrice) / 2.0;
-            }
-        }
-        if (event instanceof EAPredictionCommandExchange) {
-            EAPredictionCommandExchange<HotWaterTankPrediction> exs = ((EAPredictionCommandExchange<HotWaterTankPrediction>) event);
+
+        } else if (exchange instanceof EAPredictionCommandExchange) {
+            EAPredictionCommandExchange<HotWaterTankPrediction> exs = ((EAPredictionCommandExchange<HotWaterTankPrediction>) exchange);
             this.temperaturePrediction = exs.getPrediction().getTemperatureStates();
         }
     }
-
 }

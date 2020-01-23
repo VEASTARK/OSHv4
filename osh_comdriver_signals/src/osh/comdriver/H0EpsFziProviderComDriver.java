@@ -183,7 +183,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
 
         this.priceSignals = this.generateNewPriceSignal();
         EpsComExchange ex = new EpsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 this.priceSignals);
         this.notifyComManager(ex);
@@ -226,7 +226,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
             // EPS
             this.priceSignals = this.generateNewPriceSignal();
             EpsComExchange ex = new EpsComExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     this.priceSignals);
             this.notifyComManager(ex);

@@ -264,7 +264,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 
         //now sending priceSignal
         EpsComExchange ex = new EpsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 priceSignals);
         this.updateComDataSubscriber(ex);

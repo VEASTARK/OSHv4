@@ -116,7 +116,7 @@ public abstract class DeviceSimulationDriver
 
     @Override
     public void onSystemIsUp() {
-        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime(),
+        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(),
                 this.compressionType, this.compressionValue);
 
         this.notifyObserver(_stat);

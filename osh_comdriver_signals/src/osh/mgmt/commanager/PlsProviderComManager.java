@@ -8,7 +8,6 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.hal.exchange.PlsComExchange;
-import osh.registry.interfaces.IHasState;
 
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -18,8 +17,7 @@ import java.util.UUID;
  * @author Ingo Mauser
  */
 public class PlsProviderComManager
-        extends ComManager
-        implements IHasState {
+        extends ComManager {
 
 
     /**
@@ -55,7 +53,7 @@ public class PlsProviderComManager
                 priceDetails.setPowerLimitSignal(e.getKey(), e.getValue());
             }
 
-            this.getOCRegistry().setState(PlsStateExchange.class, this, priceDetails);
+            this.getOCRegistry().publish(PlsStateExchange.class, this, priceDetails);
         } else {
             try {
                 throw new OSHException("Signal unknown");

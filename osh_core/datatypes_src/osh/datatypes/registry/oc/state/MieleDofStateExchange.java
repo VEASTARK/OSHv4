@@ -1,6 +1,7 @@
 package osh.datatypes.registry.oc.state;
 
 import osh.datatypes.registry.StateExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.UUID;
@@ -9,7 +10,7 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
  */
-public class MieleDofStateExchange extends StateExchange {
+public class MieleDofStateExchange extends StateExchange implements IPromiseToBeImmutable {
 
     /**
      *

@@ -35,9 +35,6 @@ class CruiseControl extends JPanel {
 
         this.waitAllowed = waitAllowed;
 
-//        this.timeFormatter = DateFormat.getDateTimeInstance();
-//        this.timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-
         FlowLayout layout = new FlowLayout();
         this.setLayout(layout);
 
@@ -69,8 +66,11 @@ class CruiseControl extends JPanel {
         JButton b = new JButton("go");
         b.addActionListener(e -> {
             this.goWriteLock.lock();
-            this.go = -1;
-            this.goWriteLock.unlock();
+            try {
+                this.go = -1;
+            } finally {
+                this.goWriteLock.unlock();
+            }
         });
         this.add(b);
 
@@ -111,9 +111,10 @@ class CruiseControl extends JPanel {
             try {
                 this.go = Long.parseLong(tf.getText());
             } catch (NumberFormatException ignored) {
+            } finally {
+                this.goWriteLock.unlock();
             }
             c_wait.setEnabled(true);
-            this.goWriteLock.unlock();
         });
         this.add(b);
 
@@ -132,12 +133,14 @@ class CruiseControl extends JPanel {
     public void waitForGo() {
         while (true) {
             this.goWriteLock.lock();
-            if (this.go < 0 || this.go > this.currentTime) {
-                if (this.go < 0) this.go = 0; // wait next time again
+            try {
+                if (this.go < 0 || this.go > this.currentTime) {
+                    if (this.go < 0) this.go = 0; // wait next time again
+                    return;
+                }
+            } finally {
                 this.goWriteLock.unlock();
-                return;
             }
-            this.goWriteLock.unlock();
 
             try {
                 Thread.sleep(100);

@@ -68,9 +68,11 @@ public class DofWAMPDispatcher {
      */
     public Integer getDeviceDof(Integer id) {
         this.deviceLock.readLock().lock();
-        Integer dof = this.deviceData.get(id);
-        this.deviceLock.readLock().unlock();
-        return dof;
+        try  {
+            return this.deviceData.get(id);
+        } finally {
+            this.deviceLock.readLock().unlock();
+        }
     }
 
     /**
@@ -81,9 +83,11 @@ public class DofWAMPDispatcher {
      */
     public Map<Integer, Integer> getDeviceMap() {
         this.deviceLock.readLock().lock();
-        HashMap<Integer, Integer> devices = new HashMap<>(this.deviceData);
-        this.deviceLock.readLock().unlock();
-        return devices;
+        try {
+            return new HashMap<>(this.deviceData);
+        } finally {
+            this.deviceLock.readLock().unlock();
+        }
     }
 
     public void subscribeForWampUpdates() {
@@ -126,11 +130,13 @@ public class DofWAMPDispatcher {
                                                                 });
 
                                                         this.deviceLock.writeLock().lock();
-                                                        this.deviceData.clear();
-                                                        this.deviceData.putAll(map);
-                                                        this.notifyAll();
-                                                        this.deviceLock.writeLock().unlock();
-
+                                                        try {
+                                                            this.deviceData.clear();
+                                                            this.deviceData.putAll(map);
+                                                            this.notifyAll();
+                                                        } finally {
+                                                            this.deviceLock.writeLock().unlock();
+                                                        }
                                                     } catch (IllegalArgumentException e) {
                                                         // error
                                                     }

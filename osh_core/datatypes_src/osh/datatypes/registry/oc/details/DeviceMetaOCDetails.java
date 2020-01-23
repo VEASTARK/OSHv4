@@ -15,13 +15,13 @@ public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
      *
      */
     private static final long serialVersionUID = -6362041571466196750L;
-    protected String name;
-    protected String location;
+    private String name;
+    private String location;
 
-    protected DeviceTypes deviceType;
-    protected DeviceClassification deviceClassification;
+    private DeviceTypes deviceType;
+    private DeviceClassification deviceClassification;
 
-    protected boolean configured;
+    private boolean configured;
 
 
     /**
@@ -81,8 +81,8 @@ public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
 
     @Override
     public DeviceMetaOCDetails clone() {
-        long uuidSenderLSB = this.sender.getLeastSignificantBits();
-        long uuidSenderMSB = this.sender.getMostSignificantBits();
+        long uuidSenderLSB = this.getSender().getLeastSignificantBits();
+        long uuidSenderMSB = this.getSender().getMostSignificantBits();
         DeviceMetaOCDetails clone = new DeviceMetaOCDetails(new UUID(uuidSenderMSB, uuidSenderLSB), this.getTimestamp());
 
         clone.name = this.name;

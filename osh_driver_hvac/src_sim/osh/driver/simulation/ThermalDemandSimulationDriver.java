@@ -98,7 +98,7 @@ public abstract class ThermalDemandSimulationDriver
             predictions.add(this.demandData.getProfileForDayOfYear(day).getProfileWithoutDuplicateValues());
         }
 
-        WaterDemandPredictionExchange _ox = new WaterDemandPredictionExchange(this.getDeviceID(), this.getTimer().getUnixTime(),
+        WaterDemandPredictionExchange _ox = new WaterDemandPredictionExchange(this.getUUID(), this.getTimer().getUnixTime(),
                 predictions, this.pastDaysPrediction, this.weightForOtherWeekday, this.weightForSameWeekday);
         this.notifyObserver(_ox);
 
@@ -151,7 +151,7 @@ public abstract class ThermalDemandSimulationDriver
 
             HotWaterDemandObserverExchange ox =
                     new HotWaterDemandObserverExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             now,
                             (int) demand);
             this.notifyObserver(ox);

@@ -139,7 +139,7 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
 
         // send OC
         BatteryStorageOX ox = new BatteryStorageOX(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.inverterModel.getActivePower(),
                 this.inverterModel.getReactivePower(),

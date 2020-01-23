@@ -12,8 +12,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.dof.DofStateExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.PowerProfileTick;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.commands.StartDeviceRequest;
 import osh.datatypes.registry.commands.StopDeviceRequest;
 import osh.datatypes.registry.driver.details.appliance.GenericApplianceDriverDetails;
@@ -29,8 +28,7 @@ import osh.hal.exchange.GenericApplianceDofObserverExchange;
 import osh.hal.exchange.GenericApplianceStartTimesControllerExchange;
 import osh.hal.exchange.MieleApplianceControllerExchange;
 import osh.hal.exchange.MieleApplianceObserverExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
@@ -43,7 +41,7 @@ import java.util.Map.Entry;
  */
 public class MieleApplianceDriver
         extends HALDeviceDriver
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
     // uuid of this appliance as posted by the bus driver
     private UUID applianceBusDriverUUID;
@@ -115,12 +113,13 @@ public class MieleApplianceDriver
         this.currentLoadProfiles = this.generatePowerProfiles();
 
         // register for changes of different details...
-        this.getDriverRegistry().registerStateChangeListener(GenericApplianceDriverDetails.class, this);
-        this.getDriverRegistry().registerStateChangeListener(GenericApplianceProgramDriverDetails.class, this);
-        this.getDriverRegistry().registerStateChangeListener(DofStateExchange.class, this);
+        this.getDriverRegistry().subscribe(GenericApplianceDriverDetails.class, this.applianceBusDriverUUID,this);
+        this.getDriverRegistry().subscribe(GenericApplianceProgramDriverDetails.class, this.applianceBusDriverUUID, this);
+        this.getDriverRegistry().subscribe(DofStateExchange.class, this.getUUID(), this);
+        this.getDriverRegistry().subscribe(MieleApplianceDriverDetails.class, this.applianceBusDriverUUID, this);
 
         //DofStateExchange will only be published to the com registry, we need a data reach through for this
-        this.getOSH().getDataBroker().registerDataReachThroughState(
+        this.getOSH().getDataBroker().registerDataReachThrough(
                 this.getUUID(),
                 DofStateExchange.class,
                 RegistryType.COM,
@@ -138,10 +137,10 @@ public class MieleApplianceDriver
                         synchronized (this) {
                             if (MieleApplianceDriver.this.pendingCommand == EN50523OIDExecutionOfACommandCommands.START) {
                                 StartDeviceRequest req = new StartDeviceRequest(
-                                        MieleApplianceDriver.this.getDeviceID(),
+                                        MieleApplianceDriver.this.getUUID(),
                                         MieleApplianceDriver.this.applianceBusDriverUUID,
                                         MieleApplianceDriver.this.getTimer().getUnixTime());
-                                MieleApplianceDriver.this.getDriverRegistry().sendCommand(StartDeviceRequest.class, req);
+                                MieleApplianceDriver.this.getDriverRegistry().publish(StartDeviceRequest.class, req);
                             }
                         }
                     }
@@ -149,7 +148,7 @@ public class MieleApplianceDriver
                 1
         );
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
@@ -227,19 +226,19 @@ public class MieleApplianceDriver
                 MieleApplianceControllerExchange controllerExchange = (MieleApplianceControllerExchange) controllerRequest;
 
                 if (controllerExchange.getApplianceCommand() == EN50523OIDExecutionOfACommandCommands.START) {
-                    StartDeviceRequest req = new StartDeviceRequest(this.getDeviceID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
-                    this.getDriverRegistry().sendCommand(StartDeviceRequest.class, req);
+                    StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
+                    this.getDriverRegistry().publish(StartDeviceRequest.class, req);
                     this.pendingCommand = EN50523OIDExecutionOfACommandCommands.START;
                 }
                 if (controllerExchange.getApplianceCommand() == EN50523OIDExecutionOfACommandCommands.STOP) {
-                    StopDeviceRequest req = new StopDeviceRequest(this.getDeviceID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
-                    this.getDriverRegistry().sendCommand(StopDeviceRequest.class, req);
+                    StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), this.applianceBusDriverUUID, controllerRequest.getTimestamp());
+                    this.getDriverRegistry().publish(StopDeviceRequest.class, req);
                 }
             } else if (controllerRequest instanceof GenericApplianceStartTimesControllerExchange) {
                 GenericApplianceStartTimesControllerExchange gasce = (GenericApplianceStartTimesControllerExchange) controllerRequest;
                 ExpectedStartTimeExchange este = new ExpectedStartTimeExchange(this.applianceBusDriverUUID, gasce.getStartTime());
                 este.setExpectedStartTime(gasce.getStartTime());
-                this.getDriverRegistry().setStateOfSender(ExpectedStartTimeExchange.class, este);
+                this.getDriverRegistry().publish(ExpectedStartTimeExchange.class, este);
             }
 
         } catch (Exception reqEx) {
@@ -249,26 +248,24 @@ public class MieleApplianceDriver
 
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
 
         // our device? then: build observer exchange
-        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getDeviceID())) {
             boolean updateOx = false;
 
-            if (((StateChangedExchange) event).getType().equals(DofStateExchange.class)) {
+            if (exchange instanceof DofStateExchange) {
                 //making sure dof is only set for 'really' controllable devices
                 if (this.getDeviceType() == DeviceTypes.WASHINGMACHINE
                         || this.getDeviceType() == DeviceTypes.DISHWASHER
                         || this.getDeviceType() == DeviceTypes.DRYER) {
-                    DofStateExchange dse = this.getDriverRegistry().getState(DofStateExchange.class, this.getUUID());
+                    DofStateExchange dse = (DofStateExchange) exchange;
                     this.firstDof = dse.getDevice1stDegreeOfFreedom();
                     this.secondDof = dse.getDevice2ndDegreeOfFreedom();
                     //sanity
                     if (this.firstDof < 0 || this.secondDof < 0) {
                         this.getGlobalLogger().logError("Received illegal dof, not sending to o/c");
                     } else {
-                        GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getDeviceID(),
+                        GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getUUID(),
                                 this.getTimer().getUnixTime());
                         gadoe.setDevice1stDegreeOfFreedom(this.firstDof);
                         gadoe.setDevice1stDegreeOfFreedom(this.secondDof);
@@ -277,40 +274,25 @@ public class MieleApplianceDriver
 
                 }
 
-            } else {
-                // consider only if the own state changed
-                // (changed by meter device or BusDriver)
-                UUID entity = ((StateChangedExchange) event).getStatefulEntity();
+            } else if (exchange instanceof GenericApplianceDriverDetails ||
+                    exchange instanceof GenericApplianceProgramDriverDetails ||
+                    exchange instanceof MieleApplianceDriverDetails) {
+                this.currentAppDetails =
+                        (GenericApplianceDriverDetails) this.getDriverRegistry().getData(GenericApplianceDriverDetails.class, this.applianceBusDriverUUID);
+                this.appProgramDetails =
+                        (GenericApplianceProgramDriverDetails) this.getDriverRegistry().getData(GenericApplianceProgramDriverDetails.class, this.applianceBusDriverUUID);
+                this.mieleApplianceDriverDetails =
+                        (MieleApplianceDriverDetails) this.getDriverRegistry().getData(MieleApplianceDriverDetails.class, this.applianceBusDriverUUID);
 
-                if (this.applianceBusDriverUUID.equals(entity)) {
-                    // get appliance details from registry
-                    this.currentAppDetails = this.getDriverRegistry().getState(
-                            GenericApplianceDriverDetails.class, this.applianceBusDriverUUID);
-
-                    // get appliance program details from registry
-                    this.appProgramDetails = this.getDriverRegistry().getState(
-                            GenericApplianceProgramDriverDetails.class, this.applianceBusDriverUUID);
-
-                    // get miele program details from registry
-                    this.mieleApplianceDriverDetails = this.getDriverRegistry().getState(
-                            MieleApplianceDriverDetails.class, this.applianceBusDriverUUID);
-
-                    updateOx = true;
-                }
-
-                // EN50523 state
-
-                // update meter data
-                if (this.getMeterUuids().contains(entity)) {
-                    updateOx = true;
-                }
+                updateOx = true;
             }
+
 
 
             // generate ox object
             if (updateOx) {
                 MieleApplianceObserverExchange _ox = new MieleApplianceObserverExchange(
-                        this.getDeviceID(), this.getTimer().getUnixTime());
+                        this.getUUID(), this.getTimer().getUnixTime());
 
                 // check for incomplete data
                 if (this.currentAppDetails == null) {
@@ -417,20 +399,11 @@ public class MieleApplianceDriver
 
                 //all data available -> reset error counter
                 if (this.incompleteData > 0) {
-                    this.getGlobalLogger().logWarning("data source(s) for device: " + this.getDeviceID() + " are available again after " + this.incompleteData + " missing");
+                    this.getGlobalLogger().logWarning("data source(s) for device: " + this.getUUID() + " are available again after " + this.incompleteData + " missing");
                 }
                 this.incompleteData = 0;
 
                 this.notifyObserver(_ox);
-            } /* if updateOx */
-
-        } /* if( event instanceof StateChangedExchange ) */
-
+            }
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

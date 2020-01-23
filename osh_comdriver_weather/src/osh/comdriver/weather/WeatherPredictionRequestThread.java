@@ -55,7 +55,7 @@ public class WeatherPredictionRequestThread implements Runnable {
                 try {
                     // get WeatherPredictionn
                     WeatherPredictionDetails weatherDetails = new WeatherPredictionDetails(
-                            this.comDriver.getDeviceID(),
+                            this.comDriver.getUUID(),
                             this.comDriver.getTimer().getUnixTime(),
                             this.getWeatherPrediction(this.urlWeatherPrediction, this.apiKey));
 

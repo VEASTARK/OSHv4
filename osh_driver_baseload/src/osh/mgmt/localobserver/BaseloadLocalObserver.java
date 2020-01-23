@@ -8,7 +8,7 @@ import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.mox.IModelOfObservationType;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
@@ -16,13 +16,11 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.BaseloadObserverExchange;
 import osh.hal.exchange.BaseloadPredictionExchange;
 import osh.mgmt.localobserver.baseload.ipp.BaseloadIPP;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.time.TimeConversion;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -30,7 +28,7 @@ import java.util.UUID;
  */
 public class BaseloadLocalObserver
         extends LocalObserver
-        implements IHasState, IEventTypeReceiver {
+        implements IDataRegistryListener {
 
     private final int profileResolutionInSec = 900;
 
@@ -148,7 +146,7 @@ public class BaseloadLocalObserver
                 cpse.addPowerState(c, power);
             }
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -183,7 +181,7 @@ public class BaseloadLocalObserver
         long now = this.getTimer().getUnixTime();
 
         BaseloadIPP ipp = new BaseloadIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 now,
                 false,
@@ -193,7 +191,7 @@ public class BaseloadLocalObserver
                 this.compressionType,
                 this.compressionValue);
 
-        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
     }
 
 
@@ -203,14 +201,7 @@ public class BaseloadLocalObserver
     }
 
     @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-
-    @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
         //NOTHING
     }
 

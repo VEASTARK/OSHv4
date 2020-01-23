@@ -16,7 +16,6 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
 import osh.mgmt.mox.DachsChpMOX;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
@@ -25,8 +24,7 @@ import java.util.UUID;
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class NonControllableDachsChpLocalObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
     // data from WaterTank
     private double waterTemperature;
@@ -87,7 +85,7 @@ public class NonControllableDachsChpLocalObserver
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-        WaterStorageOCSX sx = this.getOCRegistry().getState(
+        WaterStorageOCSX sx = (WaterStorageOCSX) this.getOCRegistry().getData(
                 WaterStorageOCSX.class,
                 this.hotWaterTankUuid);
         this.waterTemperature = sx.getCurrentTemp();
@@ -112,7 +110,7 @@ public class NonControllableDachsChpLocalObserver
 
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     DeviceTypes.CHPPLANT);
 
@@ -121,7 +119,7 @@ public class NonControllableDachsChpLocalObserver
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, this.hotWaterPower);
             cpse.addPowerState(Commodity.NATURALGASPOWER, this.gasPower);
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -184,14 +182,4 @@ public class NonControllableDachsChpLocalObserver
                 this.compressionType,
                 this.compressionValue);
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-
-    // HELPER
-
 }

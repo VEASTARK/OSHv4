@@ -8,7 +8,6 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.hal.exchange.EpsComExchange;
-import osh.registry.interfaces.IHasState;
 
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -18,8 +17,7 @@ import java.util.UUID;
  * @author Ingo Mauser
  */
 public class EpsProviderComManager
-        extends ComManager
-        implements IHasState {
+        extends ComManager {
 
 
     /**
@@ -55,7 +53,7 @@ public class EpsProviderComManager
                 priceDetails.setPriceSignal(e.getKey(), e.getValue());
             }
 
-            this.getOCRegistry().setState(EpsStateExchange.class, this, priceDetails);
+            this.getOCRegistry().publish(EpsStateExchange.class, this.getUUID(), priceDetails);
         } else {
             try {
                 throw new OSHException("Signal unknown");

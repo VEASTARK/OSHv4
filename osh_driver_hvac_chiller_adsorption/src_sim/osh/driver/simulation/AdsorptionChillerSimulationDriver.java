@@ -13,7 +13,6 @@ import osh.esc.LimitedCommodityStateMap;
 import osh.esc.exception.EnergySimulationException;
 import osh.hal.exchange.ChillerControllerExchange;
 import osh.hal.exchange.ChillerObserverExchange;
-import osh.registry.interfaces.IHasState;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 
@@ -23,8 +22,7 @@ import java.util.UUID;
  * @author Julian Feder, Ingo Mauser
  */
 public class AdsorptionChillerSimulationDriver
-        extends DeviceSimulationDriver
-        implements IHasState {
+        extends DeviceSimulationDriver {
 
     //Constants
     /**
@@ -107,7 +105,7 @@ public class AdsorptionChillerSimulationDriver
 
         // notify Observer about current status
         ChillerObserverExchange ox = new ChillerObserverExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 this.running,
                 this.outdoorTemperature);
@@ -215,10 +213,4 @@ public class AdsorptionChillerSimulationDriver
     public void performNextAction(SubjectAction nextAction) {
         //NOTHING
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

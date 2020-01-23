@@ -1,5 +1,6 @@
 package osh.comdriver.simulation.cruisecontrol.stateviewer;
 
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 
 import javax.swing.event.TableModelEvent;
@@ -97,23 +98,32 @@ class StatesTableModel implements TableModel {
     @Override
     public void addTableModelListener(TableModelListener l) {
         this.modelLock.writeLock().lock();
-        if (l != null) this.modelListeners.add(l);
-        this.modelLock.writeLock().lock();
+        try {
+            if (l != null) this.modelListeners.add(l);
+        } finally {
+            this.modelLock.writeLock().unlock();
+        }
     }
 
     @Override
     public void removeTableModelListener(TableModelListener l) {
         this.modelLock.writeLock().lock();
-        if (l != null) this.modelListeners.remove(l);
-        this.modelLock.writeLock().unlock();
+        try {
+            if (l != null) this.modelListeners.remove(l);
+        } finally {
+            this.modelLock.writeLock().unlock();
+        }
     }
 
     private void notifyTableModelListener() {
         HashSet<TableModelListener> listeners;
 
         this.modelLock.readLock().lock();
-        listeners = new HashSet<>(this.modelListeners);
-        this.modelLock.readLock().unlock();
+        try {
+            listeners = new HashSet<>(this.modelListeners);
+        } finally {
+            this.modelLock.readLock().unlock();
+        }
 
         for (TableModelListener l : listeners) {
             l.tableChanged(new TableModelEvent(this));
@@ -121,14 +131,14 @@ class StatesTableModel implements TableModel {
     }
 
     @SuppressWarnings("unchecked")
-    public void setData(Map<UUID, ? extends StateExchange> data) {
+    public void setData(Map<UUID, ? extends AbstractExchange> data) {
 
         if (data == null) {
             this.data = DEFAULT_DATA;
         } else {
-            Map<UUID, StateExchange> strData = new HashMap<>();
-            for (Entry<UUID, ? extends StateExchange> e : data.entrySet()) {
-                strData.put(e.getKey(), e.getValue());
+            Map<UUID, AbstractExchange> strData = new HashMap<>();
+            for (Entry<UUID, ? extends AbstractExchange> e : data.entrySet()) {
+                if (e.getValue() instanceof StateExchange) strData.put(e.getKey(), e.getValue());
             }
             this.data = strData.entrySet().toArray(DEFAULT_DATA);
             Arrays.sort(this.data, Entry.comparingByKey());

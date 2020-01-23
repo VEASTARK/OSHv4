@@ -6,7 +6,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSHOC;
 import osh.core.interfaces.IRealTimeSubscriber;
-import osh.registry.OCRegistry;
+import osh.registry.Registry.OCRegistry;
 
 /**
  * abstract superclass for all controllers

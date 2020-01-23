@@ -20,8 +20,7 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 import osh.datatypes.registry.commands.StartDeviceRequest;
 import osh.datatypes.registry.commands.StopDeviceRequest;
@@ -39,8 +38,8 @@ import osh.eal.hal.HALDriver;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.hal.exchange.HttpRestInteractionComManagerExchange;
 import osh.mgmt.commanager.HttpRestInteractionBusManager;
-import osh.registry.DriverRegistry;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +49,7 @@ import java.util.UUID;
 /**
  * @author Kaibin Bao, Ingo Mauser
  */
-public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver implements IEventTypeReceiver {
+public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver implements IDataRegistryListener {
 
     private int m_port = 8080;
     private Server m_jetty;
@@ -123,7 +122,7 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
                 busManager,
                 this,
                 this.getTimer(),
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getDriverRegistry()));
         ServletHolder shAC = new ServletHolder(new ServletContainer(rcAC));
 
@@ -376,25 +375,25 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
     }
 
     //Register for state changes of any "standard info"
-    protected void registerToStateChanges() throws OSHException {
-        this.getDriverRegistry().registerStateChangeListener(DeviceMetaDriverDetails.class, this);
+    protected void registerToStateChanges() {
+        this.getDriverRegistry().subscribe(DeviceMetaDriverDetails.class, this);
 
-        this.getDriverRegistry().registerStateChangeListener(ElectricPowerDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(ElectricPowerDriverDetails.class, this);
 
-        this.getDriverRegistry().registerStateChangeListener(BusDeviceStatusDetails.class, this);
+        this.getDriverRegistry().subscribe(BusDeviceStatusDetails.class, this);
 
-        this.getDriverRegistry().registerStateChangeListener(SwitchDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(SwitchDriverDetails.class, this);
 
         // Generic Appliances
-        this.getDriverRegistry().registerStateChangeListener(GenericApplianceDriverDetails.class, this);
-        this.getDriverRegistry().registerStateChangeListener(GenericApplianceDofDriverDetails.class, this);
-        this.getDriverRegistry().registerStateChangeListener(GenericApplianceProgramDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(GenericApplianceDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(GenericApplianceDofDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(GenericApplianceProgramDriverDetails.class, this);
 
-        this.getDriverRegistry().registerStateChangeListener(TemperatureDetails.class, this);
-        this.getDriverRegistry().registerStateChangeListener(ConfigurationDetails.class, this);
+        this.getDriverRegistry().subscribe(TemperatureDetails.class, this);
+        this.getDriverRegistry().subscribe(ConfigurationDetails.class, this);
 
         // KIT Miele
-        this.getDriverRegistry().registerStateChangeListener(MieleApplianceDriverDetails.class, this);
+        this.getDriverRegistry().subscribe(MieleApplianceDriverDetails.class, this);
 
     }
 
@@ -403,31 +402,26 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        if (event instanceof StateChangedExchange) {
-            UUID uuid = ((StateChangedExchange) event).getStatefulEntity();
-            Class<? extends StateExchange> typeOfObj = ((StateChangedExchange) event).getType();
-            StateExchange sx = this.getDriverRegistry().getState(typeOfObj, uuid);
-
-            this.storeStateExchange(uuid, sx, false /* from HAL layer */);
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof StateExchange) {
+            this.storeStateExchange(exchange.getSender(), (StateExchange) exchange, false /* from HAL layer */);
         }
     }
 
     public void sendStartRequest(UUID device) {
-        StartDeviceRequest req = new StartDeviceRequest(this.getDeviceID(), device, this.getTimer().getUnixTime());
-        this.getDriverRegistry().sendCommand(StartDeviceRequest.class, req);
+        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        this.getDriverRegistry().publish(StartDeviceRequest.class, req);
     }
 
     public void sendStopRequest(UUID device) {
-        StopDeviceRequest req = new StopDeviceRequest(this.getDeviceID(), device, this.getTimer().getUnixTime());
-        this.getDriverRegistry().sendCommand(StopDeviceRequest.class, req);
+        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        this.getDriverRegistry().publish(StopDeviceRequest.class, req);
     }
 
     public void sendSwitchRequest(UUID device, boolean turnOn) {
-        SwitchRequest req = new SwitchRequest(this.getDeviceID(), device, this.getTimer().getUnixTime());
+        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimer().getUnixTime());
         req.setTurnOn(turnOn);
-        this.getDriverRegistry().sendCommand(SwitchRequest.class, req);
+        this.getDriverRegistry().publish(SwitchRequest.class, req);
     }
 
     @Override
@@ -435,13 +429,5 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
         return this;
     }
 
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
     abstract String getEnvironment();
-
-    // } handle states from drivers
-
 }

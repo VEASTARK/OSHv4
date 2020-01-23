@@ -19,7 +19,7 @@ import java.util.UUID;
 @XmlType
 @Entity
 @Table(name = "log_raw_bcontroldriver")
-public class BcontrolMeterDriverRawLogDetails extends StateExchange {
+public class BControlMeterDriverRawLogDetails extends StateExchange {
 
     /**
      * SERIAL
@@ -118,7 +118,7 @@ public class BcontrolMeterDriverRawLogDetails extends StateExchange {
      * for JAXB
      */
     @Deprecated
-    public BcontrolMeterDriverRawLogDetails() {
+    public BControlMeterDriverRawLogDetails() {
         super(null, 0L);
     }
 
@@ -128,7 +128,7 @@ public class BcontrolMeterDriverRawLogDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public BcontrolMeterDriverRawLogDetails(UUID sender, long timestamp) {
+    public BControlMeterDriverRawLogDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

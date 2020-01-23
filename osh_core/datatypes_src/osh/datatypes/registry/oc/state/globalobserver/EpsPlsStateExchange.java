@@ -101,15 +101,6 @@ public class EpsPlsStateExchange extends StateExchange {
     public EpsPlsStateExchange clone() {
 
         // TODO cloning
-//		EnumMap<AncillaryCommodity,PriceSignal> newPs = new HashMap<>();
-//		for (Entry<AncillaryCommodity,PriceSignal> e : ps.entrySet()) {
-//			newPs.put(e.getKey(), e.getValue().clone());
-//		}
-//		
-//		EnumMap<AncillaryCommodity,PowerLimitSignal> newPls = new HashMap<>();
-//		for (Entry<AncillaryCommodity,PowerLimitSignal> e : pwrLimit.entrySet()) {
-//			newPls.put(e.getKey(), e.getValue().clone());
-//		}
 
         return new EpsPlsStateExchange(
                 this.getSender(),

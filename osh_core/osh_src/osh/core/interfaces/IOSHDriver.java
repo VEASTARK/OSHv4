@@ -1,6 +1,6 @@
 package osh.core.interfaces;
 
-import osh.registry.DriverRegistry;
+import osh.registry.Registry.DriverRegistry;
 
 /**
  * @author Ingo Mauser

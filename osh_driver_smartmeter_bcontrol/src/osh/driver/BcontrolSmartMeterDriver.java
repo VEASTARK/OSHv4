@@ -6,14 +6,13 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.driver.details.metering.raw.BcontrolHeaterDriverRawLogDetails;
-import osh.datatypes.registry.driver.details.metering.raw.BcontrolMeterDriverRawLogDetails;
+import osh.datatypes.registry.driver.details.metering.raw.BControlHeaterDriverRawLogDetails;
+import osh.datatypes.registry.driver.details.metering.raw.BControlMeterDriverRawLogDetails;
 import osh.driver.meter.BcontrolConnectorThread;
 import osh.driver.meter.BcontrolHeaterData;
 import osh.driver.meter.BcontrolMeterData;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.HALControllerExchange;
-import osh.registry.interfaces.IHasState;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -21,7 +20,7 @@ import java.util.UUID;
 /**
  * @author Ingo Mauser
  */
-public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasState {
+public class BcontrolSmartMeterDriver extends HALDeviceDriver {
 
     private int phase;
     private String meterURL;
@@ -121,27 +120,21 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
 
         // Retrieve JSON responses from controller and build Jackson Tree
         // Model with package de.fzi.iik.habiteq.jackson
-        BcontrolMeterData bcmd = null;
         try {
-            bcmd = om.readValue(msg, BcontrolMeterData.class);
+            BcontrolMeterData bcmd = om.readValue(msg, BcontrolMeterData.class);
+            this.getDriverRegistry().publish(
+                    BControlMeterDriverRawLogDetails.class,
+                    this.convertJsonToRawDetails(bcmd));
         } catch (IOException e) {
             this.getGlobalLogger().logWarning(e.getStackTrace(), e);
         }
-
-//		getGlobalLogger().logDebug(msg);
-//		getGlobalLogger().logDebug(bcmd);
-
-        // save to registry
-        this.getDriverRegistry().setStateOfSender(
-                BcontrolMeterDriverRawLogDetails.class,
-                this.convertJsonToRawDetails(bcmd));
     }
 
 
-    private BcontrolMeterDriverRawLogDetails convertJsonToRawDetails(BcontrolMeterData bcmd) {
+    private BControlMeterDriverRawLogDetails convertJsonToRawDetails(BcontrolMeterData bcmd) {
         // convert to raw details object for logging
-        BcontrolMeterDriverRawLogDetails rawDetails = new BcontrolMeterDriverRawLogDetails(
-                this.getDeviceID(),
+        BControlMeterDriverRawLogDetails rawDetails = new BControlMeterDriverRawLogDetails(
+                this.getUUID(),
                 this.getTimer().getUnixTime());
 
         rawDetails.setPhase(this.phase);
@@ -214,14 +207,14 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
 //		getGlobalLogger().logDebug(bcmd);
 
         // save to registry
-        this.getDriverRegistry().setStateOfSender(
-                BcontrolHeaterDriverRawLogDetails.class,
+        this.getDriverRegistry().publish(
+                BControlHeaterDriverRawLogDetails.class,
                 this.convertJsonToRawDetails(bchd));
     }
 
-    private BcontrolHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
-        BcontrolHeaterDriverRawLogDetails rawDetails = new BcontrolHeaterDriverRawLogDetails(
-                this.getDeviceID(),
+    private BControlHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
+        BControlHeaterDriverRawLogDetails rawDetails = new BControlHeaterDriverRawLogDetails(
+                this.getUUID(),
                 this.getTimer().getUnixTime());
 
         rawDetails.setMode(bcmd.getMode());
@@ -364,10 +357,4 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver implements IHasSta
         super.onSystemShutdown();
         this.runnable.shutdown();
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

@@ -4,6 +4,7 @@ import osh.datatypes.commodity.Commodity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +20,11 @@ public class LimitedCommodityStateMap implements Serializable {
     private static final byte thermalTempIndex = 0;
     private static final Commodity[] allCommodities = Commodity.values();
     private static final int commodityCount = Commodity.values().length;
+    private static final boolean[] EMPTY_KEYSET = new boolean[commodityCount];
+    static {
+        Arrays.fill(EMPTY_KEYSET, false);
+    }
+
     private static final Commodity[] allElectricalCommodities = {
             Commodity.ACTIVEPOWER,
             Commodity.REACTIVEPOWER,

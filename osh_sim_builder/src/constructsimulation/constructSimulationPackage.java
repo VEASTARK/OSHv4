@@ -172,7 +172,7 @@ public class constructSimulationPackage {
 //	public static double mutationProbability = 0.005;
     public static final double mutationProbability = 0.001;
 //	static int popSize = 50;
-    public static double autoProbMuatationFactor = 1.0;
+    public static double autoProbMutationFactor = 1.0;
     //step size of the optimization algorithm (calculation interval)
     public static int stepSizeESCinOptimization = 60;
     //grid values
@@ -198,7 +198,7 @@ public class constructSimulationPackage {
     //loggingIntervals for database
 //	//FORMAT: months, weeks, days
 //	//only the first non-zero value will be regarded, so {1, 3, 4} is the same as {1, 0, 0} and so on
-    public static final int[][] loggingIntervalls = {
+    public static final int[][] loggingIntervals = {
             {0, 0, 1},    // 1 day
             {0, 1, 0},    // 1 week
             {1, 0, 0}    // 1 month
@@ -206,7 +206,7 @@ public class constructSimulationPackage {
     //if should do aggregated logging for H0
     public static boolean logH0;
     public static boolean logEpsPls;
-    public static boolean logIntervalls;
+    public static boolean logIntervals;
     public static boolean logDevices = true;
 //	static boolean useMaxEvaluations = false;
     public static boolean logDetailedPower;
@@ -851,7 +851,7 @@ public class constructSimulationPackage {
                                 crossOverParams.put("points", crossoverPoints);
                             HashMap<String, Object> mutationParams = new HashMap<>();
                             mutationParams.put("probability", mutationProbability);
-                            mutationParams.put("autoProbMuatationFactor", autoProbMuatationFactor);
+                            mutationParams.put("autoProbMuatationFactor", autoProbMutationFactor);
                             HashMap<String, Object> selectionParams = new HashMap<>();
 
                             Map<String, Map<String, ?>> stoppingRules = new HashMap<>();
@@ -2268,7 +2268,7 @@ public class constructSimulationPackage {
                             param = new ConfigurationParameter();
                             param.setParameterName("logIntervalls");
                             param.setParameterType("String");
-                            param.setParameterValue(String.valueOf(logIntervalls));
+                            param.setParameterValue(String.valueOf(logIntervals));
                             simConfig.getOshConfig().getEngineParameters().add(param);
 
                             param = new ConfigurationParameter();
@@ -2305,7 +2305,7 @@ public class constructSimulationPackage {
                             param.setParameterName("loggingIntervalls");
                             param.setParameterType("String");
                             param.setParameterValue(Arrays.toString(
-                                    Arrays.stream(loggingIntervalls).map(Arrays::toString).toArray(String[]::new)));
+                                    Arrays.stream(loggingIntervals).map(Arrays::toString).toArray(String[]::new)));
                             simConfig.getOshConfig().getEngineParameters().add(param);
 
                             simConfig.getOshConfig().setRunningType(runningType);

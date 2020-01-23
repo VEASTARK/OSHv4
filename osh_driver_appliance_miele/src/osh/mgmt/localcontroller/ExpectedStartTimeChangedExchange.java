@@ -1,6 +1,7 @@
 package osh.mgmt.localcontroller;
 
 import osh.datatypes.registry.EventExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import java.util.UUID;
 
@@ -8,7 +9,7 @@ import java.util.UUID;
 /**
  * @author Kaibin Bao
  */
-public class ExpectedStartTimeChangedExchange extends EventExchange {
+public class ExpectedStartTimeChangedExchange extends EventExchange implements IPromiseToBeImmutable {
 
     /**
      *

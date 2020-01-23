@@ -161,7 +161,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
             }
         }
 
-        VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(this.getDeviceID(), this.getTimer().getUnixTime(),
+        VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(this.getUUID(), this.getTimer().getUnixTime(),
                 VDI6002DomesticHotWaterStatistics.monthlyCorrection,
                 VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection, this.weekDayHourProbabilities, this.avgYearlyDemand);
         this.notifyObserver(_pred);
@@ -200,7 +200,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
             HotWaterDemandObserverExchange ox =
                     new HotWaterDemandObserverExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             now,
                             power);
             this.notifyObserver(ox);

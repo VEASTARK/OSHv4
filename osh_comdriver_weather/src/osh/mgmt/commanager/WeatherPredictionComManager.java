@@ -6,8 +6,6 @@ import osh.comdriver.details.WeatherPredictionDetails;
 import osh.core.com.ComManager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
-import osh.datatypes.registry.EventExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
 
 import java.util.UUID;
 
@@ -15,7 +13,7 @@ import java.util.UUID;
 /**
  * @author Jan Mueller
  */
-public class WeatherPredictionComManager extends ComManager implements IEventTypeReceiver {
+public class WeatherPredictionComManager extends ComManager {
 
     CurrentWeatherDetails currentWeatherDetails;
     WeatherPredictionDetails weatherPredictionDetails;
@@ -40,13 +38,6 @@ public class WeatherPredictionComManager extends ComManager implements IEventTyp
     public void onNextTimePeriod() throws OSHException {
         super.onNextTimePeriod();
 
-    }
-
-
-    @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        // NOTHING
     }
 
     @Override

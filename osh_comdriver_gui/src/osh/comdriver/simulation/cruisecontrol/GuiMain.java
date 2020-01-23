@@ -18,7 +18,7 @@ import osh.datatypes.gui.DeviceTableEntry;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.registry.StateExchange;
+import osh.datatypes.registry.AbstractExchange;
 
 import javax.swing.*;
 import java.awt.*;
@@ -209,7 +209,7 @@ public class GuiMain {
         this.deviceTable.refreshDeviceTable(entries);
     }
 
-    public void refreshStateTable(Set<Class<? extends StateExchange>> types, Map<UUID, ? extends StateExchange> states) {
+    public void refreshStateTable(Set<Class<? extends AbstractExchange>> types, Map<UUID, ? extends AbstractExchange> states) {
         this.stateViewer.showTypes(types);
         this.stateViewer.showStates(states);
     }

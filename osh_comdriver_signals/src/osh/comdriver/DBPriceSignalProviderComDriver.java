@@ -97,7 +97,7 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
 //		this.notifyComManager(epsComEx);
 
         // save as current state
-        CurrentPriceSignalLogDetails priceSignalDetails = new CurrentPriceSignalLogDetails(this.getDeviceID(), now);
+        CurrentPriceSignalLogDetails priceSignalDetails = new CurrentPriceSignalLogDetails(this.getUUID(), now);
         priceSignalDetails.setCommodity(pricesignal.getCommodity());
         priceSignalDetails.getPricePerUnit(pricesignal.getPrice(now));
 
@@ -122,7 +122,7 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
 
         // EPS
         EpsComExchange ex = new EpsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.currentPriceSignal);
         this.notifyComManager(ex);

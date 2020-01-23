@@ -1,5 +1,6 @@
 package osh.comdriver.simulation.cruisecontrol.stateviewer;
 
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 
 import javax.swing.*;
@@ -18,7 +19,7 @@ public class StateViewer extends JPanel implements ItemListener {
     private final JComboBox<String> registryCombo;
     private final JComboBox<String> typeCombo;
     private final DefaultComboBoxModel<String> typesModel;
-    private final TreeSet<Class<? extends StateExchange>> oldTypesList = new TreeSet<>(new ClassNameComparator());
+    private final TreeSet<Class<? extends AbstractExchange>> oldTypesList = new TreeSet<>(new ClassNameComparator());
     private final JTable table;
     private final StatesTableModel model;
     private final Set<StateViewerListener> listeners = new HashSet<>();
@@ -65,18 +66,18 @@ public class StateViewer extends JPanel implements ItemListener {
     }
 
 
-    public void showTypes(Set<Class<? extends StateExchange>> types) {
+    public void showTypes(Set<Class<? extends AbstractExchange>> types) {
         synchronized (this.oldTypesList) {
 
-            for (Class<? extends StateExchange> c : types) {
-                if (!this.oldTypesList.contains(c)) {
+            for (Class<? extends AbstractExchange> c : types) {
+                if (StateExchange.class.isAssignableFrom(c) && !this.oldTypesList.contains(c)) {
                     this.oldTypesList.add(c);
                     this.typesModel.insertElementAt(c.getName(), this.getIndexOfInOldList(c));
                 }
             }
 
-            Set<Class<? extends StateExchange>> toRemove = new HashSet<>();
-            for (Class<? extends StateExchange> c : this.oldTypesList) {
+            Set<Class<? extends AbstractExchange>> toRemove = new HashSet<>();
+            for (Class<? extends AbstractExchange> c : this.oldTypesList) {
                 if (!types.contains(c)) {
                     this.typesModel.removeElement(c.getName());
                     toRemove.add(c);
@@ -86,10 +87,10 @@ public class StateViewer extends JPanel implements ItemListener {
         }
     }
 
-    private int getIndexOfInOldList(Class<? extends StateExchange> type) {
+    private int getIndexOfInOldList(Class<? extends AbstractExchange> type) {
         int index = 0;
         synchronized (this.oldTypesList) {
-            for (Class<? extends StateExchange> c : this.oldTypesList) {
+            for (Class<? extends AbstractExchange> c : this.oldTypesList) {
                 if (c.equals(type)) return index;
                 index++;
             }
@@ -98,7 +99,7 @@ public class StateViewer extends JPanel implements ItemListener {
         return -1;
     }
 
-    public void showStates(Map<UUID, ? extends StateExchange> entries) {
+    public void showStates(Map<UUID, ? extends AbstractExchange> entries) {
         this.model.setData(entries);
     }
 
@@ -114,7 +115,7 @@ public class StateViewer extends JPanel implements ItemListener {
         }
     }
 
-    private void notifyListenersState(Class<? extends StateExchange> cls) {
+    private void notifyListenersState(Class<? extends AbstractExchange> cls) {
         synchronized (this.listeners) {
             for (StateViewerListener l : this.listeners) {
                 l.stateViewerClassChanged(cls);
@@ -137,10 +138,10 @@ public class StateViewer extends JPanel implements ItemListener {
             this.showTypes(new HashSet<>());
             this.notifyListenersRegistry(StateViewerRegistryEnum.findByString(e.getItem().toString()));
         } else if (e.getSource() == this.typeCombo) {
-            Class<? extends StateExchange> cls = null;
+            Class<? extends AbstractExchange> cls = null;
 
             synchronized (this.oldTypesList) {
-                for (Class<? extends StateExchange> c : this.oldTypesList) {
+                for (Class<? extends AbstractExchange> c : this.oldTypesList) {
                     if (c.getName().equals(e.getItem())) {
                         cls = c;
                         break;

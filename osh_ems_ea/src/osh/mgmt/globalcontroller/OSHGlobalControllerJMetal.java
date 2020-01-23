@@ -13,15 +13,13 @@ import osh.datatypes.ea.Schedule;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.state.GUIScheduleDebugExchange;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
@@ -34,8 +32,8 @@ import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
 import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
 
 import java.util.*;
@@ -45,7 +43,7 @@ import java.util.*;
  */
 public class OSHGlobalControllerJMetal
         extends GlobalController
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener, IProvidesIdentity {
 
     UUID hotWaterTankID;
     private OSHGlobalObserver oshGlobalObserver;
@@ -165,8 +163,8 @@ public class OSHGlobalControllerJMetal
 //		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), EpsStateExchange.class, RegistryType.COM, RegistryType.OC);
 //		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), PlsStateExchange.class, RegistryType.COM, RegistryType.OC);
 
-        this.getOCRegistry().registerStateChangeListener(EpsStateExchange.class, this);
-        this.getOCRegistry().registerStateChangeListener(PlsStateExchange.class, this);
+        this.getOCRegistry().subscribe(EpsStateExchange.class, this);
+        this.getOCRegistry().subscribe(PlsStateExchange.class, this);
 
 //		CostChecker.init(epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective, upperOverlimitFactor, lowerOverlimitFactor);
 
@@ -183,21 +181,16 @@ public class OSHGlobalControllerJMetal
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T ex) {
-        if (ex instanceof StateChangedExchange) {
-            StateChangedExchange exsc = (StateChangedExchange) ex;
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof EpsStateExchange) {
             this.newEpsPlsReceived = true;
-
-            if (exsc.getType().equals(EpsStateExchange.class)) {
-                EpsStateExchange eee = this.getOCRegistry().getState(EpsStateExchange.class, exsc.getStatefulEntity());
-                this.priceSignals = eee.getPriceSignals();
-            } else if (exsc.getType().equals(PlsStateExchange.class)) {
-                PlsStateExchange eee = this.getOCRegistry().getState(PlsStateExchange.class, exsc.getStatefulEntity());
-                this.powerLimitSignals = eee.getPowerLimitSignals();
-            }
+            this.priceSignals = ((EpsStateExchange) exchange).getPriceSignals();
+        } else if (exchange instanceof PlsStateExchange) {
+            this.newEpsPlsReceived = true;
+            this.powerLimitSignals = ((PlsStateExchange) exchange).getPowerLimitSignals();
         } else {
-            this.getGlobalLogger().logError("ERROR in " + this.getClass().getCanonicalName() + ": UNKNOWN EventExchange from UUID " + ex.getSender());
+            this.getGlobalLogger().logError("ERROR in " + this.getClass().getCanonicalName() + ": UNKNOWN " +
+                    "EventExchange from UUID " + exchange.getSender());
         }
     }
 
@@ -226,7 +219,7 @@ public class OSHGlobalControllerJMetal
 
             this.newEpsPlsReceived = false;
 
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     EpsPlsStateExchange.class,
                     this,
                     epse);
@@ -411,20 +404,20 @@ public class OSHGlobalControllerJMetal
                 //better be sure
                 debugProblem.finalizeGrids();
 
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         GUIHotWaterPredictionStateExchange.class,
                         this,
                         new GUIHotWaterPredictionStateExchange(this.getUUID(),
                                 this.getTimer().getUnixTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
 
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
                         new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimer().getUnixTime(), ancillaryMeter));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         GUIScheduleStateExchange.class,
                         this,
                         new GUIScheduleStateExchange(this.getUUID(), this.getTimer()
@@ -443,55 +436,36 @@ public class OSHGlobalControllerJMetal
             this.getGlobalLogger().logDebug("jmetal: problem list and solution list don't have the same size");
         }
 
-        GUIScheduleDebugExchange debug = new GUIScheduleDebugExchange(this.getUUID(), this.getTimer().getUnixTime());
-
         for (int i = 0; i < min; i++) {
             InterdependentProblemPart<?, ?> part = problemParts.get(i);
-            LocalController lc = this.getLocalController(part.getDeviceID());
+            LocalController lc = this.getLocalController(part.getUUID());
             BitSet bits = solutions.get(i);
 
             if (lc != null) {
-                this.getOCRegistry().sendCommand(
+                this.getOCRegistry().publish(
                         EASolutionCommandExchange.class,
                         part.transformToFinalInterdependentPhenotype(
                                 null,
-                                part.getDeviceID(),
+                                part.getUUID(),
                                 this.getTimer().getUnixTime(),
                                 bits));
             } else if (/* lc == null && */ part.getBitCount() > 0) {
-                throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getDeviceID() + ")");
+                throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
             }
 //			this sends a prediction of the waterTemperatures to the waterTankObserver, so the waterTank can trigger a reschedule
 //			when the actual temperatures are too different to the prediction
             if (part.transformToFinalInterdependentPrediction(bits) != null) {
-                this.getOCRegistry().sendCommand(
+                this.getOCRegistry().publish(
                         EAPredictionCommandExchange.class,
                         part.transformToFinalInterdependentPrediction(
                                 null,
-                                part.getDeviceID(),
+                                part.getUUID(),
                                 this.getTimer().getUnixTime(),
                                 bits));
             }
-
-            if (hasGUI) {
-                StringBuilder debugStr = new StringBuilder();
-                debugStr.append(this.getTimer().getUnixTime()).append(";");
-                debugStr.append(part.getSender()).append(";");
-                debugStr.append(part.problemToString()).append(";");
-                if (part instanceof ControllableIPP<?, ?>) {
-                    debugStr.append(((ControllableIPP<?, ?>) part)
-                            .solutionToString(bits));
-                }
-                debug.addString(part.getSender(), debugStr.toString());
-            }
         }
 
-        if (hasGUI && usedBits != 0)
-            this.getOCRegistry().sendEvent(GUIScheduleDebugExchange.class, debug);
-
         this.getGlobalLogger().logDebug("===    EA done    ===");
-
-        //lasttimeScheduled = getTimer().getUnixTime();
     }
 
     @Override

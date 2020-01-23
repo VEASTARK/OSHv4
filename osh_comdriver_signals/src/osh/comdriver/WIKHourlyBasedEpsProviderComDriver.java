@@ -198,7 +198,7 @@ public class WIKHourlyBasedEpsProviderComDriver extends CALComDriver {
 
         // EPS
         EpsComExchange ex = new EpsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.currentPriceSignal);
         this.notifyComManager(ex);
@@ -248,7 +248,7 @@ public class WIKHourlyBasedEpsProviderComDriver extends CALComDriver {
 
             // EPS
             EpsComExchange ex = new EpsComExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     this.currentPriceSignal);
             this.notifyComManager(ex);

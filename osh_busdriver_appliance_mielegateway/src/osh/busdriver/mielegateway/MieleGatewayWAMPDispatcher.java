@@ -72,10 +72,11 @@ public class MieleGatewayWAMPDispatcher {
         MieleDeviceHomeBusDataJSON dev;
 
         this.deviceDataLock.readLock().lock();
-        dev = this.deviceData.get(id);
-        this.deviceDataLock.readLock().unlock();
-
-        return dev;
+        try {
+            return this.deviceData.get(id);
+        } finally {
+            this.deviceDataLock.readLock().unlock();
+        }
     }
 
     /**
@@ -87,10 +88,11 @@ public class MieleGatewayWAMPDispatcher {
     public Collection<MieleDeviceHomeBusDataJSON> getDeviceData() {
 
         this.deviceDataLock.readLock().lock();
-        ArrayList<MieleDeviceHomeBusDataJSON> devices = new ArrayList<>(this.deviceData.values());
-        this.deviceDataLock.readLock().unlock();
-
-        return devices;
+        try {
+            return new ArrayList<>(this.deviceData.values());
+        } finally {
+            this.deviceDataLock.readLock().unlock();
+        }
     }
 
     public void sendCommand(String command, int uid) {
@@ -150,9 +152,12 @@ public class MieleGatewayWAMPDispatcher {
                                                                 });
 
                                                         this.deviceDataLock.writeLock().lock();
-                                                        this.deviceData.clear();
-                                                        this.deviceData.putAll(map);
-                                                        this.deviceDataLock.writeLock().unlock();
+                                                        try {
+                                                            this.deviceData.clear();
+                                                            this.deviceData.putAll(map);
+                                                        } finally {
+                                                            this.deviceDataLock.writeLock().unlock();
+                                                        }
 
                                                         this.notifyAll();
                                                     } catch (IllegalArgumentException e) {

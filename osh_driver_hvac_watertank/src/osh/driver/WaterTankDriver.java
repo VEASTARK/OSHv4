@@ -7,8 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.details.common.TemperatureDetails;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.UUID;
 
@@ -18,7 +17,7 @@ import java.util.UUID;
  */
 public abstract class WaterTankDriver
         extends HALDeviceDriver
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
 //	private WaterTank waterTank;
 
@@ -57,13 +56,12 @@ public abstract class WaterTankDriver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getDriverRegistry().registerStateChangeListener(TemperatureDetails.class, this);
+        this.getDriverRegistry().subscribe(TemperatureDetails.class, this.getUUID(),this);
 
         StaticCompressionExchange observerExchange =
-                new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
+                new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
         this.notifyObserver(observerExchange);
     }
-
 }
 
 

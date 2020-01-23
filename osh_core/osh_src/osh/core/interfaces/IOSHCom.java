@@ -1,6 +1,6 @@
 package osh.core.interfaces;
 
-import osh.registry.ComRegistry;
+import osh.registry.Registry.ComRegistry;
 
 /**
  * @author Ingo Mauser

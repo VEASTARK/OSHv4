@@ -11,6 +11,7 @@ import osh.core.oc.IOCHALDataSubscriber;
 import osh.eal.hal.HALBusDriver;
 import osh.eal.hal.IDriverDataSubscriber;
 import osh.eal.hal.exchange.IHALExchange;
+import osh.registry.interfaces.IProvidesIdentity;
 
 import java.util.UUID;
 
@@ -21,7 +22,8 @@ public abstract class BusManager extends OCComponent
         implements IRealTimeSubscriber,
         ILifeCycleListener,
         IDriverDataSubscriber,
-        IOCHALDataPublisher {
+        IOCHALDataPublisher,
+        IProvidesIdentity {
 
     private HALBusDriver busDriver;
     private final UUID uuid;
@@ -64,6 +66,7 @@ public abstract class BusManager extends OCComponent
         return this.busDriver;
     }
 
+    @Override
     public UUID getUUID() {
         return this.uuid;
     }

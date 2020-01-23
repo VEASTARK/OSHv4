@@ -1,6 +1,7 @@
 package osh.datatypes.registry.oc.localobserver;
 
 import osh.datatypes.registry.StateExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 /**
  * @author Ingo Mauser, Jan Mueller
  */
-public class BatteryStorageOCSX extends StateExchange {
+public class BatteryStorageOCSX extends StateExchange implements IPromiseToBeImmutable {
 
     private static final long serialVersionUID = -8893900933803816383L;
     private final UUID batteryId;

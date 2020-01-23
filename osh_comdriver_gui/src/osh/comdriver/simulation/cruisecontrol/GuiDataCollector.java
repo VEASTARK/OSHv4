@@ -10,7 +10,7 @@ import osh.datatypes.gui.DeviceTableEntry;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.registry.StateExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 
@@ -43,6 +43,7 @@ public class GuiDataCollector {
     private TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
     private TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
     private TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
+    private long lastTimestampWaitedAt = -1L;
 
     public GuiDataCollector(GuiMain driver, boolean saveGraph) {
         if (driver == null) throw new NullPointerException("driver is null");
@@ -55,7 +56,7 @@ public class GuiDataCollector {
         this.driver.refreshDeviceTable(deviceList);
     }
 
-    public void updateStateView(Set<Class<? extends StateExchange>> types, Map<UUID, ? extends StateExchange> states) {
+    public void updateStateView(Set<Class<? extends AbstractExchange>> types, Map<UUID, ? extends AbstractExchange> states) {
         this.driver.refreshStateTable(types, states);
     }
 
@@ -67,7 +68,12 @@ public class GuiDataCollector {
         if (this.powerHistory.containsKey(Commodity.ACTIVEPOWER))
             this.doRealPastUpdate(timestamp, "water");
 
-        this.driver.waitForUserIfRequested();
+        //current design would have the user pressing "go" after every update this limits it to at max one press per
+        // second simulated
+        if (timestamp != this.lastTimestampWaitedAt) {
+            this.lastTimestampWaitedAt = timestamp;
+            this.driver.waitForUserIfRequested();
+        }
     }
 
     public void updateGlobalSchedule(
@@ -76,7 +82,6 @@ public class GuiDataCollector {
         this.ps = ps;
         this.driver.refreshDiagram(this.schedules, ps, this.pwrLimit, timestamp, this.saveGraph);
         this.waitForUser(timestamp);
-
     }
 
     public void updateGlobalSchedule(

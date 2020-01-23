@@ -129,14 +129,14 @@ public class EnergyManagementProblem extends Problem {
         Object2ObjectOpenHashMap<UUID, Commodity[]> uuidInputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
 
         for (InterdependentProblemPart<?, ?> part : problemParts) {
-            if (this.uuidIntMap.put(part.getDeviceID(), part.getId()) != -1) {
+            if (this.uuidIntMap.put(part.getUUID(), part.getId()) != -1) {
                 throw new IllegalArgumentException("multiple IPPs with same UUID");
             }
             if (!part.isCompletelyStatic()) {
-                allUUIDs.add(part.getDeviceID());
+                allUUIDs.add(part.getUUID());
                 numberOfBits += part.getBitCount();
-                uuidOutputMap.put(part.getDeviceID(), part.getAllOutputCommodities());
-                uuidInputMap.put(part.getDeviceID(), part.getAllInputCommodities());
+                uuidOutputMap.put(part.getUUID(), part.getAllOutputCommodities());
+                uuidInputMap.put(part.getUUID(), part.getAllInputCommodities());
             }
         }
 
@@ -145,13 +145,13 @@ public class EnergyManagementProblem extends Problem {
         //split parts in 4 lists
         // calc maxReferenceTime of parts
         for (InterdependentProblemPart<?, ?> part : problemParts) {
-            if (activeUUIDs.contains(part.getDeviceID())) {
+            if (activeUUIDs.contains(part.getUUID())) {
                 if (part.isReactsToInputStates()) {
                     this.activeNeedsInput.add(part);
                 } else {
                     this.activeWorksAlone.add(part);
                 }
-            } else if (passiveUUIDs.contains(part.getDeviceID())) {
+            } else if (passiveUUIDs.contains(part.getUUID())) {
                 this.passive.add(part);
             } else {
                 if (part.isCompletelyStatic())
@@ -170,14 +170,14 @@ public class EnergyManagementProblem extends Problem {
         Set<UUID> allActive = new HashSet<>();
 
         for (InterdependentProblemPart<?, ?> part : this.activeNeedsInput) {
-            allActive.add(part.getDeviceID());
-            this.activeNeedInputUUIDs.add(part.getDeviceID());
+            allActive.add(part.getUUID());
+            this.activeNeedInputUUIDs.add(part.getUUID());
         }
         for (InterdependentProblemPart<?, ?> part : this.activeWorksAlone) {
-            allActive.add(part.getDeviceID());
+            allActive.add(part.getUUID());
         }
         for (InterdependentProblemPart<?, ?> part : this.passive) {
-            this.passiveUUIDs.add(part.getDeviceID());
+            this.passiveUUIDs.add(part.getUUID());
         }
 
         this.ocEnergySimulationCore.initializeGrids(allActive, this.activeNeedInputUUIDs, passiveUUIDs,
@@ -594,11 +594,11 @@ public class EnergyManagementProblem extends Problem {
             for (IOCEnergySubject simSub : passive) {
                 LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
                 if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                    if (simSub.getDeviceID().equals(hotWaterTankID)) {
+                    if (simSub.getUUID().equals(hotWaterTankID)) {
                         predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
                     }
                 } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                    if (simSub.getDeviceID().equals(hotWaterTankID)) {
+                    if (simSub.getUUID().equals(hotWaterTankID)) {
                         predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
                     }
                 }
@@ -618,7 +618,7 @@ public class EnergyManagementProblem extends Problem {
                 //let all active states calculate their next step
                 for (InterdependentProblemPart<?, ?> part : allActive) {
                     part.calculateNextStep();
-                    activeToPassiveMap.put(part.getDeviceID(), part.getCommodityOutputStates());
+                    activeToPassiveMap.put(part.getUUID(), part.getCommodityOutputStates());
                 }
 
                 //generally setting demand to 0, will add to this if there is really a demand
@@ -658,18 +658,18 @@ public class EnergyManagementProblem extends Problem {
                 //let all passive states calculate their next step
                 for (InterdependentProblemPart<?, ?> part : passive) {
                     part.calculateNextStep();
-                    passiveToActiveMap.put(part.getDeviceID(), part.getCommodityOutputStates());
+                    passiveToActiveMap.put(part.getUUID(), part.getCommodityOutputStates());
                 }
 
                 for (IOCEnergySubject simSub : passive) {
 
                     LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
                     if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                        if (simSub.getDeviceID().equals(hotWaterTankID)) {
+                        if (simSub.getUUID().equals(hotWaterTankID)) {
                             predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
                         }
                     } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                        if (simSub.getDeviceID().equals(hotWaterTankID)) {
+                        if (simSub.getUUID().equals(hotWaterTankID)) {
                             predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
                         }
                     }

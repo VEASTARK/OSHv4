@@ -52,7 +52,7 @@ public class CurrentWeatherRequestThread implements Runnable {
                 try {
                     // get and send to driver
                     CurrentWeatherDetails currentWeatherDetails = new CurrentWeatherDetails(
-                            this.comDriver.getDeviceID(),
+                            this.comDriver.getUUID(),
                             this.comDriver.getTimer().getUnixTime(),
                             this.getCurrentWeather(this.urlCurrentWeather, this.apiKey));
                     this.comDriver.receiveCurrentDetails(currentWeatherDetails);

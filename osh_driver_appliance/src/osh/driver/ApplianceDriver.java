@@ -3,10 +3,9 @@ package osh.driver;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.eal.hal.HALDeviceDriver;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -16,7 +15,7 @@ import java.util.UUID;
  */
 public abstract class ApplianceDriver
         extends HALDeviceDriver
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
     // TEMPORAL DEGREE OF FREEDOM
 
@@ -58,7 +57,7 @@ public abstract class ApplianceDriver
 
         // set meters
         this.setDataSourcesUsed(this.getMeterUuids());
-        this.setDataSourcesConfigured(Collections.singleton(this.getDeviceID()));
+        this.setDataSourcesConfigured(Collections.singleton(this.getUUID()));
     }
 
 
@@ -66,7 +65,7 @@ public abstract class ApplianceDriver
      * Is called to update the power values according to values metered by some other device (e.g. smart plug)
      */
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
         // our device? then: build observer exchange
 
     }
@@ -82,13 +81,4 @@ public abstract class ApplianceDriver
     protected int getDeviceMax2ndDof() {
         return this.deviceMax2ndTDof;
     }
-
-
-    // ### UNIMPORTANT METHODS ###
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

@@ -3,15 +3,14 @@ package osh.simulation.energy;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.exception.EnergySimulationException;
-
-import java.util.UUID;
+import osh.registry.interfaces.IProvidesIdentity;
 
 /**
  * Marks that the entity consumes or produces energy
  *
  * @author Ingo Mauser, Sebastian Kramer
  */
-public interface IEnergySubject {
+public interface IEnergySubject extends IProvidesIdentity {
 
     /**
      * Is invoked by the EnergySimulationCore (which is handled by the SimulationEngine or the EnergyManagementProblem)
@@ -37,8 +36,5 @@ public interface IEnergySubject {
             LimitedCommodityStateMap inputStates,
             AncillaryMeterState ancillaryMeterState)
             throws EnergySimulationException;
-
-
-    UUID getDeviceID();
 
 }

@@ -9,17 +9,14 @@ import osh.comdriver.weather.WeatherPredictionRequestThread;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.EventExchange;
 import osh.eal.hal.exceptions.HALException;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
 
 import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Jan Mueller
  */
-public class WeatherPredictionProviderComDriver extends CALComDriver implements IEventTypeReceiver, IHasState {
+public class WeatherPredictionProviderComDriver extends CALComDriver {
 
     // Current weather
     // http://api.openweathermap.org/data/2.5/weather?id=ID&APPID=APPID
@@ -117,17 +114,6 @@ public class WeatherPredictionProviderComDriver extends CALComDriver implements 
         this.reqCurrentRunnable.shutdown();
     }
 
-
-    @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
-        //NOTHING
-    }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
     @Override
     public void updateDataFromComManager(ICALExchange exchangeObject) {
         //NOTHING
@@ -137,7 +123,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver implements 
         synchronized (currentWeatherDetails) {
             //TODO: this was changed from driverRegistry to ComRegistry please fix all other classes depending on recieveing this on the driverRegistry (via DataBroker)
             // set raw details
-            this.getComRegistry().setStateOfSender(CurrentWeatherDetails.class, currentWeatherDetails);
+            this.getComRegistry().publish(CurrentWeatherDetails.class, currentWeatherDetails);
             this.getGlobalLogger().logDebug("set new state" + currentWeatherDetails);
         }
     }
@@ -146,7 +132,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver implements 
         synchronized (weatherDetails) {
             //TODO: see above
             // set raw details
-            this.getComRegistry().setStateOfSender(WeatherPredictionDetails.class, weatherDetails);
+            this.getComRegistry().publish(WeatherPredictionDetails.class, weatherDetails);
             this.getGlobalLogger().logDebug("set new state" + weatherDetails);
         }
     }

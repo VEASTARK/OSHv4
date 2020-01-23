@@ -10,7 +10,7 @@ import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.mox.IModelOfObservationType;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.details.DeviceMetaOCDetails;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.HALObserverExchange;
@@ -23,10 +23,7 @@ import osh.hal.exchange.MieleApplianceObserverExchange;
 import osh.hal.interfaces.appliance.IHALGenericApplianceDetails;
 import osh.hal.interfaces.appliance.IHALMieleApplianceProgramDetails;
 import osh.mgmt.mox.MieleApplianceMOX;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
+import osh.registry.interfaces.IDataRegistryListener;
 
 
 /**
@@ -34,7 +31,7 @@ import java.util.UUID;
  */
 public class MieleApplianceLocalObserver
         extends LocalObserver
-        implements IHasState, IEventTypeReceiver {
+        implements IDataRegistryListener {
 
     /**
      * SparseLoadProfile containing different profile with different commodities<br>
@@ -117,7 +114,7 @@ public class MieleApplianceLocalObserver
                         this.getDeviceType());
                 cpse.addPowerState(Commodity.ACTIVEPOWER, currentActivePower);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, currentReactivePower);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         CommodityPowerStateExchange.class,
                         this,
                         cpse);
@@ -206,7 +203,7 @@ public class MieleApplianceLocalObserver
             _devDetails.setDeviceClassification(ihdmd.getDeviceClassification());
             _devDetails.setConfigured(ihdmd.isConfigured());
 
-            this.getOCRegistry().setState(DeviceMetaOCDetails.class, this, _devDetails);
+            this.getOCRegistry().publish(DeviceMetaOCDetails.class, this, _devDetails);
         }
 
         if (_hx instanceof StaticCompressionExchange) {
@@ -223,7 +220,7 @@ public class MieleApplianceLocalObserver
             dse.setDevice1stDegreeOfFreedom(gadoe.getDevice1stDegreeOfFreedom());
             dse.setDevice2ndDegreeOfFreedom(gadoe.getDevice2ndDegreeOfFreedom());
 
-            this.getOCRegistry().setState(DofStateExchange.class, this, dse);
+            this.getOCRegistry().publish(DofStateExchange.class, this, dse);
         }
     }
 
@@ -233,19 +230,13 @@ public class MieleApplianceLocalObserver
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T ex) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
         //nothing
     }
 
     @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-    @Override
     public String toString() {
-        return this.getClass().getCanonicalName() + " for " + this.getDeviceID()
+        return this.getClass().getCanonicalName() + " for " + this.getUUID()
                 + " (" + this.getDeviceType() + ")";
     }
 }

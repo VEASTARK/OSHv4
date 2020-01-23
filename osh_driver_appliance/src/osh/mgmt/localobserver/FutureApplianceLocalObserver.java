@@ -8,7 +8,6 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.mox.IModelOfObservationType;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.EventExchange;
 import osh.datatypes.registry.details.common.DeviceMetaDriverDetails;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.HALObserverExchange;
@@ -23,8 +22,6 @@ import osh.hal.interfaces.appliance.IHALGenericApplianceDOF;
 import osh.hal.interfaces.appliance.IHALGenericApplianceDetails;
 import osh.hal.interfaces.appliance.IHALGenericApplianceProgramDetails;
 import osh.mgmt.mox.GenericApplianceMOX;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
 
 import java.util.EnumMap;
 import java.util.UUID;
@@ -33,8 +30,7 @@ import java.util.UUID;
  * @author Ingo Mauser , Matthias Maerz
  */
 public class FutureApplianceLocalObserver
-        extends LocalObserver
-        implements IEventTypeReceiver, IHasState {
+        extends LocalObserver {
 
     // ### State variables ###
 
@@ -124,9 +120,9 @@ public class FutureApplianceLocalObserver
 
         }
 
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 CommodityPowerStateExchange.class,
-                this,
+                this.getUUID(),
                 cpse);
 
 
@@ -162,7 +158,7 @@ public class FutureApplianceLocalObserver
             _devDetails.setDeviceType(ihdmd.getDeviceType());
             _devDetails.setDeviceClassification(ihdmd.getDeviceClassification());
             _devDetails.setConfigured(ihdmd.isConfigured());
-            this.getOCRegistry().setState(DeviceMetaDriverDetails.class, this, _devDetails);
+            this.getOCRegistry().publish(DeviceMetaDriverDetails.class, this.getUUID(), _devDetails);
         }
         if (_hx instanceof StaticCompressionExchange) {
             StaticCompressionExchange _stat = (StaticCompressionExchange) _hx;
@@ -184,23 +180,10 @@ public class FutureApplianceLocalObserver
         );
     }
 
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
     @Override
     public String toString() {
         return this.getClass().getCanonicalName()
-                + " for " + this.getDeviceID()
+                + " for " + this.getUUID()
                 + " (" + this.getDeviceType() + ")";
     }
-
-    @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        //NOTHING
-    }
-
 }

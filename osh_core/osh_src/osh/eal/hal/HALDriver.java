@@ -7,7 +7,8 @@ import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHDriver;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.eal.EALDriver;
-import osh.registry.DriverRegistry;
+import osh.registry.Registry.DriverRegistry;
+import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.uuid.UUIDLists;
 
 import java.util.ArrayList;
@@ -17,12 +18,10 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
-public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCycleListener {
+public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCycleListener, IProvidesIdentity {
 
     private final UUID deviceID;
     private OSHParameterCollection driverConfig;
-
-    private DriverRegistry driverRegistry;
 
     /**
      * CONSTRUCTOR
@@ -52,12 +51,12 @@ public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCy
      *
      * @return Device-UUID
      */
-    public UUID getDeviceID() {
+    public UUID getUUID() {
         return this.deviceID;
     }
 
     protected DriverRegistry getDriverRegistry() {
-        return this.driverRegistry;
+        return this.getOSH().getDriverRegistry();
     }
 
     /**
@@ -91,8 +90,6 @@ public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCy
 
     @Override
     public void onSystemIsUp() throws OSHException {
-        this.driverRegistry = this.getOSH().getDriverRegistry();
-
         //...in case of use please override and implement things like:
 //		getTimer().registerComponent(this, 1);
 //		getDriverRegistry().registerStateChangeListener(ComDriverDetails.class, this);

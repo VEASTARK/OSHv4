@@ -18,18 +18,16 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.PvObserverExchange;
 import osh.hal.exchange.PvPredictionExchange;
 import osh.mgmt.ipp.PvNonControllableIPP;
-import osh.registry.interfaces.IHasState;
 import osh.utils.time.TimeConversion;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
  * @author Florian Allerding, Ingo Mauser
  */
-public class PvLocalObserver extends LocalObserver implements IHasState {
+public class PvLocalObserver extends LocalObserver {
 
     // Configuration variables
     private static final int profileResolutionInSec = 900;
@@ -87,7 +85,7 @@ public class PvLocalObserver extends LocalObserver implements IHasState {
                 cpse.addPowerState(Commodity.ACTIVEPOWER, this.lastActivePowerLevel);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, this.lastReactivePowerLevel);
 
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         CommodityPowerStateExchange.class,
                         this,
                         cpse);
@@ -124,9 +122,9 @@ public class PvLocalObserver extends LocalObserver implements IHasState {
         //Prediction is always in relative Time from midnight, we need to extend it and then convert to absolute time
         SparseLoadProfile optimizationProfile = this.predictedPVProfile.merge(this.predictedPVProfile, 86400).cloneWithOffset(now);
 
-        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getDeviceID(), this.getGlobalLogger(), now, optimizationProfile, this.compressionType, this.compressionValue);
+        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(), this.getGlobalLogger(), now, optimizationProfile, this.compressionType, this.compressionValue);
 
-        this.getOCRegistry().setState(InterdependentProblemPart.class, this, ipp);
+        this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
     }
 
     private void runPvProfilePredictor(ElectricPowerOCDetails powerDetails) {
@@ -169,10 +167,4 @@ public class PvLocalObserver extends LocalObserver implements IHasState {
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
         return null;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

@@ -165,7 +165,7 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
 
         //initially give LocalObserver load data of past days
         VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 VDI6002DomesticHotWaterStatistics.monthlyCorrection,
                 VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection,
@@ -173,7 +173,7 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
                 this.avgYearlyDemand);
         this.notifyObserver(_pred);
 
-        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
+        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
         this.notifyObserver(_stat);
     }
 
@@ -198,7 +198,7 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
 
             HotWaterDemandObserverExchange ox =
                     new HotWaterDemandObserverExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             now,
                             power);
             this.notifyObserver(ox);

@@ -8,17 +8,14 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.hal.exchange.ChillerControllerExchange;
 import osh.mgmt.ipp.ChillerNonControllableIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
-import osh.registry.interfaces.IHasState;
 
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Julian Feder, Ingo Mauser
  */
 public class NonControllableAdsorptionChillerLocalController
-        extends LocalController
-        implements IHasState {
+        extends LocalController {
 
     private final double minColdWaterTemp = 10.0;
     private final double maxColdWaterTemp = 15.0;
@@ -78,7 +75,7 @@ public class NonControllableAdsorptionChillerLocalController
 
         // new IPP
         ChillerNonControllableIPP ipp = new ChillerNonControllableIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 this.getTimer().getUnixTime(),
                 toBeScheduled,
@@ -86,7 +83,7 @@ public class NonControllableAdsorptionChillerLocalController
                 temperaturePrediction,
                 this.compressionType,
                 this.compressionValue);
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this, ipp);
 
         //build CX
@@ -94,7 +91,7 @@ public class NonControllableAdsorptionChillerLocalController
         if (currentColdWaterTemp <= this.minColdWaterTemp) {
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -105,7 +102,7 @@ public class NonControllableAdsorptionChillerLocalController
                     && currentHotWaterTemp >= this.minHotWaterTemp) {
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         true,
@@ -117,11 +114,4 @@ public class NonControllableAdsorptionChillerLocalController
             this.updateOcDataSubscriber(cx);
         }
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

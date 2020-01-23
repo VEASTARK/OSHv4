@@ -9,7 +9,7 @@ import java.util.TreeMap;
  */
 public class HotWaterTankPrediction implements IPrediction {
 
-    TreeMap<Long, Double> temperatureStates;
+    private final TreeMap<Long, Double> temperatureStates;
 
     /**
      * @param temperatureStates
@@ -21,10 +21,6 @@ public class HotWaterTankPrediction implements IPrediction {
 
     public TreeMap<Long, Double> getTemperatureStates() {
         return this.temperatureStates;
-    }
-
-    public void setTemperatureStates(TreeMap<Long, Double> temperatureStates) {
-        this.temperatureStates = temperatureStates;
     }
 
     @Override

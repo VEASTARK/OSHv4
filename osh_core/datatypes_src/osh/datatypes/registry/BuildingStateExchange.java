@@ -10,30 +10,30 @@ public class BuildingStateExchange extends StateExchange {
 
     private static final long serialVersionUID = -6624430081473462447L;
 
-    long currentTick;
-    double currentActivePower;
-    double currentActivePowerConsumption;
-    double currentActivePowerChp;
-    double currentActivePowerChpFeedIn;
-    double currentActivePowerChpAutoConsumption;
-    double currentActivePowerPv;
-    double currentActivePowerPvFeedIn;
-    double currentActivePowerPvAutoConsumption;
-    double currentActivePowerBatteryCharging;
-    double currentActivePowerBatteryDischarging;
-    double currentActivePowerBatteryAutoConsumption;
-    double currentActivePowerBatteryFeedIn;
-    double currentActivePowerExternal;
-    double currentReactivePowerExternal;
-    double currentGasPowerExternal;
-    private long timestamp;
+    private long currentTick;
+    private double currentActivePower;
+    private double currentActivePowerConsumption;
+    private double currentActivePowerChp;
+    private double currentActivePowerChpFeedIn;
+    private double currentActivePowerChpAutoConsumption;
+    private double currentActivePowerPv;
+    private double currentActivePowerPvFeedIn;
+    private double currentActivePowerPvAutoConsumption;
+    private double currentActivePowerBatteryCharging;
+    private double currentActivePowerBatteryDischarging;
+    private double currentActivePowerBatteryAutoConsumption;
+    private double currentActivePowerBatteryFeedIn;
+    private double currentActivePowerExternal;
+    private double currentReactivePowerExternal;
+    private double currentGasPowerExternal;
 
-    public BuildingStateExchange() {
+    @Deprecated
+    protected BuildingStateExchange() {
     }
 
 
     public BuildingStateExchange(BuildingStateExchange other) {
-        super(other.sender, other.timestamp);
+        super(other.getSender(), other.getTimestamp());
 
 
         this.currentTick = other.currentTick;
@@ -116,22 +116,6 @@ public class BuildingStateExchange extends StateExchange {
 
     public void setCurrentTick(long currentTick) {
         this.currentTick = currentTick;
-    }
-
-    public UUID getSender() {
-        return this.sender;
-    }
-
-    public void setSender(UUID sender) {
-        this.sender = sender;
-    }
-
-    public long getTimestamp() {
-        return this.timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public double getCurrentActivePower() {
@@ -232,7 +216,7 @@ public class BuildingStateExchange extends StateExchange {
 
     @Override
     public String toString() {
-        return this.getClass().getName() + ": Sender " + this.sender + ", time: " + this.timestamp;
+        return this.getClass().getName() + ": Sender " + this.getSender() + ", time: " + this.getTimestamp();
     }
 
     public BuildingStateExchange clone() {

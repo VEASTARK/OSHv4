@@ -11,16 +11,12 @@ import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.hal.exchange.BatteryStorageOX;
 import osh.mgmt.ipp.BatteryStorageNonControllableIPP;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
 
 /**
  * @author Jan Müller, Sebastian Kramer
  */
 public class NonControllableInverterBatteryStorageObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
 
     private long NEW_IPP_AFTER;
@@ -50,7 +46,7 @@ public class NonControllableInverterBatteryStorageObserver
         if (this.lastTimeIPPSent + this.NEW_IPP_AFTER < now || Math.abs((ox.getBatteryStateOfCharge() - this.lastSOCIPP)) > this.TRIGGER_IPP_IF_DELTASoC_BIGGER) {
             // build SIPP
             BatteryStorageNonControllableIPP sipp = new BatteryStorageNonControllableIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     ox.getBatteryStateOfCharge(),
@@ -69,7 +65,7 @@ public class NonControllableInverterBatteryStorageObserver
                     ox.getCompressionType(),
                     ox.getCompressionValue()
             );
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, sipp);
             this.lastTimeIPPSent = now;
             this.lastSOCIPP = ox.getBatteryStateOfCharge();
@@ -77,27 +73,27 @@ public class NonControllableInverterBatteryStorageObserver
 
         // build SX
         CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 DeviceTypes.BATTERYSTORAGE);
 
         cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
         cpse.addPowerState(Commodity.REACTIVEPOWER, ox.getReactivePower());
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 CommodityPowerStateExchange.class,
                 this,
                 cpse);
 
         // save current state in OCRegistry (for e.g. GUI)
         BatteryStorageOCSX sx = new BatteryStorageOCSX(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getTimer().getUnixTime(),
                 ox.getBatteryStateOfCharge(),
 //						ox.getBatteryStateOfHealth(),
                 ox.getBatteryMinChargingState(),
                 ox.getBatteryMaxChargingState(),
-                this.getDeviceID());
-        this.getOCRegistry().setState(
+                this.getUUID());
+        this.getOCRegistry().publish(
                 BatteryStorageOCSX.class,
                 this,
                 sx);
@@ -109,10 +105,4 @@ public class NonControllableInverterBatteryStorageObserver
             IModelOfObservationType type) {
         return null;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

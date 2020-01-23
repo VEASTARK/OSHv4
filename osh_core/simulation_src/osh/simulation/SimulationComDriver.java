@@ -33,8 +33,8 @@ public abstract class SimulationComDriver extends CALComDriver {
     }
 
     @Override
-    public final UUID getDeviceID() {
-        return super.getDeviceID();
+    public final UUID getUUID() {
+        return super.getUUID();
     }
 
     @Override

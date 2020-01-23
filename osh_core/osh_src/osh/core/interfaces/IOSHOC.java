@@ -2,7 +2,7 @@ package osh.core.interfaces;
 
 import osh.core.oc.GlobalController;
 import osh.core.oc.GlobalObserver;
-import osh.registry.OCRegistry;
+import osh.registry.Registry.OCRegistry;
 
 /**
  * Global O/C-unit interface

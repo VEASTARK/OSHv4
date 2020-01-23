@@ -101,14 +101,17 @@ public class CurrentWeatherProviderWAMPDispatcher {
                                                         CurrentWeatherMap currentWeatherData = this.mapper.convertValue(eventNode, CurrentWeatherMap.class);
 
                                                         this.weatherWriteLock.lock();
-                                                        this.currentWeatherDetails = new CurrentWeatherDetails(
-                                                                this.comDriver.getDeviceID(),
-                                                                this.comDriver.getTimer().getUnixTime(),
-                                                                currentWeatherData);
-                                                        this.comDriver.receiveCurrentDetails(this.currentWeatherDetails);
+                                                        try {
+                                                            this.currentWeatherDetails = new CurrentWeatherDetails(
+                                                                    this.comDriver.getUUID(),
+                                                                    this.comDriver.getTimer().getUnixTime(),
+                                                                    currentWeatherData);
+                                                            this.comDriver.receiveCurrentDetails(this.currentWeatherDetails);
 
-                                                        this.lastLog = this.comDriver.getTimer().getUnixTime();
-                                                        this.weatherWriteLock.unlock();
+                                                            this.lastLog = this.comDriver.getTimer().getUnixTime();
+                                                        } finally {
+                                                            this.weatherWriteLock.unlock();
+                                                        }
 
                                                     } catch (IllegalArgumentException e) {
                                                         // error

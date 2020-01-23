@@ -1,6 +1,7 @@
 package osh.datatypes.registry.details.common;
 
 import osh.datatypes.registry.StateExchange;
+import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
@@ -11,7 +12,7 @@ import java.util.UUID;
  * @author Kaibin Bao, Ingo Mauser
  */
 @XmlType
-public class BusDeviceStatusDetails extends StateExchange {
+public class BusDeviceStatusDetails extends StateExchange implements IPromiseToBeImmutable {
 
     /**
      *

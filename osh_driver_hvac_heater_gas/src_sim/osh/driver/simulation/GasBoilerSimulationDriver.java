@@ -140,7 +140,7 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
         this.setPower(Commodity.HEATINGHOTWATERPOWER, hotWaterPower);
 
         GasBoilerObserverExchange ox = new GasBoilerObserverExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.minTemperature,
                 this.maxTemperature,

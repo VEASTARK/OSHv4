@@ -104,7 +104,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
         // communicate state to observer
         ColdWaterTankObserverExchange observerExchange =
                 new ColdWaterTankObserverExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
@@ -117,10 +117,4 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
     public void performNextAction(SubjectAction nextAction) {
         //NOTHING
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

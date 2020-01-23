@@ -1,358 +1,483 @@
 package osh.registry;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.reflections.Reflections;
 import osh.OSHComponent;
-import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.core.threads.EventQueueSubscriberInvoker;
-import osh.core.threads.InvokerThreadRegistry;
-import osh.core.threads.exceptions.InvokerThreadException;
-import osh.core.threads.exceptions.SubscriberNotFoundException;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.CommandExchange;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
-import osh.datatypes.registry.StateExchange;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
-import osh.registry.interfaces.IRegistry;
+import osh.registry.interfaces.IDataRegistryListener;
+import osh.registry.interfaces.IPromiseToBeImmutable;
+import osh.registry.interfaces.IProvidesIdentity;
+import osh.utils.Triple;
 
 import java.util.*;
-import java.util.Map.Entry;
-
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * @author Till Schuberth, Florian Allerding, Ingo Mauser
+ * Registry for communication between different modules of the OSH.
+ * This registry works with the publish/subscribe architecture and enables subscription either for specific senders
+ * (identified by their supplied UUID) of for any published exchanges of a sepcific type.
+ *
+ * @author Sebastian Kramer
+ *
  */
-public abstract class Registry extends OSHComponent implements IRegistry {
-
-    private final Map<Class<? extends StateExchange>, Map<UUID, StateExchange>> states = new HashMap<>();
-    private final Map<Class<? extends StateExchange>, Set<EventReceiverWrapper>> stateListeners = new HashMap<>();
-
-    private final Map<Class<? extends EventExchange>, Set<EventReceiverWrapper>> eventListeners = new HashMap<>();
-
-    private final Map<EventReceiverWrapper, EventQueue> queues = new HashMap<>();
-    private final Map<EventReceiverWrapper, StateChangedEventSet> stateChangedEventSets = new HashMap<>();
-
-    private final InvokerThreadRegistry invokerRegistry;
-
+public class Registry extends OSHComponent {
 
     /**
-     * CONSTRUCTOR
+     * Information provided through the {@link org.reflections} package about the classpath of which all exchange
+     * object lie.
      */
-    public Registry(IOSH osh) {
-        super(osh);
-        this.invokerRegistry = new InvokerThreadRegistry(osh);
-    }
+    private static final Reflections reflections = new Reflections(AbstractExchange.class.getPackageName());
 
     /**
-     * listener.onQueueEventReceived() is called
+     * A map containing all data currently known to this registry.
      */
-    public synchronized EventQueue register(
-            Class<? extends EventExchange> type, IEventTypeReceiver subscriber)
-            throws OSHException {
-        return this.register(type, new EventReceiverWrapper(subscriber));
-    }
+    private final Map<Class<? extends AbstractExchange>, Map<UUID, AbstractExchange>> data =
+            new Object2ObjectOpenHashMap<>();
 
     /**
-     * listener.onQueueEventReceived() is called
+     * The optional queue of exchange objects to publish to subscribers if this step is to only be completed
+     * by a specific call and not directly after each publish call
      */
-    private synchronized EventQueue register(
-            Class<? extends EventExchange> type, EventReceiverWrapper subscriber)
-            throws OSHException {
-        if (type == null || subscriber == null)
-            throw new IllegalArgumentException("argument is null");
-
-        // add subscriber to the set of subscribers for this event type
-        Set<EventReceiverWrapper> eventTypeSubscribers = this.eventListeners.computeIfAbsent(type, k -> new HashSet<>());
-        eventTypeSubscribers.add(subscriber);
-
-        // create one queue for every subscriber
-        EventQueue queue = this.queues.get(subscriber);
-        if (queue == null) {
-            queue = new EventQueue(this.getGlobalLogger(), "EventQueue for "
-                    + subscriber.getUUID().toString());
-            this.queues.put(subscriber, queue);
-            this.invokerRegistry.addQueueSubscriber(subscriber, queue);
-        }
-        return queue;
-    }
-
-    public <T extends EventExchange, U extends T> void sendEvent(Class<T> type,
-                                                                 U ex) {
-        if (type == null || ex == null)
-            throw new IllegalArgumentException("argument is null");
-
-        this.sendEvent(type, ex, null);
-    }
-
-    public <T extends CommandExchange, U extends T> void sendCommand(
-            Class<T> type, U ex) {
-        if (type == null || ex == null)
-            throw new IllegalArgumentException("argument is null");
-
-        UUID receiver = ex.getReceiver();
-        if (receiver == null)
-            throw new NullPointerException("CommandExchange: receiver is null");
-
-        this.sendEvent(type, ex, receiver);
-    }
-
-    @SuppressWarnings("unchecked")
-    private synchronized <T extends EventExchange, U extends T> void sendEvent(
-            Class<T> type, U ex, UUID receiver) {
-        Set<EventReceiverWrapper> listeners = this.eventListeners.get(type);
-        if (listeners == null)
-            return; // no listeners
-
-        for (EventReceiverWrapper r : listeners) {
-            if (receiver != null) {
-                if (!r.getUUID().equals(receiver))
-                    continue; // not the receiver
-            }
-            EventQueue queue = this.queues.get(r);
-
-            U exClone;
-            try {
-                //a cast to T should be sufficient, but if I
-                //can't cast to U, cloning isn't implemented
-                //properly anyway...
-                exClone = (U) ex.clone();
-            } catch (ClassCastException e) {
-                throw new RuntimeException("You didn't implement cloning properly in your EventExchange-subclass.", e);
-            }
-            this.enqueueAndNotify(queue, type, exClone, r);
-        }
-    }
-
-    public synchronized <T extends StateExchange> T getState(
-            Class<T> type,
-            UUID stateProvider) {
-        Map<UUID, StateExchange> map = this.states.get(type);
-        if (map == null)
-            return null;
-
-        StateExchange state = map.get(stateProvider);
-        if (state == null)
-            return null;
-
-        @SuppressWarnings("unchecked")
-        T t = (T) (state.clone());
-
-        return t;
-    }
-
-    public synchronized <T extends StateExchange> Map<UUID, T> getStates(
-            Class<? extends T> type) {
-        Map<UUID, StateExchange> map = this.states.get(type);
-        if (map == null)
-            return new HashMap<>();
-
-        Map<UUID, T> copy = new HashMap<>();
-        for (Entry<UUID, StateExchange> e : map.entrySet()) {
-            UUID uuid = e.getKey();
-            StateExchange ex = e.getValue();
-
-            @SuppressWarnings("unchecked")
-            T clone = (T) ex.clone();
-
-            copy.put(uuid, clone);
-        }
-        return copy;
-    }
-
-    public Set<Class<? extends StateExchange>> getTypes() {
-        Set<Class<? extends StateExchange>> types;
-
-        synchronized (this) {
-            types = new HashSet<>(this.states.keySet());
-        }
-
-        return types;
-    }
-
-    public synchronized <T extends StateExchange, U extends T> void setState(
-            Class<T> type,
-            IHasState provider,
-            U state) {
-
-        if (!provider.getUUID().equals(state.getSender()))
-            throw new IllegalArgumentException(
-                    "provider uuid doesn't match sender uuid");
-
-        this.setState(type, provider.getUUID(), state);
-    }
+    private final ConcurrentLinkedQueue<Triple<Class<? extends AbstractExchange>, UUID, AbstractExchange>> deferQueue = new  ConcurrentLinkedQueue<>();
 
     /**
-     * Set the state of an arbitrary object. !USE WITH CARE! This is used by bus
-     * drivers.
+     * A mapping of each listener to it's wrapper object
+     */
+    private final Map<IDataRegistryListener, DataListenerWrapper> wrapperMap = new Object2ObjectOpenHashMap<>();
+
+    /**
+     * A map of each object identifier and publisher identity to the subscribers of this specific identifier and
+     * publisher
+     */
+    private final Map<Class<? extends AbstractExchange>, Map<UUID, List<DataListenerWrapper>>> singleSubscribers =
+            new Object2ObjectOpenHashMap<>();
+
+    /**
+     * A map of object identifiers to subscribers who wish to be notified regardless of the publisher's identity
+     */
+    private final Map<Class<? extends AbstractExchange>, List<DataListenerWrapper>> manySubscribers =
+            new Object2ObjectOpenHashMap<>();
+
+    /**
+     * The flag if calls to subscribers after a publish should be made instantly or deferred to a queue till a specific
+     * flush command is given
+     */
+    private boolean deferCallbacks;
+
+    private final Lock dataReadLock;
+    private final Lock dataWriteLock;
+    private final Lock subscriberReadLock;
+    private final Lock subscriberWriteLock;
+
+    /**
+     * Generates a registry with the given organic management entity and the flag if this registry supports a
+     * simulation or real-world use
      *
-     * @param type
-     * @param state
+     * @param entity the organic management entity
+     * @param isSimulation flag if this registry is run in a simulation
      */
-    public synchronized <T extends StateExchange, U extends T> void setStateOfSender(
-            Class<T> type, U state) {
-        this.setState(type, state.getSender(), state);
+    public Registry(IOSH entity, boolean isSimulation) {
+        super(entity);
+        this.deferCallbacks = isSimulation;
+
+        ReentrantReadWriteLock dataLock = new ReentrantReadWriteLock();
+        ReentrantReadWriteLock queueLock = new ReentrantReadWriteLock();
+        ReentrantReadWriteLock listenerLock = new ReentrantReadWriteLock();
+
+        this.dataReadLock = dataLock.readLock();
+        this.dataWriteLock = dataLock.writeLock();
+        this.subscriberReadLock = listenerLock.readLock();
+        this.subscriberWriteLock = listenerLock.writeLock();
     }
 
-    private synchronized <T extends StateExchange, U extends T> void setState(
-            Class<T> type, UUID uuid, U state) {
-        Map<UUID, StateExchange> map = this.states.computeIfAbsent(type, k -> new HashMap<>());
-        map.put(uuid, state);
-
-        // inform listeners
-        Set<EventReceiverWrapper> listeners = this.stateListeners.get(type);
-        // only one exchange for every listener needed, because StateChangedExchange not modifiable
-        StateChangedExchange stChEx = new StateChangedExchange(
-                this.getTimer().getUnixTime(),
-                type,
-                uuid);
-        if (listeners != null) {
-            for (EventReceiverWrapper r : listeners) {
-                this.notifyStateChange(stChEx, r);
-            }
-        }
-    }
 
     /**
-     * Registers a listener which is notified whenever a state (from any device)
-     * is changed. This is a legacy function, please use the new version with
-     * IEventTypeReceiver as listener
+     * Looks up and retrieves the the wrapper for a given explicit listener or if not already existing creates a new
+     * one and stores it in the map.
      *
-     * @param type
-     * @param listener
-     * @throws OSHException
+     * @param listener the explicit listener
+     * @return the retrieved listener wrapper or a newly constructed one if not existing
      */
-    public synchronized void registerStateChangeListener(
-            Class<? extends StateExchange> type, IEventTypeReceiver listener)
-            throws OSHException {
-        this.registerStateChangeListener(type, new EventReceiverWrapper(listener));
+    private DataListenerWrapper retrieveCallback(IDataRegistryListener listener) {
+        return this.wrapperMap.computeIfAbsent(listener, l -> new DataListenerWrapper(listener));
     }
 
     /**
-     * Registers a listener which is notified whenever a state (from any device)
-     * is changed. This is a legacy function, please use the new version with
-     * IEventTypeReceiver as listener
+     * Publishes the given exchange object under the given identifier and with the given sender. Listeners will be
+     * instantly (and concurrently) called unless the defer flag in this registry is set.
      *
-     * @param type
-     * @param listener
-     * @throws OSHException
+     * The exchange object will be cloned for each listeners unless it indicates it's immuteability by implementing
+     * the {@link IPromiseToBeImmutable} flag interface.
+     *
+     * @param identifier the identifier under wich the exchange object will be published
+     * @param sender the sender under which the exchange object will be published
+     * @param exchange the exchange object
      */
-    private synchronized void registerStateChangeListener(
-            Class<? extends StateExchange> type, EventReceiverWrapper listener)
-            throws OSHException {
-        if (type == null || listener == null)
-            throw new IllegalArgumentException("argument is null");
-        Set<EventReceiverWrapper> listeners = this.stateListeners.computeIfAbsent(type, k -> new HashSet<>());
-        listeners.add(listener);
-
-        if (!this.stateChangedEventSets.containsKey(listener)) {
-            String name;
-            if (listener.getUUID() == null)
-                name = "StateChangeListenerQueue for "
-                        + listener.getClass().getName();
-            else
-                name = "StateChangeListenerQueue for "
-                        + listener.getUUID().toString();
-
-            StateChangedEventSet eventSet = new StateChangedEventSet(this.getGlobalLogger(), name);
-            this.stateChangedEventSets.put(listener, eventSet);
-            this.invokerRegistry.addStateSubscriber(listener, eventSet);
-        }
-
-        // push all current states (may be optional)
-        Map<UUID, StateExchange> map = this.states.get(type);
-        if (map != null) {
-            for (Entry<UUID, StateExchange> e : map.entrySet()) {
-                long timestamp = this.getTimer().getUnixTime();
-                this.notifyStateChange(
-                        new StateChangedExchange(timestamp, type, e.getKey()),
-                        listener);
-            }
-        }
-    }
-
-    /**
-     * enqueue ex in Queue queue and notify ComponentThread
-     */
-    private <T extends EventExchange> void enqueueAndNotify(EventQueue queue, Class<T> eventType, T ex,
-                                                            EventReceiverWrapper receiver) {
-
-        queue.enqueue(eventType, ex);
-
+    public <T extends AbstractExchange, U extends T> void publish(Class<T> identifier, UUID sender, U exchange) {
+        assert exchange != null;
+        this.dataWriteLock.lock();
         try {
-            this.invokerRegistry.invoke(receiver);
-        } catch (SubscriberNotFoundException e) {
-            this.getGlobalLogger().logWarning("receiver has not been found!", e);
-        } catch (InvokerThreadException e) {
-            this.getGlobalLogger().logError("thread exception", e);
+            this.data.computeIfAbsent(identifier, k -> new Object2ObjectOpenHashMap<>()).put(sender, exchange);
+        } finally {
+            this.dataWriteLock.unlock();
         }
-    }
 
-    private void notifyStateChange(StateChangedExchange ex,
-                                   EventReceiverWrapper receiver) {
-        StateChangedEventSet eventSet = this.stateChangedEventSets.get(receiver);
-        if (eventSet != null) {
-            eventSet.enqueue(ex);
+        if (!this.deferCallbacks) {
+            this.getListeners(identifier, sender).parallelStream().forEach(t -> t.onListen(
+                    exchange instanceof IPromiseToBeImmutable ? exchange : (AbstractExchange) exchange.clone()));
         } else {
-            this.getGlobalLogger().logError("event set of " + receiver + " not found!");
+            this.deferQueue.add(new Triple<>(identifier, sender, exchange));
         }
+    }
 
+    /**
+     * Publishes the given exchange object under the given identifier with the sender defined in the exchange object
+     * itself. Will automatically set the sender of a command exchange to it's intended recipient,
+     *
+     * @param identifier the identifier under wich the exchange object will be published
+     * @param exchange the exchange object
+     */
+    public <T extends AbstractExchange, U extends T> void publish(Class<T> identifier, U exchange) {
+        if (CommandExchange.class.isAssignableFrom(identifier)) {
+            this.publish(identifier, ((CommandExchange) exchange).getReceiver(), exchange);
+        } else {
+            this.publish(identifier, exchange.getSender(), exchange);
+        }
+    }
+
+    /**
+     * Publishes the given exchange object under the given identifier with the given sender as an {@link IProvidesIdentity}
+     * object
+     *
+     * @param identifier the identifier under wich the exchange object will be published
+     * @param sender the sender under which the exchange object will be published as an IHasState object
+     * @param exchange the exchange object
+     */
+    public <T extends AbstractExchange, U extends T> void publish(Class<T> identifier, IProvidesIdentity sender,
+                                                                  U exchange) {
+        this.publish(identifier, sender.getUUID(), exchange);
+    }
+
+    /**
+     * Returns all listeners subscribed to the given identifier and sender.
+     *
+     * @param identifier the given identifier
+     * @param sender the given sender
+     * @return a list of all subscriber to the specific given configuration
+     */
+    private List<DataListenerWrapper> getListeners(Class<? extends AbstractExchange> identifier, UUID sender) {
+
+        this.subscriberReadLock.lock();
         try {
-            this.invokerRegistry.notifyStateSubscriber(receiver);
-        } catch (SubscriberNotFoundException e) {
-            this.getGlobalLogger().logWarning("receiver has not been found!", e);
-        } catch (InvokerThreadException e) {
-            this.getGlobalLogger().logError("thread exception", e);
+            List<DataListenerWrapper> allListeners = new ArrayList<>();
+            Class<?> currentClass = identifier;
+
+            while (AbstractExchange.class.isAssignableFrom(currentClass)) {
+
+                if (this.singleSubscribers.containsKey(currentClass) && this.singleSubscribers.get(currentClass).containsKey(sender)) {
+                    allListeners.addAll(this.singleSubscribers.get(currentClass).get(sender));
+                }
+                if (this.manySubscribers.containsKey(currentClass)) {
+                    allListeners.addAll(this.manySubscribers.get(currentClass));
+                }
+                currentClass = currentClass.getSuperclass();
+            }
+
+            return allListeners;
+        } finally {
+            this.subscriberReadLock.unlock();
         }
     }
 
     /**
-     * Let the {@link EventQueueSubscriberInvoker}s process all queues. Only
-     * during simulation, all queue processing is done after this call. Use this
-     * for the simulation engine.
-     */
-    public synchronized void flushAllQueues() {
-        this.invokerRegistry.triggerInvokers();
-    }
-
-    /**
-     * Use this for the simulation engine.
+     * Subscribes for all published exchanges under the given identifier and the given sender with the given listener
+     * interface. This will also publish all currently existing exchanges to the given listener for the given
+     * configuration (identifier, sender) if their timestamp matches the current time.
      *
-     * @return false iff there is at least one event in some queue
+     * @param identifier the given identifier
+     * @param sender the given sender
+     * @param listener the given listener interface
      */
-    public synchronized boolean areAllQueuesEmpty() {
-        for (EventQueue queue : this.queues.values()) {
-            if (queue.isNotEmpty())
-                return false;
+    public void subscribe(Class<? extends AbstractExchange> identifier, UUID sender, IDataRegistryListener listener) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(sender);
+        Objects.requireNonNull(listener);
+
+        this.subscriberWriteLock.lock();
+        try {
+            //adds this subscription configuration (identifier, sender) and the listener wrapper to the map
+            // containing all subscribers for specific sender
+            this.singleSubscribers.computeIfAbsent(identifier, k -> new Object2ObjectOpenHashMap<>()).computeIfAbsent(sender,
+                    l -> new ArrayList<>()).add(this.retrieveCallback(listener));
+        } finally {
+            this.subscriberWriteLock.unlock();
         }
 
-        return true;
+        //retrieves all currently existing exchange objects for the given subscription configuration (identifer,
+        // sender) and publishes them to the subscriber
+        if (!this.deferCallbacks) {
+            this.dataReadLock.lock();
+            try {
+                if (this.data.containsKey(identifier) && this.data.get(identifier).containsKey(sender)) {
+                    AbstractExchange toPublish = this.data.get(identifier).get(sender);
+                    if (toPublish.getTimestamp() == this.getTimer().getUnixTime()) {
+                        this.retrieveCallback(listener).onListen(toPublish instanceof IPromiseToBeImmutable ?
+                                toPublish : (AbstractExchange) toPublish.clone());
+                    }
+                }
+            } finally {
+                this.dataReadLock.unlock();
+            }
+        }
     }
 
-    // TODO: WE SHOULD SYNCHRONIZE with queues, not always with the complete
-    // registry
-
     /**
-     * Use the returned object to perform one atomic operation consisting of
-     * multiple method calls. Example:
-     * <p>
-     * synchronized (registry.getSyncObject()) { Type bla =
-     * registry.getState(..); if (bla.func()) { registry.setState(...); } }
+     *  Helper-method to automatically extract the sender identity from {@link IProvidesIdentity} interface and then
+     *  delegate to the normal subscription process.
      *
-     * @return Object for synchronization
+     * @param identifier the given identifier
+     * @param sender the identitiy of the sender as an {@link IProvidesIdentity} interface
+     * @param listener the listener interface
      */
-    public Object getSyncObject() {
-        return this;
+    public void subscribe(Class<? extends AbstractExchange> identifier, IProvidesIdentity sender, IDataRegistryListener listener) {
+        this.subscribe(identifier, sender.getUUID(), listener);
     }
 
     /**
-     * Starts threads of the internal invoker thread registry.
+     * Subscribes for all published exchanges under the given identifier with the given listener interface. This will
+     * also publish all currently existing exchanges to the given listener for the given identifier if their
+     * timestamp matches the current time.
+     *
+     * Will automatically reject subscribing to all command exchanges as these are  only intended for a specific recipient.
+     *
+     * @param identifier the given identifier
+     * @param listener the given listener interface
      */
-    public void startQueueProcessingThreads() {
-        this.invokerRegistry.startThreads();
+    public void subscribe(Class<? extends AbstractExchange> identifier, IDataRegistryListener listener) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(listener);
+
+        if (CommandExchange.class.isAssignableFrom(identifier)) {
+            throw new IllegalArgumentException("it is not possible to subscribe to all command exchanges, please " +
+                    "provide a sender UUID");
+        }
+
+        this.subscriberWriteLock.lock();
+        try {
+            //adds this subscription configuration (identifier, sender) and the listener wrapper to the map
+            // containing all subscribers
+            this.manySubscribers.computeIfAbsent(identifier, k -> new ArrayList<>()).add(this.retrieveCallback(listener));
+        } finally {
+            this.subscriberWriteLock.unlock();
+        }
+
+        //retrieves all currently existing exchange objects for the given subscription configuration (identifer,
+        // sender) and publishes them to the subscriber (either instantly or deferred to the queue)
+        if (!this.deferCallbacks) {
+            this.dataReadLock.lock();
+            try {
+                if (this.data.containsKey(identifier)) {
+                    this.data.get(identifier).forEach((u, l) -> {
+                        if (l.getTimestamp() == this.getTimer().getUnixTime()) {
+                            this.retrieveCallback(listener).onListen(l instanceof IPromiseToBeImmutable ?
+                                    l : (AbstractExchange) l.clone());
+                        }
+                    });
+                }
+            } finally {
+                this.dataReadLock.unlock();
+            }
+        }
     }
 
-    // FIXME: registry unregister functions
-    // TODO: unregister functions unimplemented. Be careful, because you also have to
-    // remove all queues that are not longer needed, otherwise they will get
-    // filled and never be emptied.
+    /**
+     * Unsubscribes the given listener from exchanges under the given identifier with the given sender
+     *
+     * @param identifier the identifier of the exchange
+     * @param sender the sender of the exchange
+     * @param listener the listener to unsubscribe
+     * @return true if the unsubscription was successfull
+     */
+    public boolean unSubscribe(Class<? extends AbstractExchange> identifier, UUID sender, IDataRegistryListener listener) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(sender);
+        Objects.requireNonNull(listener);
+
+        boolean success;
+        this.subscriberWriteLock.lock();
+        try {
+            return this.singleSubscribers.containsKey(identifier) && this.singleSubscribers.get(identifier).containsKey(sender) &&
+                            this.wrapperMap.containsKey(listener) &&
+                            this.singleSubscribers.get(identifier).get(sender).remove(this.wrapperMap.get(listener));
+        } finally {
+            this.subscriberWriteLock.unlock();
+        }
+    }
+
+    /**
+     * Unsubscribes the given listener from all exchanges under the given identifier.
+     *
+     * @param identifier the identifier of the exchange
+     * @param listener the listener to unsubscribe
+     * @return true if the unsubscription was successfull
+     */
+    public boolean unSubscribe(Class<? extends AbstractExchange> identifier, IDataRegistryListener listener) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(listener);
+
+        this.subscriberWriteLock.lock();
+        try {
+            return this.manySubscribers.containsKey(identifier) && this.wrapperMap.containsKey(listener) &&
+                            this.manySubscribers.get(identifier).remove(this.wrapperMap.get(listener));
+        } finally {
+            this.subscriberWriteLock.unlock();
+        }
+    }
+
+    /**
+     * Retrieves the stored exchange that was published under the given identifier and the given sender.
+     *
+     * @param identifier the identifier of the exchange to retrieve
+     * @param sender the sender of the exchange to retrieve
+     * @return the stored exchange matching the given configuration or null if it does not exist
+     */
+    public AbstractExchange getData(Class<? extends AbstractExchange> identifier, UUID sender) {
+
+        this.dataReadLock.lock();
+        try {
+            if (this.data.containsKey(identifier) && this.data.get(identifier).containsKey(sender)) {
+               AbstractExchange exchange = this.data.get(identifier).get(sender);
+               return exchange instanceof IPromiseToBeImmutable ? exchange : (AbstractExchange) exchange.clone();
+            } else {
+                return null;
+            }
+        } finally {
+            this.dataReadLock.unlock();
+        }
+    }
+
+    /**
+     * Retrives the map of all stored exchanges that were published under the given identifier
+     *
+     * @param identifier the identifier of all exchanges to be retrieved
+     * @return a map of all the stored exchanges matching the given identifier mapped to their sender
+     */
+    public Map<UUID, AbstractExchange> getData(Class<? extends AbstractExchange> identifier) {
+
+        this.dataReadLock.lock();
+        try {
+            if (this.data.containsKey(identifier)) {
+                Map<UUID, AbstractExchange> states = new Object2ObjectOpenHashMap<>(this.data.get(identifier));
+                if (states.isEmpty() || states.values().stream().allMatch(e -> e instanceof IPromiseToBeImmutable)) return states;
+
+                states.replaceAll((k, v) -> (AbstractExchange) v.clone());
+                return states;
+            } else {
+                return Collections.emptyMap();
+            }
+        } finally {
+            this.dataReadLock.unlock();
+        }
+    }
+
+    /**
+     * Retrieves a set of all currently used exchange identifiers
+     *
+     * @return a set of all currently used exchange identifiers
+     */
+    public Set<Class<? extends AbstractExchange>> getDataTypes() {
+        return this.data.keySet();
+    }
+
+    /**
+     * Flushes the queue of published exchanges and notifies all subscribers of the stored exchange objects
+     *
+     * @return true if the queue was empty after flushing (necessary because of concurrent access to this class)
+     */
+    public boolean flushQueue() {
+        while (!this.deferQueue.isEmpty()) {
+            Triple<Class<? extends AbstractExchange>, UUID, AbstractExchange> queueItem = this.deferQueue.poll();
+            this.getListeners(queueItem.getFirst(), queueItem.getSecond()).forEach(t -> t.onListen(
+                    queueItem.getThird() instanceof IPromiseToBeImmutable ?
+                            queueItem.getThird() :
+                            (AbstractExchange) queueItem.getThird().clone()));
+        }
+
+        return this.deferQueue.isEmpty();
+    }
+
+    /**
+     * Changes the behaviour of this registry to notify subscribers immediately after an exchange object is published
+     * instead of collecting all objects to publish in a queue. This will empty the current queue first and then
+     * change the behaviour flag.
+     */
+    public void startContinuousRegistryFlush() {
+        this.flushQueue();
+        this.deferCallbacks = false;
+    }
+
+    /**
+     * Changes the behaviour of this registry to first collect all published exchanges in a queue and only notify
+     * subscribers if {@link Registry#flushQueue()} is called.
+     */
+    public void stopContinuousRegistryFlush() {
+        this.deferCallbacks = true;
+    }
+
+    /**
+     * Registry for the exchange of objects in the Com-layer of the organic architecture
+     */
+    public static class ComRegistry extends Registry {
+
+        /**
+         * Generates a registry with the given organic management entity and the flag if this registry supports a
+         * simulation or real-world use
+         *
+         * @param entity       the organic management entity
+         * @param isSimulation flag if this registry is run in a simulation
+         */
+        public ComRegistry(IOSH entity, boolean isSimulation) {
+            super(entity, isSimulation);
+        }
+    }
+
+    /**
+     * Registry for the exchange of objects in the EAL-layer of the organic architecture
+     */
+    public static class DriverRegistry extends Registry {
+
+        /**
+         * Generates a registry with the given organic management entity and the flag if this registry supports a
+         * simulation or real-world use
+         *
+         * @param entity       the organic management entity
+         * @param isSimulation flag if this registry is run in a simulation
+         */
+        public DriverRegistry(IOSH entity, boolean isSimulation) {
+            super(entity, isSimulation);
+        }
+    }
+
+    /**
+     * Registry for the exchange of objects in the OC-layer of the organic architecture
+     */
+    public static class OCRegistry extends Registry {
+
+        /**
+         * Generates a registry with the given organic management entity and the flag if this registry supports a
+         * simulation or real-world use
+         *
+         * @param entity       the organic management entity
+         * @param isSimulation flag if this registry is run in a simulation
+         */
+        public OCRegistry(IOSH entity, boolean isSimulation) {
+            super(entity, isSimulation);
+        }
+    }
 }
+
+

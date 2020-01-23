@@ -14,16 +14,12 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.hal.exchange.SmartHeaterOX;
 import osh.mgmt.ipp.SmartHeaterNonControllableIPP;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser
  */
 public class SmartHeaterLocalObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
     private int temperatureSetting = 70;
     private int currentState;
@@ -68,13 +64,13 @@ public class SmartHeaterLocalObserver
 
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, ox.getHotWaterPower());
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -91,7 +87,7 @@ public class SmartHeaterLocalObserver
 
     private void sendIPP(long now) {
         SmartHeaterNonControllableIPP sipp = new SmartHeaterNonControllableIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 now,
                 this.temperatureSetting,
@@ -99,7 +95,7 @@ public class SmartHeaterLocalObserver
                 this.timestampOfLastChangePerSubElement,
                 this.compressionType,
                 this.compressionValue);
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this, sipp);
         this.lastTimeIppSent = now;
         this.lastIppTempSetting = this.temperatureSetting;
@@ -110,10 +106,4 @@ public class SmartHeaterLocalObserver
             IModelOfObservationType type) {
         return null;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

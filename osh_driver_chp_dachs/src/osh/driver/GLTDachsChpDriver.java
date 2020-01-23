@@ -8,7 +8,6 @@ import osh.datatypes.registry.driver.details.chp.ChpDriverDetails;
 import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.dachs.GLTDachsInfoRequestThread;
 import osh.driver.dachs.GLTDachsPowerRequestThread;
-import osh.registry.interfaces.IHasState;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -17,8 +16,7 @@ import java.util.UUID;
  * @author Ingo Mauser, Jan Mueller
  */
 public class GLTDachsChpDriver
-        extends DachsChpDriver
-        implements IHasState {
+        extends DachsChpDriver {
 
     protected String loginName;
     protected String loginPwd;
@@ -103,13 +101,13 @@ public class GLTDachsChpDriver
         }
 
         // ### save DachsDetails into DB ###
-        this.getDriverRegistry().setStateOfSender(DachsDriverDetails.class, dachsDetails);
+        this.getDriverRegistry().publish(DachsDriverDetails.class, dachsDetails);
 
         // ### transform DachsDetails to ChpDetails ###
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getDeviceID(), this.getTimer().getUnixTime());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimer().getUnixTime());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());
@@ -176,11 +174,11 @@ public class GLTDachsChpDriver
             td.setTemperature(waterStorageTemperature);
 //			getDriverRegistry().setState(TemperatureDetails.class, this, td);
 //			getDriverRegistry().setState(TemperatureDetails.class, UUID.fromString("268ea9bd-572c-46dd-a383-960b4ed65337"), td);
-            this.getDriverRegistry().setStateOfSender(TemperatureDetails.class, td);
+            this.getDriverRegistry().publish(TemperatureDetails.class, td);
         }
 
         this.chpDriverDetails = chpDetails;
-        this.getDriverRegistry().setState(ChpDriverDetails.class, this, this.chpDriverDetails);
+        this.getDriverRegistry().publish(ChpDriverDetails.class, this, this.chpDriverDetails);
         this.processChpDetailsAndNotify(this.chpDriverDetails);
     }
 

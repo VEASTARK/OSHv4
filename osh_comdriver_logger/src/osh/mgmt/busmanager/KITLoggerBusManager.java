@@ -2,9 +2,7 @@ package osh.mgmt.busmanager;
 
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.Exchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 
 import java.util.UUID;
 
@@ -38,13 +36,11 @@ public class KITLoggerBusManager extends LoggerBusManager {
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) throws OSHException {
-        super.onQueueEventTypeReceived(type, event);
+    public <T extends AbstractExchange> void onExchange(T exchange) {
 
-        Exchange toSend = null;
+        AbstractExchange toSend = null;
 
-        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getUUID())) {
+//        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getUUID())) {
 //			StateChangedExchange exsc = (StateChangedExchange) ex;
 //			if (exsc.getType().equals(LoggerScheduleStateExchange.class)) {
 //				toSend = (LoggerScheduleStateExchange) this.ocRegistry.getState(LoggerScheduleStateExchange.class, exsc.getStatefulentity());
@@ -61,9 +57,9 @@ public class KITLoggerBusManager extends LoggerBusManager {
 //					toSend = (LoggerWaterStorageStateExchange) this.ocRegistry.getState(LoggerWaterStorageStateExchange.class, exsc.getStatefulentity());
 //				}
 //			}
-        } else {
-            toSend = event;
-        }
+//        } else {
+//            toSend = event;
+//        }
 
         if (toSend != null) {
 //			updateUnit(new GenericAbstractExchangeHALWrapper(getUUID(), toSend.getTimestamp(), toSend));

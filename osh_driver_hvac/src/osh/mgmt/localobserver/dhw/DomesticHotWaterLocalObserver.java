@@ -122,11 +122,11 @@ public class DomesticHotWaterLocalObserver
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     DeviceTypes.DOMESTICHOTWATER);
             cpse.addPowerState(Commodity.DOMESTICHOTWATERPOWER, this.hotWaterPower);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -193,7 +193,7 @@ public class DomesticHotWaterLocalObserver
                         Commodity.DOMESTICHOTWATERPOWER,
                         this.compressionType,
                         this.compressionValue);
-        this.getOCRegistry().setState(
+        this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this, ipp);
     }
 

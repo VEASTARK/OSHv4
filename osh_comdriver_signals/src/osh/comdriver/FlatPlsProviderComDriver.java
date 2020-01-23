@@ -104,7 +104,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
         long now = this.getTimer().getUnixTime();
         this.powerLimitSignals = this.generateNewPowerLimitSignal(now);
         PlsComExchange ex = new PlsComExchange(
-                this.getDeviceID(),
+                this.getUUID(),
                 now,
                 this.powerLimitSignals);
         this.notifyComManager(ex);
@@ -139,7 +139,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
             // PLS
             this.powerLimitSignals = this.generateNewPowerLimitSignal(now);
             PlsComExchange ex = new PlsComExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     this.powerLimitSignals);
             this.notifyComManager(ex);

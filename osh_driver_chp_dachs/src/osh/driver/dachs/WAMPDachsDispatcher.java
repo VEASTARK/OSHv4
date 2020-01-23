@@ -61,7 +61,7 @@ public class WAMPDachsDispatcher {
         this.subscribeForWampUpdates();
 
         this.dachsDetails = new DachsDriverDetails(
-                dachsDriver.getDeviceID(),
+                dachsDriver.getUUID(),
                 dachsDriver.getTimer().getUnixTime());
     }
 
@@ -134,10 +134,13 @@ public class WAMPDachsDispatcher {
                                                                 });
 
                                                         this.dachsDetailsLock.lock();
-                                                        this.dachsDetails.setValues(map);
-                                                        this.dachsDriver.processDachsDetails(this.dachsDetails);
-                                                        this.notifyAll();
-                                                        this.dachsDetailsLock.lock();
+                                                        try {
+                                                            this.dachsDetails.setValues(map);
+                                                            this.dachsDriver.processDachsDetails(this.dachsDetails);
+                                                            this.notifyAll();
+                                                        } finally {
+                                                            this.dachsDetailsLock.unlock();
+                                                        }
                                                     } catch (IllegalArgumentException e) {
                                                         // error
                                                     }

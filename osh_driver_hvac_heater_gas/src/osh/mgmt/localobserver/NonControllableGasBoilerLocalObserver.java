@@ -14,16 +14,12 @@ import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.GasBoilerObserverExchange;
 import osh.mgmt.ipp.GasBoilerNonControllableIPP;
-import osh.registry.interfaces.IHasState;
-
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser
  */
 public class NonControllableGasBoilerLocalObserver
-        extends LocalObserver
-        implements IHasState {
+        extends LocalObserver {
 
     private int NEW_IPP_AFTER;
     private long lastTimeIPPSent = Long.MIN_VALUE;
@@ -71,7 +67,7 @@ public class NonControllableGasBoilerLocalObserver
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getGlobalLogger(),
                     now,
                     this.minTemperature,
@@ -85,7 +81,7 @@ public class NonControllableGasBoilerLocalObserver
                     this.typicalReactivePowerOff,
                     this.compressionType,
                     this.compressionValue);
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, sipp);
             this.lastTimeIPPSent = now;
             this.lastIPPMaxTemperature = this.maxTemperature;
@@ -118,7 +114,7 @@ public class NonControllableGasBoilerLocalObserver
             if (this.initialStateLastIPP != this.initialState || this.lastIPPMaxTemperature != this.maxTemperature || this.lastIPPMinTemperature != this.minTemperature) {
                 // build SIPP
                 GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         now,
                         this.minTemperature,
@@ -132,7 +128,7 @@ public class NonControllableGasBoilerLocalObserver
                         this.typicalReactivePowerOff,
                         this.compressionType,
                         this.compressionValue);
-                this.getOCRegistry().setState(
+                this.getOCRegistry().publish(
                         InterdependentProblemPart.class, this, sipp);
                 this.initialStateLastIPP = this.initialState;
                 this.lastIPPMaxTemperature = this.maxTemperature;
@@ -141,7 +137,7 @@ public class NonControllableGasBoilerLocalObserver
 
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
@@ -149,7 +145,7 @@ public class NonControllableGasBoilerLocalObserver
             cpse.addPowerState(Commodity.REACTIVEPOWER, ox.getReactivePower());
             cpse.addPowerState(Commodity.NATURALGASPOWER, ox.getGasPower());
             cpse.addPowerState(Commodity.HEATINGHOTWATERPOWER, ox.getHotWaterPower());
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     CommodityPowerStateExchange.class,
                     this,
                     cpse);
@@ -165,10 +161,4 @@ public class NonControllableGasBoilerLocalObserver
             IModelOfObservationType type) {
         return null;
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

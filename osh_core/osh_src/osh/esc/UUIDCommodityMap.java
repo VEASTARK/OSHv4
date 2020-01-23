@@ -42,7 +42,7 @@ public class UUIDCommodityMap implements Serializable {
         Arrays.fill(this.partIdToArrayIdMap, -1);
 
         for (int i = 0; i < allParts.length; i++) {
-            if (uuidIntMap.containsKey(allParts[i].getDeviceID())) {
+            if (uuidIntMap.containsKey(allParts[i].getUUID())) {
                 this.partIdToArrayIdMap[allParts[i].getId()] = i;
                 this.innerValues[i] = new LimitedCommodityStateMap();
             } else {
@@ -82,9 +82,9 @@ public class UUIDCommodityMap implements Serializable {
         Arrays.fill(this.partIdToArrayIdMap, -1);
 
         for (int i = 0; i < allParts.size(); i++) {
-            if (uuidIntMap.containsKey(allParts.get(i).getDeviceID())) {
-                this.keyMap.put(allParts.get(i).getDeviceID(), i);
-                this.partIdToArrayIdMap[uuidIntMap.getInt(allParts.get(i).getDeviceID())] = i;
+            if (uuidIntMap.containsKey(allParts.get(i).getUUID())) {
+                this.keyMap.put(allParts.get(i).getUUID(), i);
+                this.partIdToArrayIdMap[uuidIntMap.getInt(allParts.get(i).getUUID())] = i;
             } else {
                 throw new IllegalArgumentException("no mapping for specified key");
             }
@@ -137,8 +137,8 @@ public class UUIDCommodityMap implements Serializable {
         Arrays.fill(this.partIdToArrayIdMap, -1);
 
         for (int i = 0; i < allParts.length; i++) {
-            if (uuidIntMap.containsKey(allParts[i].getDeviceID())) {
-                this.keyMap.put(allParts[i].getDeviceID(), i);
+            if (uuidIntMap.containsKey(allParts[i].getUUID())) {
+                this.keyMap.put(allParts[i].getUUID(), i);
                 this.partIdToArrayIdMap[allParts[i].getId()] = i;
                 this.innerValues[i] = new LimitedCommodityStateMap();
             } else {

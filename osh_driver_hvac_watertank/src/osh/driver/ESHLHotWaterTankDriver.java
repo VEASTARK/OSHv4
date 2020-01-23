@@ -3,8 +3,7 @@ package osh.driver;
 import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateChangedExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.details.common.TemperatureDetails;
 import osh.driver.thermal.SimpleHotWaterTank;
 import osh.eal.hal.exchange.HALControllerExchange;
@@ -98,19 +97,19 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         super.onSystemIsUp();
 
         StaticCompressionExchange _stat =
-                new StaticCompressionExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+                new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
         _stat.setCompressionType(this.compressionType);
         _stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(_stat);
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getDeviceID(), this.getTimer().getUnixTime());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimer().getUnixTime());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
 
         HotWaterTankObserverExchange observerExchange =
                 new HotWaterTankObserverExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
@@ -123,42 +122,28 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
 
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
 
-        if (event instanceof StateChangedExchange && ((StateChangedExchange) event).getStatefulEntity().equals(this.getDeviceID())) {
-            StateChangedExchange exsc = (StateChangedExchange) event;
-            boolean updateOx = false;
+        if (exchange instanceof TemperatureDetails) {
+            TemperatureDetails currentTemperatureDetails = (TemperatureDetails) exchange;
+            this.waterTank.setCurrentWaterTemperature(currentTemperatureDetails.getTemperature());
 
-            if (exsc.getType().equals(TemperatureDetails.class)) {
-                TemperatureDetails currentTemperatureDetails = this.getDriverRegistry().getState(TemperatureDetails.class, exsc.getStatefulEntity());
-                this.waterTank.setCurrentWaterTemperature(currentTemperatureDetails.getTemperature());
-                updateOx = true;
-            }
-
-            if (updateOx) {
-                HotWaterTankObserverExchange observerExchange =
-                        new HotWaterTankObserverExchange(
-                                this.getDeviceID(),
-                                this.getTimer().getUnixTime(),
-                                this.waterTank.getCurrentWaterTemperature(),
-                                this.waterTank.getTankCapacity(),
-                                this.waterTank.getTankDiameter(),
-                                this.waterTank.getAmbientTemperature(),
-                                0,
-                                0);
-                this.notifyObserver(observerExchange);
-            }
+            HotWaterTankObserverExchange observerExchange =
+                    new HotWaterTankObserverExchange(
+                            this.getUUID(),
+                            this.getTimer().getUnixTime(),
+                            this.waterTank.getCurrentWaterTemperature(),
+                            this.waterTank.getTankCapacity(),
+                            this.waterTank.getTankDiameter(),
+                            this.waterTank.getAmbientTemperature(),
+                            0,
+                            0);
+            this.notifyObserver(observerExchange);
         }
-    }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
     }
 
     @Override
     protected void onControllerRequest(HALControllerExchange controllerRequest) {
         //NOTHING
     }
-
 }

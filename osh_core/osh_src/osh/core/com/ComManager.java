@@ -10,7 +10,8 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.oc.IOCCALDataPublisher;
 import osh.core.oc.IOCCALDataSubscriber;
-import osh.registry.OCRegistry;
+import osh.registry.Registry.OCRegistry;
+import osh.registry.interfaces.IProvidesIdentity;
 
 import java.util.UUID;
 
@@ -23,7 +24,8 @@ public abstract class ComManager
         implements IRealTimeSubscriber,
         ILifeCycleListener,
         IComDataSubscriber,
-        IOCCALDataPublisher {
+        IOCCALDataPublisher,
+        IProvidesIdentity {
 
     private CALComDriver comDriver;
     private final UUID uuid;
@@ -66,19 +68,20 @@ public abstract class ComManager
         return this.comDriver;
     }
 
+    @Override
     public UUID getUUID() {
         return this.uuid;
     }
 
 
     @Override
-    public void updateOcDataSubscriber(ICALExchange calExchange) throws OSHException {
+    public void updateOcDataSubscriber(ICALExchange calExchange) {
         if (this.comDriver != null) {
             this.comDriver.onDataFromOcComponent(calExchange);
         } else {
             //NOTHING
             //TODO: error message/exception
-            throw new OSHException("No ComDriver available.");
+            throw new IllegalArgumentException("No ComDriver available.");
         }
     }
 
@@ -127,15 +130,6 @@ public abstract class ComManager
     @Override
     public void onNextTimePeriod() throws OSHException {
         //...in case of use please override
-    }
-
-    /**
-     * please avoid usage
-     *
-     * @return
-     */
-    public UUID getGlobalOCUnitUUID() {
-        return this.getOSH().getGlobalObserver().getAssignedOCUnit().getUnitID();
     }
 
     protected OCRegistry getOCRegistry() {

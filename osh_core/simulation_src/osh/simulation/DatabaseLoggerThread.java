@@ -314,9 +314,12 @@ public final class DatabaseLoggerThread extends Thread {
 
     private static void enqueue(QueueLogObject logObject) {
         queueLock.writeLock().lock();
-        logQueue.add(logObject);
-        logQueue.notify();
-        queueLock.writeLock().unlock();
+        try {
+            logQueue.add(logObject);
+            logQueue.notify();
+        } finally {
+            queueLock.writeLock().unlock();
+        }
     }
 
     public static void enqueueSimResults(OSHSimulationResults simResults, long relativeStart, long relativeEnd) {
@@ -1140,8 +1143,11 @@ public final class DatabaseLoggerThread extends Thread {
 
                 // Get the next work item off of the queue
                 queueLock.writeLock().lock();
-                work = logQueue.remove();
-                queueLock.writeLock().unlock();
+                try {
+                    work = logQueue.remove();
+                } finally {
+                    queueLock.writeLock().unlock();
+                }
 
                 if (work instanceof SimulationLogObject) {
                     logSimulationResults((SimulationLogObject) work);

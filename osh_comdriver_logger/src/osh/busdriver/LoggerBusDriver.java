@@ -6,10 +6,9 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.logger.IAnnotatedForLogging;
 import osh.datatypes.logger.LogThis;
-import osh.datatypes.registry.EventExchange;
-import osh.datatypes.registry.StateExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.eal.hal.HALBusDriver;
-import osh.registry.interfaces.IEventTypeReceiver;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -18,7 +17,7 @@ import java.util.Map.Entry;
 /**
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
-public abstract class LoggerBusDriver extends HALBusDriver implements IEventTypeReceiver {
+public abstract class LoggerBusDriver extends HALBusDriver implements IDataRegistryListener {
 
     protected static final boolean logAll = true;
     protected final ValueLoggerConfiguration valueLoggerConfiguration;
@@ -95,7 +94,7 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IEventType
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getDriverRegistry().register(LogThis.class, this);
+        this.getDriverRegistry().subscribe(LogThis.class, this.getUUID(),this);
     }
 
     /**
@@ -131,8 +130,8 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IEventType
         //TODO: log all (allow partial logging)
         if (!activeLoggers.isEmpty()) {
             if (logAll) {
-                for (Class<? extends StateExchange> type : this.getDriverRegistry().getTypes()) {
-                    for (Entry<UUID, ? extends StateExchange> ent : this.getDriverRegistry().getStates(type).entrySet()) {
+                for (Class<? extends AbstractExchange> type : this.getDriverRegistry().getDataTypes()) {
+                    for (Entry<UUID, ? extends AbstractExchange> ent : this.getDriverRegistry().getData(type).entrySet()) {
                         for (ValueLogger vLog : activeLoggers) {
                             vLog.log(currentTime, ent.getValue());
                         }
@@ -147,7 +146,7 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IEventType
                             Class realClass = Class.forName(className);
 
                             @SuppressWarnings("unchecked")
-                            StateExchange a = this.getDriverRegistry().getState(realClass, uuid);
+                            AbstractExchange a = this.getDriverRegistry().getData(realClass, uuid);
 
                             for (ValueLogger vLog : activeLoggers) {
                                 vLog.log(currentTime, a);
@@ -162,10 +161,10 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IEventType
     }
 
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(Class<T> type, T event) throws OSHException {
-        if (event instanceof LogThis) {
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof LogThis) {
 
-            LogThis logThis = (LogThis) event;
+            LogThis logThis = (LogThis) exchange;
 
             // get content to log
             IAnnotatedForLogging toLog = logThis.getToLog();

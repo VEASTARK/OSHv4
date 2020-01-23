@@ -79,40 +79,6 @@ public class TemperatureDetails extends StateExchange {
         return builder.toString();
     }
 
-//	/**
-//	 * Calculates a pseudo distance between two measurements
-//	 * A value >= 1.0 is considered significant ( which is approx. 1 K difference )
-//	 * 
-//	 * @param other
-//	 * @return
-//	 */
-//	public double distance(TemperatureDetails other) {
-//		if( other == null )
-//			return Double.MAX_VALUE;
-//		
-//		if( this.temperature == null || other.temperature == null )
-//			return Double.NaN;
-//		
-//		double dist = Math.abs( this.temperature - other.temperature );
-//
-//		/*
-//		Set<String> keys = new HashSet<String>();
-//		keys.addAll(auxiliaryTemperatures.keySet());
-//		keys.addAll(other.auxiliaryTemperatures.keySet());
-//		for( String key : keys ) {
-//			Double d1 = this.auxiliaryTemperatures.get(key);
-//			Double d2 = other.auxiliaryTemperatures.get(key);
-//			
-//			if( d1 == null ) d1 = 0.0;
-//			if( d2 == null ) d2 = 0.0;
-//			
-//			dist += Math.abs(d1 - d2);
-//		}
-//		*/
-//
-//		return dist;
-//	}
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null)

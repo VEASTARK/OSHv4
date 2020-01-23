@@ -16,11 +16,11 @@ public class ElectricPowerDriverDetails extends StateExchange {
      */
     private static final long serialVersionUID = 4799921746955434387L;
 
-    protected UUID meterUuid;
+    private UUID meterUuid;
 
-    protected double activePower;
+    private double activePower;
 
-    protected double reactivePower;
+    private double reactivePower;
 
     /**
      * CONSTRUCTOR

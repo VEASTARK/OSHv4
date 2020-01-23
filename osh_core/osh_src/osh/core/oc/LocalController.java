@@ -3,6 +3,7 @@ package osh.core.oc;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.eal.hal.exchange.IHALExchange;
+import osh.registry.interfaces.IProvidesIdentity;
 
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
  *
  * @author Florian Allerding, Ingo Mauser
  */
-public abstract class LocalController extends Controller implements IOCHALDataPublisher {
+public abstract class LocalController extends Controller implements IOCHALDataPublisher, IProvidesIdentity {
 
     private LocalOCUnit assignedOCUnit;
 
@@ -75,7 +76,7 @@ public abstract class LocalController extends Controller implements IOCHALDataPu
         this.assignedOCUnit = localOCUnit;
     }
 
-    public UUID getDeviceID() {
+    public UUID getUUID() {
         return (this.assignedOCUnit != null) ? this.assignedOCUnit.getUnitID() : null;
     }
 

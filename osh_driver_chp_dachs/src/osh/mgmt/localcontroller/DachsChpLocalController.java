@@ -4,7 +4,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.time.Activation;
@@ -14,19 +14,17 @@ import osh.driver.chp.model.GenericChpModel;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.mgmt.ipp.DachsChpIPP;
 import osh.mgmt.mox.DachsChpMOX;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.physics.ComplexPowerUtil;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer, Jan Mueller
  */
 public class DachsChpLocalController
         extends LocalController
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
     // quasi static values
     private ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
@@ -94,7 +92,7 @@ public class DachsChpLocalController
 //		createNewEaPart(false, 0);
 
         this.getTimer().registerComponent(this, 1);
-        this.getOCRegistry().register(EASolutionCommandExchange.class, this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
 
         long start = this.getTimer().getUnixTimeAtStart();
         this.lastTimeIppSent = start - 86400;
@@ -183,7 +181,7 @@ public class DachsChpLocalController
 
             // force on
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     false,
                     false,
@@ -218,7 +216,7 @@ public class DachsChpLocalController
 
             // force on (still...CHP should be running anyway)
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     false,
                     false,
@@ -301,7 +299,7 @@ public class DachsChpLocalController
                             scheduledRuntime);
 
                     cx = new ChpControllerExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getTimer().getUnixTime(),
                             false,
                             false,
@@ -314,7 +312,7 @@ public class DachsChpLocalController
                     || (this.currentActivation == null && this.startTimes.get(0).startTime > now)) {
                 // switch off (has only been on because of forced on or scheduled runtime is over)
                 cx = new ChpControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         false,
@@ -371,7 +369,7 @@ public class DachsChpLocalController
 
             // force off
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -389,10 +387,9 @@ public class DachsChpLocalController
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        if (event instanceof EASolutionCommandExchange) {
-            EASolutionCommandExchange<ActivationList> exs = ((EASolutionCommandExchange<ActivationList>) event);
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof EASolutionCommandExchange) {
+            EASolutionCommandExchange<ActivationList> exs = ((EASolutionCommandExchange<ActivationList>) exchange);
             this.startTimes = exs.getPhenotype().getList();
 
             long now = this.getTimer().getUnixTime();
@@ -460,7 +457,7 @@ public class DachsChpLocalController
         }
 
         ex = new DachsChpIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 now,
                 toBeScheduled,
@@ -481,8 +478,8 @@ public class DachsChpLocalController
                 this.compressionType,
                 this.compressionValue); //initial tank temperature for optimization
         this.lastTimeIppSent = now;
-        this.getOCRegistry().setState(
-                InterdependentProblemPart.class, this, ex);
+        this.getOCRegistry().publish(
+                InterdependentProblemPart.class, this.getUUID(), ex);
 
 
         // IMPORTANT: update of variable is done via onQueueEventTypeReceived()
@@ -490,11 +487,4 @@ public class DachsChpLocalController
 //			this.lastTimeReschedulingTriggered = now;
 //		}
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-
 }

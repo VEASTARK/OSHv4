@@ -92,9 +92,4 @@ public class KITLoggerBusDriver extends LoggerBusDriver {
     public void updateDataFromBusManager(IHALExchange exchangeObject) {
         //NOTHING
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
 }

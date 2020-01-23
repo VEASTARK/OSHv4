@@ -9,17 +9,13 @@ import osh.driver.chp.model.GenericChpModel;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.mgmt.ipp.DachsChpNonControllableIPP;
 import osh.mgmt.mox.DachsChpMOX;
-import osh.registry.interfaces.IHasState;
 import osh.utils.physics.ComplexPowerUtil;
-
-import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class NonControllableDachsChpLocalController
-        extends LocalController
-        implements IHasState {
+        extends LocalController {
 
     private long lastTimeIppSent = Long.MIN_VALUE;
     private boolean lastSentState;
@@ -83,7 +79,7 @@ public class NonControllableDachsChpLocalController
             DachsChpNonControllableIPP sIPP = null;
             try {
                 sIPP = new DachsChpNonControllableIPP(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getGlobalLogger(),
                         this.getTimer().getUnixTime(),
                         toBeScheduled,
@@ -108,7 +104,7 @@ public class NonControllableDachsChpLocalController
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            this.getOCRegistry().setState(
+            this.getOCRegistry().publish(
                     InterdependentProblemPart.class, this, sIPP);
 
             this.lastTimeIppSent = now;
@@ -122,7 +118,7 @@ public class NonControllableDachsChpLocalController
             //starting
             this.runningSince = now;
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     now,
                     false,
                     false,
@@ -131,7 +127,7 @@ public class NonControllableDachsChpLocalController
         } else if (currentWaterTemp >= this.currentHotWaterStorageMaxTemp) {
             this.stoppedSince = now;
             cx = new ChpControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -142,11 +138,4 @@ public class NonControllableDachsChpLocalController
             this.updateOcDataSubscriber(cx);
         }
     }
-
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
 }

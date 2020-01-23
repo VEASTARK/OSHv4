@@ -260,7 +260,8 @@ public class RestConfResource {
             // get device names for UUIDs
             for (int i = 0; i < uuidsFolders.length; i++) {
                 if (uuids[i] != null) {
-                    DeviceMetaDriverDetails meta = this.interactionDriver.getDriverRegistry().getState(DeviceMetaDriverDetails.class, uuids[i]);
+                    DeviceMetaDriverDetails meta =
+                            (DeviceMetaDriverDetails) this.interactionDriver.getDriverRegistry().getData(DeviceMetaDriverDetails.class, uuids[i]);
 
                     String devLocation;
                     if (meta == null) {

@@ -4,7 +4,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.EventExchange;
+import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.time.Activation;
@@ -12,19 +12,17 @@ import osh.datatypes.time.ActivationList;
 import osh.hal.exchange.ChillerControllerExchange;
 import osh.mgmt.ipp.ChillerIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
-import osh.registry.interfaces.IEventTypeReceiver;
-import osh.registry.interfaces.IHasState;
+import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Julian Feder, Ingo Mauser
  */
 public class AdsorptionChillerLocalController
         extends LocalController
-        implements IEventTypeReceiver, IHasState {
+        implements IDataRegistryListener {
 
     private static final long NEW_IPP_AFTER = 1800; //30 min
     // static values / constants
@@ -65,7 +63,7 @@ public class AdsorptionChillerLocalController
         super.onSystemIsUp();
 
         this.getTimer().registerComponent(this, 1);
-        this.getOCRegistry().register(EASolutionCommandExchange.class, this);
+        this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
     }
 
     @Override
@@ -105,7 +103,7 @@ public class AdsorptionChillerLocalController
 
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -121,7 +119,7 @@ public class AdsorptionChillerLocalController
 
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     true,
                     false,
@@ -155,7 +153,7 @@ public class AdsorptionChillerLocalController
 
             //TURN ON Adsorption Chiller
             cx = new ChillerControllerExchange(
-                    this.getDeviceID(),
+                    this.getUUID(),
                     this.getTimer().getUnixTime(),
                     false,
                     true,
@@ -191,7 +189,7 @@ public class AdsorptionChillerLocalController
 
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         true,
@@ -221,7 +219,7 @@ public class AdsorptionChillerLocalController
                     || (this.startTimes.isEmpty() && this.currentActivation == null)
                     || (this.currentActivation != null && this.currentActivation.startTime + this.currentActivation.duration < now)) {
                 cx = new ChillerControllerExchange(
-                        this.getDeviceID(),
+                        this.getUUID(),
                         this.getTimer().getUnixTime(),
                         false,
                         false,
@@ -260,7 +258,7 @@ public class AdsorptionChillerLocalController
                     this.currentActivation = this.startTimes.get(0);
                     this.startTimes.remove(0);
                     cx = new ChillerControllerExchange(
-                            this.getDeviceID(),
+                            this.getUUID(),
                             this.getTimer().getUnixTime(),
                             false,
                             true,
@@ -284,10 +282,9 @@ public class AdsorptionChillerLocalController
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends EventExchange> void onQueueEventTypeReceived(
-            Class<T> type, T event) {
-        if (event instanceof EASolutionCommandExchange) {
-            EASolutionCommandExchange<ActivationList> exs = ((EASolutionCommandExchange<ActivationList>) event);
+    public <T extends AbstractExchange> void onExchange(T exchange) {
+        if (exchange instanceof EASolutionCommandExchange) {
+            EASolutionCommandExchange<ActivationList> exs = ((EASolutionCommandExchange<ActivationList>) exchange);
             this.startTimes = exs.getPhenotype().getList();
             StringBuilder builder = new StringBuilder();
 
@@ -321,7 +318,7 @@ public class AdsorptionChillerLocalController
         ChillerIPP ex;
 
         ex = new ChillerIPP(
-                this.getDeviceID(),
+                this.getUUID(),
                 this.getGlobalLogger(),
                 now,
                 toBeScheduled,
@@ -330,18 +327,11 @@ public class AdsorptionChillerLocalController
                 this.compressionType,
                 this.compressionValue);
 
-        this.getOCRegistry().setState(
-                InterdependentProblemPart.class, this, ex);
+        this.getOCRegistry().publish(
+                InterdependentProblemPart.class, this.getUUID(), ex);
         this.lastTimeIppSent = this.getTimer().getUnixTime();
         if (toBeScheduled) {
             this.lastTimeReschedulingTriggered = this.getTimer().getUnixTime();
         }
     }
-
-    @Override
-    public UUID getUUID() {
-        return this.getDeviceID();
-    }
-
-
 }

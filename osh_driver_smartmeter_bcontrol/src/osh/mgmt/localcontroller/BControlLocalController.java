@@ -6,9 +6,9 @@ import osh.core.oc.LocalController;
 /**
  * @author Ingo Mauser
  */
-public class BcontrolLocalController extends LocalController {
+public class BControlLocalController extends LocalController {
 
-    public BcontrolLocalController(IOSHOC osh) {
+    public BControlLocalController(IOSHOC osh) {
         super(osh);
     }
 
