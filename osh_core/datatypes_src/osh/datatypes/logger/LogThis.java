@@ -2,7 +2,6 @@ package osh.datatypes.logger;
 
 import osh.datatypes.registry.CommandExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -18,7 +17,7 @@ public class LogThis extends CommandExchange {
     /**
      * CONSTRUCTOR
      */
-    public LogThis(UUID sender, UUID receiver, ZonedDateTime timestamp, IAnnotatedForLogging toLog) {
+    public LogThis(UUID sender, UUID receiver, long timestamp, IAnnotatedForLogging toLog) {
         super(sender, receiver, timestamp);
         this.toLog = toLog;
     }

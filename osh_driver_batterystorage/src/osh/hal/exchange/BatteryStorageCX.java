@@ -19,7 +19,7 @@ public class BatteryStorageCX extends HALControllerExchange {
      */
     public BatteryStorageCX(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             List<Integer> list,
             Long referenceTime
     ) {

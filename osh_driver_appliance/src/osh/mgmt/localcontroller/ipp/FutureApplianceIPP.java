@@ -14,7 +14,6 @@ import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.BitSetConverter;
 
-import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.UUID;
@@ -95,14 +94,14 @@ public class FutureApplianceIPP
     public FutureApplianceIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime timestamp,
+            long timestamp,
             int bitCount,
             boolean toBeScheduled,
-            ZonedDateTime optimizationHorizon,
+            long optimizationHorizon,
             DeviceTypes deviceType,
-            ZonedDateTime referenceTime,
-            ZonedDateTime earliestStartingTime,
-            ZonedDateTime latestStartingTime,
+            long referenceTime,
+            long earliestStartingTime,
+            long latestStartingTime,
             ApplianceProgramConfigurationStatus acp,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -122,8 +121,8 @@ public class FutureApplianceIPP
                 compressionType,
                 compressionValue);
 
-        this.earliestStartingTime = earliestStartingTime.toEpochSecond();
-        this.latestStartingTime = latestStartingTime.toEpochSecond();
+        this.earliestStartingTime = earliestStartingTime;
+        this.latestStartingTime = latestStartingTime;
 
         if (acp != null) {
             this.acp = (ApplianceProgramConfigurationStatus) acp.clone();

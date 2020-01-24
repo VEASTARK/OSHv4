@@ -1,7 +1,6 @@
 package osh.datatypes.registry;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -24,7 +23,7 @@ public abstract class StateExchange extends AbstractExchange implements Serializ
      * @param sender
      * @param timestamp
      */
-    public StateExchange(UUID sender, ZonedDateTime timestamp) {
+    public StateExchange(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

@@ -97,12 +97,12 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         super.onSystemIsUp();
 
         StaticCompressionExchange _stat =
-                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         _stat.setCompressionType(this.compressionType);
         _stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(_stat);
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
@@ -110,7 +110,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         HotWaterTankObserverExchange observerExchange =
                 new HotWaterTankObserverExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
                         this.waterTank.getTankDiameter(),
@@ -131,7 +131,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
             HotWaterTankObserverExchange observerExchange =
                     new HotWaterTankObserverExchange(
                             this.getUUID(),
-                            this.getTimeDriver().getUnixTime(),
+                            this.getTimeDriver().getCurrentEpochSecond(),
                             this.waterTank.getCurrentWaterTemperature(),
                             this.waterTank.getTankCapacity(),
                             this.waterTank.getTankDiameter(),

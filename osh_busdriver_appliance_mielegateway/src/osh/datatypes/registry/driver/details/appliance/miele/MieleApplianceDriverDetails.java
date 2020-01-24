@@ -2,7 +2,6 @@ package osh.datatypes.registry.driver.details.appliance.miele;
 
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -25,7 +24,7 @@ public class MieleApplianceDriverDetails extends StateExchange {
     /**
      * CONSTRUCTOR
      */
-    public MieleApplianceDriverDetails(UUID sender, ZonedDateTime timestamp) {
+    public MieleApplianceDriverDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

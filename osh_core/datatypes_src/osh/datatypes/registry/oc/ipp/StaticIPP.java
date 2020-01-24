@@ -8,7 +8,6 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
-import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -41,11 +40,11 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
     public StaticIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime timestamp,
+            long timestamp,
             boolean toBeScheduled,
             long optimizationHorizon,
             DeviceTypes deviceType,
-            ZonedDateTime referenceTime,
+            long referenceTime,
             Schedule schedule,
             LoadProfileCompressionTypes compressionType,
             int compressionValue,

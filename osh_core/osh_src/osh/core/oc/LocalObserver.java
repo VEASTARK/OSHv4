@@ -88,7 +88,7 @@ public abstract class LocalObserver extends Observer implements IDriverDataSubsc
     @Override
     public final void onDataFromCALDriver(IHALExchange exchangeObject) throws OCUnitException {
         // cast to the observer object
-        synchronized (this.getSyncObject()) {
+        synchronized (this) {
             this.observerDataObject = exchangeObject;
             this.onDeviceStateUpdate();
         }

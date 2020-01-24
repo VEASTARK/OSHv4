@@ -11,7 +11,6 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.thermal.SimpleColdWaterTank;
 
-import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -35,7 +34,7 @@ public class ColdWaterTankNonControllableIPP
     public ColdWaterTankNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime now,
+            long now,
             double initialTemperature,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -94,7 +93,7 @@ public class ColdWaterTankNonControllableIPP
                 this.initialTemperature,
                 this.ambientTemperature);
 
-        this.waterTank.reduceByStandingHeatLoss(maxReferenceTime - this.getTimestamp().toEpochSecond());
+        this.waterTank.reduceByStandingHeatLoss(maxReferenceTime - this.getTimestamp());
     }
 
     @Override

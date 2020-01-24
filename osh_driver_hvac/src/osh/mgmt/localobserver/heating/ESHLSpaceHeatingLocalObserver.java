@@ -38,7 +38,7 @@ public class ESHLSpaceHeatingLocalObserver
 
         if (ihex instanceof SpaceHeatingPredictionObserverExchange) {
             SpaceHeatingPredictionObserverExchange ox = (SpaceHeatingPredictionObserverExchange) ihex;
-            long now = this.getTimeDriver().getUnixTime();
+            long now = this.getTimeDriver().getCurrentEpochSecond();
 
             // create SparseLoadProfile
             this.predictedDemand = new SparseLoadProfile();

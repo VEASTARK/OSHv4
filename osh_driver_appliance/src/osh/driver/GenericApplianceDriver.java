@@ -13,6 +13,8 @@ import osh.datatypes.registry.driver.details.appliance.GenericApplianceProgramDr
 import osh.driver.appliance.generic.XsdLoadProfilesHelperTool;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.en50523.EN50523DeviceState;
 import osh.en50523.EN50523DeviceStateRemoteControl;
 import osh.hal.exchange.FutureApplianceControllerExchange;
@@ -154,9 +156,9 @@ public abstract class GenericApplianceDriver
         super.onSystemIsUp();
 
         // update status etc every second
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         // set initial device state
         this.updateGenericApplianceDriverDetails(now);
@@ -166,11 +168,8 @@ public abstract class GenericApplianceDriver
 
 
     @Override
-    synchronized public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-        // get current time
-        long now = this.getTimeDriver().getUnixTime();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
         // if not OFF -> device logic for running etc
         if (this.currentEn50523State == EN50523DeviceState.OFF) {
@@ -209,7 +208,7 @@ public abstract class GenericApplianceDriver
         FutureApplianceObserverExchange observerObj
                 = new FutureApplianceObserverExchange(
                 this.getUUID(),
-                now,
+                exchange.getEpochSecond(),
                 (this.getPower(Commodity.ACTIVEPOWER) != null ? this.getPower(Commodity.ACTIVEPOWER) : 0),            // IHALElectricPowerDetails
                 (this.getPower(Commodity.REACTIVEPOWER) != null ? this.getPower(Commodity.REACTIVEPOWER) : 0),            // IHALElectricPowerDetails
                 (this.getPower(Commodity.HEATINGHOTWATERPOWER) != null ? this.getPower(Commodity.HEATINGHOTWATERPOWER) : 0),    // IHALThermalPowerDetails
@@ -229,7 +228,7 @@ public abstract class GenericApplianceDriver
                     LoadProfileCompressionTypes.DISCONTINUITIES,
                     1,
                     -1);
-            observerObj.setAcpReferenceTime(now);
+            observerObj.setAcpReferenceTime(exchange.getEpochSecond());
             this.acpChanged = false;
         }  // ACP in OX = null
 
@@ -387,7 +386,7 @@ public abstract class GenericApplianceDriver
         if (!oldState.name().equals(this.currentEn50523State.name())) {
             this.getGlobalLogger().logDebug(this.getDeviceType()
                     + " : changed from : " + oldState.name() + " to " + this.currentEn50523State.name()
-                    + " @" + this.getTimeDriver().getUnixTime() + ", waiting for optimization...");
+                    + " @" + this.getTimeDriver().getCurrentEpochSecond() + ", waiting for optimization...");
         }
     }
 
@@ -597,7 +596,7 @@ public abstract class GenericApplianceDriver
                 UUID.randomUUID(),
                 dynamicLoadProfiles,
                 minMaxTimes,
-                this.getTimeDriver().getUnixTime());
+                this.getTimeDriver().getCurrentEpochSecond());
         this.acpChanged = true;
     }
 
@@ -651,7 +650,7 @@ public abstract class GenericApplianceDriver
                     && this.selectedProfileID != null) {
 
                 //TODO calculate ending time
-                return this.getTimeDriver().getUnixTime();
+                return this.getTimeDriver().getCurrentEpochSecond();
             } else {
                 return -1;
             }

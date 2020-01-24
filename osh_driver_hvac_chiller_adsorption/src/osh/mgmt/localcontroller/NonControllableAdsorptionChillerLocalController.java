@@ -5,6 +5,8 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ChillerControllerExchange;
 import osh.mgmt.ipp.ChillerNonControllableIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
@@ -38,13 +40,12 @@ public class NonControllableAdsorptionChillerLocalController
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
         // get new Mox
         AdsorptionChillerMOX mox = (AdsorptionChillerMOX) this.getDataFromLocalObserver();
 
@@ -55,11 +56,6 @@ public class NonControllableAdsorptionChillerLocalController
         this.compressionType = mox.getCompressionType();
         this.compressionValue = mox.getCompressionValue();
         Map<Long, Double> temperaturePrediction = mox.getTemperatureMap();
-
-        if (this.getTimeDriver().getUnixTime() % 900 == 0) {
-            //getGlobalLogger().logDebug("Cold Water Temperature: " + currentColdWaterTemp);
-            //getGlobalLogger().logDebug("Hot Water Temperature: " + currentHotWaterTemp);
-        }
 
         boolean toBeScheduled = false;
         // #1 Ask for rescheduling if temperature is above a certain threshold
@@ -77,7 +73,7 @@ public class NonControllableAdsorptionChillerLocalController
         ChillerNonControllableIPP ipp = new ChillerNonControllableIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),
-                this.getTimeDriver().getUnixTime(),
+                exchange.getEpochSecond(),
                 toBeScheduled,
                 currentState,
                 temperaturePrediction,
@@ -92,7 +88,7 @@ public class NonControllableAdsorptionChillerLocalController
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getUnixTime(),
+                    exchange.getEpochSecond(),
                     true,
                     false,
                     0);
@@ -103,7 +99,7 @@ public class NonControllableAdsorptionChillerLocalController
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getUnixTime(),
+                        exchange.getEpochSecond(),
                         false,
                         true,
                         15 * 60);

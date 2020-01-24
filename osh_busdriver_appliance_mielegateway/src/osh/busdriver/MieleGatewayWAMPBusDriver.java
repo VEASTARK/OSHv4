@@ -27,7 +27,6 @@ import osh.utils.uuid.UUIDGenerationHelperMiele;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -146,7 +145,7 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
                     break;
                 }
 
-                long timestamp = this.getTimeDriver().getUnixTime();
+                long timestamp = this.getTimeDriver().getCurrentEpochSecond();
 
                 if (this.mieleGatewayDispatcher.getDeviceData().isEmpty()) { // an error has occurred
                     for (UUID uuid : this.deviceIds.keySet()) {
@@ -224,18 +223,12 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
 
                     // start time
                     if (dev.getStartTime() != null) {
-                        long now = this.getTimeDriver().getUnixTime();
+                        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
-                        ZonedDateTime time =
-                                ZonedDateTime.ofInstant(Instant.ofEpochSecond(now),
-                                        this.getTimeDriver().getHostTimeZone());
+                        ZonedDateTime time = now.withHour(dev.getStartTime().hour()).withMinute(dev.getStartTime().minute()).withSecond(0);
 
-                        time.withHour(dev.getStartTime().hour());
-                        time.withMinute(dev.getStartTime().minute());
-                        time.withSecond(0);
-
-                        if (time.toEpochSecond() < now)
-                            time.plusDays(1);
+                        if (time.isBefore(now))
+                            time = time.plusDays(1);
 
                         mieleDetails.setStartTime(time.toEpochSecond());
                     } else

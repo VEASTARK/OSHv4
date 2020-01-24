@@ -9,6 +9,7 @@ import osh.driver.simulation.spacecooling.HollOutdoorTemperatures;
 import osh.driver.simulation.spacecooling.OutdoorTemperatures;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.exception.EnergySimulationException;
 import osh.hal.exchange.ChillerControllerExchange;
@@ -106,7 +107,7 @@ public class AdsorptionChillerSimulationDriver
         // notify Observer about current status
         ChillerObserverExchange ox = new ChillerObserverExchange(
                 this.getUUID(),
-                this.getTimeDriver().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 this.running,
                 this.outdoorTemperature);
         ox.setColdWaterPower(this.currentCoolingPower);
@@ -121,7 +122,7 @@ public class AdsorptionChillerSimulationDriver
 
         if (this.running) {
             // get outdoor temperature
-            this.currentOutdoorTemperature = this.outdoorTemperature.getTemperature(this.getTimeDriver().getUnixTime());
+            this.currentOutdoorTemperature = this.outdoorTemperature.getTemperature(this.getTimeDriver().getCurrentEpochSecond());
 
             // CALCULATE COP AND DYNAMIC COOLING POWER
             this.currentCoolingPower = AdsorptionChillerModel.chilledWaterPower(this.observedWaterTemperature, this.currentOutdoorTemperature);
@@ -133,7 +134,7 @@ public class AdsorptionChillerSimulationDriver
 //			getGlobalLogger().logDebug("observedWaterTemperature: " + observedWaterTemperature);
 //			getGlobalLogger().logDebug("currentCoolingPower: " + currentCoolingPower);
 //			getGlobalLogger().logDebug("currentCop: " + c  urrentCop);
-            if (this.getTimeDriver().getUnixTime() % 3600 == 0) {
+            if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
                 this.getGlobalLogger().logDebug(
                         "outdoorTemperature: " + this.currentOutdoorTemperature
                                 + " | hotwaterdemand: " + (int) ((-1) * (this.currentCoolingPower / this.currentCop))

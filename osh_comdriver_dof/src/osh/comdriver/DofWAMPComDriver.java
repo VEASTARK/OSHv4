@@ -90,7 +90,7 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable {
                 this.dispatcherWriteLock.unlock();
             }
 
-            long timestamp = this.getTimeDriver().getUnixTime();
+            long timestamp = this.getTimeDriver().getCurrentEpochSecond();
 
             if (this.dofDispatcher.getDeviceMap().isEmpty()) { // an error has occurred
                 this.getGlobalLogger().logError("Device Data of Dof-WAMP-Dispatcher is empty");

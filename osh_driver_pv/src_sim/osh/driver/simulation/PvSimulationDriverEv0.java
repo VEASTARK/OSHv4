@@ -100,7 +100,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getUnixTimeAtStart();
+        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
@@ -140,14 +140,14 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             predictions.add(prof);
         }
 
-        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), predictions, this.pastDaysPrediction);
+        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), predictions, this.pastDaysPrediction);
         this.notifyObserver(_ox);
     }
 
     @Override
     public void onNextTimeTick() {
         if (this.pvSwitchedOn) {
-            long now = this.getTimeDriver().getUnixTime();
+            long now = this.getTimeDriver().getCurrentEpochSecond();
             this.setPower(Commodity.ACTIVEPOWER, this.profile.getPowerAt(now));
 
             if (this.getPower(Commodity.ACTIVEPOWER) != 0) {
@@ -172,7 +172,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             }
         }
 
-        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         _ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
         _ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));
         this.notifyObserver(_ox);

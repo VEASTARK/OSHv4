@@ -9,7 +9,7 @@ public class GenericApplianceDofObserverExchange extends HALDeviceObserverExchan
     private Integer device1stDegreeOfFreedom;
     private Integer device2ndDegreeOfFreedom;
 
-    public GenericApplianceDofObserverExchange(UUID deviceID, Long timestamp) {
+    public GenericApplianceDofObserverExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

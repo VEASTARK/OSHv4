@@ -22,7 +22,7 @@ public class FutureApplianceControllerExchange
      */
     public FutureApplianceControllerExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             UUID applianceConfigurationProfileID,
             int selectedProfileId,
             long[] selectedStartTimes

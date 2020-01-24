@@ -10,6 +10,8 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.en50523.EN50523DeviceState;
 import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.mgmt.localcontroller.ipp.FutureApplianceIPP;
@@ -63,8 +65,6 @@ public class FutureApplianceLocalController
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
 
-    private long lastTimeSchedulingCaused;
-
     /**
      * CONSTRUCTOR
      *
@@ -80,16 +80,14 @@ public class FutureApplianceLocalController
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
         // register to be called every time step
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
         // register for solutions of the optimization
         this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(),this);
-
-        this.lastTimeSchedulingCaused = this.getTimeDriver().getUnixTime() - 61;
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
         // check whether there is something new...
         // ...and update MOX object for controller
         this.updateMox();
@@ -227,7 +225,7 @@ public class FutureApplianceLocalController
     protected void updateIPP(boolean toBeScheduled) {
 
         InterdependentProblemPart<?, ?> ipp = null;
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         // no profile to be scheduled...and no profile has been scheduled...
         if (this.acp == null && this.acpIDForScheduledTimes == null) {
@@ -242,7 +240,7 @@ public class FutureApplianceLocalController
                     this.getGlobalLogger(),
                     now,
                     toBeScheduled,
-                    now,
+                    0,
                     this.getLocalObserver().getDeviceType(),
                     now,
                     new Schedule(new SparseLoadProfile(), 0.0, this.getLocalObserver().getDeviceType().toString()),
@@ -400,8 +398,6 @@ public class FutureApplianceLocalController
                     this.getGlobalLogger().logDebug(e);
                 }
 
-                long now = this.getTimeDriver().getUnixTime();
-
                 // ### transform solution to phenotype ###
 
                 // get selected profile id (e.g. hybrid or normal)
@@ -414,7 +410,7 @@ public class FutureApplianceLocalController
                 if (this.acp != null) {
                     FutureApplianceControllerExchange cx = new FutureApplianceControllerExchange(
                             this.getUUID(),
-                            now, //TODo: maybe change to cx.getTimeStamp() (should be irrelevant, because of absolute times)
+                            this.getTimeDriver().getCurrentEpochSecond(),
                             this.acp.getAcpID(),
                             selectedProfileId,
                             selectedStartTimes);

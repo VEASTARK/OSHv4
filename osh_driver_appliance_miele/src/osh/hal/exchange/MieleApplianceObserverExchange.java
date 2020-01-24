@@ -30,7 +30,7 @@ public class MieleApplianceObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public MieleApplianceObserverExchange(UUID deviceID, Long timestamp) {
+    public MieleApplianceObserverExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

@@ -2,7 +2,6 @@ package osh.datatypes.registry.oc.state.globalobserver;
 
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ public class GUIHotWaterPredictionStateExchange extends StateExchange {
 
     public GUIHotWaterPredictionStateExchange(
             UUID sender,
-            ZonedDateTime timestamp,
+            long timestamp,
             TreeMap<Long, Double> predictedTankTemp,
             TreeMap<Long, Double> predictedHotWaterDemand,
             TreeMap<Long, Double> predictedHotWaterSupply) {

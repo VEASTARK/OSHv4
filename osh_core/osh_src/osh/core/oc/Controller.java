@@ -1,19 +1,19 @@
 package osh.core.oc;
 
-import osh.OSHComponent;
 import osh.core.OCComponent;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSHOC;
-import osh.core.interfaces.IRealTimeSubscriber;
+import osh.eal.time.TimeExchange;
 import osh.registry.Registry.OCRegistry;
+import osh.registry.interfaces.ITimeRegistryListener;
 
 /**
  * abstract superclass for all controllers
  *
  * @author Florian Allerding
  */
-public abstract class Controller extends OCComponent implements IRealTimeSubscriber, ILifeCycleListener {
+public abstract class Controller extends OCComponent implements ITimeRegistryListener, ILifeCycleListener {
 
 
     /**
@@ -67,13 +67,7 @@ public abstract class Controller extends OCComponent implements IRealTimeSubscri
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
         //...in case of use please override
     }
-
-    @Override
-    public OSHComponent getSyncObject() {
-        return this;
-    }
-
 }

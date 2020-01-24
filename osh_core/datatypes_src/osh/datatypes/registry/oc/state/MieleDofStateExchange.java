@@ -4,7 +4,6 @@ import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -21,9 +20,9 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
      * the duration, NOT an absolute point in time!
      */
     private final long lastDof;
-    private final ZonedDateTime earliestStartTime;
-    private final ZonedDateTime latestStartTime;
-    private final ZonedDateTime expectedStartTime;
+    private final long earliestStartTime;
+    private final long latestStartTime;
+    private final long expectedStartTime;
 
 
     /**
@@ -38,11 +37,11 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
      */
     public MieleDofStateExchange(
             UUID sender,
-            ZonedDateTime timestamp,
+            long timestamp,
             long lastDof,
-            ZonedDateTime earliestStartTime,
-            ZonedDateTime latestStartTime,
-            ZonedDateTime expectedStartTime) {
+            long earliestStartTime,
+            long latestStartTime,
+            long expectedStartTime) {
         super(sender, timestamp);
 
         this.lastDof = lastDof;
@@ -60,17 +59,17 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
     }
 
     @XmlElement
-    public ZonedDateTime getEarliestStartTime() {
+    public long getEarliestStartTime() {
         return this.earliestStartTime;
     }
 
     @XmlElement
-    public ZonedDateTime getLatestStartTime() {
+    public long getLatestStartTime() {
         return this.latestStartTime;
     }
 
     @XmlElement
-    public ZonedDateTime getExpectedStartTime() {
+    public long getExpectedStartTime() {
         return this.expectedStartTime;
     }
 

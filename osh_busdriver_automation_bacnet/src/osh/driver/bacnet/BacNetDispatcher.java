@@ -37,10 +37,12 @@ import com.serotonin.bacnet4j.type.primitive.ObjectIdentifier;
 import com.serotonin.bacnet4j.util.PropertyReferences;
 import com.serotonin.bacnet4j.util.PropertyValues;
 import osh.core.exceptions.OSHException;
-import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.logging.IGlobalLogger;
 import osh.driver.BacNetThermalDriver;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.registry.TimeRegistry;
+import osh.registry.interfaces.ITimeRegistryListener;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -54,7 +56,7 @@ import java.util.Map.Entry;
  *
  * @author Kaibin Bao
  */
-public class BacNetDispatcher implements IRealTimeSubscriber {
+public class BacNetDispatcher implements ITimeRegistryListener {
 
     private final IGlobalLogger logger;
     private final TimeRegistry timeRegistry;
@@ -138,7 +140,7 @@ public class BacNetDispatcher implements IRealTimeSubscriber {
         this.bacNetDevice = new LocalDevice(1984, "255.255.255.255");
         this.bacNetDevice.getEventHandler().addListener(new MyDeviceEventListener());
         this.bacNetDevice.initialize();
-        if (!this.STANDALONE) this.timer.registerComponent(this, 1);
+        if (!this.STANDALONE) this.timeRegistry.subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     public void addDevice(String host, int port) throws OSHException {
@@ -263,14 +265,14 @@ public class BacNetDispatcher implements IRealTimeSubscriber {
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
         try {
             if (this.rediscover_countdown <= 0) {
                 for (String dev : this.devices) {
                     try {
                         this.discover(dev, 47808);
                     } catch (UnknownHostException e) {
-                        throw new OSHException("unknown host: " + dev, e);
+                        throw new RuntimeException("unknown host: " + dev, e);
                     }
                 }
                 this.rediscover_countdown = this.REDISCOVER_INTERVAL;
@@ -278,13 +280,8 @@ public class BacNetDispatcher implements IRealTimeSubscriber {
             this.rediscover_countdown--;
             this.update();
         } catch (BACnetException e) {
-            throw new OSHException("internal bacnet error", e);
+            throw new RuntimeException("internal bacnet error", e);
         }
-    }
-
-    @Override
-    public Object getSyncObject() {
-        return this;
     }
 
     static public class BacNetObject {

@@ -16,7 +16,7 @@ import static osh.eal.time.TimeSubscribeEnum.*;
 public class TimeEventProvider {
 
     private static ZonedDateTime lastSentEventsTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
-    private static EnumSet<TimeSubscribeEnum> lastSentEvents = getTimeEvents(lastSentEventsTime);
+    private static EnumSet<TimeSubscribeEnum> lastSentEvents = getTimeEventsFromTime(lastSentEventsTime);
 
     private static EnumSet<TimeSubscribeEnum> getTimeEventsFromTime(ZonedDateTime time) {
         EnumSet<TimeSubscribeEnum> timeEvents = EnumSet.noneOf(TimeSubscribeEnum.class);

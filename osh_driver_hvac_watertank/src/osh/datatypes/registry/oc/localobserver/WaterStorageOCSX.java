@@ -3,7 +3,6 @@ package osh.datatypes.registry.oc.localobserver;
 import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -35,7 +34,7 @@ public class WaterStorageOCSX extends StateExchange implements IPromiseToBeImmut
      */
     public WaterStorageOCSX(
             UUID sender,
-            ZonedDateTime timestamp,
+            long timestamp,
             double currentTemp,
             double minTemp,
             double maxTemp,

@@ -3,7 +3,6 @@ package osh.datatypes.registry.oc.commands.globalcontroller;
 import osh.datatypes.registry.CommandExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
-import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,7 +22,7 @@ public class DofSetCommandExchange extends CommandExchange implements IPromiseTo
     public DofSetCommandExchange(
             UUID sender,
             UUID receiver,
-            ZonedDateTime timestamp,
+            long timestamp,
             Integer firstDof,
             Integer secondDoF) {
         super(sender, receiver, timestamp);

@@ -65,6 +65,14 @@ public class TimeConversion {
     }
 
     /**
+     * @param zdt
+     * @return mon=0, tue=1...
+     */
+    public static int convertTime2CorrectedWeekdayInt(ZonedDateTime zdt) {
+        return zdt.getDayOfWeek().getValue() - 1; //DoW indexes from Mon=1 to Sun=7 so we need to adjust
+    }
+
+    /**
      * @param unixTime
      * @return 01.01. 00:01 = 60
      */
@@ -128,8 +136,7 @@ public class TimeConversion {
      * @return zoned date time corresponding to the currentUnixTime
      */
     public static ZonedDateTime convertUnixTimeToZonedDateTime(long currentUnixTime) {
-        Instant time = Instant.ofEpochSecond(currentUnixTime);
-        return time.atZone(zone);
+        return Instant.ofEpochSecond(currentUnixTime).atZone(zone);
     }
 
     /**

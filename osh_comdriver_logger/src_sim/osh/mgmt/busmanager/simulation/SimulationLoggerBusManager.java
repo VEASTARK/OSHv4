@@ -3,6 +3,8 @@ package osh.mgmt.busmanager.simulation;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.registry.AbstractExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.mgmt.busmanager.LoggerBusManager;
 
 import java.util.UUID;
@@ -25,103 +27,13 @@ public class SimulationLoggerBusManager extends LoggerBusManager {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
-
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-//		// get overall power state and communicate to driver for logging
-//		{
-//			CommodityPowerStateExchange cpse = 
-//					this.getOCRegistry().getState(
-//							CommodityPowerStateExchange.class, 
-//							getGlobalOCUnitUUID());
-//
-//			if (cpse != null) {
-//				LoggerCommodityPowerHALExchange cphe = 
-//						new LoggerCommodityPowerHALExchange(
-//								cpse.getSender(), 
-//								cpse.getTimestamp(), 
-//								cpse.getPowerState());
-//				updateOcDataSubscriber(cphe);
-//			}
-//		}
-//		
-//		// get power states of all devices and communicate to logger
-//		{
-////			DevicesPowerStateExchange dpse = 
-////					this.getOCRegistry().getState(
-////							DevicesPowerStateExchange.class, 
-////							getGlobalOCUnitUUID());
-////			
-////			if (dpse != null) {
-////				LoggerDevicesPowerHALExchange dphe = 
-////						new LoggerDevicesPowerHALExchange(
-////								dpse.getSender(), 
-////								dpse.getTimestamp(), 
-////								dpse.getPowerStateMap());
-////				updateOcDataSubscriber(dphe);
-////			}
-//		}
-//		
-//		// get AncillaryCommodity Power states and communicate to logger
-//		{
-//			AncillaryCommodityPowerStateExchange vcse = 
-//					this.getOCRegistry().getState(
-//							AncillaryCommodityPowerStateExchange.class, 
-//							getGlobalOCUnitUUID());
-//			
-//			if (vcse != null) {
-//				LoggerAncillaryCommoditiesHALExchange vche =
-//						new LoggerAncillaryCommoditiesHALExchange(
-//								vcse.getSender(), 
-//								vcse.getTimestamp(), 
-//								vcse.getMap());
-//				updateOcDataSubscriber(vche);
-//			}
-//		}
-//		
-//		// get EPS and PLS states and communicate to logger
-//		{
-//			EpsPlsStateExchange epse = 
-//					this.getOCRegistry().getState(
-//							EpsPlsStateExchange.class, 
-//							getGlobalOCUnitUUID());
-//			
-//			if (epse != null) {
-//				LoggerEpsPlsHALExchange ephe =
-//						new LoggerEpsPlsHALExchange(
-//								epse.getSender(), 
-//								epse.getTimestamp(), 
-//								epse.getPs(), 
-//								epse.getPwrLimit());
-//				updateOcDataSubscriber(ephe);
-//			}
-//		}
-//		
-//		// get AncillaryCommodity Power states and EPS and PLS states and communicate to logger
-//		{
-//			DetailedCostsLoggingStateExchange vcse = 
-//					this.getOCRegistry().getState(
-//							DetailedCostsLoggingStateExchange.class, 
-//							getGlobalOCUnitUUID());
-//			
-//			if (vcse != null) {
-//				LoggerDetailedCostsHALExchange vche =
-//						new LoggerDetailedCostsHALExchange(
-//								vcse.getSender(), 
-//								vcse.getTimestamp(), 
-//								vcse.getMap(),
-//								vcse.getPs(),
-//								vcse.getPwrLimit());
-//				updateOcDataSubscriber(vche);
-//			}
-//		}
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
-
 
     @Override
     public <T extends AbstractExchange> void onExchange(T exchange) {

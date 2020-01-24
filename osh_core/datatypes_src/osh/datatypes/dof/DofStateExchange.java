@@ -2,7 +2,6 @@ package osh.datatypes.dof;
 
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -26,7 +25,7 @@ public class DofStateExchange extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public DofStateExchange(UUID sender, ZonedDateTime timestamp) {
+    public DofStateExchange(UUID sender, long timestamp) {
         super(sender, timestamp);
 
         this.device1stDegreeOfFreedom = 0;

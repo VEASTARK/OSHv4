@@ -5,10 +5,11 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHDriver;
-import osh.core.interfaces.IRealTimeSubscriber;
 import osh.eal.EALDriver;
+import osh.eal.time.TimeExchange;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.interfaces.IProvidesIdentity;
+import osh.registry.interfaces.ITimeRegistryListener;
 import osh.utils.uuid.UUIDLists;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
-public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCycleListener, IProvidesIdentity {
+public class HALDriver extends EALDriver implements ITimeRegistryListener, ILifeCycleListener, IProvidesIdentity {
 
     private final UUID deviceID;
     private OSHParameterCollection driverConfig;
@@ -74,11 +75,6 @@ public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCy
     }
 
     @Override
-    public HALDriver getSyncObject() {
-        return this;
-    }
-
-    @Override
     public void onSystemRunning() {
         //...in case of use please override
     }
@@ -111,10 +107,9 @@ public class HALDriver extends EALDriver implements IRealTimeSubscriber, ILifeCy
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        //...in case of use please override
-    }
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
 
+    }
 
     // HELPER METHODS
 

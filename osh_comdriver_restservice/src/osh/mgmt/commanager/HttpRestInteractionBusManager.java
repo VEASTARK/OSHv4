@@ -37,7 +37,7 @@ public class HttpRestInteractionBusManager extends BusManager implements IDataRe
         SwitchCommandExchange swcmd = new SwitchCommandExchange(
                 this.getUUID(),
                 element,
-                this.getTimeDriver().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 sd.getTurnOn());
         this.getOCRegistry().publish(SwitchCommandExchange.class, swcmd);
 
@@ -69,7 +69,7 @@ public class HttpRestInteractionBusManager extends BusManager implements IDataRe
             for (Entry<UUID, ? extends AbstractExchange> ent : this.getOCRegistry().getData(type).entrySet()) {
                 if (ent.getValue() instanceof StateExchange) {
                     HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
-                            this.getUUID(), this.getTimeDriver().getUnixTime(), (StateExchange) ent.getValue());
+                            this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), (StateExchange) ent.getValue());
 
                     this.updateOcDataSubscriber(toDriverExchange);
                 }
@@ -82,7 +82,7 @@ public class HttpRestInteractionBusManager extends BusManager implements IDataRe
         if (exchange instanceof StateExchange) {
             HttpRestInteractionComManagerExchange toDriverExchange = new HttpRestInteractionComManagerExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     (StateExchange) exchange);
 
             this.updateOcDataSubscriber(toDriverExchange);

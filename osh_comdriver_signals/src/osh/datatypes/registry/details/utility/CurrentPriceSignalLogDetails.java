@@ -8,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlType;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -42,10 +41,10 @@ public class CurrentPriceSignalLogDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     public CurrentPriceSignalLogDetails() {
-        this(null, null);
+        this(null, -1L);
     }
 
-    public CurrentPriceSignalLogDetails(UUID sender, ZonedDateTime timestamp) {
+    public CurrentPriceSignalLogDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

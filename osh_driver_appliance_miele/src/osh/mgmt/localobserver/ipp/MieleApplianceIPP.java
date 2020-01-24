@@ -13,7 +13,6 @@ import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.BitSetConverter;
 
-import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -50,13 +49,13 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
     public MieleApplianceIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime timestamp,
-            ZonedDateTime earliestStartTime,
-            ZonedDateTime latestStartTime,
+            long timestamp,
+            long earliestStartTime,
+            long latestStartTime,
             SparseLoadProfile profile,
             boolean toBeScheduled,
             boolean predicted,
-            ZonedDateTime optimizationHorizon,
+            long optimizationHorizon,
             DeviceTypes deviceType,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -65,7 +64,7 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
                 deviceId,
                 logger,
                 timestamp,
-                calculateBitCount(earliestStartTime.toEpochSecond(), latestStartTime.toEpochSecond()),
+                calculateBitCount(earliestStartTime, latestStartTime),
                 toBeScheduled,
                 false, //does not need ancillary meter
                 false, //does not react to input states
@@ -80,8 +79,8 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
             throw new NullPointerException("profile is null");
         }
 
-        this.earliestStartTime = earliestStartTime.toEpochSecond();
-        this.latestStartTime = latestStartTime.toEpochSecond();
+        this.earliestStartTime = earliestStartTime;
+        this.latestStartTime = latestStartTime;
         this.profile = profile.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
         this.predicted = predicted;
     }

@@ -34,17 +34,16 @@ public class SimulationHollSpaceCoolingSimulationDriver
 
     @Override
     public void onNextTimeTick() {
-
-        if (this.getTimeDriver().getUnixTime() % 86400 == 0) {
+        if (this.getTimeDriver().getCurrentEpochSecond() % 86400 == 0) {
             //SIMULATE REAL CALENDER
             SimulationHollChillerCalendar calendar = new SimulationHollChillerCalendar(this.getRandomGenerator());
-            this.dates = calendar.getDate(this.getTimeDriver().getUnixTime());
+            this.dates = calendar.getDate(this.getTimeDriver().getCurrentEpochSecond());
         }
 
         if (!this.dates.isEmpty()) {
             ChillerCalendarDate date = this.dates.get(0);
-            if (date.getStartTimestamp() <= this.getTimeDriver().getUnixTime()
-                    && date.getStartTimestamp() + date.getLength() >= this.getTimeDriver().getUnixTime()) {
+            if (date.getStartTimestamp() <= this.getTimeDriver().getCurrentEpochSecond()
+                    && date.getStartTimestamp() + date.getLength() >= this.getTimeDriver().getCurrentEpochSecond()) {
 
 //				getGlobalLogger().logDebug("start: " + date.startTimestamp);
 //				getGlobalLogger().logDebug("length: " + date.length);
@@ -52,13 +51,13 @@ public class SimulationHollSpaceCoolingSimulationDriver
 
                 // calculate demand
                 double currentOutdoorTemperature =
-                        this.outdoorTemperature.getTemperature(this.getTimeDriver().getUnixTime());
+                        this.outdoorTemperature.getTemperature(this.getTimeDriver().getCurrentEpochSecond());
                 this.coldWaterPowerDemand = this.model.calculateCoolingDemand(currentOutdoorTemperature);
 
 //				if (demand < 0) {
 //					getGlobalLogger().logDebug("Demand:" + demand + "outdoor: " + currentOutdoorTemperature);
 //				}
-            } else if (date.getStartTimestamp() + date.getLength() < this.getTimeDriver().getUnixTime()) {
+            } else if (date.getStartTimestamp() + date.getLength() < this.getTimeDriver().getCurrentEpochSecond()) {
                 this.dates.remove(0);
                 this.coldWaterPowerDemand = 0;
             }
@@ -71,7 +70,7 @@ public class SimulationHollSpaceCoolingSimulationDriver
         SpaceCoolingObserverExchange ox =
                 new SpaceCoolingObserverExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         this.dates,
                         this.outdoorTemperature.getMap(),
                         (int) Math.round(this.coldWaterPowerDemand));

@@ -2,7 +2,6 @@ package osh.datatypes.registry.commands;
 
 import osh.datatypes.registry.CommandExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -15,7 +14,7 @@ public class SwitchRequest extends CommandExchange {
     private static final long serialVersionUID = -2018595178055473489L;
     protected Boolean turnOn;
 
-    public SwitchRequest(UUID sender, UUID receiver, ZonedDateTime timestamp) {
+    public SwitchRequest(UUID sender, UUID receiver, long timestamp) {
         super(sender, receiver, timestamp);
     }
 

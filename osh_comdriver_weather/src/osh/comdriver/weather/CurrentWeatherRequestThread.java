@@ -48,16 +48,16 @@ public class CurrentWeatherRequestThread implements Runnable {
     public void run() {
         while (!this.shutdown) {
 
-            if (this.comDriver.getTimeDriver().getUnixTime() - this.lastLog >= this.logEverySeconds) {
+            if (this.comDriver.getTimeDriver().getCurrentEpochSecond() - this.lastLog >= this.logEverySeconds) {
                 try {
                     // get and send to driver
                     CurrentWeatherDetails currentWeatherDetails = new CurrentWeatherDetails(
                             this.comDriver.getUUID(),
-                            this.comDriver.getTimeDriver().getUnixTime(),
+                            this.comDriver.getTimeDriver().getCurrentEpochSecond(),
                             this.getCurrentWeather(this.urlCurrentWeather, this.apiKey));
                     this.comDriver.receiveCurrentDetails(currentWeatherDetails);
 
-                    this.lastLog = this.comDriver.getTimeDriver().getUnixTime();
+                    this.lastLog = this.comDriver.getTimeDriver().getCurrentEpochSecond();
                 } catch (Exception e) {
                     this.globalLogger.logError("Reading current weather info failed", e);
 

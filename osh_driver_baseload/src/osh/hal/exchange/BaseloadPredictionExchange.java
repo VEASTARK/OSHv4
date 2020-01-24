@@ -25,7 +25,7 @@ public class BaseloadPredictionExchange
      * @param deviceID
      * @param timestamp
      */
-    public BaseloadPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredictions,
+    public BaseloadPredictionExchange(UUID deviceID, long timestamp, List<SparseLoadProfile> powerPredictions,
                                       int usedDaysForPrediction, float weightForOtherWeekday, float weightForSameWeekday) {
         super(deviceID, timestamp);
         this.powerPredictions = powerPredictions;

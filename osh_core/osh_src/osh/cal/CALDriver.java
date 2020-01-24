@@ -6,9 +6,10 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHCom;
-import osh.core.interfaces.IRealTimeSubscriber;
+import osh.eal.time.TimeExchange;
 import osh.registry.Registry.ComRegistry;
 import osh.registry.interfaces.IProvidesIdentity;
+import osh.registry.interfaces.ITimeRegistryListener;
 import osh.utils.uuid.UUIDLists;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser, Sebastian Kramer
  */
-public class CALDriver extends OSHComponent implements IRealTimeSubscriber, ILifeCycleListener, IProvidesIdentity {
+public class CALDriver extends OSHComponent implements ITimeRegistryListener, ILifeCycleListener, IProvidesIdentity {
 
     private final UUID deviceID;
     private OSHParameterCollection comConfig;
@@ -72,11 +73,6 @@ public class CALDriver extends OSHComponent implements IRealTimeSubscriber, ILif
     }
 
     @Override
-    public CALDriver getSyncObject() {
-        return this;
-    }
-
-    @Override
     public void onSystemRunning() {
         //...in case of use please override
     }
@@ -111,7 +107,7 @@ public class CALDriver extends OSHComponent implements IRealTimeSubscriber, ILif
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
         //...in case of use please override
     }
 

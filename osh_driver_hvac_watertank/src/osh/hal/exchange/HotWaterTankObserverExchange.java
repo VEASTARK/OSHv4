@@ -27,7 +27,7 @@ public class HotWaterTankObserverExchange extends HALDeviceObserverExchange {
      */
     public HotWaterTankObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             double topTemperature,
             double tankCapacity,
             double tankDiameter,

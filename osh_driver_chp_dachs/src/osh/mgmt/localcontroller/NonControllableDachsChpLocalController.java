@@ -6,6 +6,8 @@ import osh.core.oc.LocalController;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.driver.chp.model.GenericChpModel;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.mgmt.ipp.DachsChpNonControllableIPP;
 import osh.mgmt.mox.DachsChpMOX;
@@ -44,18 +46,16 @@ public class NonControllableDachsChpLocalController
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        final long now = exchange.getEpochSecond();
         // get new MOX
         DachsChpMOX mox = (DachsChpMOX) this.getDataFromLocalObserver();
 
-        long now = this.getTimeDriver().getUnixTime();
         this.newIPPAfter = mox.getNewIPPAfter();
         this.currentHotWaterStorageMinTemp = mox.getCurrentHotWaterStorageMinTemp();
         this.currentHotWaterStorageMaxTemp = mox.getCurrentHotWaterStorageMaxTemp();
@@ -81,7 +81,7 @@ public class NonControllableDachsChpLocalController
                 sIPP = new DachsChpNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimeDriver().getUnixTime(),
+                        now,
                         toBeScheduled,
                         mox.getMinRuntime(),
                         new GenericChpModel(
@@ -128,7 +128,7 @@ public class NonControllableDachsChpLocalController
             this.stoppedSince = now;
             cx = new ChpControllerExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getUnixTime(),
+                    now,
                     true,
                     false,
                     false,

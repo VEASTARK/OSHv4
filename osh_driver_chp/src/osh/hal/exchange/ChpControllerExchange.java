@@ -23,7 +23,7 @@ public class ChpControllerExchange
      */
     public ChpControllerExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             boolean stopGenerationFlag,
             boolean electricityRequest,
             boolean heatingRequest,

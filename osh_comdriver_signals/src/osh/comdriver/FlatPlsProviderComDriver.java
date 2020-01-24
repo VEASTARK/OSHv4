@@ -8,6 +8,8 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PlsComExchange;
 
 import java.util.EnumMap;
@@ -101,7 +103,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         this.powerLimitSignals = this.generateNewPowerLimitSignal(now);
         PlsComExchange ex = new PlsComExchange(
                 this.getUUID(),
@@ -112,7 +114,11 @@ public class FlatPlsProviderComDriver extends CALComDriver {
         this.lastTimeSignalSent = now;
 
         // register
-        this.getTimeDriver().registerComponent(this, 1);
+        if (this.newSignalAfterThisPeriod % 60 == 0) {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
+        } else {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        }
     }
 
 
@@ -130,10 +136,9 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-        long now = this.getTimeDriver().getUnixTime();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        long now = exchange.getEpochSecond();
         // generate new PriceSignal and send it
         if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
             // PLS

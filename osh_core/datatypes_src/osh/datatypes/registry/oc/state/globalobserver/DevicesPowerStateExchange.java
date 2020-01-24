@@ -3,7 +3,6 @@ package osh.datatypes.registry.oc.state.globalobserver;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -27,7 +26,7 @@ public class DevicesPowerStateExchange extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public DevicesPowerStateExchange(UUID sender, ZonedDateTime timestamp) {
+    public DevicesPowerStateExchange(UUID sender, long timestamp) {
         this(sender, timestamp, new HashMap<>());
     }
 
@@ -40,7 +39,7 @@ public class DevicesPowerStateExchange extends StateExchange {
      */
     public DevicesPowerStateExchange(
             UUID sender,
-            ZonedDateTime timestamp,
+            long timestamp,
             HashMap<UUID, EnumMap<Commodity, Double>> powerStates) {
         super(sender, timestamp);
 

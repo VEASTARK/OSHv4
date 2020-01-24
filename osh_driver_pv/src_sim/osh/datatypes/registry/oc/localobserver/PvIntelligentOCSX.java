@@ -3,7 +3,6 @@ package osh.datatypes.registry.oc.localobserver;
 import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 //import osh.datatypes.energy.INeededEnergy;
@@ -31,7 +30,7 @@ public class PvIntelligentOCSX extends StateExchange implements IPromiseToBeImmu
      */
     public PvIntelligentOCSX(
             UUID sender,
-            ZonedDateTime timestamp,
+            long timestamp,
             double maxActivePower,
             double maxReactivePower,
             double currentActivePower,

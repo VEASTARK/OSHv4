@@ -97,7 +97,7 @@ public abstract class HALDeviceDriver
         // set data sources as configured
         DeviceMetaDriverDetails deviceMetaDriverDetails = new DeviceMetaDriverDetails(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentTime());
+                this.getTimeDriver().getCurrentEpochSecond());
         deviceMetaDriverDetails.setName(this.name);
         deviceMetaDriverDetails.setLocation(this.location);
         deviceMetaDriverDetails.setIcon(this.icon);
@@ -179,7 +179,7 @@ public abstract class HALDeviceDriver
     /* HELPER FUNCTIONS */
     public void setDataSourcesConfigured(Collection<UUID> uuids) {
         for (UUID uuid : uuids) {
-            ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimeDriver().getCurrentTime());
+            ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimeDriver().getCurrentEpochSecond());
             cd.setConfigurationStatus(ConfigurationStatus.CONFIGURED);
             this.getDriverRegistry().publish(ConfigurationDetails.class, cd);
         }
@@ -187,7 +187,7 @@ public abstract class HALDeviceDriver
 
     public void setDataSourcesUsed(Collection<UUID> uuids) {
         for (UUID uuid : uuids) {
-            ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimeDriver().getCurrentTime());
+            ConfigurationDetails cd = new ConfigurationDetails(uuid, this.getTimeDriver().getCurrentEpochSecond());
             cd.setConfigurationStatus(ConfigurationStatus.USED);
             cd.setUsedBy(this.getUUID());
             this.getDriverRegistry().publish(ConfigurationDetails.class, cd);

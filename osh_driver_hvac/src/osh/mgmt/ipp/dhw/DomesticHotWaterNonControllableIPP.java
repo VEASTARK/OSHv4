@@ -7,7 +7,6 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.mgmt.ipp.HotWaterDemandNonControllableIPP;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -26,7 +25,7 @@ public class DomesticHotWaterNonControllableIPP
             UUID deviceId,
             DeviceTypes deviceType,
             IGlobalLogger logger,
-            ZonedDateTime now,
+            long now,
             boolean toBeScheduled,
             SparseLoadProfile powerPrediction,
             Commodity usedCommodity,

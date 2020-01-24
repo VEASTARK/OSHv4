@@ -3,7 +3,6 @@ package osh.mgmt.localcontroller;
 import osh.datatypes.registry.EventExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -22,7 +21,7 @@ public class ExpectedStartTimeChangedExchange extends EventExchange implements I
     /**
      * CONSTRUCTOR
      */
-    public ExpectedStartTimeChangedExchange(UUID sender, ZonedDateTime timestamp, long expectedStartTime) {
+    public ExpectedStartTimeChangedExchange(UUID sender, long timestamp, long expectedStartTime) {
         super(sender, timestamp);
         this.expectedStartTime = expectedStartTime;
     }

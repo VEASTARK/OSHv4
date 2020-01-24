@@ -12,7 +12,7 @@ public class SpaceHeatingPredictionObserverExchange extends HALDeviceObserverExc
 
     private final Map<Long, Double> predictedHeatConsumptionMap;
 
-    public SpaceHeatingPredictionObserverExchange(UUID deviceID, Long timestamp,
+    public SpaceHeatingPredictionObserverExchange(UUID deviceID, long timestamp,
                                                   Map<Long, Double> predictedHeatConsumptionMap) {
         super(deviceID, timestamp);
         this.predictedHeatConsumptionMap = predictedHeatConsumptionMap;

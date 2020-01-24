@@ -15,7 +15,6 @@ import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -81,13 +80,13 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public InterdependentProblemPart(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime timestamp,
+            long timestamp,
             int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            ZonedDateTime referenceTime,
+            long referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
@@ -100,13 +99,13 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public InterdependentProblemPart(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime timestamp,
+            long timestamp,
             int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            ZonedDateTime referenceTime,
+            long referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             Commodity[] allInputCommodities,
@@ -123,7 +122,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         this.needsAncillaryMeterState = needsAncillaryMeterState;
         this.reactsToInputStates = reactsToInputStates;
         this.isCompletelyStatic = isCompletelyStatic;
-        this.referenceTime = referenceTime.toEpochSecond();
+        this.referenceTime = referenceTime;
         this.deviceType = deviceType;
         this.allOutputCommodities = allOutputCommodities;
         this.allInputCommodities = allInputCommodities;
@@ -166,7 +165,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public final EASolutionCommandExchange<PhenotypeType> transformToFinalInterdependentPhenotype(
             UUID sender,
             UUID receiver,
-            ZonedDateTime timestamp,
+            long timestamp,
             BitSet solution) {
         if (solution.length() > this.bitCount) {
             this.logger.logError("bit-count mismatch! Should be: " + this.bitCount + " but is: " + solution.size());
@@ -190,7 +189,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public final EAPredictionCommandExchange<PredictionType> transformToFinalInterdependentPrediction(
             UUID sender,
             UUID receiver,
-            ZonedDateTime timestamp,
+            long timestamp,
             BitSet solution) {
         if (solution.length() > this.bitCount) {
             this.logger.logError("bit-count mismatch! Should be: " + this.bitCount + " but is: " + solution.size());

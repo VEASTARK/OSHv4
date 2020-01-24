@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -120,7 +119,7 @@ public class BControlMeterDriverRawLogDetails extends StateExchange {
      */
     @Deprecated
     public BControlMeterDriverRawLogDetails() {
-        super(null, null);
+        super(null, -1L);
     }
 
     /**
@@ -129,7 +128,7 @@ public class BControlMeterDriverRawLogDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public BControlMeterDriverRawLogDetails(UUID sender, ZonedDateTime timestamp) {
+    public BControlMeterDriverRawLogDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

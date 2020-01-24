@@ -8,6 +8,8 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PlsComExchange;
 
 import java.util.EnumMap;
@@ -71,7 +73,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
 
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
         this.generateLimitSignal(rand);
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         this.lastSignalSent = now;
 
         PlsComExchange ex = new PlsComExchange(
@@ -81,14 +83,14 @@ public class RandomPlsProviderComDriver extends CALComDriver {
         this.notifyComManager(ex);
 
         // register
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        long now = this.getTimeDriver().getUnixTime();
+        long now = exchange.getEpochSecond();
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
 
         if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
@@ -107,7 +109,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
 
     private void generateLimitSignal(OSHRandomGenerator randomGen) {
 
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         for (int i = 0; i < this.limitsToSet.length; i++) {
             AncillaryCommodity ac = this.limitsToSet[i];

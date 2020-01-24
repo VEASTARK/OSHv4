@@ -6,7 +6,6 @@ import osh.datatypes.registry.StateExchange;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -22,10 +21,10 @@ public class GUIAncillaryMeterStateExchange extends StateExchange {
 
     @Deprecated
     public GUIAncillaryMeterStateExchange() {
-        super(null, null);
+        super(null, -1L);
     }
 
-    public GUIAncillaryMeterStateExchange(UUID sender, ZonedDateTime timestamp, AncillaryCommodityLoadProfile ancillaryMeter) {
+    public GUIAncillaryMeterStateExchange(UUID sender, long timestamp, AncillaryCommodityLoadProfile ancillaryMeter) {
         super(sender, timestamp);
         this.ancillaryMeter = ancillaryMeter;
     }

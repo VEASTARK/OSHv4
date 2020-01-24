@@ -4,7 +4,6 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -28,7 +27,7 @@ public class PlsStateExchange extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public PlsStateExchange(UUID sender, ZonedDateTime timestamp) {
+    public PlsStateExchange(UUID sender, long timestamp) {
         super(sender, timestamp);
 
         this.powerLimitSignals = new EnumMap<>(AncillaryCommodity.class);

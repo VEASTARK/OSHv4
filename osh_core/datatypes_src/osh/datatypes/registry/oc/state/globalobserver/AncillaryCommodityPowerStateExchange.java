@@ -3,7 +3,6 @@ package osh.datatypes.registry.oc.state.globalobserver;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -20,7 +19,7 @@ public class AncillaryCommodityPowerStateExchange extends StateExchange {
     /**
      * CONSTRUCTOR
      */
-    public AncillaryCommodityPowerStateExchange(UUID sender, ZonedDateTime timestamp, EnumMap<AncillaryCommodity, Integer> map) {
+    public AncillaryCommodityPowerStateExchange(UUID sender, long timestamp, EnumMap<AncillaryCommodity, Integer> map) {
         super(sender, timestamp);
 
         this.map = map;

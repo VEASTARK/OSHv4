@@ -14,7 +14,6 @@ import osh.datatypes.time.ActivationList;
 import osh.driver.chiller.AdsorptionChillerModel;
 import osh.utils.time.TimeConversion;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
@@ -88,7 +87,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     public ChillerIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime now,
+            long now,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -102,7 +101,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
                 toBeScheduled,
                 false, //needsAncillaryMeterStates
                 true, //reactsToInputStates
-                now.plusSeconds(RELATIVE_HORIZON),
+                now + RELATIVE_HORIZON,
                 now,
                 DeviceTypes.ADSORPTIONCHILLER,
                 new Commodity[]{Commodity.ACTIVEPOWER,

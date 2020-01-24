@@ -58,7 +58,7 @@ public class TimeExchange implements Serializable, IPromiseToBeImmutable {
      * Returns the seconds that have passed since epoch in this moment in time.
      * @return the seconds since epoch
      */
-    public long getSecondsSinceEpoch() {
+    public long getEpochSecond() {
         return this.secondsSinceEpoch;
     }
 

@@ -2,7 +2,6 @@ package osh.datatypes.registry.driver.details.energy;
 
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -29,13 +28,13 @@ public class ElectricPowerDriverDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public ElectricPowerDriverDetails(UUID sender, ZonedDateTime timestamp) {
+    public ElectricPowerDriverDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 
     static public ElectricPowerDriverDetails aggregatePowerDetails(UUID sender, Collection<ElectricPowerDriverDetails> details) {
         int _pdCount = 0;
-        ZonedDateTime timestamp = null;
+        long timestamp = -1L;
         double activeSum = 0, reactiveSum = 0;
 
         for (ElectricPowerDriverDetails p : details) {

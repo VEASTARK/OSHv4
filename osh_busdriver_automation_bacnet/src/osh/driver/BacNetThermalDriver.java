@@ -9,6 +9,8 @@ import osh.driver.bacnet.BacNetDispatcher;
 import osh.driver.bacnet.BacNetDispatcher.BacNetObject;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.HALControllerExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.BacNetThermalExchange;
 
 import java.io.IOException;
@@ -51,14 +53,14 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     }
 
     private void init(OSHParameterCollection config) throws OSHException {
-        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
+        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         this.deviceMetaDetails.setName(config.getParameter("name"));
         this.deviceMetaDetails.setLocation(config.getParameter("location"));
         // deviceDetails.setDeviceType(getDeviceType().toString());
         // deviceDetails.setDeviceClass(getDeviceClassification().toString());
 
         if (dispatcher == null) {
-            dispatcher = new BacNetDispatcher(this.getTimeDriver(), this.getGlobalLogger());
+            dispatcher = new BacNetDispatcher(this.getOSH().getTimeRegistry(), this.getGlobalLogger());
             try {
                 dispatcher.init();
             } catch (IOException e) {
@@ -120,13 +122,13 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     @Override
     public void onSystemIsUp() throws OSHException {
         this.init(this.getDriverConfig());
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
         super.onSystemIsUp();
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
         // build new HAL exchange
         BacNetThermalExchange _ox = this.buildObserverExchange();
@@ -134,7 +136,6 @@ public class BacNetThermalDriver extends HALDeviceDriver {
 
         // create TemperatureDetails and save to DriverRegistry
         this.getDriverRegistry().publish(TemperatureDetails.class, _ox.getTemperatureDetails());
-
     }
 
     @Override
@@ -143,11 +144,11 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     }
 
     private BacNetThermalExchange buildObserverExchange() {
-        BacNetThermalExchange _ox = new BacNetThermalExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+        BacNetThermalExchange _ox = new BacNetThermalExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
 
         _ox.setDeviceMetaDetails(this.deviceMetaDetails);
 
-        TemperatureDetails _td = new TemperatureDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
+        TemperatureDetails _td = new TemperatureDetails(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
 
         _td.setTemperature(dispatcher.getAnalogInputState(this.sensorObject));
 

@@ -12,6 +12,8 @@ import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.*;
 import osh.simulation.SimulationComDriver;
 
@@ -52,13 +54,13 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-        this.driver.updateTime(this.getTimeDriver().getUnixTime());
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        this.driver.updateTime(exchange.getEpochSecond());
     }
 
     @Override
@@ -131,7 +133,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         this.notifyComManager(
                 new GUIStateSelectedComExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         cls));
     }
 
@@ -140,7 +142,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         this.notifyComManager(
                 new GUIStateRegistrySelectedComExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         registry));
     }
 }

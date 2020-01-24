@@ -2,7 +2,6 @@ package osh.datatypes.registry.oc.details.energy;
 
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -17,7 +16,7 @@ public class ElectricPowerOCDetails extends StateExchange {
     private static final long serialVersionUID = 827260439992008634L;
     protected int activePower;
     protected int reactivePower;
-    public ElectricPowerOCDetails(UUID sender, ZonedDateTime timestamp, int activePower,
+    public ElectricPowerOCDetails(UUID sender, long timestamp, int activePower,
                                   int reactivePower) {
         super(sender, timestamp);
         this.activePower = activePower;
@@ -30,7 +29,7 @@ public class ElectricPowerOCDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public ElectricPowerOCDetails(UUID sender, ZonedDateTime timestamp) {
+    public ElectricPowerOCDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

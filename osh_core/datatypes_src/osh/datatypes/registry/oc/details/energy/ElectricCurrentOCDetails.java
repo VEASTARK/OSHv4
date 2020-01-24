@@ -2,7 +2,6 @@ package osh.datatypes.registry.oc.details.energy;
 
 import osh.datatypes.registry.StateExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -24,7 +23,7 @@ public class ElectricCurrentOCDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public ElectricCurrentOCDetails(UUID sender, ZonedDateTime timestamp) {
+    public ElectricCurrentOCDetails(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

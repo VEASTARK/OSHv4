@@ -1,7 +1,6 @@
 package osh.datatypes.registry;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -17,14 +16,14 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -461398001884824433L;
     private UUID sender;
-    private final ZonedDateTime timestamp;
+    private final long timestamp;
 
     /**
      * Public no-argument constructor for cloning.
      */
     @Deprecated
     public AbstractExchange() {
-        this.timestamp = null;
+        this.timestamp = -1L;
     }
 
     /**
@@ -33,7 +32,7 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
      * @param sender identity of the sender of this exchange
      * @param timestamp timestamp at which this exchange object was created
      */
-    public AbstractExchange(UUID sender, ZonedDateTime timestamp) {
+    public AbstractExchange(UUID sender, long timestamp) {
         Objects.requireNonNull(sender);
         Objects.requireNonNull(timestamp);
         this.sender = sender;
@@ -60,7 +59,7 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
      * Returns the timestamp marking this exchange
      * @return
      */
-    public ZonedDateTime getTimestamp() {
+    public long getTimestamp() {
         return this.timestamp;
     }
 

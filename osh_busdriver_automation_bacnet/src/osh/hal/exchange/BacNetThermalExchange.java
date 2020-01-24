@@ -23,7 +23,7 @@ public class BacNetThermalExchange
      * @param deviceID  unique identifier for this element
      * @param timestamp timestamp of this exchange
      */
-    public BacNetThermalExchange(UUID deviceID, Long timestamp) {
+    public BacNetThermalExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
         this.temperatureDetails = new TemperatureDetails(deviceID, timestamp);
     }

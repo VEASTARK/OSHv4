@@ -7,6 +7,8 @@ import osh.datatypes.registry.details.common.TemperatureDetails;
 import osh.datatypes.registry.driver.details.chp.ChpDriverDetails;
 import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.dachs.WAMPDachsDispatcher;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -37,15 +39,15 @@ public class WAMPDachsChpDriver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimeDriver().registerComponent(this, 300);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
 
         this.dachsInformationWAMPDispatcher = new WAMPDachsDispatcher(this.getGlobalLogger(), this);
         new Thread(this, "pull proxy of dachs driver to WAMP").start();
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class WAMPDachsChpDriver
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimeDriver().getUnixTime());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());
@@ -158,7 +160,7 @@ public class WAMPDachsChpDriver
         // convert to TemperatureDetails
         Double waterStorageTemperature = this.parseDoubleStatus(values.get("Hka_Mw1.Temp.sbFuehler1"));
         if (waterStorageTemperature != null) {
-            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimeDriver().getUnixTime());
+            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimeDriver().getCurrentEpochSecond());
             td.setTemperature(waterStorageTemperature);
             this.getDriverRegistry().publish(TemperatureDetails.class, td);
         }

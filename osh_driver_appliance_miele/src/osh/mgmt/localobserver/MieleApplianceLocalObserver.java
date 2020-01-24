@@ -17,6 +17,8 @@ import osh.eal.hal.exchange.HALObserverExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.eal.hal.interfaces.common.IHALDeviceMetaDetails;
 import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.en50523.EN50523DeviceState;
 import osh.hal.exchange.GenericApplianceDofObserverExchange;
 import osh.hal.exchange.MieleApplianceObserverExchange;
@@ -70,7 +72,7 @@ public class MieleApplianceLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
 
@@ -216,7 +218,7 @@ public class MieleApplianceLocalObserver
         if (_hx instanceof GenericApplianceDofObserverExchange) {
             GenericApplianceDofObserverExchange gadoe = ((GenericApplianceDofObserverExchange) _hx);
 
-            DofStateExchange dse = new DofStateExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+            DofStateExchange dse = new DofStateExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
             dse.setDevice1stDegreeOfFreedom(gadoe.getDevice1stDegreeOfFreedom());
             dse.setDevice2ndDegreeOfFreedom(gadoe.getDevice2ndDegreeOfFreedom());
 
@@ -225,8 +227,8 @@ public class MieleApplianceLocalObserver
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
 
     @Override

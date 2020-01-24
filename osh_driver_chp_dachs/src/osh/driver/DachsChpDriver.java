@@ -10,6 +10,8 @@ import osh.datatypes.registry.driver.details.chp.raw.DachsDriverDetails;
 import osh.driver.chp.ChpOperationMode;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
 import osh.utils.physics.ComplexPowerUtil;
@@ -235,7 +237,7 @@ public abstract class DachsChpDriver extends ChpDriver
         super.onSystemIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -257,19 +259,18 @@ public abstract class DachsChpDriver extends ChpDriver
 
         this.notifyObserver(observerExchange);
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
 
         // still alive message
-        if (this.getTimeDriver().getUnixTime() % 60 == 0) {
-            this.getGlobalLogger().logDebug("onNextTimePeriod() (getTimer().getUnixTime() % 60 == 0) - I'm still alive");
+        if (exchange.getTimeEvents().contains(TimeSubscribeEnum.MINUTE)) {
+            this.getGlobalLogger().logDebug("minute has passed - I'm still alive");
         }
     }
 

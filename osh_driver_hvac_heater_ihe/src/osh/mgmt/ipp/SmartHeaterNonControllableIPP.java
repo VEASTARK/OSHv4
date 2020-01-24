@@ -47,7 +47,7 @@ public class SmartHeaterNonControllableIPP
     public SmartHeaterNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            ZonedDateTime now,
+            long now,
             int temperatureSetting,
             int initialState,
             long[] timestampOfLastChangePerSubElement,

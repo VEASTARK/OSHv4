@@ -16,7 +16,7 @@ public class BaseloadStaticExchange
     private final int compressionValue;
 
 
-    public BaseloadStaticExchange(UUID deviceID, Long timestamp, LoadProfileCompressionTypes compressionType,
+    public BaseloadStaticExchange(UUID deviceID, long timestamp, LoadProfileCompressionTypes compressionType,
                                   int compressionValue) {
         super(deviceID, timestamp);
         this.compressionType = compressionType;

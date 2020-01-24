@@ -31,7 +31,7 @@ public class SmartHeaterOX
      */
     public SmartHeaterOX(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
 
             int temperatureSetting,
             int waterTemperature,

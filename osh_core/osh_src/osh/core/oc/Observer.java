@@ -1,13 +1,13 @@
 package osh.core.oc;
 
-import osh.OSHComponent;
 import osh.core.OCComponent;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSH;
-import osh.core.interfaces.IRealTimeSubscriber;
 import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.mox.IModelOfObservationType;
+import osh.eal.time.TimeExchange;
+import osh.registry.interfaces.ITimeRegistryListener;
 
 /**
  * superclass for all observer
@@ -15,7 +15,7 @@ import osh.datatypes.mox.IModelOfObservationType;
  * @author florian
  * abstract superclass for all observers
  */
-public abstract class Observer extends OCComponent implements IRealTimeSubscriber, ILifeCycleListener {
+public abstract class Observer extends OCComponent implements ITimeRegistryListener, ILifeCycleListener {
 
     protected IModelOfObservationType modelOfObservationType;
 
@@ -38,7 +38,7 @@ public abstract class Observer extends OCComponent implements IRealTimeSubscribe
     public abstract IModelOfObservationExchange getObservedModelData(IModelOfObservationType type);
 
     public final IModelOfObservationExchange getObservedModelData() {
-        synchronized (this.getSyncObject()) {
+        synchronized (this) {
             return this.getObservedModelData(this.modelOfObservationType);
         }
     }
@@ -53,7 +53,7 @@ public abstract class Observer extends OCComponent implements IRealTimeSubscribe
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
         //...in case of use please override
     }
 
@@ -86,12 +86,4 @@ public abstract class Observer extends OCComponent implements IRealTimeSubscribe
     public void onSystemShutdown() {
         //...in case of use please override
     }
-
-
-    @Override
-    public OSHComponent getSyncObject() {
-        return this;
-    }
-
-
 }

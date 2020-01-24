@@ -128,7 +128,7 @@ public class Registry extends OSHComponent {
 
         if (!this.deferCallbacks) {
             this.getListeners(identifier, sender).parallelStream().forEach(t -> t.onListen(
-                    exchange instanceof IPromiseToBeImmutable ? exchange : (AbstractExchange) exchange.clone()));
+                    exchange instanceof IPromiseToBeImmutable ? exchange : exchange.clone()));
         } else {
             this.deferQueue.add(new Triple<>(identifier, sender, exchange));
         }
@@ -224,9 +224,9 @@ public class Registry extends OSHComponent {
             try {
                 if (this.data.containsKey(identifier) && this.data.get(identifier).containsKey(sender)) {
                     AbstractExchange toPublish = this.data.get(identifier).get(sender);
-                    if (toPublish.getTimestamp().isEqual(this.getTimeDriver().getCurrentTime())) {
+                    if (toPublish.getTimestamp() == this.getTimeDriver().getCurrentEpochSecond()) {
                         this.retrieveCallback(listener).onListen(toPublish instanceof IPromiseToBeImmutable ?
-                                toPublish : (AbstractExchange) toPublish.clone());
+                                toPublish : toPublish.clone());
                     }
                 }
             } finally {
@@ -282,9 +282,9 @@ public class Registry extends OSHComponent {
             try {
                 if (this.data.containsKey(identifier)) {
                     this.data.get(identifier).forEach((u, l) -> {
-                        if (l.getTimestamp().isEqual(this.getTimeDriver().getCurrentTime())) {
+                        if (l.getTimestamp() == this.getTimeDriver().getCurrentEpochSecond()) {
                             this.retrieveCallback(listener).onListen(l instanceof IPromiseToBeImmutable ?
-                                    l : (AbstractExchange) l.clone());
+                                    l : l.clone());
                         }
                     });
                 }
@@ -351,7 +351,7 @@ public class Registry extends OSHComponent {
         try {
             if (this.data.containsKey(identifier) && this.data.get(identifier).containsKey(sender)) {
                AbstractExchange exchange = this.data.get(identifier).get(sender);
-               return exchange instanceof IPromiseToBeImmutable ? exchange : (AbstractExchange) exchange.clone();
+               return exchange instanceof IPromiseToBeImmutable ? exchange : exchange.clone();
             } else {
                 return null;
             }
@@ -374,7 +374,7 @@ public class Registry extends OSHComponent {
                 Map<UUID, AbstractExchange> states = new Object2ObjectOpenHashMap<>(this.data.get(identifier));
                 if (states.isEmpty() || states.values().stream().allMatch(e -> e instanceof IPromiseToBeImmutable)) return states;
 
-                states.replaceAll((k, v) -> (AbstractExchange) v.clone());
+                states.replaceAll((k, v) -> v.clone());
                 return states;
             } else {
                 return Collections.emptyMap();
@@ -404,7 +404,7 @@ public class Registry extends OSHComponent {
             this.getListeners(queueItem.getFirst(), queueItem.getSecond()).forEach(t -> t.onListen(
                     queueItem.getThird() instanceof IPromiseToBeImmutable ?
                             queueItem.getThird() :
-                            (AbstractExchange) queueItem.getThird().clone()));
+                            queueItem.getThird().clone()));
         }
 
         return this.deferQueue.isEmpty();

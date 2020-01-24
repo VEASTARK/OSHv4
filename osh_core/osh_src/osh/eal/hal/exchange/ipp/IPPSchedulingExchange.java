@@ -2,7 +2,6 @@ package osh.eal.hal.exchange.ipp;
 
 import osh.eal.hal.exchange.HALObserverExchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -16,7 +15,7 @@ public class IPPSchedulingExchange
     private long rescheduleAfter;
     private double triggerIfDeltaX;
 
-    public IPPSchedulingExchange(UUID deviceID, ZonedDateTime timestamp) {
+    public IPPSchedulingExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

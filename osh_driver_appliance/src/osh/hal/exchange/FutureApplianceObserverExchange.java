@@ -46,7 +46,7 @@ public class FutureApplianceObserverExchange
     // ### IHALGenericApplianceProgramDetails ###
     private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
     private UUID acpID;
-    private Long acpReferenceTime;
+    private long acpReferenceTime;
 
     // ### IHALGenericApplianceDOF ###
     private Long dof;
@@ -60,7 +60,7 @@ public class FutureApplianceObserverExchange
      */
     public FutureApplianceObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             int activePower,
             int reactivePower,
             int hotWaterPower,
@@ -147,7 +147,7 @@ public class FutureApplianceObserverExchange
     }
 
     @Override
-    public Long getAcpReferenceTime() {
+    public long getAcpReferenceTime() {
         return this.acpReferenceTime;
     }
 

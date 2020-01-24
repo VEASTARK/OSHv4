@@ -7,11 +7,12 @@ import osh.cal.IComDataSubscriber;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSHOC;
-import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.oc.IOCCALDataPublisher;
 import osh.core.oc.IOCCALDataSubscriber;
+import osh.eal.time.TimeExchange;
 import osh.registry.Registry.OCRegistry;
 import osh.registry.interfaces.IProvidesIdentity;
+import osh.registry.interfaces.ITimeRegistryListener;
 
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ import java.util.UUID;
  */
 public abstract class ComManager
         extends OSHComponent
-        implements IRealTimeSubscriber,
+        implements ITimeRegistryListener,
         ILifeCycleListener,
         IComDataSubscriber,
         IOCCALDataPublisher,
@@ -46,12 +47,6 @@ public abstract class ComManager
     @Override
     public IOSHOC getOSH() {
         return (IOSHOC) super.getOSH();
-    }
-
-
-    @Override
-    public OSHComponent getSyncObject() {
-        return this;
     }
 
     @Override
@@ -90,7 +85,7 @@ public abstract class ComManager
      */
     @Override
     public final void onDataFromCALDriver(ICALExchange exchangeObject) {
-        synchronized (this.getSyncObject()) {
+        synchronized (this) {
             this.onDriverUpdate(exchangeObject);
         }
     }
@@ -128,7 +123,7 @@ public abstract class ComManager
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
         //...in case of use please override
     }
 

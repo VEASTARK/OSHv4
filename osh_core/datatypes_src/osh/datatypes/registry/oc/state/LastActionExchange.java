@@ -3,7 +3,6 @@ package osh.datatypes.registry.oc.state;
 import osh.datatypes.registry.StateExchange;
 
 import javax.xml.bind.annotation.*;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -19,7 +18,7 @@ public class LastActionExchange extends StateExchange {
     @XmlAnyElement
     private IAction lastAction;
 
-    public LastActionExchange(UUID sender, ZonedDateTime timestamp) {
+    public LastActionExchange(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 
@@ -29,10 +28,10 @@ public class LastActionExchange extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     protected LastActionExchange() {
-        super(null, null);
+        super(null, -1L);
     }
 
-    public LastActionExchange(UUID sender, ZonedDateTime timestamp, IAction lastAction) {
+    public LastActionExchange(UUID sender, long timestamp, IAction lastAction) {
         super(sender, timestamp);
         this.lastAction = lastAction;
     }

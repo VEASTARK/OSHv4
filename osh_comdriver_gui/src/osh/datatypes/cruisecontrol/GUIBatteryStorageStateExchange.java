@@ -3,7 +3,6 @@ package osh.datatypes.cruisecontrol;
 import osh.datatypes.cruisecontrol.OptimizedDataStorage.EqualData;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -19,7 +18,7 @@ public class GUIBatteryStorageStateExchange
 
     public GUIBatteryStorageStateExchange(
             UUID sender,
-            ZonedDateTime timestamp,
+            long timestamp,
             double currentStateOfCharge,
             double minStateOfCharge,
             double maxStateOfCharge,

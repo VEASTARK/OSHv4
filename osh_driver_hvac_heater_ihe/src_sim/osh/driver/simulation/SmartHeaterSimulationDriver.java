@@ -76,7 +76,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
@@ -91,7 +91,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
 
     @Override
     public void onNextTimeTick() {
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         int availablePower = 0;
 //		if (ancillaryInputStates != null) {
@@ -138,7 +138,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
 
         SmartHeaterOX ox = new SmartHeaterOX(
                 this.getUUID(),
-                this.getTimeDriver().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 this.temperatureSetting,
                 (int) this.currentWaterTemperature,
                 this.model.getCurrentState(),

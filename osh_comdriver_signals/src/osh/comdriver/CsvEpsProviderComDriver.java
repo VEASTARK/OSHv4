@@ -8,6 +8,8 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.time.TimeConversion;
 
@@ -166,16 +168,21 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 
         this.readCsvPriceSignal();
         this.generateNewPriceSignal();
-        this.getTimeDriver().registerComponent(this, 1);
 
-        this.lastTimeSignalSent = this.getTimeDriver().getUnixTime();
+        if (this.newSignalAfterThisPeriod % 60 == 0) {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
+        } else {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        }
+
+        this.lastTimeSignalSent = this.getTimeDriver().getCurrentEpochSecond();
     }
 
     /**
      * Generate PriceSignal
      */
     private void generateNewPriceSignal() {
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         int relativeTimeFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(now);
         long yearStart = now - relativeTimeFromYearStart;
 
@@ -265,20 +272,19 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         //now sending priceSignal
         EpsComExchange ex = new EpsComExchange(
                 this.getUUID(),
-                this.getTimeDriver().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 priceSignals);
         this.updateComDataSubscriber(ex);
     }
 
-
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        if ((this.getTimeDriver().getUnixTime() - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if ((exchange.getEpochSecond() - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
             this.generateNewPriceSignal();
 
-            this.lastTimeSignalSent = this.getTimeDriver().getUnixTime();
+            this.lastTimeSignalSent = exchange.getEpochSecond();
         }
     }
 

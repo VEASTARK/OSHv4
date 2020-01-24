@@ -41,12 +41,12 @@ public class DummySignalsWAMPComManager extends ComManager implements IDataRegis
         if (exchange instanceof EpsStateExchange) {
             EpsStateExchange epse = (EpsStateExchange) exchange;
 
-            EpsComExchange ece = new EpsComExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), epse.getPriceSignals());
+            EpsComExchange ece = new EpsComExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), epse.getPriceSignals());
             this.updateOcDataSubscriber(ece);
         } else if (exchange instanceof PlsStateExchange) {
             PlsStateExchange plse = (PlsStateExchange) exchange;
 
-            PlsComExchange pce = new PlsComExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), plse.getPowerLimitSignals());
+            PlsComExchange pce = new PlsComExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), plse.getPowerLimitSignals());
             this.updateOcDataSubscriber(pce);
         }
     }

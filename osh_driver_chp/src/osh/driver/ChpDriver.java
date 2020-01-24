@@ -43,7 +43,7 @@ public abstract class ChpDriver
     protected abstract void sendPowerRequestToChp();
 
     public synchronized void processChpDetailsAndNotify(ChpDriverDetails chpDetails) {
-        ChpObserverExchange _ox = new ChpObserverExchange(this.getUUID(), this.getTimeDriver().getUnixTime());
+        ChpObserverExchange _ox = new ChpObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         _ox.setActivePower((int) Math.round(chpDetails.getCurrentElectricalPower()));
         _ox.setThermalPower((int) Math.round(chpDetails.getCurrentThermalPower()));
         _ox.setElectricityRequest(this.electricityRequest);

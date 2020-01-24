@@ -281,7 +281,7 @@ public class RestConfResource {
             int minTimeDiff = 30;
 
             long start;
-            long end = this.interactionDriver.getTimeDriver().getUnixTime() - minTimeDiff;
+            long end = this.interactionDriver.getTimeDriver().getCurrentEpochSecond() - minTimeDiff;
             String rrdPath;
 
 

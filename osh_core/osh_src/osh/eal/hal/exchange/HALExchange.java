@@ -1,6 +1,5 @@
 package osh.eal.hal.exchange;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -12,7 +11,7 @@ public abstract class HALExchange
         implements IHALExchange {
 
     private UUID deviceID;
-    private ZonedDateTime timestamp;
+    private long timestamp;
 
 
     /**
@@ -21,7 +20,7 @@ public abstract class HALExchange
      * @param deviceID
      * @param timestamp
      */
-    public HALExchange(UUID deviceID, ZonedDateTime timestamp) {
+    public HALExchange(UUID deviceID, long timestamp) {
         super();
 
         this.deviceID = deviceID;
@@ -38,11 +37,11 @@ public abstract class HALExchange
     }
 
     @Override
-    public ZonedDateTime getTimestamp() {
+    public long getTimestamp() {
         return this.timestamp;
     }
 
-    public void setTimestamp(ZonedDateTime timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 }

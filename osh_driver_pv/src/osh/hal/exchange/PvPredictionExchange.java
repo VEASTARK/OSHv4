@@ -23,7 +23,7 @@ public class PvPredictionExchange
      * @param deviceID
      * @param timestamp
      */
-    public PvPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredictions, int pastDaysPrediction) {
+    public PvPredictionExchange(UUID deviceID, long timestamp, List<SparseLoadProfile> powerPredictions, int pastDaysPrediction) {
         super(deviceID, timestamp);
         this.powerPredictions = powerPredictions;
         this.pastDaysPrediction = pastDaysPrediction;

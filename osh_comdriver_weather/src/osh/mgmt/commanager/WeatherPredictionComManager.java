@@ -6,6 +6,8 @@ import osh.comdriver.details.WeatherPredictionDetails;
 import osh.core.com.ComManager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.util.UUID;
 
@@ -31,13 +33,12 @@ public class WeatherPredictionComManager extends ComManager {
 
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
 
     @Override

@@ -80,7 +80,7 @@ public class PvLocalObserver extends LocalObserver {
 
                 CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         DeviceTypes.PVSYSTEM);
                 cpse.addPowerState(Commodity.ACTIVEPOWER, this.lastActivePowerLevel);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, this.lastReactivePowerLevel);
@@ -93,7 +93,7 @@ public class PvLocalObserver extends LocalObserver {
 
             //refresh time from Midnight
             long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimeDriver().getUnixTime());
+            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimeDriver().getCurrentEpochSecond());
 
             //monitor the load profile
             this.runPvProfilePredictor(_powDetails);
@@ -117,7 +117,7 @@ public class PvLocalObserver extends LocalObserver {
     }
 
     private void updateEAPart() {
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         //Prediction is always in relative Time from midnight, we need to extend it and then convert to absolute time
         SparseLoadProfile optimizationProfile = this.predictedPVProfile.merge(this.predictedPVProfile, 86400).cloneWithOffset(now);

@@ -1,6 +1,5 @@
 package osh.datatypes.registry;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -11,7 +10,7 @@ public abstract class EventExchange extends AbstractExchange {
 
     private static final long serialVersionUID = -7069547228943707389L;
 
-    public EventExchange(UUID sender, ZonedDateTime timestamp) {
+    public EventExchange(UUID sender, long timestamp) {
         super(sender, timestamp);
     }
 

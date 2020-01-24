@@ -7,6 +7,8 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ColdWaterTankObserverExchange;
 import osh.mgmt.ipp.ColdWaterTankNonControllableIPP;
 
@@ -40,15 +42,14 @@ public class ColdWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
     }
 
-
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        long now = this.getTimeDriver().getUnixTime();
+        long now = exchange.getEpochSecond();
 
         if (now > this.lastTimeIPPSent + NEW_IPP_AFTER) {
             ColdWaterTankNonControllableIPP ex;
@@ -66,7 +67,6 @@ public class ColdWaterTankLocalObserver
             this.lastTimeIPPSent = now;
             this.temperatureInLastIPP = this.currentTemperature;
         }
-
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ColdWaterTankLocalObserver
                 ex = new ColdWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimeDriver().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         this.currentTemperature,
                         this.compressionType,
                         this.compressionValue);
@@ -93,13 +93,13 @@ public class ColdWaterTankLocalObserver
                         this,
                         ex);
                 this.temperatureInLastIPP = this.currentTemperature;
-                this.lastTimeIPPSent = this.getTimeDriver().getUnixTime();
+                this.lastTimeIPPSent = this.getTimeDriver().getCurrentEpochSecond();
             }
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
                     this.getUUID(),
-                    this.getTimeDriver().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,

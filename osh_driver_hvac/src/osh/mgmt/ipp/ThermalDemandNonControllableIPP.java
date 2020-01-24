@@ -10,7 +10,6 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -49,7 +48,7 @@ public abstract class ThermalDemandNonControllableIPP
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
-            ZonedDateTime referenceTime,
+            long referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
             LoadProfileCompressionTypes compressionType,

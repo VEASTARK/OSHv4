@@ -24,7 +24,7 @@ public class MieleApplianceControllerExchange extends HALControllerExchange
      */
     public MieleApplianceControllerExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             EN50523OIDExecutionOfACommandCommands applianceCommand) {
         super(deviceID, timestamp);
 

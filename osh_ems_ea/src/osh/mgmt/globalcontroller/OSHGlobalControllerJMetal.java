@@ -24,6 +24,8 @@ import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIScheduleStateExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.esc.OCEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.Fitness;
 import osh.mgmt.globalcontroller.jmetal.GAParameters;
@@ -158,7 +160,7 @@ public class OSHGlobalControllerJMetal
             throw new OSHException("this global controller only works with global observers of type " + OSHGlobalObserver.class.getName());
         }
 
-        this.getOSH().getTimeDriver().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 //		
 //		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), EpsStateExchange.class, RegistryType.COM, RegistryType.OC);
 //		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), PlsStateExchange.class, RegistryType.COM, RegistryType.OC);
@@ -168,7 +170,7 @@ public class OSHGlobalControllerJMetal
 
 //		CostChecker.init(epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective, upperOverlimitFactor, lowerOverlimitFactor);
 
-        this.lastTimeSchedulingStarted = this.getTimeDriver().getUnixTimeAtStart() + 60;
+        this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().toEpochSecond() + 60;
     }
 
     @Override
@@ -194,11 +196,10 @@ public class OSHGlobalControllerJMetal
         }
     }
 
-
     @Override
-    public void onNextTimePeriod() throws OSHException {
-
-        long now = this.getTimeDriver().getUnixTime();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        long now = exchange.getEpochSecond();
 
         // check whether rescheduling is required and if so do rescheduling
         this.handleScheduling();
@@ -232,7 +233,7 @@ public class OSHGlobalControllerJMetal
      *
      * @throws OSHException
      */
-    private void handleScheduling() throws OSHException {
+    private void handleScheduling() {
 
         boolean reschedulingRequired = false;
 
@@ -245,7 +246,7 @@ public class OSHGlobalControllerJMetal
         }
 
         if (reschedulingRequired) {
-            this.lastTimeSchedulingStarted = this.getTimeDriver().getUnixTime();
+            this.lastTimeSchedulingStarted = this.getTimeDriver().getCurrentEpochSecond();
             this.startScheduling();
         }
 
@@ -254,12 +255,11 @@ public class OSHGlobalControllerJMetal
     /**
      * is triggered to
      *
-     * @throws OSHException
      */
-    public void startScheduling() throws OSHException {
+    public void startScheduling() {
 
         if (this.ocESC == null) {
-            throw new OSHException("OC-EnergySimulationCore not set, optimisation impossible, crashing now");
+            throw new RuntimeException("OC-EnergySimulationCore not set, optimisation impossible, crashing now");
         }
 
         //retrieve information of ga should log to database
@@ -309,7 +309,7 @@ public class OSHGlobalControllerJMetal
                 optimisationRunRandomGenerator,
                 showSolverDebugMessages,
                 this.gaparameters,
-                this.getTimeDriver().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 this.stepSize,
                 this.logDir);
 
@@ -323,7 +323,7 @@ public class OSHGlobalControllerJMetal
 
         // debug print
         this.getGlobalLogger().logDebug("=== scheduling... ===");
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         int[][] bitPositions = new int[problemParts.size()][2];
         int bitPosStart = 0;
@@ -374,7 +374,7 @@ public class OSHGlobalControllerJMetal
                     bitPositions,
                     tempPriceSignals,
                     tempPowerLimitSignals,
-                    this.getTimeDriver().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     fitnessFunction);
             solutions = resultWithAll.getBitSet();
 
@@ -408,12 +408,12 @@ public class OSHGlobalControllerJMetal
                         GUIHotWaterPredictionStateExchange.class,
                         this,
                         new GUIHotWaterPredictionStateExchange(this.getUUID(),
-                                this.getTimeDriver().getUnixTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
+                                this.getTimeDriver().getCurrentEpochSecond(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
 
                 this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
-                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getUnixTime(), ancillaryMeter));
+                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), ancillaryMeter));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)
@@ -421,7 +421,7 @@ public class OSHGlobalControllerJMetal
                         GUIScheduleStateExchange.class,
                         this,
                         new GUIScheduleStateExchange(this.getUUID(), this.getTimeDriver()
-                                .getUnixTime(), schedules, this.stepSize));
+                                .getCurrentEpochSecond(), schedules, this.stepSize));
 
             }
         } catch (Exception e) {
@@ -447,7 +447,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPhenotype(
                                 null,
                                 part.getUUID(),
-                                this.getTimeDriver().getUnixTime(),
+                                this.getTimeDriver().getCurrentEpochSecond(),
                                 bits));
             } else if (/* lc == null && */ part.getBitCount() > 0) {
                 throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
@@ -460,7 +460,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPrediction(
                                 null,
                                 part.getUUID(),
-                                this.getTimeDriver().getUnixTime(),
+                                this.getTimeDriver().getCurrentEpochSecond(),
                                 bits));
             }
         }

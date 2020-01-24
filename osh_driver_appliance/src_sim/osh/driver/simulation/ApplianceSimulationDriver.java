@@ -12,6 +12,7 @@ import osh.utils.slp.IH0Profile;
 import osh.utils.string.StringConversions;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -72,6 +73,8 @@ public abstract class ApplianceSimulationDriver
     @Deprecated
     private int deviceMax2ndTDof;
 
+    private ZonedDateTime lastTimeScreenplayGenerated;
+
 
     /**
      * CONSTRUCTOR
@@ -124,7 +127,7 @@ public abstract class ApplianceSimulationDriver
                             Class h0Class = Class.forName(h0ProfileClass);
 
                             h0Profile = (IH0Profile) h0Class.getConstructor(int.class, String.class, double.class)
-                                    .newInstance(TimeConversion.convertUnixTime2Year(this.getTimeDriver().getUnixTime()),
+                                    .newInstance(this.getTimeDriver().getCurrentTime().getYear(),
                                             h0ProfileFileName,
                                             1000);
 
@@ -187,7 +190,6 @@ public abstract class ApplianceSimulationDriver
         }
     }
 
-
     /**
      * Get random hour of day according to specific probability
      * . Used for dynamic screenplay<br>
@@ -229,7 +231,7 @@ public abstract class ApplianceSimulationDriver
         } else if (deviatedHour >= 24) {
             deviatedHour -= 24;
         }
-        return (long) (this.getTimeDriver().getUnixTime() + deviatedHour * 3600.0);
+        return (long) (this.getTimeDriver().getCurrentEpochSecond() + deviatedHour * 3600.0);
     }
 
 
@@ -251,13 +253,14 @@ public abstract class ApplianceSimulationDriver
 
         //if dynamic screenplay then generate daily screenplay
         if (this.getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
-            //FIXME: this can go very wrong, because the step size can be greater than 1
-            if (this.getTimeDriver().getUnixTime() % 86400 == 0) {
+            if (this.lastTimeScreenplayGenerated == null ||
+                    this.getTimeDriver().getCurrentTime().getDayOfYear() != this.lastTimeScreenplayGenerated.getDayOfYear()) {
                 try {
                     this.generateDynamicDailyScreenplay();
                 } catch (OSHException e) {
                     e.printStackTrace();
                 }
+                this.lastTimeScreenplayGenerated = this.getTimeDriver().getCurrentTime();
             }
         }
     }
@@ -281,8 +284,8 @@ public abstract class ApplianceSimulationDriver
         }
 
         // run on last day immediately
-        if ((this.getTimeDriver().getUnixTime() - this.getTimeDriver().getUnixTimeAtStart()) / 86400
-                == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1)) {
+        if (!this.getTimeDriver().getCurrentTime().plusSeconds(this.getSimulationEngine().getSimulationDuration()).minusDays(1)
+                .isAfter(this.getTimeDriver().getCurrentTime())) {
             maxDof = 0;
         }
 

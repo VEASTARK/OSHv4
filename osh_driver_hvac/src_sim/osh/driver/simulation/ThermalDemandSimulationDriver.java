@@ -87,7 +87,7 @@ public abstract class ThermalDemandSimulationDriver
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getUnixTimeAtStart();
+        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
@@ -98,7 +98,8 @@ public abstract class ThermalDemandSimulationDriver
             predictions.add(this.demandData.getProfileForDayOfYear(day).getProfileWithoutDuplicateValues());
         }
 
-        WaterDemandPredictionExchange _ox = new WaterDemandPredictionExchange(this.getUUID(), this.getTimeDriver().getUnixTime(),
+        WaterDemandPredictionExchange _ox = new WaterDemandPredictionExchange(this.getUUID(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 predictions, this.pastDaysPrediction, this.weightForOtherWeekday, this.weightForSameWeekday);
         this.notifyObserver(_ox);
 
@@ -129,7 +130,7 @@ public abstract class ThermalDemandSimulationDriver
         int randomHourShift = 2; // % 2 == 0
 
         // get new values
-        long now = this.getTimeDriver().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         if (now % 3600 == 0) {
 //			double demand = 0;
             int randomNumber = ownGen.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
