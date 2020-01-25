@@ -10,6 +10,8 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.eal.hal.exceptions.HALException;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements Runnable 
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 3600);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.HOUR);
 
         this.currentWeatherProviderWAMPDispatcher = new CurrentWeatherProviderWAMPDispatcher(this.getGlobalLogger(), this);
         this.weatherPredictionProviderWAMPDispatcher = new WeatherPredictionProviderWAMPDispatcher(this.getGlobalLogger(), this);
@@ -59,12 +61,11 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements Runnable 
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
         // still alive message
-        if (this.getTimer().getUnixTime() % 60 == 0) {
-            this.getGlobalLogger().logDebug("onNextTimePeriod() (getTimer().getUnixTime() % 60 == 0) - I'm still alive");
+        if (exchange.getTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+            this.getGlobalLogger().logDebug("hour gone - I'm still alive");
         }
 
     }

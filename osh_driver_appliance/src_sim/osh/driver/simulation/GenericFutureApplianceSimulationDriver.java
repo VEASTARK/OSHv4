@@ -217,7 +217,7 @@ public class GenericFutureApplianceSimulationDriver
     @Override
     public void onNextTimeTick() {
         // get current time
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         // if not OFF -> device logic for running etc
         if (this.currentEn50523State == EN50523DeviceState.OFF) {
@@ -426,7 +426,7 @@ public class GenericFutureApplianceSimulationDriver
      * Turn it off...
      */
     private void turnOff() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         for (Commodity c : this.usedCommodities) {
             this.setPower(c, 0);
@@ -627,14 +627,14 @@ public class GenericFutureApplianceSimulationDriver
 
             if (this.isControllable()) {
                 // if controllable then PROGRAMMED
-                this.configurationStartedAt = this.getTimer().getUnixTime();
+                this.configurationStartedAt = this.getTimeDriver().getCurrentEpochSecond();
                 this.setEN50523State(EN50523DeviceState.PROGRAMMED); // wait until optimization in PROGRAMMED state
                 this.selectedProfileID = null; // safety first...
 //				selectedNextProfileID = null; //safety first
                 this.selectedStartingTimes = null; // safety first...
             } else {
                 // if NOT controllable then RUNNING
-                this.configurationStartedAt = this.getTimer().getUnixTime();
+                this.configurationStartedAt = this.getTimeDriver().getCurrentEpochSecond();
                 this.phaseStartedAt = this.configurationStartedAt;
                 this.setEN50523State(EN50523DeviceState.RUNNING);
                 this.selectedProfileID = 0; // start with the first profile
@@ -662,7 +662,7 @@ public class GenericFutureApplianceSimulationDriver
                     UUID.randomUUID(),
                     dynamicLoadProfiles,
                     minMaxTimes,
-                    this.getTimer().getUnixTime());
+                    this.getTimeDriver().getCurrentEpochSecond());
             this.acpChanged = true;
 
         } else if (!nextAction.isNextState() && nextAction.getActionType() == ActionType.I_DEVICE_ACTION) {
@@ -692,13 +692,14 @@ public class GenericFutureApplianceSimulationDriver
             throw new OSHException("ERROR: noOfPrograms != configurationShares.length");
         }
 
-        boolean lastDay = (this.getTimer().getUnixTime() - this.getTimer().getUnixTimeAtStart()) / 86400
+        boolean lastDay =
+                (this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond()) / 86400
                 == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1);
 
         //calculate runs per day, correct for impossible runs from earlier days
         int runsToday = 0;
         // days with higher consumption explained by run of devices have more runs
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
         double avgRunsToday = this.getAvgDailyRuns() * this.getCorrectionFactorDay()[dayOfYear];
 
@@ -785,7 +786,8 @@ public class GenericFutureApplianceSimulationDriver
                     //okay, we can't shift it to the next day, so we'll cheat
                     if (lastDay) {
                         long lastEndTime = blockedTime == 0 ? now : blockedTime;
-                        long endOfSim = this.getSimulationEngine().getSimulationDuration() + this.getTimer().getUnixTimeAtStart();
+                        long endOfSim =
+                                this.getSimulationEngine().getSimulationDuration() + this.getTimeDriver().getTimeAtStart().toEpochSecond();
 
                         selectedStartTimeAndDofs = new Long[runsToday][2];
                         for (int i = 0; i < runsToday; i++) {
@@ -862,7 +864,7 @@ public class GenericFutureApplianceSimulationDriver
             } while (startTime <= now + blockedSeconds);
 
             // better do not generate action for the beginning of the simulation (no signal...)
-            if (startTime < this.getTimer().getUnixTimeAtStart() + 100) {
+            if (startTime < this.getTimeDriver().getTimeAtStart().toEpochSecond() + 100) {
                 startTime = 100;
             }
             //ensure the start time is in the future (action will otherwise be deleted)
@@ -873,7 +875,7 @@ public class GenericFutureApplianceSimulationDriver
             //check that startTime does not violate previous selected startTimes/tDofs
             long currentEnd = startTime + tDof + maxTicks + 100;
 
-            if (lastDay && currentEnd >= this.getTimer().getUnixTimeAtStart() + this.getSimulationEngine().getSimulationDuration())
+            if (lastDay && currentEnd >= this.getTimeDriver().getTimeAtStart().toEpochSecond() + this.getSimulationEngine().getSimulationDuration())
                 return null;
 
             for (int j = 0; j < i; j++) {

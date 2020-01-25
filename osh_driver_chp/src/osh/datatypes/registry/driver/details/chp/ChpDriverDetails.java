@@ -49,7 +49,7 @@ public class ChpDriverDetails extends StateExchange {
      */
     @Deprecated
     public ChpDriverDetails() {
-        super(null, 0);
+        super(null, -1L);
     }
 
     /**

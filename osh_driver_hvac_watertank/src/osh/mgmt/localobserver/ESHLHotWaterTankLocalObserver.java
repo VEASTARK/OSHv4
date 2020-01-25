@@ -12,6 +12,8 @@ import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
@@ -56,17 +58,21 @@ public class ESHLHotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        if (this.NEW_IPP_AFTER % 60 == 0) {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
+        } else {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        }
+
         this.getOCRegistry().subscribe(EAPredictionCommandExchange.class,this.getUUID(), this);
         this.getOCRegistry().subscribe(EpsStateExchange.class, this.getUUID(), this);
     }
 
-
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        long now = this.getTimer().getUnixTime();
+        long now = exchange.getEpochSecond();
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
@@ -110,9 +116,7 @@ public class ESHLHotWaterTankLocalObserver
                 this.temperatureInLastIPP = this.currentTemperature;
             }
         }
-
     }
-
 
     @Override
     public void onDeviceStateUpdate() {
@@ -137,7 +141,7 @@ public class ESHLHotWaterTankLocalObserver
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
@@ -150,14 +154,14 @@ public class ESHLHotWaterTankLocalObserver
                         InterdependentProblemPart.class,
                         this,
                         ex);
-                this.lastTimeIPPSent = this.getTimer().getUnixTime();
+                this.lastTimeIPPSent = this.getTimeDriver().getCurrentEpochSecond();
                 this.temperatureInLastIPP = this.currentTemperature;
             }
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,
@@ -185,7 +189,7 @@ public class ESHLHotWaterTankLocalObserver
         if (exchange instanceof EpsStateExchange) {
                 EpsStateExchange eee = (EpsStateExchange) exchange;
 
-                long now = this.getTimer().getUnixTime();
+                long now = this.getTimeDriver().getCurrentEpochSecond();
                 double firstPrice = eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPrice(now);
                 double lastPrice = eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPrice(
                         eee.getPriceSignals().get(AncillaryCommodity.NATURALGASPOWEREXTERNAL).getPriceUnknownAtAndAfter() - 1);

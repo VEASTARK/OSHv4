@@ -114,7 +114,7 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
 
     @Override
     public void onNextTimeTick() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         int currentPowerAtGridConnection = 0;
         if (this.ancillaryMeterState != null) {

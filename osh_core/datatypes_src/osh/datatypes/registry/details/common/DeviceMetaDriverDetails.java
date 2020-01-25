@@ -30,7 +30,7 @@ public class DeviceMetaDriverDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     protected DeviceMetaDriverDetails() {
-        this(null, 0);
+        this(null, -1L);
     }
 
     /**

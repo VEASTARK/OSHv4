@@ -417,7 +417,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
 
             double currentGasPowerExternal = ancillaryMeterState.getPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL);
 
-            long currentTime = this.timerDriver.getUnixTime();
+            long currentTime = this.timeDriver.getCurrentTime().toEpochSecond();
 
             /* array
              * [0] = epsCosts

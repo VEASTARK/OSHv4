@@ -23,6 +23,7 @@ import osh.registry.Registry;
 import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.Registry.OCRegistry;
+import osh.registry.TimeRegistry;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
@@ -30,7 +31,7 @@ import osh.simulation.exception.SimulationEngineException;
 import osh.simulation.screenplay.ScreenplayType;
 import osh.utils.xml.XMLSerialization;
 
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Random;
 import java.util.UUID;
 
@@ -112,8 +113,7 @@ public class OSHLifeCycleManager {
             String ocConfigFile,
             String ealConfigFile,
             String calConfigFile,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             Long randomSeed,
             Long optimizationMainRandomSeed,
             String runID,
@@ -126,7 +126,6 @@ public class OSHLifeCycleManager {
                 ocConfigFile,
                 ealConfigFile,
                 calConfigFile,
-                hostTimeZone,
                 forcedStartTime,
                 randomSeed,
                 optimizationMainRandomSeed,
@@ -145,8 +144,7 @@ public class OSHLifeCycleManager {
             String ocConfigFile,
             String ealConfigFile,
             String calConfigFile,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             Long randomSeed,
             Long optimizationMainRandomSeed,
             String runID,
@@ -162,7 +160,6 @@ public class OSHLifeCycleManager {
                 ocConfigFile,
                 ealConfigFile,
                 calConfigFile,
-                hostTimeZone,
                 forcedStartTime,
                 randomSeed,
                 optimizationMainRandomSeed,
@@ -180,8 +177,7 @@ public class OSHLifeCycleManager {
             String ocConfigFile,
             String ealConfigFile,
             String calConfigFile,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             Long randomSeed,
             Long optimizationMainRandomSeed,
             String runID,
@@ -268,6 +264,10 @@ public class OSHLifeCycleManager {
         ComRegistry comRegistry = new ComRegistry(this.theOrganicSmartHome, isSimulation);
         this.theOrganicSmartHome.setComRegistry(comRegistry);
 
+        // assign TimeRegistry (informs about time events)
+        TimeRegistry timeRegistry = new TimeRegistry(this.theOrganicSmartHome, isSimulation);
+        this.theOrganicSmartHome.setTimeRegistry(timeRegistry);
+
         //instantiating the data broker and assiging it to the osh
         this.dataBroker = new DataBroker(this.theOrganicSmartHome, UUID.randomUUID());
         this.theOrganicSmartHome.setDataBroker(this.dataBroker);
@@ -277,7 +277,6 @@ public class OSHLifeCycleManager {
                 ocConfig,
                 ealConfig,
                 calConfig,
-                hostTimeZone,
                 forcedStartTime,
                 optimizationMainRandomSeed,
                 runID,
@@ -291,8 +290,7 @@ public class OSHLifeCycleManager {
             OCConfiguration ocConfig,
             EALConfiguration ealConfig,
             CALConfiguration calConfig,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             Long optimizationMainRandomSeed,
             String runID,
             String configurationID,
@@ -342,7 +340,6 @@ public class OSHLifeCycleManager {
                 ocConfig,
                 ealConfig,
                 calConfig,
-                hostTimeZone,
                 forcedStartTime,
                 optimizationMainRandomSeed,
                 logDir);
@@ -354,8 +351,7 @@ public class OSHLifeCycleManager {
             OCConfiguration ocConfig,
             EALConfiguration ealConfig,
             CALConfiguration calConfig,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             Long optimizationMainRandomSeed,
             String logDir) throws LifeCycleManagerException {
 
@@ -369,14 +365,14 @@ public class OSHLifeCycleManager {
 
             if (this.hasSimEngine) {
                 if (this.simEngine != null) {
-                    this.ealManager.loadConfiguration(ealConfig, hostTimeZone, forcedStartTime, this.simEngine);
+                    this.ealManager.loadConfiguration(ealConfig, forcedStartTime, this.simEngine);
                 } else {
-                    this.ealManager.loadConfiguration(ealConfig, hostTimeZone, forcedStartTime, Long.valueOf(oshConfig.getRandomSeed()), oshConfig.getEngineParameters(),
+                    this.ealManager.loadConfiguration(ealConfig, forcedStartTime, Long.valueOf(oshConfig.getRandomSeed()), oshConfig.getEngineParameters(),
                             this.screenPlayType, oshConfig.getGridConfigurations(), oshConfig.getMeterUUID());
                     this.simEngine = this.ealManager.getSimEngine();
                 }
             } else {
-                this.ealManager.loadConfiguration(ealConfig, hostTimeZone, forcedStartTime);
+                this.ealManager.loadConfiguration(ealConfig, forcedStartTime);
             }
         } catch (Exception ex) {
             throw new LifeCycleManagerException(ex);
@@ -410,8 +406,6 @@ public class OSHLifeCycleManager {
             System.exit(0);
             throw new LifeCycleManagerException(ex);
         }
-
-        this.theOrganicSmartHome.getTimer().startTimerProcessingThreads();
     }
 
     protected void prepareSystemShutdown() {
@@ -521,7 +515,7 @@ public class OSHLifeCycleManager {
     }
 
     public void initDatabaseLogging(boolean isDatabaseLogging, String tableName,
-                                    long forcedStartTime, int[] databasesToLog) throws LifeCycleManagerException {
+                                    ZonedDateTime forcedStartTime, int[] databasesToLog) throws LifeCycleManagerException {
         if (isDatabaseLogging) {
             DatabaseLoggerThread.initLogger(tableName,
                     this.theOrganicSmartHome.getOSHStatus().getLogDir(),

@@ -34,7 +34,6 @@ import osh.datatypes.registry.driver.details.energy.ElectricPowerDriverDetails;
 import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.HALBusDriver;
-import osh.eal.hal.HALDriver;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.hal.exchange.HttpRestInteractionComManagerExchange;
 import osh.mgmt.commanager.HttpRestInteractionBusManager;
@@ -121,7 +120,6 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
         rcAC.registerInstances(new RestApplianceControlResource(
                 busManager,
                 this,
-                this.getTimer(),
                 this.getUUID(),
                 this.getDriverRegistry()));
         ServletHolder shAC = new ServletHolder(new ServletContainer(rcAC));
@@ -409,24 +407,19 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
     }
 
     public void sendStartRequest(UUID device) {
-        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimeDriver().getCurrentEpochSecond());
         this.getDriverRegistry().publish(StartDeviceRequest.class, req);
     }
 
     public void sendStopRequest(UUID device) {
-        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimeDriver().getCurrentEpochSecond());
         this.getDriverRegistry().publish(StopDeviceRequest.class, req);
     }
 
     public void sendSwitchRequest(UUID device, boolean turnOn) {
-        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimer().getUnixTime());
+        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimeDriver().getCurrentEpochSecond());
         req.setTurnOn(turnOn);
         this.getDriverRegistry().publish(SwitchRequest.class, req);
-    }
-
-    @Override
-    public HALDriver getSyncObject() {
-        return this;
     }
 
     abstract String getEnvironment();

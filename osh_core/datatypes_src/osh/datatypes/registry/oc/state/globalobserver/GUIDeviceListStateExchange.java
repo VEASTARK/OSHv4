@@ -22,7 +22,7 @@ public class GUIDeviceListStateExchange extends StateExchange {
 
     @Deprecated
     public GUIDeviceListStateExchange() {
-        super(null, 0L);
+        super(null, -1L);
     }
 
     public GUIDeviceListStateExchange(UUID sender, long timestamp, Set<DeviceTableEntry> deviceList) {

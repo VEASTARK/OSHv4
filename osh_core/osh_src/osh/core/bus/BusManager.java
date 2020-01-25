@@ -1,17 +1,17 @@
 package osh.core.bus;
 
-import osh.OSHComponent;
 import osh.core.OCComponent;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
 import osh.core.interfaces.IOSHOC;
-import osh.core.interfaces.IRealTimeSubscriber;
 import osh.core.oc.IOCHALDataPublisher;
 import osh.core.oc.IOCHALDataSubscriber;
 import osh.eal.hal.HALBusDriver;
 import osh.eal.hal.IDriverDataSubscriber;
 import osh.eal.hal.exchange.IHALExchange;
+import osh.eal.time.TimeExchange;
 import osh.registry.interfaces.IProvidesIdentity;
+import osh.registry.interfaces.ITimeRegistryListener;
 
 import java.util.UUID;
 
@@ -19,7 +19,7 @@ import java.util.UUID;
  * @author Florian Allerding, Till Schuberth, Ingo Mauser
  */
 public abstract class BusManager extends OCComponent
-        implements IRealTimeSubscriber,
+        implements ITimeRegistryListener,
         ILifeCycleListener,
         IDriverDataSubscriber,
         IOCHALDataPublisher,
@@ -45,11 +45,6 @@ public abstract class BusManager extends OCComponent
         return super.getOSH();
     }
 
-
-    @Override
-    public OSHComponent getSyncObject() {
-        return this;
-    }
 
     @Override
     public void setOcDataSubscriber(IOCHALDataSubscriber monitorObject) {
@@ -84,7 +79,7 @@ public abstract class BusManager extends OCComponent
 
     @Override
     public final void onDataFromCALDriver(IHALExchange exchangeObject) {
-        synchronized (this.getSyncObject()) {
+        synchronized (this) {
             this.onDriverUpdate(exchangeObject);
         }
     }
@@ -122,7 +117,7 @@ public abstract class BusManager extends OCComponent
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
         //NOTHING
     }
 

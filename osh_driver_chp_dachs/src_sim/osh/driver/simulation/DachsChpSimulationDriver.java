@@ -233,7 +233,7 @@ public class DachsChpSimulationDriver
         super.onSimulationIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimer().getUnixTime());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -290,7 +290,7 @@ public class DachsChpSimulationDriver
             this.runtimeRemaining = 0;
         }
 
-        this.chpModel.calcPower(this.getTimer().getUnixTime());
+        this.chpModel.calcPower(this.getTimeDriver().getCurrentEpochSecond());
         int activePower = this.chpModel.getActivePower();
         int reactivePower = this.chpModel.getReactivePower();
         int thermalPower = this.chpModel.getThermalPower();
@@ -321,7 +321,7 @@ public class DachsChpSimulationDriver
         // send ObserverExchange
         ChpObserverExchange observerExchange = new ChpObserverExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime());
+                this.getTimeDriver().getCurrentEpochSecond());
 
         observerExchange.setActivePower(Math.round(this.getPower(Commodity.ACTIVEPOWER)));
         observerExchange.setReactivePower(Math.round(this.getPower(Commodity.REACTIVEPOWER)));
@@ -366,7 +366,7 @@ public class DachsChpSimulationDriver
             this.starts++;
         }
         super.setRunning(running);
-        this.chpModel.setRunning(running, this.getTimer().getUnixTime());
+        this.chpModel.setRunning(running, this.getTimeDriver().getCurrentEpochSecond());
     }
 
     @Override

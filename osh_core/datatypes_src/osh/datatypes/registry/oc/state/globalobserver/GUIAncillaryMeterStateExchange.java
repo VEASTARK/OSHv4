@@ -21,7 +21,7 @@ public class GUIAncillaryMeterStateExchange extends StateExchange {
 
     @Deprecated
     public GUIAncillaryMeterStateExchange() {
-        super(null, 0L);
+        super(null, -1L);
     }
 
     public GUIAncillaryMeterStateExchange(UUID sender, long timestamp, AncillaryCommodityLoadProfile ancillaryMeter) {

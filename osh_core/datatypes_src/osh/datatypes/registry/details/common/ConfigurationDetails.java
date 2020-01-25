@@ -26,7 +26,7 @@ public class ConfigurationDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private ConfigurationDetails() {
-        this(null, 0);
+        this(null, -1L);
     }
 
     public ConfigurationDetails(UUID sender, long timestamp) {

@@ -105,7 +105,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
         ColdWaterTankObserverExchange observerExchange =
                 new ColdWaterTankObserverExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        this.getTimeDriver().getCurrentEpochSecond(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
                         demand,

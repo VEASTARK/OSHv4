@@ -8,6 +8,7 @@ import osh.datatypes.logger.IAnnotatedForLogging;
 import osh.datatypes.logger.LogThis;
 import osh.datatypes.registry.AbstractExchange;
 import osh.eal.hal.HALBusDriver;
+import osh.eal.time.TimeExchange;
 import osh.registry.interfaces.IDataRegistryListener;
 
 import java.util.*;
@@ -97,16 +98,12 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IDataRegis
         this.getDriverRegistry().subscribe(LogThis.class, this.getUUID(),this);
     }
 
-    /**
-     * Pull-logging
-     */
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        long currentTime = exchange.getEpochSecond();
 
         ArrayList<ValueLogger> activeLoggers = new ArrayList<>();
-
-        long currentTime = this.getTimer().getUnixTime();
 
         if (this.consoleLog != null
                 && (currentTime - this.lastLoggingToConsoleAt) >= this.valueLoggerConfiguration.getValueLoggingToConsoleResolution()) {
@@ -171,7 +168,7 @@ public abstract class LoggerBusDriver extends HALBusDriver implements IDataRegis
 
             ArrayList<ValueLogger> activeLoggers = new ArrayList<>();
 
-            long currentTime = this.getTimer().getUnixTime();
+            long currentTime = this.getTimeDriver().getCurrentEpochSecond();
 
             if (this.consoleLog != null) {
                 activeLoggers.add(this.consoleLog);

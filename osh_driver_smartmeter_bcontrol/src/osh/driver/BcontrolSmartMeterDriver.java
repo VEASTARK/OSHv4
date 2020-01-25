@@ -13,6 +13,8 @@ import osh.driver.meter.BcontrolHeaterData;
 import osh.driver.meter.BcontrolMeterData;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.HALControllerExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -83,11 +85,11 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
 
         this.runnable = new BcontrolConnectorThread(
                 this.getGlobalLogger(),
-                this.getTimer(),
+                this.getTimeDriver(),
                 this,
                 this.meterURL,
                 this.meterNumber,
@@ -96,10 +98,9 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
         this.thread.start();
     }
 
-
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
         //NOTHING
     }
 
@@ -135,7 +136,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
         // convert to raw details object for logging
         BControlMeterDriverRawLogDetails rawDetails = new BControlMeterDriverRawLogDetails(
                 this.getUUID(),
-                this.getTimer().getUnixTime());
+                this.getTimeDriver().getCurrentEpochSecond());
 
         rawDetails.setPhase(this.phase);
 
@@ -215,7 +216,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
     private BControlHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
         BControlHeaterDriverRawLogDetails rawDetails = new BControlHeaterDriverRawLogDetails(
                 this.getUUID(),
-                this.getTimer().getUnixTime());
+                this.getTimeDriver().getCurrentEpochSecond());
 
         rawDetails.setMode(bcmd.getMode());
         rawDetails.setOrder(bcmd.getOrder());

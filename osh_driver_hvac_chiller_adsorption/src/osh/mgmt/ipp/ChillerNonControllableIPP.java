@@ -204,7 +204,7 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
             coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);
         }
 
-        if (chillerNewState || this.interdependentLastState || this.interdependentTime - this.getReferenceTime() == 0) {
+        if (chillerNewState || this.interdependentLastState || this.interdependentTime == this.getReferenceTime()) {
 
 
             if (this.lp != null) {

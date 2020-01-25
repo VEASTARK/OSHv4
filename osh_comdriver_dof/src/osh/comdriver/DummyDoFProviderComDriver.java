@@ -48,7 +48,7 @@ public class DummyDoFProviderComDriver extends CALComDriver {
 
     private void processDofInformation() {
 
-        DofComExchange dce = new DofComExchange(this.getUUID(), this.getTimer().getUnixTime());
+        DofComExchange dce = new DofComExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
 
         UUID[] deviceIds = {
                 UUID.fromString("e2ef0d13-61b3-4188-b32a-1570dcbab4d1"), //INDUCTIONCOOKTOP

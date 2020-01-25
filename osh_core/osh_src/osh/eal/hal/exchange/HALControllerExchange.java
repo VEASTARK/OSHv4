@@ -6,7 +6,7 @@ import java.util.UUID;
  * @author Florian Allerding
  */
 public abstract class HALControllerExchange extends HALExchange {
-    public HALControllerExchange(UUID deviceID, Long timestamp) {
+    public HALControllerExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 }

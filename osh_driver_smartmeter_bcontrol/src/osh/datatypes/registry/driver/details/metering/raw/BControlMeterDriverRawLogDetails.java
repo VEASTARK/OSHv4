@@ -119,7 +119,7 @@ public class BControlMeterDriverRawLogDetails extends StateExchange {
      */
     @Deprecated
     public BControlMeterDriverRawLogDetails() {
-        super(null, 0L);
+        super(null, -1L);
     }
 
     /**

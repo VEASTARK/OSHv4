@@ -9,6 +9,8 @@ import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExch
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.time.Activation;
 import osh.datatypes.time.ActivationList;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ChillerControllerExchange;
 import osh.mgmt.ipp.ChillerIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
@@ -62,15 +64,14 @@ public class AdsorptionChillerLocalController
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
         this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-        long now = this.getTimer().getUnixTime();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        final long now = exchange.getEpochSecond();
 
         // get new Mox
         AdsorptionChillerMOX mox = (AdsorptionChillerMOX) this.getDataFromLocalObserver();
@@ -84,7 +85,7 @@ public class AdsorptionChillerLocalController
 
         Map<Long, Double> temperaturePrediction = mox.getTemperatureMap();
 
-        if (this.getTimer().getUnixTime() % 3600 == 0) {
+        if (exchange.getTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
             this.getGlobalLogger().logDebug("Cold Water Temperature: " + this.currentColdWaterTemperature);
             this.getGlobalLogger().logDebug("Hot Water Temperature : " + this.currentHotWaterTemperature);
         }
@@ -104,7 +105,7 @@ public class AdsorptionChillerLocalController
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    now,
                     true,
                     false,
                     0);
@@ -120,7 +121,7 @@ public class AdsorptionChillerLocalController
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    now,
                     true,
                     false,
                     0);
@@ -154,7 +155,7 @@ public class AdsorptionChillerLocalController
             //TURN ON Adsorption Chiller
             cx = new ChillerControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    now,
                     false,
                     true,
                     expectedRunningTime);
@@ -190,15 +191,15 @@ public class AdsorptionChillerLocalController
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        now,
                         false,
                         true,
                         expectedRunningTime);
             }
         } else {
             // check whether to reschedule...
-            long diff = this.getTimer().getUnixTime() - this.lastTimeReschedulingTriggered;
-            long diff_ipp = this.getTimer().getUnixTime() - this.lastTimeIppSent;
+            long diff = now - this.lastTimeReschedulingTriggered;
+            long diff_ipp = now - this.lastTimeIppSent;
             if (diff < 0 || diff >= this.RESCHEDULE_AFTER) {
                 this.createNewEaPart(
                         this.currentState,
@@ -220,7 +221,7 @@ public class AdsorptionChillerLocalController
                     || (this.currentActivation != null && this.currentActivation.startTime + this.currentActivation.duration < now)) {
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        now,
                         false,
                         false,
                         0);
@@ -259,7 +260,7 @@ public class AdsorptionChillerLocalController
                     this.startTimes.remove(0);
                     cx = new ChillerControllerExchange(
                             this.getUUID(),
-                            this.getTimer().getUnixTime(),
+                            now,
                             false,
                             true,
                             0);
@@ -300,7 +301,7 @@ public class AdsorptionChillerLocalController
             builder.append("}");
 
             this.getGlobalLogger().logDebug(builder.toString());
-            this.lastTimeReschedulingTriggered = this.getTimer().getUnixTime();
+            this.lastTimeReschedulingTriggered = this.getTimeDriver().getCurrentEpochSecond();
         }
     }
 
@@ -329,9 +330,9 @@ public class AdsorptionChillerLocalController
 
         this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this.getUUID(), ex);
-        this.lastTimeIppSent = this.getTimer().getUnixTime();
+        this.lastTimeIppSent = this.getTimeDriver().getCurrentEpochSecond();
         if (toBeScheduled) {
-            this.lastTimeReschedulingTriggered = this.getTimer().getUnixTime();
+            this.lastTimeReschedulingTriggered = this.getTimeDriver().getCurrentEpochSecond();
         }
     }
 }

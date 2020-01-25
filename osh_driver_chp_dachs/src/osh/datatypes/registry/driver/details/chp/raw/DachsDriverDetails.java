@@ -91,7 +91,7 @@ public class DachsDriverDetails extends StateExchange {
      */
     @Deprecated
     public DachsDriverDetails() {
-        super(null, 0);
+        super(null, -1L);
     }
 
     /**

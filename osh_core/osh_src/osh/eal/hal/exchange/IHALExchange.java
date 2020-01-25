@@ -9,5 +9,5 @@ public interface IHALExchange {
 
     UUID getDeviceID();
 
-    Long getTimestamp();
+    long getTimestamp();
 }

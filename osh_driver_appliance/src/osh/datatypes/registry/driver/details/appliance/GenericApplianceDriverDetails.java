@@ -28,7 +28,7 @@ public class GenericApplianceDriverDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private GenericApplianceDriverDetails() {
-        this(null, 0);
+        this(null, -1L);
     }
 
 

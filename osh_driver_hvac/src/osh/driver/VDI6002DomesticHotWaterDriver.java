@@ -11,6 +11,8 @@ import osh.driver.simulation.thermal.VDI6002DomesticHotWaterStatistics;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
 import osh.simulation.exception.SimulationSubjectException;
@@ -161,26 +163,27 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
         //initially give LocalObserver load data of past days
         VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 VDI6002DomesticHotWaterStatistics.monthlyCorrection,
                 VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection,
                 this.weekDayHourProbabilities,
                 this.avgYearlyDemand);
         this.notifyObserver(_pred);
 
-        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(), this.compressionType, this.compressionValue);
+        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(),
+                this.compressionType, this.compressionValue);
         this.notifyObserver(_stat);
     }
 
     @Override
-    public void onNextTimePeriod() {
-
-        long now = this.getTimer().getUnixTime();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        long now = exchange.getEpochSecond();
 
         if (this.dayProfile == null || now % 86400 == 0) {
             if (this.dayProfile == null)

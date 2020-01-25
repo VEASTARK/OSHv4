@@ -5,6 +5,8 @@ import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHStatus;
 import osh.datatypes.logger.SystemLoggerConfiguration;
 
+import java.time.format.DateTimeFormatter;
+
 /**
  * Global logger for the OSH. Please use this logger for all OSH logging issues
  *
@@ -13,6 +15,8 @@ import osh.datatypes.logger.SystemLoggerConfiguration;
 public class OSHGlobalLogger implements IGlobalLogger {
 
     private IOSH osh;
+
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
 
     //	// if true please check for required changes
     private boolean createSingleLogfile;
@@ -83,9 +87,9 @@ public class OSHGlobalLogger implements IGlobalLogger {
     }
 
 
-    private long currentTime() {
-        if (this.osh.getTimer() == null) return -1; //timer is not initialized yet
-        return this.osh.getTimer().getUnixTime();
+    private String currentTime() {
+        if (this.osh.getTimeDriver() == null) return "NOT-STARTED"; //timer is not initialized yet
+        return this.osh.getTimeDriver().getCurrentTime().format(this.timeFormatter);
     }
 
     /**

@@ -7,7 +7,6 @@ import osh.configuration.system.DeviceTypes;
 import osh.core.RegistryType;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
-import osh.core.interfaces.IRealTimeSubscriber;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.dof.DofStateExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
@@ -23,6 +22,8 @@ import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.en50523.EN50523OIDExecutionOfACommandCommands;
 import osh.hal.exchange.GenericApplianceDofObserverExchange;
 import osh.hal.exchange.GenericApplianceStartTimesControllerExchange;
@@ -125,35 +126,26 @@ public class MieleApplianceDriver
                 RegistryType.COM,
                 RegistryType.DRIVER);
 
-        this.getTimer().registerComponent(
-                new IRealTimeSubscriber() {
-                    @Override
-                    public Object getSyncObject() {
-                        return MieleApplianceDriver.this;
-                    }
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
-                    @Override
-                    public void onNextTimePeriod() {
-                        synchronized (this) {
-                            if (MieleApplianceDriver.this.pendingCommand == EN50523OIDExecutionOfACommandCommands.START) {
-                                StartDeviceRequest req = new StartDeviceRequest(
-                                        MieleApplianceDriver.this.getUUID(),
-                                        MieleApplianceDriver.this.applianceBusDriverUUID,
-                                        MieleApplianceDriver.this.getTimer().getUnixTime());
-                                MieleApplianceDriver.this.getDriverRegistry().publish(StartDeviceRequest.class, req);
-                            }
-                        }
-                    }
-                },
-                1
-        );
-
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
     }
 
+    @Override
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+
+        if (MieleApplianceDriver.this.pendingCommand == EN50523OIDExecutionOfACommandCommands.START) {
+            StartDeviceRequest req = new StartDeviceRequest(
+                    MieleApplianceDriver.this.getUUID(),
+                    MieleApplianceDriver.this.applianceBusDriverUUID,
+                    exchange.getEpochSecond());
+            MieleApplianceDriver.this.getDriverRegistry().publish(StartDeviceRequest.class, req);
+        }
+    }
 
     private ArrayList<PowerProfileTick> shrinkPowerProfile(
             Commodity commodity,
@@ -266,7 +258,7 @@ public class MieleApplianceDriver
                         this.getGlobalLogger().logError("Received illegal dof, not sending to o/c");
                     } else {
                         GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getUUID(),
-                                this.getTimer().getUnixTime());
+                                this.getTimeDriver().getCurrentEpochSecond());
                         gadoe.setDevice1stDegreeOfFreedom(this.firstDof);
                         gadoe.setDevice1stDegreeOfFreedom(this.secondDof);
                         this.notifyObserver(gadoe);
@@ -292,7 +284,7 @@ public class MieleApplianceDriver
             // generate ox object
             if (updateOx) {
                 MieleApplianceObserverExchange _ox = new MieleApplianceObserverExchange(
-                        this.getUUID(), this.getTimer().getUnixTime());
+                        this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
 
                 // check for incomplete data
                 if (this.currentAppDetails == null) {
@@ -353,20 +345,20 @@ public class MieleApplianceDriver
                                 }
                             }
                             if (this.programStartedTime == -1)
-                                this.programStartedTime = this.getTimer().getUnixTime();
+                                this.programStartedTime = this.getTimeDriver().getCurrentEpochSecond();
 
                             long remainingProgramDuration;
                             if (this.isControllable()) {
                                 remainingProgramDuration = this.mieleApplianceDriverDetails.getProgramRemainingTime();
-                                long now = this.getTimer().getUnixTime();
+                                long now = this.getTimeDriver().getCurrentEpochSecond();
                                 if (remainingProgramDuration == -1 && this.programStartedTime <= now) { // IMA @2016-05-20: FIX for hob/oven are "Controllable"
                                     remainingProgramDuration = this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size() - (now - this.programStartedTime);
                                 }
                             } else {
-                                remainingProgramDuration = this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size() - (this.getTimer().getUnixTime() - this.programStartedTime);
+                                remainingProgramDuration = this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size() - (this.getTimeDriver().getCurrentEpochSecond() - this.programStartedTime);
                             }
 
-                            long finishedProgramDuration = this.getTimer().getUnixTime() - this.programStartedTime;
+                            long finishedProgramDuration = this.getTimeDriver().getCurrentEpochSecond() - this.programStartedTime;
 
                             EnumMap<Commodity, ArrayList<PowerProfileTick>> expectedLoadProfiles = new EnumMap<>(Commodity.class);
 

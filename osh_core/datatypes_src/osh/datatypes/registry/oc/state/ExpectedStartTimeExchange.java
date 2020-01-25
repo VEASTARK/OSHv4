@@ -20,7 +20,7 @@ public class ExpectedStartTimeExchange extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private ExpectedStartTimeExchange() {
-        this(null, 0);
+        this(null, -1L);
     }
 
     public ExpectedStartTimeExchange(UUID sender, long timestamp) {

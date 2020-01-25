@@ -52,7 +52,7 @@ public class InverterBatteryStorageObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         // get OX
         BatteryStorageOX ox = (BatteryStorageOX) this.getObserverDataObject();
@@ -112,7 +112,7 @@ public class InverterBatteryStorageObserver
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
         return new BatteryStorageMOX(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 this.activePower,
                 this.reactivePower,
                 this.batteryStateOfCharge,

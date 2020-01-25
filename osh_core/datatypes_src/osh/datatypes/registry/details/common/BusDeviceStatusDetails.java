@@ -27,7 +27,7 @@ public class BusDeviceStatusDetails extends StateExchange implements IPromiseToB
     @SuppressWarnings("unused")
     @Deprecated
     protected BusDeviceStatusDetails() {
-        this(null, 0, ConnectionStatus.UNDEFINED);
+        this(null, -1L, ConnectionStatus.UNDEFINED);
     }
 
     public BusDeviceStatusDetails(UUID sender, long timestamp, ConnectionStatus state) {

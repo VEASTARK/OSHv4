@@ -11,12 +11,15 @@ import osh.datatypes.time.Activation;
 import osh.datatypes.time.ActivationList;
 import osh.driver.chp.ChpOperationMode;
 import osh.driver.chp.model.GenericChpModel;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.mgmt.ipp.DachsChpIPP;
 import osh.mgmt.mox.DachsChpMOX;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.physics.ComplexPowerUtil;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -91,12 +94,12 @@ public class DachsChpLocalController
 //		// init before registering for timer messages
 //		createNewEaPart(false, 0);
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
         this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
 
-        long start = this.getTimer().getUnixTimeAtStart();
-        this.lastTimeIppSent = start - 86400;
-        this.lastTimeReschedulingTriggered = start - 86400;
+        ZonedDateTime start = this.getTimeDriver().getTimeAtStart();
+        this.lastTimeIppSent = start.minusDays(1).toEpochSecond();
+        this.lastTimeReschedulingTriggered = start.minusDays(1).toEpochSecond();
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             this.keepAliveTime = 0;
@@ -105,12 +108,12 @@ public class DachsChpLocalController
         }
     }
 
-
     @Override
-    public synchronized void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
+        final long now = exchange.getEpochSecond();
 
-        long now = this.getTimer().getUnixTime();
+//        this.getGlobalLogger().logDebug("controller called");
 
         // get new Mox
         DachsChpMOX mox = (DachsChpMOX) this.getDataFromLocalObserver();
@@ -182,7 +185,7 @@ public class DachsChpLocalController
             // force on
             cx = new ChpControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    now,
                     false,
                     false,
                     true, //ON
@@ -217,7 +220,7 @@ public class DachsChpLocalController
             // force on (still...CHP should be running anyway)
             cx = new ChpControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    now,
                     false,
                     false,
                     true,
@@ -300,7 +303,7 @@ public class DachsChpLocalController
 
                     cx = new ChpControllerExchange(
                             this.getUUID(),
-                            this.getTimer().getUnixTime(),
+                            now,
                             false,
                             false,
                             true,
@@ -313,7 +316,7 @@ public class DachsChpLocalController
                 // switch off (has only been on because of forced on or scheduled runtime is over)
                 cx = new ChpControllerExchange(
                         this.getUUID(),
-                        this.getTimer().getUnixTime(),
+                        now,
                         false,
                         false,
                         false,
@@ -370,7 +373,7 @@ public class DachsChpLocalController
             // force off
             cx = new ChpControllerExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    now,
                     true,
                     false,
                     false,
@@ -392,7 +395,7 @@ public class DachsChpLocalController
             EASolutionCommandExchange<ActivationList> exs = ((EASolutionCommandExchange<ActivationList>) exchange);
             this.startTimes = exs.getPhenotype().getList();
 
-            long now = this.getTimer().getUnixTime();
+            long now = this.getTimeDriver().getCurrentEpochSecond();
 
             //check if currently running and should be shutdown by the optimization
             if (this.currentActivation != null) {

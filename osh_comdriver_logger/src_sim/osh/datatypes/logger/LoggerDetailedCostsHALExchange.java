@@ -28,7 +28,7 @@ public class LoggerDetailedCostsHALExchange extends HALExchange {
      */
     public LoggerDetailedCostsHALExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             EnumMap<AncillaryCommodity, Integer> map,
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit) {

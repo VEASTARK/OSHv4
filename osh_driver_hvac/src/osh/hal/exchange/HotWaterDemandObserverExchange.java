@@ -14,7 +14,7 @@ public class HotWaterDemandObserverExchange extends HALDeviceObserverExchange {
 
     public HotWaterDemandObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             int power) {
         super(deviceID, timestamp);
 

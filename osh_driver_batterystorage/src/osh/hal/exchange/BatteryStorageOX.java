@@ -42,7 +42,7 @@ public class BatteryStorageOX
      */
     public BatteryStorageOX(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
 
             int activePower,
             int reactivePower,

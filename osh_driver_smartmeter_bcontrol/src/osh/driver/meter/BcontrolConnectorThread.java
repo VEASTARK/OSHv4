@@ -2,7 +2,7 @@ package osh.driver.meter;
 
 import osh.core.logging.IGlobalLogger;
 import osh.driver.BcontrolSmartMeterDriver;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,7 +24,7 @@ public class BcontrolConnectorThread implements Runnable {
     private final String heaterPagePart2 = ".json?idtype=uuid";
 
     private final IGlobalLogger logger;
-    private final HALRealTimeDriver timer;
+    private final EALTimeDriver timer;
     private final BcontrolSmartMeterDriver meterDriver;
 
     private final String meterURL;
@@ -47,7 +47,7 @@ public class BcontrolConnectorThread implements Runnable {
      */
     public BcontrolConnectorThread(
             IGlobalLogger logger,
-            HALRealTimeDriver timer,
+            EALTimeDriver timer,
             BcontrolSmartMeterDriver meterDriver,
             String meterURL,
             int meterNumber,
@@ -169,10 +169,10 @@ public class BcontrolConnectorThread implements Runnable {
 
             }
 
-            long lastPull = this.timer.getUnixTime();
+            long lastPull = this.timer.getCurrentEpochSecond();
 
             try {
-                while (lastPull >= this.timer.getUnixTime()) {
+                while (lastPull >= this.timer.getCurrentEpochSecond()) {
                     Thread.sleep(10);
                 }
             } catch (InterruptedException e) {

@@ -6,6 +6,8 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.eal.hal.exchange.IHALExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.util.UUID;
 
@@ -45,17 +47,16 @@ public class KITLoggerBusDriver extends LoggerBusDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     /**
      * Pull-logging
      */
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
-
 
     private boolean isWagoMeter(UUID id) {
         return (id.getMostSignificantBits() >> 32) == 0x75086001 /* Wago Meter */;

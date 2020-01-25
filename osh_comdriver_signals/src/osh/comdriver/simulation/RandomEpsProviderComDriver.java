@@ -8,6 +8,8 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 
 import java.util.EnumMap;
@@ -82,7 +84,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
 
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
         this.generatePriceSignal(rand);
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         this.lastSignalSent = now;
 
         // EPS
@@ -93,13 +95,14 @@ public class RandomEpsProviderComDriver extends CALComDriver {
         this.notifyComManager(ex);
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
     }
 
     @Override
-    public void onNextTimePeriod() {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        long now = this.getTimer().getUnixTime();
+        long now = exchange.getEpochSecond();
         OSHRandomGenerator rand = new OSHRandomGenerator(
                 new Random(this.getOSH().getRandomGenerator().getNextLong()));
 
@@ -127,7 +130,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
 
     private void generatePriceSignal(OSHRandomGenerator randomGen) {
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         for (int i = 0; i < this.pricesToSet.length; i++) {
             AncillaryCommodity ac = this.pricesToSet[i];

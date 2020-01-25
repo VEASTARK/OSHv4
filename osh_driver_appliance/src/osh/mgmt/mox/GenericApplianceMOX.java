@@ -20,7 +20,7 @@ public class GenericApplianceMOX implements IModelOfObservationExchange {
 
     private ApplianceProgramConfigurationStatus acp;
     private final UUID acpID;
-    private final Long acpReferenceTime;
+    private final long acpReferenceTime;
 
     private Long dof;
 
@@ -36,7 +36,7 @@ public class GenericApplianceMOX implements IModelOfObservationExchange {
             EN50523DeviceState currentState,
             ApplianceProgramConfigurationStatus acp,
             UUID acpID,
-            Long acpReferenceTime,
+            long acpReferenceTime,
             Long dof,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -74,7 +74,7 @@ public class GenericApplianceMOX implements IModelOfObservationExchange {
         return this.acpID;
     }
 
-    public Long getAcpReferenceTime() {
+    public long getAcpReferenceTime() {
         return this.acpReferenceTime;
     }
 

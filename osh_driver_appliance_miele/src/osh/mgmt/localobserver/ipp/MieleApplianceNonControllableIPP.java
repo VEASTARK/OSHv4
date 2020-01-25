@@ -64,7 +64,8 @@ public class MieleApplianceNonControllableIPP extends NonControllableIPP<ISoluti
                 compressionType,
                 compressionValue);
 
-        this.profile = profile.cloneAfter(timestamp).getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
+        this.profile = profile.cloneAfter(timestamp).getCompressedProfile(this.compressionType,
+                this.compressionValue, this.compressionValue);
 
     }
 

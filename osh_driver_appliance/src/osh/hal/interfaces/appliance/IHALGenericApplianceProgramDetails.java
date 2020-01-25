@@ -12,5 +12,5 @@ public interface IHALGenericApplianceProgramDetails {
 
     UUID getAcpID();
 
-    Long getAcpReferenceTime();
+    long getAcpReferenceTime();
 }

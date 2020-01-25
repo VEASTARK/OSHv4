@@ -30,7 +30,7 @@ public class HALDeviceObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public HALDeviceObserverExchange(UUID deviceID, Long timestamp) {
+    public HALDeviceObserverExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

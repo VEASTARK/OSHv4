@@ -5,6 +5,8 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.PvCommandExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PvControllerExchange;
 import osh.registry.interfaces.IDataRegistryListener;
 
@@ -24,17 +26,16 @@ public class PvLocalController extends LocalController implements IDataRegistryL
         super(osh);
     }
 
-
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
 
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.HOUR);
 
         this.getOCRegistry().subscribe(PvCommandExchange.class, this.getUUID(), this);
     }
@@ -46,7 +47,7 @@ public class PvLocalController extends LocalController implements IDataRegistryL
 
         PvControllerExchange _cx = new PvControllerExchange(
                 this.getUUID(),
-                this.getTimer().getUnixTime(),
+                this.getTimeDriver().getCurrentEpochSecond(),
                 _cmd.getNewPvSwitchedOn(),
                 (int) Math.round(_cmd.getReactivePowerTargetValue()));
         this.updateOcDataSubscriber(_cx);

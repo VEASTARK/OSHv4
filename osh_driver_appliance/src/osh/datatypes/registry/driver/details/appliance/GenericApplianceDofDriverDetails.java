@@ -36,7 +36,7 @@ public class GenericApplianceDofDriverDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private GenericApplianceDofDriverDetails() {
-        this(null, 0);
+        this(null, -1L);
     }
 
 

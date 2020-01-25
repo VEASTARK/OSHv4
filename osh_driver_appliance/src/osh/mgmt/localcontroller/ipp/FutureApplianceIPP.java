@@ -137,19 +137,19 @@ public class FutureApplianceIPP
         for (SparseLoadProfile[] compressedDLProfile : this.compressedDLProfiles) {
             for (SparseLoadProfile sparseLoadProfile : compressedDLProfile) {
                 if (!tempUsedComm.contains(Commodity.ACTIVEPOWER) &&
-                        sparseLoadProfile.getFloorEntry(Commodity.ACTIVEPOWER, referenceTime) != null) {
+                        sparseLoadProfile.getFloorEntry(Commodity.ACTIVEPOWER, this.getReferenceTime()) != null) {
                     tempUsedComm.add(Commodity.ACTIVEPOWER);
                 }
                 if (!tempUsedComm.contains(Commodity.REACTIVEPOWER) &&
-                        sparseLoadProfile.getFloorEntry(Commodity.REACTIVEPOWER, referenceTime) != null) {
+                        sparseLoadProfile.getFloorEntry(Commodity.REACTIVEPOWER, this.getReferenceTime()) != null) {
                     tempUsedComm.add(Commodity.REACTIVEPOWER);
                 }
                 if (!tempUsedComm.contains(Commodity.HEATINGHOTWATERPOWER) &&
-                        sparseLoadProfile.getFloorEntry(Commodity.HEATINGHOTWATERPOWER, referenceTime) != null) {
+                        sparseLoadProfile.getFloorEntry(Commodity.HEATINGHOTWATERPOWER, this.getReferenceTime()) != null) {
                     tempUsedComm.add(Commodity.HEATINGHOTWATERPOWER);
                 }
                 if (!tempUsedComm.contains(Commodity.NATURALGASPOWER) &&
-                        sparseLoadProfile.getFloorEntry(Commodity.NATURALGASPOWER, referenceTime) != null) {
+                        sparseLoadProfile.getFloorEntry(Commodity.NATURALGASPOWER, this.getReferenceTime()) != null) {
                     tempUsedComm.add(Commodity.NATURALGASPOWER);
                 }
             }
@@ -160,8 +160,8 @@ public class FutureApplianceIPP
 
         // recalculate partition of solution ("header")
         this.header = calculateHeader(
-                earliestStartingTime,
-                latestStartingTime,
+                this.earliestStartingTime,
+                this.latestStartingTime,
                 acp);
 
         int[][][] minMaxTimes = acp.getMinMaxDurations();
@@ -171,8 +171,8 @@ public class FutureApplianceIPP
 
         // recalculate max values (max lengths of phases)
         this.maxValues = calculateMaxValuesArray(
-                earliestStartingTime,
-                latestStartingTime,
+                this.earliestStartingTime,
+                this.latestStartingTime,
                 minMaxTimes);
 
         // calculate sum of all max values (for determination of how to distribute tdof)

@@ -60,7 +60,7 @@ public class SpaceHeatingLocalObserver
             HotWaterDemandObserverExchange ox = (HotWaterDemandObserverExchange) hx;
             this.hotWaterPower = ox.getHotWaterPower();
 
-            long now = this.getTimer().getUnixTime();
+            long now = this.getTimeDriver().getCurrentEpochSecond();
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -79,7 +79,8 @@ public class SpaceHeatingLocalObserver
 
             this.monitorLoad();
 
-            boolean firstDay = this.getTimer().getUnixTime() - this.getTimer().getUnixTimeAtStart() < 86400;
+            boolean firstDay =
+                    this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond() < 86400;
 
             if (firstDay || lastTimeFromMidnight > this.timeFromMidnight) {
                 //a new day has begun...
@@ -178,7 +179,7 @@ public class SpaceHeatingLocalObserver
 
 
     private void sendIPP() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
         long secondsSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
         long startOfDay = now - secondsSinceMidnight;
 

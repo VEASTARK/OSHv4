@@ -21,7 +21,7 @@ public class GenericApplianceStartTimesControllerExchange extends HALControllerE
      */
     public GenericApplianceStartTimesControllerExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             long startTime) {
         super(deviceID, timestamp);
 

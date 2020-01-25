@@ -3,6 +3,8 @@ package osh.mgmt.busmanager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.registry.AbstractExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.util.UUID;
 
@@ -27,7 +29,7 @@ public class KITLoggerBusManager extends LoggerBusManager {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
 //		this.ocRegistry.registerStateChangeListener(LoggerScheduleStateExchange.class, this);
 //		this.ocRegistry.registerStateChangeListener(LoggerPriceAndLimitStateExchange.class, this);
@@ -67,22 +69,7 @@ public class KITLoggerBusManager extends LoggerBusManager {
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-//		double posSum = 0.0, negSum = 0.0, sum = 0.0;
-//		
-//		for (StateExchange se : this.ocRegistry.getStates(CommodityPowerStateExchange.class).values()) {
-//			CommodityPowerStateExchange pd = (CommodityPowerStateExchange) se;
-//			
-//			Double tmp = pd.getPowerState(Commodity.ACTIVEPOWER);
-//			double power = (tmp != null ? tmp : 0.0);
-//			
-//			if (power < 0) negSum += power; else posSum += power;
-//			sum += power;
-//		}
-//		
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
     }
-
-
 }

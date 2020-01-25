@@ -21,7 +21,7 @@ public class LoggerDevicesPowerHALExchange extends HALExchange {
      */
     public LoggerDevicesPowerHALExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             HashMap<UUID, EnumMap<Commodity, Double>> powerStates) {
         super(deviceID, timestamp);
 

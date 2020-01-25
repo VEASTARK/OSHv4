@@ -34,7 +34,7 @@ public class ElectricPowerDriverDetails extends StateExchange {
 
     static public ElectricPowerDriverDetails aggregatePowerDetails(UUID sender, Collection<ElectricPowerDriverDetails> details) {
         int _pdCount = 0;
-        long timestamp = 0;
+        long timestamp = -1L;
         double activeSum = 0, reactiveSum = 0;
 
         for (ElectricPowerDriverDetails p : details) {

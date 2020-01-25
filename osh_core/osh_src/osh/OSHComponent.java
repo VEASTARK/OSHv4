@@ -3,7 +3,7 @@ package osh;
 import osh.core.OSHRandomGenerator;
 import osh.core.interfaces.IOSH;
 import osh.core.logging.IGlobalLogger;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 
 /**
  * Super class for all components managed by the OCManager or HALManager
@@ -38,8 +38,8 @@ public abstract class OSHComponent {
         return this.theOrganicSmartHome;
     }
 
-    public HALRealTimeDriver getTimer() {
-        return this.theOrganicSmartHome.getTimer();
+    public EALTimeDriver getTimeDriver() {
+        return this.theOrganicSmartHome.getTimeDriver();
     }
 
 }

@@ -11,7 +11,7 @@ public abstract class HALExchange
         implements IHALExchange {
 
     private UUID deviceID;
-    private Long timestamp;
+    private long timestamp;
 
 
     /**
@@ -20,7 +20,7 @@ public abstract class HALExchange
      * @param deviceID
      * @param timestamp
      */
-    public HALExchange(UUID deviceID, Long timestamp) {
+    public HALExchange(UUID deviceID, long timestamp) {
         super();
 
         this.deviceID = deviceID;
@@ -37,11 +37,11 @@ public abstract class HALExchange
     }
 
     @Override
-    public Long getTimestamp() {
+    public long getTimestamp() {
         return this.timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 }

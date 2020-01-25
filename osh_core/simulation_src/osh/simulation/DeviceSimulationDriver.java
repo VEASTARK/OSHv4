@@ -116,7 +116,7 @@ public abstract class DeviceSimulationDriver
 
     @Override
     public void onSystemIsUp() {
-        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimer().getUnixTime(),
+        StaticCompressionExchange _stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(),
                 this.compressionType, this.compressionValue);
 
         this.notifyObserver(_stat);
@@ -225,7 +225,7 @@ public abstract class DeviceSimulationDriver
         //invoke for announcement...
         this.onNextTimeTick();
 
-        long currentTimeTick = this.getOSH().getTimer().getUnixTime();
+        long currentTimeTick = this.getOSH().getTimeDriver().getCurrentEpochSecond();
 
         while (!this.actions.isEmpty() && this.actions.first().getTick() <= currentTimeTick) {
             // delete earlier entries (tbd)

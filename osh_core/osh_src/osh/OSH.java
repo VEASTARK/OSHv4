@@ -11,10 +11,11 @@ import osh.core.interfaces.IOSHStatus;
 import osh.core.logging.IGlobalLogger;
 import osh.core.oc.GlobalController;
 import osh.core.oc.GlobalObserver;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.Registry.OCRegistry;
+import osh.registry.TimeRegistry;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
@@ -23,7 +24,7 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
 
     /* default */ IGlobalLogger logger;
     /* default */ OSHStatus oshstatus;
-    /* default */ HALRealTimeDriver timer;
+    /* default */ EALTimeDriver timeDriver;
     /* default */ OSHRandomGenerator randomGenerator;
     /* default */ GlobalController globalcontroller;
     /* default */ GlobalObserver globalobserver;
@@ -40,6 +41,10 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
      * DriverRegistry (HALDriver and BusDriver communication below HAL)
      */
     private DriverRegistry driverRegistry;
+    /**
+     * TimeRegistry (communication about current time state)
+     */
+    private TimeRegistry timeRegistry;
     private DataBroker dataBroker;
 
 
@@ -80,6 +85,14 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
         this.driverRegistry = driverRegistry;
     }
 
+    @Override
+    public TimeRegistry getTimeRegistry() {
+        return this.timeRegistry;
+    }
+
+    public void setTimeRegistry(TimeRegistry timeRegistry) {
+        this.timeRegistry = timeRegistry;
+    }
 
     @Override
     public IGlobalLogger getLogger() {
@@ -100,12 +113,12 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
     }
 
     @Override
-    public HALRealTimeDriver getTimer() {
-        return this.timer;
+    public EALTimeDriver getTimeDriver() {
+        return this.timeDriver;
     }
 
-    public void setTimer(HALRealTimeDriver timer) {
-        this.timer = timer;
+    public void setTimeDriver(EALTimeDriver timeDriver) {
+        this.timeDriver = timeDriver;
     }
 
     @Override

@@ -41,7 +41,7 @@ public class GenericMieleApplianceObserverExchange
      */
     public GenericMieleApplianceObserverExchange(
             UUID deviceID,
-            Long timestamp) {
+            long timestamp) {
         super(deviceID, timestamp);
     }
 

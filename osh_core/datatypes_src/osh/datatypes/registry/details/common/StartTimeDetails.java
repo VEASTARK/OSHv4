@@ -28,7 +28,7 @@ public class StartTimeDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     protected StartTimeDetails() {
-        super(null, 0);
+        super(null, -1L);
     }
 
     /**

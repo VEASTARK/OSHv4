@@ -15,11 +15,11 @@ public class StaticCompressionExchange
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
 
-    public StaticCompressionExchange(UUID deviceID, Long timestamp) {
+    public StaticCompressionExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 
-    public StaticCompressionExchange(UUID deviceID, Long timestamp, LoadProfileCompressionTypes compressionType,
+    public StaticCompressionExchange(UUID deviceID, long timestamp, LoadProfileCompressionTypes compressionType,
                                      int compressionValue) {
         super(deviceID, timestamp);
         this.compressionType = compressionType;

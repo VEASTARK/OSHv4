@@ -32,7 +32,7 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
     private int forcedOffAdditionalCost;
     private double chpOnCervisiaStepSizeMultiplier;
 
-    public ChpStaticDetailsObserverExchange(UUID deviceID, Long timestamp) {
+    public ChpStaticDetailsObserverExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

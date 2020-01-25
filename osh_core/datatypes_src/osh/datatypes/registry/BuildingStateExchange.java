@@ -1,5 +1,6 @@
 package osh.datatypes.registry;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -10,7 +11,7 @@ public class BuildingStateExchange extends StateExchange {
 
     private static final long serialVersionUID = -6624430081473462447L;
 
-    private long currentTick;
+    private ZonedDateTime currentTime;
     private double currentActivePower;
     private double currentActivePowerConsumption;
     private double currentActivePowerChp;
@@ -36,7 +37,7 @@ public class BuildingStateExchange extends StateExchange {
         super(other.getSender(), other.getTimestamp());
 
 
-        this.currentTick = other.currentTick;
+        this.currentTime = other.currentTime;
         this.currentActivePower = other.currentActivePower;
         this.currentActivePowerConsumption = other.currentActivePowerConsumption;
         this.currentActivePowerChp = other.currentActivePowerChp;
@@ -54,7 +55,7 @@ public class BuildingStateExchange extends StateExchange {
         this.currentGasPowerExternal = other.currentGasPowerExternal;
     }
 
-    public BuildingStateExchange(UUID sender, long currentTick, long timestamp, double currentActivePower,
+    public BuildingStateExchange(UUID sender, ZonedDateTime currentTime, long timestamp, double currentActivePower,
                                  double currentActivePowerConsumption, double currentActivePowerChp, double currentActivePowerChpFeedIn,
                                  double currentActivePowerChpAutoConsumption, double currentActivePowerPv, double currentActivePowerPvFeedIn,
                                  double currentActivePowerPvAutoConsumption, double currentActivePowerBatteryCharging, double currentActivePowerBatteryDischarging,
@@ -63,7 +64,7 @@ public class BuildingStateExchange extends StateExchange {
 
         super(sender, timestamp);
 
-        this.currentTick = currentTick;
+        this.currentTime = currentTime;
         this.currentActivePower = currentActivePower;
         this.currentActivePowerConsumption = currentActivePowerConsumption;
         this.currentActivePowerChp = currentActivePowerChp;
@@ -110,12 +111,12 @@ public class BuildingStateExchange extends StateExchange {
         this.currentActivePowerPvAutoConsumption = currentActivePowerPvAutoConsumption;
     }
 
-    public long getCurrentTick() {
-        return this.currentTick;
+    public ZonedDateTime getCurrentTime() {
+        return this.currentTime;
     }
 
-    public void setCurrentTick(long currentTick) {
-        this.currentTick = currentTick;
+    public void setCurrentTime(ZonedDateTime currentTime) {
+        this.currentTime = currentTime;
     }
 
     public double getCurrentActivePower() {

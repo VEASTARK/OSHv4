@@ -51,7 +51,7 @@ public class ChpObserverExchange
      */
     public ChpObserverExchange(
             UUID deviceID,
-            Long timestamp) {
+            long timestamp) {
         super(deviceID, timestamp);
     }
 

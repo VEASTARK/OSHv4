@@ -22,7 +22,7 @@ public class DofSetCommandExchange extends CommandExchange implements IPromiseTo
     public DofSetCommandExchange(
             UUID sender,
             UUID receiver,
-            Long timestamp,
+            long timestamp,
             Integer firstDof,
             Integer secondDoF) {
         super(sender, receiver, timestamp);

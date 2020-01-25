@@ -53,7 +53,7 @@ public class SpaceCoolingLocalObserver
                     new ChilledWaterDemandNonControllableIPP(
                             this.getUUID(),
                             this.getGlobalLogger(),
-                            this.getTimer().getUnixTime(),
+                            this.getTimeDriver().getCurrentEpochSecond(),
                             false,
                             this.dates,
                             this.temperaturePrediction,
@@ -65,7 +65,7 @@ public class SpaceCoolingLocalObserver
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     DeviceTypes.SPACECOOLING);
             cpse.addPowerState(Commodity.COLDWATERPOWER, this.coldWaterPower);
             this.getOCRegistry().publish(

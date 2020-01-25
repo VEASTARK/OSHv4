@@ -10,6 +10,8 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.eal.hal.exceptions.HALException;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 
 import java.util.UUID;
 
@@ -61,7 +63,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 3600);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.HOUR);
 
         // init weather prediction request thread
         this.reqPredictionRunnable = new WeatherPredictionRequestThread(this.getGlobalLogger(), this, this.urlToWeatherPrediction,
@@ -78,12 +80,11 @@ public class WeatherPredictionProviderComDriver extends CALComDriver {
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
         // still alive message
-        if (this.getTimer().getUnixTime() % 60 == 0) {
-            this.getGlobalLogger().logDebug("onNextTimePeriod() (getTimer().getUnixTime() % 60 == 0) - I'm still alive");
+        if (exchange.getTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+            this.getGlobalLogger().logDebug("hour gone - I'm still alive");
         }
 
         // re-init request thread if dead

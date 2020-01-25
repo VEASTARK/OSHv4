@@ -31,7 +31,7 @@ public class SmartPlugObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public SmartPlugObserverExchange(UUID deviceID, Long timestamp) {
+    public SmartPlugObserverExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

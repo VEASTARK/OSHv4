@@ -82,7 +82,7 @@ public class VDI6002DomesticHotWaterLocalObserver
         if (hx instanceof HotWaterDemandObserverExchange) {
             HotWaterDemandObserverExchange ox = (HotWaterDemandObserverExchange) hx;
             this.hotWaterPower = ox.getHotWaterPower();
-            long now = this.getTimer().getUnixTime();
+            long now = this.getTimeDriver().getCurrentEpochSecond();
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -123,7 +123,7 @@ public class VDI6002DomesticHotWaterLocalObserver
     }
 
     private void sendIPP() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         DomesticHotWaterNonControllableIPP ipp =
                 new DomesticHotWaterNonControllableIPP(

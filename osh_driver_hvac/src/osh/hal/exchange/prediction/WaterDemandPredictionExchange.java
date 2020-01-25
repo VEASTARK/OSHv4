@@ -25,7 +25,7 @@ public class WaterDemandPredictionExchange
      * @param deviceID
      * @param timestamp
      */
-    public WaterDemandPredictionExchange(UUID deviceID, Long timestamp, List<SparseLoadProfile> powerPredictions,
+    public WaterDemandPredictionExchange(UUID deviceID, long timestamp, List<SparseLoadProfile> powerPredictions,
                                          int pastDaysPrediction,
                                          float weightForOtherWeekday,
                                          float weightForSameWeekday) {

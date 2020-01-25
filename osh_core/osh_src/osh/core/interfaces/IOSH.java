@@ -4,7 +4,8 @@ import osh.core.DataBroker;
 import osh.core.LifeCycleStates;
 import osh.core.OSHRandomGenerator;
 import osh.core.logging.IGlobalLogger;
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
+import osh.registry.TimeRegistry;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth
@@ -17,7 +18,9 @@ public interface IOSH {
 
     IOSHStatus getOSHStatus();
 
-    HALRealTimeDriver getTimer();
+    EALTimeDriver getTimeDriver();
+
+    TimeRegistry getTimeRegistry();
 
     OSHRandomGenerator getRandomGenerator();
 

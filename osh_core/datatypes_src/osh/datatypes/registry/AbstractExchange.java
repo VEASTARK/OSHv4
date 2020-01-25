@@ -23,7 +23,7 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
      */
     @Deprecated
     public AbstractExchange() {
-        this.timestamp = 0L;
+        this.timestamp = -1L;
     }
 
     /**
@@ -33,6 +33,7 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
      * @param timestamp timestamp at which this exchange object was created
      */
     public AbstractExchange(UUID sender, long timestamp) {
+        Objects.requireNonNull(sender);
         this.sender = sender;
         this.timestamp = timestamp;
     }

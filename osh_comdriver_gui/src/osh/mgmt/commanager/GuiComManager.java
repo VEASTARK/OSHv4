@@ -11,6 +11,8 @@ import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.localobserver.BatteryStorageOCSX;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 import osh.datatypes.registry.oc.state.globalobserver.*;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.*;
 import osh.registry.interfaces.IDataRegistryListener;
 
@@ -56,7 +58,7 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
         this.getOCRegistry().subscribe(BatteryStorageOCSX.class, this);
         this.getOCRegistry().subscribe(DevicesPowerStateExchange.class, this);
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     @Override
@@ -147,9 +149,8 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
         // TODO build clean sum object (NOT WaterStorageSumDetails...)...maybe somewhere else
         // Best place would be GlobalObserver!
 
@@ -164,14 +165,14 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
                 this.updateOcDataSubscriber(
                         new GUIStatesComExchange(
                                 this.getUUID(),
-                                this.getTimer().getUnixTime(),
+                                exchange.getEpochSecond(),
                                 this.getOCRegistry().getDataTypes(),
                                 states));
             } else if (this.stateViewerRegistry == StateViewerRegistryEnum.DRIVER) {
                 this.updateOcDataSubscriber(
                         new GUIStatesComExchange(
                                 this.getUUID(),
-                                this.getTimer().getUnixTime(),
+                                exchange.getEpochSecond(),
                                 this.stateViewerType));
             }
         } finally {

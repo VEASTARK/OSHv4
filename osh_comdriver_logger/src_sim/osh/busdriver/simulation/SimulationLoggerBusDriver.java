@@ -15,6 +15,7 @@ import osh.datatypes.logger.LoggerEpsPlsHALExchange;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.DevicesPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.LoggerCommodityPowerHALExchange;
 import osh.hal.exchange.LoggerDevicesPowerHALExchange;
 
@@ -56,7 +57,7 @@ public class SimulationLoggerBusDriver extends LoggerBusDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
 
     /**
@@ -67,7 +68,7 @@ public class SimulationLoggerBusDriver extends LoggerBusDriver {
     @SuppressWarnings("unused")
     @Override
     public void updateDataFromBusManager(IHALExchange exchangeObject) {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         if (this.valueLoggerConfiguration != null && this.valueLoggerConfiguration.getIsValueLoggingToFileActive()) {
             if (exchangeObject instanceof LoggerCommodityPowerHALExchange) {

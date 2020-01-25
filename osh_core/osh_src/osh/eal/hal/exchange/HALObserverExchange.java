@@ -15,7 +15,7 @@ public abstract class HALObserverExchange extends HALExchange {
      * @param deviceID
      * @param timestamp
      */
-    public HALObserverExchange(UUID deviceID, Long timestamp) {
+    public HALObserverExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

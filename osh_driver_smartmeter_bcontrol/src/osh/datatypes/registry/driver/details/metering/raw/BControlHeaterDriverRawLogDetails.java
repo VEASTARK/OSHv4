@@ -252,7 +252,7 @@ public class BControlHeaterDriverRawLogDetails extends StateExchange {
      */
     @Deprecated
     public BControlHeaterDriverRawLogDetails() {
-        super(null, 0L);
+        super(null, -1L);
     }
 
     /**

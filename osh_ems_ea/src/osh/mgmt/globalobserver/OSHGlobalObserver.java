@@ -20,6 +20,8 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.*;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.uuid.UUIDLists;
@@ -69,7 +71,7 @@ public class OSHGlobalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
         this.getOCRegistry().subscribe(InterdependentProblemPart.class, this);
 
@@ -104,7 +106,7 @@ public class OSHGlobalObserver
                     GUIDeviceListStateExchange.class, this,
                     new GUIDeviceListStateExchange(
                             this.getUUID(),
-                            this.getTimer().getUnixTime(),
+                            this.getTimeDriver().getCurrentEpochSecond(),
                             this.getDeviceList(this.getProblemParts())
                     )
             );
@@ -182,7 +184,7 @@ public class OSHGlobalObserver
             }
         }
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         // Export Commodity powerStates
         CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -430,8 +432,8 @@ public class OSHGlobalObserver
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
         // get current power states
         //  and also send them to logger

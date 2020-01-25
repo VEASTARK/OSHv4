@@ -18,7 +18,7 @@ public class PvControllerExchange extends HALControllerExchange {
      */
     public PvControllerExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             Boolean newPvSwitchedOn,
             Integer reactivePowerTargetValue) {
         super(deviceID, timestamp);

@@ -12,6 +12,8 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.GasBoilerObserverExchange;
 import osh.mgmt.ipp.GasBoilerNonControllableIPP;
 
@@ -56,14 +58,18 @@ public class NonControllableGasBoilerLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.getTimer().registerComponent(this, 1);
+        if (this.NEW_IPP_AFTER % 60 == 0) {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
+        } else {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        }
     }
 
     @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        long now = this.getTimer().getUnixTime();
+        long now = exchange.getEpochSecond();
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
             GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
@@ -93,7 +99,7 @@ public class NonControllableGasBoilerLocalObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         IHALExchange _ihal = this.getObserverDataObject();
 
@@ -138,7 +144,7 @@ public class NonControllableGasBoilerLocalObserver
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());

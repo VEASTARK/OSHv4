@@ -16,8 +16,8 @@ import osh.core.interfaces.IOSH;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
 import osh.core.oc.LocalObserver;
-import osh.core.threads.InvokerThreadRegistry;
 import osh.eal.EALManager;
+import osh.eal.EALTimeDriver;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.simulation.*;
 import osh.simulation.energy.SimEnergySimulationCore;
@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -58,8 +58,8 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     }
 
 
-    public HALRealTimeDriver getRealTimeDriver() {
-        return this.getOSH().getTimer();
+    public EALTimeDriver getTimeDriver() {
+        return this.getOSH().getTimeDriver();
     }
 
     public ArrayList<HALDeviceDriver> getConnectedDevices() {
@@ -69,11 +69,10 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     // if you want to do 'real' things ;-), no SimEngine
     public void loadConfiguration(
             EALConfiguration ealConfig,
-            ZoneId hostTimeZone,
-            long forcedStartTime) throws HALManagerException {
+            ZonedDateTime forcedStartTime) throws HALManagerException {
 
         this.simEngine = null;
-        this.loadFromConfiguration(ealConfig, hostTimeZone, forcedStartTime);
+        this.loadFromConfiguration(ealConfig, forcedStartTime);
 
         this.getGlobalLogger().logInfo("...EAL-layer is up!");
     }
@@ -81,12 +80,11 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     //loading with external SimulationEngine
     public void loadConfiguration(
             EALConfiguration ealConfig,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             SimulationEngine simEngine) throws HALManagerException {
 
         this.simEngine = simEngine;
-        this.loadFromConfiguration(ealConfig, hostTimeZone, forcedStartTime);
+        this.loadFromConfiguration(ealConfig, forcedStartTime);
         this.initSimulationEngine();
 
         this.getGlobalLogger().logInfo("...EAL-layer is up!");
@@ -95,15 +93,14 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     //building the SimulationEngine in this class
     public void loadConfiguration(
             EALConfiguration ealConfig,
-            ZoneId hostTimeZone,
-            long forcedStartTime,
+            ZonedDateTime forcedStartTime,
             Long randomSeed,
             List<ConfigurationParameter> engineParameters,
             ScreenplayType currentScreenplayType,
             List<GridConfig> gridConfigurations,
             String meterUUID) throws HALManagerException {
 
-        this.loadFromConfiguration(ealConfig, hostTimeZone, forcedStartTime);
+        this.loadFromConfiguration(ealConfig, forcedStartTime);
         this.buildSimulationEngine(
                 this.getOSH().getOSHStatus().getRunID(),
                 this.getOSH().getOSHStatus().getConfigurationID(),
@@ -121,26 +118,21 @@ public class HALManager extends EALManager implements ILifeCycleListener {
 
     private void loadFromConfiguration(
             EALConfiguration ealConfig,
-            ZoneId hostTimeZone,
-            long forcedStartTime) throws HALManagerException {
+            ZonedDateTime forcedStartTime) throws HALManagerException {
 
         boolean isSimulation = this.getOSH().getOSHStatus().isSimulation();
-        boolean runningVirtual = this.getOSH().getOSHStatus().isRunningVirtual();
 
         this.getGlobalLogger().logInfo("...loading EAL configuration");
         this.ealConfig = ealConfig;
         if (ealConfig == null) throw new NullPointerException("ealConfig is null");
 
         // init real time driver and set the mode
-        HALRealTimeDriver realTimeDriver = new HALRealTimeDriver(
-                this.getGlobalLogger(),
-                hostTimeZone,
+        EALTimeDriver timeDriver = new EALTimeDriver(
+                forcedStartTime,
                 isSimulation,
-                runningVirtual,
-                1,
-                forcedStartTime);
-        ((OSH) this.getOSH()).setTimer(realTimeDriver);
-        realTimeDriver.setThreadRegistry(new InvokerThreadRegistry(this.getOSH()));
+                this.getGlobalLogger(),
+                this.getOSH().getTimeRegistry());
+        ((OSH) this.getOSH()).setTimeDriver(timeDriver);
 
         this.getGlobalLogger().logInfo("...creating EAL-BUS-devices...");
         this.processBusDeviceConfiguration();
@@ -230,7 +222,7 @@ public class HALManager extends EALManager implements ILifeCycleListener {
         }
 
         //assign time base
-        this.simEngine.assignTimerDriver(this.getRealTimeDriver());
+        this.simEngine.assignTimerDriver(this.getTimeDriver());
 
         this.getGlobalLogger().logInfo("...creating EAL-SimulationEngine... [DONE]");
     }

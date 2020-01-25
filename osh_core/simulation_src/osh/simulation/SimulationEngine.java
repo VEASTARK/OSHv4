@@ -1,6 +1,6 @@
 package osh.simulation;
 
-import osh.eal.hal.HALRealTimeDriver;
+import osh.eal.EALTimeDriver;
 import osh.registry.Registry;
 import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
@@ -19,7 +19,7 @@ public abstract class SimulationEngine {
     protected SimulationResults oshSimulationResults;
 
     //TIMER
-    protected HALRealTimeDriver timerDriver;
+    protected EALTimeDriver timeDriver;
 
     //COMMUNICATION
     protected ComRegistry comRegistry;
@@ -35,8 +35,8 @@ public abstract class SimulationEngine {
     // ## IMPORTANT GETTERS AND SETTERS ##
 
     // # TIMER DRIVER #
-    public void assignTimerDriver(HALRealTimeDriver timerDriver) {
-        this.timerDriver = timerDriver;
+    public void assignTimerDriver(EALTimeDriver timeDriver) {
+        this.timeDriver = timeDriver;
     }
 
     // # REGISTRIES #
@@ -98,7 +98,7 @@ public abstract class SimulationEngine {
     private void internalSimulateNextTimeTick(long currentTick, boolean doSimulation) throws SimulationEngineException {
         //update realtimeDriver
         //doNextSimulationTickTimer:
-        if (this.timerDriver != null) this.timerDriver.updateTimer(currentTick);
+        if (this.timeDriver != null) this.timeDriver.updateTimer(currentTick);
 
         //do the simulation in subengines
         if (doSimulation) {

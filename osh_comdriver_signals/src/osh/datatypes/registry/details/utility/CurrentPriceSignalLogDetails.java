@@ -41,7 +41,7 @@ public class CurrentPriceSignalLogDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     public CurrentPriceSignalLogDetails() {
-        this(null, 0);
+        this(null, -1L);
     }
 
     public CurrentPriceSignalLogDetails(UUID sender, long timestamp) {

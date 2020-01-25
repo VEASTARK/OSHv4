@@ -24,7 +24,7 @@ public class ColdWaterTankObserverExchange
      */
     public ColdWaterTankObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            long timestamp,
             double topTemperature,
             double tankCapacity,
             double hotWaterDemand,

@@ -8,6 +8,8 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
+import osh.eal.time.TimeExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.time.TimeConversion;
 
@@ -168,7 +170,7 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
             PriceSignal newSignal = this.generateWeekDayBasedPriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrices);
@@ -209,13 +211,18 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
         this.lastSignalSent = now;
 
         // register
-        this.getTimer().registerComponent(this, 1);
+        if (this.newSignalAfterThisPeriod % 60 == 0) {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
+        } else {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        }
     }
 
     @Override
-    public void onNextTimePeriod() {
+    public <T extends TimeExchange> void onTimeExchange(T exchange) {
+        super.onTimeExchange(exchange);
 
-        long now = this.getTimer().getUnixTime();
+        long now = exchange.getEpochSecond();
 
         if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
@@ -270,8 +277,8 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
         PriceSignal priceSignal;
 
 
-        long now = this.getTimer().getUnixTime();
-        if (now == this.getTimer().getUnixTimeAtStart()) {
+        long now = this.getTimeDriver().getCurrentEpochSecond();
+        if (now == this.getTimeDriver().getTimeAtStart().toEpochSecond()) {
             // initial price signal
             long timeSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
             long timeTillEndOfDay = 86400 - timeSinceMidnight;
@@ -300,9 +307,9 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
 
     private PriceSignal generateWeekDayBasedPriceSignal(AncillaryCommodity commodity, Double[] prices) {
         PriceSignal priceSignal;
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
-        if (now == this.getTimer().getUnixTimeAtStart()) {
+        if (now == this.getTimeDriver().getTimeAtStart().toEpochSecond()) {
             // initial price signal
 
             long timeSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);

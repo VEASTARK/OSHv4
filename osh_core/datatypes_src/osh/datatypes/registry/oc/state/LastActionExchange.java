@@ -28,7 +28,7 @@ public class LastActionExchange extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     protected LastActionExchange() {
-        super(null, 0);
+        super(null, -1L);
     }
 
     public LastActionExchange(UUID sender, long timestamp, IAction lastAction) {

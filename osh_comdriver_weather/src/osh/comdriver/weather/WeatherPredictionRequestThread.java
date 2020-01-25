@@ -51,18 +51,18 @@ public class WeatherPredictionRequestThread implements Runnable {
     public void run() {
         while (!this.shutdown) {
 
-            if (this.comDriver.getTimer().getUnixTime() - this.lastLog >= this.logEverySeconds) {
+            if (this.comDriver.getTimeDriver().getCurrentEpochSecond() - this.lastLog >= this.logEverySeconds) {
                 try {
                     // get WeatherPredictionn
                     WeatherPredictionDetails weatherDetails = new WeatherPredictionDetails(
                             this.comDriver.getUUID(),
-                            this.comDriver.getTimer().getUnixTime(),
+                            this.comDriver.getTimeDriver().getCurrentEpochSecond(),
                             this.getWeatherPrediction(this.urlWeatherPrediction, this.apiKey));
 
                     // send WeatherPrediction to ComDriver
                     this.comDriver.receivePredictionDetails(weatherDetails);
 
-                    this.lastLog = this.comDriver.getTimer().getUnixTime();
+                    this.lastLog = this.comDriver.getTimeDriver().getCurrentEpochSecond();
                 } catch (Exception e) {
                     this.globalLogger.logError("Reading weather prediction info failed", e);
 

@@ -35,7 +35,7 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
      */
     @SuppressWarnings("unused")
     private GenericApplianceProgramDriverDetails() {
-        this(null, 0);
+        this(null, -1L);
     }
 
     /**

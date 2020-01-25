@@ -15,7 +15,7 @@ public class IPPSchedulingExchange
     private long rescheduleAfter;
     private double triggerIfDeltaX;
 
-    public IPPSchedulingExchange(UUID deviceID, Long timestamp) {
+    public IPPSchedulingExchange(UUID deviceID, long timestamp) {
         super(deviceID, timestamp);
     }
 

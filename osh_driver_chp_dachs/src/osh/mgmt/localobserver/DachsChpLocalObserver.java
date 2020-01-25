@@ -76,21 +76,7 @@ public class DachsChpLocalObserver
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-
-        this.getTimer().registerComponent(this, 1);
     }
-
-
-    @Override
-    public void onNextTimePeriod() throws OSHException {
-        super.onNextTimePeriod();
-
-        WaterStorageOCSX sx = (WaterStorageOCSX) this.getOCRegistry().getData(
-                WaterStorageOCSX.class,
-                this.hotWaterTankUuid);
-        this.waterTemperature = sx.getCurrentTemp();
-    }
-
 
     @Override
     public void onDeviceStateUpdate() {
@@ -111,7 +97,7 @@ public class DachsChpLocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimer().getUnixTime(),
+                    this.getTimeDriver().getCurrentEpochSecond(),
                     DeviceTypes.CHPPLANT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, this.activePower);
@@ -157,6 +143,12 @@ public class DachsChpLocalObserver
 
     @Override
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
+
+        WaterStorageOCSX sx = (WaterStorageOCSX) this.getOCRegistry().getData(
+                WaterStorageOCSX.class,
+                this.hotWaterTankUuid);
+        this.waterTemperature = sx.getCurrentTemp();
+
         return new DachsChpMOX(
                 this.waterTemperature,
                 this.running,

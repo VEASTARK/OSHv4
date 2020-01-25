@@ -142,7 +142,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
-        long startTime = this.getTimer().getUnixTimeAtStart();
+        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
 
         this.log = DatabaseLoggerThread.isLogHotWater();
 
@@ -161,7 +161,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
             }
         }
 
-        VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(this.getUUID(), this.getTimer().getUnixTime(),
+        VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(),
                 VDI6002DomesticHotWaterStatistics.monthlyCorrection,
                 VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection, this.weekDayHourProbabilities, this.avgYearlyDemand);
         this.notifyObserver(_pred);
@@ -173,7 +173,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         long initialNumber = this.getRandomGenerator().getNextLong();
         OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
 
-        long now = this.getTimer().getUnixTime();
+        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         if (this.dayProfile == null || now % 86400 == 0) {
             if (this.dayProfile == null)
@@ -256,7 +256,8 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
         SparseLoadProfile[] newDayProfiles = new SparseLoadProfile[runsToday];
 
-        boolean lastDay = (this.getTimer().getUnixTime() - this.getTimer().getUnixTimeAtStart()) / 86400
+        boolean lastDay =
+                (this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond()) / 86400
                 == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1);
 
         for (int i = 0; i < runsToday; i++) {

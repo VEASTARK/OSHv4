@@ -31,7 +31,7 @@ public class TemperatureDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     private TemperatureDetails() {
-        super(null, 0);
+        super(null, -1L);
     }
 
     public TemperatureDetails(UUID deviceId, long timestamp) {
