@@ -34,7 +34,6 @@ public abstract class AbstractExchange implements Serializable, Cloneable {
      */
     public AbstractExchange(UUID sender, long timestamp) {
         Objects.requireNonNull(sender);
-        Objects.requireNonNull(timestamp);
         this.sender = sender;
         this.timestamp = timestamp;
     }

@@ -13,8 +13,6 @@ import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchang
 import osh.driver.chp.ChpOperationMode;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
-import osh.eal.time.TimeExchange;
-import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
 import osh.mgmt.mox.DachsChpMOX;
@@ -78,20 +76,7 @@ public class DachsChpLocalObserver
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
-
-        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
     }
-
-    @Override
-    public <T extends TimeExchange> void onTimeExchange(T exchange) {
-        super.onTimeExchange(exchange);
-
-        WaterStorageOCSX sx = (WaterStorageOCSX) this.getOCRegistry().getData(
-                WaterStorageOCSX.class,
-                this.hotWaterTankUuid);
-        this.waterTemperature = sx.getCurrentTemp();
-    }
-
 
     @Override
     public void onDeviceStateUpdate() {
@@ -158,6 +143,12 @@ public class DachsChpLocalObserver
 
     @Override
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
+
+        WaterStorageOCSX sx = (WaterStorageOCSX) this.getOCRegistry().getData(
+                WaterStorageOCSX.class,
+                this.hotWaterTankUuid);
+        this.waterTemperature = sx.getCurrentTemp();
+
         return new DachsChpMOX(
                 this.waterTemperature,
                 this.running,

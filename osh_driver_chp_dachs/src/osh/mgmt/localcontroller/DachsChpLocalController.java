@@ -113,6 +113,8 @@ public class DachsChpLocalController
         super.onTimeExchange(exchange);
         final long now = exchange.getEpochSecond();
 
+//        this.getGlobalLogger().logDebug("controller called");
+
         // get new Mox
         DachsChpMOX mox = (DachsChpMOX) this.getDataFromLocalObserver();
         double tempGradient = (mox.getWaterTemperature() - this.currentWaterTemperature) / 1.0; // Kelvin/sec

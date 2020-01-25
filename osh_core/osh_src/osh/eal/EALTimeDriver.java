@@ -75,7 +75,10 @@ public class EALTimeDriver implements Runnable {
      * @param simulationSeconds the amount of seconds this simulation has run
      */
     public void updateTimer(long simulationSeconds) {
+        //we don't update subscribers at the start of the simulation, only at the first second
+        if (simulationSeconds == 0) return;
         this.currentTime = this.timeAtStart.plusSeconds(simulationSeconds);
+        this.currentEpochSecond = this.currentTime.toEpochSecond();
 
         this.currentTimeEvents = TimeEventProvider.getTimeEvents(this.currentTime);
 
@@ -94,6 +97,7 @@ public class EALTimeDriver implements Runnable {
     public void run() {
         try {
             this.currentTime = ZonedDateTime.now(this.hostTimeZone).truncatedTo(ChronoUnit.SECONDS);
+            this.currentEpochSecond = this.currentTime.toEpochSecond();
             this.currentTimeEvents = TimeEventProvider.getTimeEvents(this.currentTime);
 
             this.timeRegistry.publish(new TimeExchange(this.currentTimeEvents, this.currentTime));

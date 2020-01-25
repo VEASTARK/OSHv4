@@ -445,7 +445,7 @@ public class OSHGlobalControllerJMetal
                 this.getOCRegistry().publish(
                         EASolutionCommandExchange.class,
                         part.transformToFinalInterdependentPhenotype(
-                                null,
+                                this.getUUID(),
                                 part.getUUID(),
                                 this.getTimeDriver().getCurrentEpochSecond(),
                                 bits));
@@ -458,7 +458,7 @@ public class OSHGlobalControllerJMetal
                 this.getOCRegistry().publish(
                         EAPredictionCommandExchange.class,
                         part.transformToFinalInterdependentPrediction(
-                                null,
+                                this.getUUID(),
                                 part.getUUID(),
                                 this.getTimeDriver().getCurrentEpochSecond(),
                                 bits));

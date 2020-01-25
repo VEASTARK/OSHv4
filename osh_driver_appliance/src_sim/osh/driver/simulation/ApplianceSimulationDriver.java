@@ -284,7 +284,7 @@ public abstract class ApplianceSimulationDriver
         }
 
         // run on last day immediately
-        if (!this.getTimeDriver().getCurrentTime().plusSeconds(this.getSimulationEngine().getSimulationDuration()).minusDays(1)
+        if (!this.getTimeDriver().getTimeAtStart().plusSeconds(this.getSimulationEngine().getSimulationDuration()).minusDays(1)
                 .isAfter(this.getTimeDriver().getCurrentTime())) {
             maxDof = 0;
         }
