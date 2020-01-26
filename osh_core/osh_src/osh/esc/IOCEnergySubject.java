@@ -2,8 +2,6 @@ package osh.esc;
 
 import osh.simulation.energy.IEnergySubject;
 
-import java.util.BitSet;
-
 /**
  * Marks that the entity (represented by its ProblemPart) consumes or produces energy
  * that is interdependent to other devices
@@ -16,14 +14,12 @@ public interface IOCEnergySubject extends IEnergySubject {
      * Set initial values
      *
      * @param maxReferenceTime
-     * @param solution
      * @param stepSize
      * @param calculateLoadProfile indicates that devices should create load profiles throughout the interdependent calculation (currently only needed for the GUI)
      * @param keepPrediction       indicates that predicted values throughout the optimization (e.g. waterTemperatures) should be kept
      */
     void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean calculateLoadProfile,
             boolean keepPrediction

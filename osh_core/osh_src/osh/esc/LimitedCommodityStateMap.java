@@ -3,10 +3,7 @@ package osh.esc;
 import osh.datatypes.commodity.Commodity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Sebastian Kramer
@@ -74,6 +71,31 @@ public class LimitedCommodityStateMap implements Serializable {
                 this.ordinalToThermalMap[c.ordinal()] = thermalCount++;
             }
         }
+    }
+
+    public LimitedCommodityStateMap(EnumSet<Commodity> allPossibleCommodities) {
+
+        this.powers = new double[allPossibleCommodities.size()];
+        for (int i = 0; i < commodityCount; i++) {
+            this.ordinalToPowerMap[i] = -1;
+            this.ordinalToElectricityMap[i] = -1;
+            this.ordinalToThermalMap[i] = -1;
+        }
+        int electricCount = 0, thermalCount = 0, i = 0;
+
+        for (Commodity c : allPossibleCommodities) {
+            this.ordinalToPowerMap[c.ordinal()] = i;
+
+            if (allElectricCommoditiesList.contains(c)) {
+                this.ordinalToElectricityMap[c.ordinal()] = electricCount++;
+            } else {
+                this.ordinalToThermalMap[c.ordinal()] = thermalCount++;
+            }
+            i++;
+        }
+
+        this.addElectrical = new double[electricCount][1];
+        this.addThermal = new double[thermalCount][2];
     }
 
     public LimitedCommodityStateMap(Commodity[] allPossibleCommodities) {

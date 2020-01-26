@@ -6,8 +6,10 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
 
 import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -40,14 +42,13 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
             boolean isCompletelyStatic,
             long referenceTime,
             DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
+            EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(
                 deviceId,
                 logger,
                 referenceTime,
-                0,
                 toBeScheduled,
                 needsAncillaryMeterState,
                 reactsToInputStates,
@@ -56,58 +57,34 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
                 deviceType,
                 allOutputCommodities,
                 compressionType,
-                compressionValue);
-    }
-
-    public NonControllableIPP(
-            UUID deviceId,
-            IGlobalLogger logger,
-            boolean toBeScheduled,
-            boolean needsAncillaryMeterState,
-            boolean reactsToInputStates,
-            boolean isCompletelyStatic,
-            long referenceTime,
-            DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
-            Commodity[] allInputCommodities,
-            LoadProfileCompressionTypes compressionType,
-            int compressionValue) {
-        super(
-                deviceId,
-                logger,
-                referenceTime,
-                0,
-                toBeScheduled,
-                needsAncillaryMeterState,
-                reactsToInputStates,
-                isCompletelyStatic,
-                referenceTime,
-                deviceType,
-                allOutputCommodities,
-                allInputCommodities,
-                compressionType,
-                compressionValue);
-    }
-
-
-    @Override
-    public final void setBitCount(int bitCount) {
-        if (bitCount != 0) throw new IllegalArgumentException("bit-count != 0");
+                compressionValue,
+                null,
+                null);
     }
 
     @Override
-    public final PhenotypeType transformToPhenotype(BitSet solution) {
+    public final PhenotypeType transformToPhenotype(DecodedSolutionWrapper solution) {
         return null;
     }
 
     @Override
-    public final PhenotypeType transformToFinalInterdependentPhenotype(BitSet solution) {
+    public final PhenotypeType transformToFinalInterdependentPhenotype() {
         return null;
     }
 
     @Override
-    public PredictionType transformToFinalInterdependentPrediction(BitSet solution) {
+    public PredictionType transformToFinalInterdependentPrediction() {
         return null;
+    }
+
+    @Override
+    public final void setSolution(BitSet solution) {
+        //should not be called but to be safe we ensure that nothing is happening if it is
+    }
+
+    @Override
+    public final void setSolution(double[] solution) {
+        //should not be called but to be safe we ensure that nothing is happening if it is
     }
 
     @Override

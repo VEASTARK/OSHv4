@@ -1,4 +1,4 @@
-package osh.mgmt.ipp;
+package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
@@ -6,48 +6,48 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.power.SparseLoadProfile;
-import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 
 import java.util.UUID;
 
 /**
- * @author Ingo Mauser
+ * Simplified IPP for devices whose loads can be fully pre-calculated.
+ *
+ * @author Sebastian Kramer
  */
-public abstract class ThermalDemandNonControllableIPP
+public abstract class PreCalculatedNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = -4181010416941022236L;
-
-    // ### interdependent stuff ###
 
     /**
-     * used for iteration in interdependent calculation (ancillary time in the future)
+     *
      */
-    protected long interdependentTime;
-    /**
-     * running times of chiller
-     */
-    protected double interdependentCervisia;
+    private static final long serialVersionUID = 6115879812569415975L;
 
+    /**
+     * all pre-calculated output states of this problem-part
+     */
     protected LimitedCommodityStateMap[] allOutputStates;
 
     protected long outputStatesCalculatedFor = Long.MIN_VALUE;
     protected long maxHorizon = Long.MIN_VALUE;
 
-    protected SparseLoadProfile lp;
-
-
     /**
-     * CONSTRUCTOR
+     * Constructs this simplified problem-part with the given information.
+     *
+     * @param deviceId the identifier of the devide that is represented by this problem-part
+     * @param logger the global logger
+     * @param toBeScheduled flag if this problem-part should cause a scheduling
+     * @param referenceTime the starting-time this problem-part represents at the moment
+     * @param deviceType the type of device that is represented by this problem-part
+     * @param allOutputCommodities all possible commodities that can be emitted by this problem-part
+     * @param compressionType the type of compression to use for this problem-part
+     * @param compressionValue the associated compression value to be used for compression
      */
-    public ThermalDemandNonControllableIPP(
+    public PreCalculatedNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
             boolean toBeScheduled,
-            boolean needsAncillaryMeterState,
-            boolean reactsToInputStates,
             long referenceTime,
             DeviceTypes deviceType,
             Commodity[] allOutputCommodities,
@@ -57,8 +57,8 @@ public abstract class ThermalDemandNonControllableIPP
                 deviceId,
                 logger,
                 toBeScheduled,
-                needsAncillaryMeterState,
-                reactsToInputStates,
+                false,
+                false,
                 false, //is not static
                 referenceTime,
                 deviceType,
@@ -68,24 +68,23 @@ public abstract class ThermalDemandNonControllableIPP
     }
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
+     * No-arg constructor for serialization.
      */
     @Deprecated
-    protected ThermalDemandNonControllableIPP() {
+    protected PreCalculatedNonControllableIPP() {
         super();
     }
 
 
     @Override
     public void calculateNextStep() {
-        int index = (int) ((this.interdependentTime - this.outputStatesCalculatedFor) / this.stepSize);
+        int index = (int) ((this.getInterdependentTime() - this.outputStatesCalculatedFor) / this.getStepSize());
         if (index >= this.allOutputStates.length) {
             this.setOutputStates(null);
         } else {
             this.setOutputStates(this.allOutputStates[index]);
         }
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
     @Override

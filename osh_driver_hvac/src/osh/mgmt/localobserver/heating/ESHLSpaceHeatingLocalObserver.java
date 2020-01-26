@@ -8,7 +8,7 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.SpaceHeatingPredictionObserverExchange;
-import osh.mgmt.ipp.heating.SpaceHeatingNonControllableIPP;
+import osh.mgmt.ipp.thermal.ThermalDemandNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 
 import java.util.Map;
@@ -53,13 +53,12 @@ public class ESHLSpaceHeatingLocalObserver
             this.predictedDemand.setEndingTimeOfProfile(now);
 
             // Send new IPP
-            SpaceHeatingNonControllableIPP ipp =
-                    new SpaceHeatingNonControllableIPP(
+            ThermalDemandNonControllableIPP ipp =
+                    new ThermalDemandNonControllableIPP(
                             this.getUUID(),
                             this.getDeviceType(),
                             this.getGlobalLogger(),
-                            now,
-                            false,
+                            false, now,
                             this.predictedDemand.clone(),
                             Commodity.HEATINGHOTWATERPOWER,
                             this.compressionType,

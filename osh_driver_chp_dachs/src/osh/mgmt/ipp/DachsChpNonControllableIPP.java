@@ -11,7 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.chp.model.GenericChpModel;
 
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -40,20 +40,11 @@ public class DachsChpNonControllableIPP
     // temperature control
     private double hotWaterStorageMinTemp;
     private double hotWaterStorageMaxTemp;
-    /**
-     * used for iteration in interdependent calculation (virtual time in the future)
-     */
-    private long interdependentTime;
-    /**
-     * running times of chiller
-     */
-    private double interdependentCervisia;
     private boolean interdependentLastState;
     /**
      * from hot water tank IPP
      */
     private double currentWaterTemperature;
-    private SparseLoadProfile lp;
 
 
     /**
@@ -92,12 +83,10 @@ public class DachsChpNonControllableIPP
                 false, //is not static
                 now,
                 DeviceTypes.CHPPLANT,
-                new Commodity[]{Commodity.ACTIVEPOWER,
+                EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
                         Commodity.HEATINGHOTWATERPOWER,
-                        Commodity.NATURALGASPOWER
-                },
-                new Commodity[]{Commodity.HEATINGHOTWATERPOWER},
+                        Commodity.NATURALGASPOWER),
                 compressionType,
                 compressionValue);
 
@@ -110,6 +99,8 @@ public class DachsChpNonControllableIPP
         this.hotWaterStorageMaxTemp = hotWaterStorageMaxTemp;
         this.currentWaterTemperature = currentWaterTemperature;
         this.fixedCostPerStart = fixedCostPerStart;
+
+        this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
 
@@ -118,26 +109,11 @@ public class DachsChpNonControllableIPP
     @Override
     public void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
-        this.stepSize = stepSize;
 
-        // used for iteration in interdependent calculation
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-
-        // initialize variables
-        if (createLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
-        this.interdependentCervisia = 0.0;
-
-        if (this.getReferenceTime() != maxReferenceTime)
-            this.setReferenceTime(maxReferenceTime);
-        this.interdependentTime = this.getReferenceTime();
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
         this.interdependentLastState = this.initialChpState;
 
@@ -166,18 +142,18 @@ public class DachsChpNonControllableIPP
         } else {
             if (this.currentWaterTemperature < this.hotWaterStorageMinTemp) {
                 chpNewState = true;
-                this.interdependentCervisia += this.fixedCostPerStart;
+                this.addInterdependentCervisia(this.fixedCostPerStart);
             }
         }
 
         // ### set power profiles and cervizia
 
         if (chpNewState != this.interdependentLastState) {
-            this.actualModel.setRunning(chpNewState, this.interdependentTime);
+            this.actualModel.setRunning(chpNewState, this.getInterdependentTime());
         }
 
 
-        this.actualModel.calcPowerAvg(this.interdependentTime, this.interdependentTime + this.stepSize);
+        this.actualModel.calcPowerAvg(this.getInterdependentTime(), this.getInterdependentTime() + this.getStepSize());
         int activePower = this.actualModel.getAvgActualActivePower();
         int reactivePower = this.actualModel.getAvgActualReactivePower();
         int thermalPower = this.actualModel.getAvgActualThermalPower();
@@ -185,11 +161,11 @@ public class DachsChpNonControllableIPP
 
 
         // set power
-        if (this.lp != null) {
-            this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, activePower);
-            this.lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, reactivePower);
-            this.lp.setLoad(Commodity.NATURALGASPOWER, this.interdependentTime, gasPower);
-            this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, thermalPower);
+        if (this.getLoadProfile() != null) {
+            this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), activePower);
+            this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), reactivePower);
+            this.getLoadProfile().setLoad(Commodity.NATURALGASPOWER, this.getInterdependentTime(), gasPower);
+            this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), thermalPower);
         }
 
         boolean hasValues = false;
@@ -229,25 +205,25 @@ public class DachsChpNonControllableIPP
         }
 
         this.interdependentLastState = chpNewState;
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
 
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.NATURALGASPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, 0);
+        if (this.getLoadProfile() != null) {
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.NATURALGASPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
             }
 
-            return new Schedule(this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue),
-                    this.interdependentCervisia, this.getDeviceType().toString());
+            return new Schedule(this.getLoadProfile().getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue),
+                    this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            return new Schedule(new SparseLoadProfile(), this.interdependentCervisia, this.getDeviceType().toString());
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 

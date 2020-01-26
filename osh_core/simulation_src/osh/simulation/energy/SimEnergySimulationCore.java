@@ -5,7 +5,6 @@ import osh.datatypes.commodity.AncillaryMeterState;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.EnergySimulationCore;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.esc.grid.EnergyGrid;
 import osh.esc.grid.EnergySimulationTypes;
 
@@ -53,8 +52,7 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
     }
 
     public AncillaryMeterState doNextEnergySimulation(
-            ArrayList<IDeviceEnergySubject> energySimulationSubjects)
-            throws EnergySimulationException {
+            ArrayList<IDeviceEnergySubject> energySimulationSubjects) {
 
         // Get output states
         Map<UUID, LimitedCommodityStateMap> simSubjCommodityStates = new HashMap<>();
@@ -86,7 +84,6 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
         // Get AncillaryState of Meter (grid connections)
 
         // Inform subjects about input states (total flow)
-        try {
             for (IEnergySubject _simSubject : energySimulationSubjects) {
                 UUID simSubjID = _simSubject.getUUID();
 //				EnumMap<Commodity,RealCommodityState> simSubjState = totalInputStates.get(simSubjID);
@@ -107,9 +104,6 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
 
                 _simSubject.setCommodityInputStates(simSubjState, clonedAncillaryMeterState);
             }
-        } catch (EnergySimulationException ex) {
-            throw new EnergySimulationException(ex);
-        }
 
         return ancillaryMeterState;
     }

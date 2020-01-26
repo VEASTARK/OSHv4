@@ -2,7 +2,6 @@ package osh.simulation.energy;
 
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.registry.interfaces.IProvidesIdentity;
 
 /**
@@ -20,8 +19,7 @@ public interface IEnergySubject extends IProvidesIdentity {
      * entity consumes energy: positive values <br />
      * entity produces energy: negative values
      */
-    LimitedCommodityStateMap getCommodityOutputStates()
-    ;
+    LimitedCommodityStateMap getCommodityOutputStates();
 
     /**
      * Is invoked by the EnergySimulationCore (which is handled by the SimulationEngine or the EnergyManagementProblem)
@@ -34,7 +32,6 @@ public interface IEnergySubject extends IProvidesIdentity {
      */
     void setCommodityInputStates(
             LimitedCommodityStateMap inputStates,
-            AncillaryMeterState ancillaryMeterState)
-            throws EnergySimulationException;
+            AncillaryMeterState ancillaryMeterState);
 
 }

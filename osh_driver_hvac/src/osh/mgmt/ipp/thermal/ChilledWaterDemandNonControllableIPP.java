@@ -1,31 +1,32 @@
-package osh.mgmt.ipp;
+package osh.mgmt.ipp.thermal;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
-import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
+import osh.datatypes.registry.oc.ipp.PreCalculatedNonControllableIPP;
 import osh.driver.datatypes.cooling.ChillerCalendarDate;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.time.TimeConversion;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Julian Feder
  */
 public class ChilledWaterDemandNonControllableIPP
-        extends ThermalDemandNonControllableIPP {
+        extends PreCalculatedNonControllableIPP {
 
     private static final long serialVersionUID = 3835919942638394624L;
 
     private final ArrayList<ChillerCalendarDate> dates;
     private final Map<Long, Double> temperaturePrediction;
-    private ArrayList<ChillerCalendarDate> datesForEvaluation;
-    private double coldWaterPower;
 
 
     /**
@@ -44,8 +45,6 @@ public class ChilledWaterDemandNonControllableIPP
                 deviceId,
                 logger,
                 toBeScheduled,
-                false,    //needsAncillaryMeterstate
-                false,    //reactsToInputStates
                 now,
                 DeviceTypes.SPACECOOLING,
                 new Commodity[]{
@@ -67,7 +66,6 @@ public class ChilledWaterDemandNonControllableIPP
         }
 
         this.temperaturePrediction = temperaturePrediction;
-
     }
 
 
@@ -83,32 +81,16 @@ public class ChilledWaterDemandNonControllableIPP
     }
 
 
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean calculateLoadProfile,
             boolean keepPrediction) {
 
-        if (maxReferenceTime != this.getReferenceTime())
-            this.interdependentTime = maxReferenceTime;
-        else
-            this.interdependentTime = this.getReferenceTime();
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, calculateLoadProfile, keepPrediction);
 
-        this.stepSize = stepSize;
-
-        if (calculateLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
-
-        this.interdependentCervisia = 0.0;
-
-        this.coldWaterPower = 0;
-        this.datesForEvaluation = new ArrayList<>();
+        ArrayList<ChillerCalendarDate> datesForEvaluation = new ArrayList<>();
         for (ChillerCalendarDate chillerCalendarDate : this.dates) {
             ChillerCalendarDate date = new ChillerCalendarDate(
                     chillerCalendarDate.getStartTimestamp(),
@@ -116,21 +98,22 @@ public class ChilledWaterDemandNonControllableIPP
                     chillerCalendarDate.getAmountOfPerson(),
                     chillerCalendarDate.getSetTemperature(),
                     chillerCalendarDate.getKnownPower());
-            this.datesForEvaluation.add(date);
+            datesForEvaluation.add(date);
         }
 
         if (this.outputStatesCalculatedFor != maxReferenceTime) {
             long time = maxReferenceTime;
             ObjectArrayList<LimitedCommodityStateMap> tempAllOutputStates = new ObjectArrayList<>();
+            double coldWaterPower;
 
             while (time < this.maxHorizon) {
                 LimitedCommodityStateMap output = null;
 
-                this.coldWaterPower = 0;
+                coldWaterPower = 0;
                 // Date active?
-                if (!this.datesForEvaluation.isEmpty()) {
+                if (!datesForEvaluation.isEmpty()) {
 
-                    ChillerCalendarDate date = this.datesForEvaluation.get(0);
+                    ChillerCalendarDate date = datesForEvaluation.get(0);
 
                     if (date.getStartTimestamp() <= time
                             && date.getStartTimestamp() + date.getLength() >= time) {
@@ -138,22 +121,21 @@ public class ChilledWaterDemandNonControllableIPP
                         long secondsFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(time);
 
                         double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
-                        this.coldWaterPower = Math.max(0, ((0.4415 * outdoorTemperature) - 9.6614) * 1000);
+                        coldWaterPower = Math.max(0, ((0.4415 * outdoorTemperature) - 9.6614) * 1000);
 
-//						if (demand < 0) {
-//							System.out.println("Demand:" + demand + "outdoor: " + currentOutdoorTemperature);
-//						}
                     } else if (date.getStartTimestamp() + date.getLength() < time) {
-                        this.datesForEvaluation.remove(0);
+                        datesForEvaluation.remove(0);
                     }
 
-                    output = new LimitedCommodityStateMap(this.allOutputCommodities);
-                    output.setPower(Commodity.COLDWATERPOWER, this.coldWaterPower);
+                    if (coldWaterPower > 0) {
+                        output = new LimitedCommodityStateMap(this.allOutputCommodities);
+                        output.setPower(Commodity.COLDWATERPOWER, coldWaterPower);
+                    }
                 }
                 tempAllOutputStates.add(output);
 
-                if (this.lp != null)
-                    this.lp.setLoad(Commodity.COLDWATERPOWER, time, (int) this.coldWaterPower);
+                if (this.getLoadProfile() != null)
+                    this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, time, (int) coldWaterPower);
 
                 time += stepSize;
             }
@@ -164,39 +146,29 @@ public class ChilledWaterDemandNonControllableIPP
 
             this.allOutputStates = new LimitedCommodityStateMap[tempAllOutputStates.size()];
             this.allOutputStates = tempAllOutputStates.toArray(this.allOutputStates);
-            if (this.lp != null)
-                this.lp.setLoad(Commodity.COLDWATERPOWER, time, 0);
+            if (this.getLoadProfile() != null)
+                this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, time, 0);
             this.outputStatesCalculatedFor = maxReferenceTime;
         }
         this.setOutputStates(null);
 
     }
 
-
     @Override
     public Schedule getFinalInterdependentSchedule() {
 
-        if (this.lp == null) {
-            return new Schedule(new SparseLoadProfile(), this.interdependentCervisia, this.getDeviceType().toString());
+        if (this.getLoadProfile() == null) {
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(),
+                    this.getDeviceType().toString());
         } else {
-            SparseLoadProfile slp = this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
-            return new Schedule(slp, this.interdependentCervisia, this.getDeviceType().toString());
+            SparseLoadProfile slp = this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue);
+            return new Schedule(slp, this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
-
-    @Override
-    public void setCommodityInputStates(
-            LimitedCommodityStateMap inputStates,
-//			EnumMap<AncillaryCommodity, AncillaryCommodityState> ancillaryInputStates)
-            AncillaryMeterState ancillaryMeterState) {
-        //Do Nothing
-    }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {
         return "SpaceCooling NonControllableIPP";
     }
-
 }

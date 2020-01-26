@@ -8,14 +8,22 @@ import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.StateExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.IPPSolutionHandler;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.AbstractEncodedVariableInformation;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 
 import java.io.Serializable;
 import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -25,24 +33,38 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         extends StateExchange
         implements IOCEnergySubject, Serializable {
 
-    public static final Commodity[] DEFAULT_INPUT = {};
-
     private static final long serialVersionUID = 1852491971934065038L;
     public IGlobalLogger logger;
+
+    //## input & output states ##
+
     protected LimitedCommodityStateMap interdependentInputStates;
     //states for internal use (so we dont have to constantly instantiate new Maps (time intensive)
     protected LimitedCommodityStateMap internalInterdependentOutputStates;
-    protected Commodity[] allOutputCommodities;
+    //"Real" output states that will be given to the ESC
+    private LimitedCommodityStateMap interdependentOutputStates;
+    protected EnumSet<Commodity> allOutputCommodities;
     //as most ipps will not require input commodities we can leave that as an empty array and overwrite when necessary
-    protected Commodity[] allInputCommodities;
+    private EnumSet<Commodity> allInputCommodities = EnumSet.noneOf(Commodity.class);
     protected AncillaryMeterState ancillaryMeterState;
-    protected long interdependentTime;
-    protected int stepSize;
+
+    //## time ##
+    private long interdependentTime;
+    private int stepSize;
+    private long referenceTime;
+
     //How to compress the load profiles used
     protected LoadProfileCompressionTypes compressionType;
     protected int compressionValue;
+
+    //## solutions ##
+    protected IPPSolutionHandler solutionHandler;
+    protected DecodedSolutionWrapper currentSolution;
+    private double interdependentCervisia;
+
     private UUID deviceID;
-    private int bitCount;
+
+    //## information about needed information of this ipp ##
     private boolean toBeScheduled;
     /**
      * flag if problem part needs ancillary meter state as an input state
@@ -57,12 +79,11 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      * flag if the problem part is completely static and will provide no load values
      */
     private boolean isCompletelyStatic;
-    //"Real" output states that will be given to the ESC
-    private LimitedCommodityStateMap interdependentOutputStates;
-    private long referenceTime;
+
     private int id;
     // necessary to distinguish PV power / CHP power / device power / appliance power for pricing
     private DeviceTypes deviceType;
+    private transient SparseLoadProfile loadProfile;
 
 
     /**
@@ -81,43 +102,24 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
             UUID deviceId,
             IGlobalLogger logger,
             long timestamp,
-            int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
             long referenceTime,
             DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
+            EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
-            int compressionValue) {
-        this(deviceId, logger, timestamp, bitCount, toBeScheduled, needsAncillaryMeterState, reactsToInputStates,
-                isCompletelyStatic, referenceTime, deviceType, allOutputCommodities, DEFAULT_INPUT, compressionType,
-                compressionValue);
-    }
+            int compressionValue,
+            BinaryVariableTranslator binaryTranslator,
+            RealVariableTranslator realTranslator) {
 
-    public InterdependentProblemPart(
-            UUID deviceId,
-            IGlobalLogger logger,
-            long timestamp,
-            int bitCount,
-            boolean toBeScheduled,
-            boolean needsAncillaryMeterState,
-            boolean reactsToInputStates,
-            boolean isCompletelyStatic,
-            long referenceTime,
-            DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
-            Commodity[] allInputCommodities,
-            LoadProfileCompressionTypes compressionType,
-            int compressionValue) {
         super(deviceId, timestamp);
 
         this.deviceID = deviceId;
 
         this.logger = logger;
 
-        this.bitCount = bitCount;
         this.toBeScheduled = toBeScheduled;
         this.needsAncillaryMeterState = needsAncillaryMeterState;
         this.reactsToInputStates = reactsToInputStates;
@@ -125,22 +127,43 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         this.referenceTime = referenceTime;
         this.deviceType = deviceType;
         this.allOutputCommodities = allOutputCommodities;
-        this.allInputCommodities = allInputCommodities;
         this.compressionType = compressionType;
         this.compressionValue = compressionValue;
         this.internalInterdependentOutputStates = new LimitedCommodityStateMap(allOutputCommodities);
+        this.solutionHandler = new IPPSolutionHandler(binaryTranslator, realTranslator);
     }
 
+    @Override
+    public void initializeInterdependentCalculation(
+            long maxReferenceTime,
+            int stepSize,
+            boolean createLoadProfile,
+            boolean keepPrediction) {
 
-//	/**
-//	 * Get schedule without interdependencies with other devices, 
-//	 * i.e., estimate the behavior!<br>
-//	 * <br>
-//	 * IMPORTANT: Normally, use getFinalInterdependentSchedule() after
-//	 * doing the simulation stepwise.
-//	 */
-//	@Deprecated
-//	public abstract Schedule getSchedule(BitSet solution);
+        this.stepSize = stepSize;
+        if (createLoadProfile)
+            this.loadProfile = new SparseLoadProfile();
+        else
+            this.loadProfile = null;
+
+        if (this.referenceTime != maxReferenceTime) {
+            this.recalculateEncoding(maxReferenceTime, this.getOptimizationHorizon());
+        }
+
+        this.interdependentCervisia = 0.0;
+
+        this.interdependentTime = this.referenceTime;
+        this.interdependentOutputStates = null;
+
+        if (this.internalInterdependentOutputStates != null) {
+            this.internalInterdependentOutputStates.clear();
+        } else {
+            this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.getAllOutputCommodities());
+        }
+
+        this.interdependentInputStates = null;
+        this.ancillaryMeterState = null;
+    }
 
     /**
      * Transform to phenotype without interdependencies with other devices,
@@ -149,7 +172,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      * IMPORTANT: Normally, use getFinalInterdependentSchedule() after
      * doing the simulation stepwise.
      */
-    public abstract ISolution transformToPhenotype(BitSet solution);
+    public abstract ISolution transformToPhenotype(DecodedSolutionWrapper solution);
 
 
     /**
@@ -165,22 +188,18 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public final EASolutionCommandExchange<PhenotypeType> transformToFinalInterdependentPhenotype(
             UUID sender,
             UUID receiver,
-            long timestamp,
-            BitSet solution) {
-        if (solution.length() > this.bitCount) {
-            this.logger.logError("bit-count mismatch! Should be: " + this.bitCount + " but is: " + solution.size());
-        }
+            long timestamp) {
         return new EASolutionCommandExchange<>(
                 sender,
                 receiver,
                 timestamp,
-                this.transformToFinalInterdependentPhenotype(solution));
+                this.transformToFinalInterdependentPhenotype());
     }
 
     /**
      * Get final phenotype that depends on other devices
      */
-    public abstract PhenotypeType transformToFinalInterdependentPhenotype(BitSet solution);
+    public abstract PhenotypeType transformToFinalInterdependentPhenotype();
 
 
     /**
@@ -189,22 +208,18 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public final EAPredictionCommandExchange<PredictionType> transformToFinalInterdependentPrediction(
             UUID sender,
             UUID receiver,
-            long timestamp,
-            BitSet solution) {
-        if (solution.length() > this.bitCount) {
-            this.logger.logError("bit-count mismatch! Should be: " + this.bitCount + " but is: " + solution.size());
-        }
+            long timestamp) {
         return new EAPredictionCommandExchange<>(
                 sender,
                 receiver,
                 timestamp,
-                this.transformToFinalInterdependentPrediction(solution));
+                this.transformToFinalInterdependentPrediction());
     }
 
     /**
      * Get final prediction that depends on other devices
      */
-    public abstract PredictionType transformToFinalInterdependentPrediction(BitSet solution);
+    public abstract PredictionType transformToFinalInterdependentPrediction();
 
 
     /**
@@ -225,6 +240,24 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
 
     }
 
+    /**
+     * Sets the current solution of this problem-part to the decoded variables of the given binary encoded solution.
+     *
+     * @param encodedSolution the binary encoded solution
+     */
+    public void setSolution(BitSet encodedSolution) {
+        this.currentSolution = this.solutionHandler.decode(encodedSolution);
+    }
+
+    /**
+     * Sets the current solution of this problem-part to the decoded variables of the given real encoded solution.
+     *
+     * @param encodedSolution the real encoded solution
+     */
+    public void setSolution(double[] encodedSolution) {
+        this.currentSolution = this.solutionHandler.decode(encodedSolution);
+    }
+
     @Override
     public LimitedCommodityStateMap getCommodityOutputStates() {
         return this.interdependentOutputStates;
@@ -235,17 +268,6 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     }
 
     // Getters & Setters
-
-    /**
-     * returns the number of bits. Don't change this value while scheduling!
-     */
-    public final int getBitCount() {
-        return this.bitCount;
-    }
-
-    public void setBitCount(int bitCount) {
-        this.bitCount = bitCount;
-    }
 
     public IGlobalLogger getGlobalLogger() {
         return this.logger;
@@ -266,20 +288,22 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     }
 
     @Override
-    public void prepareForDeepCopy() {
-
-    }
+    public void prepareForDeepCopy() {}
 
     public boolean isCompletelyStatic() {
         return this.isCompletelyStatic;
     }
 
-    public Commodity[] getAllOutputCommodities() {
+    public EnumSet<Commodity> getAllOutputCommodities() {
         return this.allOutputCommodities;
     }
 
-    public Commodity[] getAllInputCommodities() {
+    public EnumSet<Commodity> getAllInputCommodities() {
         return this.allInputCommodities;
+    }
+
+    public void setAllInputCommodities(EnumSet<Commodity> allInputCommodities) {
+        this.allInputCommodities = allInputCommodities;
     }
 
     public long getReferenceTime() {
@@ -307,6 +331,83 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         this.id = id;
     }
 
+    /**
+     * Returns specific encoding information about the variables this problem-part needs for the optimization loop.
+     *
+     * @param variableEncoding the encoding for which information is required
+     * @return information about the required encoding
+     */
+    public AbstractEncodedVariableInformation getVariableInformation(VariableEncoding variableEncoding) {
+        return this.solutionHandler.getVariableInformation(variableEncoding);
+    }
+
+    /**
+     * Returns a load profile containing all emitted commodities of this problem-part over the optimization loop.
+     *
+     * @return a load profile containing all emitted commodities
+     */
+    public SparseLoadProfile getLoadProfile() {
+        return this.loadProfile;
+    }
+
+    /**
+     * Sets the load profile representing all emitted commodities of this problem-part to the given value
+     *
+     * @param loadProfile the new load profile representing all emitted commodities of this problem-part
+     */
+    public void setLoadProfile(SparseLoadProfile loadProfile) {
+        this.loadProfile = loadProfile;
+    }
+
+    /**
+     * Returns the additional costs incurred by this problem-part over the optimization loop (e.g. start-stop costs).
+     *
+     * @return the additional costs incurred by this problem-part
+     */
+    public double getInterdependentCervisia() {
+        return this.interdependentCervisia;
+    }
+
+    /**
+     * Adds the given value to the additonal costs of this problem-part.
+     *
+     * @param add the additional value
+     */
+    public void addInterdependentCervisia(double add) {
+        this.interdependentCervisia += add;
+    }
+
+    /**
+     * Returns the current simulated time this problem-part is at inside the optimization loop.
+     *
+     * @return the current simulated time of this problem-part
+     */
+    public long getInterdependentTime() {
+        return this.interdependentTime;
+    }
+
+    /**
+     * Increments the current simulation time of this problem-part by the set step-size of the optimization loop.
+     */
+    public void incrementInterdependentTime() {
+        this.interdependentTime += this.stepSize;
+    }
+
+    /**
+     * Returns the time-step-size of the optimization loop this problem-part is part of.
+     *
+     * @return the time-step-size of the optimization loop
+     */
+    public int getStepSize() {
+        return this.stepSize;
+    }
+
+    /**
+     * Returns a string representation of this problem-part.
+     *
+     * @return a string representation of this problem-part
+     * @return a string representation of this problem-part
+     */
     public abstract String problemToString();
 
     @Override

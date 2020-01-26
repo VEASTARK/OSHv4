@@ -14,7 +14,7 @@ import osh.driver.simulation.batterylogic.SimpleBatteryLogic;
 import osh.driver.simulation.batterystorage.SimpleBatteryStorageModel;
 import osh.driver.simulation.inverter.SimpleInverterModel;
 
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -41,7 +41,6 @@ public class BatteryStorageNonControllableIPP
     private SimpleInverterModel inverterModel;
     private SimpleBatteryStorageModel batteryModel;
     private SimpleBatteryLogic batteryLogic;
-    private SparseLoadProfile lp = new SparseLoadProfile();
 
 
     /**
@@ -77,7 +76,7 @@ public class BatteryStorageNonControllableIPP
                 false, //is not static
                 now,
                 DeviceTypes.BATTERYSTORAGE,
-                new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER},
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
 
@@ -131,23 +130,11 @@ public class BatteryStorageNonControllableIPP
     @Override
     public void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.stepSize = stepSize;
-        if (createLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
-
-        // used for iteration in interdependent calculation
-        this.interdependentTime = this.getReferenceTime();
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-        this.ancillaryMeterState = null;
-
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
         this.inverterModel = new SimpleInverterModel(
                 this.inverterMinComplexPower,
@@ -187,7 +174,7 @@ public class BatteryStorageNonControllableIPP
                     availablePower,
                     this.batteryModel,
                     this.inverterModel,
-                    this.stepSize,
+                    this.getStepSize(),
                     0,
                     0,
                     0,
@@ -201,27 +188,29 @@ public class BatteryStorageNonControllableIPP
                     Commodity.REACTIVEPOWER, this.inverterModel.getReactivePower());
             this.setOutputStates(this.internalInterdependentOutputStates);
 
-            if (this.lp != null) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, this.inverterModel.getActivePower());
-                this.lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, this.inverterModel.getActivePower());
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), this.inverterModel.getActivePower());
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(),
+                        this.inverterModel.getActivePower());
             }
         } else {
             this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, 0);
+        if (this.getLoadProfile() != null) {
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), 0);
             }
-            return new Schedule(this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue), 0, this.getDeviceType().toString());
+            return new Schedule(this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 

@@ -11,7 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.gasboiler.GasBoilerModel;
 
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -34,11 +34,6 @@ public class GasBoilerNonControllableIPP
     private int typicalReactivePowerOff;
 
     private GasBoilerModel model;
-
-    // ### interdependent stuff ###
-
-    private SparseLoadProfile lp;
-
 
     /**
      * CONSTRUCTOR
@@ -68,11 +63,10 @@ public class GasBoilerNonControllableIPP
                 false, //is not static
                 now,
                 DeviceTypes.GASHEATING,
-                new Commodity[]{Commodity.ACTIVEPOWER,
+                EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
                         Commodity.HEATINGHOTWATERPOWER,
-                        Commodity.NATURALGASPOWER
-                },
+                        Commodity.NATURALGASPOWER),
                 compressionType,
                 compressionValue);
 
@@ -88,7 +82,7 @@ public class GasBoilerNonControllableIPP
         this.model = new GasBoilerModel(this.MAX_HOT_WATER_POWER, this.MAX_GAS_POWER, typicalActivePowerOn, typicalActivePowerOff,
                 typicalReactivePowerOn, typicalReactivePowerOff, this.INITIAL_STATE);
 
-        this.allInputCommodities = new Commodity[]{Commodity.HEATINGHOTWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
     /**
@@ -117,22 +111,11 @@ public class GasBoilerNonControllableIPP
     @Override
     public void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        // used for iteration in interdependent calculation
-        this.interdependentTime = this.getReferenceTime();
-        this.stepSize = stepSize;
-
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-
-        if (createLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
         this.model = new GasBoilerModel(this.MAX_HOT_WATER_POWER, this.MAX_GAS_POWER, this.typicalActivePowerOn, this.typicalActivePowerOff,
                 this.typicalReactivePowerOn, this.typicalReactivePowerOff, this.INITIAL_STATE);
@@ -155,13 +138,15 @@ public class GasBoilerNonControllableIPP
             }
 
             double activePower = 0.0 + this.model.getActivePower();
+            double reactivePower = 0.0 + this.model.getReactivePower();
             double thermalPower = 0.0 + -this.model.getHotWaterPower();
             double gasPower = 0.0 + this.model.getGasPower();
 
-            if (this.lp != null) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, (int) activePower);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, (int) thermalPower);
-                this.lp.setLoad(Commodity.NATURALGASPOWER, this.interdependentTime, (int) gasPower);
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) activePower);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), (int) reactivePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) thermalPower);
+                this.getLoadProfile().setLoad(Commodity.NATURALGASPOWER, this.getInterdependentTime(), (int) gasPower);
             }
 
             // update interdependentOutputStates
@@ -197,21 +182,23 @@ public class GasBoilerNonControllableIPP
             this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.NATURALGASPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, 0);
+        if (this.getLoadProfile() != null) {
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.NATURALGASPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
             }
-            return new Schedule(this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue), 0, this.getDeviceType().toString());
+            return new Schedule(this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 

@@ -8,6 +8,7 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
 import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -46,7 +47,7 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
             long optimizationHorizon,
             long referenceTime,
             DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
+            EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId, logger, timestamp, bitCount, toBeScheduled, needsAncillaryMeterState,

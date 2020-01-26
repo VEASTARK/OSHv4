@@ -11,7 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.thermal.SimpleColdWaterTank;
 
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 
@@ -47,12 +47,12 @@ public class ColdWaterTankNonControllableIPP
                 false, //is not static
                 now,
                 DeviceTypes.COLDWATERSTORAGE,
-                new Commodity[]{Commodity.COLDWATERPOWER},
+                EnumSet.of(Commodity.COLDWATERPOWER),
                 compressionType,
                 compressionValue);
 
         this.initialTemperature = initialTemperature;
-        this.allInputCommodities = new Commodity[]{Commodity.COLDWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.COLDWATERPOWER));
     }
 
     /**
@@ -78,14 +78,11 @@ public class ColdWaterTankNonControllableIPP
     @Override
     public void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.stepSize = stepSize;
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
         this.waterTank = new SimpleColdWaterTank(
                 this.tankCapacity,
@@ -93,7 +90,7 @@ public class ColdWaterTankNonControllableIPP
                 this.initialTemperature,
                 this.ambientTemperature);
 
-        this.waterTank.reduceByStandingHeatLoss(maxReferenceTime - this.getTimestamp());
+        this.waterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp());
     }
 
     @Override
@@ -104,7 +101,7 @@ public class ColdWaterTankNonControllableIPP
             // update tank according to interdependentInputStates
             double coldWaterPower = this.interdependentInputStates.getPower(Commodity.COLDWATERPOWER);
             if (coldWaterPower != 0) {
-                this.waterTank.addPowerOverTime(coldWaterPower, this.stepSize, null, null);
+                this.waterTank.addPowerOverTime(coldWaterPower, this.getStepSize(), null, null);
             }
 
             // update interdependentOutputStates
@@ -113,8 +110,8 @@ public class ColdWaterTankNonControllableIPP
         }
 
         // reduce by standing loss
-        this.waterTank.reduceByStandingHeatLoss(this.stepSize);
-
+        this.waterTank.reduceByStandingHeatLoss(this.getStepSize());
+        this.incrementInterdependentTime();
     }
 
 

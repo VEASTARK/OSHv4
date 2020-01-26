@@ -1,4 +1,4 @@
-package osh.mgmt.ipp;
+package osh.mgmt.ipp.thermal;
 
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
@@ -10,49 +10,52 @@ import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 import java.util.UUID;
 
 /**
- * Represents a specific, fully predicted problem-part for a pv-device.
+ * Represents a specific, fully predicted problem-part for the hot-water demand.
  *
- * @author Sebastian Kramer, Ingo Mauser, Till Schuberth
+ * @author Ingo Mauser, Jan Mueller, Sebastian Kramer
  */
-public class PvNonControllableIPP extends PredictedNonControllableIPP {
+public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP {
 
-    private static final long serialVersionUID = 4737054684215212047L;
+    private static final long serialVersionUID = -1011574853269626608L;
 
     /**
      * No-arg constructor for serialization.
      */
     @Deprecated
-    protected PvNonControllableIPP() {
+    protected ThermalDemandNonControllableIPP() {
         super();
     }
 
     /**
-     * Constructs this miele device problem-part.
-
+     * Constructs this hot-water-demand problem-part.
+     *
      * @param deviceId the identifier of the devide that is represented by this problem-part
      * @param logger the global logger
+     * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param referenceTime the starting-time this problem-part represents at the moment
-     * @param predictedPVProfile the predicted heating power profile
+     * @param deviceType the type of device that is represented by this problem-part
+     * @param powerPrediction the predicted heating power profile
      * @param compressionType the type of compression to use for this problem-part
      * @param compressionValue the associated compression value to be used for compression
      */
-    public PvNonControllableIPP(
+    public ThermalDemandNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
+            boolean toBeScheduled,
             long referenceTime,
-            SparseLoadProfile predictedPVProfile,
+            DeviceTypes deviceType,
+            SparseLoadProfile powerPrediction,
+            Commodity usedCommodity,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
-
         super(deviceId,
                 logger,
-                false,
+                toBeScheduled,
                 referenceTime,
-                DeviceTypes.PVSYSTEM,
-                predictedPVProfile,
+                deviceType,
+                powerPrediction,
                 new Commodity[]{
-                        Commodity.ACTIVEPOWER,
-                        Commodity.REACTIVEPOWER
+                        usedCommodity
                 },
                 compressionType,
                 compressionValue);
@@ -60,6 +63,6 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
 
     @Override
     public String problemToString() {
-        return "[" + this.getTimestamp() + "] PvIPP";
+        return "[" + this.getTimestamp() + "] SpaceHeatingDemandNonControllableIPP";
     }
 }

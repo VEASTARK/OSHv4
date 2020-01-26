@@ -11,7 +11,7 @@ import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.WaterDemandPredictionExchange;
-import osh.mgmt.ipp.dhw.DomesticHotWaterNonControllableIPP;
+import osh.mgmt.ipp.thermal.ThermalDemandNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 import osh.utils.time.TimeConversion;
 
@@ -183,13 +183,13 @@ public class DomesticHotWaterLocalObserver
         long secondsSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
         long startOfDay = now - secondsSinceMidnight;
 
-        DomesticHotWaterNonControllableIPP ipp =
-                new DomesticHotWaterNonControllableIPP(
+        ThermalDemandNonControllableIPP ipp =
+                new ThermalDemandNonControllableIPP(
                         this.getUUID(),
-                        this.getDeviceType(),
                         this.getGlobalLogger(),
-                        now,
                         false,
+                        now,
+                        this.getDeviceType(),
                         this.predictedWaterDemand.cloneWithOffset(startOfDay),
                         Commodity.DOMESTICHOTWATERPOWER,
                         this.compressionType,

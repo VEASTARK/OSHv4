@@ -8,7 +8,7 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -20,7 +20,6 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
         extends NonControllableIPP<PhenotypeType, PredictionType> {
 
     private static final long serialVersionUID = -8858902765784429939L;
-    public static final Commodity[] ALL_OUTPUT_COMMODITIES = {};
 
     private Schedule schedule;
     private String description;
@@ -42,7 +41,6 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
             IGlobalLogger logger,
             long timestamp,
             boolean toBeScheduled,
-            long optimizationHorizon,
             DeviceTypes deviceType,
             long referenceTime,
             Schedule schedule,
@@ -59,7 +57,7 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
                 true, //is static
                 referenceTime,
                 deviceType,
-                ALL_OUTPUT_COMMODITIES,
+                EnumSet.noneOf(Commodity.class),
                 compressionType,
                 compressionValue);
 
@@ -71,13 +69,10 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
     @Override
     public void initializeInterdependentCalculation(
             long maxReferenceTime,
-            BitSet solution,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
-        this.stepSize = stepSize;
-        this.internalInterdependentOutputStates = null;
-        this.setOutputStates(null);
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
         // do nothing
     }
 

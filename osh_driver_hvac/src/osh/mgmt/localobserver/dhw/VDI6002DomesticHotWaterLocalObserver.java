@@ -11,7 +11,7 @@ import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
-import osh.mgmt.ipp.dhw.DomesticHotWaterNonControllableIPP;
+import osh.mgmt.ipp.thermal.ThermalDemandNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 import osh.utils.time.TimeConversion;
 
@@ -125,13 +125,13 @@ public class VDI6002DomesticHotWaterLocalObserver
     private void sendIPP() {
         long now = this.getTimeDriver().getCurrentEpochSecond();
 
-        DomesticHotWaterNonControllableIPP ipp =
-                new DomesticHotWaterNonControllableIPP(
+        ThermalDemandNonControllableIPP ipp =
+                new ThermalDemandNonControllableIPP(
                         this.getUUID(),
-                        this.getDeviceType(),
                         this.getGlobalLogger(),
-                        now,
                         false,
+                        now,
+                        this.getDeviceType(),
                         this.predictedDemand.clone(),
                         Commodity.DOMESTICHOTWATERPOWER,
                         this.compressionType,
