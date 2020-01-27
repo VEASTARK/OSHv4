@@ -16,8 +16,8 @@ public class IPPSolutionHandler implements Serializable {
 
     private static final long serialVersionUID = -2563485448154473813L;
 
-    private final BinaryVariableTranslator binaryTranslator;
-    private final RealVariableTranslator realTranslator;
+    private final AbstractVariableTranslator<BitSet> binaryTranslator;
+    private final AbstractVariableTranslator<double[]> realTranslator;
 
     private VariableType variableType;
     private int variableCount;
@@ -37,7 +37,7 @@ public class IPPSolutionHandler implements Serializable {
      * @param binaryTranslator translator for binary encoding
      * @param realTranslator translator for real encoding
      */
-    public IPPSolutionHandler(BinaryVariableTranslator binaryTranslator, RealVariableTranslator realTranslator) {
+    public IPPSolutionHandler(AbstractVariableTranslator<BitSet> binaryTranslator, AbstractVariableTranslator<double[]> realTranslator) {
         this.binaryTranslator = binaryTranslator;
         this.realTranslator = realTranslator;
     }

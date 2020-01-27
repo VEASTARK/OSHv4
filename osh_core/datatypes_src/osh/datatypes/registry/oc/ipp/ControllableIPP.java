@@ -6,6 +6,9 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.AbstractVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
 
 import java.util.BitSet;
 import java.util.EnumSet;
@@ -40,7 +43,6 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
             UUID deviceId,
             IGlobalLogger logger,
             long timestamp,
-            int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
@@ -50,8 +52,9 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
-        super(deviceId, logger, timestamp, bitCount, toBeScheduled, needsAncillaryMeterState,
-                reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities, compressionType, compressionValue);
+        super(deviceId, logger, timestamp, toBeScheduled, needsAncillaryMeterState,
+                reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities, compressionType,
+                compressionValue, new BinaryVariableTranslator(), new RealVariableTranslator());
         this.optimizationHorizon = optimizationHorizon;
     }
 
@@ -59,21 +62,23 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
             UUID deviceId,
             IGlobalLogger logger,
             long timestamp,
-            int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             long optimizationHorizon,
             long referenceTime,
             DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
-            Commodity[] allInputCommodities,
+            EnumSet<Commodity> allOutputCommodities,
+            EnumSet<Commodity> allInputCommodities,
             LoadProfileCompressionTypes compressionType,
-            int compressionValue) {
-        super(deviceId, logger, timestamp, bitCount, toBeScheduled, needsAncillaryMeterState,
-                reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities, allInputCommodities,
-                compressionType, compressionValue);
+            int compressionValue,
+            AbstractVariableTranslator<BitSet> binaryTranslator,
+            AbstractVariableTranslator<double[]> realTranslator) {
+        super(deviceId, logger, timestamp, toBeScheduled, needsAncillaryMeterState,
+                reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities,
+                compressionType, compressionValue, binaryTranslator, realTranslator);
         this.optimizationHorizon = optimizationHorizon;
+        this.setAllInputCommodities(allInputCommodities);
     }
 
     @Override
@@ -85,10 +90,10 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
         this.optimizationHorizon = optimizationHorizon;
     }
 
-    public abstract String solutionToString(BitSet bits);
+    public abstract String solutionToString();
 
     @Override
-    public PredictionType transformToFinalInterdependentPrediction(BitSet solution) {
+    public PredictionType transformToFinalInterdependentPrediction() {
         return null;
     }
 

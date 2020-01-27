@@ -9,6 +9,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -21,7 +22,7 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
     private static final long serialVersionUID = 4986064304539182805L;
 
     protected final SparseLoadProfile predictedProfile;
-    private Commodity[] usedCommodities;
+    private EnumSet<Commodity> usedCommodities;
 
     /**
      * No-arg constructor for serialization.
@@ -52,7 +53,7 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
             long referenceTime,
             DeviceTypes deviceType,
             SparseLoadProfile predictedProfile,
-            Commodity[] usedCommodities,
+            EnumSet<Commodity> usedCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId,
@@ -88,19 +89,23 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
             while (time < this.maxHorizon) {
                 LimitedCommodityStateMap output = null;
                 boolean hasValues = false;
-                double[] powers = new double[this.usedCommodities.length];
+                double[] powers = new double[this.usedCommodities.size()];
 
-                for (int i = 0; i < this.usedCommodities.length; i++) {
-                    powers[i] = this.predictedProfile.getAverageLoadFromTill(this.usedCommodities[i], time, time + stepSize);
+                int i = 0;
+                for (Commodity c : this.usedCommodities) {
+                    powers[i] = this.predictedProfile.getAverageLoadFromTill(c, time, time + stepSize);
                     if (powers[i] != 0.0) {
                         hasValues = true;
                     }
+                    i++;
                 }
 
                 if (hasValues) {
                     output = new LimitedCommodityStateMap(this.allOutputCommodities);
-                    for (int i = 0; i < this.usedCommodities.length; i++) {
-                        output.setPower(this.usedCommodities[i], powers[i]);
+                    i = 0;
+                    for (Commodity c : this.usedCommodities) {
+                        output.setPower(c, powers[i]);
+                        i++;
                     }
                 }
                 tempAllOutputStates.add(output);

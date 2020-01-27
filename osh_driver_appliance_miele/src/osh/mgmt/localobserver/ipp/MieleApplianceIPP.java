@@ -10,10 +10,12 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.esc.LimitedCommodityStateMap;
-import osh.utils.BitSetConverter;
 
-import java.util.BitSet;
+import java.util.EnumSet;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -28,7 +30,6 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
     private boolean predicted;
 
     private SparseLoadProfile profile;
-    private SparseLoadProfile lp;
 
     private LimitedCommodityStateMap[] allOutputStates;
     private long outputStatesCalculatedFor;
@@ -64,62 +65,42 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
                 deviceId,
                 logger,
                 timestamp,
-                calculateBitCount(earliestStartTime, latestStartTime),
                 toBeScheduled,
                 false, //does not need ancillary meter
                 false, //does not react to input states
                 optimizationHorizon,
                 timestamp,
                 deviceType,
-                new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER},
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
 
-        if (profile == null) {
-            throw new NullPointerException("profile is null");
-        }
+        Objects.requireNonNull(profile);
 
         this.earliestStartTime = earliestStartTime;
         this.latestStartTime = latestStartTime;
         this.profile = profile.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
         this.predicted = predicted;
-    }
 
-    /**
-     * returns the needed amount of bits for the EA
-     *
-     * @param earliestStartTime
-     * @param latestStartTime
-     */
-    private static int calculateBitCount(
-            long earliestStartTime,
-            long latestStartTime) {
-        if (earliestStartTime > latestStartTime) {
-            return 0;
-        }
-
-        long diff = latestStartTime - earliestStartTime + 1;
-
-        return (int) Math.ceil(Math.log(diff) / Math.log(2));
+        this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
     }
 
     @Override
     public void initializeInterdependentCalculation(long maxReferenceTime,
-                                                    BitSet solution, int stepSize, boolean createLoadProfile,
+                                                    int stepSize, boolean createLoadProfile,
                                                     boolean keepPrediction) {
 
-        this.interdependentTime = maxReferenceTime;
-        this.stepSize = stepSize;
+        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
-        this.lp = this.profile.cloneWithOffset(this.earliestStartTime + this.getStartOffset(solution));
+        SparseLoadProfile lp = this.profile.cloneWithOffset(this.earliestStartTime + this.getStartOffset(this.currentSolution));
 
         long time = maxReferenceTime;
         ObjectArrayList<LimitedCommodityStateMap> tempOutputStates = new ObjectArrayList<>();
 
-        while (time < this.lp.getEndingTimeOfProfile()) {
+        while (time < lp.getEndingTimeOfProfile()) {
             LimitedCommodityStateMap output = null;
-            double activePower = this.lp.getAverageLoadFromTill(Commodity.ACTIVEPOWER, time, time + stepSize);
-            double reactivePower = this.lp.getAverageLoadFromTill(Commodity.REACTIVEPOWER, time, time + stepSize);
+            double activePower = lp.getAverageLoadFromTill(Commodity.ACTIVEPOWER, time, time + stepSize);
+            double reactivePower = lp.getAverageLoadFromTill(Commodity.REACTIVEPOWER, time, time + stepSize);
 
             if (activePower != 0.0 || reactivePower != 0) {
                 output = new LimitedCommodityStateMap(this.allOutputCommodities);
@@ -140,51 +121,64 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
 
         this.outputStatesCalculatedFor = maxReferenceTime;
 
-        this.setOutputStates(null);
+        if (this.getLoadProfile() != null) {
+            this.setLoadProfile(lp);
+        }
+    }
+
+    private void updateSolutionInformation(long referenceTime, long maxHorizon) {
+
+        long maxOffset = this.latestStartTime - this.earliestStartTime;
+
+        this.solutionHandler.updateVariableInformation(VariableType.LONG, 1, new double[][]{{0, maxOffset}});
+    }
+
+    @Override
+    protected void interpretNewSolution() {
+        //do nothing, solution will be interpreted in initializeInterdependentCalculation
     }
 
     @Override
     public void calculateNextStep() {
-        int index = (int) ((this.interdependentTime - this.outputStatesCalculatedFor) / this.stepSize);
+        int index = (int) ((this.getInterdependentTime() - this.outputStatesCalculatedFor) / this.getStepSize());
         if (index < this.allOutputStates.length) {
             this.setOutputStates(this.allOutputStates[index]);
         } else {
             this.setOutputStates(null);
         }
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
     @Override
-    public String solutionToString(BitSet bits) {
-        if (bits == null)
-            return "ERROR: no solution bits";
-        return "start time: " + this.getStartTime(bits);
+    public String solutionToString() {
+        if (this.currentSolution == null)
+            return "ERROR: no solution";
+        return "start time: " +  this.getStartTime(this.currentSolution);
     }
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
-        return new Schedule(this.lp, 0.0, this.getDeviceType().toString());
+        return new Schedule(this.getLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
     }
 
     @Override
-    public ISolution transformToPhenotype(BitSet solution) {
+    public ISolution transformToPhenotype(DecodedSolutionWrapper solution) {
         return new MieleSolution(this.getStartTime(solution), this.predicted);
     }
 
     @Override
-    public ISolution transformToFinalInterdependentPhenotype(BitSet solution) {
-        return this.transformToPhenotype(solution);
+    public ISolution transformToFinalInterdependentPhenotype() {
+        return this.transformToPhenotype(this.currentSolution);
     }
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         this.setReferenceTime(currentTime);
+        this.setOptimizationHorizon(maxHorizon);
         if (this.earliestStartTime < currentTime) {
             this.earliestStartTime = Math.min(currentTime, this.latestStartTime);
-            this.setBitCount(calculateBitCount(
-                    this.earliestStartTime,
-                    this.latestStartTime));
         }
+        this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
     }
 
     @Override
@@ -193,13 +187,15 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
                 + "(" + (this.latestStartTime - this.earliestStartTime) + ")" + (this.predicted ? " (predicted)" : "");
     }
 
-    public long getStartTime(BitSet solution) {
+    public long getStartTime(DecodedSolutionWrapper solution) {
         return this.earliestStartTime + this.getStartOffset(solution);
     }
 
-    private long getStartOffset(BitSet solution) {
-        long maxOffset = this.latestStartTime - this.earliestStartTime;
-        return (long) Math.floor(BitSetConverter.gray2long(solution)
-                / Math.pow(2, this.getBitCount()) * maxOffset);
+    private long getStartOffset(DecodedSolutionWrapper solution) {
+        if (solution != null && solution.getLongArray() != null && solution.getLongArray().length == 1) {
+            return solution.getLongArray()[0];
+        } else {
+            return 0;
+        }
     }
 }

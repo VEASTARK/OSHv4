@@ -8,6 +8,7 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -50,7 +51,7 @@ public abstract class PreCalculatedNonControllableIPP
             boolean toBeScheduled,
             long referenceTime,
             DeviceTypes deviceType,
-            Commodity[] allOutputCommodities,
+            EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(

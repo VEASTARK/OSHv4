@@ -7,6 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -52,10 +53,7 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
                 referenceTime,
                 deviceType,
                 baseload,
-                new Commodity[]{
-                        Commodity.ACTIVEPOWER,
-                        Commodity.REACTIVEPOWER
-                },
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
     }

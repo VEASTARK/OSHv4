@@ -7,6 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -55,7 +56,7 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
                 referenceTime,
                 deviceType,
                 powerPrediction,
-                new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER},
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
     }

@@ -240,7 +240,6 @@ public class FutureApplianceLocalController
                     this.getGlobalLogger(),
                     now,
                     toBeScheduled,
-                    0,
                     this.getLocalObserver().getDeviceType(),
                     now,
                     new Schedule(new SparseLoadProfile(), 0.0, this.getLocalObserver().getDeviceType().toString()),
@@ -342,10 +341,6 @@ public class FutureApplianceLocalController
                     this.getUUID(),
                     this.getGlobalLogger(),
                     now,
-                    FutureApplianceIPP.calculateBitCount(
-                            this.earliestStartingTime,
-                            this.latestStartingTime,
-                            this.acp),
                     toBeScheduled,
                     optimizationHorizon,
                     this.getLocalObserver().getDeviceType(),

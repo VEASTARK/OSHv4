@@ -183,10 +183,9 @@ public class BaseloadLocalObserver
         BaseloadIPP ipp = new BaseloadIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),
-                now,
                 false,
-                DeviceTypes.BASELOAD,
                 now,
+                DeviceTypes.BASELOAD,
                 this.predictedBaseloadProfile.cloneWithOffset(now),
                 this.compressionType,
                 this.compressionValue);

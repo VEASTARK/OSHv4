@@ -88,6 +88,11 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
     }
 
     @Override
+    protected final void interpretNewSolution() {
+        //should not be called but to be safe we ensure that nothing is happening if it is
+    }
+
+    @Override
     public long getOptimizationHorizon() {
         return 0;
     }

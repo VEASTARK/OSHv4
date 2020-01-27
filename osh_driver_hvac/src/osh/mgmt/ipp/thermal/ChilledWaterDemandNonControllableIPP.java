@@ -12,10 +12,7 @@ import osh.driver.datatypes.cooling.ChillerCalendarDate;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.time.TimeConversion;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Julian Feder
@@ -47,9 +44,7 @@ public class ChilledWaterDemandNonControllableIPP
                 toBeScheduled,
                 now,
                 DeviceTypes.SPACECOOLING,
-                new Commodity[]{
-                        Commodity.COLDWATERPOWER,
-                },
+               EnumSet.of(Commodity.COLDWATERPOWER),
                 compressionType,
                 compressionValue
         );

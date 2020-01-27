@@ -12,9 +12,8 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.StateExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.AbstractVariableTranslator;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.IPPSolutionHandler;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.AbstractEncodedVariableInformation;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
@@ -111,8 +110,8 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue,
-            BinaryVariableTranslator binaryTranslator,
-            RealVariableTranslator realTranslator) {
+            AbstractVariableTranslator<BitSet> binaryTranslator,
+            AbstractVariableTranslator<double[]> realTranslator) {
 
         super(deviceId, timestamp);
 
@@ -158,7 +157,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         if (this.internalInterdependentOutputStates != null) {
             this.internalInterdependentOutputStates.clear();
         } else {
-            this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.getAllOutputCommodities());
+            this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.allOutputCommodities);
         }
 
         this.interdependentInputStates = null;
@@ -247,6 +246,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      */
     public void setSolution(BitSet encodedSolution) {
         this.currentSolution = this.solutionHandler.decode(encodedSolution);
+        this.interpretNewSolution();
     }
 
     /**
@@ -256,7 +256,13 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      */
     public void setSolution(double[] encodedSolution) {
         this.currentSolution = this.solutionHandler.decode(encodedSolution);
+        this.interpretNewSolution();
     }
+
+    /**
+     * Interprets the newly set solution.
+     */
+    protected abstract void interpretNewSolution();
 
     @Override
     public LimitedCommodityStateMap getCommodityOutputStates() {
