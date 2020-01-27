@@ -125,7 +125,7 @@ public class OSHGlobalObserver
                 type = ocUnit.getDeviceType().toString() + "(" + ocUnit.getDeviceClassification().toString() + ")";
             } catch (NullPointerException ignored) {
             }
-            DeviceTableEntry e = new DeviceTableEntry(i, p.getUUID(), type, p.getBitCount(), "[" + p.getTimestamp() + "] " + p.isToBeScheduled(), p.problemToString());
+            DeviceTableEntry e = new DeviceTableEntry(i, p.getUUID(), type, "[" + p.getTimestamp() + "] " + p.isToBeScheduled(), p.problemToString());
             entries.add(e);
             i++;
         }

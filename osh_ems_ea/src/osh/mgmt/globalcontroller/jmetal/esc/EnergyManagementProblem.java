@@ -21,6 +21,8 @@ import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.BinaryEncodedVariableInformation;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.OCEnergySimulationCore;
@@ -39,37 +41,37 @@ public class EnergyManagementProblem extends Problem {
 
     private static final long serialVersionUID = 1L;
     private final int STEP_SIZE;
-    final int[][] bitPositions;
     final Set<UUID> passiveUUIDs = new HashSet<>();
     final Set<UUID> activeNeedInputUUIDs = new HashSet<>();
     final Object2IntOpenHashMap<UUID> uuidIntMap;
     private final IFitness fitnessFunction;
     // active nodes, need information about commodity input states (new IPP)
-    private final List<InterdependentProblemPart<?, ?>> activeNeedsInput;
+    private final InterdependentProblemPart<?, ?>[] activeNeedsInput;
     // active nodes
-    private final List<InterdependentProblemPart<?, ?>> activeWorksAlone;
+    private final InterdependentProblemPart<?, ?>[] activeWorksAlone;
     // passive nodes
-    private final List<InterdependentProblemPart<?, ?>> passive;
+    private final InterdependentProblemPart<?, ?>[] passive;
     // static PP
-    private final List<InterdependentProblemPart<?, ?>> staticParts;
+    private final InterdependentProblemPart<?, ?>[] staticParts;
     private final EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private final EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private final long ignoreLoadProfileBefore;
     private final long ignoreLoadProfileAfter;
     private boolean multiThreading;
-    private ObjectArrayList<List<InterdependentProblemPart<?, ?>>> multiThreadedActiveNeedsInput;
-    private ObjectArrayList<List<InterdependentProblemPart<?, ?>>> multiThreadedActiveWorksAlone;
-    private ObjectArrayList<List<InterdependentProblemPart<?, ?>>> multiThreadedPassive;
-    private ObjectArrayList<List<InterdependentProblemPart<?, ?>>> multiThreadedStatic;
+    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedActiveNeedsInput;
+    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedActiveWorksAlone;
+    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedPassive;
+    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedStatic;
     private ObjectArrayList<OCEnergySimulationCore> multiOCs;
-    private List<InterdependentProblemPart<?, ?>> multiThreadedMasterCopiesActiveNI;
-    private List<InterdependentProblemPart<?, ?>> multiThreadedMasterCopiesActiveWA;
-    private List<InterdependentProblemPart<?, ?>> multiThreadedMasterCopiesPassive;
-    private List<InterdependentProblemPart<?, ?>> multiThreadedMasterCopiesStatic;
+    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesActiveNI;
+    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesActiveWA;
+    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesPassive;
+    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesStatic;
     private Long maxReferenceTime;
     private Long maxOptimizationHorizon;
     private boolean keepPrediction;
     private final OCEnergySimulationCore ocEnergySimulationCore;
+    private final SolutionDistributor distributor;
 
 
     /**
@@ -77,9 +79,9 @@ public class EnergyManagementProblem extends Problem {
      *
      */
     public EnergyManagementProblem(
-            List<InterdependentProblemPart<?, ?>> problemParts,
+            InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
-            int[][] bitPositions,
+            SolutionDistributor distributor,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
@@ -90,12 +92,10 @@ public class EnergyManagementProblem extends Problem {
             int STEP_SIZE) {
         super(new PseudoRandom(randomGenerator));
 
-        this.bitPositions = bitPositions;
-
-        this.activeNeedsInput = new ArrayList<>();
-        this.activeWorksAlone = new ArrayList<>();
-        this.passive = new ArrayList<>();
-        this.staticParts = new ArrayList<>();
+        List<InterdependentProblemPart<?, ?>> activeNeedsInput = new ArrayList<>();
+        List<InterdependentProblemPart<?, ?>> activeWorksAlone = new ArrayList<>();
+        List<InterdependentProblemPart<?, ?>> passive = new ArrayList<>();
+        List<InterdependentProblemPart<?, ?>> staticParts = new ArrayList<>();
 
         this.priceSignals = priceSignals;
         this.powerLimitSignals = powerLimitSignals;
@@ -113,20 +113,19 @@ public class EnergyManagementProblem extends Problem {
 
         // create EnergySimulationCore
         this.ocEnergySimulationCore = ocESC;
-
+        this.distributor = distributor;
 
         this.fitnessFunction = fitnessFunction;
-        int numberOfBits = 0;
 
         Set<UUID> allUUIDs = new HashSet<>();
         Set<UUID> activeUUIDs = new HashSet<>();
         Set<UUID> passiveUUIDs = new HashSet<>();
 
-        this.uuidIntMap = new Object2IntOpenHashMap<>(problemParts.size());
+        this.uuidIntMap = new Object2IntOpenHashMap<>(problemParts.length);
         this.uuidIntMap.defaultReturnValue(-1);
 
-        Object2ObjectOpenHashMap<UUID, Commodity[]> uuidOutputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
-        Object2ObjectOpenHashMap<UUID, Commodity[]> uuidInputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap = new Object2ObjectOpenHashMap<>(problemParts.length);
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap = new Object2ObjectOpenHashMap<>(problemParts.length);
 
         for (InterdependentProblemPart<?, ?> part : problemParts) {
             if (this.uuidIntMap.put(part.getUUID(), part.getId()) != -1) {
@@ -134,7 +133,6 @@ public class EnergyManagementProblem extends Problem {
             }
             if (!part.isCompletelyStatic()) {
                 allUUIDs.add(part.getUUID());
-                numberOfBits += part.getBitCount();
                 uuidOutputMap.put(part.getUUID(), part.getAllOutputCommodities());
                 uuidInputMap.put(part.getUUID(), part.getAllInputCommodities());
             }
@@ -147,15 +145,15 @@ public class EnergyManagementProblem extends Problem {
         for (InterdependentProblemPart<?, ?> part : problemParts) {
             if (activeUUIDs.contains(part.getUUID())) {
                 if (part.isReactsToInputStates()) {
-                    this.activeNeedsInput.add(part);
+                    activeNeedsInput.add(part);
                 } else {
-                    this.activeWorksAlone.add(part);
+                    activeWorksAlone.add(part);
                 }
             } else if (passiveUUIDs.contains(part.getUUID())) {
-                this.passive.add(part);
+                passive.add(part);
             } else {
                 if (part.isCompletelyStatic())
-                    this.staticParts.add(part);
+                    staticParts.add(part);
                 else
                     throw new IllegalArgumentException("part is neither active nor passive");
             }
@@ -166,6 +164,11 @@ public class EnergyManagementProblem extends Problem {
                 this.maxReferenceTime = Math.max(this.maxReferenceTime, part.getReferenceTime());
             }
         }
+
+        this.activeNeedsInput = activeNeedsInput.toArray(InterdependentProblemPart<?, ?>[]::new);
+        this.activeWorksAlone = activeWorksAlone.toArray(InterdependentProblemPart<?, ?>[]::new);
+        this.passive = passive.toArray(InterdependentProblemPart<?, ?>[]::new);
+        this.staticParts = staticParts.toArray(InterdependentProblemPart<?, ?>[]::new);
 
         Set<UUID> allActive = new HashSet<>();
 
@@ -200,7 +203,8 @@ public class EnergyManagementProblem extends Problem {
         this.solutionType_ = new BinarySolutionType(this);
 
         this.length_ = new int[this.numberOfVariables_];
-        this.length_[0] = numberOfBits;
+        this.length_[0] =
+                ((BinaryEncodedVariableInformation) distributor.getVariableInformation(VariableEncoding.BINARY)).getBitCount();
 
     }
 
@@ -212,10 +216,10 @@ public class EnergyManagementProblem extends Problem {
         this.multiThreadedStatic = new ObjectArrayList<>();
         this.multiOCs = new ObjectArrayList<>();
 
-        this.multiThreadedMasterCopiesActiveNI = new ObjectArrayList<>();
-        this.multiThreadedMasterCopiesActiveWA = new ObjectArrayList<>();
-        this.multiThreadedMasterCopiesPassive = new ObjectArrayList<>();
-        this.multiThreadedMasterCopiesStatic = new ObjectArrayList<>();
+        this.multiThreadedMasterCopiesActiveNI = new InterdependentProblemPart<?, ?>[this.activeNeedsInput.length];
+        this.multiThreadedMasterCopiesActiveWA = new InterdependentProblemPart<?, ?>[this.activeWorksAlone.length];
+        this.multiThreadedMasterCopiesPassive = new InterdependentProblemPart<?, ?>[this.passive.length];
+        this.multiThreadedMasterCopiesStatic = new InterdependentProblemPart<?, ?>[this.staticParts.length];
 
         //set logger to null so that deep copy does not try to copy it
         IGlobalLogger temp = null;
@@ -235,7 +239,7 @@ public class EnergyManagementProblem extends Problem {
             part.prepareForDeepCopy();
             if (part instanceof NonControllableIPP<?, ?>) {
                 //initialize completely static IPP so we can save that time on every copy
-                part.initializeInterdependentCalculation(this.maxReferenceTime, new BitSet(), this.STEP_SIZE, false, false);
+                part.initializeInterdependentCalculation(this.maxReferenceTime, this.STEP_SIZE, false, false);
             }
         }
         for (InterdependentProblemPart<?, ?> part : this.passive) {
@@ -244,26 +248,26 @@ public class EnergyManagementProblem extends Problem {
             part.prepareForDeepCopy();
             if (part instanceof NonControllableIPP<?, ?>) {
                 //initialize completely static IPP so we can save that time on every copy
-                part.initializeInterdependentCalculation(this.maxReferenceTime, new BitSet(), this.STEP_SIZE, false, false);
+                part.initializeInterdependentCalculation(this.maxReferenceTime, this.STEP_SIZE, false, false);
             }
         }
 
         //create one master copy per ProblemPart
-        for (int j = 0; j < this.activeNeedsInput.size(); j++) {
-            InterdependentProblemPart<?, ?> part = this.activeNeedsInput.get(j);
-            this.multiThreadedMasterCopiesActiveNI.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+        for (int j = 0; j < this.activeNeedsInput.length; j++) {
+            InterdependentProblemPart<?, ?> part = this.activeNeedsInput[j];
+            this.multiThreadedMasterCopiesActiveNI[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
         }
-        for (int j = 0; j < this.activeWorksAlone.size(); j++) {
-            InterdependentProblemPart<?, ?> part = this.activeWorksAlone.get(j);
-            this.multiThreadedMasterCopiesActiveWA.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+        for (int j = 0; j < this.activeWorksAlone.length; j++) {
+            InterdependentProblemPart<?, ?> part = this.activeWorksAlone[j];
+            this.multiThreadedMasterCopiesActiveWA[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
         }
-        for (int j = 0; j < this.passive.size(); j++) {
-            InterdependentProblemPart<?, ?> part = this.passive.get(j);
-            this.multiThreadedMasterCopiesPassive.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+        for (int j = 0; j < this.passive.length; j++) {
+            InterdependentProblemPart<?, ?> part = this.passive[j];
+            this.multiThreadedMasterCopiesPassive[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
         }
-        for (int j = 0; j < this.staticParts.size(); j++) {
-            InterdependentProblemPart<?, ?> part = this.staticParts.get(j);
-            this.multiThreadedMasterCopiesStatic.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+        for (int j = 0; j < this.staticParts.length; j++) {
+            InterdependentProblemPart<?, ?> part = this.staticParts[j];
+            this.multiThreadedMasterCopiesStatic[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
         }
 
         //restore logger
@@ -282,8 +286,8 @@ public class EnergyManagementProblem extends Problem {
     }
 
     @SuppressWarnings("unchecked")
-    private synchronized List<InterdependentProblemPart<?, ?>>[] requestIPPCopies() {
-        List<InterdependentProblemPart<?, ?>>[] ret = (ObjectArrayList<InterdependentProblemPart<?, ?>>[]) new ObjectArrayList<?>[4];
+    private synchronized InterdependentProblemPart<?, ?>[][] requestIPPCopies() {
+        InterdependentProblemPart<?, ?>[][] ret = new InterdependentProblemPart<?, ?>[4][];
 
         if (!this.multiThreadedActiveNeedsInput.isEmpty()) {
             ret[0] = this.multiThreadedActiveNeedsInput.remove(0);
@@ -291,26 +295,27 @@ public class EnergyManagementProblem extends Problem {
             ret[2] = this.multiThreadedPassive.remove(0);
             ret[3] = this.multiThreadedStatic.remove(0);
         } else {
-            ObjectArrayList<InterdependentProblemPart<?, ?>> niList = new ObjectArrayList<>();
-            ObjectArrayList<InterdependentProblemPart<?, ?>> waList = new ObjectArrayList<>();
-            ObjectArrayList<InterdependentProblemPart<?, ?>> paList = new ObjectArrayList<>();
-            ObjectArrayList<InterdependentProblemPart<?, ?>> stList = new ObjectArrayList<>();
+            InterdependentProblemPart<?, ?>[] niList =
+                    new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesActiveNI.length];
+            InterdependentProblemPart<?, ?>[] waList = new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesActiveWA.length];
+            InterdependentProblemPart<?, ?>[] paList = new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesPassive.length];
+            InterdependentProblemPart<?, ?>[] stList = new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesStatic.length];
 
-            for (int j = 0; j < this.multiThreadedMasterCopiesActiveNI.size(); j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesActiveNI.get(j);
-                niList.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+            for (int j = 0; j < this.multiThreadedMasterCopiesActiveNI.length; j++) {
+                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesActiveNI[j];
+                niList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
             }
-            for (int j = 0; j < this.multiThreadedMasterCopiesActiveWA.size(); j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesActiveWA.get(j);
-                waList.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+            for (int j = 0; j < this.multiThreadedMasterCopiesActiveWA.length; j++) {
+                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesActiveWA[j];
+                waList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
             }
-            for (int j = 0; j < this.multiThreadedMasterCopiesPassive.size(); j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesPassive.get(j);
-                paList.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+            for (int j = 0; j < this.multiThreadedMasterCopiesPassive.length; j++) {
+                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesPassive[j];
+                paList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
             }
-            for (int j = 0; j < this.multiThreadedMasterCopiesStatic.size(); j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesStatic.get(j);
-                stList.add(j, (InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+            for (int j = 0; j < this.multiThreadedMasterCopiesStatic.length; j++) {
+                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesStatic[j];
+                stList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
             }
 
             ret[0] = niList;
@@ -330,8 +335,10 @@ public class EnergyManagementProblem extends Problem {
         }
     }
 
-    private synchronized void freeIPPCopies(List<InterdependentProblemPart<?, ?>> needsI, List<InterdependentProblemPart<?, ?>> worksA,
-                                            List<InterdependentProblemPart<?, ?>> passive, List<InterdependentProblemPart<?, ?>> staticParts) {
+    private synchronized void freeIPPCopies(InterdependentProblemPart<?, ?>[] needsI,
+                                            InterdependentProblemPart<?, ?>[] worksA,
+                                            InterdependentProblemPart<?, ?>[] passive,
+                                            InterdependentProblemPart<?, ?>[] staticParts) {
         this.multiThreadedActiveNeedsInput.add(needsI);
         this.multiThreadedActiveWorksAlone.add(worksA);
         this.multiThreadedPassive.add(passive);
@@ -362,19 +369,19 @@ public class EnergyManagementProblem extends Problem {
 
     private void evaluate(Solution solution, boolean log) {
 
-        List<InterdependentProblemPart<?, ?>> activeNeedsInput;
-        List<InterdependentProblemPart<?, ?>> activeWorksAlone;
-        List<InterdependentProblemPart<?, ?>> passive;
-        List<InterdependentProblemPart<?, ?>> staticParts;
-        List<InterdependentProblemPart<?, ?>> allIPPs;
+        InterdependentProblemPart<?, ?>[] activeNeedsInput;
+        InterdependentProblemPart<?, ?>[] activeWorksAlone;
+        InterdependentProblemPart<?, ?>[] passive;
+        InterdependentProblemPart<?, ?>[] staticParts;
+        InterdependentProblemPart<?, ?>[] allIPPs;
         OCEnergySimulationCore ocEnergySimulationCore;
 
         if (this.multiThreading) {
-            List<InterdependentProblemPart<?, ?>>[] list = this.requestIPPCopies();
-            activeNeedsInput = list[0];
-            activeWorksAlone = list[1];
-            passive = list[2];
-            staticParts = list[3];
+            InterdependentProblemPart<?, ?>[][] copies = this.requestIPPCopies();
+            activeNeedsInput = copies[0];
+            activeWorksAlone = copies[1];
+            passive = copies[2];
+            staticParts = copies[3];
             ocEnergySimulationCore = this.requestOCESC();
         } else {
             activeNeedsInput = this.activeNeedsInput;
@@ -383,71 +390,60 @@ public class EnergyManagementProblem extends Problem {
             staticParts = this.staticParts;
             ocEnergySimulationCore = this.ocEnergySimulationCore;
         }
-        allIPPs = new ObjectArrayList<>(activeNeedsInput.size() + activeWorksAlone.size() + passive.size() + staticParts.size());
-        allIPPs.addAll(activeNeedsInput);
-        allIPPs.addAll(activeWorksAlone);
-        allIPPs.addAll(passive);
-        allIPPs.addAll(staticParts);
+        allIPPs = new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length + passive.length + staticParts.length];
+        int index = 0;
+        for (InterdependentProblemPart<?, ?> part : activeNeedsInput) {
+            allIPPs[index++] = part;
+        }
+        for (InterdependentProblemPart<?, ?> part : activeWorksAlone) {
+            allIPPs[index++] = part;
+        }
+        for (InterdependentProblemPart<?, ?> part : passive) {
+            allIPPs[index++] = part;
+        }
+        for (InterdependentProblemPart<?, ?> part : staticParts) {
+            allIPPs[index++] = part;
+        }
+
+        this.distributor.distributeSolution(solution, allIPPs);
 
 
         try {
             double fitness;
 
-            Binary variable = (Binary) solution.getDecisionVariables()[0];
-
             // calculate interdependent parts
 
             // initialize
             for (InterdependentProblemPart<?, ?> part : allIPPs) {
-                int bitPos = 0;
-                try {
-                    bitPos = this.bitPositions[part.getId()][0];
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.exit(0);
-                }
-                int bitposEnd = this.bitPositions[part.getId()][1];
                 part.initializeInterdependentCalculation(
                         this.maxReferenceTime,
-                        variable.bits_.get(bitPos, bitposEnd),
                         this.STEP_SIZE,
                         false,
                         this.keepPrediction
                 );
-
-                if ((part.getBitCount() == 0 && (bitposEnd - bitPos) != 0)
-                        || (part.getBitCount() > 0 && (bitposEnd - bitPos) != part.getBitCount())) {
-                    throw new IllegalArgumentException("bit-count mismatch");
-                }
             }
 
             // go through step by step
             AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
             ancillaryMeter.initSequential();
 
-            ObjectArrayList<InterdependentProblemPart<?, ?>> allActive = new ObjectArrayList<>(activeNeedsInput.size() + activeWorksAlone.size());
-            allActive.addAll(activeNeedsInput);
-            allActive.addAll(activeWorksAlone);
+            InterdependentProblemPart<?, ?>[] allActiveArray =
+                    new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length];
+            index = 0;
+            for (InterdependentProblemPart<?, ?> part : activeNeedsInput) allActiveArray[index++] = part;
+            for (InterdependentProblemPart<?, ?> part : activeWorksAlone) allActiveArray[index++] = part;
 
-            InterdependentProblemPart<?, ?>[] allActiveArray = new InterdependentProblemPart<?, ?>[allActive.size()];
-            allActiveArray = allActive.toArray(allActiveArray);
-
-            InterdependentProblemPart<?, ?>[] allActiveNIArray = new InterdependentProblemPart<?, ?>[activeNeedsInput.size()];
-            allActiveNIArray = activeNeedsInput.toArray(allActiveNIArray);
-
-            InterdependentProblemPart<?, ?>[] passiveArray = new InterdependentProblemPart<?, ?>[passive.size()];
-            passiveArray = passive.toArray(passiveArray);
 
             // go through in steps of STEP_SIZE (in ticks)
             //init the maps for the commodity states
             UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActiveArray, this.uuidIntMap, true);
 
-            UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passiveArray, this.uuidIntMap, true);
+            UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passive, this.uuidIntMap, true);
 
             long t;
 
             //let all passive states calculate their first state
-            for (InterdependentProblemPart<?, ?> part : passiveArray) {
+            for (InterdependentProblemPart<?, ?> part : passive) {
                 part.calculateNextStep();
                 passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
             }
@@ -456,7 +452,7 @@ public class EnergyManagementProblem extends Problem {
             AncillaryMeterState meterState = new AncillaryMeterState();
 
             //send the first passive state to active nodes
-            ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
+            ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs, passiveToActiveMap);
 
             // iterate
             for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
@@ -468,19 +464,20 @@ public class EnergyManagementProblem extends Problem {
                 }
 
                 //send active state to passive nodes, save meter state
-                ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passiveArray, this.passiveUUIDs, meterState);
+                ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passive, this.passiveUUIDs, meterState);
 
                 //send loads to the ancillary meter profile
                 ancillaryMeter.setLoadSequential(meterState, t);
 
                 //let all passive states calculate their next step
-                for (InterdependentProblemPart<?, ?> part : passiveArray) {
+                for (InterdependentProblemPart<?, ?> part : passive) {
                     part.calculateNextStep();
                     passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
                 }
 
                 //send new passive states to active nodes
-                ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
+                ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs,
+                        passiveToActiveMap);
 
             }
 
@@ -518,7 +515,7 @@ public class EnergyManagementProblem extends Problem {
         }
     }
 
-    public void evaluateWithDebuggingInformation(BitSet bits,
+    public void evaluateWithDebuggingInformation(Solution solution,
                                                  AncillaryCommodityLoadProfile ancillaryMeter,
                                                  TreeMap<Long, Double> predictedTankTemp,
                                                  TreeMap<Long, Double> predictedHotWaterDemand,
@@ -529,60 +526,54 @@ public class EnergyManagementProblem extends Problem {
 
         ancillaryMeter.initSequential();
 
-        List<InterdependentProblemPart<?, ?>> activeNeedsInput = this.activeNeedsInput;
-        List<InterdependentProblemPart<?, ?>> activeWorksAlone = this.activeWorksAlone;
-        List<InterdependentProblemPart<?, ?>> passive = this.passive;
-        List<InterdependentProblemPart<?, ?>> staticParts = this.staticParts;
+        InterdependentProblemPart<?, ?>[] activeNeedsInput = this.activeNeedsInput;
+        InterdependentProblemPart<?, ?>[] activeWorksAlone = this.activeWorksAlone;
+        InterdependentProblemPart<?, ?>[] passive = this.passive;
+        InterdependentProblemPart<?, ?>[] staticParts = this.staticParts;
 
-        List<InterdependentProblemPart<?, ?>> allIPPs = new ArrayList<>(activeNeedsInput);
-        allIPPs.addAll(activeWorksAlone);
-        allIPPs.addAll(passive);
-        allIPPs.addAll(staticParts);
+        InterdependentProblemPart<?, ?>[] allIPPs =
+                new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length + passive.length + staticParts.length];
+        int index = 0;
+        for (InterdependentProblemPart<?, ?> part : activeNeedsInput) {
+            allIPPs[index++] = part;
+        }
+        for (InterdependentProblemPart<?, ?> part : activeWorksAlone) {
+            allIPPs[index++] = part;
+        }
+        for (InterdependentProblemPart<?, ?> part : passive) {
+            allIPPs[index++] = part;
+        }
+        for (InterdependentProblemPart<?, ?> part : staticParts) {
+            allIPPs[index++] = part;
+        }
 
         try {
+
+            this.distributor.distributeSolution(solution, allIPPs);
 
             // calculate interdependent parts
 
             // initialize
             for (InterdependentProblemPart<?, ?> part : allIPPs) {
-                int bitPos = 0;
-                try {
-                    bitPos = this.bitPositions[part.getId()][0];
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.exit(0);
-                }
-                int bitPosEnd = this.bitPositions[part.getId()][1];
                 part.initializeInterdependentCalculation(
                         this.maxReferenceTime,
-                        bits.get(bitPos, bitPosEnd),
                         this.STEP_SIZE,
                         true,
                         keepPrediction
                 );
-                if ((part.getBitCount() == 0 && (bitPosEnd - bitPos) != 0)
-                        || (part.getBitCount() != 0 && (bitPosEnd - bitPos) != part.getBitCount())) {
-                    throw new IllegalArgumentException("bit-count mismatch");
-                }
             }
 
-            List<InterdependentProblemPart<?, ?>> allActive = new LinkedList<>(activeNeedsInput);
-            allActive.addAll(activeWorksAlone);
-
-            InterdependentProblemPart<?, ?>[] allActiveArray = new InterdependentProblemPart<?, ?>[allActive.size()];
-            allActiveArray = allActive.toArray(allActiveArray);
-
-            InterdependentProblemPart<?, ?>[] allActiveNIArray = new InterdependentProblemPart<?, ?>[activeNeedsInput.size()];
-            allActiveNIArray = activeNeedsInput.toArray(allActiveNIArray);
-
-            InterdependentProblemPart<?, ?>[] passiveArray = new InterdependentProblemPart<?, ?>[passive.size()];
-            passiveArray = passive.toArray(passiveArray);
+            InterdependentProblemPart<?, ?>[] allActiveArray =
+                    new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length];
+            index = 0;
+            for (InterdependentProblemPart<?, ?> part : activeNeedsInput) allActiveArray[index++] = part;
+            for (InterdependentProblemPart<?, ?> part : activeWorksAlone) allActiveArray[index++] = part;
 
             // go through in steps of STEP_SIZE (in ticks)
             long t;
 
             //init the maps for the commodity states
-            UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActive, this.uuidIntMap);
+            UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActiveArray, this.uuidIntMap);
             UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passive, this.uuidIntMap);
 
             //let all passive states calculate their first state
@@ -609,14 +600,15 @@ public class EnergyManagementProblem extends Problem {
             AncillaryMeterState meterState = new AncillaryMeterState();
 
             //send the first passive state to active nodes
-            this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
+            this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs,
+                    passiveToActiveMap);
 
             for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
 
                 activeToPassiveMap.clearInnerStates();
 
                 //let all active states calculate their next step
-                for (InterdependentProblemPart<?, ?> part : allActive) {
+                for (InterdependentProblemPart<?, ?> part : allActiveArray) {
                     part.calculateNextStep();
                     activeToPassiveMap.put(part.getUUID(), part.getCommodityOutputStates());
                 }
@@ -625,7 +617,7 @@ public class EnergyManagementProblem extends Problem {
                 predictedHotWaterDemand.put(t, 0.0);
                 predictedHotWaterSupply.put(t, 0.0);
 
-                for (IOCEnergySubject simSub : allActive) {
+                for (IOCEnergySubject simSub : allActiveArray) {
                     LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
 
                     if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
@@ -650,7 +642,8 @@ public class EnergyManagementProblem extends Problem {
                 }
 
                 //send active state to passive nodes, save meterstate
-                this.ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passiveArray, this.passiveUUIDs, meterState);
+                this.ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passive, this.passiveUUIDs,
+                        meterState);
 
                 ancillaryMeter.setLoadSequential(meterState, t);
 
@@ -676,7 +669,8 @@ public class EnergyManagementProblem extends Problem {
                 }
 
                 //send new passive states to active nodes
-                this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, allActiveNIArray, this.activeNeedInputUUIDs, passiveToActiveMap);
+                this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs,
+                        passiveToActiveMap);
             }
             ancillaryMeter.endSequential();
             ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);

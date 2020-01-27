@@ -72,17 +72,17 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
             Set<UUID> activeNeedsInputNodes,
             Set<UUID> passiveNodes,
             Object2IntOpenHashMap<UUID> uuidToIntMap,
-            Object2ObjectOpenHashMap<UUID, Commodity[]> uuidOutputMap,
-            Object2ObjectOpenHashMap<UUID, Commodity[]> uuidInputMap) {
+            Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap,
+            Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap) {
 
         Object2IntOpenHashMap<UUID> uuidToIntMapWithMeter = new Object2IntOpenHashMap<>(uuidToIntMap);
         uuidToIntMapWithMeter.put(this.meterUUID, uuidToIntMap.size());
 
-        Object2ObjectOpenHashMap<UUID, Commodity[]> uuidOutputMapWithMeter = new Object2ObjectOpenHashMap<>(uuidOutputMap);
-        uuidOutputMapWithMeter.put(this.meterUUID, Commodity.values());
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMapWithMeter = new Object2ObjectOpenHashMap<>(uuidOutputMap);
+        uuidOutputMapWithMeter.put(this.meterUUID, EnumSet.allOf(Commodity.class));
 
-        Object2ObjectOpenHashMap<UUID, Commodity[]> uuidInputMapWithMeter = new Object2ObjectOpenHashMap<>(uuidInputMap);
-        uuidInputMapWithMeter.put(this.meterUUID, Commodity.values());
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMapWithMeter = new Object2ObjectOpenHashMap<>(uuidInputMap);
+        uuidInputMapWithMeter.put(this.meterUUID, EnumSet.allOf(Commodity.class));
 
 
         for (Entry<EnergySimulationTypes, EnergyGrid> grid : this.grids.entrySet()) {

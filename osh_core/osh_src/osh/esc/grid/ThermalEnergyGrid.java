@@ -87,7 +87,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
     @Override
     public void initializeGrid(Set<UUID> allActiveNodes, Set<UUID> activeNeedsInputNodes,
                                Set<UUID> passiveNodes, Object2IntOpenHashMap<UUID> uuidToIntMap,
-                               Object2ObjectOpenHashMap<UUID, Commodity[]> uuidOutputMap) {
+                               Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap) {
 
         List<InitializedEnergyRelation> initializedImprovedActiveToPassiveList = new ObjectArrayList<>();
         List<InitializedEnergyRelation> initializedImprovedPassiveToActiveList = new ObjectArrayList<>();
@@ -105,8 +105,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             boolean isMeter = this.meterUUIDs.contains(passiveId);
 
             //if both exist and an exchange should be made add to the respective lists
-            if (activeType && (passiveType || isMeter)
-                    && Arrays.stream(uuidOutputMap.get(activeId)).anyMatch(c -> c == rel.getActiveToPassive().getCommodity())) {
+            if (activeType && (passiveType || isMeter) && uuidOutputMap.get(activeId).contains(rel.getActiveToPassive().getCommodity())) {
 
                 InitializedEnergyRelation relNew = tempA2PHelpMap.get(activeId);
 
@@ -117,8 +116,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
 
                 relNew.addEnergyTarget(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(passiveId), rel.getActiveToPassive().getCommodity()));
             }
-            if (activeTypeNI && passiveType
-                    && Arrays.stream(uuidOutputMap.get(passiveId)).anyMatch(c -> c == rel.getPassiveToActive().getCommodity())) {
+            if (activeTypeNI && passiveType && uuidOutputMap.get(passiveId).contains(rel.getPassiveToActive().getCommodity())) {
 
                 InitializedEnergyRelation relNew = tempP2AHelpMap.get(passiveId);
 

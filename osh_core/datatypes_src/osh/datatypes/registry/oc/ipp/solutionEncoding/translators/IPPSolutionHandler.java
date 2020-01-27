@@ -68,8 +68,6 @@ public class IPPSolutionHandler implements Serializable {
      * @return the encoding requirements for the needed variables
      */
     public AbstractEncodedVariableInformation getVariableInformation(VariableEncoding variableEncoding) {
-        Objects.requireNonNull(this.variableType);
-
         //translators will be null for non-controllable ipps
         if (variableEncoding == VariableEncoding.BINARY) {
             return this.binaryTranslator != null ? this.binaryTranslator.getVariableInformation(this.variableType,

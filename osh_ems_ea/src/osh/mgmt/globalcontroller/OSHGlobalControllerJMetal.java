@@ -1,5 +1,6 @@
 package osh.mgmt.globalcontroller;
 
+import jmetal.core.Solution;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.oc.GAConfiguration;
@@ -33,6 +34,7 @@ import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
 import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
+import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
@@ -313,8 +315,11 @@ public class OSHGlobalControllerJMetal
                 this.stepSize,
                 this.logDir);
 
-        List<InterdependentProblemPart<?, ?>> problemParts = this.oshGlobalObserver.getProblemParts();
-        List<BitSet> solutions;
+        List<InterdependentProblemPart<?, ?>> partsList = this.oshGlobalObserver.getProblemParts();
+        InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[partsList.size()];
+        problemParts = partsList.toArray(problemParts);
+
+        Solution solution;
         SolutionWithFitness resultWithAll;
 
         if (!this.oshGlobalObserver.getAndResetProblempartChangedFlag()) {
@@ -325,13 +330,7 @@ public class OSHGlobalControllerJMetal
         this.getGlobalLogger().logDebug("=== scheduling... ===");
         long now = this.getTimeDriver().getCurrentEpochSecond();
 
-        int[][] bitPositions = new int[problemParts.size()][2];
-        int bitPosStart = 0;
-        int bitPosEnd;
-        int counter = 0;
         long ignoreLoadProfileAfter = now;
-        int usedBits = 0;
-
         long maxHorizon = now;
 
         for (InterdependentProblemPart<?, ?> problem : problemParts) {
@@ -340,18 +339,11 @@ public class OSHGlobalControllerJMetal
             }
         }
 
+        int counter = 0;
         for (InterdependentProblemPart<?, ?> problem : problemParts) {
             problem.recalculateEncoding(now, maxHorizon);
             problem.setId(counter);
-            if (problem.getBitCount() > 0) {
-                bitPosEnd = bitPosStart + problem.getBitCount();
-            } else {
-                bitPosEnd = bitPosStart;
-            }
-            bitPositions[counter] = new int[]{bitPosStart, bitPosEnd};
             counter++;
-            bitPosStart += problem.getBitCount();
-            usedBits += problem.getBitCount();
         }
         ignoreLoadProfileAfter = Math.max(ignoreLoadProfileAfter, maxHorizon);
 
@@ -371,15 +363,35 @@ public class OSHGlobalControllerJMetal
             resultWithAll = solver.getSolution(
                     problemParts,
                     this.ocESC,
-                    bitPositions,
                     tempPriceSignals,
                     tempPowerLimitSignals,
                     this.getTimeDriver().getCurrentEpochSecond(),
                     fitnessFunction);
-            solutions = resultWithAll.getBitSet();
+            solution = resultWithAll.getSolution();
+
+            SolutionDistributor distributor = new SolutionDistributor();
+            distributor.gatherVariableInformation(problemParts);
+
+            EnergyManagementProblem problem = new EnergyManagementProblem(
+                    problemParts,
+                    this.ocESC,
+                    distributor,
+                    this.priceSignals,
+                    this.powerLimitSignals,
+                    now,
+                    ignoreLoadProfileAfter,
+                    optimisationRunRandomGenerator,
+                    this.getGlobalLogger(),
+                    fitnessFunction,
+                    this.stepSize);
+
+            problem.evaluateFinalTime(solution, this.logGa);
+            problem.finalizeGrids();
+
+            distributor.distributeSolution(solution, problemParts);
 
 
-            if ((hasGUI || isReal) && usedBits != 0) {
+            if ((hasGUI || isReal) && solution.getDecisionVariables().length > 0) {
                 TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
                 TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
                 TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
@@ -387,12 +399,12 @@ public class OSHGlobalControllerJMetal
                 AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
 
                 EnergyManagementProblem debugProblem = new EnergyManagementProblem(
-                        problemParts, this.ocESC, bitPositions, this.priceSignals,
+                        problemParts, this.ocESC, distributor, this.priceSignals,
                         this.powerLimitSignals, now, ignoreLoadProfileAfter,
                         optimisationRunRandomGenerator, this.getGlobalLogger(), fitnessFunction, this.stepSize);
 
                 debugProblem.evaluateWithDebuggingInformation(
-                        resultWithAll.getFullSet(),
+                        solution,
                         ancillaryMeter,
                         predictedTankTemp,
                         predictedHotWaterDemand,
@@ -431,15 +443,8 @@ public class OSHGlobalControllerJMetal
         }
 
 
-        int min = Math.min(solutions.size(), problemParts.size());
-        if (solutions.size() != problemParts.size()) {
-            this.getGlobalLogger().logDebug("jmetal: problem list and solution list don't have the same size");
-        }
-
-        for (int i = 0; i < min; i++) {
-            InterdependentProblemPart<?, ?> part = problemParts.get(i);
+        for (InterdependentProblemPart<?, ?> part : problemParts) {
             LocalController lc = this.getLocalController(part.getUUID());
-            BitSet bits = solutions.get(i);
 
             if (lc != null) {
                 this.getOCRegistry().publish(
@@ -447,21 +452,17 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPhenotype(
                                 this.getUUID(),
                                 part.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(),
-                                bits));
-            } else if (/* lc == null && */ part.getBitCount() > 0) {
-                throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
+                                this.getTimeDriver().getCurrentEpochSecond()));
             }
 //			this sends a prediction of the waterTemperatures to the waterTankObserver, so the waterTank can trigger a reschedule
 //			when the actual temperatures are too different to the prediction
-            if (part.transformToFinalInterdependentPrediction(bits) != null) {
+            if (part.transformToFinalInterdependentPrediction() != null) {
                 this.getOCRegistry().publish(
                         EAPredictionCommandExchange.class,
                         part.transformToFinalInterdependentPrediction(
                                 this.getUUID(),
                                 part.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(),
-                                bits));
+                                this.getTimeDriver().getCurrentEpochSecond()));
             }
         }
 

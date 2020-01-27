@@ -338,6 +338,14 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     }
 
     /**
+     * Returns the solution handler associated with this problem-part.
+     * @return the solution handler associated with this problem-part
+     */
+    public IPPSolutionHandler getSolutionHandler() {
+        return this.solutionHandler;
+    }
+
+    /**
      * Returns specific encoding information about the variables this problem-part needs for the optimization loop.
      *
      * @param variableEncoding the encoding for which information is required

@@ -7,6 +7,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.UUIDCommodityMap;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,7 +24,7 @@ public interface EnergyGrid {
      * Initialize grid by loading all relations into lists
      */
     void initializeGrid(Set<UUID> allActiveNodes, Set<UUID> activeNeedsInputNodes,
-                        Set<UUID> passiveNodes, Object2IntOpenHashMap<UUID> uuidToIntMap, Object2ObjectOpenHashMap<UUID, Commodity[]> uuidOutputMap);
+                        Set<UUID> passiveNodes, Object2IntOpenHashMap<UUID> uuidToIntMap, Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap);
 
     /**
      * Finalize grid by unloading all relations

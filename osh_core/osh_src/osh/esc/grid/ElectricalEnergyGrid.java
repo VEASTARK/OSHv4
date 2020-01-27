@@ -120,7 +120,7 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
     @Override
     public void initializeGrid(Set<UUID> allActiveNodes, Set<UUID> activeNeedsInputNodes,
                                Set<UUID> passiveNodes, Object2IntOpenHashMap<UUID> uuidToIntMap,
-                               Object2ObjectOpenHashMap<UUID, Commodity[]> uuidOutputMap) {
+                               Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap) {
 
 
         this.initializedPassiveToActiveRelationList = new ObjectArrayList<>();
@@ -138,8 +138,7 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
             boolean isMeter = this.meterUUIDs.contains(passiveId);
 
             //if both exist and the device really puts out the commodity add to the respective lists
-            if (activeType && (passiveType || isMeter)
-                    && Arrays.stream(uuidOutputMap.get(activeId)).anyMatch(c -> c == rel.getActiveToPassive().getCommodity())) {
+            if (activeType && (passiveType || isMeter) && uuidOutputMap.get(activeId).contains(rel.getActiveToPassive().getCommodity())) {
                 InitializedEnergyRelation relNew = tempHelpMap.get(activeId);
 
                 if (relNew == null) {
@@ -473,6 +472,8 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
             Map<UUID, LimitedCommodityStateMap> totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
 
+        Objects.requireNonNull(ancillaryMeterState);
+
         // calculate ancillary states
 
         for (UUID meter : this.meterUUIDs) {
@@ -501,10 +502,6 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
             LimitedCommodityStateMap meterMap = totalInputStates.get(meter);
 
             double totalPower = meterMap.getPower(Commodity.ACTIVEPOWER);
-
-            if (ancillaryMeterState == null) {
-                ancillaryMeterState = new AncillaryMeterState();
-            }
 
             // net consumption
             if (totalPower >= 0) {
@@ -563,6 +560,8 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
             UUIDCommodityMap totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
 
+        Objects.requireNonNull(ancillaryMeterState);
+
         // calculate ancillary states
 
         for (UUID meter : this.meterUUIDs) {
@@ -591,10 +590,6 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
             LimitedCommodityStateMap meterMap = totalInputStates.get(meter);
 
             double totalPower = meterMap.getPower(Commodity.ACTIVEPOWER);
-
-            if (ancillaryMeterState == null) {
-                ancillaryMeterState = new AncillaryMeterState();
-            }
 
             // net consumption
             if (totalPower >= 0) {

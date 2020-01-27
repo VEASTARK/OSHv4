@@ -53,7 +53,7 @@ public class UUIDCommodityMap implements Serializable {
 
     public UUIDCommodityMap(Set<UUID> allUUIDs,
                             Object2IntOpenHashMap<UUID> uuidIntMap,
-                            Object2ObjectOpenHashMap<UUID, Commodity[]> uuidInputMap,
+                            Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap,
                             boolean makeNoMap) {
         this.keyMap = null;
         this.partIdToArrayIdMap = new int[uuidIntMap.size()];
