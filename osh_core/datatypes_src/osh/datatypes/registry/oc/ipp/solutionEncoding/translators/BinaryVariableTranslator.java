@@ -112,7 +112,7 @@ public class BinaryVariableTranslator extends AbstractVariableTranslator<BitSet>
      * @param variableBoundaries the min/max boundaries of the encoded variables
      * @return the bit-set decoded to a long variable
      */
-    private long bitSetToLong(BitSet bitSet, int bitCount, double[] variableBoundaries) {
+    protected long bitSetToLong(BitSet bitSet, int bitCount, double[] variableBoundaries) {
 
         long partialNumber = BitSetConverter.gray2long(bitSet);
 

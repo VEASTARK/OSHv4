@@ -129,9 +129,9 @@ public class JMetalEnergySolverGA extends JMetalSolver {
             problem.initMultithreading();
         }
 
-// 		{ 			
-//			algorithm = new OSH_gGASingleThread(problem, true, timestamp, pw);
-//		}
+//        {
+//            algorithm = new OSH_gGASingleThread(problem, true, timestamp, pw);
+//        }
 
         /* Algorithm parameters */
         algorithm.setInputParameter("maxEvaluations", this.gaparameters.getNumEvaluations());

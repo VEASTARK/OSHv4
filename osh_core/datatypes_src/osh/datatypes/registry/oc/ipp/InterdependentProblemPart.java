@@ -151,7 +151,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
 
         this.interdependentCervisia = 0.0;
 
-        this.interdependentTime = this.referenceTime;
+        this.interdependentTime = maxReferenceTime;
         this.interdependentOutputStates = null;
 
         if (this.internalInterdependentOutputStates != null) {

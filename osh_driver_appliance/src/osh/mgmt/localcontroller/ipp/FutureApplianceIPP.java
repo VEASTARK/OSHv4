@@ -11,6 +11,8 @@ import osh.datatypes.power.ILoadProfile;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryFullRangeVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.esc.LimitedCommodityStateMap;
@@ -104,8 +106,11 @@ public class FutureApplianceIPP
                 referenceTime,
                 deviceType,
                 EnumSet.noneOf(Commodity.class), //we will calculate this and set in our constructor so this is a dummy value
+                EnumSet.noneOf(Commodity.class),
                 compressionType,
-                compressionValue);
+                compressionValue,
+                new BinaryFullRangeVariableTranslator(),
+                new RealVariableTranslator());
 
         this.earliestStartingTime = earliestStartingTime;
         this.latestStartingTime = latestStartingTime;
@@ -142,6 +147,8 @@ public class FutureApplianceIPP
         }
 
         this.allOutputCommodities = tempUsedComm.clone();
+        this.usedCommodities = tempUsedComm.clone();
+        this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.allOutputCommodities);
 
         // recalculate partition of solution ("header")
         this.header = calculateHeader(

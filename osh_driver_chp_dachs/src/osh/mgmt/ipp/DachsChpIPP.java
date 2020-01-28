@@ -174,7 +174,7 @@ public class DachsChpIPP
 
     private void updateSolutionInformation(long referenceTime, long maxHorizon) {
 
-        int slots = (int) Math.ceil(((double) (maxHorizon - referenceTime)) / ((float) TIME_PER_SLOT));
+        int slots = (int) Math.round(((double) (maxHorizon - referenceTime)) / ((float) TIME_PER_SLOT));
         double[][] boundarys = new double[slots][];
 
         for (int i = 0; i < slots; i++) {

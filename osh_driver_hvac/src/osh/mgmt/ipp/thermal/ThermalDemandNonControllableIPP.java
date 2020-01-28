@@ -62,6 +62,6 @@ public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP
 
     @Override
     public String problemToString() {
-        return "[" + this.getTimestamp() + "] SpaceHeatingDemandNonControllableIPP";
+        return "[" + this.getTimestamp() + "] ThermalDemandNonControllableIPP";
     }
 }
