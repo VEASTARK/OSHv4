@@ -3,6 +3,7 @@ package osh.datatypes.registry.details.common;
 import osh.datatypes.registry.StateExchange;
 import osh.utils.DeepCopy;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,19 +26,9 @@ public class TemperatureDetails extends StateExchange {
 
     private HashMap<String, Double> auxiliaryTemperatures = new HashMap<>();
 
-    /**
-     * JAXB
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private TemperatureDetails() {
-        super(null, -1L);
-    }
-
-    public TemperatureDetails(UUID deviceId, long timestamp) {
+    public TemperatureDetails(UUID deviceId, ZonedDateTime timestamp) {
         super(deviceId, timestamp);
     }
-
 
     public Double getTemperature() {
         return this.temperature;

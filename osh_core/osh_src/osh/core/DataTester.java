@@ -108,14 +108,14 @@ public final class DataTester {
         }
 
         public void sendEvent() {
-            StopDeviceRequest sdr = new StopDeviceRequest(this.uuid, UUID.randomUUID(), EPOCH.toEpochSecond());
+            StopDeviceRequest sdr = new StopDeviceRequest(this.uuid, UUID.randomUUID(), EPOCH);
             ((OSH) this.getOSH()).getDriverRegistry().publish(StopDeviceRequest.class, sdr);
         }
 
         public void sendState() {
-            EpsStateExchange pls = new EpsStateExchange(this.uuid, EPOCH.toEpochSecond());
+            EpsStateExchange pls = new EpsStateExchange(this.uuid, EPOCH);
             ((OSH) this.getOSH()).getDriverRegistry().publish(EpsStateExchange.class, this, pls);
-            EpsPlsStateExchange epsPls = new EpsPlsStateExchange(this.uuid, EPOCH.toEpochSecond(), null, null, 0, 0, 0, 0, 0, false);
+            EpsPlsStateExchange epsPls = new EpsPlsStateExchange(this.uuid, EPOCH, null, null, 0, 0, 0, 0, 0, false);
             ((OSH) this.getOSH()).getDriverRegistry().publish(EpsPlsStateExchange.class, this, epsPls);
         }
 
@@ -149,12 +149,12 @@ public final class DataTester {
         }
 
         public void sendEvent() {
-            StartDeviceRequest sdr = new StartDeviceRequest(this.uuid, UUID.randomUUID(), EPOCH.toEpochSecond());
+            StartDeviceRequest sdr = new StartDeviceRequest(this.uuid, UUID.randomUUID(), EPOCH);
             ((OSH) this.getOSH()).getOCRegistry().publish(StartDeviceRequest.class, sdr);
         }
 
         public void sendState() {
-            PlsStateExchange pls = new PlsStateExchange(this.uuid, EPOCH.toEpochSecond());
+            PlsStateExchange pls = new PlsStateExchange(this.uuid, EPOCH);
             ((OSH) this.getOSH()).getOCRegistry().publish(PlsStateExchange.class, this, pls);
         }
 

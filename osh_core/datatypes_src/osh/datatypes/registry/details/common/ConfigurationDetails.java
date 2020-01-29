@@ -4,6 +4,7 @@ import osh.datatypes.registry.StateExchange;
 
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -20,16 +21,7 @@ public class ConfigurationDetails extends StateExchange {
     private ConfigurationStatus configurationStatus;
     private UUID usedBy;
 
-    /**
-     * for JAXB
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private ConfigurationDetails() {
-        this(null, -1L);
-    }
-
-    public ConfigurationDetails(UUID sender, long timestamp) {
+    public ConfigurationDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

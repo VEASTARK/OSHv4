@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.datatypes.commodity.Commodity;
 import osh.eal.hal.exchange.HALExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class LoggerCommodityPowerHALExchange extends HALExchange {
      * CONSTRUCTOR
      */
     public LoggerCommodityPowerHALExchange(
-            UUID deviceID, Long timestamp,
+            UUID deviceID, ZonedDateTime timestamp,
             EnumMap<Commodity, Double> powerState) {
         super(deviceID, timestamp);
 

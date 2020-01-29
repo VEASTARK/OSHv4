@@ -5,6 +5,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.eal.hal.exchange.HALExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class LoggerEpsPlsHALExchange extends HALExchange {
      */
     public LoggerEpsPlsHALExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit) {
         super(sender, timestamp);

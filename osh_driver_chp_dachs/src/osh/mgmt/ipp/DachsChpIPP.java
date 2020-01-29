@@ -13,6 +13,7 @@ import osh.datatypes.time.Activation;
 import osh.datatypes.time.ActivationList;
 import osh.driver.chp.model.GenericChpModel;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -79,7 +80,7 @@ public class DachsChpIPP
     public DachsChpIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialState,
             int minRunTime,
@@ -98,13 +99,13 @@ public class DachsChpIPP
     ) {
         super(deviceId,
                 logger,
-                now,
+                timeStamp,
                 getNecessaryNumberOfBits(relativeHorizon),
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
-                now + relativeHorizon,
-                now,
+                timeStamp.toEpochSecond() + relativeHorizon,
+                timeStamp.toEpochSecond(),
                 DeviceTypes.CHPPLANT,
                 new Commodity[]{Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,

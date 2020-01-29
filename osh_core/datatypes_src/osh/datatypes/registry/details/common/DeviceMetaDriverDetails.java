@@ -5,6 +5,7 @@ import osh.configuration.system.DeviceTypes;
 import osh.datatypes.registry.StateExchange;
 
 import javax.xml.bind.annotation.XmlType;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @XmlType
@@ -30,7 +31,7 @@ public class DeviceMetaDriverDetails extends StateExchange {
     @SuppressWarnings("unused")
     @Deprecated
     protected DeviceMetaDriverDetails() {
-        this(null, -1L);
+        super();
     }
 
     /**
@@ -39,7 +40,7 @@ public class DeviceMetaDriverDetails extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public DeviceMetaDriverDetails(UUID sender, long timestamp) {
+    public DeviceMetaDriverDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

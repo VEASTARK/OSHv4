@@ -12,6 +12,7 @@ import osh.driver.datatypes.cooling.ChillerCalendarDate;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -34,7 +35,7 @@ public class ChilledWaterDemandNonControllableIPP
     public ChilledWaterDemandNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             ArrayList<ChillerCalendarDate> dates,
             Map<Long, Double> temperaturePrediction,
@@ -46,7 +47,7 @@ public class ChilledWaterDemandNonControllableIPP
                 toBeScheduled,
                 false,    //needsAncillaryMeterstate
                 false,    //reactsToInputStates
-                now,
+                timeStamp,
                 DeviceTypes.SPACECOOLING,
                 new Commodity[]{
                         Commodity.COLDWATERPOWER,

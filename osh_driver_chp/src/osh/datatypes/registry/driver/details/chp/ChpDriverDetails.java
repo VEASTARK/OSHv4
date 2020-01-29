@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -45,17 +46,9 @@ public class ChpDriverDetails extends StateExchange {
 
 
     /**
-     * for JAXB
-     */
-    @Deprecated
-    public ChpDriverDetails() {
-        super(null, -1L);
-    }
-
-    /**
      * CONSTRUCTOR
      */
-    public ChpDriverDetails(UUID sender, long timestamp) {
+    public ChpDriverDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

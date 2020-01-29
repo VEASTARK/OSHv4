@@ -4,6 +4,7 @@ import osh.eal.hal.exchange.HALControllerExchange;
 import osh.en50523.EN50523OIDExecutionOfACommandCommands;
 import osh.hal.interfaces.appliance.IHALGenericApplianceEn50523Command;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -24,7 +25,7 @@ public class MieleApplianceControllerExchange extends HALControllerExchange
      */
     public MieleApplianceControllerExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             EN50523OIDExecutionOfACommandCommands applianceCommand) {
         super(deviceID, timestamp);
 

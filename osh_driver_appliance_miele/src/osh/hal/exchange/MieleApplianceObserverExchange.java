@@ -5,6 +5,7 @@ import osh.datatypes.power.PowerProfileTick;
 import osh.eal.hal.interfaces.common.IHALProgramRemainingTime;
 import osh.hal.interfaces.appliance.IHALMieleApplianceProgramDetails;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.UUID;
@@ -30,7 +31,7 @@ public class MieleApplianceObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public MieleApplianceObserverExchange(UUID deviceID, long timestamp) {
+    public MieleApplianceObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

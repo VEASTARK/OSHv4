@@ -19,11 +19,14 @@ import osh.en50523.EN50523DeviceState;
 import osh.en50523.EN50523DeviceStateRemoteControl;
 import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
+import osh.utils.time.TimeUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -50,13 +53,13 @@ public abstract class GenericApplianceDriver
     /**
      * Expected ending time received from appliance
      */
-    protected Long expectedEndingTimeReceivedFromAppliance;
+    protected ZonedDateTime expectedEndingTimeReceivedFromAppliance;
 
     // ### Variables for Configurations (= program + extras + loadProfiles) ###
     /**
      * Expected finish time received from appliance
      */
-    protected Long expectedFinishTimeReceivedFromAppliance;
+    protected ZonedDateTime expectedFinishTimeReceivedFromAppliance;
     /**
      * Device Configuration which is now active: Selected by user on device
      */
@@ -90,7 +93,7 @@ public abstract class GenericApplianceDriver
     /**
      * in case of tDoF: result of optimization
      */
-    private long[] selectedStartingTimes;
+    private ZonedDateTime[] selectedStartingTimes;
 
     /**
      * Active Configuration Profile (ACP)<br>
@@ -158,7 +161,7 @@ public abstract class GenericApplianceDriver
         // update status etc every second
         this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // set initial device state
         this.updateGenericApplianceDriverDetails(now);
@@ -208,7 +211,7 @@ public abstract class GenericApplianceDriver
         FutureApplianceObserverExchange observerObj
                 = new FutureApplianceObserverExchange(
                 this.getUUID(),
-                exchange.getEpochSecond(),
+                exchange.getTime(),
                 (this.getPower(Commodity.ACTIVEPOWER) != null ? this.getPower(Commodity.ACTIVEPOWER) : 0),            // IHALElectricPowerDetails
                 (this.getPower(Commodity.REACTIVEPOWER) != null ? this.getPower(Commodity.REACTIVEPOWER) : 0),            // IHALElectricPowerDetails
                 (this.getPower(Commodity.HEATINGHOTWATERPOWER) != null ? this.getPower(Commodity.HEATINGHOTWATERPOWER) : 0),    // IHALThermalPowerDetails
@@ -250,14 +253,16 @@ public abstract class GenericApplianceDriver
 
     private long calculateDOFFromFinishTimeAndRemainingTime() {
         //if programmtime is bigger than the time of the settings from the appliance
-        if (this.expectedEndingTimeReceivedFromAppliance >= this.expectedFinishTimeReceivedFromAppliance) {
+        if (TimeUtils.isAfterEquals(this.expectedEndingTimeReceivedFromAppliance,
+                this.expectedFinishTimeReceivedFromAppliance)) {
             //RETURN DOF = 0
             //means the appliance will be starting right now
             return 0;
         } else {
             //calculate the dof from the programmtime and the setting from the appliance.
             //RETURN DOF
-            long dof = (this.expectedFinishTimeReceivedFromAppliance - this.expectedEndingTimeReceivedFromAppliance);
+            long dof = Duration.between(this.expectedEndingTimeReceivedFromAppliance,
+                    this.expectedFinishTimeReceivedFromAppliance).getSeconds();
             double dofRounded = dof;
 
             //ROUND DOF in the last 2 numbers, that will give a max change of 50 sec.
@@ -615,21 +620,13 @@ public abstract class GenericApplianceDriver
     }
 
     public void setExpectedEndingTimeReceivedFromAppliance(
-            Long expectedEndingTimeReceivedFromAppliance) {
+            ZonedDateTime expectedEndingTimeReceivedFromAppliance) {
         this.expectedEndingTimeReceivedFromAppliance = expectedEndingTimeReceivedFromAppliance;
     }
 
     public void setExpectedFinishTimeReceivedFromAppliance(
-            Long expectedFinishTimeReceivedFromAppliance) {
+            ZonedDateTime expectedFinishTimeReceivedFromAppliance) {
         this.expectedFinishTimeReceivedFromAppliance = expectedFinishTimeReceivedFromAppliance;
-    }
-
-    protected long[] getSelectedStartingTimes() {
-        if (this.selectedStartingTimes != null) {
-            return this.selectedStartingTimes.clone();
-        } else {
-            return null;
-        }
     }
 
     protected Integer getSelectedProfileID() {
@@ -640,7 +637,7 @@ public abstract class GenericApplianceDriver
         this.acpChanged = acpChanged;
     }
 
-    private long getExpectedEndingTime() {
+    private ZonedDateTime getExpectedEndingTime() {
         if (this.expectedEndingTimeReceivedFromAppliance != null) {
             // received ending time from appliance
             return this.expectedEndingTimeReceivedFromAppliance;
@@ -650,20 +647,11 @@ public abstract class GenericApplianceDriver
                     && this.selectedProfileID != null) {
 
                 //TODO calculate ending time
-                return this.getTimeDriver().getCurrentEpochSecond();
+                return this.getTimeDriver().getCurrentTime();
             } else {
-                return -1;
+                return null;
             }
         }
-    }
-
-
-    private long getExpectedFinishTime() {
-        if (this.expectedFinishTimeReceivedFromAppliance != null) {
-            // received ending time from appliance
-            return this.expectedFinishTimeReceivedFromAppliance;
-        }
-        return -1;
     }
 
     // ### reset method for variables
@@ -703,13 +691,13 @@ public abstract class GenericApplianceDriver
 
     // ### Details Creators ###
 
-    protected void updateGenericApplianceDriverDetails(long now) {
+    protected void updateGenericApplianceDriverDetails(ZonedDateTime now) {
         GenericApplianceDriverDetails driverDetails = this.createApplianceDetails(now);
         this.getDriverRegistry().publish(GenericApplianceDriverDetails.class, driverDetails);
     }
 
 
-    private GenericApplianceDriverDetails createApplianceDetails(long now) {
+    private GenericApplianceDriverDetails createApplianceDetails(ZonedDateTime now) {
         GenericApplianceDriverDetails details = new GenericApplianceDriverDetails(this.getUUID(), now);
         details.setState(this.currentEn50523State);
         details.setStateTextDE(this.currentEn50523State.getDescriptionDE());
@@ -717,13 +705,13 @@ public abstract class GenericApplianceDriver
     }
 
 
-    protected void updateGenericApplianceProgramDriverDetails(long now) {
+    protected void updateGenericApplianceProgramDriverDetails(ZonedDateTime now) {
         GenericApplianceProgramDriverDetails pdd = this.createGenericApplianceProgramDriverDetails(now);
         this.getDriverRegistry().publish(GenericApplianceProgramDriverDetails.class, pdd);
     }
 
 
-    private GenericApplianceProgramDriverDetails createGenericApplianceProgramDriverDetails(long now) {
+    private GenericApplianceProgramDriverDetails createGenericApplianceProgramDriverDetails(ZonedDateTime now) {
         GenericApplianceProgramDriverDetails details = new GenericApplianceProgramDriverDetails(this.getUUID(), now);
 
         if (this.selectedConfigurationID == null
@@ -735,32 +723,23 @@ public abstract class GenericApplianceDriver
         }
 
         if (this.selectedStartingTimes == null) {
-            details.setStartTime(-1);
+            details.setStartTime(null);
         } else {
             details.setStartTime(this.selectedStartingTimes[0]);
         }
 
-        long expectedEndingTime = this.getExpectedEndingTime();
+        ZonedDateTime expectedEndingTime = this.getExpectedEndingTime();
+        details.setEndTime(expectedEndingTime);
 
-        if (expectedEndingTime == -1) {
-            details.setEndTime(-1);
+        Duration remainingTime = Duration.between(now, expectedEndingTime);
+
+        if (expectedEndingTime == null) {
+            details.setRemainingTime(null);
         } else {
-            details.setEndTime(expectedEndingTime);
+            details.setRemainingTime(remainingTime);
         }
 
-        if (expectedEndingTime == -1) {
-            details.setRemainingTime(-1);
-        } else {
-            details.setRemainingTime((int) (expectedEndingTime - now));
-        }
-
-        long expectedFinishTime = this.getExpectedFinishTime();
-
-        if (expectedFinishTime == -1) {
-            details.setFinishTime(-1);
-        } else {
-            details.setFinishTime(expectedFinishTime);
-        }
+        details.setFinishTime(this.expectedFinishTimeReceivedFromAppliance);
 
 
         return details;

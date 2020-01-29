@@ -13,6 +13,7 @@ import osh.hal.interfaces.appliance.IHALGenericApplianceDetails;
 import osh.hal.interfaces.appliance.IHALGenericApplianceIsCurrentlyControllable;
 import osh.hal.interfaces.appliance.IHALGenericApplianceProgramDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -46,7 +47,7 @@ public class FutureApplianceObserverExchange
     // ### IHALGenericApplianceProgramDetails ###
     private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
     private UUID acpID;
-    private long acpReferenceTime;
+    private ZonedDateTime acpReferenceTime;
 
     // ### IHALGenericApplianceDOF ###
     private Long dof;
@@ -60,7 +61,7 @@ public class FutureApplianceObserverExchange
      */
     public FutureApplianceObserverExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             int activePower,
             int reactivePower,
             int hotWaterPower,
@@ -147,11 +148,11 @@ public class FutureApplianceObserverExchange
     }
 
     @Override
-    public long getAcpReferenceTime() {
+    public ZonedDateTime getAcpReferenceTime() {
         return this.acpReferenceTime;
     }
 
-    public void setAcpReferenceTime(long acpReferenceTime) {
+    public void setAcpReferenceTime(ZonedDateTime acpReferenceTime) {
         this.acpReferenceTime = acpReferenceTime;
     }
 

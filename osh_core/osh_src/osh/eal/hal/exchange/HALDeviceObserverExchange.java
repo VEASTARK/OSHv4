@@ -5,6 +5,7 @@ import osh.configuration.system.DeviceTypes;
 import osh.datatypes.registry.details.common.DeviceMetaDriverDetails;
 import osh.eal.hal.interfaces.common.IHALDeviceMetaDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -30,7 +31,7 @@ public class HALDeviceObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public HALDeviceObserverExchange(UUID deviceID, long timestamp) {
+    public HALDeviceObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

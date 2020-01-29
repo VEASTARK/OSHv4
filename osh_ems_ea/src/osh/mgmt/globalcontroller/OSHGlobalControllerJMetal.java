@@ -447,7 +447,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPhenotype(
                                 this.getUUID(),
                                 part.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(),
+                                this.getTimeDriver().getCurrentTime(),
                                 bits));
             } else if (/* lc == null && */ part.getBitCount() > 0) {
                 throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
@@ -460,7 +460,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPrediction(
                                 this.getUUID(),
                                 part.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(),
+                                this.getTimeDriver().getCurrentTime(),
                                 bits));
             }
         }

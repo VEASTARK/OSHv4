@@ -5,6 +5,7 @@ import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 import osh.eal.hal.interfaces.gas.IHALGasPowerDetails;
 import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -44,7 +45,7 @@ public class GasBoilerObserverExchange
      */
     public GasBoilerObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
 
             double minTemperature,
             double maxTemperature,

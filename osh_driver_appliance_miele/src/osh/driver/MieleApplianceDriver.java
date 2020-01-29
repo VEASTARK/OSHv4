@@ -128,7 +128,7 @@ public class MieleApplianceDriver
 
         this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
@@ -142,7 +142,7 @@ public class MieleApplianceDriver
             StartDeviceRequest req = new StartDeviceRequest(
                     MieleApplianceDriver.this.getUUID(),
                     MieleApplianceDriver.this.applianceBusDriverUUID,
-                    exchange.getEpochSecond());
+                    exchange.getTime());
             MieleApplianceDriver.this.getDriverRegistry().publish(StartDeviceRequest.class, req);
         }
     }
@@ -258,7 +258,7 @@ public class MieleApplianceDriver
                         this.getGlobalLogger().logError("Received illegal dof, not sending to o/c");
                     } else {
                         GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond());
+                                this.getTimeDriver().getCurrentTime());
                         gadoe.setDevice1stDegreeOfFreedom(this.firstDof);
                         gadoe.setDevice1stDegreeOfFreedom(this.secondDof);
                         this.notifyObserver(gadoe);
@@ -284,7 +284,7 @@ public class MieleApplianceDriver
             // generate ox object
             if (updateOx) {
                 MieleApplianceObserverExchange _ox = new MieleApplianceObserverExchange(
-                        this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+                        this.getUUID(), this.getTimeDriver().getCurrentTime());
 
                 // check for incomplete data
                 if (this.currentAppDetails == null) {

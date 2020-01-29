@@ -12,6 +12,7 @@ import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.chiller.AdsorptionChillerModel;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.UUID;
@@ -80,12 +81,12 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
      * CONSTRUCTOR
      *
      * @param deviceId
-     * @param now
+     * @param timeStamp
      */
     public ChillerNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -98,7 +99,7 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
                 false, //needsAncillaryMeterState
                 true, //reactsToInputStates
                 false, //is not static
-                now,
+                timeStamp,
                 DeviceTypes.ADSORPTIONCHILLER,
                 new Commodity[]{Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,

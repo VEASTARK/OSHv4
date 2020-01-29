@@ -4,6 +4,7 @@ import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -37,7 +38,7 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
      */
     public MieleDofStateExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             long lastDof,
             long earliestStartTime,
             long latestStartTime,

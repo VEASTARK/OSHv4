@@ -4,6 +4,7 @@ import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -31,7 +32,7 @@ public class SmartHeaterOX
      */
     public SmartHeaterOX(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
 
             int temperatureSetting,
             int waterTemperature,

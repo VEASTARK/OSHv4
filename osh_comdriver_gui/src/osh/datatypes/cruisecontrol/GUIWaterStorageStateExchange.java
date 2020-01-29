@@ -3,6 +3,7 @@ package osh.datatypes.cruisecontrol;
 import osh.datatypes.cruisecontrol.OptimizedDataStorage.EqualData;
 import osh.datatypes.registry.oc.localobserver.WaterStorageOCSX;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -22,7 +23,7 @@ public class GUIWaterStorageStateExchange
 
     public GUIWaterStorageStateExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             double currentTemp,
             double minTemp,
             double maxTemp,

@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -18,7 +19,7 @@ public class PvControllerExchange extends HALControllerExchange {
      */
     public PvControllerExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             Boolean newPvSwitchedOn,
             Integer reactivePowerTargetValue) {
         super(deviceID, timestamp);

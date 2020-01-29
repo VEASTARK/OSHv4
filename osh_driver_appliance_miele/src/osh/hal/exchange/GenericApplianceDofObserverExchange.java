@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class GenericApplianceDofObserverExchange extends HALDeviceObserverExchange {
@@ -9,7 +10,7 @@ public class GenericApplianceDofObserverExchange extends HALDeviceObserverExchan
     private Integer device1stDegreeOfFreedom;
     private Integer device2ndDegreeOfFreedom;
 
-    public GenericApplianceDofObserverExchange(UUID deviceID, long timestamp) {
+    public GenericApplianceDofObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

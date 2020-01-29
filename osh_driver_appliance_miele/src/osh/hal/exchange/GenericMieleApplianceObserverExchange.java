@@ -7,6 +7,7 @@ import osh.en50523.EN50523DeviceState;
 import osh.hal.interfaces.appliance.IHALGenericApplianceDetails;
 import osh.hal.interfaces.appliance.IHALGenericApplianceIsCurrentlyControllable;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -41,7 +42,7 @@ public class GenericMieleApplianceObserverExchange
      */
     public GenericMieleApplianceObserverExchange(
             UUID deviceID,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

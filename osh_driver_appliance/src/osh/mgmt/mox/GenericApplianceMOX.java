@@ -5,6 +5,7 @@ import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.en50523.EN50523DeviceState;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -22,7 +23,7 @@ public class GenericApplianceMOX implements IModelOfObservationExchange {
     private final UUID acpID;
     private final long acpReferenceTime;
 
-    private Long dof;
+    private Duration dof;
 
     private final LoadProfileCompressionTypes compressionType;
     private final int compressionValue;
@@ -37,7 +38,7 @@ public class GenericApplianceMOX implements IModelOfObservationExchange {
             ApplianceProgramConfigurationStatus acp,
             UUID acpID,
             long acpReferenceTime,
-            Long dof,
+            Duration dof,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
@@ -78,11 +79,11 @@ public class GenericApplianceMOX implements IModelOfObservationExchange {
         return this.acpReferenceTime;
     }
 
-    public Long getDof() {
+    public Duration getDof() {
         return this.dof;
     }
 
-    public void setDof(Long dof) {
+    public void setDof(Duration dof) {
         this.dof = dof;
     }
 

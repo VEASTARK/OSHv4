@@ -4,6 +4,7 @@ import osh.driver.chp.ChpOperationMode;
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.hal.interfaces.chp.IHALChpStaticDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -32,7 +33,7 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
     private int forcedOffAdditionalCost;
     private double chpOnCervisiaStepSizeMultiplier;
 
-    public ChpStaticDetailsObserverExchange(UUID deviceID, long timestamp) {
+    public ChpStaticDetailsObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

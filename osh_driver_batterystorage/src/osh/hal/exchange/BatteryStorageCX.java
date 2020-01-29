@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public class BatteryStorageCX extends HALControllerExchange {
      */
     public BatteryStorageCX(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             List<Integer> list,
             Long referenceTime
     ) {

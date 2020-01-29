@@ -2,6 +2,7 @@ package osh.hal.interfaces.appliance;
 
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -12,5 +13,5 @@ public interface IHALGenericApplianceProgramDetails {
 
     UUID getAcpID();
 
-    long getAcpReferenceTime();
+    ZonedDateTime getAcpReferenceTime();
 }

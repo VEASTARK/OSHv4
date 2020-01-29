@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ public class SpaceHeatingPredictionObserverExchange extends HALDeviceObserverExc
 
     private final Map<Long, Double> predictedHeatConsumptionMap;
 
-    public SpaceHeatingPredictionObserverExchange(UUID deviceID, long timestamp,
+    public SpaceHeatingPredictionObserverExchange(UUID deviceID, ZonedDateTime timestamp,
                                                   Map<Long, Double> predictedHeatConsumptionMap) {
         super(deviceID, timestamp);
         this.predictedHeatConsumptionMap = predictedHeatConsumptionMap;

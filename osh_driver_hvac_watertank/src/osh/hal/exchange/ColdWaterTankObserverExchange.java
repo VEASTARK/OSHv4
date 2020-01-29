@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -24,7 +25,7 @@ public class ColdWaterTankObserverExchange
      */
     public ColdWaterTankObserverExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             double topTemperature,
             double tankCapacity,
             double hotWaterDemand,

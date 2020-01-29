@@ -27,6 +27,8 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -77,14 +79,14 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * StartingTime of Active Configuration Profile (ACP)
      */
-    protected Long configurationStartedAt;
+    protected ZonedDateTime configurationStartedAt;
 
-    protected long lastSet1sttDof;
+    protected Duration lastSet1sttDof;
 
     /**
      * StartingTime of Active Phase in Active Configuration Profile
      */
-    protected Long phaseStartedAt;
+    protected ZonedDateTime phaseStartedAt;
 
 
     // ### PRIVATE variables for exclusive usage in this class, NOT in subclasses ###
@@ -97,7 +99,7 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * in case of tDoF: result of optimization
      */
-    private long[] selectedStartingTimes;
+    private ZonedDateTime[] selectedStartingTimes;
 
     /**
      * Active Configuration Profile (ACP)<br>
@@ -217,7 +219,7 @@ public class GenericFutureApplianceSimulationDriver
     @Override
     public void onNextTimeTick() {
         // get current time
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // if not OFF -> device logic for running etc
         if (this.currentEn50523State == EN50523DeviceState.OFF) {
@@ -280,7 +282,7 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * Logic when in state PROGRAMMED
      */
-    private void doLogicProgrammed(long now) {
+    private void doLogicProgrammed(ZonedDateTime now) {
         // start device if time is reached / if it has been optimized...
         if (this.selectedStartingTimes == null) {
             // PROGRAMMED and not optimized, yet
@@ -303,7 +305,7 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * Logic when in state RUNNING
      */
-    private void doLogicRunning(long now) {
+    private void doLogicRunning(ZonedDateTime now) {
         // validity check
         {
             int currentDurationSinceStart = (int) (now - this.configurationStartedAt);

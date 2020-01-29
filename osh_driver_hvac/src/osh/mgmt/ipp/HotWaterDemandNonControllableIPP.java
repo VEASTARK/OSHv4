@@ -9,6 +9,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -31,7 +32,7 @@ public class HotWaterDemandNonControllableIPP
             UUID deviceId,
             DeviceTypes deviceType,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             SparseLoadProfile powerPrediction,
             Commodity usedCommodity,
@@ -43,7 +44,7 @@ public class HotWaterDemandNonControllableIPP
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 false, //does not react to input states
-                now,
+                timeStamp,
                 deviceType,
                 new Commodity[]{
                         usedCommodity

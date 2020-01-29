@@ -12,6 +12,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -46,10 +47,9 @@ public class BaseloadIPP extends NonControllableIPP<ISolution, IPrediction> {
     public BaseloadIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             DeviceTypes deviceType,
-            long referenceTime,
             SparseLoadProfile baseload,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -59,7 +59,7 @@ public class BaseloadIPP extends NonControllableIPP<ISolution, IPrediction> {
                 false,    //does not need ancillary meter
                 false,    //does not react to input states
                 false, //is not static
-                referenceTime,
+                timestamp,
                 deviceType,
                 new Commodity[]{
                         Commodity.ACTIVEPOWER,

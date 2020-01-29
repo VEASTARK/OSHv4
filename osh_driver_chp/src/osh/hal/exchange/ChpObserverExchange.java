@@ -7,6 +7,7 @@ import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 import osh.hal.interfaces.chp.IHALChpDetails;
 import osh.hal.interfaces.chp.IHALExtendedChpDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -51,7 +52,7 @@ public class ChpObserverExchange
      */
     public ChpObserverExchange(
             UUID deviceID,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

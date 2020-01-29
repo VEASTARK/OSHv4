@@ -3,6 +3,7 @@ package osh.hal.exchange.prediction;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exchange.HALObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,8 @@ public class WaterDemandPredictionExchange
      * @param deviceID
      * @param timestamp
      */
-    public WaterDemandPredictionExchange(UUID deviceID, long timestamp, List<SparseLoadProfile> powerPredictions,
+    public WaterDemandPredictionExchange(UUID deviceID, ZonedDateTime timestamp,
+                                         List<SparseLoadProfile> powerPredictions,
                                          int pastDaysPrediction,
                                          float weightForOtherWeekday,
                                          float weightForSameWeekday) {

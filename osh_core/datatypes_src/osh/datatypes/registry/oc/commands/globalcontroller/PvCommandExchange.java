@@ -2,27 +2,26 @@ package osh.datatypes.registry.oc.commands.globalcontroller;
 
 import osh.datatypes.registry.CommandExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
 public class PvCommandExchange extends CommandExchange {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -168998441819144791L;
     private Boolean newPvSwitchedOn;
     private Double reactivePowerTargetValue;
 
-    public PvCommandExchange(UUID sender, UUID receiver, long time, Boolean newPvSwitchedOn) {
+    public PvCommandExchange(UUID sender, UUID receiver, ZonedDateTime time, Boolean newPvSwitchedOn) {
         this(sender, receiver, time, newPvSwitchedOn, null);
     }
 
-    public PvCommandExchange(UUID sender, UUID receiver, long time, Double reactivePowerTargetValue) {
+    public PvCommandExchange(UUID sender, UUID receiver, ZonedDateTime time, Double reactivePowerTargetValue) {
         this(sender, receiver, time, null, reactivePowerTargetValue);
     }
 
-    public PvCommandExchange(UUID sender, UUID receiver, long timestamp, Boolean newPvSwitchedOn, Double reactivePowerTargetValue) {
+    public PvCommandExchange(UUID sender, UUID receiver, ZonedDateTime timestamp, Boolean newPvSwitchedOn,
+                             Double reactivePowerTargetValue) {
         super(sender, receiver, timestamp);
         this.newPvSwitchedOn = newPvSwitchedOn;
         this.reactivePowerTargetValue = reactivePowerTargetValue;
