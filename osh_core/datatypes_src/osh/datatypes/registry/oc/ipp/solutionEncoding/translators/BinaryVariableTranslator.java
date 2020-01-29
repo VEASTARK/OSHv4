@@ -132,7 +132,7 @@ public class BinaryVariableTranslator extends AbstractVariableTranslator<BitSet>
      * @param variableBoundaries the given min/max boundaries of the long variable
      * @return how many bits would be needed to encode a long variable with the given min/max boundaries
      */
-    private int bitsUsedForVariable(double[] variableBoundaries) {
+    protected int bitsUsedForVariable(double[] variableBoundaries) {
         if (variableBoundaries[1] == variableBoundaries[0]) {
             return 0;
         }

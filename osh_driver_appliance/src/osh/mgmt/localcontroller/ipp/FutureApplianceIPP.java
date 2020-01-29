@@ -192,7 +192,7 @@ public class FutureApplianceIPP
             ApplianceProgramConfigurationStatus acp) {
         int[] header = new int[3];
         header[0] = acp.getDynamicLoadProfiles().length;
-        header[1] = (int) (latestStartTime - earliestStartTime + 1);
+        header[1] = (int) (latestStartTime - earliestStartTime);
         header[2] = getMaxNumberOfPhases(acp);
         return header;
     }
@@ -455,7 +455,7 @@ public class FutureApplianceIPP
         }
 
         for (int i = 0; i < this.header[2]; i++) {
-            boundaries[i + startIndex] = new double[]{0, this.header[1] - 1};
+            boundaries[i + startIndex] = new double[]{0, this.header[1]};
         }
 
         this.solutionHandler.updateVariableInformation(VariableType.LONG, variableCount, boundaries);

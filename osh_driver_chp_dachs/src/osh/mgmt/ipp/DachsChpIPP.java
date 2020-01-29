@@ -173,7 +173,7 @@ public class DachsChpIPP
     }
 
     private void updateSolutionInformation(long referenceTime, long maxHorizon) {
-
+        //TODO: change to Math.ceil as soon as backwards compatibility is broken by another update
         int slots = (int) Math.round(((double) (maxHorizon - referenceTime)) / ((float) TIME_PER_SLOT));
         double[][] boundarys = new double[slots][];
 
