@@ -138,7 +138,7 @@ public class BaseloadLocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     DeviceTypes.OTHER);
 
             for (Commodity c : _ox.getCommodities()) {
@@ -178,16 +178,13 @@ public class BaseloadLocalObserver
 
 
     private void updateIPP() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-
         BaseloadIPP ipp = new BaseloadIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),
-                now,
+                this.getTimeDriver().getCurrentTime(),
                 false,
                 DeviceTypes.BASELOAD,
-                now,
-                this.predictedBaseloadProfile.cloneWithOffset(now),
+                this.predictedBaseloadProfile.cloneWithOffset(this.getTimeDriver().getCurrentEpochSecond()),
                 this.compressionType,
                 this.compressionValue);
 

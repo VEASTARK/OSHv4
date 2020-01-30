@@ -8,6 +8,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.dof.DofStateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -90,7 +91,7 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable {
                 this.dispatcherWriteLock.unlock();
             }
 
-            long timestamp = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime timestamp = this.getTimeDriver().getCurrentTime();
 
             if (this.dofDispatcher.getDeviceMap().isEmpty()) { // an error has occurred
                 this.getGlobalLogger().logError("Device Data of Dof-WAMP-Dispatcher is empty");

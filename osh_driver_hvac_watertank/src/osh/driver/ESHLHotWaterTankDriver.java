@@ -11,6 +11,7 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.hal.exchange.HotWaterTankObserverExchange;
 
+import java.time.Duration;
 import java.util.UUID;
 
 
@@ -21,7 +22,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
 
     private final SimpleHotWaterTank waterTank;
 
-    private long newIppAfter;
+    private Duration newIppAfter;
     private double triggerIppIfDeltaTempBigger;
 
 //	private TemperatureDetails currentTemperatureDetails = null;
@@ -72,9 +73,9 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         }
 
         try {
-            this.newIppAfter = Long.parseLong(this.getDriverConfig().getParameter("newIppAfter"));
+            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
         } catch (Exception e) {
-            this.newIppAfter = 3600; // 1 hour
+            this.newIppAfter = Duration.ofHours(1); // 1 hour
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
         }
 
@@ -97,12 +98,12 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         super.onSystemIsUp();
 
         StaticCompressionExchange _stat =
-                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _stat.setCompressionType(this.compressionType);
         _stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(_stat);
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
@@ -110,7 +111,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
         HotWaterTankObserverExchange observerExchange =
                 new HotWaterTankObserverExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
                         this.waterTank.getTankDiameter(),
@@ -131,7 +132,7 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
             HotWaterTankObserverExchange observerExchange =
                     new HotWaterTankObserverExchange(
                             this.getUUID(),
-                            this.getTimeDriver().getCurrentEpochSecond(),
+                            this.getTimeDriver().getCurrentTime(),
                             this.waterTank.getCurrentWaterTemperature(),
                             this.waterTank.getTankCapacity(),
                             this.waterTank.getTankDiameter(),

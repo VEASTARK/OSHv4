@@ -47,7 +47,7 @@ public class PvLocalController extends LocalController implements IDataRegistryL
 
         PvControllerExchange _cx = new PvControllerExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 _cmd.getNewPvSwitchedOn(),
                 (int) Math.round(_cmd.getReactivePowerTargetValue()));
         this.updateOcDataSubscriber(_cx);

@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALComExchange;
 import osh.datatypes.gui.DeviceTableEntry;
 
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class GUIDeviceListComExchange extends CALComExchange {
      */
     public GUIDeviceListComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             Set<DeviceTableEntry> deviceList) {
         super(deviceID, timestamp);
 

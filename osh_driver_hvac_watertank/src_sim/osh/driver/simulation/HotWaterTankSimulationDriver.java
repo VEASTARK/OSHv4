@@ -12,6 +12,7 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -21,7 +22,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
 //	private SimpleHotWaterTank waterTank;
 
-    private long newIppAfter;
+    private Duration newIppAfter;
     private double triggerIppIfDeltaTempBigger;
 
     private boolean log;
@@ -77,9 +78,9 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
         }
 
         try {
-            this.newIppAfter = Long.parseLong(this.getDriverConfig().getParameter("newIppAfter"));
+            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
         } catch (Exception e) {
-            this.newIppAfter = 3600; // 1 hour
+            this.newIppAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
         }
 
@@ -101,7 +102,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
@@ -170,7 +171,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
         HotWaterTankObserverExchange observerExchange =
                 new HotWaterTankObserverExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
                         this.waterTank.getTankDiameter(),

@@ -20,6 +20,7 @@ import osh.hal.exchange.FutureApplianceObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
 import osh.utils.time.TimeConversion;
+import osh.utils.time.TimeUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -308,8 +309,8 @@ public class GenericFutureApplianceSimulationDriver
     private void doLogicRunning(ZonedDateTime now) {
         // validity check
         {
-            int currentDurationSinceStart = (int) (now - this.configurationStartedAt);
-            if (currentDurationSinceStart < 0) {
+            Duration currentDurationSinceStart = Duration.between(this.configurationStartedAt, now);
+            if (currentDurationSinceStart.isNegative()) {
                 this.getGlobalLogger().logError(this.getDeviceType() + " ERROR: timewarp, currentDurationSinceStart is negative!", new Exception());
             }
         }
@@ -331,7 +332,7 @@ public class GenericFutureApplianceSimulationDriver
 
         // check if next phase has to be started
         // [0] is currently running phase / next phase
-        if (this.selectedStartingTimes.length > 1 && now >= this.selectedStartingTimes[1]) {
+        if (this.selectedStartingTimes.length > 1 && TimeUtils.isAfterEquals(now,this.selectedStartingTimes[1])) {
             // NEW PHASE
             // current phase is finished...
             // next phase is due...
@@ -366,7 +367,7 @@ public class GenericFutureApplianceSimulationDriver
             this.applianceConfigurationProfile = newACP;
 
             //next phase would be last phase --> do not send an updated acp as this would cause a rescheduling, controller will reschedule when device --> off
-            if (this.selectedStartingTimes.length == 2 && this.selectedStartingTimes[1] + minMaxTimes[this.selectedProfileID][1][0] <= now + 1) {
+            if (this.selectedStartingTimes.length == 2 && TimeUtils.isBeforeEquals(this.selectedStartingTimes[1].plusSeconds(minMaxTimes[this.selectedProfileID][1][0]), now.plusSeconds(1))) {
                 this.getGlobalLogger().logDebug("Switched to last phase, set notReschedule-Flag");
                 newACP.setDoNotReschedule(true);
             }
@@ -375,19 +376,22 @@ public class GenericFutureApplianceSimulationDriver
             this.phaseStartedAt = now;
 
             // shorten selectedStartingTimes (until upcoming optimization is finished)
-            long[] newSelectedStartingTimes = new long[this.selectedStartingTimes.length - 1];
+            ZonedDateTime[] newSelectedStartingTimes = new ZonedDateTime[this.selectedStartingTimes.length - 1];
             System.arraycopy(this.selectedStartingTimes, 1, newSelectedStartingTimes, 0, this.selectedStartingTimes.length - 1);
             this.selectedStartingTimes = newSelectedStartingTimes;
 
             // set new power values...
             for (Commodity c : this.usedCommodities) {
                 try {
-                    this.setPower(c, newDlp[this.selectedProfileID][0].getLoadAt(c, (int) (now - this.phaseStartedAt))); // (now - configurationStartedAt) = 0!
+                    this.setPower(c,
+                            newDlp[this.selectedProfileID][0].getLoadAt(c,
+                                    Duration.between(this.phaseStartedAt, now).getSeconds())); //
+                    // (now - configurationStartedAt) = 0!
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        } else if (this.selectedStartingTimes.length == 1 && this.selectedStartingTimes[0] + minMaxTimes[this.selectedProfileID][0][0] <= now) {
+        } else if (this.selectedStartingTimes.length == 1 && TimeUtils.isBeforeEquals(this.selectedStartingTimes[0].plusSeconds(minMaxTimes[this.selectedProfileID][0][0]), now)) {
             // END LAST PHASE
             // it has been the last phase:
             // END of program reached (in simulation: always exactly as expected)
@@ -414,8 +418,8 @@ public class GenericFutureApplianceSimulationDriver
             // phase is running (not yet finished)...
             // is RUNNING...get current power values / load
 
-            int currentDurationSinceStart = (int) (now - this.phaseStartedAt);
-            int corrected = (int) (currentDurationSinceStart % dlp[this.selectedProfileID][0].getEndingTimeOfProfile());
+            long currentDurationSinceStart = Duration.between(this.phaseStartedAt, now).getSeconds();
+            long corrected = (currentDurationSinceStart % dlp[this.selectedProfileID][0].getEndingTimeOfProfile());
 
             // set new power values...
             for (Commodity c : this.usedCommodities) {
@@ -575,7 +579,7 @@ public class GenericFutureApplianceSimulationDriver
 
         // DoF-Action
         if (nextAction.getActionType() == ActionType.USER_ACTION) {
-            int newDof;
+            Duration newDof;
 
             String dofString = ActionParametersHelper.getValueForParameterOfParameters(
                     nextAction.getPerformAction().get(0),
@@ -583,9 +587,9 @@ public class GenericFutureApplianceSimulationDriver
                     "tdof");
 
             if (dofString != null) {
-                newDof = Integer.parseInt(dofString);
+                newDof = Duration.ofSeconds(Integer.parseInt(dofString));
             } else {
-                newDof = 0;
+                newDof = Duration.ZERO;
             }
 
             this.lastSet1sttDof = newDof;
@@ -629,14 +633,14 @@ public class GenericFutureApplianceSimulationDriver
 
             if (this.isControllable()) {
                 // if controllable then PROGRAMMED
-                this.configurationStartedAt = this.getTimeDriver().getCurrentEpochSecond();
+                this.configurationStartedAt = this.getTimeDriver().getCurrentTime();
                 this.setEN50523State(EN50523DeviceState.PROGRAMMED); // wait until optimization in PROGRAMMED state
                 this.selectedProfileID = null; // safety first...
 //				selectedNextProfileID = null; //safety first
                 this.selectedStartingTimes = null; // safety first...
             } else {
                 // if NOT controllable then RUNNING
-                this.configurationStartedAt = this.getTimeDriver().getCurrentEpochSecond();
+                this.configurationStartedAt = this.getTimeDriver().getCurrentTime();
                 this.phaseStartedAt = this.configurationStartedAt;
                 this.setEN50523State(EN50523DeviceState.RUNNING);
                 this.selectedProfileID = 0; // start with the first profile
@@ -652,11 +656,11 @@ public class GenericFutureApplianceSimulationDriver
                 minMaxTimes = shortenedMinMaxTimes;
 
                 // set starting times (start immediately with minimum times)
-                this.selectedStartingTimes = new long[shortenedDlp[0].length];
-                long time = this.configurationStartedAt;
+                this.selectedStartingTimes = new ZonedDateTime[shortenedDlp[0].length];
+                ZonedDateTime time = this.configurationStartedAt;
                 for (int i = 0; i < dynamicLoadProfiles[0].length; i++) {
                     this.selectedStartingTimes[i] = time;
-                    time += minMaxTimes[0][i][0];
+                    time = time.plusSeconds(minMaxTimes[0][i][0]);
                 }
             }
 
@@ -664,7 +668,7 @@ public class GenericFutureApplianceSimulationDriver
                     UUID.randomUUID(),
                     dynamicLoadProfiles,
                     minMaxTimes,
-                    this.getTimeDriver().getCurrentEpochSecond());
+                    this.getTimeDriver().getCurrentTime());
             this.acpChanged = true;
 
         } else if (!nextAction.isNextState() && nextAction.getActionType() == ActionType.I_DEVICE_ACTION) {
@@ -1017,14 +1021,14 @@ public class GenericFutureApplianceSimulationDriver
         if (this.selectedStartingTimes != null) {
             int lastIndex = this.selectedStartingTimes.length - 1;
             long otherLast =
-                    this.selectedStartingTimes[lastIndex]
-                            + this.applianceConfigurationProfile.getDynamicLoadProfiles()[this.selectedProfileID][lastIndex].getEndingTimeOfProfile() + 100;
+                    this.selectedStartingTimes[lastIndex].plusSeconds(
+                            this.applianceConfigurationProfile.getDynamicLoadProfiles()[this.selectedProfileID][lastIndex].getEndingTimeOfProfile() + 100).toEpochSecond();
 
             //running action could be rescheduled, so look for maximum length this could run
             if (this.isControllable()) {
-                long lastPossibleEnd = this.configurationStartedAt + this.lastSet1sttDof
+                long lastPossibleEnd = this.configurationStartedAt.plus(this.lastSet1sttDof).plusSeconds(
                         + XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)) + 100;
+                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)) + 100).toEpochSecond();
                 otherLast = Math.max(lastPossibleEnd, otherLast);
             }
 

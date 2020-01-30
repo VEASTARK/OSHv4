@@ -80,7 +80,7 @@ public class PvLocalObserver extends LocalObserver {
 
                 CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         DeviceTypes.PVSYSTEM);
                 cpse.addPowerState(Commodity.ACTIVEPOWER, this.lastActivePowerLevel);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, this.lastReactivePowerLevel);
@@ -122,7 +122,8 @@ public class PvLocalObserver extends LocalObserver {
         //Prediction is always in relative Time from midnight, we need to extend it and then convert to absolute time
         SparseLoadProfile optimizationProfile = this.predictedPVProfile.merge(this.predictedPVProfile, 86400).cloneWithOffset(now);
 
-        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(), this.getGlobalLogger(), now, optimizationProfile, this.compressionType, this.compressionValue);
+        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(), this.getGlobalLogger(),
+                this.getTimeDriver().getCurrentTime(), optimizationProfile, this.compressionType, this.compressionValue);
 
         this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
     }

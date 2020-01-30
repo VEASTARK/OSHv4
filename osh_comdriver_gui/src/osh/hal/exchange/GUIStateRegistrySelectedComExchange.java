@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALExchange;
 import osh.comdriver.simulation.cruisecontrol.stateviewer.StateViewerRegistryEnum;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -17,7 +18,8 @@ public class GUIStateRegistrySelectedComExchange extends CALExchange {
     /**
      * CONSTRUCTOR
      */
-    public GUIStateRegistrySelectedComExchange(UUID deviceID, Long timestamp, StateViewerRegistryEnum registry) {
+    public GUIStateRegistrySelectedComExchange(UUID deviceID, ZonedDateTime timestamp,
+                                               StateViewerRegistryEnum registry) {
         super(deviceID, timestamp);
         this.registry = registry;
     }

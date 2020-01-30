@@ -109,6 +109,14 @@ public class TimeConversion {
     }
 
     /**
+     * @param zdt
+     * @return jan=0, ... , dec=11
+     */
+    public static int convertZonedDateTime2MonthInt(ZonedDateTime zdt) {
+        return zdt.getMonth().getValue() - 1;
+    }
+
+    /**
      * @param unixTime
      * @return seconds since midnight (1am=3600)
      */

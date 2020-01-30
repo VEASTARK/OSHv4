@@ -231,7 +231,7 @@ public abstract class GenericApplianceDriver
                     LoadProfileCompressionTypes.DISCONTINUITIES,
                     1,
                     -1);
-            observerObj.setAcpReferenceTime(exchange.getEpochSecond());
+            observerObj.setAcpReferenceTime(exchange.getTime());
             this.acpChanged = false;
         }  // ACP in OX = null
 
@@ -251,13 +251,13 @@ public abstract class GenericApplianceDriver
 
     }
 
-    private long calculateDOFFromFinishTimeAndRemainingTime() {
+    private Duration calculateDOFFromFinishTimeAndRemainingTime() {
         //if programmtime is bigger than the time of the settings from the appliance
         if (TimeUtils.isAfterEquals(this.expectedEndingTimeReceivedFromAppliance,
                 this.expectedFinishTimeReceivedFromAppliance)) {
             //RETURN DOF = 0
             //means the appliance will be starting right now
-            return 0;
+            return Duration.ZERO;
         } else {
             //calculate the dof from the programmtime and the setting from the appliance.
             //RETURN DOF
@@ -271,7 +271,7 @@ public abstract class GenericApplianceDriver
             dofRounded *= 100;
             dof = (long) dofRounded;
 
-            return dof;
+            return Duration.ofSeconds(dof);
         }
 
     }
@@ -601,7 +601,7 @@ public abstract class GenericApplianceDriver
                 UUID.randomUUID(),
                 dynamicLoadProfiles,
                 minMaxTimes,
-                this.getTimeDriver().getCurrentEpochSecond());
+                this.getTimeDriver().getCurrentTime());
         this.acpChanged = true;
     }
 

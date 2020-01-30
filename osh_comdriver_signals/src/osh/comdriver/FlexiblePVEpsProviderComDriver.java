@@ -16,6 +16,8 @@ import osh.utils.time.TimeConversion;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -39,11 +41,11 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
     /**
      * Timestamp of the last price signal sent to global controller
      */
-    private long lastSignalSent;
+    private ZonedDateTime lastSignalSent;
     /**
      * Maximum time the signal is available in advance (36h)
      */
@@ -74,9 +76,10 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         super(osh, deviceID, driverConfig);
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -160,7 +163,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         }
 
 
-        this.signalAvailableFor = this.signalPeriod - this.newSignalAfterThisPeriod;
+        this.signalAvailableFor = (int) (this.signalPeriod - this.newSignalAfterThisPeriod.toSeconds());
 
     }
 
@@ -169,7 +172,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         this.pVPriceSignal = this.readCsvPriceSignal(this.filePathActivePowerFeedInPVPriceSignal);
 
@@ -212,7 +215,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         this.lastSignalSent = now;
 
         // register
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -222,9 +225,9 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
-        if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
                 PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
                 this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);

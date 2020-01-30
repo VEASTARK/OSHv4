@@ -15,6 +15,8 @@ import osh.utils.slp.IH0Profile;
 import osh.utils.time.TimeConversion;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -34,14 +36,14 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
 
     /**
      * Maximum time the signal is available in advance (36h)
      */
     private int signalPeriod;
 
-    private long lastTimeSignalSent;
+    private ZonedDateTime lastTimeSignalSent;
 
     /* Minimum time the signal is available in advance (24h)
      * atLeast = signalPeriod - newSignalAfterThisPeriod */
@@ -87,9 +89,10 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         }
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -186,14 +189,14 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         this.priceSignals = this.generateNewPriceSignal();
         EpsComExchange ex = new EpsComExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 this.priceSignals);
         this.notifyComManager(ex);
 
-        this.lastTimeSignalSent = this.getTimeDriver().getCurrentEpochSecond();
+        this.lastTimeSignalSent = this.getTimeDriver().getCurrentTime();
 
         //register update
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -204,12 +207,12 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
         // generate new PriceSignal and send it
-        if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isAfter(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
 
-            int nowIsYear = TimeConversion.convertUnixTime2Year(now);
+            int nowIsYear = now.getYear();
             if (nowIsYear != this.currentYear) {
                 // new years eve...
                 this.currentYear = nowIsYear;

@@ -6,6 +6,7 @@ import osh.core.interfaces.IOSHOC;
 import osh.datatypes.dof.DofStateExchange;
 import osh.hal.exchange.DofComExchange;
 
+import java.time.ZonedDateTime;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public class SimpleDofComManager extends ComManager {
             DofComExchange dce = (DofComExchange) exchangeObject;
 
 
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
             for (Entry<UUID, Integer> en : dce.getDevice1stDegreeOfFreedom().entrySet()) {
 

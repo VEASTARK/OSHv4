@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.cal.CALComExchange;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class DofComExchange extends CALComExchange {
      * @param deviceID
      * @param timestamp
      */
-    public DofComExchange(UUID deviceID, Long timestamp) {
+    public DofComExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
 
     }

@@ -13,6 +13,8 @@ import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.time.TimeConversion;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.UUID;
@@ -33,11 +35,11 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
     /**
      * Timestamp of the last price signal sent to global controller
      */
-    private long lastSignalSent;
+    private ZonedDateTime lastSignalSent;
     /**
      * Maximum time the signal is available in advance (36h)
      */
@@ -68,9 +70,10 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
         super(osh, deviceID, driverConfig);
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12); //12 hours
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -153,7 +156,7 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
                 .map(AncillaryCommodity::fromString)
                 .collect(Collectors.toList());
 
-        this.signalAvailableFor = this.signalPeriod - this.newSignalAfterThisPeriod;
+        this.signalAvailableFor = (int) (this.signalPeriod - this.newSignalAfterThisPeriod.toSeconds());
     }
 
 
@@ -161,7 +164,7 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         this.generatePriceSignals();
 
@@ -172,10 +175,10 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
                 this.currentPriceSignal);
         this.notifyComManager(ex);
 
-        this.lastSignalSent = now - this.newSignalAfterThisPeriod;
+        this.lastSignalSent = now.minus(this.newSignalAfterThisPeriod);
 
         // register
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -186,12 +189,12 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
-        if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             this.generatePriceSignals();
 
-            this.lastSignalSent += this.newSignalAfterThisPeriod;
+            this.lastSignalSent = now;
 
             // EPS
             EpsComExchange ex = new EpsComExchange(

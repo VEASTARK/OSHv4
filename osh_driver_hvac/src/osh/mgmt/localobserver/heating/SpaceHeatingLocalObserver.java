@@ -15,6 +15,7 @@ import osh.mgmt.ipp.HotWaterDemandNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class SpaceHeatingLocalObserver
             HotWaterDemandObserverExchange ox = (HotWaterDemandObserverExchange) hx;
             this.hotWaterPower = ox.getHotWaterPower();
 
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -179,9 +180,8 @@ public class SpaceHeatingLocalObserver
 
 
     private void sendIPP() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        long secondsSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
-        long startOfDay = now - secondsSinceMidnight;
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        long startOfDay = now.withHour(0).withMinute(0).withSecond(0).withNano(0).toEpochSecond();
 
         HotWaterDemandNonControllableIPP ipp =
                 new HotWaterDemandNonControllableIPP(

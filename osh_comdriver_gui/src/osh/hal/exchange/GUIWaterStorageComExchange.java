@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.cal.CALComExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -28,7 +29,7 @@ public class GUIWaterStorageComExchange extends CALComExchange {
      */
     public GUIWaterStorageComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             double currentTemp,
             double minTemp,
             double maxTemp,

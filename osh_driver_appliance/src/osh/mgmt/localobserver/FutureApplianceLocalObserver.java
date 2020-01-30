@@ -23,6 +23,8 @@ import osh.hal.interfaces.appliance.IHALGenericApplianceDetails;
 import osh.hal.interfaces.appliance.IHALGenericApplianceProgramDetails;
 import osh.mgmt.mox.GenericApplianceMOX;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -45,9 +47,9 @@ public class FutureApplianceLocalObserver
 
     private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
     private UUID acpID; // save ID separately for detection of new ACP
-    private Long acpReferenceTime;
+    private ZonedDateTime acpReferenceTime;
 
-    private Long dof;
+    private Duration dof;
 
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
@@ -115,7 +117,7 @@ public class FutureApplianceLocalObserver
             if (ihgad.getDOF() != null) {
                 this.dof = ihgad.getDOF();
             } else {
-                this.dof = 0L;
+                this.dof = Duration.ZERO;
             }
 
         }

@@ -8,6 +8,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.ThermalDemandData;
 import osh.eal.hal.exceptions.HALException;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.WaterDemandPredictionExchange;
 import osh.simulation.DatabaseLoggerThread;
@@ -16,6 +17,7 @@ import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -99,7 +101,7 @@ public abstract class ThermalDemandSimulationDriver
         }
 
         WaterDemandPredictionExchange _ox = new WaterDemandPredictionExchange(this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 predictions, this.pastDaysPrediction, this.weightForOtherWeekday, this.weightForSameWeekday);
         this.notifyObserver(_ox);
 
@@ -130,20 +132,21 @@ public abstract class ThermalDemandSimulationDriver
         int randomHourShift = 2; // % 2 == 0
 
         // get new values
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        if (now % 3600 == 0) {
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
 //			double demand = 0;
             int randomNumber = ownGen.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
-            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber, randomHourShift);
+            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now.toEpochSecond(), randomNumber
+                    , randomHourShift);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now - 3600, 0, 0);
 //			demand += 0.5 * demandData.getTotalThermalDemand(now, 0, 0);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now + 3600, 0, 0);
 
             // demand: month correction
-            demand *= this.getMonthlyCorrection(TimeConversion.convertUnixTime2MonthInt(now));
+            demand *= this.getMonthlyCorrection(TimeConversion.convertZonedDateTime2MonthInt(now));
 
             // demand: day of week correction
-            demand *= this.getDayOfWeekCorrection(TimeConversion.convertUnixTime2CorrectedWeekdayInt(now));
+            demand *= this.getDayOfWeekCorrection(TimeConversion.convertTime2CorrectedWeekdayInt(now));
 
             // demand: general correction value
             demand *= this.getGeneralCorrection();
@@ -160,9 +163,9 @@ public abstract class ThermalDemandSimulationDriver
 
         if (this.log) {
             int power = this.getPower(this.hotWaterType);
-            int weekDay = TimeConversion.convertUnixTime2CorrectedWeekdayInt(now);
-            int minute = TimeConversion.convertUnixTime2MinuteOfDay(now);
-            int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
+            int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(now);
+            int minute = now.getMinute();
+            int dayOfYear = now.getDayOfYear();
             this.avgWeekDayLoad[weekDay][minute] += power;
             this.avgWeekDayLoadCounter[weekDay][minute]++;
             this.avgDayLoad[dayOfYear] += power;

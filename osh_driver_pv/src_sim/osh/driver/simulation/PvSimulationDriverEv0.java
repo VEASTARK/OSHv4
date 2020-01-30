@@ -140,7 +140,8 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             predictions.add(prof);
         }
 
-        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), predictions, this.pastDaysPrediction);
+        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(), predictions,
+                this.pastDaysPrediction);
         this.notifyObserver(_ox);
     }
 
@@ -172,7 +173,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             }
         }
 
-        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
         _ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));
         this.notifyObserver(_ox);

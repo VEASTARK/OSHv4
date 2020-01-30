@@ -5,6 +5,7 @@ import osh.core.logging.IGlobalLogger;
 import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;
 
 import java.sql.*;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -123,14 +124,14 @@ public class DofDBThread extends Thread {
 
                     String devId = expectedStartTimeExchange.getSender()
                             .toString();
-                    int startTime = (int) expectedStartTimeExchange
+                    ZonedDateTime startTime = expectedStartTimeExchange
                             .getExpectedStartTime();
 
                     query = "INSERT INTO `" + "appliance_schedule" + "`"
                             + "(`uuid`, `scheduled_at`, `scheduled_to`) "
                             + "VALUES (" + "'" + devId + "', " + "'"
                             + (System.currentTimeMillis() / 1000L) + "', "
-                            + "'" + startTime + "'" + ")";
+                            + "'" + startTime.toEpochSecond() + "'" + ")";
                     statement.execute(query);
                 }
                 // commit the query

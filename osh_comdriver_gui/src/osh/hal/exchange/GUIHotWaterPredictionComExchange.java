@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.cal.CALComExchange;
 
+import java.time.ZonedDateTime;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ public class GUIHotWaterPredictionComExchange extends CALComExchange {
     private final TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
 
     public GUIHotWaterPredictionComExchange(UUID sender,
-                                            long timestamp,
+                                            ZonedDateTime timestamp,
                                             TreeMap<Long, Double> predictedTankTemp,
                                             TreeMap<Long, Double> predictedHotWaterDemand,
                                             TreeMap<Long, Double> predictedHotWaterSupply) {

@@ -12,6 +12,9 @@ import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchang
 import osh.hal.exchange.BatteryStorageOX;
 import osh.mgmt.mox.BatteryStorageMOX;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * @author Jan Mueller, Matthias Maerz
  */
@@ -34,8 +37,8 @@ public class InverterBatteryStorageObserver
     private int activePower;
     private int reactivePower;
 
-    private int rescheduleAfter;
-    private long newIppAfter;
+    private Duration rescheduleAfter;
+    private Duration newIppAfter;
     private int triggerIppIfDeltaSoCBigger;
 
     private LoadProfileCompressionTypes compressionType;
@@ -52,7 +55,7 @@ public class InverterBatteryStorageObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // get OX
         BatteryStorageOX ox = (BatteryStorageOX) this.getObserverDataObject();

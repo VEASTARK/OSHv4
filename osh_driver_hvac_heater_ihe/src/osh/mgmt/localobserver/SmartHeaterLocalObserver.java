@@ -15,6 +15,9 @@ import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.hal.exchange.SmartHeaterOX;
 import osh.mgmt.ipp.SmartHeaterNonControllableIPP;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * @author Ingo Mauser
  */
@@ -28,9 +31,9 @@ public class SmartHeaterLocalObserver
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
 
-    private long NEW_IPP_AFTER;
+    private Duration NEW_IPP_AFTER;
     private int TRIGGER_IPP_IF_DELTA_TEMP_BIGGER;
-    private long lastTimeIppSent = Long.MIN_VALUE;
+    private ZonedDateTime lastTimeIppSent;
     private double lastIppTempSetting = Integer.MIN_VALUE;
 
 
@@ -45,7 +48,7 @@ public class SmartHeaterLocalObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         IHALExchange _ihal = this.getObserverDataObject();
 
@@ -57,15 +60,14 @@ public class SmartHeaterLocalObserver
             this.currentState = ox.getCurrentState();
             this.timestampOfLastChangePerSubElement = ox.getTimestampOfLastChangePerSubElement();
 
-            long ipp_diff = now - this.lastTimeIppSent;
-            if (ipp_diff >= this.NEW_IPP_AFTER || Math.abs(this.temperatureSetting - this.lastIppTempSetting) > this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
+            if (!now.isAfter(this.lastTimeIppSent.plus(this.NEW_IPP_AFTER)) || Math.abs(this.temperatureSetting - this.lastIppTempSetting) > this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
                 this.sendIPP(now);
             }
 
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());
@@ -85,7 +87,7 @@ public class SmartHeaterLocalObserver
         }
     }
 
-    private void sendIPP(long now) {
+    private void sendIPP(ZonedDateTime now) {
         SmartHeaterNonControllableIPP sipp = new SmartHeaterNonControllableIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),

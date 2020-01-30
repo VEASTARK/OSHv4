@@ -449,7 +449,7 @@ public class FutureApplianceIPP
 
         // convert to selected starting times
         long[] selectedStartingTimes = getStartingTimes(
-                this.acp.getAcpReferenceTime(),
+                this.acp.getAcpReferenceTime().toEpochSecond(),
                 selectedTDOF,
                 selectedMinMaxTimes);
 
@@ -702,7 +702,7 @@ public class FutureApplianceIPP
         return new GenericApplianceSolution(
                 this.acp.getAcpID(),
                 getStartingTimes(
-                        this.acp.getAcpReferenceTime(),
+                        this.acp.getAcpReferenceTime().toEpochSecond(),
                         selectedTimeOfTDOF,
                         this.acp.getMinMaxDurations()[selectedProfile]),
                 selectedProfile);

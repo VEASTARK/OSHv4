@@ -76,7 +76,8 @@ public class SpaceHeatingDriver
         this.getDriverRegistry().subscribe(WeatherPredictionDetails.class, this.getUUID(), this);
 
         StaticCompressionExchange observerExchange =
-                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), this.compressionType, this.compressionValue);
+                new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(), this.compressionType,
+                        this.compressionValue);
 
         this.notifyObserver(observerExchange);
     }
@@ -103,7 +104,7 @@ public class SpaceHeatingDriver
             SpaceHeatingPredictionObserverExchange observerExchange =
                     new SpaceHeatingPredictionObserverExchange(
                             this.getUUID(),
-                            this.getTimeDriver().getCurrentEpochSecond(),
+                            this.getTimeDriver().getCurrentTime(),
                             this.predictedHeatConsumptionMap);
             this.notifyObserver(observerExchange);
         }
