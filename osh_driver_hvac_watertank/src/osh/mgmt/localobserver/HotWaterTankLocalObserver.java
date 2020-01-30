@@ -75,8 +75,6 @@ public class HotWaterTankLocalObserver
         long now = exchange.getEpochSecond();
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
-            this.getGlobalLogger().logDebug("sending new tank-ipp, due to time: current: " + now + ", lasts " +
-                    "sent: " + this.lastTimeIPPSent);
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     this.getGlobalLogger(),
@@ -146,8 +144,6 @@ public class HotWaterTankLocalObserver
             this.currentTemperature = ox.getTopTemperature();
 
             if (Math.abs(this.temperatureInLastIPP - this.currentTemperature) >= this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
-                this.getGlobalLogger().logDebug("sending new tank-ipp, due to temp-diff: current: " + this.currentTemperature + ", lasts " +
-                        "sent: " + this.temperatureInLastIPP);
                 this.tankCapacity = ox.getTankCapacity();
                 this.tankDiameter = ox.getTankDiameter();
                 this.ambientTemperature = ox.getAmbientTemperature();
