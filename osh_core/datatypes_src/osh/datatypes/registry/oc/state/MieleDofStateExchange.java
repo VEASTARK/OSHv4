@@ -4,6 +4,7 @@ import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -20,10 +21,10 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
     /**
      * the duration, NOT an absolute point in time!
      */
-    private final long lastDof;
-    private final long earliestStartTime;
-    private final long latestStartTime;
-    private final long expectedStartTime;
+    private final Duration lastDof;
+    private final ZonedDateTime earliestStartTime;
+    private final ZonedDateTime latestStartTime;
+    private final ZonedDateTime expectedStartTime;
 
 
     /**
@@ -39,10 +40,10 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
     public MieleDofStateExchange(
             UUID sender,
             ZonedDateTime timestamp,
-            long lastDof,
-            long earliestStartTime,
-            long latestStartTime,
-            long expectedStartTime) {
+            Duration lastDof,
+            ZonedDateTime earliestStartTime,
+            ZonedDateTime latestStartTime,
+            ZonedDateTime expectedStartTime) {
         super(sender, timestamp);
 
         this.lastDof = lastDof;
@@ -55,22 +56,22 @@ public class MieleDofStateExchange extends StateExchange implements IPromiseToBe
      * returns the last set degree of freedom in seconds as duration
      */
     @XmlElement
-    public long getLastDof() {
+    public Duration getLastDof() {
         return this.lastDof;
     }
 
     @XmlElement
-    public long getEarliestStartTime() {
+    public ZonedDateTime getEarliestStartTime() {
         return this.earliestStartTime;
     }
 
     @XmlElement
-    public long getLatestStartTime() {
+    public ZonedDateTime getLatestStartTime() {
         return this.latestStartTime;
     }
 
     @XmlElement
-    public long getExpectedStartTime() {
+    public ZonedDateTime getExpectedStartTime() {
         return this.expectedStartTime;
     }
 

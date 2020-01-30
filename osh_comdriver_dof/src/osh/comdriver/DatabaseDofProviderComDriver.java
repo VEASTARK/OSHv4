@@ -11,6 +11,7 @@ import osh.hal.exchange.DofComExchange;
 import osh.hal.exchange.ScheduledApplianceUIExchange;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -22,8 +23,8 @@ import java.util.UUID;
  */
 public class DatabaseDofProviderComDriver extends CALComDriver {
 
-    final HashMap<UUID, Integer> device1stDegreeOfFreedom = new HashMap<>();
-    final HashMap<UUID, Integer> device2ndDegreeOfFreedom = new HashMap<>();
+    final HashMap<UUID, Duration> device1stDegreeOfFreedom = new HashMap<>();
+    final HashMap<UUID, Duration> device2ndDegreeOfFreedom = new HashMap<>();
     private final OSHParameterCollection config;
     private DofDBThread dbThread;
 
@@ -100,10 +101,10 @@ public class DatabaseDofProviderComDriver extends CALComDriver {
     public void processDofInformation(HashMap<UUID, Integer> appliance1stDof, HashMap<UUID, Integer> appliance2ndDof) {
 
         for (Entry<UUID, Integer> e : appliance1stDof.entrySet()) {
-            this.device1stDegreeOfFreedom.put(e.getKey(), e.getValue());
+            this.device1stDegreeOfFreedom.put(e.getKey(), Duration.ofSeconds(e.getValue()));
         }
         for (Entry<UUID, Integer> e : appliance2ndDof.entrySet()) {
-            this.device2ndDegreeOfFreedom.put(e.getKey(), e.getValue());
+            this.device2ndDegreeOfFreedom.put(e.getKey(), Duration.ofSeconds(e.getValue()));
         }
 
         DofComExchange dce = new DofComExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());

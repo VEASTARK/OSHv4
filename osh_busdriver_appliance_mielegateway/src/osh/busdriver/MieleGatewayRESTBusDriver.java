@@ -77,7 +77,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
 
     static private StartTimeDetails createStartTimeDetails(
             final UUID devUUID,
-            long timestamp,
+            ZonedDateTime timestamp,
             MieleDeviceHomeBusDataREST dev) {
 
         StartTimeDetails startDetails = new StartTimeDetails(devUUID, timestamp);
@@ -110,7 +110,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
 
     static private GenericApplianceDriverDetails createApplianceDetails(
             UUID uuid,
-            long timestamp,
+            ZonedDateTime timestamp,
             MieleDeviceHomeBusDataREST dev) throws OSHException {
 
         GenericApplianceDriverDetails details = new GenericApplianceDriverDetails(uuid, timestamp);
@@ -155,7 +155,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
                     break;
                 }
 
-                long timestamp = this.getTimeDriver().getCurrentEpochSecond();
+                ZonedDateTime timestamp = this.getTimeDriver().getCurrentTime();
 
                 if (this.mieleGatewayDispatcher.getDeviceData().isEmpty()) { // an error has occurred
                     for (UUID uuid : this.deviceProperties.keySet()) {

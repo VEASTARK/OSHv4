@@ -58,7 +58,7 @@ public class ESHLSpaceHeatingLocalObserver
                             this.getUUID(),
                             this.getDeviceType(),
                             this.getGlobalLogger(),
-                            now,
+                            this.getTimeDriver().getCurrentTime(),
                             false,
                             this.predictedDemand.clone(),
                             Commodity.HEATINGHOTWATERPOWER,

@@ -165,14 +165,14 @@ public class GuiComManager extends ComManager implements IDataRegistryListener {
                 this.updateOcDataSubscriber(
                         new GUIStatesComExchange(
                                 this.getUUID(),
-                                exchange.getEpochSecond(),
+                                exchange.getTime(),
                                 this.getOCRegistry().getDataTypes(),
                                 states));
             } else if (this.stateViewerRegistry == StateViewerRegistryEnum.DRIVER) {
                 this.updateOcDataSubscriber(
                         new GUIStatesComExchange(
                                 this.getUUID(),
-                                exchange.getEpochSecond(),
+                                exchange.getTime(),
                                 this.stateViewerType));
             }
         } finally {

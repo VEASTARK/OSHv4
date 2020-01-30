@@ -34,6 +34,7 @@ import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
+import java.time.Duration;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -53,8 +54,8 @@ public class MieleApplianceDriver
     private long programStartedTime = -1;
 
     //temporal degree of freedom
-    private int firstDof;
-    private int secondDof;
+    private Duration firstDof;
+    private Duration secondDof;
 
     // pending command
     private EN50523OIDExecutionOfACommandCommands pendingCommand;
@@ -254,7 +255,7 @@ public class MieleApplianceDriver
                     this.firstDof = dse.getDevice1stDegreeOfFreedom();
                     this.secondDof = dse.getDevice2ndDegreeOfFreedom();
                     //sanity
-                    if (this.firstDof < 0 || this.secondDof < 0) {
+                    if (this.firstDof.isNegative() || this.secondDof.isNegative()) {
                         this.getGlobalLogger().logError("Received illegal dof, not sending to o/c");
                     } else {
                         GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getUUID(),

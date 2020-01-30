@@ -11,6 +11,7 @@ import osh.datatypes.registry.oc.details.SwitchOCDetails;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.hal.exchange.SmartPlugObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -34,7 +35,7 @@ public class SmartPlugLocalObserver extends LocalObserver {
         SmartPlugObserverExchange plugObserverExchange = (SmartPlugObserverExchange) this.getObserverDataObject();
 
         UUID uuid = plugObserverExchange.getDeviceID();
-        long timestamp = plugObserverExchange.getTimestamp();
+        ZonedDateTime timestamp = plugObserverExchange.getTimestamp();
 
         if (plugObserverExchange.getDeviceType() == DeviceTypes.SWITCHPLUG
                 || plugObserverExchange.getDeviceType() == DeviceTypes.METERSWITCHPLUG) {

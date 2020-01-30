@@ -89,6 +89,10 @@ public class TimeConversion {
         return time.toEpochSecond() - yearStart.toEpochSecond();
     }
 
+    public static long getSecondsSinceDayStart(ZonedDateTime time) {
+        return time.toEpochSecond() - TimeConversion.getCurrentStartOfDay(time);
+    }
+
     /**
      * @param unixTime
      * @return jan=1 (as ENUM -> getValue()), ...
@@ -125,6 +129,14 @@ public class TimeConversion {
         ZonedDateTime zdt = time.atZone(zone);
         ZonedDateTime midnight = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
         return (int) (unixTime - midnight.toEpochSecond());
+    }
+
+    /**
+     * @param time
+     * @return epoch seconds at the start of the current day
+     */
+    public static long getCurrentStartOfDay(ZonedDateTime time) {
+        return time.withHour(0).withMinute(0).withSecond(0).withNano(0).toEpochSecond();
     }
 
 
@@ -252,6 +264,16 @@ public class TimeConversion {
         ZonedDateTime zdt = time.atZone(zone);
 
         return ((zdt.getHour() * 60 + zdt.getMinute()) % 1440);
+    }
+
+    /**
+     * gets minuteOfDay
+     *
+     * @param time
+     * @return minuteOfDay, 00:01 = 1
+     */
+    public static int convertTime2MinuteOfDay(ZonedDateTime time) {
+        return ((time.getHour() * 60 + time.getMinute()) % 1440);
     }
 
     public static int getNumberOfDaysInYearFromTimeStamp(long timeStamp) {

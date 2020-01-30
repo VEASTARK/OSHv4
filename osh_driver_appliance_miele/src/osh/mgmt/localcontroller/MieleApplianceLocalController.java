@@ -25,6 +25,11 @@ import osh.mgmt.localobserver.ipp.MieleSolution;
 import osh.mgmt.localobserver.miele.MieleAction;
 import osh.mgmt.mox.MieleApplianceMOX;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.time.TimeConversion;
+import osh.utils.time.TimeUtils;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -46,25 +51,25 @@ public class MieleApplianceLocalController
     /**
      * use private setter setStartTime()
      */
-    private long startTime = -1;
+    private ZonedDateTime startTime;
 
     // used for EA planning
-    private final long expectedStartTime = -1;
-    private long profileStarted = -1;
-    private long programmedAt = -1;
+    private final ZonedDateTime expectedStartTime = null;
+    private ZonedDateTime profileStarted;
+    private ZonedDateTime programmedAt;
 
     /**
      * Never change this by hand, use setDof()
      */
-    private int firstDof;
+    private Duration firstDof;
     /**
      * Never change this by hand, use setDof()
      */
-    private int secondDof;
+    private Duration secondDof;
     /**
      * Never change this by hand, use setDof()
      */
-    private long latestStart;
+    private ZonedDateTime latestStart;
 
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
@@ -101,7 +106,7 @@ public class MieleApplianceLocalController
         MieleApplianceControllerExchange halControllerExchangeObject
                 = new MieleApplianceControllerExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 EN50523OIDExecutionOfACommandCommands.START);
         this.updateOcDataSubscriber(halControllerExchangeObject);
     }
@@ -113,8 +118,8 @@ public class MieleApplianceLocalController
             EASolutionCommandExchange<MieleSolution> solution = (EASolutionCommandExchange<MieleSolution>) exchange;
             if (!solution.getReceiver().equals(this.getUUID()) || solution.getPhenotype() == null) return;
             this.getGlobalLogger().logDebug("getting new starttime: " + solution.getPhenotype().startTime);
-            this.setStartTime(solution.getPhenotype().startTime);
-            this.setWAMPStartTime(solution.getPhenotype().startTime);
+            this.setStartTime(TimeConversion.convertUnixTimeToZonedDateTime(solution.getPhenotype().startTime));
+            this.setWAMPStartTime(TimeConversion.convertUnixTimeToZonedDateTime(solution.getPhenotype().startTime));
             this.updateDofExchange();
 
             //System.out.println(getDeviceID() + " got new start time: " + startTime);
@@ -132,7 +137,7 @@ public class MieleApplianceLocalController
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
         EN50523DeviceState oldState = this.currentState;
         this.updateMOX();
@@ -151,14 +156,14 @@ public class MieleApplianceLocalController
                 }
                 break;
                 default: {
-                    this.startTime = -1;
+                    this.startTime = null;
                 }
             }
         }
 
         if ((this.currentState == EN50523DeviceState.PROGRAMMED
                 || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART)
-                && this.startTime != -1 && this.startTime <= now) {
+                && this.startTime != null && TimeUtils.isBeforeEquals(this.startTime, now)) {
             this.callDevice();
         }
 
@@ -211,11 +216,11 @@ public class MieleApplianceLocalController
         this.compressionValue = mox.getCompressionValue();
     }
 
-    private long getStartTime() {
+    private ZonedDateTime getStartTime() {
         return this.startTime;
     }
 
-    private void setStartTime(long startTime) {
+    private void setStartTime(ZonedDateTime startTime) {
         this.startTime = startTime;
 
         this.getOCRegistry().publish(
@@ -223,34 +228,34 @@ public class MieleApplianceLocalController
                 this.getUUID(),
                 new ExpectedStartTimeExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         startTime));
 
         this.getOCRegistry().publish(
                 ExpectedStartTimeChangedExchange.class,
                 new ExpectedStartTimeChangedExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         startTime));
 
 
     }
 
-    private void setWAMPStartTime(long startTime) {
+    private void setWAMPStartTime(ZonedDateTime startTime) {
         GenericApplianceStartTimesControllerExchange halControllerExchangeObject
                 = new GenericApplianceStartTimesControllerExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 startTime);
         this.updateOcDataSubscriber(halControllerExchangeObject);
     }
 
-    public void setDof(Integer firstDof, Integer secondDof) {
+    public void setDof(Duration firstDof, Duration secondDof) {
 
         boolean dofChanged = false;
 
-        if ((firstDof != null && firstDof < 0)
-                || (secondDof != null && secondDof < 0)) {
+        if ((firstDof != null && firstDof.isNegative())
+                || (secondDof != null && secondDof.isNegative())) {
             throw new IllegalArgumentException("firstDof or secondDof < 0");
         }
 
@@ -258,12 +263,12 @@ public class MieleApplianceLocalController
             throw new IllegalArgumentException("firstDof and secondDof == null");
         }
 
-        if (firstDof != null && this.firstDof != firstDof) {
+        if (firstDof != null && !this.firstDof.equals(firstDof)) {
             this.firstDof = firstDof;
             dofChanged = true;
         }
 
-        if (secondDof != null && this.secondDof != secondDof) {
+        if (secondDof != null && !this.secondDof.equals(secondDof)) {
             this.secondDof = secondDof;
             dofChanged = true;
         }
@@ -283,38 +288,38 @@ public class MieleApplianceLocalController
                 this.getUUID(),
                 new MieleDofStateExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         this.firstDof,
-                        Math.min(this.getTimeDriver().getCurrentEpochSecond(), this.latestStart),
+                        TimeUtils.getEarlierTime(this.getTimeDriver().getCurrentTime(), this.latestStart),
                         this.latestStart,
-                        this.expectedStartTime));
+                        null));
     }
 
 
     protected void updateIPPExchange() {
         InterdependentProblemPart<?, ?> ipp;
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         if (this.currentState == EN50523DeviceState.PROGRAMMED
                 || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART) {
-            assert this.programmedAt >= 0;
+            assert this.programmedAt != null;
 
 //			if( deviceStartTime != -1 )
 //				latestStart = deviceStartTime;
 //			else
-            this.latestStart = this.programmedAt + this.firstDof;
+            this.latestStart = this.programmedAt.plus(this.firstDof);
 
             ipp = new MieleApplianceIPP(
                     this.getUUID(),
                     this.getGlobalLogger(),
                     now, //now
-                    now, //earliest starting time
-                    this.latestStart,
+                    now.toEpochSecond(), //earliest starting time
+                    this.latestStart.toEpochSecond(),
                     this.currentProfile.clone(),
                     true, //reschedule
                     false,
-                    this.latestStart + this.currentProfile.getEndingTimeOfProfile(),
+                    this.latestStart.toEpochSecond() + this.currentProfile.getEndingTimeOfProfile(),
                     this.getLocalObserver().getDeviceType(),
                     this.compressionType,
                     this.compressionValue);
@@ -329,15 +334,15 @@ public class MieleApplianceLocalController
                     this.getUUID(),
                     new LastActionExchange(
                             this.getUUID(),
-                            this.getTimeDriver().getCurrentEpochSecond(),
+                            this.getTimeDriver().getCurrentTime(),
                             mieleAction));
         } else {
-            if (this.profileStarted > 0) {
+            if (this.profileStarted != null) {
                 ipp = new MieleApplianceNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
                         now,
-                        new SparseLoadProfile().merge(this.currentProfile, this.profileStarted),
+                        new SparseLoadProfile().merge(this.currentProfile, this.profileStarted.toEpochSecond()),
                         true, // reschedule
                         this.getLocalObserver().getDeviceType(),
                         this.compressionType,

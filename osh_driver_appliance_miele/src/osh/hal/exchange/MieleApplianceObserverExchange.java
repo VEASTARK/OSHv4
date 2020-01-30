@@ -19,7 +19,7 @@ public class MieleApplianceObserverExchange
         implements IHALProgramRemainingTime, IHALMieleApplianceProgramDetails {
 
     private int programRemainingTime;
-    private long deviceStartTime;
+    private ZonedDateTime deviceStartTime;
     private EnumMap<Commodity, ArrayList<PowerProfileTick>> expectedLoadProfiles;
     private String programName;
     private String phaseName;
@@ -44,11 +44,11 @@ public class MieleApplianceObserverExchange
         this.programRemainingTime = remainingTime;
     }
 
-    public long getDeviceStartTime() {
+    public ZonedDateTime getDeviceStartTime() {
         return this.deviceStartTime;
     }
 
-    public void setDeviceStartTime(long deviceStartTime) {
+    public void setDeviceStartTime(ZonedDateTime deviceStartTime) {
         this.deviceStartTime = deviceStartTime;
     }
 

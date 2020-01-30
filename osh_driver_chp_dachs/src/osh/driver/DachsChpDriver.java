@@ -16,6 +16,7 @@ import osh.hal.exchange.ChpControllerExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
 import osh.utils.physics.ComplexPowerUtil;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -39,8 +40,8 @@ public abstract class DachsChpDriver extends ChpDriver
 //	private double typicalMassFlow = 1;
     private UUID hotWaterTankUuid;
 
-    private int rescheduleAfter;
-    private long newIPPAfter;
+    private Duration rescheduleAfter;
+    private Duration newIPPAfter;
     private int relativeHorizonIPP;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
@@ -115,16 +116,17 @@ public abstract class DachsChpDriver extends ChpDriver
         }
 
         try {
-            this.rescheduleAfter = Integer.parseInt(this.getDriverConfig().getParameter("rescheduleAfter"));
+            this.rescheduleAfter = Duration.ofSeconds(Integer.parseInt(this.getDriverConfig().getParameter(
+                    "rescheduleAfter")));
         } catch (Exception e) {
-            this.rescheduleAfter = 4 * 3600; // 4 hours
+            this.rescheduleAfter = Duration.ofHours(4);
             this.getGlobalLogger().logWarning("Can't get rescheduleAfter, using the default value: " + this.rescheduleAfter);
         }
 
         try {
-            this.newIPPAfter = Long.parseLong(this.getDriverConfig().getParameter("newIPPAfter"));
+            this.newIPPAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIPPAfter")));
         } catch (Exception e) {
-            this.newIPPAfter = 3600; // 1 hour
+            this.newIPPAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIPPAfter, using the default value: " + this.newIPPAfter);
         }
 
@@ -237,7 +239,7 @@ public abstract class DachsChpDriver extends ChpDriver
         super.onSystemIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -259,7 +261,7 @@ public abstract class DachsChpDriver extends ChpDriver
 
         this.notifyObserver(observerExchange);
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);

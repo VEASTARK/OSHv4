@@ -8,6 +8,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.dof.DofStateExchange;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,8 +103,8 @@ public class DofWAMPComDriver extends CALComDriver implements Runnable {
                 UUID mieleUUID = this.mieleUUIDMap.get(dof.getKey());
                 if (!this.lastSentValues.get(mieleUUID).equals(dof.getValue())) {
                     DofStateExchange dse = new DofStateExchange(mieleUUID, timestamp);
-                    dse.setDevice1stDegreeOfFreedom(dof.getValue());
-                    dse.setDevice2ndDegreeOfFreedom(dof.getValue());
+                    dse.setDevice1stDegreeOfFreedom(Duration.ofSeconds(dof.getValue()));
+                    dse.setDevice2ndDegreeOfFreedom(Duration.ofSeconds(dof.getValue()));
                     this.getComRegistry().publish(DofStateExchange.class, dse);
 
                     this.lastSentValues.put(mieleUUID, dof.getValue());

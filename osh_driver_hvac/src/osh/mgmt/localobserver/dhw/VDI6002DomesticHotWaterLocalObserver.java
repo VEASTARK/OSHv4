@@ -9,11 +9,14 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
 import osh.mgmt.ipp.dhw.DomesticHotWaterNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 import osh.utils.time.TimeConversion;
+
+import java.time.ZonedDateTime;
 
 /**
  * @author Sebastian Kramer
@@ -29,11 +32,11 @@ public class VDI6002DomesticHotWaterLocalObserver
     private SparseLoadProfile predictedDemand;
 
     private int hotWaterPower;
-    private long timeFromMidnight = Long.MAX_VALUE; // sic!
 
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
 
+    private ZonedDateTime lastTimeIPPSent;
 
     /**
      * CONSTRUCTOR
@@ -43,11 +46,11 @@ public class VDI6002DomesticHotWaterLocalObserver
     }
 
 
-    private void generatePrediction(long timeStamp) {
+    private void generatePrediction(ZonedDateTime time) {
 
-        int weekDay = TimeConversion.convertUnixTime2CorrectedWeekdayInt(timeStamp);
-        int month = TimeConversion.convertUnixTime2MonthInt(timeStamp);
-        long midnight = TimeConversion.getUnixTimeStampCurrentDayMidnight(timeStamp);
+        int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(time);
+        int month = TimeConversion.convertZonedDateTime2MonthInt(time);
+        long midnight = TimeConversion.getCurrentStartOfDay(time);
 
         this.predictedDemand = new SparseLoadProfile();
 
@@ -57,10 +60,12 @@ public class VDI6002DomesticHotWaterLocalObserver
             this.predictedDemand.setLoad(Commodity.DOMESTICHOTWATERPOWER, midnight + i * 3600, (int) Math.round(dayDemand * this.weekDayHourProbabilities[weekDay][i]));
         }
 
+        ZonedDateTime tomorrow = time.plusDays(1);
+
         //predict demand for the next day
-        long midNightTomorrow = TimeConversion.getStartOfXthDayAfterToday(midnight, 1);
-        weekDay = TimeConversion.convertUnixTime2CorrectedWeekdayInt(midNightTomorrow);
-        month = TimeConversion.convertUnixTime2MonthInt(midNightTomorrow);
+        long midNightTomorrow = TimeConversion.getCurrentStartOfDay(tomorrow);
+        weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(tomorrow);
+        month = TimeConversion.convertZonedDateTime2MonthInt(tomorrow);
 
         dayDemand = (this.avgYearlyDemand / 365.0) * this.correctionFactorMonth[month] * this.correctionFactorWeekday[weekDay] * 1000;
         for (int i = 0; i < 24; i++) {
@@ -82,7 +87,7 @@ public class VDI6002DomesticHotWaterLocalObserver
         if (hx instanceof HotWaterDemandObserverExchange) {
             HotWaterDemandObserverExchange ox = (HotWaterDemandObserverExchange) hx;
             this.hotWaterPower = ox.getHotWaterPower();
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -95,13 +100,7 @@ public class VDI6002DomesticHotWaterLocalObserver
                     this,
                     cpse);
 
-            long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
-
-//			boolean firstDay = getTimer().getUnixTime() - getTimer().getUnixTimeAtStart() < 86400;
-
-//			if (firstDay || lastTimeFromMidnight > this.timeFromMidnight) {
-            if (lastTimeFromMidnight > this.timeFromMidnight) {
+            if (this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 this.generatePrediction(now);
                 //a new day has begun...
                 this.sendIPP();
@@ -123,7 +122,8 @@ public class VDI6002DomesticHotWaterLocalObserver
     }
 
     private void sendIPP() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        this.lastTimeIPPSent = now;
 
         DomesticHotWaterNonControllableIPP ipp =
                 new DomesticHotWaterNonControllableIPP(

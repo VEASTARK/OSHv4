@@ -19,6 +19,7 @@ import osh.mgmt.mox.DachsChpMOX;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.physics.ComplexPowerUtil;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -35,8 +36,8 @@ public class DachsChpLocalController
     private int typicalReactivePower = Integer.MIN_VALUE;
     private int typicalGasPower = Integer.MIN_VALUE;
     private int typicalThermalPower = Integer.MIN_VALUE;
-    private int rescheduleAfter;
-    private long newIPPAfter;
+    private Duration rescheduleAfter;
+    private Duration newIPPAfter;
     private int relativeHorizonIPP;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
@@ -53,8 +54,8 @@ public class DachsChpLocalController
     // ### variables ###
 
     // scheduling
-    private long lastTimeReschedulingTriggered;
-    private long lastTimeIppSent;
+    private ZonedDateTime lastTimeReschedulingTriggered;
+    private ZonedDateTime lastTimeIppSent;
 
     private List<Activation> startTimes;
     private Activation currentActivation;
@@ -63,8 +64,8 @@ public class DachsChpLocalController
     private double currentWaterTemperature = Double.MIN_VALUE;
     private boolean currentState;
     private boolean lastState;
-    private long runningSince;
-    private long stoppedSince;
+    private ZonedDateTime runningSince;
+    private ZonedDateTime stoppedSince;
     private int lastThermalPower;
     private int currentRemainingRunningTime;
     private int currentActivePower = Integer.MIN_VALUE;
@@ -98,8 +99,8 @@ public class DachsChpLocalController
         this.getOCRegistry().subscribe(EASolutionCommandExchange.class, this.getUUID(), this);
 
         ZonedDateTime start = this.getTimeDriver().getTimeAtStart();
-        this.lastTimeIppSent = start.minusDays(1).toEpochSecond();
-        this.lastTimeReschedulingTriggered = start.minusDays(1).toEpochSecond();
+        this.lastTimeIppSent = start.minusDays(1);
+        this.lastTimeReschedulingTriggered = start.minusDays(1);
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             this.keepAliveTime = 0;
@@ -111,7 +112,7 @@ public class DachsChpLocalController
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        final long now = exchange.getEpochSecond();
+        final ZonedDateTime now = exchange.getTime();
 
 //        this.getGlobalLogger().logDebug("controller called");
 
@@ -161,7 +162,7 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
+                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now.toEpochSecond()) {
                 this.startTimes.remove(0);
             }
 
@@ -198,7 +199,7 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
+                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now.toEpochSecond()) {
                 this.startTimes.remove(0);
             }
 
@@ -236,15 +237,14 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
+                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now.toEpochSecond()) {
                 this.startTimes.remove(0);
             }
 
             // check whether to reschedule...
-            long diff = now - this.lastTimeReschedulingTriggered;
-            long ipp_diff = now - this.lastTimeIppSent;
+            Duration ipp_diff = Duration.between(this.lastTimeIppSent, now);
             //don't reschedule too often let's wait first for the solution
-            if (diff >= this.rescheduleAfter && ipp_diff > 10) {
+            if (now.isAfter(this.lastTimeReschedulingTriggered.plus(this.rescheduleAfter)) && ipp_diff.toSeconds() > 10) {
                 // force rescheduling
                 this.createNewEaPart(
                         this.currentState,
@@ -255,7 +255,7 @@ public class DachsChpLocalController
                         now,
                         true, // toBeScheduled
                         this.currentRemainingRunningTime);
-            } else if (ipp_diff >= this.newIPPAfter) {
+            } else if (ipp_diff.compareTo(this.newIPPAfter) >= 0) {
                 // just update...
                 this.createNewEaPart(
                         this.currentState,
@@ -270,7 +270,7 @@ public class DachsChpLocalController
 
             if (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime <= now) {
+                    && this.startTimes.get(0).startTime <= now.toEpochSecond()) {
                 // switch on
 
                 int scheduledRuntime;
@@ -279,7 +279,8 @@ public class DachsChpLocalController
                 if (this.startTimes.get(0) == null) {
                     this.getGlobalLogger().logError("starttimes == null || starttimes.isEmpty() || starttimes.get(0) == null -> " + (this.startTimes != null ? this.startTimes.size() : null));
                 } else {
-                    scheduledRuntime = (int) ((this.startTimes.get(0).startTime + this.startTimes.get(0).duration) - now);
+                    scheduledRuntime =
+                            (int) ((this.startTimes.get(0).startTime + this.startTimes.get(0).duration) - now.toEpochSecond());
                     this.currentActivation = this.startTimes.get(0);
                     long scheduledDuration = this.startTimes.get(0).duration;
                     this.startTimes.remove(0);
@@ -309,10 +310,10 @@ public class DachsChpLocalController
                             true,
                             scheduledRuntime);
                 }
-            } else if ((this.currentActivation != null && this.currentActivation.startTime + this.currentActivation.duration - this.keepAliveTime < now)
+            } else if ((this.currentActivation != null && this.currentActivation.startTime + this.currentActivation.duration - this.keepAliveTime < now.toEpochSecond())
                     || (this.currentActivation == null && this.startTimes == null)
                     || (this.currentActivation == null && this.startTimes.isEmpty())
-                    || (this.currentActivation == null && this.startTimes.get(0).startTime > now)) {
+                    || (this.currentActivation == null && this.startTimes.get(0).startTime > now.toEpochSecond())) {
                 // switch off (has only been on because of forced on or scheduled runtime is over)
                 cx = new ChpControllerExchange(
                         this.getUUID(),
@@ -349,7 +350,7 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
+                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now.toEpochSecond()) {
                 this.startTimes.remove(0);
             }
 
@@ -434,7 +435,7 @@ public class DachsChpLocalController
             int typicalReactivePower,
             int typicalThermalPower,
             int typicalGasPower,
-            long now,
+            ZonedDateTime now,
             boolean toBeScheduled,
             long remainingRunningTime) {
 

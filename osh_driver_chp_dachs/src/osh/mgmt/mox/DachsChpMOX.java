@@ -4,6 +4,8 @@ import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.driver.chp.ChpOperationMode;
 
+import java.time.Duration;
+
 /**
  * @author Ingo Mauser
  */
@@ -28,8 +30,8 @@ public class DachsChpMOX implements IModelOfObservationExchange {
     private final int typicalGasPower;
     private final int typicalThermalPower;
 
-    private final int rescheduleAfter;
-    private final long newIPPAfter;
+    private final Duration rescheduleAfter;
+    private final Duration newIPPAfter;
     private final int relativeHorizonIPP;
     private final double currentHotWaterStorageMinTemp;
     private final double currentHotWaterStorageMaxTemp;
@@ -59,8 +61,8 @@ public class DachsChpMOX implements IModelOfObservationExchange {
                        int typicalReactivePower,
                        int typicalGasPower,
                        int typicalThermalPower,
-                       int rescheduleAfter,
-                       long newIPPAfter,
+                       Duration rescheduleAfter,
+                       Duration newIPPAfter,
                        int relativeHorizonIPP,
                        double currentHotWaterStorageMinTemp,
                        double currentHotWaterStorageMaxTemp,
@@ -154,12 +156,12 @@ public class DachsChpMOX implements IModelOfObservationExchange {
         return this.operationMode;
     }
 
-    public int getRescheduleAfter() {
+    public Duration getRescheduleAfter() {
         return this.rescheduleAfter;
     }
 
 
-    public long getNewIPPAfter() {
+    public Duration getNewIPPAfter() {
         return this.newIPPAfter;
     }
 

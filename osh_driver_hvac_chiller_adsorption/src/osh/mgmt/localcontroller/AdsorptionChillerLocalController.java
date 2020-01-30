@@ -16,6 +16,7 @@ import osh.mgmt.ipp.ChillerIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ public class AdsorptionChillerLocalController
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        final long now = exchange.getEpochSecond();
+        final ZonedDateTime now = exchange.getTime();
 
         // get new Mox
         AdsorptionChillerMOX mox = (AdsorptionChillerMOX) this.getDataFromLocalObserver();
@@ -308,7 +309,7 @@ public class AdsorptionChillerLocalController
     private void createNewEaPart(
             boolean currentState,
             Map<Long, Double> temperaturePrediction,
-            long now,
+            ZonedDateTime now,
             boolean toBeScheduled,
             long expectedRunningTime) {
 

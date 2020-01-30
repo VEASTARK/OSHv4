@@ -229,7 +229,7 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
             CommodityPowerStateExchange cpse = (CommodityPowerStateExchange) sx;
             RestPowerDetails powerDetails = this.getRestStateDetails(uuid).getPowerDetails();
 
-            powerDetails.setTimestamp(cpse.getTimestamp());
+            powerDetails.setTimestamp(cpse.getTimestamp().toEpochSecond());
 
             Double activePower = cpse.getPowerState(Commodity.ACTIVEPOWER);
             if (activePower != null) {
@@ -244,21 +244,21 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
             RestBusDeviceStatusDetails busdevDetails = this.getRestStateDetails(uuid).getBusDeviceStatusDetails();
 
             busdevDetails.setSender(bdsd.getSender());
-            busdevDetails.setTimestamp(bdsd.getTimestamp());
+            busdevDetails.setTimestamp(bdsd.getTimestamp().toEpochSecond());
             busdevDetails.setState(RestBusDeviceStatusDetails.ConnectionStatus.valueOf(bdsd.getState().name()));
         } else if (sx instanceof SwitchDriverDetails) {
             SwitchDriverDetails sdd = (SwitchDriverDetails) sx;
             RestSwitchDetails switchDetails = this.getRestStateDetails(uuid).getSwitchDetails();
 
             switchDetails.setSender(sdd.getSender());
-            switchDetails.setTimestamp(sdd.getTimestamp());
+            switchDetails.setTimestamp(sdd.getTimestamp().toEpochSecond());
             switchDetails.setOn(sdd.isOn());
         } else if (sx instanceof GenericApplianceDriverDetails) {
             GenericApplianceDriverDetails gadd = (GenericApplianceDriverDetails) sx;
             RestApplianceDetails applianceDetails = this.getRestStateDetails(uuid).getApplianceDetails();
 
             applianceDetails.setSender(gadd.getSender());
-            applianceDetails.setTimestamp(gadd.getTimestamp());
+            applianceDetails.setTimestamp(gadd.getTimestamp().toEpochSecond());
             applianceDetails.setState(gadd.getState());
             applianceDetails.setStateTextDE(gadd.getStateTextDE());
 
@@ -294,27 +294,27 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
             RestApplianceDetails applianceDetails = this.getRestStateDetails(uuid).getApplianceDetails();
 
             applianceDetails.setSender(gapdd.getSender());
-            applianceDetails.setTimestamp(gapdd.getTimestamp());
+            applianceDetails.setTimestamp(gapdd.getTimestamp().toEpochSecond());
 
             applianceDetails.setProgramName(gapdd.getProgramName());
             applianceDetails.setPhaseName(gapdd.getPhaseName());
 
-            applianceDetails.setStartTime(gapdd.getStartTime());
-            applianceDetails.setEndTime(gapdd.getEndTime());
-            applianceDetails.setRemainingTime(gapdd.getRemainingTime());
+            applianceDetails.setStartTime(gapdd.getStartTime().toEpochSecond());
+            applianceDetails.setEndTime(gapdd.getEndTime().toEpochSecond());
+            applianceDetails.setRemainingTime((int) gapdd.getRemainingTime().toSeconds());
         } else if (sx instanceof MieleApplianceDriverDetails) {
             MieleApplianceDriverDetails madd = (MieleApplianceDriverDetails) sx;
             RestApplianceDetails applianceDetails = this.getRestStateDetails(uuid).getApplianceDetails();
 
             applianceDetails.setSender(madd.getSender());
-            applianceDetails.setTimestamp(madd.getTimestamp());
+            applianceDetails.setTimestamp(madd.getTimestamp().toEpochSecond());
             applianceDetails.setExpectedProgramDuration((int) madd.getExpectedProgramDuration());
         } else if (sx instanceof DeviceMetaDriverDetails) {
             DeviceMetaDriverDetails dmdd = (DeviceMetaDriverDetails) sx;
             RestDeviceMetaDetails deviceMetaDetails = this.getRestStateDetails(uuid).getDeviceMetaDetails();
 
             deviceMetaDetails.setSender(dmdd.getSender());
-            deviceMetaDetails.setTimestamp(dmdd.getTimestamp());
+            deviceMetaDetails.setTimestamp(dmdd.getTimestamp().toEpochSecond());
             deviceMetaDetails.setConfigured(dmdd.isConfigured());
             deviceMetaDetails.setDeviceClassification(dmdd.getDeviceClassification());
             deviceMetaDetails.setDeviceType(dmdd.getDeviceType());
@@ -326,7 +326,7 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
             RestConfigurationDetails configurationDetails = this.getRestStateDetails(uuid).getConfigurationDetails();
 
             configurationDetails.setSender(cd.getSender());
-            configurationDetails.setTimestamp(cd.getTimestamp());
+            configurationDetails.setTimestamp(cd.getTimestamp().toEpochSecond());
             configurationDetails.setConfigurationStatus(RestConfigurationDetails.ConfigurationStatus.valueOf(cd.getConfigurationStatus().name()));
             configurationDetails.setUsedBy(cd.getUsedBy());
         } else if (sx instanceof TemperatureDetails) {
@@ -336,7 +336,7 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
                 RestTemperatureDetails tempDetails = this.getRestStateDetails(uuid).getTemperatureDetails();
 
                 tempDetails.setSender(td.getSender());
-                tempDetails.setTimestamp(td.getTimestamp());
+                tempDetails.setTimestamp(td.getTimestamp().toEpochSecond());
                 tempDetails.setTemperature(td.getTemperature());
                 for (Map.Entry<String, Double> ent : td.getAuxiliaryTemperatures().entrySet()) {
                     if (ent.getValue() != null) {
@@ -347,10 +347,10 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
         } else if (sx instanceof ExpectedStartTimeExchange) {
             ExpectedStartTimeExchange este = (ExpectedStartTimeExchange) sx;
 
-            if (este.getExpectedStartTime() >= 0) {
+            if (este.getExpectedStartTime() != null) {
                 RestScheduleDetails scheduleDetails = this.getRestStateDetails(uuid).getScheduleDetails();
-                scheduleDetails.setTimestamp(este.getTimestamp());
-                scheduleDetails.setScheduledStartTime(este.getExpectedStartTime());
+                scheduleDetails.setTimestamp(este.getTimestamp().toEpochSecond());
+                scheduleDetails.setScheduledStartTime(este.getExpectedStartTime().toEpochSecond());
             } else {
                 this.getRestStateDetails(uuid).setScheduleDetails(null);
             }
@@ -407,17 +407,17 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
     }
 
     public void sendStartRequest(UUID device) {
-        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimeDriver().getCurrentEpochSecond());
+        StartDeviceRequest req = new StartDeviceRequest(this.getUUID(), device, this.getTimeDriver().getCurrentTime());
         this.getDriverRegistry().publish(StartDeviceRequest.class, req);
     }
 
     public void sendStopRequest(UUID device) {
-        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimeDriver().getCurrentEpochSecond());
+        StopDeviceRequest req = new StopDeviceRequest(this.getUUID(), device, this.getTimeDriver().getCurrentTime());
         this.getDriverRegistry().publish(StopDeviceRequest.class, req);
     }
 
     public void sendSwitchRequest(UUID device, boolean turnOn) {
-        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimeDriver().getCurrentEpochSecond());
+        SwitchRequest req = new SwitchRequest(this.getUUID(), device, this.getTimeDriver().getCurrentTime());
         req.setTurnOn(turnOn);
         this.getDriverRegistry().publish(SwitchRequest.class, req);
     }

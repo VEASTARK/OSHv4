@@ -16,6 +16,7 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -26,7 +27,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     private final int INITIAL_STATE = 0;
     private final long[] INITIAL_LAST_CHANGE = {-1, -1, -1}; // do NOT use MIN_VALUE!!!
     private int temperatureSetting;
-    private long newIppAfter;
+    private Duration newIppAfter;
     private int triggerIppIfDeltaTempBigger;
 
     private SmartHeaterModel model;
@@ -53,9 +54,9 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
         }
 
         try {
-            this.newIppAfter = Long.parseLong(this.getDriverConfig().getParameter("newIppAfter"));
+            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
         } catch (Exception e) {
-            this.newIppAfter = 3600; // 1 hour
+            this.newIppAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
         }
 
@@ -76,7 +77,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
 
-        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _ise.setNewIppAfter(this.newIppAfter);
         _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
         this.notifyObserver(_ise);
@@ -138,7 +139,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
 
         SmartHeaterOX ox = new SmartHeaterOX(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 this.temperatureSetting,
                 (int) this.currentWaterTemperature,
                 this.model.getCurrentState(),

@@ -32,4 +32,16 @@ public class TimeUtils {
     public static boolean isBeforeEquals(ZonedDateTime time, ZonedDateTime other) {
         return other.isAfter(time);
     }
+
+    /**
+     * Returns the earlier of the two given times
+     *
+     * @param time the first time
+     * @param other the second time
+     *
+     * @return the earlier of the two times
+     */
+    public static ZonedDateTime getEarlierTime(ZonedDateTime time, ZonedDateTime other) {
+        return time.compareTo(other) < 0 ? time : other;
+    }
 }

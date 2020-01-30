@@ -6,6 +6,7 @@ import osh.mgmt.localobserver.ipp.MieleApplianceIPP;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class MieleAction implements IAction {
 
     private UUID deviceID;
-    private long programmedAt;
+    private ZonedDateTime programmedAt;
     private MieleApplianceIPP ipp;
 
 
@@ -37,7 +38,7 @@ public class MieleAction implements IAction {
      */
     public MieleAction(
             UUID deviceID,
-            long programmedAt,
+            ZonedDateTime programmedAt,
             MieleApplianceIPP ipp) {
         this.deviceID = deviceID;
         this.programmedAt = programmedAt;
@@ -50,7 +51,7 @@ public class MieleAction implements IAction {
     }
 
     @Override
-    public long getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return this.programmedAt;
     }
 

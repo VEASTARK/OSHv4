@@ -17,14 +17,17 @@ import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.GasBoilerObserverExchange;
 import osh.mgmt.ipp.GasBoilerNonControllableIPP;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * @author Ingo Mauser
  */
 public class NonControllableGasBoilerLocalObserver
         extends LocalObserver {
 
-    private int NEW_IPP_AFTER;
-    private long lastTimeIPPSent = Long.MIN_VALUE;
+    private Duration NEW_IPP_AFTER;
+    private ZonedDateTime lastTimeIPPSent;
     private boolean initialStateLastIPP;
     private double lastIPPMinTemperature = 60;
     private double lastIPPMaxTemperature = 80;
@@ -58,7 +61,7 @@ public class NonControllableGasBoilerLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        if (this.NEW_IPP_AFTER % 60 == 0) {
+        if (this.NEW_IPP_AFTER.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -69,9 +72,9 @@ public class NonControllableGasBoilerLocalObserver
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
-        if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
+        if (this.lastTimeIPPSent == null || now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
                     this.getUUID(),
                     this.getGlobalLogger(),
@@ -99,7 +102,7 @@ public class NonControllableGasBoilerLocalObserver
 
     @Override
     public void onDeviceStateUpdate() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         IHALExchange _ihal = this.getObserverDataObject();
 
@@ -137,6 +140,7 @@ public class NonControllableGasBoilerLocalObserver
                 this.getOCRegistry().publish(
                         InterdependentProblemPart.class, this, sipp);
                 this.initialStateLastIPP = this.initialState;
+                this.lastTimeIPPSent = now;
                 this.lastIPPMaxTemperature = this.maxTemperature;
                 this.lastIPPMinTemperature = this.minTemperature;
             }
@@ -144,7 +148,7 @@ public class NonControllableGasBoilerLocalObserver
             // build SX
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     DeviceTypes.INSERTHEATINGELEMENT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, ox.getActivePower());

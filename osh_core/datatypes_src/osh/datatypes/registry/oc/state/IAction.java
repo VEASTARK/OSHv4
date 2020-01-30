@@ -1,5 +1,6 @@
 package osh.datatypes.registry.oc.state;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -10,7 +11,7 @@ import java.util.UUID;
 public interface IAction {
     UUID getDeviceId();
 
-    long getTimestamp();
+    ZonedDateTime getTimestamp();
 
     boolean equals(IAction other);
 

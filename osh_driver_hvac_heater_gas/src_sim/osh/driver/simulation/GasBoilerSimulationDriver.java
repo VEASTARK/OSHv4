@@ -9,6 +9,8 @@ import osh.hal.exchange.GasBoilerObserverExchange;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -28,7 +30,7 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
 
     private GasBoilerModel model;
 
-    private int newIppAfter;
+    private Duration newIppAfter;
 
     /**
      * CONSTRUCTOR
@@ -100,9 +102,9 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
         }
 
         try {
-            this.newIppAfter = Integer.parseInt(driverConfig.getParameter("newIppAfter"));
+            this.newIppAfter = Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter("newIppAfter")));
         } catch (Exception e) {
-            this.newIppAfter = 3600; //1 hour
+            this.newIppAfter = Duration.ofHours(1); //1 hour
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
         }
 
@@ -118,7 +120,7 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
 
     @Override
     public void onNextTimeTick() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // LOGIC
         double waterTemperature = this.commodityInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);

@@ -2,31 +2,32 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class GenericApplianceDofObserverExchange extends HALDeviceObserverExchange {
 
-    private Integer device1stDegreeOfFreedom;
-    private Integer device2ndDegreeOfFreedom;
+    private Duration device1stDegreeOfFreedom;
+    private Duration device2ndDegreeOfFreedom;
 
     public GenericApplianceDofObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 
-    public Integer getDevice1stDegreeOfFreedom() {
+    public Duration getDevice1stDegreeOfFreedom() {
         return this.device1stDegreeOfFreedom;
     }
 
-    public void setDevice1stDegreeOfFreedom(Integer device1stDegreeOfFreedom) {
+    public void setDevice1stDegreeOfFreedom(Duration device1stDegreeOfFreedom) {
         this.device1stDegreeOfFreedom = device1stDegreeOfFreedom;
     }
 
-    public Integer getDevice2ndDegreeOfFreedom() {
+    public Duration getDevice2ndDegreeOfFreedom() {
         return this.device2ndDegreeOfFreedom;
     }
 
-    public void setDevice2ndDegreeOfFreedom(Integer device2ndDegreeOfFreedom) {
+    public void setDevice2ndDegreeOfFreedom(Duration device2ndDegreeOfFreedom) {
         this.device2ndDegreeOfFreedom = device2ndDegreeOfFreedom;
     }
 

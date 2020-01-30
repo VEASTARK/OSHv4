@@ -13,17 +13,20 @@ import osh.mgmt.ipp.DachsChpNonControllableIPP;
 import osh.mgmt.mox.DachsChpMOX;
 import osh.utils.physics.ComplexPowerUtil;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class NonControllableDachsChpLocalController
         extends LocalController {
 
-    private long lastTimeIppSent = Long.MIN_VALUE;
+    private ZonedDateTime lastTimeIppSent;
     private boolean lastSentState;
 
 
-    private long newIPPAfter;
+    private Duration newIPPAfter;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
     private double fixedCostPerStart;
@@ -31,8 +34,8 @@ public class NonControllableDachsChpLocalController
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
 
-    private long runningSince;
-    private long stoppedSince;
+    private ZonedDateTime runningSince;
+    private ZonedDateTime stoppedSince;
     private int lastThermalPower;
 
     /**
@@ -52,7 +55,7 @@ public class NonControllableDachsChpLocalController
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        final long now = exchange.getEpochSecond();
+        final ZonedDateTime now = exchange.getTime();
         // get new MOX
         DachsChpMOX mox = (DachsChpMOX) this.getDataFromLocalObserver();
 
@@ -67,7 +70,8 @@ public class NonControllableDachsChpLocalController
         if (mox.isRunning())
             this.lastThermalPower = mox.getThermalPower();
 
-        if ((now > this.lastTimeIppSent + this.newIPPAfter) || mox.isRunning() != this.lastSentState) {
+        if (this.lastTimeIppSent == null ||
+                now.isAfter(this.lastTimeIppSent.plus(this.newIPPAfter)) || mox.isRunning() != this.lastSentState) {
             int typicalActivePower = mox.getTypicalActivePower();
             int typicalReactivePower = mox.getTypicalReactivePower();
             int typicalThermalPower = mox.getTypicalThermalPower();
@@ -101,6 +105,7 @@ public class NonControllableDachsChpLocalController
                         this.fixedCostPerStart,
                         this.compressionType,
                         this.compressionValue);
+                this.lastTimeIppSent = now;
             } catch (Exception e) {
                 e.printStackTrace();
             }
