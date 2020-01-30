@@ -60,11 +60,8 @@ public class HotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        if (this.NEW_IPP_AFTER % 60 == 0) {
-            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
-        } else {
-            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
-        }
+        //TODO: change back to updating only for minutes when next backwards-compatibility breáking update is released
+        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
         this.getOCRegistry().subscribe(EAPredictionCommandExchange.class, this.getUUID(),this);
         this.getOCRegistry().subscribe(EpsStateExchange.class, this.getUUID(),this);
@@ -78,6 +75,8 @@ public class HotWaterTankLocalObserver
         long now = exchange.getEpochSecond();
 
         if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
+            this.getGlobalLogger().logDebug("sending new tank-ipp, due to time: current: " + now + ", lasts " +
+                    "sent: " + this.lastTimeIPPSent);
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     this.getGlobalLogger(),
@@ -147,7 +146,8 @@ public class HotWaterTankLocalObserver
             this.currentTemperature = ox.getTopTemperature();
 
             if (Math.abs(this.temperatureInLastIPP - this.currentTemperature) >= this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
-
+                this.getGlobalLogger().logDebug("sending new tank-ipp, due to temp-diff: current: " + this.currentTemperature + ", lasts " +
+                        "sent: " + this.temperatureInLastIPP);
                 this.tankCapacity = ox.getTankCapacity();
                 this.tankDiameter = ox.getTankDiameter();
                 this.ambientTemperature = ox.getAmbientTemperature();
