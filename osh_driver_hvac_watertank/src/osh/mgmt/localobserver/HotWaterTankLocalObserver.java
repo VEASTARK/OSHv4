@@ -62,7 +62,7 @@ public class HotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        if (this.NEW_IPP_AFTER.toSeconds() % 60 == 0) {
+        if (this.NEW_IPP_AFTER != null && this.NEW_IPP_AFTER.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);

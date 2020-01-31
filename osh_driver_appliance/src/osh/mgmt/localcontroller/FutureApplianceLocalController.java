@@ -46,12 +46,12 @@ public class FutureApplianceLocalController
     /**
      * Never change this by hand, use setDof()
      */
-    private Duration current1stTemporalDof;
+    private Duration current1stTemporalDof = Duration.ZERO;
 
     /**
      * Never change this by hand, use setDof()
      */
-    private Duration max2ndTemporalDof; // currently not in use
+    private Duration max2ndTemporalDof = Duration.ZERO; // currently not in use
 
     /**
      * indicates whether tDoF has been changed by the user (e.g., using the GUI)
@@ -150,7 +150,7 @@ public class FutureApplianceLocalController
             this.earliestStartingTime = null;
             this.latestStartingTime = null;
             this.originalMaxDuration = null;
-        } else if (mox.getDof() != null && this.current1stTemporalDof.minus(mox.getDof()).abs().getSeconds() >= 10) {
+        } else if (mox.getDof() != null && (this.current1stTemporalDof.minus(mox.getDof()).abs().getSeconds() >= 10)) {
             this.currentState = mox.getCurrentState();
             this.setTemporalDof(mox.getDof(), null);
         } else if ((mox.getCurrentState() == EN50523DeviceState.OFF && this.currentState == EN50523DeviceState.OFF)

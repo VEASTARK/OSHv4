@@ -191,7 +191,7 @@ public class McFlatEpsProviderComDriver extends CALComDriver {
 
         ZonedDateTime now = exchange.getTime();
 
-        if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
+        if (!now.isBefore(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             this.generatePriceSignals();
 
             this.lastSignalSent = now;

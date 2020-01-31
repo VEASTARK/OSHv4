@@ -227,7 +227,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         super.onTimeExchange(exchange);
         ZonedDateTime now = exchange.getTime();
 
-        if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
+        if (!now.isBefore(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
                 PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
                 this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);

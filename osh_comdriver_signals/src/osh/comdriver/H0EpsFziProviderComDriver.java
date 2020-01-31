@@ -210,7 +210,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         ZonedDateTime now = exchange.getTime();
 
         // generate new PriceSignal and send it
-        if (!now.isAfter(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
+        if (!now.isBefore(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
 
             int nowIsYear = now.getYear();
             if (nowIsYear != this.currentYear) {

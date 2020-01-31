@@ -30,7 +30,9 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Interruptible hybrid appliance
@@ -41,6 +43,7 @@ public class GenericFutureApplianceSimulationDriver
         extends ApplianceSimulationDriver {
 
 
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     public static final int[] DEFAULT_CORRECTION_IDS = new int[0];
 
     // ### Variables for ESC ###
@@ -288,7 +291,9 @@ public class GenericFutureApplianceSimulationDriver
         if (this.selectedStartingTimes == null) {
             // PROGRAMMED and not optimized, yet
             // wait for optimization
-            this.getGlobalLogger().logDebug(this.getDeviceType() + " : PROGRAMMED @" + now + ", waiting for optimization...");
+            this.getGlobalLogger().logDebug(this.getDeviceType() + " : PROGRAMMED @" + now.format(this.timeFormatter) + ", " +
+                    "waiting for " +
+                    "optimization...");
         } else {
             // received selected starting times, go RUNNING (maybe running in pause...)
             this.setEN50523State(EN50523DeviceState.RUNNING);
@@ -296,8 +301,8 @@ public class GenericFutureApplianceSimulationDriver
             this.phaseStartedAt = now;
             this.acpChanged = true;
             this.getGlobalLogger().logDebug(
-                    this.getDeviceType() + " : started RUNNING @" + now
-                            + " with selectedStartingTimes: " + Arrays.toString(this.selectedStartingTimes)
+                    this.getDeviceType() + " : started RUNNING @" + now.format(this.timeFormatter)
+                            + " with selectedStartingTimes: " + Arrays.stream(this.selectedStartingTimes).map(s -> s.format(this.timeFormatter)).collect(Collectors.joining(", "))
                             + " and selectedProfile: " + this.selectedProfileID);
         }
     }
@@ -432,14 +437,14 @@ public class GenericFutureApplianceSimulationDriver
      * Turn it off...
      */
     private void turnOff() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         for (Commodity c : this.usedCommodities) {
             this.setPower(c, 0);
         }
 
         this.setEN50523State(EN50523DeviceState.OFF);
-        this.getGlobalLogger().logDebug(this.getDeviceType() + " : switched OFF @" + now);
+        this.getGlobalLogger().logDebug(this.getDeviceType() + " : switched OFF @" + now.format(this.timeFormatter));
 
         // reset variables
         this.acpChanged = true;
@@ -560,7 +565,8 @@ public class GenericFutureApplianceSimulationDriver
             this.selectedProfileID = cx.getSelectedProfileId();
             this.selectedStartingTimes = cx.getSelectedStartTimes();
 
-            String selectTimes = Arrays.toString(this.selectedStartingTimes);
+            String selectTimes =
+                    Arrays.stream(this.selectedStartingTimes).map(a -> a.format(this.timeFormatter)).collect(Collectors.joining(", "));
             this.getGlobalLogger().logDebug(this.getDeviceType() + " RECEIVED Selected starting times: " + selectTimes + " with selected profile: " + this.selectedProfileID);// (selectedNextProfileID == null ? selectedProfileID : selectedNextProfileID));
         } else {
             this.getGlobalLogger().logError(this.getDeviceType() + " received CX although not in state PROGRAMMED or RUNNING");

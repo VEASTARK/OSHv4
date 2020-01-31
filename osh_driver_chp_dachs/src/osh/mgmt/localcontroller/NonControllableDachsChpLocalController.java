@@ -128,7 +128,7 @@ public class NonControllableDachsChpLocalController
                     false,
                     false,
                     true,
-                    15 * 60);
+                    Duration.ofMinutes(15));
         } else if (currentWaterTemp >= this.currentHotWaterStorageMaxTemp) {
             this.stoppedSince = now;
             cx = new ChpControllerExchange(
@@ -137,7 +137,7 @@ public class NonControllableDachsChpLocalController
                     true,
                     false,
                     false,
-                    0);
+                    Duration.ZERO);
         }
         if (cx != null) {
             this.updateOcDataSubscriber(cx);

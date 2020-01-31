@@ -143,7 +143,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
         super.onTimeExchange(exchange);
         ZonedDateTime now = exchange.getTime();
         // generate new PriceSignal and send it
-        if (!now.isAfter(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
+        if (!now.isBefore(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
             // PLS
             this.powerLimitSignals = this.generateNewPowerLimitSignal(now.toEpochSecond());
             PlsComExchange ex = new PlsComExchange(

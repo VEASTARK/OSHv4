@@ -66,7 +66,7 @@ public class DachsChpSimulationDriver
 
     private boolean electricityRequest;
     private boolean heatingRequest;
-    private int runtimeRemaining;
+    private Duration runtimeRemaining;
     @SuppressWarnings("unused")
     private int offTimeRemaining;
 
@@ -277,19 +277,19 @@ public class DachsChpSimulationDriver
         if (this.electricityRequest || this.heatingRequest || this.runningRequestFromController) {
             if (!this.isRunning()) {
                 if (this.runningRequestFromController) {
-                    this.runtimeRemaining = 30 * 60;
+                    this.runtimeRemaining = Duration.ofMinutes(30);
                 } else {
-                    this.runtimeRemaining = 0;
+                    this.runtimeRemaining = Duration.ZERO;
                 }
             } else {
-                if (this.runtimeRemaining > 0) {
-                    this.runtimeRemaining -= 1;
+                if (this.runtimeRemaining.compareTo(Duration.ZERO) > 0) {
+                    this.runtimeRemaining = this.runtimeRemaining.minusSeconds(1);
                 }
             }
             this.setRunning(true);
         } else {
             this.setRunning(false);
-            this.runtimeRemaining = 0;
+            this.runtimeRemaining = Duration.ZERO;
         }
 
         this.chpModel.calcPower(this.getTimeDriver().getCurrentEpochSecond());

@@ -39,7 +39,7 @@ public class NonControllableDachsChpLocalObserver
     private int hotWaterPower;
     private int gasPower;
 
-    private int runtimeRemaining;
+    private Duration runtimeRemaining;
     private boolean running;
 
     // quasi static values

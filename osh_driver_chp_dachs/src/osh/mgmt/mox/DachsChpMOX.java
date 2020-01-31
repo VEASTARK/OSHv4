@@ -16,7 +16,7 @@ public class DachsChpMOX implements IModelOfObservationExchange {
 //	private INeededEnergy neededEnergy;
 
     private final boolean running;
-    private final int remainingRunningTime;
+    private final Duration remainingRunningTime;
 
     private final int activePower;
     private final int reactivePower;
@@ -51,7 +51,7 @@ public class DachsChpMOX implements IModelOfObservationExchange {
      */
     public DachsChpMOX(double waterTemperature,
                        boolean running,
-                       int remainingRunningTime,
+                       Duration remainingRunningTime,
                        int activePower,
                        int reactivePower,
                        int thermalPower,
@@ -116,7 +116,7 @@ public class DachsChpMOX implements IModelOfObservationExchange {
         return this.running;
     }
 
-    public int getRemainingRunningTime() {
+    public Duration getRemainingRunningTime() {
         return this.remainingRunningTime;
     }
 

@@ -1,5 +1,7 @@
 package osh.hal.interfaces.chp;
 
+import java.time.Duration;
+
 /**
  * @author Ingo Mauser
  */
@@ -10,5 +12,5 @@ public interface IHALChpDetails {
 
     boolean isElectricityRequest();
 
-    int getMinRuntimeRemaining();
+    Duration getMinRuntimeRemaining();
 }

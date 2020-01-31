@@ -14,6 +14,7 @@ import osh.datatypes.time.ActivationList;
 import osh.driver.chiller.AdsorptionChillerModel;
 import osh.utils.time.TimeConversion;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -302,19 +303,22 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         long timeOfFirstBit = this.getReferenceTime();
         Activation currentActivation = null;
 
+        long duration = 0;
         for (int i = 0; i < ab.length; i++) {
             if (ab[i]) {
                 // turn on
                 if (currentActivation == null) {
                     currentActivation = new Activation();
-                    currentActivation.startTime = timeOfFirstBit + i * TIME_PER_SLOT;
-                    currentActivation.duration = TIME_PER_SLOT;
+                    currentActivation.startTime = TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * TIME_PER_SLOT);
+                    duration = TIME_PER_SLOT;
                 } else {
-                    currentActivation.duration += TIME_PER_SLOT;
+                    duration += TIME_PER_SLOT;
                 }
             } else {
                 // turn off
                 if (currentActivation != null) {
+                    currentActivation.duration = Duration.ofSeconds(duration);
+                    duration = 0;
                     this.interdependentStartingTimes.add(currentActivation);
                     currentActivation = null;
                 }
@@ -322,6 +326,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         }
 
         if (currentActivation != null) {
+            currentActivation.duration = Duration.ofSeconds(duration);
             this.interdependentStartingTimes.add(currentActivation);
         }
 

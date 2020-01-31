@@ -27,6 +27,7 @@ import osh.utils.uuid.UUIDGenerationHelperMiele;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -211,15 +212,15 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
                     // duration
                     MieleApplianceDriverDetails mieleDetails = new MieleApplianceDriverDetails(devUUID, timestamp);
                     if (dev.getDuration() != null)
-                        mieleDetails.setExpectedProgramDuration(dev.getDuration().duration() * 60);
+                        mieleDetails.setExpectedProgramDuration(Duration.ofMinutes(dev.getDuration().duration()));
                     else
-                        mieleDetails.setExpectedProgramDuration(-1);
+                        mieleDetails.setExpectedProgramDuration(null);
 
                     // remaining time
                     if (dev.getRemainingTime() != null)
-                        mieleDetails.setProgramRemainingTime(dev.getRemainingTime().duration() * 60);
+                        mieleDetails.setProgramRemainingTime(Duration.ofMinutes(dev.getRemainingTime().duration()));
                     else
-                        mieleDetails.setProgramRemainingTime(-1);
+                        mieleDetails.setProgramRemainingTime(null);
 
                     // start time
                     if (dev.getStartTime() != null) {
@@ -230,9 +231,9 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
                         if (time.isBefore(now))
                             time = time.plusDays(1);
 
-                        mieleDetails.setStartTime(time.toEpochSecond());
+                        mieleDetails.setStartTime(time);
                     } else
-                        mieleDetails.setStartTime(-1);
+                        mieleDetails.setStartTime(null);
 
 
                     // set state of the UUID

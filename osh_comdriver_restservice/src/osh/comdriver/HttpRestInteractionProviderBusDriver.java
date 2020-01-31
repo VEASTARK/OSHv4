@@ -308,7 +308,7 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
 
             applianceDetails.setSender(madd.getSender());
             applianceDetails.setTimestamp(madd.getTimestamp().toEpochSecond());
-            applianceDetails.setExpectedProgramDuration((int) madd.getExpectedProgramDuration());
+            applianceDetails.setExpectedProgramDuration((int) madd.getExpectedProgramDuration().toSeconds());
         } else if (sx instanceof DeviceMetaDriverDetails) {
             DeviceMetaDriverDetails dmdd = (DeviceMetaDriverDetails) sx;
             RestDeviceMetaDetails deviceMetaDetails = this.getRestStateDetails(uuid).getDeviceMetaDetails();

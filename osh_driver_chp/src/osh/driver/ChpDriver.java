@@ -7,6 +7,7 @@ import osh.eal.hal.HALDeviceDriver;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.Duration;
 import java.util.UUID;
 
 
@@ -67,10 +68,10 @@ public abstract class ChpDriver
         this.minimumRuntime = minimumRuntime;
     }
 
-    public int getMinimumRuntimeRemaining() {
+    public Duration getMinimumRuntimeRemaining() {
         int returnValue = this.minimumRuntime - this.runtime;
         if (returnValue < 0) returnValue = 0;
-        return returnValue;
+        return Duration.ofSeconds(returnValue);
     }
 
     public int getRuntime() {

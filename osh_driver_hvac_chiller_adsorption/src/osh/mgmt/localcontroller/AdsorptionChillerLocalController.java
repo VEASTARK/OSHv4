@@ -15,7 +15,9 @@ import osh.hal.exchange.ChillerControllerExchange;
 import osh.mgmt.ipp.ChillerIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.time.TimeUtils;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +29,9 @@ public class AdsorptionChillerLocalController
         extends LocalController
         implements IDataRegistryListener {
 
-    private static final long NEW_IPP_AFTER = 1800; //30 min
+    private static final Duration NEW_IPP_AFTER = Duration.ofMinutes(30); //30 min
     // static values / constants
-    private final int RESCHEDULE_AFTER = 4 * 3600; // 4 hours
+    private final Duration RESCHEDULE_AFTER = Duration.ofHours(4); // 4 hours
     private final double minColdWaterTemp = 10.0; // [°C]
     private final double maxColdWaterTemp = 15.0;    // [°C]
     private final double hysteresis = 1.0;
@@ -38,8 +40,8 @@ public class AdsorptionChillerLocalController
     private final double maxHotWaterTemp = 80.0; // [°C]
 
     // scheduling
-    private long lastTimeReschedulingTriggered;
-    private long lastTimeIppSent;
+    private ZonedDateTime lastTimeReschedulingTriggered;
+    private ZonedDateTime lastTimeIppSent;
 
     private List<Activation> startTimes;
     private Activation currentActivation;
@@ -134,11 +136,7 @@ public class AdsorptionChillerLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
-                if (this.startTimes.size() == 1) {
-                    @SuppressWarnings("unused")
-                    int debug = 0;
-                }
+                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
@@ -166,11 +164,7 @@ public class AdsorptionChillerLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
-                if (this.startTimes.size() == 1) {
-                    @SuppressWarnings("unused")
-                    int debug = 0;
-                }
+                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
@@ -199,16 +193,14 @@ public class AdsorptionChillerLocalController
             }
         } else {
             // check whether to reschedule...
-            long diff = now - this.lastTimeReschedulingTriggered;
-            long diff_ipp = now - this.lastTimeIppSent;
-            if (diff < 0 || diff >= this.RESCHEDULE_AFTER) {
+            if (!now.isAfter(this.lastTimeReschedulingTriggered.plus(this.RESCHEDULE_AFTER))) {
                 this.createNewEaPart(
                         this.currentState,
                         temperaturePrediction,
                         now,
                         true,
                         0);
-            } else if (diff_ipp >= NEW_IPP_AFTER) {
+            } else if (!now.isAfter(this.lastTimeIppSent.plus(NEW_IPP_AFTER))) {
                 this.createNewEaPart(
                         this.currentState,
                         temperaturePrediction,
@@ -219,7 +211,7 @@ public class AdsorptionChillerLocalController
 
             if (this.startTimes == null
                     || (this.startTimes.isEmpty() && this.currentActivation == null)
-                    || (this.currentActivation != null && this.currentActivation.startTime + this.currentActivation.duration < now)) {
+                    || (this.currentActivation != null && now.isBefore(this.currentActivation.startTime.plus(this.currentActivation.duration)))) {
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
                         now,
@@ -228,17 +220,13 @@ public class AdsorptionChillerLocalController
                         0);
                 this.currentActivation = null;
             } else if (!this.startTimes.isEmpty()
-                    && this.startTimes.get(0).startTime <= now) {
+                    && TimeUtils.isBeforeEquals(this.startTimes.get(0).startTime, now)) {
                 // set on
 
                 // remove old start times... (sanity)
                 while (this.startTimes != null
                         && !this.startTimes.isEmpty()
-                        && this.startTimes.get(0).startTime + this.startTimes.get(0).duration < now) {
-                    if (this.startTimes.size() == 1) {
-                        @SuppressWarnings("unused")
-                        int debug = 0;
-                    }
+                        && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                     this.startTimes.remove(0);
                 }
 
@@ -302,7 +290,7 @@ public class AdsorptionChillerLocalController
             builder.append("}");
 
             this.getGlobalLogger().logDebug(builder.toString());
-            this.lastTimeReschedulingTriggered = this.getTimeDriver().getCurrentEpochSecond();
+            this.lastTimeReschedulingTriggered = this.getTimeDriver().getCurrentTime();
         }
     }
 
@@ -331,9 +319,9 @@ public class AdsorptionChillerLocalController
 
         this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this.getUUID(), ex);
-        this.lastTimeIppSent = this.getTimeDriver().getCurrentEpochSecond();
+        this.lastTimeIppSent = this.getTimeDriver().getCurrentTime();
         if (toBeScheduled) {
-            this.lastTimeReschedulingTriggered = this.getTimeDriver().getCurrentEpochSecond();
+            this.lastTimeReschedulingTriggered = this.getTimeDriver().getCurrentTime();
         }
     }
 }

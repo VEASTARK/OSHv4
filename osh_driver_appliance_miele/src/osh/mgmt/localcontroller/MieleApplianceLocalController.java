@@ -61,11 +61,11 @@ public class MieleApplianceLocalController
     /**
      * Never change this by hand, use setDof()
      */
-    private Duration firstDof;
+    private Duration firstDof = Duration.ZERO;
     /**
      * Never change this by hand, use setDof()
      */
-    private Duration secondDof;
+    private Duration secondDof = Duration.ZERO;
     /**
      * Never change this by hand, use setDof()
      */

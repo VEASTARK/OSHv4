@@ -224,7 +224,7 @@ public class WIKHourlyBasedEpsProviderComDriver extends CALComDriver {
 
         ZonedDateTime now = exchange.getTime();
 
-        if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
+        if (!now.isBefore(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
                 PriceSignal newSignal = this.generateTreeMapBasedPriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrices);
                 this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);
