@@ -107,7 +107,7 @@ public class DomesticHotWaterLocalObserver
         } else {
             this.lastDayProfile.setLoad(
                     Commodity.DOMESTICHOTWATERPOWER,
-                    TimeConversion.getSecondsSinceYearStart(this.getTimeDriver().getCurrentTime()),
+                    TimeConversion.getSecondsSinceDayStart(this.getTimeDriver().getCurrentTime()),
                     this.hotWaterPower);
         }
     }
@@ -142,7 +142,7 @@ public class DomesticHotWaterLocalObserver
                 this.sendIPP();
             }
             if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
-                long secondsSinceMidnight = TimeConversion.getSecondsSinceYearStart(now);
+                long secondsSinceMidnight = TimeConversion.getSecondsSinceDayStart(now);
                 double predVal = this.predictedWaterDemand.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, secondsSinceMidnight);
 
                 if ((predVal != 0 && (this.hotWaterPower / predVal > 1.25

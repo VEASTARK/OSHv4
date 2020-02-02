@@ -163,7 +163,7 @@ public class MieleApplianceLocalController
 
         if ((this.currentState == EN50523DeviceState.PROGRAMMED
                 || this.currentState == EN50523DeviceState.PROGRAMMEDWAITINGTOSTART)
-                && this.startTime != null && TimeUtils.isBeforeEquals(this.startTime, now)) {
+                && this.startTime != null && !this.startTime.isAfter(now)) {
             this.callDevice();
         }
 

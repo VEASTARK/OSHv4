@@ -60,7 +60,7 @@ public class SmartHeaterLocalObserver
             this.currentState = ox.getCurrentState();
             this.timestampOfLastChangePerSubElement = ox.getTimestampOfLastChangePerSubElement();
 
-            if (!now.isAfter(this.lastTimeIppSent.plus(this.NEW_IPP_AFTER)) || Math.abs(this.temperatureSetting - this.lastIppTempSetting) > this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
+            if (!now.isBefore(this.lastTimeIppSent.plus(this.NEW_IPP_AFTER)) || Math.abs(this.temperatureSetting - this.lastIppTempSetting) > this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
                 this.sendIPP(now);
             }
 

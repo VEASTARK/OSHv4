@@ -78,12 +78,16 @@ public class SpaceHeatingLocalObserver
 
             this.monitorLoad();
 
-            if (this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
+            //only to keep consistent with old mode of operation TODO: remove when next backwards-compatibility breaking update is released
+            boolean firstDay = now.isBefore(this.getTimeDriver().getTimeAtStart().plusDays(1));
+
+            if (firstDay || this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 //a new day has begun...
                 this.sendIPP();
             }
-            if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
-                long secondsSinceMidnight = TimeConversion.getSecondsSinceYearStart(now);
+            //TODO: remove first condition when next backwards-compatibility breaking update is released
+            if ((firstDay || !this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) && this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+                long secondsSinceMidnight = TimeConversion.getSecondsSinceDayStart(now);
                 double predVal = this.predictedWaterDemand.getLoadAt(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight);
 
                 if ((predVal != 0 && (this.hotWaterPower / predVal > 1.25
@@ -169,7 +173,7 @@ public class SpaceHeatingLocalObserver
         } else {
             this.lastDayProfile.setLoad(
                     Commodity.HEATINGHOTWATERPOWER,
-                    TimeConversion.getSecondsSinceYearStart(this.getTimeDriver().getCurrentTime()),
+                    TimeConversion.getSecondsSinceDayStart(this.getTimeDriver().getCurrentTime()),
                     this.hotWaterPower);
         }
     }
@@ -177,7 +181,8 @@ public class SpaceHeatingLocalObserver
 
     private void sendIPP() {
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
-        long startOfDay = now.withHour(0).withMinute(0).withSecond(0).withNano(0).toEpochSecond();
+//        this.lastTimeIPPSent = now;
+        long startOfDay = TimeConversion.getCurrentStartOfDay(now);
 
         HotWaterDemandNonControllableIPP ipp =
                 new HotWaterDemandNonControllableIPP(

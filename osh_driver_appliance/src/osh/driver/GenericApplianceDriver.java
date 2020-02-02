@@ -19,7 +19,6 @@ import osh.en50523.EN50523DeviceState;
 import osh.en50523.EN50523DeviceStateRemoteControl;
 import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
-import osh.utils.time.TimeUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,6 +26,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -37,6 +37,8 @@ public abstract class GenericApplianceDriver
         extends ApplianceDriver {
 
     // ### Variables for LoadProfile ###
+
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     /**
      * Compression type of the load profile
@@ -253,8 +255,7 @@ public abstract class GenericApplianceDriver
 
     private Duration calculateDOFFromFinishTimeAndRemainingTime() {
         //if programmtime is bigger than the time of the settings from the appliance
-        if (TimeUtils.isAfterEquals(this.expectedEndingTimeReceivedFromAppliance,
-                this.expectedFinishTimeReceivedFromAppliance)) {
+        if (!this.expectedEndingTimeReceivedFromAppliance.isBefore(this.expectedFinishTimeReceivedFromAppliance)) {
             //RETURN DOF = 0
             //means the appliance will be starting right now
             return Duration.ZERO;
@@ -391,7 +392,7 @@ public abstract class GenericApplianceDriver
         if (!oldState.name().equals(this.currentEn50523State.name())) {
             this.getGlobalLogger().logDebug(this.getDeviceType()
                     + " : changed from : " + oldState.name() + " to " + this.currentEn50523State.name()
-                    + " @" + this.getTimeDriver().getCurrentEpochSecond() + ", waiting for optimization...");
+                    + " @" + this.getTimeDriver().getCurrentTime().format(this.timeFormatter) + ", waiting for optimization...");
         }
     }
 

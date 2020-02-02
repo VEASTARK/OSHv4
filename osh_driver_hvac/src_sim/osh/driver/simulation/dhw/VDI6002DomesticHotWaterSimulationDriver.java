@@ -144,7 +144,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
+        ZonedDateTime startTime = this.getTimeDriver().getTimeAtStart();
 
         this.log = DatabaseLoggerThread.isLogHotWater();
 
@@ -152,7 +152,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
             this.avgWeekDayLoad = new double[7][1440];
             this.avgWeekDayLoadCounter = new int[7][1440];
 
-            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTimeStamp(startTime);
+            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTime(startTime);
             this.avgDayLoad = new double[daysInYear];
             this.avgDayLoadCounter = new int[daysInYear];
             Arrays.fill(this.avgDayLoad, 0.0);
@@ -177,7 +177,6 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
 
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
-        long epochSeconds = this.getTimeDriver().getCurrentEpochSecond();
 
         if (this.dayProfile == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             if (this.dayProfile == null)
@@ -185,7 +184,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
             this.generateDailyDemandProfile(now, newRandomGen);
         }
 
-        int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, epochSeconds);
+        int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.getTimeDriver().getCurrentEpochSecond());
 
         if (this.log) {
             int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(now);
@@ -261,8 +260,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         SparseLoadProfile[] newDayProfiles = new SparseLoadProfile[runsToday];
 
         boolean lastDay =
-                (this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond()) / 86400
-                == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1);
+                !this.getTimeDriver().getCurrentTime().isBefore(this.getTimeDriver().getTimeAtStart().plusSeconds(this.getSimulationEngine().getSimulationDuration()).minusDays(1));
 
         for (int i = 0; i < runsToday; i++) {
 

@@ -16,6 +16,8 @@ import osh.utils.time.TimeConversion;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -30,7 +32,7 @@ import java.util.stream.Stream;
 public class CsvEpsProviderComDriver extends CALComDriver {
 
     private final List<Double> priceSignalYear;
-    private long newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
     private int resolutionOfPriceSignal;
     private String filePathPriceSignal;
     private int signalPeriod;
@@ -43,7 +45,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 
     private final List<AncillaryCommodity> activeAncillaryCommodities;
 
-    private long lastTimeSignalSent;
+    private ZonedDateTime lastTimeSignalSent;
 
 
     /**
@@ -59,9 +61,10 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         this.priceSignalYear = new ArrayList<>();
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12); //12 hours
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -169,13 +172,13 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         this.readCsvPriceSignal();
         this.generateNewPriceSignal();
 
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
         }
 
-        this.lastTimeSignalSent = this.getTimeDriver().getCurrentEpochSecond();
+        this.lastTimeSignalSent = this.getTimeDriver().getCurrentTime();
     }
 
     /**
@@ -281,10 +284,10 @@ public class CsvEpsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        if ((exchange.getEpochSecond() - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!exchange.getTime().isAfter(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
             this.generateNewPriceSignal();
 
-            this.lastTimeSignalSent = exchange.getEpochSecond();
+            this.lastTimeSignalSent = exchange.getTime();
         }
     }
 

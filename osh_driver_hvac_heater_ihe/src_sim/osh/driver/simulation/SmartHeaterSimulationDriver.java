@@ -92,8 +92,6 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
 
     @Override
     public void onNextTimeTick() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-
         int availablePower = 0;
 //		if (ancillaryInputStates != null) {
         if (this.ancillaryMeterState != null) {
@@ -123,7 +121,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
 //			}
         }
 
-        this.model.updateAvailablePower(now, availablePower, this.currentWaterTemperature);
+        this.model.updateAvailablePower(this.getTimeDriver().getCurrentEpochSecond(), availablePower, this.currentWaterTemperature);
 
         int activePower = (int) this.model.getPower();
         int hotWaterPower = (int) -this.model.getPower();

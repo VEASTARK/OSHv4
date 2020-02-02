@@ -13,8 +13,8 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
 import osh.utils.slp.IH0Profile;
-import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -102,7 +102,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
             Class h0Class = Class.forName(h0ClassName);
 
             this.baseload = (IH0Profile) h0Class.getConstructor(int.class, String.class, double.class)
-                    .newInstance(TimeConversion.convertUnixTime2Year(this.getTimeDriver().getCurrentEpochSecond()),
+                    .newInstance(this.getTimeDriver().getCurrentTime().getYear(),
                             h0ProfileFileName,
                             yearlyElectricityConsumptionOfHousehold);
 
@@ -114,18 +114,25 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
     @Override
     public void onSimulationIsUp() {
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
-
+        ZonedDateTime timeAtStart = this.getTimeDriver().getTimeAtStart();
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
             SparseLoadProfile dayProfile = new SparseLoadProfile();
-            int dayCorrection = (int) Math.abs((startTime / 86400 - i) % 365) * 86400;
-
+//            ZonedDateTime pastDay = timeAtStart.minusDays(i);
+//            //loadprofile only provides 365 days so we have to reduce further for leapyears
+//            if (pastDay.getDayOfYear() > 365) {
+//                pastDay.minusDays(1);
+//            }
+//            long pastDayStart = TimeConversion.getSecondsSinceYearStart(pastDay);
+            //TODO: this will result in the wrong days used for pastPredictions at the start of a year, but will
+            // remain to keep backwards-compaitiblity. Fix in next update that breaks this (uncomment above lines and
+            // delete the next one)
+            long pastDayStart = (int) Math.abs((timeAtStart.toEpochSecond() / 86400 - i) % 365) * 86400;
             for (int sec = 0; sec < 86400; sec++) {
-                int activeLoad = this.baseload.getActivePowerAt(dayCorrection + sec);
+                int activeLoad = this.baseload.getActivePowerAt(pastDayStart + sec);
 
                 dayProfile.setLoad(Commodity.ACTIVEPOWER, sec, activeLoad);
 

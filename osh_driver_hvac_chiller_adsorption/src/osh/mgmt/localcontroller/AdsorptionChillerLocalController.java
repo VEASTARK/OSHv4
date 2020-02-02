@@ -15,7 +15,6 @@ import osh.hal.exchange.ChillerControllerExchange;
 import osh.mgmt.ipp.ChillerIPP;
 import osh.mgmt.mox.AdsorptionChillerMOX;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.utils.time.TimeUtils;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -136,7 +135,7 @@ public class AdsorptionChillerLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
+                    && now.isAfter(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
@@ -164,7 +163,7 @@ public class AdsorptionChillerLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
+                    && now.isAfter(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
@@ -193,14 +192,14 @@ public class AdsorptionChillerLocalController
             }
         } else {
             // check whether to reschedule...
-            if (!now.isAfter(this.lastTimeReschedulingTriggered.plus(this.RESCHEDULE_AFTER))) {
+            if (!now.isBefore(this.lastTimeReschedulingTriggered.plus(this.RESCHEDULE_AFTER))) {
                 this.createNewEaPart(
                         this.currentState,
                         temperaturePrediction,
                         now,
                         true,
                         0);
-            } else if (!now.isAfter(this.lastTimeIppSent.plus(NEW_IPP_AFTER))) {
+            } else if (!now.isBefore(this.lastTimeIppSent.plus(NEW_IPP_AFTER))) {
                 this.createNewEaPart(
                         this.currentState,
                         temperaturePrediction,
@@ -211,7 +210,7 @@ public class AdsorptionChillerLocalController
 
             if (this.startTimes == null
                     || (this.startTimes.isEmpty() && this.currentActivation == null)
-                    || (this.currentActivation != null && now.isBefore(this.currentActivation.startTime.plus(this.currentActivation.duration)))) {
+                    || (this.currentActivation != null && now.isAfter(this.currentActivation.startTime.plus(this.currentActivation.duration)))) {
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
                         now,
@@ -220,13 +219,13 @@ public class AdsorptionChillerLocalController
                         0);
                 this.currentActivation = null;
             } else if (!this.startTimes.isEmpty()
-                    && TimeUtils.isBeforeEquals(this.startTimes.get(0).startTime, now)) {
+                    && !this.startTimes.get(0).startTime.isAfter(now)) {
                 // set on
 
                 // remove old start times... (sanity)
                 while (this.startTimes != null
                         && !this.startTimes.isEmpty()
-                        && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
+                        && now.isAfter(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                     this.startTimes.remove(0);
                 }
 

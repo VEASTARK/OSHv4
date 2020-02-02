@@ -2,13 +2,11 @@ package constructsimulation.generation;
 
 import constructsimulation.data.OldSimOSHConfigurationData;
 import constructsimulation.datatypes.*;
-import constructsimulation.generation.device.CreateBusDevice;
 import constructsimulation.generation.device.CreateComDevice;
 import constructsimulation.generation.device.CreateDevice;
 import constructsimulation.generation.parameter.CreateConfigurationParameter;
 import osh.configuration.cal.AssignedComDevice;
 import osh.configuration.cal.CALConfiguration;
-import osh.configuration.eal.AssignedBusDevice;
 import osh.configuration.eal.AssignedDevice;
 import osh.configuration.eal.EALConfiguration;
 import osh.configuration.oc.OCConfiguration;
@@ -61,19 +59,8 @@ public class ConstructSimulationHelper {
      */
     private static EALConfiguration constructEALConfiguration(
             EALConfigurationWrapper ealConfigurationData) {
-        EALConfiguration ealConfig = new EALConfiguration();
 
-        //add bus device for simulation output logging
-        if (ealConfigurationData.simLogger) {
-            AssignedBusDevice loggerBusDevice = CreateBusDevice.createBusDevice(
-                    BusDeviceTypes.FILELOGGER,
-                    OldSimOSHConfigurationData.comDeviceIdSimulationLoggerNew,
-                    ealConfigurationData.loggerBusDriverClassName,
-                    ealConfigurationData.loggerBusManagerClassName);
-            ealConfig.getAssignedBusDevices().add(loggerBusDevice);
-        }
-
-        return ealConfig;
+        return new EALConfiguration();
     }
 
     /**

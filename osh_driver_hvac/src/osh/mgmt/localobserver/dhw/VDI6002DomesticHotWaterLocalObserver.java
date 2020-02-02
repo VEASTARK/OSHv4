@@ -9,7 +9,6 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
-import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
 import osh.mgmt.ipp.dhw.DomesticHotWaterNonControllableIPP;
@@ -100,7 +99,7 @@ public class VDI6002DomesticHotWaterLocalObserver
                     this,
                     cpse);
 
-            if (this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
+            if (this.lastTimeIPPSent == null || this.lastTimeIPPSent.getDayOfYear() != now.getDayOfYear()) {
                 this.generatePrediction(now);
                 //a new day has begun...
                 this.sendIPP();

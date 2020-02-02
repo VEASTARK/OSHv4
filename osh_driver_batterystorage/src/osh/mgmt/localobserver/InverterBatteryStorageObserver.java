@@ -114,8 +114,6 @@ public class InverterBatteryStorageObserver
     @Override
     public IModelOfObservationExchange getObservedModelData(IModelOfObservationType type) {
         return new BatteryStorageMOX(
-                this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
                 this.activePower,
                 this.reactivePower,
                 this.batteryStateOfCharge,

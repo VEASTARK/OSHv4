@@ -20,7 +20,6 @@ import osh.hal.exchange.FutureApplianceObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
 import osh.utils.time.TimeConversion;
-import osh.utils.time.TimeUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -337,7 +336,7 @@ public class GenericFutureApplianceSimulationDriver
 
         // check if next phase has to be started
         // [0] is currently running phase / next phase
-        if (this.selectedStartingTimes.length > 1 && TimeUtils.isAfterEquals(now,this.selectedStartingTimes[1])) {
+        if (this.selectedStartingTimes.length > 1 && !now.isBefore(this.selectedStartingTimes[1])) {
             // NEW PHASE
             // current phase is finished...
             // next phase is due...
@@ -372,7 +371,7 @@ public class GenericFutureApplianceSimulationDriver
             this.applianceConfigurationProfile = newACP;
 
             //next phase would be last phase --> do not send an updated acp as this would cause a rescheduling, controller will reschedule when device --> off
-            if (this.selectedStartingTimes.length == 2 && TimeUtils.isBeforeEquals(this.selectedStartingTimes[1].plusSeconds(minMaxTimes[this.selectedProfileID][1][0]), now.plusSeconds(1))) {
+            if (this.selectedStartingTimes.length == 2 && !now.plusSeconds(1).isBefore(this.selectedStartingTimes[1].plusSeconds(minMaxTimes[this.selectedProfileID][1][0]))) {
                 this.getGlobalLogger().logDebug("Switched to last phase, set notReschedule-Flag");
                 newACP.setDoNotReschedule(true);
             }
@@ -396,7 +395,7 @@ public class GenericFutureApplianceSimulationDriver
                     e.printStackTrace();
                 }
             }
-        } else if (this.selectedStartingTimes.length == 1 && TimeUtils.isBeforeEquals(this.selectedStartingTimes[0].plusSeconds(minMaxTimes[this.selectedProfileID][0][0]), now)) {
+        } else if (this.selectedStartingTimes.length == 1 && !now.isBefore(this.selectedStartingTimes[0].plusSeconds(minMaxTimes[this.selectedProfileID][0][0]))) {
             // END LAST PHASE
             // it has been the last phase:
             // END of program reached (in simulation: always exactly as expected)
@@ -705,8 +704,7 @@ public class GenericFutureApplianceSimulationDriver
         }
 
         boolean lastDay =
-                (this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond()) / 86400
-                == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1);
+                !this.getTimeDriver().getCurrentTime().isBefore(this.getTimeDriver().getTimeAtStart().plusSeconds(this.getSimulationEngine().getSimulationDuration()).minusDays(1));
 
         //calculate runs per day, correct for impossible runs from earlier days
         int runsToday = 0;

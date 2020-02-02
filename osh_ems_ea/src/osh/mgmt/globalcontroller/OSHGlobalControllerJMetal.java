@@ -37,7 +37,6 @@ import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
-import osh.utils.time.TimeUtils;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -241,8 +240,7 @@ public class OSHGlobalControllerJMetal
 
         //check if something has been changed:
         for (InterdependentProblemPart<?, ?> problemPart : this.oshGlobalObserver.getProblemParts()) {
-            if (problemPart.isToBeScheduled() && TimeUtils.isAfterEquals(problemPart.getTimestamp(),
-                    this.lastTimeSchedulingStarted)) {
+            if (problemPart.isToBeScheduled() && !problemPart.getTimestamp().isBefore(this.lastTimeSchedulingStarted)) {
                 reschedulingRequired = true;
                 break;
             }
@@ -302,6 +300,7 @@ public class OSHGlobalControllerJMetal
 
 //		boolean showSolverDebugMessages = getControllerBoxStatus().getShowSolverDebugMessages();
         boolean showSolverDebugMessages = true;
+        final long now = this.getTimeDriver().getCurrentEpochSecond();
 
         OSHRandomGenerator optimisationRunRandomGenerator = new OSHRandomGenerator(new Random(this.optimizationMainRandomGenerator.getNextLong()));
 
@@ -312,7 +311,7 @@ public class OSHGlobalControllerJMetal
                 optimisationRunRandomGenerator,
                 showSolverDebugMessages,
                 this.gaparameters,
-                this.getTimeDriver().getCurrentEpochSecond(),
+                now,
                 this.stepSize,
                 this.logDir);
 
@@ -326,7 +325,6 @@ public class OSHGlobalControllerJMetal
 
         // debug print
         this.getGlobalLogger().logDebug("=== scheduling... ===");
-        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         int[][] bitPositions = new int[problemParts.size()][2];
         int bitPosStart = 0;
@@ -377,7 +375,7 @@ public class OSHGlobalControllerJMetal
                     bitPositions,
                     tempPriceSignals,
                     tempPowerLimitSignals,
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    now,
                     fitnessFunction);
             solutions = resultWithAll.getBitSet();
 

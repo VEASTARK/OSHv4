@@ -30,7 +30,6 @@ import osh.hal.exchange.GenericApplianceStartTimesControllerExchange;
 import osh.hal.exchange.MieleApplianceControllerExchange;
 import osh.hal.exchange.MieleApplianceObserverExchange;
 import osh.registry.interfaces.IDataRegistryListener;
-import osh.utils.time.TimeUtils;
 import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
@@ -355,7 +354,7 @@ public class MieleApplianceDriver
                             if (this.isControllable()) {
                                 remainingProgramDuration = this.mieleApplianceDriverDetails.getProgramRemainingTime();
                                 ZonedDateTime now = this.getTimeDriver().getCurrentTime();
-                                if (remainingProgramDuration == null && TimeUtils.isBeforeEquals(this.programStartedTime, now)) {
+                                if (remainingProgramDuration == null && !this.programStartedTime.isAfter(now)) {
                                     // IMA
                                     // @2016-05-20: FIX for hob/oven are "Controllable"
                                     remainingProgramDuration =

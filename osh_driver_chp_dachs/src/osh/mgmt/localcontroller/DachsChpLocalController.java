@@ -164,7 +164,7 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
+                    && now.isAfter(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
@@ -201,7 +201,7 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
+                    && now.isAfter(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
@@ -238,14 +238,14 @@ public class DachsChpLocalController
             // remove old start times... (sanity)
             while (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && now.isBefore(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
+                    && now.isAfter(this.startTimes.get(0).startTime.plus(this.startTimes.get(0).duration))) {
                 this.startTimes.remove(0);
             }
 
             // check whether to reschedule...
             Duration ipp_diff = Duration.between(this.lastTimeIppSent, now);
             //don't reschedule too often let's wait first for the solution
-            if (now.isAfter(this.lastTimeReschedulingTriggered.plus(this.rescheduleAfter)) && ipp_diff.toSeconds() > 10) {
+            if (!now.isBefore(this.lastTimeReschedulingTriggered.plus(this.rescheduleAfter)) && ipp_diff.toSeconds() > 10) {
                 // force rescheduling
                 this.createNewEaPart(
                         this.currentState,
@@ -271,7 +271,7 @@ public class DachsChpLocalController
 
             if (this.startTimes != null
                     && !this.startTimes.isEmpty()
-                    && !now.isAfter(this.startTimes.get(0).startTime)) {
+                    && !this.startTimes.get(0).startTime.isAfter(now)) {
                 // switch on
 
                 Duration scheduledRuntime;
@@ -327,7 +327,7 @@ public class DachsChpLocalController
 
                 if (this.currentState) {
 //					System.out.println("[" + now + "] Scheduled stop");
-                    this.getGlobalLogger().logDebug("CHP scheduled stop at " + now);
+                    this.getGlobalLogger().logDebug("CHP scheduled stop at " + now.format(this.timeFormatter));
                     this.stoppedSince = now;
                 }
 

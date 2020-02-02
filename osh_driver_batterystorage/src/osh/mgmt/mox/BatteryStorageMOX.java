@@ -4,7 +4,6 @@ import osh.datatypes.mox.IModelOfObservationExchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
 import java.time.Duration;
-import java.util.UUID;
 
 public class BatteryStorageMOX implements IModelOfObservationExchange {
 
@@ -36,15 +35,10 @@ public class BatteryStorageMOX implements IModelOfObservationExchange {
     /**
      * CONSTRUCTOR
      *
-     * @param deviceID
-     * @param timestamp
      * @param activePower
      * @param reactivePower
      */
     public BatteryStorageMOX(
-            UUID deviceID,
-            Long timestamp,
-
             int activePower,
             int reactivePower,
 

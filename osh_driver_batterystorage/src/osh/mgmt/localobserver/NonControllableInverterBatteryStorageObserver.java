@@ -45,6 +45,8 @@ public class NonControllableInverterBatteryStorageObserver
         this.NEW_IPP_AFTER = ox.getNewIppAfter();
         this.TRIGGER_IPP_IF_DELTASoC_BIGGER = ox.getTriggerIppIfDeltaSoCBigger();
 
+        //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
+        // backwards-compatibility breaking update is released
         if (this.lastTimeIPPSent == null ||
                 this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER).isBefore(now) || Math.abs((ox.getBatteryStateOfCharge() - this.lastSOCIPP)) > this.TRIGGER_IPP_IF_DELTASoC_BIGGER) {
             // build SIPP

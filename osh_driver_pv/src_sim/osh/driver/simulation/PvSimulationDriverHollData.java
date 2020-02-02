@@ -108,17 +108,14 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
-        int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(startTime);
-
-
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
-
-            int pastDay = Math.floorMod(dayOfYear - i, 365);
+            int pastDay = TimeConversion.getCorrectedDayOfYear(this.getTimeDriver().getTimeAtStart().minusDays(i));
+            //profile only provides for 365 days, so we have to shorten in leap years
+            if (pastDay > 364) pastDay = 364;
             predictions.add(this.profile.getPowerForDay(pastDay));
         }
 

@@ -1,6 +1,7 @@
 package osh.utils.time;
 
 import java.time.*;
+import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
 
 /**
@@ -226,6 +227,15 @@ public class TimeConversion {
     }
 
     /**
+     * get the 0-based day-of-year
+     * @param time
+     * @return 0 = 01.01. ....
+     */
+    public static int getCorrectedDayOfYear(ZonedDateTime time) {
+        return time.getDayOfYear() - 1;
+    }
+
+    /**
      * get month of dayOfYear and year
      *
      * @param dayOfYear 1. jan = 0, ...
@@ -286,6 +296,10 @@ public class TimeConversion {
             // normal year
             return 365;
         }
+    }
+
+    public static int getNumberOfDaysInYearFromTime(ZonedDateTime time) {
+        return (int) time.range(ChronoField.DAY_OF_YEAR).getMaximum();
     }
 
 }

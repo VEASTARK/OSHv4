@@ -12,7 +12,6 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.slp.IH0Profile;
-import osh.utils.time.TimeConversion;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -172,7 +171,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.currentYear = TimeConversion.convertUnixTime2Year(this.getTimeDriver().getCurrentEpochSecond());
+        this.currentYear = this.getTimeDriver().getCurrentTime().getYear();
 
         try {
             Class h0Class = Class.forName(this.h0ClassName);
@@ -247,23 +246,26 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
 
     private EnumMap<AncillaryCommodity, PriceSignal> generateNewPriceSignal() {
 
+        long epochSecond = this.getTimeDriver().getCurrentEpochSecond();
+        long signalEnd = epochSecond + this.signalPeriod;
+
         PriceSignal newPriceSignalAutoConsPV = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerAutoConsumptionPV,
                 AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION);
 
         PriceSignal newPriceSignalAutoConsCHP = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerAutoConsumptionCHP,
                 AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION);
 
         PriceSignal newPriceSignalExternal = VirtualPriceSignalGenerator.getRandomH0BasedPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerExternalSupplyMin,
                 this.activePowerExternalSupplyAvg,
@@ -276,22 +278,22 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
                 AncillaryCommodity.ACTIVEPOWEREXTERNAL);
 
         PriceSignal newPriceSignalFeedInPV = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerFeedInPV,
                 AncillaryCommodity.PVACTIVEPOWERFEEDIN);
 
         PriceSignal newPriceSignalFeedInCHP = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerFeedInCHP,
                 AncillaryCommodity.CHPACTIVEPOWERFEEDIN);
 
         PriceSignal newPriceSignalNaturalGas = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.naturalGasPowerPrice,
                 AncillaryCommodity.NATURALGASPOWEREXTERNAL);

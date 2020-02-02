@@ -216,7 +216,7 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
 
         int month = TimeConversion.convertZonedDateTime2MonthInt(now);
         int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(now);
-        long midnightToday = now.withHour(0).withMinute(0).withSecond(0).withNano(0).toEpochSecond();
+        long midnightToday = TimeConversion.getCurrentStartOfDay(now);
 
         int runsToday;
         double avgRunsToday = (this.avgYearlyRuns / 365.0) * VDI6002DomesticHotWaterStatistics.monthlyCorrection[month] * VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection[weekDay];

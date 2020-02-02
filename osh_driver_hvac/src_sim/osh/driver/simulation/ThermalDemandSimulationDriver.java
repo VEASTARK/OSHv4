@@ -89,13 +89,15 @@ public abstract class ThermalDemandSimulationDriver
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
+        ZonedDateTime timeAtStart = this.getTimeDriver().getTimeAtStart();
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
-            int day = Math.floorMod((startTime / 86400 - i), 365);
+            int day = TimeConversion.getCorrectedDayOfYear(timeAtStart.minusDays(i));
+            //profile only provides for 365 days, so we have to go further back for leap-years
+            if (day > 364) day = 364;
 
             predictions.add(this.demandData.getProfileForDayOfYear(day).getProfileWithoutDuplicateValues());
         }
@@ -114,7 +116,7 @@ public abstract class ThermalDemandSimulationDriver
                 Arrays.fill(this.avgWeekDayLoadCounter[i], 0);
             }
 
-            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTimeStamp(startTime);
+            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTime(timeAtStart);
             this.avgDayLoad = new double[daysInYear];
             this.avgDayLoadCounter = new int[daysInYear];
             Arrays.fill(this.avgDayLoad, 0.0);
