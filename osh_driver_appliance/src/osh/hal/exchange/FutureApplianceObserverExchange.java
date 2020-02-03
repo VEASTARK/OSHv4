@@ -13,6 +13,8 @@ import osh.hal.interfaces.appliance.IHALGenericApplianceDetails;
 import osh.hal.interfaces.appliance.IHALGenericApplianceIsCurrentlyControllable;
 import osh.hal.interfaces.appliance.IHALGenericApplianceProgramDetails;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -46,10 +48,10 @@ public class FutureApplianceObserverExchange
     // ### IHALGenericApplianceProgramDetails ###
     private ApplianceProgramConfigurationStatus applianceConfigurationProfile;
     private UUID acpID;
-    private long acpReferenceTime;
+    private ZonedDateTime acpReferenceTime;
 
     // ### IHALGenericApplianceDOF ###
-    private Long dof;
+    private Duration dof;
 
     // ### IHALGenericApplianceIsCurrentlyControllable ###
     private boolean currentlyControllable;
@@ -60,7 +62,7 @@ public class FutureApplianceObserverExchange
      */
     public FutureApplianceObserverExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             int activePower,
             int reactivePower,
             int hotWaterPower,
@@ -147,11 +149,11 @@ public class FutureApplianceObserverExchange
     }
 
     @Override
-    public long getAcpReferenceTime() {
+    public ZonedDateTime getAcpReferenceTime() {
         return this.acpReferenceTime;
     }
 
-    public void setAcpReferenceTime(long acpReferenceTime) {
+    public void setAcpReferenceTime(ZonedDateTime acpReferenceTime) {
         this.acpReferenceTime = acpReferenceTime;
     }
 
@@ -179,11 +181,11 @@ public class FutureApplianceObserverExchange
     }
 
     @Override
-    public Long getDOF() {
+    public Duration getDOF() {
         return this.dof;
     }
 
-    public void setDOF(long dof) {
+    public void setDOF(Duration dof) {
         this.dof = dof;
     }
 

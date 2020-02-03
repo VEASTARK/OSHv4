@@ -4,6 +4,8 @@ import osh.driver.chp.ChpOperationMode;
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.hal.interfaces.chp.IHALChpStaticDetails;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -19,8 +21,8 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
     private int typicalReactivePower;
     private int typicalGasPower;
     private int typicalThermalPower;
-    private int rescheduleAfter;
-    private long newIPPAfter;
+    private Duration rescheduleAfter;
+    private Duration newIPPAfter;
     private int relativeHorizonIPP;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
@@ -32,7 +34,7 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
     private int forcedOffAdditionalCost;
     private double chpOnCervisiaStepSizeMultiplier;
 
-    public ChpStaticDetailsObserverExchange(UUID deviceID, long timestamp) {
+    public ChpStaticDetailsObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 
@@ -88,19 +90,19 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
         this.typicalThermalPower = typicalThermalPower;
     }
 
-    public int getRescheduleAfter() {
+    public Duration getRescheduleAfter() {
         return this.rescheduleAfter;
     }
 
-    public void setRescheduleAfter(int rescheduleAfter) {
+    public void setRescheduleAfter(Duration rescheduleAfter) {
         this.rescheduleAfter = rescheduleAfter;
     }
 
-    public long getNewIPPAfter() {
+    public Duration getNewIPPAfter() {
         return this.newIPPAfter;
     }
 
-    public void setNewIPPAfter(long newIPPAfter) {
+    public void setNewIPPAfter(Duration newIPPAfter) {
         this.newIPPAfter = newIPPAfter;
     }
 

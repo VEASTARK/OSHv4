@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -10,7 +11,7 @@ import java.util.UUID;
  */
 public class GenericApplianceStartTimesControllerExchange extends HALControllerExchange {
 
-    private long startTime;
+    private ZonedDateTime startTime;
 
 
     /**
@@ -21,20 +22,20 @@ public class GenericApplianceStartTimesControllerExchange extends HALControllerE
      */
     public GenericApplianceStartTimesControllerExchange(
             UUID deviceID,
-            long timestamp,
-            long startTime) {
+            ZonedDateTime timestamp,
+            ZonedDateTime startTime) {
         super(deviceID, timestamp);
 
         this.startTime = startTime;
     }
 
 
-    public long getStartTime() {
+    public ZonedDateTime getStartTime() {
         return this.startTime;
     }
 
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(ZonedDateTime startTime) {
         this.startTime = startTime;
     }
 

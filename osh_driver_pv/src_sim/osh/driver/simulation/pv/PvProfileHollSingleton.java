@@ -6,6 +6,8 @@ import osh.utils.csv.CSVImporter;
 import osh.utils.physics.ComplexPowerUtil;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
+
 /**
  * @author Ingo Mauser
  * TODO make singleton
@@ -46,15 +48,15 @@ public class PvProfileHollSingleton {
     /**
      * IMPORTANT: Value <= 0 (Generating Power!)
      *
-     * @param timeStamp
+     * @param time
      * @return Value <= 0 in W
      */
-    public int getPowerAt(long timeStamp) {
-        int day = TimeConversion.convertUnixTime2CorrectedDayOfYear(timeStamp);
+    public int getPowerAt(ZonedDateTime time) {
+        int day = TimeConversion.getCorrectedDayOfYear(time);
         if (day > 365) {
             day = 365;
         }
-        int minute = TimeConversion.convertUnixTime2SecondsSinceMidnight(timeStamp) / 60;
+        int minute = TimeConversion.getMinutesSinceDayStart(time);
 
         int power = pvProfileArray[day][minute];
 

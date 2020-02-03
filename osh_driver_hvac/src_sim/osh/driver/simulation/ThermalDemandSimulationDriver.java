@@ -8,6 +8,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.ThermalDemandData;
 import osh.eal.hal.exceptions.HALException;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.WaterDemandPredictionExchange;
 import osh.simulation.DatabaseLoggerThread;
@@ -16,6 +17,7 @@ import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -87,19 +89,21 @@ public abstract class ThermalDemandSimulationDriver
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
+        ZonedDateTime timeAtStart = this.getTimeDriver().getTimeAtStart();
 
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
-            int day = Math.floorMod((startTime / 86400 - i), 365);
+            int day = TimeConversion.getCorrectedDayOfYear(timeAtStart.minusDays(i));
+            //profile only provides for 365 days, so we have to go further back for leap-years
+            if (day > 364) day = 364;
 
             predictions.add(this.demandData.getProfileForDayOfYear(day).getProfileWithoutDuplicateValues());
         }
 
         WaterDemandPredictionExchange _ox = new WaterDemandPredictionExchange(this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 predictions, this.pastDaysPrediction, this.weightForOtherWeekday, this.weightForSameWeekday);
         this.notifyObserver(_ox);
 
@@ -112,7 +116,7 @@ public abstract class ThermalDemandSimulationDriver
                 Arrays.fill(this.avgWeekDayLoadCounter[i], 0);
             }
 
-            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTimeStamp(startTime);
+            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTime(timeAtStart);
             this.avgDayLoad = new double[daysInYear];
             this.avgDayLoadCounter = new int[daysInYear];
             Arrays.fill(this.avgDayLoad, 0.0);
@@ -130,20 +134,21 @@ public abstract class ThermalDemandSimulationDriver
         int randomHourShift = 2; // % 2 == 0
 
         // get new values
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        if (now % 3600 == 0) {
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
 //			double demand = 0;
             int randomNumber = ownGen.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
-            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber, randomHourShift);
+            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
+                    , randomHourShift);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now - 3600, 0, 0);
 //			demand += 0.5 * demandData.getTotalThermalDemand(now, 0, 0);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now + 3600, 0, 0);
 
             // demand: month correction
-            demand *= this.getMonthlyCorrection(TimeConversion.convertUnixTime2MonthInt(now));
+            demand *= this.getMonthlyCorrection(TimeConversion.getCorrectedMonth(now));
 
             // demand: day of week correction
-            demand *= this.getDayOfWeekCorrection(TimeConversion.convertUnixTime2CorrectedWeekdayInt(now));
+            demand *= this.getDayOfWeekCorrection(TimeConversion.getCorrectedDayOfWeek(now));
 
             // demand: general correction value
             demand *= this.getGeneralCorrection();
@@ -160,9 +165,9 @@ public abstract class ThermalDemandSimulationDriver
 
         if (this.log) {
             int power = this.getPower(this.hotWaterType);
-            int weekDay = TimeConversion.convertUnixTime2CorrectedWeekdayInt(now);
-            int minute = TimeConversion.convertUnixTime2MinuteOfDay(now);
-            int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
+            int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
+            int minute = now.getMinute();
+            int dayOfYear = now.getDayOfYear();
             this.avgWeekDayLoad[weekDay][minute] += power;
             this.avgWeekDayLoadCounter[weekDay][minute]++;
             this.avgDayLoad[dayOfYear] += power;

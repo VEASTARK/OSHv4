@@ -12,6 +12,8 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PlsComExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -25,14 +27,14 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
 
     /**
      * Maximum time the signal is available in advance (36h)
      */
     private int signalPeriod;
 
-    private long lastTimeSignalSent;
+    private ZonedDateTime lastTimeSignalSent;
 
     private int activeLowerLimit;
     private int activeUpperLimit;
@@ -56,9 +58,10 @@ public class FlatPlsProviderComDriver extends CALComDriver {
         this.powerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12h
+            this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -103,8 +106,8 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        this.powerLimitSignals = this.generateNewPowerLimitSignal(now);
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        this.powerLimitSignals = this.generateNewPowerLimitSignal(now.toEpochSecond());
         PlsComExchange ex = new PlsComExchange(
                 this.getUUID(),
                 now,
@@ -114,7 +117,7 @@ public class FlatPlsProviderComDriver extends CALComDriver {
         this.lastTimeSignalSent = now;
 
         // register
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -138,11 +141,11 @@ public class FlatPlsProviderComDriver extends CALComDriver {
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
         // generate new PriceSignal and send it
-        if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isBefore(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
             // PLS
-            this.powerLimitSignals = this.generateNewPowerLimitSignal(now);
+            this.powerLimitSignals = this.generateNewPowerLimitSignal(now.toEpochSecond());
             PlsComExchange ex = new PlsComExchange(
                     this.getUUID(),
                     now,

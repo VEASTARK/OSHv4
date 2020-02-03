@@ -849,10 +849,4 @@
             <localObserverClassName>osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver</localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
-    <assignedBusDevices>
-        <busDeviceID>00000000-c306-4fea-a487-1c48adc52ad4</busDeviceID>
-        <busDeviceType>FILELOGGER</busDeviceType>
-        <busManagerClassName>osh.mgmt.busmanager.simulation.SimulationLoggerBusManager</busManagerClassName>
-        <busDriverClassName>osh.busdriver.simulation.SimulationLoggerBusDriver</busDriverClassName>
-    </assignedBusDevices>
 </EALConfiguration>

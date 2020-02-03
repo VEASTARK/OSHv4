@@ -7,6 +7,7 @@ import osh.eal.hal.interfaces.hvac.IHALAdsorptionChillerDetails;
 import osh.eal.hal.interfaces.thermal.IHALColdWaterPowerDetails;
 import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -45,7 +46,7 @@ public class ChillerObserverExchange
      */
     public ChillerObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             boolean running,
             OutdoorTemperatures outdoorTemperature) {
         super(deviceID, timestamp);

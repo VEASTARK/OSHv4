@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -74,9 +75,9 @@ public class SimplePVProfileCleaner {
             System.out.println("START: fill existing data");
             // fill existing data
             for (int[] ints : inputArray) {
-                int currentInputTime = ints[0];
-                currentDay = TimeConversion.convertUnixTime2CorrectedDayOfYear(currentInputTime);
-                currentSecondOfDay = TimeConversion.convertUnixTime2SecondsSinceMidnight(currentInputTime);
+                ZonedDateTime currentInputTime = TimeConversion.convertUnixTimeToZonedDateTime(ints[0]);
+                currentDay = TimeConversion.getCorrectedDayOfYear(currentInputTime);
+                currentSecondOfDay = (int) TimeConversion.getSecondsSinceDayStart(currentInputTime);
                 outputArray[currentSecondOfDay][currentDay][0] =
                         outputFirstTimestamp + currentDay * 86400 + currentSecondOfDay;
                 outputArray[currentSecondOfDay][currentDay][1] = ints[1];

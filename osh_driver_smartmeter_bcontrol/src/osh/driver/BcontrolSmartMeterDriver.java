@@ -136,7 +136,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
         // convert to raw details object for logging
         BControlMeterDriverRawLogDetails rawDetails = new BControlMeterDriverRawLogDetails(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond());
+                this.getTimeDriver().getCurrentTime());
 
         rawDetails.setPhase(this.phase);
 
@@ -216,7 +216,7 @@ public class BcontrolSmartMeterDriver extends HALDeviceDriver {
     private BControlHeaterDriverRawLogDetails convertJsonToRawDetails(BcontrolHeaterData bcmd) {
         BControlHeaterDriverRawLogDetails rawDetails = new BControlHeaterDriverRawLogDetails(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond());
+                this.getTimeDriver().getCurrentTime());
 
         rawDetails.setMode(bcmd.getMode());
         rawDetails.setOrder(bcmd.getOrder());

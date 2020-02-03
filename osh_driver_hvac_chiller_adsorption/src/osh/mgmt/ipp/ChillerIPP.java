@@ -14,6 +14,8 @@ import osh.datatypes.time.ActivationList;
 import osh.driver.chiller.AdsorptionChillerModel;
 import osh.utils.time.TimeConversion;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
@@ -87,7 +89,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     public ChillerIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -96,13 +98,13 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         super(
                 deviceId,
                 logger,
-                now,
+                timeStamp,
                 getNecessaryNumberOfBits(RELATIVE_HORIZON),
                 toBeScheduled,
                 false, //needsAncillaryMeterStates
                 true, //reactsToInputStates
-                now + RELATIVE_HORIZON,
-                now,
+                timeStamp.toEpochSecond() + RELATIVE_HORIZON,
+                timeStamp.toEpochSecond(),
                 DeviceTypes.ADSORPTIONCHILLER,
                 new Commodity[]{Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -236,7 +238,8 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
                     @SuppressWarnings("unused")
                     int debug = 0;
                 }
-                long secondsFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(this.interdependentTime);
+                long secondsFromYearStart =
+                        TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.interdependentTime));
                 double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
                 activePower = this.typicalRunningActivePower;
                 coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);
@@ -301,19 +304,22 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         long timeOfFirstBit = this.getReferenceTime();
         Activation currentActivation = null;
 
+        long duration = 0;
         for (int i = 0; i < ab.length; i++) {
             if (ab[i]) {
                 // turn on
                 if (currentActivation == null) {
                     currentActivation = new Activation();
-                    currentActivation.startTime = timeOfFirstBit + i * TIME_PER_SLOT;
-                    currentActivation.duration = TIME_PER_SLOT;
+                    currentActivation.startTime = TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * TIME_PER_SLOT);
+                    duration = TIME_PER_SLOT;
                 } else {
-                    currentActivation.duration += TIME_PER_SLOT;
+                    duration += TIME_PER_SLOT;
                 }
             } else {
                 // turn off
                 if (currentActivation != null) {
+                    currentActivation.duration = Duration.ofSeconds(duration);
+                    duration = 0;
                     this.interdependentStartingTimes.add(currentActivation);
                     currentActivation = null;
                 }
@@ -321,6 +327,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         }
 
         if (currentActivation != null) {
+            currentActivation.duration = Duration.ofSeconds(duration);
             this.interdependentStartingTimes.add(currentActivation);
         }
 

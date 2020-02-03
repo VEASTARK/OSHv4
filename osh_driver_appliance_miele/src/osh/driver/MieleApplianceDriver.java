@@ -34,6 +34,8 @@ import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -50,11 +52,11 @@ public class MieleApplianceDriver
     // driverData
     private DeviceProfile deviceProfile;
     private EnumMap<Commodity, ArrayList<PowerProfileTick>> currentLoadProfiles;
-    private long programStartedTime = -1;
+    private ZonedDateTime programStartedTime;
 
     //temporal degree of freedom
-    private int firstDof;
-    private int secondDof;
+    private Duration firstDof;
+    private Duration secondDof;
 
     // pending command
     private EN50523OIDExecutionOfACommandCommands pendingCommand;
@@ -128,7 +130,7 @@ public class MieleApplianceDriver
 
         this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 
-        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        StaticCompressionExchange stat = new StaticCompressionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         stat.setCompressionType(this.compressionType);
         stat.setCompressionValue(this.compressionValue);
         this.notifyObserver(stat);
@@ -142,7 +144,7 @@ public class MieleApplianceDriver
             StartDeviceRequest req = new StartDeviceRequest(
                     MieleApplianceDriver.this.getUUID(),
                     MieleApplianceDriver.this.applianceBusDriverUUID,
-                    exchange.getEpochSecond());
+                    exchange.getTime());
             MieleApplianceDriver.this.getDriverRegistry().publish(StartDeviceRequest.class, req);
         }
     }
@@ -150,7 +152,7 @@ public class MieleApplianceDriver
     private ArrayList<PowerProfileTick> shrinkPowerProfile(
             Commodity commodity,
             List<PowerProfileTick> powerProfile,
-            int programDuration) {
+            long programDuration) {
         ArrayList<PowerProfileTick> _tmpList = new ArrayList<>();
 
         //if it's greater => shrink it!
@@ -254,11 +256,11 @@ public class MieleApplianceDriver
                     this.firstDof = dse.getDevice1stDegreeOfFreedom();
                     this.secondDof = dse.getDevice2ndDegreeOfFreedom();
                     //sanity
-                    if (this.firstDof < 0 || this.secondDof < 0) {
+                    if (this.firstDof.isNegative() || this.secondDof.isNegative()) {
                         this.getGlobalLogger().logError("Received illegal dof, not sending to o/c");
                     } else {
                         GenericApplianceDofObserverExchange gadoe = new GenericApplianceDofObserverExchange(this.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond());
+                                this.getTimeDriver().getCurrentTime());
                         gadoe.setDevice1stDegreeOfFreedom(this.firstDof);
                         gadoe.setDevice1stDegreeOfFreedom(this.secondDof);
                         this.notifyObserver(gadoe);
@@ -284,7 +286,7 @@ public class MieleApplianceDriver
             // generate ox object
             if (updateOx) {
                 MieleApplianceObserverExchange _ox = new MieleApplianceObserverExchange(
-                        this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+                        this.getUUID(), this.getTimeDriver().getCurrentTime());
 
                 // check for incomplete data
                 if (this.currentAppDetails == null) {
@@ -318,23 +320,24 @@ public class MieleApplianceDriver
                     switch (this.currentAppDetails.getState()) {
                         case PROGRAMMEDWAITINGTOSTART:
                         case PROGRAMMED: {
-                            long maxProgramDuration = this.mieleApplianceDriverDetails.getExpectedProgramDuration();
+                            Duration maxProgramDuration = this.mieleApplianceDriverDetails.getExpectedProgramDuration();
 
                             // Miele Gateway needs some time before it delivers the correct information about program duration
-                            if (maxProgramDuration <= 0)
+                            if (maxProgramDuration.isNegative())
                                 return;
 
                             EnumMap<Commodity, ArrayList<PowerProfileTick>> expectedLoadProfiles = new EnumMap<>(Commodity.class);
 
                             for (Entry<Commodity, ArrayList<PowerProfileTick>> e : this.currentLoadProfiles.entrySet()) {
-                                ArrayList<PowerProfileTick> expectedPowerProfile = this.shrinkPowerProfile(e.getKey(), e.getValue(), (int) maxProgramDuration);
+                                ArrayList<PowerProfileTick> expectedPowerProfile = this.shrinkPowerProfile(e.getKey()
+                                        , e.getValue(), maxProgramDuration.toSeconds());
                                 expectedLoadProfiles.put(e.getKey(), expectedPowerProfile);
                             }
 
                             _ox.setExpectedLoadProfiles(expectedLoadProfiles);
                             _ox.setDeviceStartTime(this.mieleApplianceDriverDetails.getStartTime());
 
-                            this.programStartedTime = -1;
+                            this.programStartedTime = null;
 
                         }
                         break;
@@ -344,27 +347,37 @@ public class MieleApplianceDriver
                                     this.pendingCommand = null;
                                 }
                             }
-                            if (this.programStartedTime == -1)
-                                this.programStartedTime = this.getTimeDriver().getCurrentEpochSecond();
+                            if (this.programStartedTime == null)
+                                this.programStartedTime = this.getTimeDriver().getCurrentTime();
 
-                            long remainingProgramDuration;
+                            Duration remainingProgramDuration;
                             if (this.isControllable()) {
                                 remainingProgramDuration = this.mieleApplianceDriverDetails.getProgramRemainingTime();
-                                long now = this.getTimeDriver().getCurrentEpochSecond();
-                                if (remainingProgramDuration == -1 && this.programStartedTime <= now) { // IMA @2016-05-20: FIX for hob/oven are "Controllable"
-                                    remainingProgramDuration = this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size() - (now - this.programStartedTime);
+                                ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+                                if (remainingProgramDuration == null && !this.programStartedTime.isAfter(now)) {
+                                    // IMA
+                                    // @2016-05-20: FIX for hob/oven are "Controllable"
+                                    remainingProgramDuration =
+                                            Duration.ofSeconds(this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size()).minus(Duration.between(this.programStartedTime, now));
                                 }
                             } else {
-                                remainingProgramDuration = this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size() - (this.getTimeDriver().getCurrentEpochSecond() - this.programStartedTime);
+                                remainingProgramDuration =
+                                        Duration.ofSeconds(this.currentLoadProfiles.get(Commodity.ACTIVEPOWER).size()).minus(Duration.between(this.programStartedTime, this.getTimeDriver().getCurrentTime()));
                             }
 
-                            long finishedProgramDuration = this.getTimeDriver().getCurrentEpochSecond() - this.programStartedTime;
+                            Duration finishedProgramDuration = Duration.between(this.programStartedTime,
+                                    this.getTimeDriver().getCurrentTime());
 
                             EnumMap<Commodity, ArrayList<PowerProfileTick>> expectedLoadProfiles = new EnumMap<>(Commodity.class);
 
-                            if (remainingProgramDuration > 0) { // only makes sense if gateway doesn't provide this information
+                            if (remainingProgramDuration != null && !remainingProgramDuration.isNegative()) { // only
+                                // makes sense if gateway doesn't
+                                // provide this
+                                // information
                                 for (Entry<Commodity, ArrayList<PowerProfileTick>> e : this.currentLoadProfiles.entrySet()) {
-                                    ArrayList<PowerProfileTick> expectedPowerProfile = this.shrinkPowerProfile(e.getKey(), e.getValue(), (int) (remainingProgramDuration + finishedProgramDuration));
+                                    ArrayList<PowerProfileTick> expectedPowerProfile =
+                                            this.shrinkPowerProfile(e.getKey(), e.getValue(),
+                                                    remainingProgramDuration.plus(finishedProgramDuration).toSeconds());
                                     expectedLoadProfiles.put(e.getKey(), expectedPowerProfile);
                                 }
                             }
@@ -376,7 +389,7 @@ public class MieleApplianceDriver
                         }
                         break;
                         default: {
-                            this.programStartedTime = -1;
+                            this.programStartedTime = null;
                         }
                         break;
                     }

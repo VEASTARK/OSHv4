@@ -5,6 +5,7 @@ import osh.core.OSHRandomGenerator;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.utils.slp.IH0Profile;
+import osh.utils.time.TimeConversion;
 
 
 /**
@@ -61,7 +62,8 @@ public class VirtualPriceSignalGenerator {
 
         for (long i = startTime; i < endTime; i += constantPeriod) {
             // calculate average percent of H0 profile above daily min
-            double avgPercent = profile.getAvgPercentOfDailyMaxWithoutDailyMin(i);
+            double avgPercent =
+                    profile.getAvgPercentOfDailyMaxWithoutDailyMin(TimeConversion.convertUnixTimeToZonedDateTime(i));
 
             // ### generate new active price ###
             int avgActiveAbsolute = (int) Math.round(avgPercent * activeDiff);
@@ -86,7 +88,8 @@ public class VirtualPriceSignalGenerator {
             int newActiveDiff = newActiveMax - newActiveMin;
 
             // calculate price
-            double currentPercentOfMaxWithoutMin = profile.getPercentOfDailyMaxWithoutDailyMin(i);
+            double currentPercentOfMaxWithoutMin =
+                    profile.getPercentOfDailyMaxWithoutDailyMin(TimeConversion.convertUnixTimeToZonedDateTime(i));
             int newActiveValue =
                     newActiveMin + (int) Math.round(currentPercentOfMaxWithoutMin * newActiveDiff);
 

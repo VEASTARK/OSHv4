@@ -19,6 +19,8 @@ import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -31,9 +33,9 @@ public class ESHLHotWaterTankLocalObserver
 
     private final double defaultPunishmentFactorPerWsPowerLost = 6.0 / 3600000.0;
     TreeMap<Long, Double> temperaturePrediction = new TreeMap<>();
-    private long NEW_IPP_AFTER;
+    private Duration NEW_IPP_AFTER = Duration.ZERO;
     private double TRIGGER_IPP_IF_DELTA_TEMP_BIGGER;
-    private long lastTimeIPPSent = Long.MIN_VALUE;
+    private ZonedDateTime lastTimeIPPSent;
     private double tankCapacity = 100;
     private double tankDiameter = 1.0;
     private double ambientTemperature = 20.0;
@@ -58,7 +60,7 @@ public class ESHLHotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        if (this.NEW_IPP_AFTER % 60 == 0) {
+        if (this.NEW_IPP_AFTER.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -72,9 +74,11 @@ public class ESHLHotWaterTankLocalObserver
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
-        if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
+        //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
+        // backwards-compatibility breaking update is released
+        if (this.lastTimeIPPSent == null || now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     this.getGlobalLogger(),
@@ -93,8 +97,8 @@ public class ESHLHotWaterTankLocalObserver
                     ex);
             this.lastTimeIPPSent = now;
             this.temperatureInLastIPP = this.currentTemperature;
-        } else if (now % 60 == 0 && this.temperaturePrediction != null) {
-            Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(now);
+        } else if (exchange.getTimeEvents().contains(TimeSubscribeEnum.MINUTE) && this.temperaturePrediction != null) {
+            Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(exchange.getEpochSecond());
             if (predEntry != null && Math.abs(predEntry.getValue() - this.currentTemperature) > 2) {
                 HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
@@ -141,7 +145,7 @@ public class ESHLHotWaterTankLocalObserver
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
@@ -154,14 +158,14 @@ public class ESHLHotWaterTankLocalObserver
                         InterdependentProblemPart.class,
                         this,
                         ex);
-                this.lastTimeIPPSent = this.getTimeDriver().getCurrentEpochSecond();
+                this.lastTimeIPPSent = this.getTimeDriver().getCurrentTime();
                 this.temperatureInLastIPP = this.currentTemperature;
             }
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,

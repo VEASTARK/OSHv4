@@ -9,12 +9,14 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.WaterDemandPredictionExchange;
 import osh.mgmt.ipp.dhw.DomesticHotWaterNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +36,11 @@ public class DomesticHotWaterLocalObserver
     private SparseLoadProfile predictedWaterDemand;
 
     private int hotWaterPower;
-    private long timeFromMidnight;
 
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
+
+    private ZonedDateTime lastTimeIPPSent;
 
 
     /**
@@ -54,7 +57,7 @@ public class DomesticHotWaterLocalObserver
 
     private void monitorLoad() {
 
-        if (this.timeFromMidnight == 0) {
+        if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             // a brand new day...let's make a new prediction
 
             if (this.lastDayProfile.getEndingTimeOfProfile() != 0) {
@@ -104,7 +107,7 @@ public class DomesticHotWaterLocalObserver
         } else {
             this.lastDayProfile.setLoad(
                     Commodity.DOMESTICHOTWATERPOWER,
-                    this.timeFromMidnight,
+                    TimeConversion.getSecondsSinceDayStart(this.getTimeDriver().getCurrentTime()),
                     this.hotWaterPower);
         }
     }
@@ -118,7 +121,7 @@ public class DomesticHotWaterLocalObserver
         if (hx instanceof HotWaterDemandObserverExchange) {
             HotWaterDemandObserverExchange ox = (HotWaterDemandObserverExchange) hx;
             this.hotWaterPower = ox.getHotWaterPower();
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -131,20 +134,16 @@ public class DomesticHotWaterLocalObserver
                     this,
                     cpse);
 
-            long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
 
             this.monitorLoad();
 
-            boolean firstDay =
-                    this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond() < 86400;
-
-            if (firstDay || lastTimeFromMidnight > this.timeFromMidnight) {
+            if (this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 //a new day has begun...
                 this.sendIPP();
             }
-            if (lastTimeFromMidnight <= this.timeFromMidnight && now % 3600 == 0) {
-                double predVal = this.predictedWaterDemand.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.timeFromMidnight);
+            if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+                long secondsSinceMidnight = TimeConversion.getSecondsSinceDayStart(now);
+                double predVal = this.predictedWaterDemand.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, secondsSinceMidnight);
 
                 if ((predVal != 0 && (this.hotWaterPower / predVal > 1.25
                         || this.hotWaterPower / predVal < 0.75))
@@ -153,14 +152,14 @@ public class DomesticHotWaterLocalObserver
 
                     System.out.println("DOMESTICHOTWATERPOWER: too different, setting new");
                     //only using the actual value for the next hour, restore the predicted value if there is no other value set in t+3600
-                    int oldVal = this.predictedWaterDemand.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.timeFromMidnight);
-                    Long nextLoadChange = this.predictedWaterDemand.getNextLoadChange(Commodity.DOMESTICHOTWATERPOWER, this.timeFromMidnight);
+                    int oldVal = this.predictedWaterDemand.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, secondsSinceMidnight);
+                    Long nextLoadChange = this.predictedWaterDemand.getNextLoadChange(Commodity.DOMESTICHOTWATERPOWER, secondsSinceMidnight);
 
-                    if ((nextLoadChange != null && nextLoadChange > this.timeFromMidnight + 3600)
-                            || (nextLoadChange == null && this.predictedWaterDemand.getEndingTimeOfProfile() > this.timeFromMidnight + 3600)) {
-                        this.predictedWaterDemand.setLoad(Commodity.DOMESTICHOTWATERPOWER, this.timeFromMidnight + 3600, oldVal);
+                    if ((nextLoadChange != null && nextLoadChange > secondsSinceMidnight + 3600)
+                            || (nextLoadChange == null && this.predictedWaterDemand.getEndingTimeOfProfile() > secondsSinceMidnight + 3600)) {
+                        this.predictedWaterDemand.setLoad(Commodity.DOMESTICHOTWATERPOWER, secondsSinceMidnight + 3600, oldVal);
                     }
-                    this.predictedWaterDemand.setLoad(Commodity.DOMESTICHOTWATERPOWER, this.timeFromMidnight, this.hotWaterPower);
+                    this.predictedWaterDemand.setLoad(Commodity.DOMESTICHOTWATERPOWER, secondsSinceMidnight, this.hotWaterPower);
                     this.sendIPP();
                 }
             }
@@ -179,9 +178,9 @@ public class DomesticHotWaterLocalObserver
     }
 
     private void sendIPP() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        long secondsSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
-        long startOfDay = now - secondsSinceMidnight;
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        long startOfDay = TimeConversion.getStartOfDay(now).toEpochSecond();
+        this.lastTimeIPPSent = now;
 
         DomesticHotWaterNonControllableIPP ipp =
                 new DomesticHotWaterNonControllableIPP(

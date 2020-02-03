@@ -68,7 +68,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
 
         if (exchangeObject instanceof GUIScheduleComExchange) {
             GUIScheduleComExchange exgs = (GUIScheduleComExchange) exchangeObject;
-            this.collector.updateGlobalSchedule(exgs.getSchedules(), exchangeObject.getTimestamp());
+            this.collector.updateGlobalSchedule(exgs.getSchedules(), exchangeObject.getTimestamp().toEpochSecond());
         } else if (exchangeObject instanceof GUIDeviceListComExchange) {
             GUIDeviceListComExchange exgdl = (GUIDeviceListComExchange) exchangeObject;
             this.collector.updateEADeviceList(exgdl.getDeviceList());
@@ -86,10 +86,10 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
             }
         } else if (exchangeObject instanceof GUIEpsComExchange) {
             GUIEpsComExchange gece = (GUIEpsComExchange) exchangeObject;
-            this.collector.updateGlobalSchedule(gece.getPriceSignals(), gece.getTimestamp());
+            this.collector.updateGlobalSchedule(gece.getPriceSignals(), gece.getTimestamp().toEpochSecond());
         } else if (exchangeObject instanceof GUIPlsComExchange) {
             GUIPlsComExchange gpce = (GUIPlsComExchange) exchangeObject;
-            this.collector.updateGlobalSchedule(gpce.getTimestamp(), gpce.getPowerLimitSignals());
+            this.collector.updateGlobalSchedule(gpce.getTimestamp().toEpochSecond(), gpce.getPowerLimitSignals());
         } else if (exchangeObject instanceof GUIWaterStorageComExchange) {
             GUIWaterStorageComExchange gwsce = (GUIWaterStorageComExchange) exchangeObject;
             WaterStorageOCSX gwsse = new WaterStorageOCSX(
@@ -105,11 +105,11 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         } else if (exchangeObject instanceof GUIHotWaterPredictionComExchange) {
             GUIHotWaterPredictionComExchange ghwpce = (GUIHotWaterPredictionComExchange) exchangeObject;
             this.collector.updateWaterPredictionData(
-                    ghwpce.getPredictedTankTemp(), ghwpce.getPredictedHotWaterDemand(), ghwpce.getPredictedHotWaterSupply(), ghwpce.getTimestamp());
+                    ghwpce.getPredictedTankTemp(), ghwpce.getPredictedHotWaterDemand(), ghwpce.getPredictedHotWaterSupply(), ghwpce.getTimestamp().toEpochSecond());
         } else if (exchangeObject instanceof GUIAncillaryMeterComExchange) {
             GUIAncillaryMeterComExchange gamce = (GUIAncillaryMeterComExchange) exchangeObject;
 
-            this.collector.updateAncillaryMeter(gamce.getAncillaryMeter(), gamce.getTimestamp());
+            this.collector.updateAncillaryMeter(gamce.getAncillaryMeter(), gamce.getTimestamp().toEpochSecond());
         } else if (exchangeObject instanceof GUIBatteryStorageComExchange) {
             GUIBatteryStorageComExchange gbsce = (GUIBatteryStorageComExchange) exchangeObject;
             BatteryStorageOCSX gbsse = new BatteryStorageOCSX(
@@ -122,7 +122,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
             this.collector.updateBatteryStorageData(gbsse);
         } else if (exchangeObject instanceof DevicesPowerComExchange) {
             DevicesPowerComExchange dpsex = (DevicesPowerComExchange) exchangeObject;
-            this.collector.updatePowerStates(dpsex.getTimestamp(), dpsex.getPowerStates());
+            this.collector.updatePowerStates(dpsex.getTimestamp().toEpochSecond(), dpsex.getPowerStates());
         } else {
             this.getGlobalLogger().logError("unknown exchange data type: " + exchangeObject.getClass().getName());
         }
@@ -133,7 +133,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         this.notifyComManager(
                 new GUIStateSelectedComExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         cls));
     }
 
@@ -142,7 +142,7 @@ public class GuiComDriver extends SimulationComDriver implements StateViewerList
         this.notifyComManager(
                 new GUIStateRegistrySelectedComExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         registry));
     }
 }

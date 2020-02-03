@@ -12,6 +12,8 @@ import osh.hal.exchange.BatteryStorageOX;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -42,7 +44,7 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
     private int inverterMinComplexPower;
     private int inverterMaxComplexPower;
 
-    private long newIppAfter;
+    private Duration newIppAfter;
     private int triggerIppIfDeltaSoCBigger;
 
     /**
@@ -76,10 +78,10 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
         this.inverterMaxComplexPower = this.inverterMaxPower;
 
         try {
-            this.newIppAfter = Long.parseLong(this.getDriverConfig().getParameter("newIppAfter"));
+            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
         } catch (Exception e) {
-            this.newIppAfter = 3600; // 1 hour
-            this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
+            this.newIppAfter = Duration.ofHours(1); // 1 hour
+            this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter.getSeconds());
         }
 
         try {
@@ -114,7 +116,7 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
 
     @Override
     public void onNextTimeTick() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         int currentPowerAtGridConnection = 0;
         if (this.ancillaryMeterState != null) {
@@ -156,7 +158,7 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
                 this.inverterMaxComplexPower,
                 this.inverterMinPower,
                 this.inverterMaxPower,
-                0,
+                Duration.ZERO,
                 this.newIppAfter,
                 this.triggerIppIfDeltaSoCBigger,
                 this.compressionType,

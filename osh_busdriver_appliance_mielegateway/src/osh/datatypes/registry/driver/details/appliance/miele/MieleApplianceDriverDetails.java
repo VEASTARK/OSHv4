@@ -2,6 +2,8 @@ package osh.datatypes.registry.driver.details.appliance.miele;
 
 import osh.datatypes.registry.StateExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -16,22 +18,22 @@ public class MieleApplianceDriverDetails extends StateExchange {
      *
      */
     private static final long serialVersionUID = 5818061135587946337L;
-    protected long expectedProgramDuration;
-    protected long startTime;
-    protected long programRemainingTime;
+    protected Duration expectedProgramDuration;
+    protected ZonedDateTime startTime;
+    protected Duration programRemainingTime;
 
 
     /**
      * CONSTRUCTOR
      */
-    public MieleApplianceDriverDetails(UUID sender, long timestamp) {
+    public MieleApplianceDriverDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 
     /**
      * gets the program duration in seconds
      */
-    public long getExpectedProgramDuration() {
+    public Duration getExpectedProgramDuration() {
         return this.expectedProgramDuration;
     }
 
@@ -40,7 +42,7 @@ public class MieleApplianceDriverDetails extends StateExchange {
      *
      * @param expectedProgramDuration
      */
-    public void setExpectedProgramDuration(long expectedProgramDuration) {
+    public void setExpectedProgramDuration(Duration expectedProgramDuration) {
         this.expectedProgramDuration = expectedProgramDuration;
     }
 
@@ -49,7 +51,7 @@ public class MieleApplianceDriverDetails extends StateExchange {
      *
      * @return
      */
-    public long getStartTime() {
+    public ZonedDateTime getStartTime() {
         return this.startTime;
     }
 
@@ -58,14 +60,14 @@ public class MieleApplianceDriverDetails extends StateExchange {
      *
      * @param startTime
      */
-    public void setStartTime(long startTime) {
+    public void setStartTime(ZonedDateTime startTime) {
         this.startTime = startTime;
     }
 
     /**
      * gets the remaining program time in seconds
      */
-    public long getProgramRemainingTime() {
+    public Duration getProgramRemainingTime() {
         return this.programRemainingTime;
     }
 
@@ -74,7 +76,7 @@ public class MieleApplianceDriverDetails extends StateExchange {
      *
      * @param programTimeLeft
      */
-    public void setProgramRemainingTime(long programTimeLeft) {
+    public void setProgramRemainingTime(Duration programTimeLeft) {
         this.programRemainingTime = programTimeLeft;
     }
 

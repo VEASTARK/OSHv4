@@ -5,6 +5,8 @@ import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 import osh.eal.hal.interfaces.gas.IHALGasPowerDetails;
 import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -33,7 +35,7 @@ public class GasBoilerObserverExchange
     private final int typicalReactivePowerOn;
     private final int typicalReactivePowerOff;
 
-    private final int newIppAfter;
+    private final Duration newIppAfter;
 
 
     /**
@@ -44,7 +46,7 @@ public class GasBoilerObserverExchange
      */
     public GasBoilerObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
 
             double minTemperature,
             double maxTemperature,
@@ -62,7 +64,7 @@ public class GasBoilerObserverExchange
             int typicalActivePowerOff,
             int typicalReactivePowerOn,
             int typicalReactivePowerOff,
-            int newIppAfter) {
+            Duration newIppAfter) {
 
         super(deviceID, timestamp);
 
@@ -142,7 +144,7 @@ public class GasBoilerObserverExchange
         return this.typicalReactivePowerOff;
     }
 
-    public int getNewIppAfter() {
+    public Duration getNewIppAfter() {
         return this.newIppAfter;
     }
 

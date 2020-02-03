@@ -4,6 +4,7 @@ import osh.cal.CALComExchange;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class GUIEpsComExchange extends CALComExchange {
     /**
      * CONSTRUCTOR
      */
-    public GUIEpsComExchange(UUID deviceID, Long timestamp) {
+    public GUIEpsComExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

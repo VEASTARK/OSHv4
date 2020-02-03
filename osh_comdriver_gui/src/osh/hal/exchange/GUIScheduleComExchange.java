@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALComExchange;
 import osh.datatypes.ea.Schedule;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class GUIScheduleComExchange extends CALComExchange {
      */
     public GUIScheduleComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             List<Schedule> schedules,
             int stepSize) {
         super(deviceID, timestamp);

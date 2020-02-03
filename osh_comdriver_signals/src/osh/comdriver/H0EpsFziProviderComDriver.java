@@ -12,9 +12,10 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.slp.IH0Profile;
-import osh.utils.time.TimeConversion;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -34,14 +35,14 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
 
     /**
      * Maximum time the signal is available in advance (36h)
      */
     private int signalPeriod;
 
-    private long lastTimeSignalSent;
+    private ZonedDateTime lastTimeSignalSent;
 
     /* Minimum time the signal is available in advance (24h)
      * atLeast = signalPeriod - newSignalAfterThisPeriod */
@@ -87,9 +88,10 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         }
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -169,7 +171,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        this.currentYear = TimeConversion.convertUnixTime2Year(this.getTimeDriver().getCurrentEpochSecond());
+        this.currentYear = this.getTimeDriver().getCurrentTime().getYear();
 
         try {
             Class h0Class = Class.forName(this.h0ClassName);
@@ -186,14 +188,14 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         this.priceSignals = this.generateNewPriceSignal();
         EpsComExchange ex = new EpsComExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 this.priceSignals);
         this.notifyComManager(ex);
 
-        this.lastTimeSignalSent = this.getTimeDriver().getCurrentEpochSecond();
+        this.lastTimeSignalSent = this.getTimeDriver().getCurrentTime();
 
         //register update
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -204,12 +206,12 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
         // generate new PriceSignal and send it
-        if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isBefore(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
 
-            int nowIsYear = TimeConversion.convertUnixTime2Year(now);
+            int nowIsYear = now.getYear();
             if (nowIsYear != this.currentYear) {
                 // new years eve...
                 this.currentYear = nowIsYear;
@@ -244,23 +246,26 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
 
     private EnumMap<AncillaryCommodity, PriceSignal> generateNewPriceSignal() {
 
+        long epochSecond = this.getTimeDriver().getCurrentEpochSecond();
+        long signalEnd = epochSecond + this.signalPeriod;
+
         PriceSignal newPriceSignalAutoConsPV = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerAutoConsumptionPV,
                 AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION);
 
         PriceSignal newPriceSignalAutoConsCHP = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerAutoConsumptionCHP,
                 AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION);
 
         PriceSignal newPriceSignalExternal = VirtualPriceSignalGenerator.getRandomH0BasedPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerExternalSupplyMin,
                 this.activePowerExternalSupplyAvg,
@@ -273,22 +278,22 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
                 AncillaryCommodity.ACTIVEPOWEREXTERNAL);
 
         PriceSignal newPriceSignalFeedInPV = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerFeedInPV,
                 AncillaryCommodity.PVACTIVEPOWERFEEDIN);
 
         PriceSignal newPriceSignalFeedInCHP = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.activePowerFeedInCHP,
                 AncillaryCommodity.CHPACTIVEPOWERFEEDIN);
 
         PriceSignal newPriceSignalNaturalGas = VirtualPriceSignalGenerator.getConstantPriceSignal(
-                this.getTimeDriver().getCurrentEpochSecond(),
-                this.getTimeDriver().getCurrentEpochSecond() + this.signalPeriod,
+                epochSecond,
+                signalEnd,
                 this.signalConstantPeriod,
                 this.naturalGasPowerPrice,
                 AncillaryCommodity.NATURALGASPOWEREXTERNAL);

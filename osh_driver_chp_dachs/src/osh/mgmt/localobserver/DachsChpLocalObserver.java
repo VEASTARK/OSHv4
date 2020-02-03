@@ -17,6 +17,7 @@ import osh.hal.exchange.ChpObserverExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
 import osh.mgmt.mox.DachsChpMOX;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -35,7 +36,7 @@ public class DachsChpLocalObserver
     private int hotWaterPower;
     private int gasPower;
 
-    private int runtimeRemaining;
+    private Duration runtimeRemaining;
     private boolean running;
 
     // quasi static values
@@ -46,8 +47,8 @@ public class DachsChpLocalObserver
     private int typicalThermalPower;
     private UUID hotWaterTankUuid;
 
-    private int rescheduleAfter;
-    private long newIPPAfter;
+    private Duration rescheduleAfter;
+    private Duration newIPPAfter;
     private int relativeHorizonIPP;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
@@ -97,7 +98,7 @@ public class DachsChpLocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     DeviceTypes.CHPPLANT);
 
             cpse.addPowerState(Commodity.ACTIVEPOWER, this.activePower);

@@ -109,20 +109,21 @@ public class GuiDataCollector {
 
     public synchronized void updateWaterStorageData(WaterStorageOCSX exws) {
         UUID tankId = exws.getTankId();
+        long epochTimeStamp = exws.getTimestamp().toEpochSecond();
 
         if (this.tankTemps.get(tankId) == null) {
             this.tankTemps.put(tankId, new TreeMap<>());
             this.lastWaterRefresh.put(tankId, 0L);
         }
-        this.tankTemps.get(tankId).put(exws.getTimestamp(), exws.getCurrentTemp());
+        this.tankTemps.get(tankId).put(epochTimeStamp, exws.getCurrentTemp());
 
         this.hotWaterDemands.computeIfAbsent(tankId, k -> new TreeMap<>());
-        this.hotWaterDemands.get(tankId).put(exws.getTimestamp(), exws.getDemand());
+        this.hotWaterDemands.get(tankId).put(epochTimeStamp, exws.getDemand());
 
         this.hotWaterSupplies.computeIfAbsent(tankId, k -> new TreeMap<>());
-        this.hotWaterSupplies.get(tankId).put(exws.getTimestamp(), exws.getSupply());
+        this.hotWaterSupplies.get(tankId).put(epochTimeStamp, exws.getSupply());
 
-        this.checkForPastUpdateOfWater(exws.getTimestamp());
+        this.checkForPastUpdateOfWater(epochTimeStamp);
     }
 
     public synchronized void updateWaterPredictionData(
@@ -154,6 +155,7 @@ public class GuiDataCollector {
 
     public synchronized void updateBatteryStorageData(BatteryStorageOCSX exbs) {
         UUID batteryId = exbs.getBatteryId();
+        long epochTimeStamp = exbs.getTimestamp().toEpochSecond();
 
         GUIBatteryStorageStateExchange guiBatteryStorageStateExchange =
                 new GUIBatteryStorageStateExchange(
@@ -167,8 +169,8 @@ public class GuiDataCollector {
             this.batteryStorageHistories.put(batteryId, new OptimizedDataStorage<>());
             this.lastBatteryRefresh.put(batteryId, 0L);
         }
-        this.batteryStorageHistories.get(batteryId).add(exbs.getTimestamp(), guiBatteryStorageStateExchange);
-        this.checkForPastUpdateOfBattery(exbs.getTimestamp());
+        this.batteryStorageHistories.get(batteryId).add(epochTimeStamp, guiBatteryStorageStateExchange);
+        this.checkForPastUpdateOfBattery(epochTimeStamp);
     }
 
 

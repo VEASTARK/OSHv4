@@ -4,6 +4,7 @@ import osh.cal.CALComExchange;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -23,7 +24,7 @@ public class GUIPlsComExchange extends CALComExchange {
      * @param deviceID
      * @param timestamp
      */
-    public GUIPlsComExchange(UUID deviceID, Long timestamp) {
+    public GUIPlsComExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

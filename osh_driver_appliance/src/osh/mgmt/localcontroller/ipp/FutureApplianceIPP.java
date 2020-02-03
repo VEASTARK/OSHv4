@@ -14,6 +14,7 @@ import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.BitSetConverter;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.UUID;
@@ -94,7 +95,7 @@ public class FutureApplianceIPP
     public FutureApplianceIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             int bitCount,
             boolean toBeScheduled,
             long optimizationHorizon,
@@ -448,7 +449,7 @@ public class FutureApplianceIPP
 
         // convert to selected starting times
         long[] selectedStartingTimes = getStartingTimes(
-                this.acp.getAcpReferenceTime(),
+                this.acp.getAcpReferenceTime().toEpochSecond(),
                 selectedTDOF,
                 selectedMinMaxTimes);
 
@@ -701,7 +702,7 @@ public class FutureApplianceIPP
         return new GenericApplianceSolution(
                 this.acp.getAcpID(),
                 getStartingTimes(
-                        this.acp.getAcpReferenceTime(),
+                        this.acp.getAcpReferenceTime().toEpochSecond(),
                         selectedTimeOfTDOF,
                         this.acp.getMinMaxDurations()[selectedProfile]),
                 selectedProfile);

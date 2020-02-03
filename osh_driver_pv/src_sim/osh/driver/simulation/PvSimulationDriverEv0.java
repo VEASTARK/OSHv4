@@ -13,7 +13,6 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
-import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -100,17 +99,15 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
         //initially give LocalObserver load data of past days
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
-
         List<SparseLoadProfile> predictions = new LinkedList<>();
 
-        ZonedDateTime current = TimeConversion.convertUnixTimeToZonedDateTime(startTime);
+        ZonedDateTime current = this.getTimeDriver().getTimeAtStart();
 
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
 
             ZonedDateTime pastDay = current.minusDays(i);
-            SparseLoadProfile prof = this.profile.getProfileForDayOfYear(pastDay.toLocalDate()).getProfileWithoutDuplicateValues();
+            SparseLoadProfile prof = this.profile.getProfileForDayOfYear(pastDay).getProfileWithoutDuplicateValues();
             try {
                 Long nextLoadChange = 0L;
                 while (nextLoadChange != null) {
@@ -140,14 +137,15 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             predictions.add(prof);
         }
 
-        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), predictions, this.pastDaysPrediction);
+        PvPredictionExchange _ox = new PvPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(), predictions,
+                this.pastDaysPrediction);
         this.notifyObserver(_ox);
     }
 
     @Override
     public void onNextTimeTick() {
         if (this.pvSwitchedOn) {
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
             this.setPower(Commodity.ACTIVEPOWER, this.profile.getPowerAt(now));
 
             if (this.getPower(Commodity.ACTIVEPOWER) != 0) {
@@ -172,7 +170,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
             }
         }
 
-        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        PvObserverExchange _ox = new PvObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _ox.setActivePower(this.getPower(Commodity.ACTIVEPOWER));
         _ox.setReactivePower(this.getPower(Commodity.REACTIVEPOWER));
         this.notifyObserver(_ox);

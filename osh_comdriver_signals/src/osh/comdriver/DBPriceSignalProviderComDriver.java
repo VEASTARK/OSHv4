@@ -14,6 +14,7 @@ import osh.datatypes.registry.details.utility.CurrentPriceSignalLogDetails;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -89,7 +90,7 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
      */
     public void processPriceSignal(PriceSignal pricesignal, PowerLimitSignal powerLimit) {
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
 //		HashMap<VirtualCommodity,PriceSignal> map = new HashMap<>();
 //		map.put(VirtualCommodity.ACTIVEPOWEREXTERNAL, pricesignal);
@@ -99,7 +100,7 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
         // save as current state
         CurrentPriceSignalLogDetails priceSignalDetails = new CurrentPriceSignalLogDetails(this.getUUID(), now);
         priceSignalDetails.setCommodity(pricesignal.getCommodity());
-        priceSignalDetails.getPricePerUnit(pricesignal.getPrice(now));
+        priceSignalDetails.getPricePerUnit(pricesignal.getPrice(now.toEpochSecond()));
 
         this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, pricesignal);
 

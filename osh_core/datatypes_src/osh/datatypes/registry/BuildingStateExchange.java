@@ -55,7 +55,7 @@ public class BuildingStateExchange extends StateExchange {
         this.currentGasPowerExternal = other.currentGasPowerExternal;
     }
 
-    public BuildingStateExchange(UUID sender, ZonedDateTime currentTime, long timestamp, double currentActivePower,
+    public BuildingStateExchange(UUID sender, ZonedDateTime currentTime, ZonedDateTime timestamp, double currentActivePower,
                                  double currentActivePowerConsumption, double currentActivePowerChp, double currentActivePowerChpFeedIn,
                                  double currentActivePowerChpAutoConsumption, double currentActivePowerPv, double currentActivePowerPvFeedIn,
                                  double currentActivePowerPvAutoConsumption, double currentActivePowerBatteryCharging, double currentActivePowerBatteryDischarging,

@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALComExchange;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -19,7 +20,7 @@ public class GUIAncillaryMeterComExchange extends CALComExchange {
      */
     public GUIAncillaryMeterComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             AncillaryCommodityLoadProfile ancillaryMeter) {
         super(deviceID, timestamp);
 

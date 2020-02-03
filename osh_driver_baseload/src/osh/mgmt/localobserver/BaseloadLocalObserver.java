@@ -13,6 +13,7 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.BaseloadObserverExchange;
 import osh.hal.exchange.BaseloadPredictionExchange;
 import osh.mgmt.localobserver.baseload.ipp.BaseloadIPP;
@@ -59,7 +60,7 @@ public class BaseloadLocalObserver
 
     private void monitorBaseloadProfile(int activeBaseload, int reactiveBaseload) {
 
-        if (this.timeFromMidnight == 0) {
+        if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             // a brand new day...let's make a new prediction
 
             if (this.lastDayProfile.getEndingTimeOfProfile() != 0) {
@@ -138,7 +139,7 @@ public class BaseloadLocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     DeviceTypes.OTHER);
 
             for (Commodity c : _ox.getCommodities()) {
@@ -151,13 +152,12 @@ public class BaseloadLocalObserver
                     this,
                     cpse);
 
-            long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimeDriver().getCurrentEpochSecond());
+            this.timeFromMidnight = TimeConversion.getSecondsSinceDayStart(this.getTimeDriver().getCurrentTime());
 
             //monitor the baseload
             this.monitorBaseloadProfile(_ox.getActivePower(), _ox.getReactivePower());
 
-            if (lastTimeFromMidnight > this.timeFromMidnight) {
+            if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 //a new day has begun...
                 this.updateIPP();
             }
@@ -178,16 +178,13 @@ public class BaseloadLocalObserver
 
 
     private void updateIPP() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-
         BaseloadIPP ipp = new BaseloadIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),
-                now,
+                this.getTimeDriver().getCurrentTime(),
                 false,
                 DeviceTypes.BASELOAD,
-                now,
-                this.predictedBaseloadProfile.cloneWithOffset(now),
+                this.predictedBaseloadProfile.cloneWithOffset(this.getTimeDriver().getCurrentEpochSecond()),
                 this.compressionType,
                 this.compressionValue);
 

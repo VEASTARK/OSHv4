@@ -4,6 +4,7 @@ import osh.datatypes.hal.interfaces.ITemperatureDetails;
 import osh.datatypes.registry.details.common.TemperatureDetails;
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class BacNetThermalExchange
      * @param deviceID  unique identifier for this element
      * @param timestamp timestamp of this exchange
      */
-    public BacNetThermalExchange(UUID deviceID, long timestamp) {
+    public BacNetThermalExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
         this.temperatureDetails = new TemperatureDetails(deviceID, timestamp);
     }

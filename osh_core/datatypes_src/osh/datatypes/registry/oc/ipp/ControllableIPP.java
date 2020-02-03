@@ -7,6 +7,7 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
     public ControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
@@ -57,7 +58,7 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
     public ControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             int bitCount,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,

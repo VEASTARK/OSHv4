@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALComExchange;
 import osh.datatypes.cruisecontrol.OptimizedDataStorage.EqualData;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -20,7 +21,8 @@ public class WaterStorageSumDetailsComExchange extends CALComExchange implements
     /**
      * CONSTRUCTOR
      */
-    public WaterStorageSumDetailsComExchange(UUID deviceID, Long timestamp, double posSum, double negSum, double sum) {
+    public WaterStorageSumDetailsComExchange(UUID deviceID, ZonedDateTime timestamp, double posSum, double negSum,
+                                             double sum) {
         super(deviceID, timestamp);
         this.posSum = posSum;
         this.negSum = negSum;

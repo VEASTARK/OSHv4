@@ -8,6 +8,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.VDI6002DomesticHotWaterStatistics;
 import osh.eal.hal.exceptions.HALException;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
 import osh.simulation.DatabaseLoggerThread;
@@ -17,6 +18,7 @@ import osh.simulation.screenplay.SubjectAction;
 import osh.utils.csv.CSVImporter;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
@@ -142,7 +144,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
     public void onSimulationIsUp() throws SimulationSubjectException {
         super.onSimulationIsUp();
-        long startTime = this.getTimeDriver().getTimeAtStart().toEpochSecond();
+        ZonedDateTime startTime = this.getTimeDriver().getTimeAtStart();
 
         this.log = DatabaseLoggerThread.isLogHotWater();
 
@@ -150,7 +152,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
             this.avgWeekDayLoad = new double[7][1440];
             this.avgWeekDayLoadCounter = new int[7][1440];
 
-            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTimeStamp(startTime);
+            int daysInYear = TimeConversion.getNumberOfDaysInYearFromTime(startTime);
             this.avgDayLoad = new double[daysInYear];
             this.avgDayLoadCounter = new int[daysInYear];
             Arrays.fill(this.avgDayLoad, 0.0);
@@ -161,7 +163,8 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
             }
         }
 
-        VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(),
+        VDI6002WaterDemandPredictionExchange _pred = new VDI6002WaterDemandPredictionExchange(this.getUUID(),
+                this.getTimeDriver().getCurrentTime(),
                 VDI6002DomesticHotWaterStatistics.monthlyCorrection,
                 VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection, this.weekDayHourProbabilities, this.avgYearlyDemand);
         this.notifyObserver(_pred);
@@ -173,20 +176,20 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         long initialNumber = this.getRandomGenerator().getNextLong();
         OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
-        if (this.dayProfile == null || now % 86400 == 0) {
+        if (this.dayProfile == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             if (this.dayProfile == null)
                 this.dayProfile = new SparseLoadProfile();
             this.generateDailyDemandProfile(now, newRandomGen);
         }
 
-        int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, now);
+        int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.getTimeDriver().getCurrentEpochSecond());
 
         if (this.log) {
-            int weekDay = TimeConversion.convertUnixTime2CorrectedWeekdayInt(now);
-            int minute = TimeConversion.convertUnixTime2MinuteOfDay(now);
-            int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
+            int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
+            int minute = TimeConversion.getMinutesSinceDayStart(now);
+            int dayOfYear = now.getDayOfYear();
             this.avgWeekDayLoad[weekDay][minute] += power;
             this.avgWeekDayLoadCounter[weekDay][minute]++;
             this.avgDayLoad[dayOfYear] += power;
@@ -238,11 +241,11 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         // NOTHING
     }
 
-    private void generateDailyDemandProfile(long now, OSHRandomGenerator randomGen) {
+    private void generateDailyDemandProfile(ZonedDateTime now, OSHRandomGenerator randomGen) {
 
-        int month = TimeConversion.convertUnixTime2MonthInt(now);
-        int weekDay = TimeConversion.convertUnixTime2CorrectedWeekdayInt(now);
-        long midnightToday = TimeConversion.getUnixTimeStampCurrentDayMidnight(now);
+        int month = TimeConversion.getCorrectedMonth(now);
+        int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
+        long midnightToday = TimeConversion.getStartOfDay(now).toEpochSecond();
 
         int runsToday;
         double avgRunsToday = (this.avgYearlyRuns / 365.0) * VDI6002DomesticHotWaterStatistics.monthlyCorrection[month] * VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection[weekDay];
@@ -257,8 +260,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         SparseLoadProfile[] newDayProfiles = new SparseLoadProfile[runsToday];
 
         boolean lastDay =
-                (this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond()) / 86400
-                == (this.getSimulationEngine().getSimulationDuration() / 86400 - 1);
+                !this.getTimeDriver().getCurrentTime().isBefore(this.getTimeDriver().getTimeAtStart().plusSeconds(this.getSimulationEngine().getSimulationDuration()).minusDays(1));
 
         for (int i = 0; i < runsToday; i++) {
 

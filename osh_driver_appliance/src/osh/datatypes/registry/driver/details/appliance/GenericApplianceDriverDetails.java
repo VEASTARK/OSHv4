@@ -3,6 +3,7 @@ package osh.datatypes.registry.driver.details.appliance;
 import osh.datatypes.registry.StateExchange;
 import osh.en50523.EN50523DeviceState;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -23,16 +24,6 @@ public class GenericApplianceDriverDetails extends StateExchange {
 
 
     /**
-     * for JAXB
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private GenericApplianceDriverDetails() {
-        this(null, -1L);
-    }
-
-
-    /**
      * CONSTRUCTOR
      *
      * @param sender
@@ -40,7 +31,7 @@ public class GenericApplianceDriverDetails extends StateExchange {
      */
     public GenericApplianceDriverDetails(
             UUID sender,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

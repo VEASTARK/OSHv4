@@ -339,11 +339,7 @@ public class constructSimulationPackage {
             false, // available
             false, // available
     };
-    /**
-     * Simulate real PV from logged data of KIT ESHL PV
-     */
 //	static boolean usePVRealESHL = true;
-    public static boolean usePVRealESHL;
     /**
      * Simulate real PV from logged data of FZI HoLL PV
      */
@@ -604,9 +600,6 @@ public class constructSimulationPackage {
     // GUI-Configuration
     static final String guiComDriverClass = BuildingConfiguration.guiComDriverClass;
     static final String guiComManagerClass = BuildingConfiguration.guiComManagerClass;
-    // Logger-Configuration
-    static final String loggerBusDriverClass = osh.busdriver.simulation.SimulationLoggerBusDriver.class.getName();
-    static final String loggerBusManagerClass = osh.mgmt.busmanager.simulation.SimulationLoggerBusManager.class.getName();
 
     static {
         /* Random seed if fixed random seed */
@@ -839,9 +832,7 @@ public class constructSimulationPackage {
                                     new EALConfigurationWrapper(
                                             currentNumberOfPersons,
                                             h0Filename,
-                                            simPackage.isSimulationResultLogging(),
-                                            loggerBusDriverClass,
-                                            loggerBusManagerClass);
+                                            simPackage.isSimulationResultLogging());
 
                             //GA configuration
                             //ONLY EVER use datatypes that have a String constructor, everything else will ecplode in your face
@@ -1973,28 +1964,6 @@ public class constructSimulationPackage {
 
                             // OTHER
 
-
-                            if (usePVRealESHL) {
-                                Map<String, String> pvParams = new HashMap<>();
-                                pvParams.put("usedcommodities", "[ACTIVEPOWER,REACTIVEPOWER]");
-                                pvParams.put("screenplaytype", String.valueOf(simPackage.getScreenplayType()));
-                                pvParams.put("nominalpower", String.valueOf(pvNominalPower));
-                                pvParams.put("pastDaysPrediction", String.valueOf(pastDaysPrediction));
-                                pvParams.put("pathToFiles", pathToFilesESHL);
-                                pvParams.put("fileExtension", fileExtensionESHL);
-                                pvParams.put("profileNominalPower", String.valueOf(profileNominalPowerESHL));
-
-                                AddAssignedDevice.addAssignedDevice(
-                                        simConfig.getEalConfig(),
-                                        UUID.fromString("7fc1f1d9-39c3-4e5f-8907-aeb0cd1ee84c"),
-                                        osh.driver.simulation.PvSimulationDriverESHLData.class.getName(),
-                                        osh.mgmt.localobserver.PvLocalObserver.class.getName(),
-                                        osh.mgmt.localcontroller.PvLocalController.class.getName(),
-                                        false,
-                                        DeviceTypes.PVSYSTEM,
-                                        DeviceClassification.PVSYSTEM,
-                                        pvParams);
-                            }
 
                             if (usePVRealHOLL) {
                                 Map<String, String> pvParams = new HashMap<>();

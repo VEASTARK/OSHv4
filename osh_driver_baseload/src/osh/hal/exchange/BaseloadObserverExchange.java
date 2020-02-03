@@ -5,6 +5,7 @@ import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 import osh.eal.hal.interfaces.gas.IHALGasPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Set;
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class BaseloadObserverExchange
      */
     public BaseloadObserverExchange(
             UUID deviceID,
-            Long timestamp) {
+            ZonedDateTime timestamp) {
         super(deviceID, timestamp);
 
         this.powerMap = new EnumMap<>(Commodity.class);

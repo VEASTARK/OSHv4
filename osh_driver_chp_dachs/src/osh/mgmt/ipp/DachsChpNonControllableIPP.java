@@ -11,6 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.chp.model.GenericChpModel;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ public class DachsChpNonControllableIPP
     public DachsChpNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             int minRuntime,
             GenericChpModel chpModel,
@@ -90,7 +91,7 @@ public class DachsChpNonControllableIPP
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                now,
+                timeStamp,
                 DeviceTypes.CHPPLANT,
                 new Commodity[]{Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,

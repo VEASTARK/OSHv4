@@ -2,6 +2,8 @@ package osh.eal.hal.exchange.ipp;
 
 import osh.eal.hal.exchange.HALObserverExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -11,27 +13,27 @@ import java.util.UUID;
 public class IPPSchedulingExchange
         extends HALObserverExchange {
 
-    private long newIppAfter;
-    private long rescheduleAfter;
+    private Duration newIppAfter;
+    private Duration rescheduleAfter;
     private double triggerIfDeltaX;
 
-    public IPPSchedulingExchange(UUID deviceID, long timestamp) {
+    public IPPSchedulingExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 
-    public long getNewIppAfter() {
+    public Duration getNewIppAfter() {
         return this.newIppAfter;
     }
 
-    public void setNewIppAfter(long newIppAfter) {
+    public void setNewIppAfter(Duration newIppAfter) {
         this.newIppAfter = newIppAfter;
     }
 
-    public long getRescheduleAfter() {
+    public Duration getRescheduleAfter() {
         return this.rescheduleAfter;
     }
 
-    public void setRescheduleAfter(long rescheduleAfter) {
+    public void setRescheduleAfter(Duration rescheduleAfter) {
         this.rescheduleAfter = rescheduleAfter;
     }
 

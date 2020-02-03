@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALExchange;
 import osh.datatypes.registry.AbstractExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -17,7 +18,7 @@ public class GUIStateSelectedComExchange extends CALExchange {
     /**
      * CONSTRUCTOR
      */
-    public GUIStateSelectedComExchange(UUID deviceID, Long timestamp, Class<? extends AbstractExchange> cls) {
+    public GUIStateSelectedComExchange(UUID deviceID, ZonedDateTime timestamp, Class<? extends AbstractExchange> cls) {
         super(deviceID, timestamp);
         this.cls = cls;
     }

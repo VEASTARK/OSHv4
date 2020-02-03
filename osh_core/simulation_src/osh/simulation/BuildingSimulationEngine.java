@@ -22,6 +22,7 @@ import osh.utils.time.TimeConversion;
 import osh.utils.xml.XMLSerialization;
 
 import java.io.PrintWriter;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -417,7 +418,8 @@ public class BuildingSimulationEngine extends SimulationEngine {
 
             double currentGasPowerExternal = ancillaryMeterState.getPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL);
 
-            long currentTime = this.timeDriver.getCurrentTime().toEpochSecond();
+            long currentTime = this.timeDriver.getCurrentEpochSecond();
+            ZonedDateTime now = this.timeDriver.getCurrentTime();
 
             /* array
              * [0] = epsCosts
@@ -497,11 +499,14 @@ public class BuildingSimulationEngine extends SimulationEngine {
                         if (this.timeStampForInterval[i] == null) {
                             Long[] interval = this.loggingIntervals.get(i);
                             if (interval[0] > 0) {
-                                this.timeStampForInterval[i] = TimeConversion.getStartOfXthMonth(currentTime, interval[0]);
+                                this.timeStampForInterval[i] =
+                                        TimeConversion.getStartOfMonth(now.plusMonths(interval[0])).toEpochSecond();
                             } else if (interval[1] > 0) {
-                                this.timeStampForInterval[i] = TimeConversion.getStartOfXthWeek(currentTime, interval[1]);
+                                this.timeStampForInterval[i] =
+                                        TimeConversion.getStartOfWeek(now.plusWeeks(interval[1])).toEpochSecond();
                             } else {
-                                this.timeStampForInterval[i] = TimeConversion.getStartOfXthDayAfterToday(currentTime, interval[2]);
+                                this.timeStampForInterval[i] =
+                                        TimeConversion.getStartOfDay(now.plusDays(interval[2])).toEpochSecond();
                             }
                         } else if (this.timeStampForInterval[i] <= currentTime) {
                             Long[] interval = this.loggingIntervals.get(i);
@@ -513,11 +518,14 @@ public class BuildingSimulationEngine extends SimulationEngine {
 
                             this.relativeIntervalStart[i] = currentTick + 1;
                             if (interval[0] > 0) {
-                                this.timeStampForInterval[i] = TimeConversion.getStartOfXthMonth(currentTime, interval[0]);
+                                this.timeStampForInterval[i] =
+                                        TimeConversion.getStartOfMonth(now.plusMonths(interval[0])).toEpochSecond();
                             } else if (interval[1] > 0) {
-                                this.timeStampForInterval[i] = TimeConversion.getStartOfXthWeek(currentTime, interval[1]);
+                                this.timeStampForInterval[i] =
+                                        TimeConversion.getStartOfWeek(now.plusWeeks(interval[1])).toEpochSecond();
                             } else {
-                                this.timeStampForInterval[i] = TimeConversion.getStartOfXthDayAfterToday(currentTime, interval[2]);
+                                this.timeStampForInterval[i] =
+                                        TimeConversion.getStartOfDay(now.plusDays(interval[2])).toEpochSecond();
                             }
                         }
                     }
@@ -588,14 +596,15 @@ public class BuildingSimulationEngine extends SimulationEngine {
 
 
                 if (currentTick % 60 == 0) {
-                    int dofWeek = TimeConversion.convertUnixTime2CorrectedWeekdayInt(currentTime);
-                    int dOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(currentTime);
-                    this.aggrH0ResultsWeekdays[dofWeek][(int) ((currentTick / 60) % 1440)][0] += this.aggrActiveConsumption;
-                    this.aggrH0ResultsWeekdays[dofWeek][(int) ((currentTick / 60) % 1440)][1] += this.aggrReactiveConsumption;
-                    this.h0ResultsCounter[dofWeek][(int) ((currentTick / 60) % 1440)]++;
-                    this.aggrH0ResultsDays[dOfYear % 365][0] += this.aggrActiveConsumption;
-                    this.aggrH0ResultsDays[dOfYear % 365][1] += this.aggrReactiveConsumption;
-                    this.h0ResultsCounterDays[dOfYear % 365]++;
+                    int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(now);
+                    int dayOfYear = TimeConversion.getCorrectedDayOfYear(now);
+                    int minuteOfDay = TimeConversion.getMinutesSinceDayStart(now);
+                    this.aggrH0ResultsWeekdays[dayOfWeek][minuteOfDay][0] += this.aggrActiveConsumption;
+                    this.aggrH0ResultsWeekdays[dayOfWeek][minuteOfDay][1] += this.aggrReactiveConsumption;
+                    this.h0ResultsCounter[dayOfWeek][minuteOfDay]++;
+                    this.aggrH0ResultsDays[dayOfYear % 365][0] += this.aggrActiveConsumption;
+                    this.aggrH0ResultsDays[dayOfYear % 365][1] += this.aggrReactiveConsumption;
+                    this.h0ResultsCounterDays[dayOfYear % 365]++;
 
                     this.aggrActiveConsumption = 0;
                     this.aggrReactiveConsumption = 0;

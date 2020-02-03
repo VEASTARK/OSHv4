@@ -4,6 +4,8 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -30,8 +32,8 @@ public class BatteryStorageOX
     private final int inverterMinPower;
     private final int batteryMaxDischargePower;
 
-    private final int rescheduleAfter;
-    private final long newIppAfter;
+    private final Duration rescheduleAfter;
+    private final Duration newIppAfter;
     private final int triggerIppIfDeltaSoCBigger;
     private final LoadProfileCompressionTypes compressionType;
     private final int compressionValue;
@@ -42,7 +44,7 @@ public class BatteryStorageOX
      */
     public BatteryStorageOX(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
 
             int activePower,
             int reactivePower,
@@ -60,8 +62,8 @@ public class BatteryStorageOX
             int inverterMaxComplexPower,
             int inverterMinPower,
             int inverterMaxPower,
-            int rescheduleAfter,
-            long newIppAfter,
+            Duration rescheduleAfter,
+            Duration newIppAfter,
             int triggerIppIfDeltaSoCBigger,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -162,11 +164,11 @@ public class BatteryStorageOX
         return this.batteryMaxDischargePower;
     }
 
-    public int getRescheduleAfter() {
+    public Duration getRescheduleAfter() {
         return this.rescheduleAfter;
     }
 
-    public long getNewIppAfter() {
+    public Duration getNewIppAfter() {
         return this.newIppAfter;
     }
 

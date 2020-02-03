@@ -1,5 +1,6 @@
 package osh.cal;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -13,7 +14,7 @@ public abstract class CALComExchange extends CALExchange {
      * @param deviceID
      * @param timestamp
      */
-    public CALComExchange(UUID deviceID, Long timestamp) {
+    public CALComExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

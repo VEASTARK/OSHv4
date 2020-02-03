@@ -4,6 +4,7 @@ import osh.cal.CALComExchange;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -27,7 +28,7 @@ public class GUIStatesComExchange extends CALComExchange {
      */
     public GUIStatesComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             Set<Class<? extends AbstractExchange>> types,
             Map<UUID, ? extends AbstractExchange> states) {
         super(deviceID, timestamp);
@@ -68,7 +69,7 @@ public class GUIStatesComExchange extends CALComExchange {
 
     public GUIStatesComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             Class<? extends AbstractExchange> driverStateType) {
         super(deviceID, timestamp);
 

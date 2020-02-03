@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.datatypes.registry.StateExchange;
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -18,7 +19,7 @@ public class HttpRestInteractionComManagerExchange
      * @param deviceID
      * @param timestamp
      */
-    public HttpRestInteractionComManagerExchange(UUID deviceID, Long timestamp, StateExchange stateExchange) {
+    public HttpRestInteractionComManagerExchange(UUID deviceID, ZonedDateTime timestamp, StateExchange stateExchange) {
         super(deviceID, timestamp);
         this.stateExchange = stateExchange;
     }

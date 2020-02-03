@@ -15,6 +15,7 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PvObserverExchange;
 import osh.hal.exchange.PvPredictionExchange;
 import osh.mgmt.ipp.PvNonControllableIPP;
@@ -80,7 +81,7 @@ public class PvLocalObserver extends LocalObserver {
 
                 CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         DeviceTypes.PVSYSTEM);
                 cpse.addPowerState(Commodity.ACTIVEPOWER, this.lastActivePowerLevel);
                 cpse.addPowerState(Commodity.REACTIVEPOWER, this.lastReactivePowerLevel);
@@ -92,14 +93,13 @@ public class PvLocalObserver extends LocalObserver {
             }
 
             //refresh time from Midnight
-            long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(this.getTimeDriver().getCurrentEpochSecond());
+            this.timeFromMidnight = TimeConversion.getSecondsSinceDayStart(this.getTimeDriver().getCurrentTime());
 
             //monitor the load profile
             this.runPvProfilePredictor(_powDetails);
 
             //refresh the EApart
-            if (lastTimeFromMidnight > this.timeFromMidnight) {
+            if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 //a new day has begun...
                 this.updateEAPart();
             }
@@ -122,14 +122,15 @@ public class PvLocalObserver extends LocalObserver {
         //Prediction is always in relative Time from midnight, we need to extend it and then convert to absolute time
         SparseLoadProfile optimizationProfile = this.predictedPVProfile.merge(this.predictedPVProfile, 86400).cloneWithOffset(now);
 
-        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(), this.getGlobalLogger(), now, optimizationProfile, this.compressionType, this.compressionValue);
+        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(), this.getGlobalLogger(),
+                this.getTimeDriver().getCurrentTime(), optimizationProfile, this.compressionType, this.compressionValue);
 
         this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);
     }
 
     private void runPvProfilePredictor(ElectricPowerOCDetails powerDetails) {
 
-        if (this.timeFromMidnight == 0) {
+        if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             //hooray a brand new day...let's make a new prediction
 
             if (this.lastDayProfile.getEndingTimeOfProfile() != 0) {
@@ -155,6 +156,7 @@ public class PvLocalObserver extends LocalObserver {
             if (this.timeRangeCounter >= profileResolutionInSec) {
                 this.lastDayProfile.setLoad(Commodity.ACTIVEPOWER, this.timeFromMidnight, powerDetails.getActivePower());
                 this.lastDayProfile.setLoad(Commodity.REACTIVEPOWER, this.timeFromMidnight, powerDetails.getReactivePower());
+                //TODO: change to 1 in when next backwards-compatibility breaking update gets released
                 this.timeRangeCounter = 0;
             } else {
                 ++this.timeRangeCounter;

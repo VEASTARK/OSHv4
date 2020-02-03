@@ -7,6 +7,8 @@ import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 import osh.hal.interfaces.chp.IHALChpDetails;
 import osh.hal.interfaces.chp.IHALExtendedChpDetails;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -25,7 +27,7 @@ public class ChpObserverExchange
     private boolean running;
     private boolean heatingRequest;
     private boolean electricityRequest;
-    private int minRuntimeRemaining;
+    private Duration minRuntimeRemaining;
     private int minRuntime;
 
     // ### IHALExtendedChpDetails ###
@@ -51,7 +53,7 @@ public class ChpObserverExchange
      */
     public ChpObserverExchange(
             UUID deviceID,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 
@@ -74,11 +76,11 @@ public class ChpObserverExchange
     }
 
     @Override
-    public int getMinRuntimeRemaining() {
+    public Duration getMinRuntimeRemaining() {
         return this.minRuntimeRemaining;
     }
 
-    public void setMinRuntimeRemaining(int minRuntimeRemaining) {
+    public void setMinRuntimeRemaining(Duration minRuntimeRemaining) {
         this.minRuntimeRemaining = minRuntimeRemaining;
     }
 
@@ -87,7 +89,7 @@ public class ChpObserverExchange
     }
 
     public void setMinRuntime(int minRuntime) {
-        this.minRuntimeRemaining = minRuntime;
+        this.minRuntime = minRuntime;
     }
 
     @Override

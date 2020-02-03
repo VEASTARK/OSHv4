@@ -12,6 +12,9 @@ import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchang
 import osh.hal.exchange.BatteryStorageOX;
 import osh.mgmt.ipp.BatteryStorageNonControllableIPP;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * @author Jan Müller, Sebastian Kramer
  */
@@ -19,8 +22,8 @@ public class NonControllableInverterBatteryStorageObserver
         extends LocalObserver {
 
 
-    private long NEW_IPP_AFTER;
-    private long lastTimeIPPSent = Long.MIN_VALUE;
+    private Duration NEW_IPP_AFTER;
+    private ZonedDateTime lastTimeIPPSent;
     private double lastSOCIPP = Integer.MIN_VALUE;
     private int TRIGGER_IPP_IF_DELTASoC_BIGGER;
 
@@ -32,18 +35,20 @@ public class NonControllableInverterBatteryStorageObserver
         //NOTHING
     }
 
-
     @Override
     public void onDeviceStateUpdate() {
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // get OX
         BatteryStorageOX ox = (BatteryStorageOX) this.getObserverDataObject();
         this.NEW_IPP_AFTER = ox.getNewIppAfter();
         this.TRIGGER_IPP_IF_DELTASoC_BIGGER = ox.getTriggerIppIfDeltaSoCBigger();
 
-        if (this.lastTimeIPPSent + this.NEW_IPP_AFTER < now || Math.abs((ox.getBatteryStateOfCharge() - this.lastSOCIPP)) > this.TRIGGER_IPP_IF_DELTASoC_BIGGER) {
+        //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
+        // backwards-compatibility breaking update is released
+        if (this.lastTimeIPPSent == null ||
+                this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER).isBefore(now) || Math.abs((ox.getBatteryStateOfCharge() - this.lastSOCIPP)) > this.TRIGGER_IPP_IF_DELTASoC_BIGGER) {
             // build SIPP
             BatteryStorageNonControllableIPP sipp = new BatteryStorageNonControllableIPP(
                     this.getUUID(),
@@ -87,7 +92,7 @@ public class NonControllableInverterBatteryStorageObserver
         // save current state in OCRegistry (for e.g. GUI)
         BatteryStorageOCSX sx = new BatteryStorageOCSX(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 ox.getBatteryStateOfCharge(),
 //						ox.getBatteryStateOfHealth(),
                 ox.getBatteryMinChargingState(),

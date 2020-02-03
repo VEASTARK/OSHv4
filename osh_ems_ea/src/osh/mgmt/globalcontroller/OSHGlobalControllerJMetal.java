@@ -38,6 +38,7 @@ import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -57,7 +58,7 @@ public class OSHGlobalControllerJMetal
     private int varOptimizationObjective;
     private double upperOverlimitFactor;
     private double lowerOverlimitFactor;
-    private long lastTimeSchedulingStarted;
+    private ZonedDateTime lastTimeSchedulingStarted;
     private OSHRandomGenerator optimizationMainRandomGenerator;
     private long optimizationMainRandomSeed;
     private GAParameters gaparameters;
@@ -170,7 +171,7 @@ public class OSHGlobalControllerJMetal
 
 //		CostChecker.init(epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective, upperOverlimitFactor, lowerOverlimitFactor);
 
-        this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().toEpochSecond() + 60;
+        this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
     }
 
     @Override
@@ -199,7 +200,7 @@ public class OSHGlobalControllerJMetal
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
         // check whether rescheduling is required and if so do rescheduling
         this.handleScheduling();
@@ -239,14 +240,14 @@ public class OSHGlobalControllerJMetal
 
         //check if something has been changed:
         for (InterdependentProblemPart<?, ?> problemPart : this.oshGlobalObserver.getProblemParts()) {
-            if (problemPart.isToBeScheduled() && problemPart.getTimestamp() >= this.lastTimeSchedulingStarted) {
+            if (problemPart.isToBeScheduled() && !problemPart.getTimestamp().isBefore(this.lastTimeSchedulingStarted)) {
                 reschedulingRequired = true;
                 break;
             }
         }
 
         if (reschedulingRequired) {
-            this.lastTimeSchedulingStarted = this.getTimeDriver().getCurrentEpochSecond();
+            this.lastTimeSchedulingStarted = this.getTimeDriver().getCurrentTime();
             this.startScheduling();
         }
 
@@ -299,6 +300,7 @@ public class OSHGlobalControllerJMetal
 
 //		boolean showSolverDebugMessages = getControllerBoxStatus().getShowSolverDebugMessages();
         boolean showSolverDebugMessages = true;
+        final long now = this.getTimeDriver().getCurrentEpochSecond();
 
         OSHRandomGenerator optimisationRunRandomGenerator = new OSHRandomGenerator(new Random(this.optimizationMainRandomGenerator.getNextLong()));
 
@@ -309,7 +311,7 @@ public class OSHGlobalControllerJMetal
                 optimisationRunRandomGenerator,
                 showSolverDebugMessages,
                 this.gaparameters,
-                this.getTimeDriver().getCurrentEpochSecond(),
+                now,
                 this.stepSize,
                 this.logDir);
 
@@ -323,7 +325,6 @@ public class OSHGlobalControllerJMetal
 
         // debug print
         this.getGlobalLogger().logDebug("=== scheduling... ===");
-        long now = this.getTimeDriver().getCurrentEpochSecond();
 
         int[][] bitPositions = new int[problemParts.size()][2];
         int bitPosStart = 0;
@@ -374,7 +375,7 @@ public class OSHGlobalControllerJMetal
                     bitPositions,
                     tempPriceSignals,
                     tempPowerLimitSignals,
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    now,
                     fitnessFunction);
             solutions = resultWithAll.getBitSet();
 
@@ -408,12 +409,12 @@ public class OSHGlobalControllerJMetal
                         GUIHotWaterPredictionStateExchange.class,
                         this,
                         new GUIHotWaterPredictionStateExchange(this.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
+                                this.getTimeDriver().getCurrentTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
 
                 this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
-                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond(), ancillaryMeter));
+                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(), ancillaryMeter));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)
@@ -421,7 +422,7 @@ public class OSHGlobalControllerJMetal
                         GUIScheduleStateExchange.class,
                         this,
                         new GUIScheduleStateExchange(this.getUUID(), this.getTimeDriver()
-                                .getCurrentEpochSecond(), schedules, this.stepSize));
+                                .getCurrentTime(), schedules, this.stepSize));
 
             }
         } catch (Exception e) {
@@ -447,7 +448,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPhenotype(
                                 this.getUUID(),
                                 part.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(),
+                                this.getTimeDriver().getCurrentTime(),
                                 bits));
             } else if (/* lc == null && */ part.getBitCount() > 0) {
                 throw new NullPointerException("got a local part with used bits but without controller! (UUID: " + part.getUUID() + ")");
@@ -460,7 +461,7 @@ public class OSHGlobalControllerJMetal
                         part.transformToFinalInterdependentPrediction(
                                 this.getUUID(),
                                 part.getUUID(),
-                                this.getTimeDriver().getCurrentEpochSecond(),
+                                this.getTimeDriver().getCurrentTime(),
                                 bits));
             }
         }

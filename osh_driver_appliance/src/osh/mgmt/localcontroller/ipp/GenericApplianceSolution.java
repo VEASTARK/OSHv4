@@ -1,7 +1,9 @@
 package osh.mgmt.localcontroller.ipp;
 
 import osh.datatypes.ea.interfaces.ISolution;
+import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -63,6 +65,10 @@ public class GenericApplianceSolution implements ISolution {
         if (this.profileId != other.profileId)
             return false;
         return Arrays.equals(this.startingTimes, other.startingTimes);
+    }
+
+    public ZonedDateTime[] getZonedStartingTimes() {
+        return Arrays.stream(this.startingTimes).mapToObj(TimeConversion::convertUnixTimeToZonedDateTime).toArray(ZonedDateTime[]::new);
     }
 
 

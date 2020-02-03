@@ -53,7 +53,7 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     }
 
     private void init(OSHParameterCollection config) throws OSHException {
-        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        this.deviceMetaDetails = new DeviceMetaDriverDetails(this.getUUID(), this.getTimeDriver().getCurrentTime());
         this.deviceMetaDetails.setName(config.getParameter("name"));
         this.deviceMetaDetails.setLocation(config.getParameter("location"));
         // deviceDetails.setDeviceType(getDeviceType().toString());
@@ -144,11 +144,11 @@ public class BacNetThermalDriver extends HALDeviceDriver {
     }
 
     private BacNetThermalExchange buildObserverExchange() {
-        BacNetThermalExchange _ox = new BacNetThermalExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        BacNetThermalExchange _ox = new BacNetThermalExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
 
         _ox.setDeviceMetaDetails(this.deviceMetaDetails);
 
-        TemperatureDetails _td = new TemperatureDetails(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        TemperatureDetails _td = new TemperatureDetails(this.getUUID(), this.getTimeDriver().getCurrentTime());
 
         _td.setTemperature(dispatcher.getAnalogInputState(this.sensorObject));
 

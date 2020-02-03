@@ -6,6 +6,7 @@ import osh.eal.hal.interfaces.electricity.IHALElectricCurrentDetails;
 import osh.eal.hal.interfaces.electricity.IHALElectricVoltageDetails;
 import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -36,7 +37,7 @@ public class PvObserverExchange
     /**
      * CONSTRUCTOR 1
      */
-    public PvObserverExchange(UUID deviceID, Long timestamp) {
+    public PvObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 
@@ -45,7 +46,7 @@ public class PvObserverExchange
      */
     public PvObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             int activePower,
             int reactivePower,
             double voltage,

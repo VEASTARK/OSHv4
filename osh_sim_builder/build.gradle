@@ -22,7 +22,6 @@ dependencies {
     implementation project(":osh_busdriver_automation_bacnet")
     implementation project(":osh_busdriver_automation_wago")
     implementation project(":osh_comdriver_dof")
-    implementation project(":osh_comdriver_logger")
     implementation project(":osh_comdriver_restservice")
     implementation project(":osh_driver_appliance_miele")
     implementation project(":osh_driver_hvac")

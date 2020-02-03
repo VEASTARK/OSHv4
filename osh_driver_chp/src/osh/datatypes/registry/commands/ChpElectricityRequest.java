@@ -3,6 +3,7 @@ package osh.datatypes.registry.commands;
 import osh.datatypes.registry.CommandExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -11,9 +12,6 @@ import java.util.UUID;
  */
 public class ChpElectricityRequest extends CommandExchange implements IPromiseToBeImmutable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 2650396121767761563L;
     private final boolean on;
 
@@ -21,7 +19,7 @@ public class ChpElectricityRequest extends CommandExchange implements IPromiseTo
     public ChpElectricityRequest(
             UUID sender,
             UUID receiver,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean on) {
         super(sender, receiver, timestamp);
 

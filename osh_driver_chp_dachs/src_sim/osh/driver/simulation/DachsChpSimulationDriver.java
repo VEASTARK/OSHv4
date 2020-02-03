@@ -18,6 +18,7 @@ import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -42,8 +43,8 @@ public class DachsChpSimulationDriver
     private final double typicalMassFlow = 1;
     private UUID hotWaterTankUuid;
 
-    private int rescheduleAfter;
-    private long newIPPAfter;
+    private Duration rescheduleAfter;
+    private Duration newIPPAfter;
     private int relativeHorizonIPP;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
@@ -65,7 +66,7 @@ public class DachsChpSimulationDriver
 
     private boolean electricityRequest;
     private boolean heatingRequest;
-    private int runtimeRemaining;
+    private Duration runtimeRemaining;
     @SuppressWarnings("unused")
     private int offTimeRemaining;
 
@@ -127,16 +128,17 @@ public class DachsChpSimulationDriver
         }
 
         try {
-            this.rescheduleAfter = Integer.parseInt(this.getDriverConfig().getParameter("rescheduleAfter"));
+            this.rescheduleAfter = Duration.ofSeconds(Integer.parseInt(this.getDriverConfig().getParameter(
+                    "rescheduleAfter")));
         } catch (Exception e) {
-            this.rescheduleAfter = 4 * 3600; // 4 hours
+            this.rescheduleAfter = Duration.ofHours(4);
             this.getGlobalLogger().logWarning("Can't get rescheduleAfter, using the default value: " + this.rescheduleAfter);
         }
 
         try {
-            this.newIPPAfter = Long.parseLong(this.getDriverConfig().getParameter("newIPPAfter"));
+            this.newIPPAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIPPAfter")));
         } catch (Exception e) {
-            this.newIPPAfter = 3600; // 1 hour
+            this.newIPPAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIPPAfter, using the default value: " + this.newIPPAfter);
         }
 
@@ -233,7 +235,7 @@ public class DachsChpSimulationDriver
         super.onSimulationIsUp();
 
         ChpStaticDetailsObserverExchange observerExchange =
-                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+                new ChpStaticDetailsObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         observerExchange.setTypicalActivePower(this.typicalActivePower);
         observerExchange.setTypicalReactivePower(this.typicalReactivePower);
         observerExchange.setTypicalThermalPower(this.typicalThermalPower);
@@ -275,19 +277,19 @@ public class DachsChpSimulationDriver
         if (this.electricityRequest || this.heatingRequest || this.runningRequestFromController) {
             if (!this.isRunning()) {
                 if (this.runningRequestFromController) {
-                    this.runtimeRemaining = 30 * 60;
+                    this.runtimeRemaining = Duration.ofMinutes(30);
                 } else {
-                    this.runtimeRemaining = 0;
+                    this.runtimeRemaining = Duration.ZERO;
                 }
             } else {
-                if (this.runtimeRemaining > 0) {
-                    this.runtimeRemaining -= 1;
+                if (this.runtimeRemaining.compareTo(Duration.ZERO) > 0) {
+                    this.runtimeRemaining = this.runtimeRemaining.minusSeconds(1);
                 }
             }
             this.setRunning(true);
         } else {
             this.setRunning(false);
-            this.runtimeRemaining = 0;
+            this.runtimeRemaining = Duration.ZERO;
         }
 
         this.chpModel.calcPower(this.getTimeDriver().getCurrentEpochSecond());
@@ -321,7 +323,7 @@ public class DachsChpSimulationDriver
         // send ObserverExchange
         ChpObserverExchange observerExchange = new ChpObserverExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond());
+                this.getTimeDriver().getCurrentTime());
 
         observerExchange.setActivePower(Math.round(this.getPower(Commodity.ACTIVEPOWER)));
         observerExchange.setReactivePower(Math.round(this.getPower(Commodity.REACTIVEPOWER)));

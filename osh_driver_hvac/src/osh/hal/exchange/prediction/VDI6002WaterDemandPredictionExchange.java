@@ -2,6 +2,7 @@ package osh.hal.exchange.prediction;
 
 import osh.eal.hal.exchange.HALObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -25,7 +26,7 @@ public class VDI6002WaterDemandPredictionExchange
      * @param weekDayHourProbabilities
      * @param avgYearlyDemand
      */
-    public VDI6002WaterDemandPredictionExchange(UUID deviceID, Long timestamp, double[] correctionFactorMonth,
+    public VDI6002WaterDemandPredictionExchange(UUID deviceID, ZonedDateTime timestamp, double[] correctionFactorMonth,
                                                 double[] correctionFactorWeekday, double[][] weekDayHourProbabilities, double avgYearlyDemand) {
         super(deviceID, timestamp);
         this.correctionFactorMonth = correctionFactorMonth;

@@ -13,22 +13,15 @@ public class EALConfigurationWrapper {
 
     public final boolean simLogger;
 
-    public final String loggerBusDriverClassName;
-    public final String loggerBusManagerClassName;
-
     public EALConfigurationWrapper(
             int numberOfPersons,
             String h0Filename,
-            boolean simLogger,
-            String loggerBusDriverClassName,
-            String loggerBusManagerClassName
+            boolean simLogger
     ) {
 
         this.numberOfPersons = numberOfPersons;
         this.h0Filename = h0Filename;
 
         this.simLogger = simLogger;
-        this.loggerBusDriverClassName = loggerBusDriverClassName;
-        this.loggerBusManagerClassName = loggerBusManagerClassName;
     }
 }

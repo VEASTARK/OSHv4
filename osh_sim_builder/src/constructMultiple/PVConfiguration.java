@@ -6,7 +6,6 @@ public class PVConfiguration {
     public final String pvComplexPowerMax;
     public final String pvCosPhiMax;
     public final int pvNominalPower;
-    public final boolean usePVRealESHL;
     public final boolean usePVRealHOLL;
 
     public PVConfiguration(String pvComplexPowerMax, String pvCosPhiMax,
@@ -14,15 +13,14 @@ public class PVConfiguration {
         this.pvComplexPowerMax = pvComplexPowerMax;
         this.pvCosPhiMax = pvCosPhiMax;
         this.pvNominalPower = pvNominalPower;
-        this.usePVRealESHL = usePVRealESHL;
         this.usePVRealHOLL = usePVRealHOLL;
     }
 
     public String toShortName() {
-        if (!this.usePVRealESHL && !this.usePVRealHOLL)
+        if (!this.usePVRealHOLL)
             return "npv";
         String name = "pv";
-        name += this.usePVRealESHL ? "ESHL" : "HOLL";
+        name += "HOLL";
         name += this.pvNominalPower;
         return name;
     }
