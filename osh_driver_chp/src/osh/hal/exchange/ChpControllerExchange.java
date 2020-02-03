@@ -2,6 +2,8 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -15,7 +17,7 @@ public class ChpControllerExchange
     private boolean electricityRequest;
     private boolean heatingRequest;
 
-    private final int scheduledRuntime;
+    private final Duration scheduledRuntime;
 
     /**
      * @param deviceID
@@ -23,11 +25,11 @@ public class ChpControllerExchange
      */
     public ChpControllerExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean stopGenerationFlag,
             boolean electricityRequest,
             boolean heatingRequest,
-            int scheduledRuntime) {
+            Duration scheduledRuntime) {
         super(deviceID, timestamp);
 
         this.stopGenerationFlag = stopGenerationFlag;
@@ -61,7 +63,7 @@ public class ChpControllerExchange
         this.heatingRequest = heatingRequest;
     }
 
-    public int getScheduledRuntime() {
+    public Duration getScheduledRuntime() {
         return this.scheduledRuntime;
     }
 

@@ -4,6 +4,7 @@ import osh.cal.CALComExchange;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.registry.oc.state.globalobserver.DevicesPowerStateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class DevicesPowerComExchange extends CALComExchange {
     /**
      * CONSTRUCTOR
      */
-    public DevicesPowerComExchange(UUID deviceID, Long timestamp, DevicesPowerStateExchange dpsex) {
+    public DevicesPowerComExchange(UUID deviceID, ZonedDateTime timestamp, DevicesPowerStateExchange dpsex) {
         super(deviceID, timestamp);
 
         DevicesPowerStateExchange cloned = dpsex.clone();

@@ -27,6 +27,9 @@ import osh.hal.interfaces.appliance.IHALMieleApplianceProgramDetails;
 import osh.mgmt.mox.MieleApplianceMOX;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 
 /**
  * @author Florian Allerding, Ingo Mauser, Sebastian Kramer
@@ -49,13 +52,13 @@ public class MieleApplianceLocalObserver
     /**
      * latest start time set by device
      */
-    private long deviceStartTime = -1;
+    private ZonedDateTime deviceStartTime;
 
     private int lastActivePowerLevel;
     private int lastReactivePowerLevel;
 
-    private long profileStarted = -1;
-    private long programmedAt = -1;
+    private ZonedDateTime profileStarted;
+    private ZonedDateTime programmedAt;
 
 
     /**
@@ -87,8 +90,8 @@ public class MieleApplianceLocalObserver
         HALObserverExchange _hx = (HALObserverExchange) this.getObserverDataObject();
 
         if (_hx instanceof MieleApplianceObserverExchange) {
-            long currentDeviceStartTime = ((MieleApplianceObserverExchange) _hx).getDeviceStartTime();
-            if (Math.abs(currentDeviceStartTime - this.deviceStartTime) >= 300 /* 5 Minutes */)
+            ZonedDateTime currentDeviceStartTime = ((MieleApplianceObserverExchange) _hx).getDeviceStartTime();
+            if (Duration.between(currentDeviceStartTime, this.deviceStartTime).abs().toSeconds() >= 300 /* 5 Minutes */)
                 programUpdated = true;
             this.deviceStartTime = currentDeviceStartTime;
 
@@ -141,8 +144,8 @@ public class MieleApplianceLocalObserver
                     switch (newState) {
                         case OFF:
                         case STANDBY: {
-                            this.profileStarted = -1;
-                            this.programmedAt = -1;
+                            this.profileStarted = null;
+                            this.programmedAt = null;
                             this.currentProfile = new SparseLoadProfile();
                         }
                         break;
@@ -155,8 +158,8 @@ public class MieleApplianceLocalObserver
                                             1,
                                             -1);
 
-                            this.profileStarted = -1;
-                            if (this.programmedAt == -1)
+                            this.profileStarted = null;
+                            if (this.programmedAt == null)
                                 this.programmedAt = _hx.getTimestamp();
                         }
                         break;
@@ -167,18 +170,18 @@ public class MieleApplianceLocalObserver
                                             LoadProfileCompressionTypes.DISCONTINUITIES,
                                             1,
                                             -1);
-                            if (this.profileStarted == -1)
+                            if (this.profileStarted == null)
                                 this.profileStarted = _hx.getTimestamp();
                         }
                         break;
                         case ENDPROGRAMMED: {
-                            this.programmedAt = -1;
-                            this.profileStarted = -1;
+                            this.programmedAt = null;
+                            this.profileStarted = null;
                         }
                         break;
                         default:
-                            this.programmedAt = -1;
-                            this.profileStarted = -1;
+                            this.programmedAt = null;
+                            this.profileStarted = null;
                             break;
                     }
 
@@ -218,7 +221,7 @@ public class MieleApplianceLocalObserver
         if (_hx instanceof GenericApplianceDofObserverExchange) {
             GenericApplianceDofObserverExchange gadoe = ((GenericApplianceDofObserverExchange) _hx);
 
-            DofStateExchange dse = new DofStateExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+            DofStateExchange dse = new DofStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
             dse.setDevice1stDegreeOfFreedom(gadoe.getDevice1stDegreeOfFreedom());
             dse.setDevice2ndDegreeOfFreedom(gadoe.getDevice2ndDegreeOfFreedom());
 

@@ -1,5 +1,6 @@
 package osh.cal;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -9,5 +10,5 @@ public interface ICALExchange {
 
     UUID getDeviceID();
 
-    Long getTimestamp();
+    ZonedDateTime getTimestamp();
 }

@@ -3,6 +3,7 @@ package osh.datatypes.registry.oc.state;
 import osh.datatypes.registry.StateExchange;
 
 import javax.xml.bind.annotation.*;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -18,20 +19,11 @@ public class LastActionExchange extends StateExchange {
     @XmlAnyElement
     private IAction lastAction;
 
-    public LastActionExchange(UUID sender, long timestamp) {
+    public LastActionExchange(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 
-    /**
-     * for JAXB, do not use
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    protected LastActionExchange() {
-        super(null, -1L);
-    }
-
-    public LastActionExchange(UUID sender, long timestamp, IAction lastAction) {
+    public LastActionExchange(UUID sender, ZonedDateTime timestamp, IAction lastAction) {
         super(sender, timestamp);
         this.lastAction = lastAction;
     }

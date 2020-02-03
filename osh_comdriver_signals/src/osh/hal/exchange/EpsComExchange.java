@@ -4,6 +4,7 @@ import osh.cal.CALComExchange;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +28,7 @@ public class EpsComExchange extends CALComExchange {
      */
     public EpsComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals) {
         super(deviceID, timestamp);
 
@@ -40,7 +41,7 @@ public class EpsComExchange extends CALComExchange {
 
     public EpsComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             Map<AncillaryCommodity, PriceSignal> priceSignals,
             boolean causeScheduling) {
         super(deviceID, timestamp);

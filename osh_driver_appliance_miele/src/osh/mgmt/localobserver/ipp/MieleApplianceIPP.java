@@ -14,6 +14,7 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionW
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -50,7 +51,7 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
     public MieleApplianceIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             long earliestStartTime,
             long latestStartTime,
             SparseLoadProfile profile,
@@ -69,7 +70,7 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
                 false, //does not need ancillary meter
                 false, //does not react to input states
                 optimizationHorizon,
-                timestamp,
+                timestamp.toEpochSecond(),
                 deviceType,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,

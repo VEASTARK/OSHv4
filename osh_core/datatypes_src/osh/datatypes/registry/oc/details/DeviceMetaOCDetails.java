@@ -4,6 +4,7 @@ import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -30,7 +31,7 @@ public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
      * @param sender
      * @param timestamp
      */
-    public DeviceMetaOCDetails(UUID sender, long timestamp) {
+    public DeviceMetaOCDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 

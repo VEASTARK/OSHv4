@@ -12,6 +12,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.ihe.SmartHeaterModel;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -33,12 +34,12 @@ public class SmartHeaterNonControllableIPP
      * CONSTRUCTOR
      *
      * @param deviceId
-     * @param now
+     * @param timeStamp
      */
     public SmartHeaterNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             int temperatureSetting,
             int initialState,
             long[] timestampOfLastChangePerSubElement,
@@ -52,7 +53,7 @@ public class SmartHeaterNonControllableIPP
                 true, //needs ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                now,
+                timeStamp,
                 DeviceTypes.INSERTHEATINGELEMENT,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,

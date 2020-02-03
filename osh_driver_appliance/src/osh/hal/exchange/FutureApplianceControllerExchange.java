@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -14,7 +15,7 @@ public class FutureApplianceControllerExchange
 
     private final UUID applianceConfigurationProfileID;
     private final int selectedProfileId;
-    private final long[] selectedStartTimes;
+    private final ZonedDateTime[] selectedStartTimes;
 
 
     /**
@@ -22,10 +23,10 @@ public class FutureApplianceControllerExchange
      */
     public FutureApplianceControllerExchange(
             UUID deviceID,
-            long timestamp,
+            ZonedDateTime timestamp,
             UUID applianceConfigurationProfileID,
             int selectedProfileId,
-            long[] selectedStartTimes
+            ZonedDateTime[] selectedStartTimes
     ) {
         super(deviceID, timestamp);
 
@@ -42,7 +43,7 @@ public class FutureApplianceControllerExchange
         return this.selectedProfileId;
     }
 
-    public long[] getSelectedStartTimes() {
+    public ZonedDateTime[] getSelectedStartTimes() {
         return this.selectedStartTimes;
     }
 

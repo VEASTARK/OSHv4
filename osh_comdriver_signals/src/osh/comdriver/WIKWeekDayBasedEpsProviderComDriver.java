@@ -13,6 +13,8 @@ import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.time.TimeConversion;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -35,11 +37,11 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
     /**
      * Timestamp of the last price signal sent to global controller
      */
-    private long lastSignalSent;
+    private ZonedDateTime lastSignalSent;
     /**
      * Maximum time the signal is available in advance (36h)
      */
@@ -68,9 +70,10 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
         super(osh, deviceID, driverConfig);
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -162,7 +165,7 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
                 .map(Double::parseDouble)
                 .toArray(Double[]::new);
 
-        this.signalAvailableFor = this.signalPeriod - this.newSignalAfterThisPeriod;
+        this.signalAvailableFor = (int) (this.signalPeriod - this.newSignalAfterThisPeriod.toSeconds());
     }
 
 
@@ -170,7 +173,7 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
             PriceSignal newSignal = this.generateWeekDayBasedPriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrices);
@@ -211,7 +214,7 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
         this.lastSignalSent = now;
 
         // register
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -222,9 +225,9 @@ public class WIKWeekDayBasedEpsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
-        if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isBefore(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
                 PriceSignal newSignal = this.generateWeekDayBasedPriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrices);
                 this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);

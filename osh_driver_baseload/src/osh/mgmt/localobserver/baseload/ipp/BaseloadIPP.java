@@ -7,6 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
 
     /**
      * Constructs this baseload problem-part.
-     *  @param deviceId the identifier of the devide that is represented by this problem-part
+     * @param deviceId the identifier of the devide that is represented by this problem-part
      * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param referenceTime the starting-time this problem-part represents at the moment
@@ -42,7 +43,7 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
             UUID deviceId,
             IGlobalLogger logger,
             boolean toBeScheduled,
-            long referenceTime,
+            ZonedDateTime timestamp,
             DeviceTypes deviceType,
             SparseLoadProfile baseload,
             LoadProfileCompressionTypes compressionType,
@@ -50,7 +51,7 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
         super(deviceId,
                 logger,
                 toBeScheduled,
-                referenceTime,
+                timestamp,
                 deviceType,
                 baseload,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),

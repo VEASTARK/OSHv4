@@ -3,6 +3,7 @@ package osh.driver.chp.model;
 import osh.utils.physics.ComplexPowerUtil;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 
 /**
  * @author Sebastian Kramer, Ingo Mauser
@@ -57,8 +58,8 @@ public class GenericChpModel implements Serializable {
             double cosPhi,
             boolean isOn,
             int lastThermalPower,
-            Long runningSince,
-            Long stoppedSince) {
+            ZonedDateTime runningSince,
+            ZonedDateTime stoppedSince) {
         this.typicalActivePower = typicalActivePower;
         this.typicalReactivePower = typicalReactivePower;
         this.typicalThermalPower = typicalThermalPower;
@@ -66,8 +67,8 @@ public class GenericChpModel implements Serializable {
         this.cosPhi = cosPhi;
         this.isOn = isOn;
         this.lastThermalPower = lastThermalPower;
-        this.runningSince = runningSince != null ? runningSince : Long.MAX_VALUE;
-        this.stoppedSince = stoppedSince != null ? stoppedSince : Long.MAX_VALUE;
+        this.runningSince = runningSince != null ? runningSince.toEpochSecond() : Long.MAX_VALUE;
+        this.stoppedSince = stoppedSince != null ? stoppedSince.toEpochSecond() : Long.MAX_VALUE;
     }
 
     public void setRunning(boolean isRunning, long timeStamp) {

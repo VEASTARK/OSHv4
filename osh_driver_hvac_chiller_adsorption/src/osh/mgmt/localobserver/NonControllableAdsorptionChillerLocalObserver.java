@@ -69,7 +69,7 @@ public class NonControllableAdsorptionChillerLocalObserver extends LocalObserver
 
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     DeviceTypes.ADSORPTIONCHILLER);
             cpse.addPowerState(Commodity.ACTIVEPOWER, this.activePower);
             cpse.addPowerState(Commodity.REACTIVEPOWER, this.reactivePower);

@@ -4,7 +4,6 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.utils.time.TimeConversion;
 
-import java.time.Period;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -80,15 +79,15 @@ public class PriceSignalGenerator {
         PriceSignal priceSignal = new PriceSignal(commodity);
 
         long time = startTime;
-        priceSignal.setPrice(time, pricesPerWeekDay[TimeConversion.convertUnixTime2CorrectedWeekdayInt(time)]);
+        priceSignal.setPrice(time, pricesPerWeekDay[TimeConversion.convertUnixTime2CorrectedDayOfWeek(time)]);
         time -= TimeConversion.convertUnixTime2SecondsSinceMidnight(time);
 
         while (true) { //Yeah, Yeah I know ...
-            time = TimeConversion.addPeriodToUnixTime(time, Period.ofDays(1));
+            time = TimeConversion.convertUnixTimeToZonedDateTime(time).plusDays(1).toEpochSecond();
             if (time > endTime)
                 break;
 
-            priceSignal.setPrice(time, pricesPerWeekDay[TimeConversion.convertUnixTime2CorrectedWeekdayInt(time)]);
+            priceSignal.setPrice(time, pricesPerWeekDay[TimeConversion.convertUnixTime2CorrectedDayOfWeek(time)]);
         }
 
         priceSignal.setKnownPriceInterval(startTime, endTime);

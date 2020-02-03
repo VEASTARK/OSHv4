@@ -1,5 +1,6 @@
 package osh.cal;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -11,7 +12,7 @@ public abstract class CALExchange
         implements ICALExchange {
 
     private UUID deviceID;
-    private Long timestamp;
+    private ZonedDateTime timestamp;
 
 
     /**
@@ -20,7 +21,7 @@ public abstract class CALExchange
      * @param deviceID
      * @param timestamp
      */
-    public CALExchange(UUID deviceID, Long timestamp) {
+    public CALExchange(UUID deviceID, ZonedDateTime timestamp) {
         super();
 
         this.deviceID = deviceID;
@@ -37,11 +38,11 @@ public abstract class CALExchange
     }
 
     @Override
-    public Long getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return this.timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(ZonedDateTime timestamp) {
         this.timestamp = timestamp;
     }
 }

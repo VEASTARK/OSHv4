@@ -5,6 +5,8 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.utils.csv.CSVImporter;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
+
 /**
  * @author Florian Allerding, Sebastian Kramer, Ingo Mauser, Till Schuberth
  */
@@ -28,15 +30,15 @@ public class ThermalDemandData {
 
 
     /**
-     * @param timestamp
+     * @param time
      * @param randomDev    e {0, 1, 2} -> +-1h
      * @param randomDevMax % 2 == 0
      * @param randomDevMax % 2 == 0
      * @return
      */
-    public double getTotalThermalDemand(long timestamp, int randomDev, int randomDevMax) {
-        int day = TimeConversion.convertUnixTime2CorrectedDayOfYear(timestamp);
-        int hour = TimeConversion.convertUnixTime2SecondsSinceMidnight(timestamp) / 3600;
+    public double getTotalThermalDemand(ZonedDateTime time, int randomDev, int randomDevMax) {
+        int day = TimeConversion.getCorrectedDayOfYear(time);
+        int hour = (int) (TimeConversion.getSecondsSinceDayStart(time) / 3600);
 
         hour = hour + randomDev - (randomDevMax / 2);
         if (hour < 0) {

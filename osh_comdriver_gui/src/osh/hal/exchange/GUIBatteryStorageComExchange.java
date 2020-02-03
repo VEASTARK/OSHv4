@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.cal.CALComExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -27,7 +28,7 @@ public class GUIBatteryStorageComExchange extends CALComExchange {
      */
     public GUIBatteryStorageComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             double currentStateOfCharge,
             double minStateOfCharge,
             double maxStateOfCharge,

@@ -104,7 +104,7 @@ public class CurrentWeatherProviderWAMPDispatcher {
                                                         try {
                                                             this.currentWeatherDetails = new CurrentWeatherDetails(
                                                                     this.comDriver.getUUID(),
-                                                                    this.comDriver.getTimeDriver().getCurrentEpochSecond(),
+                                                                    this.comDriver.getTimeDriver().getCurrentTime(),
                                                                     currentWeatherData);
                                                             this.comDriver.receiveCurrentDetails(this.currentWeatherDetails);
 

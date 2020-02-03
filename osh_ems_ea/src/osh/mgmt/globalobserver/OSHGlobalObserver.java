@@ -26,6 +26,7 @@ import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.utils.uuid.UUIDLists;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -106,7 +107,7 @@ public class OSHGlobalObserver
                     GUIDeviceListStateExchange.class, this,
                     new GUIDeviceListStateExchange(
                             this.getUUID(),
-                            this.getTimeDriver().getCurrentEpochSecond(),
+                            this.getTimeDriver().getCurrentTime(),
                             this.getDeviceList(this.getProblemParts())
                     )
             );
@@ -184,7 +185,7 @@ public class OSHGlobalObserver
             }
         }
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // Export Commodity powerStates
         CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(

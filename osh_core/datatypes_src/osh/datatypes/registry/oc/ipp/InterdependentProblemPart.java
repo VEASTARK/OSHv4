@@ -21,6 +21,7 @@ import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.UUID;
@@ -100,7 +101,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public InterdependentProblemPart(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
@@ -187,7 +188,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public final EASolutionCommandExchange<PhenotypeType> transformToFinalInterdependentPhenotype(
             UUID sender,
             UUID receiver,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         return new EASolutionCommandExchange<>(
                 sender,
                 receiver,
@@ -207,7 +208,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public final EAPredictionCommandExchange<PredictionType> transformToFinalInterdependentPrediction(
             UUID sender,
             UUID receiver,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         return new EAPredictionCommandExchange<>(
                 sender,
                 receiver,

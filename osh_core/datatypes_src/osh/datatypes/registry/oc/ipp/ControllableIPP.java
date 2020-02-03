@@ -10,6 +10,7 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.AbstractVariab
 import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryVariableTranslator;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
     public ControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
@@ -61,7 +62,7 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
     public ControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,

@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.eal.hal.exchange.HALObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -16,7 +17,7 @@ public class BaseloadStaticExchange
     private final int compressionValue;
 
 
-    public BaseloadStaticExchange(UUID deviceID, long timestamp, LoadProfileCompressionTypes compressionType,
+    public BaseloadStaticExchange(UUID deviceID, ZonedDateTime timestamp, LoadProfileCompressionTypes compressionType,
                                   int compressionValue) {
         super(deviceID, timestamp);
         this.compressionType = compressionType;

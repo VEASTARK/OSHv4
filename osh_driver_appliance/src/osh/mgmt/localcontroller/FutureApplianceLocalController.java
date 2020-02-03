@@ -20,6 +20,8 @@ import osh.mgmt.localcontroller.ipp.GenericApplianceSolution;
 import osh.mgmt.mox.GenericApplianceMOX;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -44,12 +46,12 @@ public class FutureApplianceLocalController
     /**
      * Never change this by hand, use setDof()
      */
-    private int current1stTemporalDof;
+    private Duration current1stTemporalDof = Duration.ZERO;
 
     /**
      * Never change this by hand, use setDof()
      */
-    private int max2ndTemporalDof; // currently not in use
+    private Duration max2ndTemporalDof = Duration.ZERO; // currently not in use
 
     /**
      * indicates whether tDoF has been changed by the user (e.g., using the GUI)
@@ -58,9 +60,9 @@ public class FutureApplianceLocalController
 
     // scheduling variables
     private UUID acpIDForScheduledTimes;
-    private Long earliestStartingTime;
-    private Long latestStartingTime;
-    private Long originalMaxDuration;
+    private ZonedDateTime earliestStartingTime;
+    private ZonedDateTime latestStartingTime;
+    private Duration originalMaxDuration;
 
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
@@ -148,9 +150,9 @@ public class FutureApplianceLocalController
             this.earliestStartingTime = null;
             this.latestStartingTime = null;
             this.originalMaxDuration = null;
-        } else if (mox.getDof() != null && (this.current1stTemporalDof / 10) != (mox.getDof() / 10)) {
+        } else if (mox.getDof() != null && (this.current1stTemporalDof.minus(mox.getDof()).abs().getSeconds() >= 10)) {
             this.currentState = mox.getCurrentState();
-            this.setTemporalDof(mox.getDof().intValue(), null);
+            this.setTemporalDof(mox.getDof(), null);
         } else if ((mox.getCurrentState() == EN50523DeviceState.OFF && this.currentState == EN50523DeviceState.OFF)
                 || (mox.getCurrentState() == EN50523DeviceState.PROGRAMMED && this.currentState == EN50523DeviceState.PROGRAMMED)
                 || (mox.getCurrentState() == EN50523DeviceState.ENDPROGRAMMED && this.currentState == EN50523DeviceState.ENDPROGRAMMED)) {
@@ -225,7 +227,7 @@ public class FutureApplianceLocalController
     protected void updateIPP(boolean toBeScheduled) {
 
         InterdependentProblemPart<?, ?> ipp = null;
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         // no profile to be scheduled...and no profile has been scheduled...
         if (this.acp == null && this.acpIDForScheduledTimes == null) {
@@ -241,7 +243,6 @@ public class FutureApplianceLocalController
                     now,
                     toBeScheduled,
                     this.getLocalObserver().getDeviceType(),
-                    now,
                     new Schedule(new SparseLoadProfile(), 0.0, this.getLocalObserver().getDeviceType().toString()),
                     this.compressionType,
                     this.compressionValue);
@@ -275,8 +276,9 @@ public class FutureApplianceLocalController
 
                 if (this.currentState == EN50523DeviceState.PROGRAMMED) {
                     //OK
-                    this.latestStartingTime = now + this.current1stTemporalDof;
-                    this.originalMaxDuration = ApplianceProgramConfigurationStatus.getTotalMaxDuration(this.acp);
+                    this.latestStartingTime = now.plus(this.current1stTemporalDof);
+                    this.originalMaxDuration =
+                            Duration.ofSeconds(ApplianceProgramConfigurationStatus.getTotalMaxDuration(this.acp));
 //					getGlobalLogger().logDebug("Setting new acp: " + originalMaxduration);
                 } else if (this.currentState == EN50523DeviceState.RUNNING) {
                     // keep latest starting time
@@ -295,7 +297,7 @@ public class FutureApplianceLocalController
                         // rescheduling of old one with new tDoF (dofChanged)
                         // reset earliest and latest starting times according to 1st tDoF
                         this.earliestStartingTime = now;
-                        this.latestStartingTime = now + this.current1stTemporalDof;
+                        this.latestStartingTime = now.plus(this.current1stTemporalDof);
                     } else {
                         this.getGlobalLogger().logDebug("ERROR: should not happen (acpID has already been scheduled...no new TDOF...why reschedule?!?)");
                     }
@@ -306,7 +308,7 @@ public class FutureApplianceLocalController
             }
 
             // determine longest profile of alternatives (with minimum times of phases)
-            long maxDuration = ApplianceProgramConfigurationStatus.getTotalMaxDuration(this.acp);
+            Duration maxDuration = Duration.ofSeconds(ApplianceProgramConfigurationStatus.getTotalMaxDuration(this.acp));
 
             // determine absolute optimization horizon (absolute time!)
             if (this.latestStartingTime == null) {
@@ -314,21 +316,22 @@ public class FutureApplianceLocalController
             }
 
             //for interruptible devices, we need to correct the LST
-            if (this.originalMaxDuration > maxDuration) {
+            if (this.originalMaxDuration.compareTo(maxDuration) > 0) {
 //				getGlobalLogger().logDebug("Correcting LST by " + (originalMaxduration - maxDuration));
-                this.latestStartingTime += (this.originalMaxDuration - maxDuration);
+                this.latestStartingTime = this.latestStartingTime.plus(this.originalMaxDuration.minus(maxDuration));
                 // correcting old maxDuration so that the next phase does not cause to much correction
                 this.originalMaxDuration = maxDuration;
 
-            } else if (this.originalMaxDuration < maxDuration) {
+            } else if (this.originalMaxDuration.compareTo(maxDuration) < 0) {
                 this.getGlobalLogger().logError("New Maxduration bigger than older duration, this should not happen");
             }
 
-            long optimizationHorizon = now + (this.latestStartingTime - this.earliestStartingTime) + maxDuration;
+            ZonedDateTime optimizationHorizon =
+                    now.plus(Duration.between(this.earliestStartingTime, this.latestStartingTime).plus(maxDuration));
 
             //ensure that hybrid devices have a long horizon
             if (this.acp.getDynamicLoadProfiles().length > 1) {
-                optimizationHorizon = Math.max(optimizationHorizon, now + 24 * 60 * 60);
+                if (now.plusDays(1).isAfter(optimizationHorizon)) optimizationHorizon = now.plusDays(1);
             }
 
 //			getGlobalLogger().logDebug("EST: " + earliestStartingTime);
@@ -342,11 +345,11 @@ public class FutureApplianceLocalController
                     this.getGlobalLogger(),
                     now,
                     toBeScheduled,
-                    optimizationHorizon,
+                    optimizationHorizon.toEpochSecond(),
                     this.getLocalObserver().getDeviceType(),
-                    now,
-                    this.earliestStartingTime,
-                    this.latestStartingTime,
+                    now.toEpochSecond(),
+                    this.earliestStartingTime.toEpochSecond(),
+                    this.latestStartingTime.toEpochSecond(),
                     this.acp,
                     this.compressionType,
                     this.compressionValue);
@@ -398,17 +401,14 @@ public class FutureApplianceLocalController
                 // get selected profile id (e.g. hybrid or normal)
                 int selectedProfileId = solution.getPhenotype().profileId;
 
-                //calculate start times
-                long[] selectedStartTimes = solution.getPhenotype().startingTimes;
-
                 //should never be NULL...
                 if (this.acp != null) {
                     FutureApplianceControllerExchange cx = new FutureApplianceControllerExchange(
                             this.getUUID(),
-                            this.getTimeDriver().getCurrentEpochSecond(),
+                            this.getTimeDriver().getCurrentTime(),
                             this.acp.getAcpID(),
                             selectedProfileId,
-                            selectedStartTimes);
+                            solution.getPhenotype().getZonedStartingTimes());
                     // send CX to driver
                     this.updateOcDataSubscriber(cx);
                 } else {
@@ -425,9 +425,9 @@ public class FutureApplianceLocalController
     /**
      * Use this method to set new tDoF
      */
-    protected void setTemporalDof(Integer firstTemporalDof, Integer secondTemporalDof) {
-        if ((firstTemporalDof != null && firstTemporalDof < 0)
-                || (secondTemporalDof != null && secondTemporalDof < 0)) {
+    protected void setTemporalDof(Duration firstTemporalDof, Duration secondTemporalDof) {
+        if ((firstTemporalDof != null && firstTemporalDof.isNegative())
+                || (secondTemporalDof != null && secondTemporalDof.isNegative())) {
             throw new IllegalArgumentException("firstDof or secondDof < 0");
         }
 
@@ -435,12 +435,12 @@ public class FutureApplianceLocalController
             throw new IllegalArgumentException("firstDof and secondDof == null");
         }
 
-        if (firstTemporalDof != null && this.current1stTemporalDof != firstTemporalDof) {
+        if (firstTemporalDof != null && !this.current1stTemporalDof.equals(firstTemporalDof)) {
             this.current1stTemporalDof = firstTemporalDof;
             this.tDOFChanged = true;
         }
 
-        if (secondTemporalDof != null && this.max2ndTemporalDof != secondTemporalDof) {
+        if (secondTemporalDof != null && !this.max2ndTemporalDof.equals(secondTemporalDof)) {
             this.max2ndTemporalDof = secondTemporalDof;
             this.tDOFChanged = true;
         }

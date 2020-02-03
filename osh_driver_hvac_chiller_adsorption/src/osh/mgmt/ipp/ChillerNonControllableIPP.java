@@ -12,6 +12,7 @@ import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.chiller.AdsorptionChillerModel;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
@@ -72,12 +73,12 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
      * CONSTRUCTOR
      *
      * @param deviceId
-     * @param now
+     * @param timeStamp
      */
     public ChillerNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -90,7 +91,7 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
                 false, //needsAncillaryMeterState
                 true, //reactsToInputStates
                 false, //is not static
-                now,
+                timeStamp,
                 DeviceTypes.ADSORPTIONCHILLER,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -170,7 +171,7 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
         double coldWaterPower = 0;
 
         if (chillerNewState) {
-            long secondsFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(this.getInterdependentTime());
+            long secondsFromYearStart = TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.getInterdependentTime()));
             double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
             activePower = this.typicalRunningActivePower;
             coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);

@@ -4,6 +4,7 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.CommandExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.UUID;
 
@@ -13,9 +14,6 @@ import java.util.UUID;
  */
 public class PriceSignalCommandExchange extends CommandExchange {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 3519660001234351000L;
     private final EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
 
@@ -30,7 +28,7 @@ public class PriceSignalCommandExchange extends CommandExchange {
     public PriceSignalCommandExchange(
             UUID sender,
             UUID receiver,
-            long timestamp,
+            ZonedDateTime timestamp,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals) {
         super(sender, receiver, timestamp);
 

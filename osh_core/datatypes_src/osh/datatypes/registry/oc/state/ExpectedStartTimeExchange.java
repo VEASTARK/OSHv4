@@ -3,6 +3,7 @@ package osh.datatypes.registry.oc.state;
 import osh.datatypes.registry.StateExchange;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -12,38 +13,29 @@ public class ExpectedStartTimeExchange extends StateExchange {
      *
      */
     private static final long serialVersionUID = -5083812677185394953L;
-    private long expectedStartTime;
+    private ZonedDateTime expectedStartTime;
 
-    /**
-     * for JAXB
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private ExpectedStartTimeExchange() {
-        this(null, -1L);
-    }
-
-    public ExpectedStartTimeExchange(UUID sender, long timestamp) {
+    public ExpectedStartTimeExchange(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 
-    public ExpectedStartTimeExchange(UUID sender, long timestamp,
-                                     long startTime) {
+    public ExpectedStartTimeExchange(UUID sender, ZonedDateTime timestamp,
+                                     ZonedDateTime startTime) {
         super(sender, timestamp);
         this.expectedStartTime = startTime;
     }
 
-    public long getExpectedStartTime() {
+    public ZonedDateTime getExpectedStartTime() {
         return this.expectedStartTime;
     }
 
-    public void setExpectedStartTime(long expectedStartTime) {
+    public void setExpectedStartTime(ZonedDateTime expectedStartTime) {
         this.expectedStartTime = expectedStartTime;
     }
 
     @Override
     public String toString() {
         return "ExpectedStartTimeExchange [expectedStartTime="
-                + this.expectedStartTime + "]";
+                + this.expectedStartTime.toEpochSecond() + "]";
     }
 }

@@ -4,6 +4,7 @@ import osh.driver.datatypes.cooling.ChillerCalendarDate;
 import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.eal.hal.interfaces.thermal.IHALColdWaterPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class SpaceCoolingObserverExchange extends HALDeviceObserverExchange impl
 
     public SpaceCoolingObserverExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             ArrayList<ChillerCalendarDate> dates,
             Map<Long, Double> temperaturePrediction,
             int coldWaterPower) {

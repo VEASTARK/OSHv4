@@ -16,6 +16,8 @@ import osh.utils.time.TimeConversion;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -30,7 +32,7 @@ import java.util.stream.Stream;
 public class CsvEpsProviderComDriver extends CALComDriver {
 
     private final List<Double> priceSignalYear;
-    private long newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
     private int resolutionOfPriceSignal;
     private String filePathPriceSignal;
     private int signalPeriod;
@@ -43,7 +45,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 
     private final List<AncillaryCommodity> activeAncillaryCommodities;
 
-    private long lastTimeSignalSent;
+    private ZonedDateTime lastTimeSignalSent;
 
 
     /**
@@ -59,9 +61,10 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         this.priceSignalYear = new ArrayList<>();
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; //12 hours
+            this.newSignalAfterThisPeriod = Duration.ofHours(12); //12 hours
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
@@ -169,22 +172,24 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         this.readCsvPriceSignal();
         this.generateNewPriceSignal();
 
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
         }
 
-        this.lastTimeSignalSent = this.getTimeDriver().getCurrentEpochSecond();
+        this.lastTimeSignalSent = this.getTimeDriver().getCurrentTime();
     }
 
     /**
      * Generate PriceSignal
      */
     private void generateNewPriceSignal() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        int relativeTimeFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(now);
-        long yearStart = now - relativeTimeFromYearStart;
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        int relativeTimeFromYearStart = (int) TimeConversion.getSecondsSinceYearStart(now);
+        long yearStart = TimeConversion.getStartOfYear(now).toEpochSecond();
+        long signalStart = now.toEpochSecond();
+        long signalEnd = signalStart + this.signalPeriod;
 
         EnumMap<AncillaryCommodity, PriceSignal> priceSignals = new EnumMap<>(AncillaryCommodity.class);
 
@@ -199,7 +204,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
                     priceSignal.setPrice(yearStart + i * this.resolutionOfPriceSignal, this.priceSignalYear.get(i));
                 }
             }
-            priceSignal.setKnownPriceInterval(now, now + this.signalPeriod);
+            priceSignal.setKnownPriceInterval(signalStart, signalEnd);
             priceSignal.compress();
             priceSignals.put(priceSignal.getCommodity(), priceSignal);
         }
@@ -208,11 +213,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // PV ActivePower FeedIn
             PriceSignal newPriceSignalFeedInPV = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.PVACTIVEPOWERFEEDIN,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerFeedInPV);
-            newPriceSignalFeedInPV.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalFeedInPV.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalFeedInPV.compress();
             priceSignals.put(newPriceSignalFeedInPV.getCommodity(), newPriceSignalFeedInPV);
         }
@@ -221,11 +226,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // CHP ActivePower FeedIn
             PriceSignal newPriceSignalFeedInCHP = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.CHPACTIVEPOWERFEEDIN,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerFeedInCHP);
-            newPriceSignalFeedInCHP.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalFeedInCHP.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalFeedInCHP.compress();
             priceSignals.put(newPriceSignalFeedInCHP.getCommodity(), newPriceSignalFeedInCHP);
         }
@@ -234,11 +239,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // Natural Gas Power Price
             PriceSignal newPriceSignalNaturalGas = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.NATURALGASPOWEREXTERNAL,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.naturalGasPowerPrice);
-            newPriceSignalNaturalGas.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalNaturalGas.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalNaturalGas.compress();
             priceSignals.put(newPriceSignalNaturalGas.getCommodity(), newPriceSignalNaturalGas);
         }
@@ -247,11 +252,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // Natural Gas Power Price
             PriceSignal newPriceSignalPVAutoConsumption = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerAutoConsumptionPV);
-            newPriceSignalPVAutoConsumption.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalPVAutoConsumption.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalPVAutoConsumption.compress();
             priceSignals.put(newPriceSignalPVAutoConsumption.getCommodity(), newPriceSignalPVAutoConsumption);
         }
@@ -260,11 +265,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // Natural Gas Power Price
             PriceSignal newPriceSignalCHPAutoConsumption = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerAutoConsumptionCHP);
-            newPriceSignalCHPAutoConsumption.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalCHPAutoConsumption.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalCHPAutoConsumption.compress();
             priceSignals.put(newPriceSignalCHPAutoConsumption.getCommodity(), newPriceSignalCHPAutoConsumption);
         }
@@ -272,7 +277,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         //now sending priceSignal
         EpsComExchange ex = new EpsComExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 priceSignals);
         this.updateComDataSubscriber(ex);
     }
@@ -281,10 +286,10 @@ public class CsvEpsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        if ((exchange.getEpochSecond() - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!exchange.getTime().isAfter(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
             this.generateNewPriceSignal();
 
-            this.lastTimeSignalSent = exchange.getEpochSecond();
+            this.lastTimeSignalSent = exchange.getTime();
         }
     }
 

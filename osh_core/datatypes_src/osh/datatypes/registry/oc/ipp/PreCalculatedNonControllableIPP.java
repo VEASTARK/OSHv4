@@ -8,6 +8,7 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -49,7 +50,7 @@ public abstract class PreCalculatedNonControllableIPP
             UUID deviceId,
             IGlobalLogger logger,
             boolean toBeScheduled,
-            long referenceTime,
+            ZonedDateTime timeStamp,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
@@ -61,7 +62,7 @@ public abstract class PreCalculatedNonControllableIPP
                 false,
                 false,
                 false, //is not static
-                referenceTime,
+                timeStamp,
                 deviceType,
                 allOutputCommodities,
                 compressionType,

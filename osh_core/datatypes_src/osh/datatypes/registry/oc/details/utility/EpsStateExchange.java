@@ -4,6 +4,7 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -28,13 +29,13 @@ public class EpsStateExchange extends StateExchange {
      * @param sender
      * @param timestamp
      */
-    public EpsStateExchange(UUID sender, long timestamp) {
+    public EpsStateExchange(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
 
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
     }
 
-    public EpsStateExchange(UUID sender, long timestamp, boolean causeScheduling) {
+    public EpsStateExchange(UUID sender, ZonedDateTime timestamp, boolean causeScheduling) {
         super(sender, timestamp);
 
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);

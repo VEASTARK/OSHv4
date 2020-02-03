@@ -1,5 +1,6 @@
 package osh.eal.hal.exchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -9,5 +10,5 @@ public interface IHALExchange {
 
     UUID getDeviceID();
 
-    long getTimestamp();
+    ZonedDateTime getTimestamp();
 }

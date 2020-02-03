@@ -8,6 +8,7 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
 
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.UUID;
@@ -40,7 +41,7 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            long referenceTime,
+            ZonedDateTime timeStamp,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
@@ -48,12 +49,12 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
         super(
                 deviceId,
                 logger,
-                referenceTime,
+                timeStamp,
                 toBeScheduled,
                 needsAncillaryMeterState,
                 reactsToInputStates,
                 isCompletelyStatic,
-                referenceTime,
+                timeStamp.toEpochSecond(),
                 deviceType,
                 allOutputCommodities,
                 compressionType,

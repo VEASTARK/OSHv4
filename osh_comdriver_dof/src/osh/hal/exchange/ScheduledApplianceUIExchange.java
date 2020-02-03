@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.cal.CALComExchange;
 import osh.datatypes.registry.oc.state.ExpectedStartTimeExchange;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class ScheduledApplianceUIExchange extends CALComExchange {
      * @param deviceID
      * @param timestamp
      */
-    public ScheduledApplianceUIExchange(UUID deviceID, Long timestamp) {
+    public ScheduledApplianceUIExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

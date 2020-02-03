@@ -7,6 +7,7 @@ import osh.eal.hal.HALDeviceDriver;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.Duration;
 import java.util.UUID;
 
 
@@ -43,7 +44,7 @@ public abstract class ChpDriver
     protected abstract void sendPowerRequestToChp();
 
     public synchronized void processChpDetailsAndNotify(ChpDriverDetails chpDetails) {
-        ChpObserverExchange _ox = new ChpObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        ChpObserverExchange _ox = new ChpObserverExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
         _ox.setActivePower((int) Math.round(chpDetails.getCurrentElectricalPower()));
         _ox.setThermalPower((int) Math.round(chpDetails.getCurrentThermalPower()));
         _ox.setElectricityRequest(this.electricityRequest);
@@ -67,10 +68,10 @@ public abstract class ChpDriver
         this.minimumRuntime = minimumRuntime;
     }
 
-    public int getMinimumRuntimeRemaining() {
+    public Duration getMinimumRuntimeRemaining() {
         int returnValue = this.minimumRuntime - this.runtime;
         if (returnValue < 0) returnValue = 0;
-        return returnValue;
+        return Duration.ofSeconds(returnValue);
     }
 
     public int getRuntime() {

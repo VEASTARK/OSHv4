@@ -3,6 +3,7 @@ package osh.hal.exchange;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exchange.HALObserverExchange;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class BaseloadPredictionExchange
      * @param deviceID
      * @param timestamp
      */
-    public BaseloadPredictionExchange(UUID deviceID, long timestamp, List<SparseLoadProfile> powerPredictions,
+    public BaseloadPredictionExchange(UUID deviceID, ZonedDateTime timestamp, List<SparseLoadProfile> powerPredictions,
                                       int usedDaysForPrediction, float weightForOtherWeekday, float weightForSameWeekday) {
         super(deviceID, timestamp);
         this.powerPredictions = powerPredictions;

@@ -29,6 +29,7 @@ import osh.utils.uuid.UUIDGenerationHelperMiele;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
 
     static private StartTimeDetails createStartTimeDetails(
             final UUID devUUID,
-            long timestamp,
+            ZonedDateTime timestamp,
             MieleDeviceHomeBusDataREST dev) {
 
         StartTimeDetails startDetails = new StartTimeDetails(devUUID, timestamp);
@@ -110,7 +111,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
 
     static private GenericApplianceDriverDetails createApplianceDetails(
             UUID uuid,
-            long timestamp,
+            ZonedDateTime timestamp,
             MieleDeviceHomeBusDataREST dev) throws OSHException {
 
         GenericApplianceDriverDetails details = new GenericApplianceDriverDetails(uuid, timestamp);
@@ -155,7 +156,7 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
                     break;
                 }
 
-                long timestamp = this.getTimeDriver().getCurrentEpochSecond();
+                ZonedDateTime timestamp = this.getTimeDriver().getCurrentTime();
 
                 if (this.mieleGatewayDispatcher.getDeviceData().isEmpty()) { // an error has occurred
                     for (UUID uuid : this.deviceProperties.keySet()) {
@@ -206,15 +207,15 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
                     // duration
                     MieleApplianceDriverDetails mieleDetails = new MieleApplianceDriverDetails(devUUID, timestamp);
                     if (dev.getDuration() != null)
-                        mieleDetails.setExpectedProgramDuration(dev.getDuration().duration() * 60);
+                        mieleDetails.setExpectedProgramDuration(Duration.ofMinutes(dev.getDuration().duration()));
                     else
-                        mieleDetails.setExpectedProgramDuration(-1);
+                        mieleDetails.setExpectedProgramDuration(null);
 
                     // remaining time
                     if (dev.getRemainingTime() != null)
-                        mieleDetails.setProgramRemainingTime(dev.getRemainingTime().duration() * 60);
+                        mieleDetails.setProgramRemainingTime(Duration.ofMinutes(dev.getRemainingTime().duration()));
                     else
-                        mieleDetails.setProgramRemainingTime(-1);
+                        mieleDetails.setProgramRemainingTime(null);
 
                     // start time
                     if (dev.getStartTime() != null) {
@@ -225,9 +226,9 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
                         if (time.isBefore(now))
                             time = time.plusDays(1);
 
-                        mieleDetails.setStartTime(time.toEpochSecond());
+                        mieleDetails.setStartTime(time);
                     } else
-                        mieleDetails.setStartTime(-1);
+                        mieleDetails.setStartTime(null);
 
 
                     // set state of the UUID

@@ -15,6 +15,7 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -102,9 +103,9 @@ public class MieleGatewayWAMPDispatcher {
                         err -> this.logger.logError("sending command failed", err));
     }
 
-    public void sendStartTimes(long startTime, int uid) {
+    public void sendStartTimes(ZonedDateTime startTime, int uid) {
         HashMap<Integer, Long> publishMap = new HashMap<>();
-        publishMap.put(uid, startTime);
+        publishMap.put(uid, startTime.toEpochSecond());
         this.client.publish("eshl.schedules", publishMap, new TypeReference<Map<Integer, Long>>() {
         })
                 .observeOn(this.rxScheduler)

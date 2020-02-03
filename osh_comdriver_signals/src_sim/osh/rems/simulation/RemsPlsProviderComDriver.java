@@ -12,6 +12,8 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PlsComExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -27,7 +29,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private int newSignalAfterThisPeriod;
+    private Duration newSignalAfterThisPeriod;
 
     /**
      * Maximum time the signal is available in advance (36h)
@@ -43,16 +45,17 @@ public class RemsPlsProviderComDriver extends CALComDriver {
     private EnumMap<AncillaryCommodity, PowerLimitSignal> newSignals;
     private boolean newSignalReceived;
 
-    private long lastTimeSignalSent;
+    private ZonedDateTime lastTimeSignalSent;
 
     public RemsPlsProviderComDriver(IOSH osh, UUID deviceID, OSHParameterCollection driverConfig) {
         super(osh, deviceID, driverConfig);
         this.remsPowerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
 
         try {
-            this.newSignalAfterThisPeriod = Integer.parseInt(this.getComConfig().getParameter("newSignalAfterThisPeriod"));
+            this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
+                    "newSignalAfterThisPeriod")));
         } catch (Exception e) {
-            this.newSignalAfterThisPeriod = 43200; // 12h
+            this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning(
                     "Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
@@ -101,15 +104,15 @@ public class RemsPlsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now.toEpochSecond());
         PlsComExchange ex = new PlsComExchange(this.getUUID(), now, this.remsPowerLimitSignals);
         this.notifyComManager(ex);
 
         this.lastTimeSignalSent = now;
 
         // register
-        if (this.newSignalAfterThisPeriod % 60 == 0) {
+        if (this.newSignalAfterThisPeriod.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -133,12 +136,12 @@ public class RemsPlsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
         // generate new PriceSignal and send it
-        if ((now - this.lastTimeSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isAfter(this.lastTimeSignalSent.plus(this.newSignalAfterThisPeriod))) {
             // PLS
-            this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
+            this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(exchange.getEpochSecond());
             PlsComExchange ex = new PlsComExchange(this.getUUID(), now, this.remsPowerLimitSignals);
             this.notifyComManager(ex);
 
@@ -147,7 +150,7 @@ public class RemsPlsProviderComDriver extends CALComDriver {
 
             //ensure that even if we only receive a signal for one ancillary commodity the signals for all the others
             // have a sufficient horizon
-            this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(now);
+            this.remsPowerLimitSignals = this.generateNewPowerLimitSignal(exchange.getEpochSecond());
             for (Entry<AncillaryCommodity, PowerLimitSignal> pls : this.newSignals.entrySet()) {
                 this.remsPowerLimitSignals.put(pls.getKey(), pls.getValue());
             }
@@ -170,11 +173,11 @@ public class RemsPlsProviderComDriver extends CALComDriver {
         this.remsPowerLimitSignals = remsPowerLimitSignals;
     }
 
-    public int getNewSignalAfterThisPeriod() {
+    public Duration getNewSignalAfterThisPeriod() {
         return this.newSignalAfterThisPeriod;
     }
 
-    public void setNewSignalAfterThisPeriod(int newSignalAfterThisPeriod) {
+    public void setNewSignalAfterThisPeriod(Duration newSignalAfterThisPeriod) {
         this.newSignalAfterThisPeriod = newSignalAfterThisPeriod;
     }
 

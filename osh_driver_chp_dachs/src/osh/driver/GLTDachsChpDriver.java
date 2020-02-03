@@ -11,6 +11,8 @@ import osh.driver.dachs.GLTDachsPowerRequestThread;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -22,7 +24,7 @@ public class GLTDachsChpDriver
 
     protected String loginName;
     protected String loginPwd;
-    private long lastRequest = Long.MIN_VALUE;
+    private ZonedDateTime lastRequest;
     private GLTDachsInfoRequestThread reqRunnable;
     private Thread reqThread;
 
@@ -81,7 +83,7 @@ public class GLTDachsChpDriver
     protected void sendPowerRequestToChp() {
         // Start new thread and send power request to CHP
         // (Has to be resend at least every 10 minutes)
-        if (this.isOperationRequest() && this.getTimeDriver().getCurrentEpochSecond() - this.lastRequest > 60) {
+        if (this.isOperationRequest() && Duration.between(this.lastRequest, this.getTimeDriver().getCurrentTime()).toSeconds() > 60) {
             GLTDachsPowerRequestThread powerRequestThread = new GLTDachsPowerRequestThread(
                     this.getGlobalLogger(),
                     this.isOperationRequest(),
@@ -90,7 +92,7 @@ public class GLTDachsChpDriver
                     this.loginPwd
             );
             new Thread(powerRequestThread, "DachsPowerRequestThread").start();
-            this.lastRequest = this.getTimeDriver().getCurrentEpochSecond();
+            this.lastRequest = this.getTimeDriver().getCurrentTime();
         }
     }
 
@@ -108,7 +110,7 @@ public class GLTDachsChpDriver
         HashMap<String, String> values = dachsDetails.getValues();
 
         // convert Dachs Details to general CHP details
-        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimeDriver().getCurrentEpochSecond());
+        ChpDriverDetails chpDetails = new ChpDriverDetails(this.getUUID(), this.getTimeDriver().getCurrentTime());
 
         // Heating request or power request? Or both?
         chpDetails.setPowerGenerationRequest(this.isElectricityRequest());
@@ -171,7 +173,7 @@ public class GLTDachsChpDriver
         Double waterStorageTemperature = this.parseDoubleStatus(values.get("Hka_Mw1.Temp.sbFuehler1"));
         if (waterStorageTemperature != null) {
 //			TemperatureDetails td = new TemperatureDetails(getDeviceID(), getTimer().getUnixTime());
-            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimeDriver().getCurrentEpochSecond());
+            TemperatureDetails td = new TemperatureDetails(this.getHotWaterTankUuid(), this.getTimeDriver().getCurrentTime());
             td.setTemperature(waterStorageTemperature);
 //			getDriverRegistry().setState(TemperatureDetails.class, this, td);
 //			getDriverRegistry().setState(TemperatureDetails.class, UUID.fromString("268ea9bd-572c-46dd-a383-960b4ed65337"), td);

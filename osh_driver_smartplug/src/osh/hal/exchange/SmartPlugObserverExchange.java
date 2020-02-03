@@ -4,6 +4,7 @@ import osh.eal.hal.exchange.HALDeviceObserverExchange;
 import osh.eal.hal.interfaces.common.IHALSwitchDetails;
 import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 
@@ -31,7 +32,7 @@ public class SmartPlugObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public SmartPlugObserverExchange(UUID deviceID, long timestamp) {
+    public SmartPlugObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 

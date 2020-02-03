@@ -12,6 +12,7 @@ import osh.driver.datatypes.cooling.ChillerCalendarDate;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -32,7 +33,7 @@ public class ChilledWaterDemandNonControllableIPP
     public ChilledWaterDemandNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             ArrayList<ChillerCalendarDate> dates,
             Map<Long, Double> temperaturePrediction,
@@ -42,7 +43,7 @@ public class ChilledWaterDemandNonControllableIPP
                 deviceId,
                 logger,
                 toBeScheduled,
-                now,
+                timeStamp,
                 DeviceTypes.SPACECOOLING,
                EnumSet.of(Commodity.COLDWATERPOWER),
                 compressionType,
@@ -113,7 +114,8 @@ public class ChilledWaterDemandNonControllableIPP
                     if (date.getStartTimestamp() <= time
                             && date.getStartTimestamp() + date.getLength() >= time) {
 
-                        long secondsFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(time);
+                        long secondsFromYearStart =
+                                TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(time));
 
                         double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
                         coldWaterPower = Math.max(0, ((0.4415 * outdoorTemperature) - 9.6614) * 1000);

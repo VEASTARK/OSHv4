@@ -3,6 +3,8 @@ package osh.datatypes.registry.driver.details.appliance;
 import osh.configuration.appliance.XsdLoadProfiles;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -21,22 +23,14 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
     private static final long serialVersionUID = -3542084220556069585L;
     protected String programName;
     protected String phaseName;
-    protected long startTime;
-    protected long endTime;
-    protected int remainingTime;
-    protected long finishTime;
+    protected ZonedDateTime startTime;
+    protected ZonedDateTime endTime;
+    protected Duration remainingTime;
+    protected ZonedDateTime finishTime;
 
 
     protected XsdLoadProfiles loadProfiles;
 
-
-    /**
-     * for JAXB
-     */
-    @SuppressWarnings("unused")
-    private GenericApplianceProgramDriverDetails() {
-        this(null, -1L);
-    }
 
     /**
      * CONSTRUCTOR
@@ -46,7 +40,7 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
      */
     public GenericApplianceProgramDriverDetails(
             UUID sender,
-            long timestamp) {
+            ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
 
@@ -67,35 +61,35 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         this.phaseName = phaseName;
     }
 
-    public long getStartTime() {
+    public ZonedDateTime getStartTime() {
         return this.startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(ZonedDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public long getEndTime() {
+    public ZonedDateTime getEndTime() {
         return this.endTime;
     }
 
-    public void setEndTime(long endTime) {
+    public void setEndTime(ZonedDateTime endTime) {
         this.endTime = endTime;
     }
 
-    public int getRemainingTime() {
+    public Duration getRemainingTime() {
         return this.remainingTime;
     }
 
-    public void setRemainingTime(int remainingTime) {
+    public void setRemainingTime(Duration remainingTime) {
         this.remainingTime = remainingTime;
     }
 
-    public long getFinishTime() {
+    public ZonedDateTime getFinishTime() {
         return this.finishTime;
     }
 
-    public void setFinishTime(long finishTime) {
+    public void setFinishTime(ZonedDateTime finishTime) {
         this.finishTime = finishTime;
     }
 
@@ -129,10 +123,10 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         int result = super.hashCode();
         result = 31 * result + (this.programName != null ? this.programName.hashCode() : 0);
         result = 31 * result + (this.phaseName != null ? this.phaseName.hashCode() : 0);
-        result = 31 * result + (int) (this.startTime ^ (this.startTime >>> 32));
-        result = 31 * result + (int) (this.endTime ^ (this.endTime >>> 32));
-        result = 31 * result + this.remainingTime;
-        result = 31 * result + (int) (this.finishTime ^ (this.finishTime >>> 32));
+        result = 31 * result + (this.startTime != null ? this.startTime.hashCode() : 0);
+        result = 31 * result + (this.endTime != null ? this.endTime.hashCode() : 0);
+        result = 31 * result + (this.remainingTime != null ? this.remainingTime.hashCode() : 0);
+        result = 31 * result + (this.finishTime != null ? this.finishTime.hashCode() : 0);
         result = 31 * result + (this.loadProfiles != null ? this.loadProfiles.hashCode() : 0);
         return result;
     }

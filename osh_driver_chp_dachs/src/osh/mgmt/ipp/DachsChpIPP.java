@@ -16,7 +16,10 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.datatypes.time.Activation;
 import osh.datatypes.time.ActivationList;
 import osh.driver.chp.model.GenericChpModel;
+import osh.utils.time.TimeConversion;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -74,7 +77,7 @@ public class DachsChpIPP
     public DachsChpIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialState,
             int minRunTime,
@@ -93,12 +96,12 @@ public class DachsChpIPP
     ) {
         super(deviceId,
                 logger,
-                now,
+                timeStamp,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
-                now + relativeHorizon,
-                now,
+                timeStamp.toEpochSecond() + relativeHorizon,
+                timeStamp.toEpochSecond(),
                 DeviceTypes.CHPPLANT,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -337,19 +340,23 @@ public class DachsChpIPP
         long timeOfFirstBit = this.getReferenceTime();
         Activation currentActivation = null;
 
+        long duration = 0;
         for (int i = 0; i < ab.length; i++) {
             if (ab[i]) {
                 // turn on
                 if (currentActivation == null) {
                     currentActivation = new Activation();
-                    currentActivation.startTime = timeOfFirstBit + i * TIME_PER_SLOT;
-                    currentActivation.duration = TIME_PER_SLOT;
+                    currentActivation.startTime =
+                            TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * TIME_PER_SLOT);
+                    duration = TIME_PER_SLOT;
                 } else {
-                    currentActivation.duration += TIME_PER_SLOT;
+                    duration += TIME_PER_SLOT;
                 }
             } else {
                 // turn off
                 if (currentActivation != null) {
+                    currentActivation.duration = Duration.ofSeconds(duration);
+                    duration = 0;
                     this.interdependentStartingTimes.add(currentActivation);
                     currentActivation = null;
                 }
@@ -357,6 +364,7 @@ public class DachsChpIPP
         }
 
         if (currentActivation != null) {
+            currentActivation.duration = Duration.ofSeconds(duration);
             this.interdependentStartingTimes.add(currentActivation);
         }
 
@@ -377,19 +385,23 @@ public class DachsChpIPP
         boolean[] activationBits = this.getActivationBits(timeOfFirstBit, solution);
         Activation currentActivation = null;
 
+        long duration = 0;
         for (int i = 0; i < activationBits.length; i++) {
             if (activationBits[i]) {
                 // turn on
                 if (currentActivation == null) {
                     currentActivation = new Activation();
-                    currentActivation.startTime = timeOfFirstBit + i * TIME_PER_SLOT;
-                    currentActivation.duration = TIME_PER_SLOT;
+                    currentActivation.startTime = TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * TIME_PER_SLOT);
+                    currentActivation.duration = Duration.ZERO;
+                    duration = TIME_PER_SLOT;
                 } else {
-                    currentActivation.duration += TIME_PER_SLOT;
+                    duration += TIME_PER_SLOT;
                 }
             } else {
                 // turn off
                 if (currentActivation != null) {
+                    currentActivation.duration = Duration.ofSeconds(duration);
+                    duration = 0;
                     startTimes.add(currentActivation);
                     currentActivation = null;
                 }
@@ -397,6 +409,7 @@ public class DachsChpIPP
         }
 
         if (currentActivation != null) {
+            currentActivation.duration = Duration.ofSeconds(duration);
             startTimes.add(currentActivation);
         }
 

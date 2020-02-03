@@ -19,6 +19,8 @@ import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 import osh.registry.interfaces.IDataRegistryListener;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -31,9 +33,9 @@ public class HotWaterTankLocalObserver
 
     private final double defaultPunishmentFactorPerWsPowerLost = 6.0 / 3600000.0;
     TreeMap<Long, Double> temperaturePrediction = new TreeMap<>();
-    private long NEW_IPP_AFTER;
+    private Duration NEW_IPP_AFTER;
     private double TRIGGER_IPP_IF_DELTA_TEMP_BIGGER;
-    private long lastTimeIPPSent = Long.MIN_VALUE;
+    private ZonedDateTime lastTimeIPPSent;
     private Double lastKnownGasPrice;
     private double tankCapacity = 100;
     private double tankDiameter = 1.0;
@@ -60,8 +62,11 @@ public class HotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        //TODO: change back to updating only for minutes when next backwards-compatibility breáking update is released
-        this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        if (this.NEW_IPP_AFTER != null && this.NEW_IPP_AFTER.toSeconds() % 60 == 0) {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
+        } else {
+            this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
+        }
 
         this.getOCRegistry().subscribe(EAPredictionCommandExchange.class, this.getUUID(),this);
         this.getOCRegistry().subscribe(EpsStateExchange.class, this.getUUID(),this);
@@ -72,9 +77,12 @@ public class HotWaterTankLocalObserver
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
+        long nowSeconds = exchange.getEpochSecond();
 
-        if (now > this.lastTimeIPPSent + this.NEW_IPP_AFTER) {
+        //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
+        // backwards-compatibility breaking update is released
+        if (now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     this.getGlobalLogger(),
@@ -93,12 +101,12 @@ public class HotWaterTankLocalObserver
                     ex);
             this.lastTimeIPPSent = now;
             this.temperatureInLastIPP = this.currentTemperature;
-        } else if (now % 60 == 0 && this.temperaturePrediction != null) {
-            Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(now);
+        } else if (exchange.getTimeEvents().contains(TimeSubscribeEnum.MINUTE) && this.temperaturePrediction != null) {
+            Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(nowSeconds);
             if (predEntry != null
                     && Math.abs(predEntry.getValue() - this.currentTemperature) > 2.5
                     //if pred is too old don't pay attention to it
-                    && (this.temperaturePrediction.ceilingEntry(now) != null || (now - predEntry.getKey()) < 3600)) {
+                    && (this.temperaturePrediction.ceilingEntry(nowSeconds) != null || (nowSeconds - predEntry.getKey()) < 3600)) {
                 if (this.lastMinuteViolated) {
                     this.getGlobalLogger().logDebug("Temperature prediction was wrong by >2.5 degree for two consecutive minutes, reschedule");
                     HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
@@ -152,7 +160,7 @@ public class HotWaterTankLocalObserver
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
@@ -165,14 +173,14 @@ public class HotWaterTankLocalObserver
                         InterdependentProblemPart.class,
                         this,
                         ex);
-                this.lastTimeIPPSent = this.getTimeDriver().getCurrentEpochSecond();
+                this.lastTimeIPPSent = this.getTimeDriver().getCurrentTime();
                 this.temperatureInLastIPP = this.currentTemperature;
             }
 
             // save current state in OCRegistry (for e.g. GUI)
             WaterStorageOCSX sx = new WaterStorageOCSX(
                     this.getUUID(),
-                    this.getTimeDriver().getCurrentEpochSecond(),
+                    this.getTimeDriver().getCurrentTime(),
                     this.currentTemperature,
                     this.currentMinTemperature,
                     this.currentMaxTemperature,

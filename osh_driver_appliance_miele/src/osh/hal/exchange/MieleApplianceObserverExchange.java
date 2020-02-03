@@ -5,6 +5,7 @@ import osh.datatypes.power.PowerProfileTick;
 import osh.eal.hal.interfaces.common.IHALProgramRemainingTime;
 import osh.hal.interfaces.appliance.IHALMieleApplianceProgramDetails;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.UUID;
@@ -18,7 +19,7 @@ public class MieleApplianceObserverExchange
         implements IHALProgramRemainingTime, IHALMieleApplianceProgramDetails {
 
     private int programRemainingTime;
-    private long deviceStartTime;
+    private ZonedDateTime deviceStartTime;
     private EnumMap<Commodity, ArrayList<PowerProfileTick>> expectedLoadProfiles;
     private String programName;
     private String phaseName;
@@ -30,7 +31,7 @@ public class MieleApplianceObserverExchange
      * @param deviceID
      * @param timestamp
      */
-    public MieleApplianceObserverExchange(UUID deviceID, long timestamp) {
+    public MieleApplianceObserverExchange(UUID deviceID, ZonedDateTime timestamp) {
         super(deviceID, timestamp);
     }
 
@@ -43,11 +44,11 @@ public class MieleApplianceObserverExchange
         this.programRemainingTime = remainingTime;
     }
 
-    public long getDeviceStartTime() {
+    public ZonedDateTime getDeviceStartTime() {
         return this.deviceStartTime;
     }
 
-    public void setDeviceStartTime(long deviceStartTime) {
+    public void setDeviceStartTime(ZonedDateTime deviceStartTime) {
         this.deviceStartTime = deviceStartTime;
     }
 

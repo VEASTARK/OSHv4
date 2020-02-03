@@ -5,6 +5,7 @@ import osh.datatypes.power.ILoadProfile;
 import osh.datatypes.power.SparseLoadProfile;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -14,7 +15,7 @@ public class ApplianceProgramConfigurationStatus implements Cloneable, Serializa
 
     private static final long serialVersionUID = -2752978492500340593L;
 
-    private final long acpReferenceTime;
+    private final ZonedDateTime acpReferenceTime;
 
     /**
      * ID for every update (with changes)
@@ -37,7 +38,7 @@ public class ApplianceProgramConfigurationStatus implements Cloneable, Serializa
             UUID acpID,
             SparseLoadProfile[][] dynamicLoadProfiles,
             int[][][] minMaxDurations,
-            long acpReferenceTime) {
+            ZonedDateTime acpReferenceTime) {
 
         this.acpID = acpID;
         this.dynamicLoadProfiles = dynamicLoadProfiles;
@@ -49,7 +50,7 @@ public class ApplianceProgramConfigurationStatus implements Cloneable, Serializa
             UUID acpID,
             SparseLoadProfile[][] dynamicLoadProfiles,
             int[][][] minMaxTimes,
-            long acpReferenceTime,
+            ZonedDateTime acpReferenceTime,
             boolean doNotReschedule) {
 
         this.acpID = acpID;
@@ -93,7 +94,7 @@ public class ApplianceProgramConfigurationStatus implements Cloneable, Serializa
         return this.dynamicLoadProfiles[profileNo][this.dynamicLoadProfiles[profileNo].length - 1];
     }
 
-    public long getAcpReferenceTime() {
+    public ZonedDateTime getAcpReferenceTime() {
         return this.acpReferenceTime;
     }
 

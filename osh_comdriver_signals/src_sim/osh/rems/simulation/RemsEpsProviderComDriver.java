@@ -13,6 +13,8 @@ import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.time.TimeConversion;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map.Entry;
@@ -32,7 +34,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private final int newSignalAfterThisPeriod = 43200; // 12 hours
+    private final Duration newSignalAfterThisPeriod = Duration.ofHours(12);
     /**
      * Maximum time the signal is available in advance (36h)
      */
@@ -40,7 +42,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     /**
      * Minimum time the signal is available in advance (24h)
      */
-    private final int signalAvailableFor = this.signalPeriod - this.newSignalAfterThisPeriod;
+    private final int signalAvailableFor = (int) (this.signalPeriod - this.newSignalAfterThisPeriod.toSeconds());
     /**
      * Signal is constant for 15 minutes
      */
@@ -53,7 +55,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     /**
      * Timestamp of the last price signal sent to global controller
      */
-    private long lastSignalSent;
+    private ZonedDateTime lastSignalSent;
     private double reactivePowerPrice;
     //	private double activePowerFeedInCHP = 5.0;
     private boolean newSignalReceived;
@@ -102,7 +104,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         {
             PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
@@ -142,7 +144,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
 
         if (this.newSignalReceived) {
             ArrayList<AncillaryCommodity> allRelevantCommodities = new ArrayList<>();
@@ -191,7 +193,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
             this.lastSignalSent = now;
             //System.out.println("SENT NEW PRICE SIGNAL TO OSH: " + newSignals.get(0).getPrices() + " FOR: " + uuid.substring(uuid.length() - 3));
             //System.out.println("SENT NEW PRICE SIGNAL TO OSH: " + newSignals.get(0).getPrices() + newSignals.get(1).getPrices()+newSignals.get(2).getPrices());
-        } else if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
+        } else if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
 
             //DIRTY FIX, pls make better ...
             ArrayList<AncillaryCommodity> allRelevantCommodities = new ArrayList<>();

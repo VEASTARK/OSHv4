@@ -73,7 +73,7 @@ public class NonControllableAdsorptionChillerLocalController
         ChillerNonControllableIPP ipp = new ChillerNonControllableIPP(
                 this.getUUID(),
                 this.getGlobalLogger(),
-                exchange.getEpochSecond(),
+                exchange.getTime(),
                 toBeScheduled,
                 currentState,
                 temperaturePrediction,
@@ -88,7 +88,7 @@ public class NonControllableAdsorptionChillerLocalController
             //TURN OFF Adsorption Chiller
             cx = new ChillerControllerExchange(
                     this.getUUID(),
-                    exchange.getEpochSecond(),
+                    exchange.getTime(),
                     true,
                     false,
                     0);
@@ -99,7 +99,7 @@ public class NonControllableAdsorptionChillerLocalController
                 //TURN ON Adsorption Chiller
                 cx = new ChillerControllerExchange(
                         this.getUUID(),
-                        exchange.getEpochSecond(),
+                        exchange.getTime(),
                         false,
                         true,
                         15 * 60);

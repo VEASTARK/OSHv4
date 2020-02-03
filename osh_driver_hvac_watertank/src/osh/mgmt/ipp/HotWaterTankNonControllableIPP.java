@@ -11,6 +11,7 @@ import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.thermal.SimpleHotWaterTank;
 import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class HotWaterTankNonControllableIPP
     public HotWaterTankNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             double initialTemperature,
             double tankCapacity,
             double tankDiameter,
@@ -58,7 +59,7 @@ public class HotWaterTankNonControllableIPP
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                now,
+                timeStamp,
                 DeviceTypes.HOTWATERSTORAGE,
                 EnumSet.of(Commodity.HEATINGHOTWATERPOWER,
                         Commodity.DOMESTICHOTWATERPOWER),
@@ -117,7 +118,7 @@ public class HotWaterTankNonControllableIPP
                 this.initialTemperature,
                 this.ambientTemperature);
 
-        this.waterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp());
+        this.waterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp().toEpochSecond());
         this.firstTemperature = this.waterTank.getCurrentWaterTemperature();
     }
 

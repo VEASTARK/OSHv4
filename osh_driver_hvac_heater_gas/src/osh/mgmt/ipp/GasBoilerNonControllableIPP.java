@@ -11,6 +11,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.gasboiler.GasBoilerModel;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -41,7 +42,7 @@ public class GasBoilerNonControllableIPP
     public GasBoilerNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long now,
+            ZonedDateTime timeStamp,
             double minTemperature,
             double maxTemperature,
             boolean initialState,
@@ -61,7 +62,7 @@ public class GasBoilerNonControllableIPP
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                now,
+                timeStamp,
                 DeviceTypes.GASHEATING,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,

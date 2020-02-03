@@ -67,7 +67,7 @@ public class July2013HollSpaceCoolingSimulationDriver
         SpaceCoolingObserverExchange ox =
                 new SpaceCoolingObserverExchange(
                         this.getUUID(),
-                        this.getTimeDriver().getCurrentEpochSecond(),
+                        this.getTimeDriver().getCurrentTime(),
                         this.dates,
                         this.outdoorTemperature.getMap(),
                         (int) Math.round(this.coldWaterPowerDemand));

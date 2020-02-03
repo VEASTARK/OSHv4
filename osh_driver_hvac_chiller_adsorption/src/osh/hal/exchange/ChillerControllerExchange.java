@@ -2,6 +2,7 @@ package osh.hal.exchange;
 
 import osh.eal.hal.exchange.HALControllerExchange;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -22,7 +23,7 @@ public class ChillerControllerExchange
      */
     public ChillerControllerExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             boolean stopGenerationFlag,
             boolean coolingRequest,
             int scheduledRuntime) {

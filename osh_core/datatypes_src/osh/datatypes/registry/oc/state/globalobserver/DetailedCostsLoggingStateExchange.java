@@ -5,6 +5,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.StateExchange;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class DetailedCostsLoggingStateExchange extends StateExchange {
      */
     public DetailedCostsLoggingStateExchange(
             UUID sender,
-            long timestamp,
+            ZonedDateTime timestamp,
             EnumMap<AncillaryCommodity, Integer> map,
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit) {

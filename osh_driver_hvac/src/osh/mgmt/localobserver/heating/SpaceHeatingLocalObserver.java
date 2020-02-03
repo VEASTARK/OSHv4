@@ -9,12 +9,14 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.state.globalobserver.CommodityPowerStateExchange;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
+import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.WaterDemandPredictionExchange;
 import osh.mgmt.ipp.thermal.ThermalDemandNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +36,11 @@ public class SpaceHeatingLocalObserver
     private SparseLoadProfile predictedWaterDemand;
 
     private int hotWaterPower;
-    private long timeFromMidnight;
 
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
+
+    private ZonedDateTime lastTimeIPPSent;
 
 
     /**
@@ -60,7 +63,7 @@ public class SpaceHeatingLocalObserver
             HotWaterDemandObserverExchange ox = (HotWaterDemandObserverExchange) hx;
             this.hotWaterPower = ox.getHotWaterPower();
 
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
             // set current power state
             CommodityPowerStateExchange cpse = new CommodityPowerStateExchange(
@@ -73,35 +76,33 @@ public class SpaceHeatingLocalObserver
                     this,
                     cpse);
 
-            long lastTimeFromMidnight = this.timeFromMidnight;
-            this.timeFromMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
-
-
             this.monitorLoad();
 
-            boolean firstDay =
-                    this.getTimeDriver().getCurrentEpochSecond() - this.getTimeDriver().getTimeAtStart().toEpochSecond() < 86400;
+            //only to keep consistent with old mode of operation TODO: remove when next backwards-compatibility breaking update is released
+            boolean firstDay = now.isBefore(this.getTimeDriver().getTimeAtStart().plusDays(1));
 
-            if (firstDay || lastTimeFromMidnight > this.timeFromMidnight) {
+            if (firstDay || this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 //a new day has begun...
                 this.sendIPP();
             }
-            if (lastTimeFromMidnight <= this.timeFromMidnight && now % 3600 == 0) {
-                double predVal = this.predictedWaterDemand.getLoadAt(Commodity.HEATINGHOTWATERPOWER, this.timeFromMidnight);
+            //TODO: remove first condition when next backwards-compatibility breaking update is released
+            if ((firstDay || !this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) && this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+                long secondsSinceMidnight = TimeConversion.getSecondsSinceDayStart(now);
+                double predVal = this.predictedWaterDemand.getLoadAt(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight);
 
                 if ((predVal != 0 && (this.hotWaterPower / predVal > 1.25
                         || this.hotWaterPower / predVal < 0.75))
                         || (predVal == 0 && this.hotWaterPower != 0)) {
                     //only using the actual value for the next hour, restore the predicted value if there is no other value set in t+3600
-                    int oldVal = this.predictedWaterDemand.getLoadAt(Commodity.HEATINGHOTWATERPOWER, this.timeFromMidnight);
-                    Long nextLoadChange = this.predictedWaterDemand.getNextLoadChange(Commodity.HEATINGHOTWATERPOWER, this.timeFromMidnight);
+                    int oldVal = this.predictedWaterDemand.getLoadAt(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight);
+                    Long nextLoadChange = this.predictedWaterDemand.getNextLoadChange(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight);
 
-                    if ((nextLoadChange != null && nextLoadChange > this.timeFromMidnight + 3600)
-                            || (nextLoadChange == null && this.predictedWaterDemand.getEndingTimeOfProfile() > this.timeFromMidnight + 3600)) {
-                        this.predictedWaterDemand.setLoad(Commodity.HEATINGHOTWATERPOWER, this.timeFromMidnight + 3600, oldVal);
+                    if ((nextLoadChange != null && nextLoadChange > secondsSinceMidnight + 3600)
+                            || (nextLoadChange == null && this.predictedWaterDemand.getEndingTimeOfProfile() > secondsSinceMidnight + 3600)) {
+                        this.predictedWaterDemand.setLoad(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight + 3600, oldVal);
                     }
 
-                    this.predictedWaterDemand.setLoad(Commodity.HEATINGHOTWATERPOWER, this.timeFromMidnight, this.hotWaterPower);
+                    this.predictedWaterDemand.setLoad(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight, this.hotWaterPower);
                     this.sendIPP();
                 }
             }
@@ -122,7 +123,7 @@ public class SpaceHeatingLocalObserver
 
     private void monitorLoad() {
 
-        if (this.timeFromMidnight == 0) {
+        if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             // a brand new day...let's make a new prediction
 
             if (this.lastDayProfile.getEndingTimeOfProfile() != 0) {
@@ -172,16 +173,16 @@ public class SpaceHeatingLocalObserver
         } else {
             this.lastDayProfile.setLoad(
                     Commodity.HEATINGHOTWATERPOWER,
-                    this.timeFromMidnight,
+                    TimeConversion.getSecondsSinceDayStart(this.getTimeDriver().getCurrentTime()),
                     this.hotWaterPower);
         }
     }
 
 
     private void sendIPP() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        long secondsSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
-        long startOfDay = now - secondsSinceMidnight;
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+//        this.lastTimeIPPSent = now;
+        long startOfDay = TimeConversion.getStartOfDay(now).toEpochSecond();
 
         ThermalDemandNonControllableIPP ipp =
                 new ThermalDemandNonControllableIPP(

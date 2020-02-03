@@ -5,7 +5,7 @@ import osh.datatypes.power.SparseLoadProfile;
 import osh.utils.csv.CSVImporter;
 import osh.utils.time.TimeConversion;
 
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -45,15 +45,15 @@ public class PvProfile {
     /**
      * IMPORTANT: Value <= 0 (Generating Power!)
      *
-     * @param timeStamp
+     * @param time
      * @return Value <= 0 in W
      */
-    public int getPowerAt(long timeStamp) {
-        int month = TimeConversion.convertUnixTime2MonthInt(timeStamp);
-        int time = TimeConversion.convertUnixTime2SecondsSinceMidnight(timeStamp);
+    public int getPowerAt(ZonedDateTime time) {
+        int month = TimeConversion.getCorrectedMonth(time);
+        long daySeconds = TimeConversion.getSecondsSinceDayStart(time);
 
         // Do NOT use Math.round()!!!
-        int interval = (int) ((double) time / (60 * 15));
+        int interval = (int) ((double) daySeconds / (60 * 15));
 
         int power = this.pvProfileArray[month][0][interval];
 
@@ -70,7 +70,7 @@ public class PvProfile {
         return power;
     }
 
-    public SparseLoadProfile getProfileForDayOfYear(LocalDate date) {
+    public SparseLoadProfile getProfileForDayOfYear(ZonedDateTime date) {
         int month = date.getMonthValue() - 1;
         int startInterval = (date.getDayOfMonth() - 1) * 96;
 

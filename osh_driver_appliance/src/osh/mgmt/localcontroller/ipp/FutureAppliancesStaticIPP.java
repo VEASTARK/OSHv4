@@ -8,6 +8,7 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.oc.ipp.StaticIPP;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -35,10 +36,9 @@ public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction>
     public FutureAppliancesStaticIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             DeviceTypes deviceType,
-            long referenceTime,
             Schedule schedule,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -49,7 +49,6 @@ public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction>
                 timestamp,
                 toBeScheduled,
                 deviceType,
-                referenceTime,
                 schedule,
                 compressionType,
                 compressionValue,

@@ -17,6 +17,7 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionW
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -84,7 +85,7 @@ public class FutureApplianceIPP
     public FutureApplianceIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long timestamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             long optimizationHorizon,
             DeviceTypes deviceType,
@@ -357,7 +358,7 @@ public class FutureApplianceIPP
 
         // convert to selected starting times
         long[] selectedStartingTimes = getStartingTimes(
-                this.acp.getAcpReferenceTime(),
+                this.acp.getAcpReferenceTime().toEpochSecond(),
                 selectedTDOF,
                 selectedMinMaxTimes);
 
@@ -365,7 +366,7 @@ public class FutureApplianceIPP
         System.arraycopy(selectedStartingTimes, 0, this.initializedStartingTimes, 0, selectedStartingTimes.length);
         this.initializedStartingTimes[selectedStartingTimes.length] = Long.MAX_VALUE;
 
-// merge phases to profile
+        // merge phases to profile
         for (int i = 0; i < selectedMinMaxTimes.length; i++) {
             try {
                 long availableLength = selectedDlp[i].getEndingTimeOfProfile(); // is has relative times
@@ -628,7 +629,7 @@ public class FutureApplianceIPP
         return new GenericApplianceSolution(
                 this.acp.getAcpID(),
                 getStartingTimes(
-                        this.acp.getAcpReferenceTime(),
+                        this.acp.getAcpReferenceTime().toEpochSecond(),
                         selectedTimeOfTDOF,
                         this.acp.getMinMaxDurations()[selectedProfile]),
                 selectedProfile);

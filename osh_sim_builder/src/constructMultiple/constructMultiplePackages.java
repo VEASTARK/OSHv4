@@ -87,7 +87,6 @@ public class constructMultiplePackages {
             constructSimulationPackage.pvComplexPowerMax = pvConfig.pvComplexPowerMax;
             constructSimulationPackage.pvCosPhiMax = pvConfig.pvCosPhiMax;
             constructSimulationPackage.pvNominalPower = pvConfig.pvNominalPower;
-            constructSimulationPackage.usePVRealESHL = pvConfig.usePVRealESHL;
             constructSimulationPackage.usePVRealHOLL = pvConfig.usePVRealHOLL;
         }
         if (config.containsKey("chpType")) {

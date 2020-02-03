@@ -7,6 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
     public PvNonControllableIPP(
             UUID deviceId,
             IGlobalLogger logger,
-            long referenceTime,
+            ZonedDateTime timestamp,
             SparseLoadProfile predictedPVProfile,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
@@ -48,7 +49,7 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
         super(deviceId,
                 logger,
                 false,
-                referenceTime,
+                timestamp,
                 DeviceTypes.PVSYSTEM,
                 predictedPVProfile,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),

@@ -4,6 +4,7 @@ import osh.cal.CALComExchange;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +28,7 @@ public class PlsComExchange extends CALComExchange {
      */
     public PlsComExchange(
             UUID deviceID,
-            Long timestamp,
+            ZonedDateTime timestamp,
             Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals) {
         super(deviceID, timestamp);
 

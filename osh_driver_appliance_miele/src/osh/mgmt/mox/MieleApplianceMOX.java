@@ -5,6 +5,8 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.en50523.EN50523DeviceState;
 
+import java.time.ZonedDateTime;
+
 /**
  * @author Sebastian Kramer
  */
@@ -17,14 +19,14 @@ public class MieleApplianceMOX implements IModelOfObservationExchange {
     private final SparseLoadProfile currentProfile;
     private final EN50523DeviceState currentState;
 
-    private final long profileStarted;
-    private final long programmedAt;
+    private final ZonedDateTime profileStarted;
+    private final ZonedDateTime programmedAt;
 
     private final LoadProfileCompressionTypes compressionType;
     private final int compressionValue;
 
     public MieleApplianceMOX(SparseLoadProfile currentProfile, EN50523DeviceState currentState,
-                             long profileStarted, long programmedAt, LoadProfileCompressionTypes compressionType,
+                             ZonedDateTime profileStarted, ZonedDateTime programmedAt, LoadProfileCompressionTypes compressionType,
                              int compressionValue) {
         super();
         this.currentProfile = currentProfile;
@@ -43,11 +45,11 @@ public class MieleApplianceMOX implements IModelOfObservationExchange {
         return this.currentState;
     }
 
-    public long getProfileStarted() {
+    public ZonedDateTime getProfileStarted() {
         return this.profileStarted;
     }
 
-    public long getProgrammedAt() {
+    public ZonedDateTime getProgrammedAt() {
         return this.programmedAt;
     }
 

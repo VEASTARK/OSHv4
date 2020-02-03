@@ -106,7 +106,7 @@ public class AdsorptionChillerSimulationDriver
         // notify Observer about current status
         ChillerObserverExchange ox = new ChillerObserverExchange(
                 this.getUUID(),
-                this.getTimeDriver().getCurrentEpochSecond(),
+                this.getTimeDriver().getCurrentTime(),
                 this.running,
                 this.outdoorTemperature);
         ox.setColdWaterPower(this.currentCoolingPower);

@@ -12,6 +12,8 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.Random;
 import java.util.UUID;
@@ -28,7 +30,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
     /**
      * Time after which a signal is send
      */
-    private final int newSignalAfterThisPeriod = 12 * 60 * 60;
+    private final Duration newSignalAfterThisPeriod = Duration.ofHours(12);
     /**
      * Maximum time the signal is available in advance (36h)
      */
@@ -67,7 +69,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
     /**
      * Timestamp of the last price signal sent to global controller
      */
-    private long lastSignalSent;
+    private ZonedDateTime lastSignalSent;
 
 
     public RandomEpsProviderComDriver(
@@ -84,7 +86,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
 
         OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
         this.generatePriceSignal(rand);
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
         this.lastSignalSent = now;
 
         // EPS
@@ -102,11 +104,11 @@ public class RandomEpsProviderComDriver extends CALComDriver {
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
 
-        long now = exchange.getEpochSecond();
+        ZonedDateTime now = exchange.getTime();
         OSHRandomGenerator rand = new OSHRandomGenerator(
                 new Random(this.getOSH().getRandomGenerator().getNextLong()));
 
-        if ((now - this.lastSignalSent) >= this.newSignalAfterThisPeriod) {
+        if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             this.generatePriceSignal(rand);
 
             this.lastSignalSent = now;

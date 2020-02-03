@@ -7,6 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
             UUID deviceId,
             IGlobalLogger logger,
             boolean toBeScheduled,
-            long referenceTime,
+            ZonedDateTime timestamp,
             DeviceTypes deviceType,
             SparseLoadProfile powerPrediction,
             LoadProfileCompressionTypes compressionType,
@@ -53,7 +54,7 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
                 deviceId,
                 logger,
                 toBeScheduled,
-                referenceTime,
+                timestamp,
                 deviceType,
                 powerPrediction,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
