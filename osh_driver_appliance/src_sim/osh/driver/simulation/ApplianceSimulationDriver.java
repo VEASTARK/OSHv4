@@ -198,7 +198,7 @@ public abstract class ApplianceSimulationDriver
             long timestamp,
             OSHRandomGenerator randomGen) {
         double randomDouble = randomGen.getNextDouble();
-        int weekday = TimeConversion.convertUnixTime2CorrectedWeekdayInt(timestamp);
+        int weekday = TimeConversion.convertUnixTime2CorrectedDayOfWeek(timestamp);
         int hour = 0;
         double[] probability = this.probabilityPerHourOfWeekdayCumulativeDistribution[weekday];
         for (int i = 0; i < probability.length; i++) {

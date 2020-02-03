@@ -214,9 +214,9 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
 
     private void generateDailyDemandProfile(ZonedDateTime now, OSHRandomGenerator randomGen) {
 
-        int month = TimeConversion.convertZonedDateTime2MonthInt(now);
-        int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(now);
-        long midnightToday = TimeConversion.getCurrentStartOfDay(now);
+        int month = TimeConversion.getCorrectedMonth(now);
+        int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
+        long midnightToday = TimeConversion.getStartOfDay(now).toEpochSecond();
 
         int runsToday;
         double avgRunsToday = (this.avgYearlyRuns / 365.0) * VDI6002DomesticHotWaterStatistics.monthlyCorrection[month] * VDI6002DomesticHotWaterStatistics.dayOfWeekCorrection[weekDay];

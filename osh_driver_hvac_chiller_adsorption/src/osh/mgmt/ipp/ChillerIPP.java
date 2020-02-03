@@ -238,7 +238,8 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
                     @SuppressWarnings("unused")
                     int debug = 0;
                 }
-                long secondsFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(this.interdependentTime);
+                long secondsFromYearStart =
+                        TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.interdependentTime));
                 double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
                 activePower = this.typicalRunningActivePower;
                 coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);

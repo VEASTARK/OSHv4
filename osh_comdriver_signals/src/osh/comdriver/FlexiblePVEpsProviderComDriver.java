@@ -299,14 +299,15 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
 
 
         long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime time = this.getTimeDriver().getCurrentTime();
         if (now == this.getTimeDriver().getTimeAtStart().toEpochSecond()) {
             // initial price signal
-            long timeSinceMidnight = TimeConversion.convertUnixTime2SecondsSinceMidnight(now);
+            long timeSinceMidnight = TimeConversion.getSecondsSinceDayStart(time);
             long timeTillEndOfDay = 86400 - timeSinceMidnight;
 
             priceSignal = PriceSignalGenerator.getFlexiblePriceSignal(
                     commodity,
-                    TimeConversion.convertUnixTime2SecondsFromYearStart(now),
+                    TimeConversion.getSecondsSinceYearStart(time),
                     now,
                     now + timeTillEndOfDay + this.signalAvailableFor,
                     this.resolutionOfPriceSignal,
@@ -317,7 +318,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
 
             priceSignal = PriceSignalGenerator.getFlexiblePriceSignal(
                     commodity,
-                    TimeConversion.convertUnixTime2SecondsFromYearStart(now),
+                    TimeConversion.getSecondsSinceYearStart(time),
                     now,
                     now + this.signalPeriod,
                     this.resolutionOfPriceSignal,

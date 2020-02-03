@@ -138,17 +138,17 @@ public abstract class ThermalDemandSimulationDriver
         if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
 //			double demand = 0;
             int randomNumber = ownGen.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
-            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now.toEpochSecond(), randomNumber
+            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
                     , randomHourShift);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now - 3600, 0, 0);
 //			demand += 0.5 * demandData.getTotalThermalDemand(now, 0, 0);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now + 3600, 0, 0);
 
             // demand: month correction
-            demand *= this.getMonthlyCorrection(TimeConversion.convertZonedDateTime2MonthInt(now));
+            demand *= this.getMonthlyCorrection(TimeConversion.getCorrectedMonth(now));
 
             // demand: day of week correction
-            demand *= this.getDayOfWeekCorrection(TimeConversion.convertTime2CorrectedWeekdayInt(now));
+            demand *= this.getDayOfWeekCorrection(TimeConversion.getCorrectedDayOfWeek(now));
 
             // demand: general correction value
             demand *= this.getGeneralCorrection();
@@ -165,7 +165,7 @@ public abstract class ThermalDemandSimulationDriver
 
         if (this.log) {
             int power = this.getPower(this.hotWaterType);
-            int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(now);
+            int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
             int minute = now.getMinute();
             int dayOfYear = now.getDayOfYear();
             this.avgWeekDayLoad[weekDay][minute] += power;

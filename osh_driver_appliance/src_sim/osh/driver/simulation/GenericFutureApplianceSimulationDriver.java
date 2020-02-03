@@ -710,7 +710,7 @@ public class GenericFutureApplianceSimulationDriver
         int runsToday = 0;
         // days with higher consumption explained by run of devices have more runs
         long now = this.getTimeDriver().getCurrentEpochSecond();
-        int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(now);
+        int dayOfYear = TimeConversion.getCorrectedDayOfYear(this.getTimeDriver().getCurrentTime());
         double avgRunsToday = this.getAvgDailyRuns() * this.getCorrectionFactorDay()[dayOfYear];
 
         int dailyRunsMin = (int) Math.floor(avgRunsToday);
@@ -908,7 +908,7 @@ public class GenericFutureApplianceSimulationDriver
     private void generateAndSetActions(long startTime, int configurationID, long tDof) {
 
         this.dofs[(int) Math.round(tDof / 60.0)]++;
-        this.startTimes[TimeConversion.convertUnixTime2MinuteOfDay(startTime)]++;
+        this.startTimes[TimeConversion.getMinutesSinceDayStart(TimeConversion.convertUnixTimeToZonedDateTime(startTime))]++;
 
         SubjectAction action = new SubjectAction();
         action.setTick(startTime);

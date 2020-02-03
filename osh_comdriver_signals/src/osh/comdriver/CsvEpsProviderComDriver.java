@@ -185,9 +185,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
      * Generate PriceSignal
      */
     private void generateNewPriceSignal() {
-        long now = this.getTimeDriver().getCurrentEpochSecond();
-        int relativeTimeFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(now);
-        long yearStart = now - relativeTimeFromYearStart;
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
+        int relativeTimeFromYearStart = (int) TimeConversion.getSecondsSinceYearStart(now);
+        long yearStart = TimeConversion.getStartOfYear(now).toEpochSecond();
+        long signalStart = now.toEpochSecond();
+        long signalEnd = signalStart + this.signalPeriod;
 
         EnumMap<AncillaryCommodity, PriceSignal> priceSignals = new EnumMap<>(AncillaryCommodity.class);
 
@@ -202,7 +204,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
                     priceSignal.setPrice(yearStart + i * this.resolutionOfPriceSignal, this.priceSignalYear.get(i));
                 }
             }
-            priceSignal.setKnownPriceInterval(now, now + this.signalPeriod);
+            priceSignal.setKnownPriceInterval(signalStart, signalEnd);
             priceSignal.compress();
             priceSignals.put(priceSignal.getCommodity(), priceSignal);
         }
@@ -211,11 +213,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // PV ActivePower FeedIn
             PriceSignal newPriceSignalFeedInPV = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.PVACTIVEPOWERFEEDIN,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerFeedInPV);
-            newPriceSignalFeedInPV.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalFeedInPV.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalFeedInPV.compress();
             priceSignals.put(newPriceSignalFeedInPV.getCommodity(), newPriceSignalFeedInPV);
         }
@@ -224,11 +226,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // CHP ActivePower FeedIn
             PriceSignal newPriceSignalFeedInCHP = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.CHPACTIVEPOWERFEEDIN,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerFeedInCHP);
-            newPriceSignalFeedInCHP.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalFeedInCHP.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalFeedInCHP.compress();
             priceSignals.put(newPriceSignalFeedInCHP.getCommodity(), newPriceSignalFeedInCHP);
         }
@@ -237,11 +239,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // Natural Gas Power Price
             PriceSignal newPriceSignalNaturalGas = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.NATURALGASPOWEREXTERNAL,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.naturalGasPowerPrice);
-            newPriceSignalNaturalGas.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalNaturalGas.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalNaturalGas.compress();
             priceSignals.put(newPriceSignalNaturalGas.getCommodity(), newPriceSignalNaturalGas);
         }
@@ -250,11 +252,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // Natural Gas Power Price
             PriceSignal newPriceSignalPVAutoConsumption = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerAutoConsumptionPV);
-            newPriceSignalPVAutoConsumption.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalPVAutoConsumption.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalPVAutoConsumption.compress();
             priceSignals.put(newPriceSignalPVAutoConsumption.getCommodity(), newPriceSignalPVAutoConsumption);
         }
@@ -263,11 +265,11 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             // Natural Gas Power Price
             PriceSignal newPriceSignalCHPAutoConsumption = PriceSignalGenerator.getConstantPriceSignal(
                     AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION,
-                    now,
-                    now + this.signalPeriod,
+                    signalStart,
+                    signalEnd,
                     this.signalPeriod,
                     this.activePowerAutoConsumptionCHP);
-            newPriceSignalCHPAutoConsumption.setKnownPriceInterval(now, now + this.signalPeriod);
+            newPriceSignalCHPAutoConsumption.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalCHPAutoConsumption.compress();
             priceSignals.put(newPriceSignalCHPAutoConsumption.getCommodity(), newPriceSignalCHPAutoConsumption);
         }

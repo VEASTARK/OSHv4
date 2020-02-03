@@ -182,7 +182,7 @@ public class SpaceHeatingLocalObserver
     private void sendIPP() {
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 //        this.lastTimeIPPSent = now;
-        long startOfDay = TimeConversion.getCurrentStartOfDay(now);
+        long startOfDay = TimeConversion.getStartOfDay(now).toEpochSecond();
 
         HotWaterDemandNonControllableIPP ipp =
                 new HotWaterDemandNonControllableIPP(

@@ -179,7 +179,7 @@ public class DomesticHotWaterLocalObserver
 
     private void sendIPP() {
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
-        long startOfDay = TimeConversion.getCurrentStartOfDay(now);
+        long startOfDay = TimeConversion.getStartOfDay(now).toEpochSecond();
         this.lastTimeIPPSent = now;
 
         DomesticHotWaterNonControllableIPP ipp =

@@ -1,5 +1,7 @@
 package osh.utils.slp;
 
+import java.time.ZonedDateTime;
+
 /**
  * interface for methods which a H0-Profile should provide
  *
@@ -32,36 +34,36 @@ public interface IH0Profile {
     }
 
     /**
-     * gets the baseload power for the given unix-timestamp
+     * gets the baseload power for the given time
      *
-     * @param timeStamp unix-timestamp
-     * @return baseload power for the given unix-timestamp
+     * @param time time
+     * @return baseload power for the given time
      */
-    int getActivePowerAt(long timeStamp);
+    int getActivePowerAt(ZonedDateTime time);
 
     /**
      * gets the percentage the power of the given time is between the daily maximum and minimum
      *
-     * @param timestamp unix-timestamp
+     * @param time time
      * @return the percentage the power of the given time is between the daily maximum and minimum
      */
-    double getPercentOfDailyMaxWithoutDailyMin(long timestamp);
+    double getPercentOfDailyMaxWithoutDailyMin(ZonedDateTime time);
 
     /**
-     * gets the average percentage the power during the whole day of the given timestamp is between the daily maximum and minimum
+     * gets the average percentage the power during the whole day of the given time is between the daily maximum and minimum
      *
-     * @param timestamp unix-timestamp
-     * @return the average percentage the power during the whole day of the given timestamp is between the daily maximum and minimum
+     * @param time time
+     * @return the average percentage the power during the whole day of the given time is between the daily maximum and minimum
      */
-    double getAvgPercentOfDailyMaxWithoutDailyMin(long timestamp);
+    double getAvgPercentOfDailyMaxWithoutDailyMin(ZonedDateTime time);
 
     /**
      * gets the probability correction factor to which one has to correct a distribution to follow the H0-Profile
      *
-     * @param timestamp unix-timestamp
+     * @param time time
      * @return the probability correction factor to which one has to correct a distribution to follow the H0-Profile
      */
-    double getCorrectionFactorForTimestamp(long timestamp);
+    double getCorrectionFactorForTimestamp(ZonedDateTime time);
 
     /**
      * gets the correction factors as an array for every day in the year

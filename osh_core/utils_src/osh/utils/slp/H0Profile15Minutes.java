@@ -3,6 +3,8 @@ package osh.utils.slp;
 import osh.utils.csv.CSVImporter;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 
@@ -119,19 +121,19 @@ public class H0Profile15Minutes implements IH0Profile {
 
     private void calculateCorrectionFactorDay() {
 
-        int weekDay = TimeConversion.getCorrectedFirstWeekDayOfYear(this.year);
+        ZonedDateTime time = ZonedDateTime.of(this.year, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
         double aggregate = 0;
 
         for (int d0 = 0; d0 < this.numberOfDaysInThisYear; d0++) {
-            int month = TimeConversion.getMonthFromDayOfYearAndYear(d0, this.year);
-            int dayOfMonth = TimeConversion.getDayOfMonthFromDayOfYearAndYear(d0, this.year);
+            time = time.plusDays(d0);
+            int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(time);
+            int month = TimeConversion.getCorrectedMonth(time);
+            int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(time);
             int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
 
-            this.correctionFactorForDay[d0] = IH0Profile.getBdewDynamizationValue(d0) * this.seasonCorrectionFactor[season] * this.seasonWeekdayCorrectionFactor[season][weekDay];
+            this.correctionFactorForDay[d0] = IH0Profile.getBdewDynamizationValue(d0) * this.seasonCorrectionFactor[season] * this.seasonWeekdayCorrectionFactor[season][dayOfWeek];
 
             aggregate += this.correctionFactorForDay[d0];
-            weekDay++;
-            weekDay %= 7;
         }
 
         aggregate /= this.numberOfDaysInThisYear;
@@ -142,16 +144,16 @@ public class H0Profile15Minutes implements IH0Profile {
         }
     }
 
-    public double getCorrectionFactorForTimestamp(long timestamp) {
-        int month = TimeConversion.convertUnixTime2Month(timestamp).getValue();
-        int weekday = TimeConversion.convertUnixTime2CorrectedWeekdayInt(timestamp);
-        int dayOfMonth = TimeConversion.convertUnixTime2DayOfMonth(timestamp);
-        int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(timestamp);
+    public double getCorrectionFactorForTimestamp(ZonedDateTime time) {
+        int month = TimeConversion.getCorrectedMonth(time);
+        int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(time);
+        int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(time);
+        int dayOfYear = TimeConversion.getCorrectedDayOfYear(time);
 
         int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
 
 
-        return IH0Profile.getBdewDynamizationValue(dayOfYear) * this.seasonCorrectionFactor[season] * this.seasonWeekdayCorrectionFactor[season][weekday];
+        return IH0Profile.getBdewDynamizationValue(dayOfYear) * this.seasonCorrectionFactor[season] * this.seasonWeekdayCorrectionFactor[season][dayOfWeek];
     }
 
     /**
@@ -220,11 +222,11 @@ public class H0Profile15Minutes implements IH0Profile {
     }
 
 
-    public double getAvgPercentOfDailyMaxWithoutDailyMin(long timestamp) {
-        int month = TimeConversion.convertUnixTime2Month(timestamp).getValue();
-        int day = TimeConversion.convertUnixTime2DayOfMonth(timestamp);
-        int weekday = TimeConversion.convertUnixTime2CorrectedWeekdayInt(timestamp);
-        int season = this.getSeasonIndexFromDayMonth(day, month);
+    public double getAvgPercentOfDailyMaxWithoutDailyMin(ZonedDateTime time) {
+        int month = TimeConversion.getCorrectedMonth(time);
+        int weekday = TimeConversion.getCorrectedDayOfWeek(time);
+        int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(time);
+        int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
 
         double max = 0;
         for (int i = 0; i < 96; i++) {
@@ -239,36 +241,37 @@ public class H0Profile15Minutes implements IH0Profile {
         return avgPercent;
     }
 
-    public double getPercentOfDailyMaxWithoutDailyMin(long timestamp) {
-        int month = TimeConversion.convertUnixTime2Month(timestamp).getValue();
-        int day = TimeConversion.convertUnixTime2DayOfMonth(timestamp);
-        int weekday = TimeConversion.convertUnixTime2CorrectedWeekdayInt(timestamp);
-        int season = this.getSeasonIndexFromDayMonth(day, month);
-        int time = TimeConversion.convertUnixTime2SecondsSinceMidnight(timestamp);
-        int quarterHour = ((time / (15 * 60)) % 96);
+    public double getPercentOfDailyMaxWithoutDailyMin(ZonedDateTime time) {
+        int month = TimeConversion.getCorrectedMonth(time);
+        int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(time);
+        int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(time);
+        int dayOfYear = TimeConversion.getCorrectedDayOfYear(time);
+        int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
+        long daySecond = TimeConversion.getSecondsSinceDayStart(time);
+        int quarterHour = (int) ((daySecond / (15 * 60)) % 96);
 
         double max = 0;
         for (int i = 0; i < 96; i++) {
-            max = Math.max(max, this.h0ProfileArrayWithoutMin[season][weekday][i]);
+            max = Math.max(max, this.h0ProfileArrayWithoutMin[season][dayOfWeek][i]);
         }
-        return this.h0ProfileArrayWithoutMin[season][weekday][quarterHour] / max;
+        return this.h0ProfileArrayWithoutMin[season][dayOfWeek][quarterHour] / max;
     }
 
 
-    public int getActivePowerAt(long timeStamp) {
-        int month = TimeConversion.convertUnixTime2Month(timeStamp).getValue();
-        int weekday = TimeConversion.convertUnixTime2CorrectedWeekdayInt(timeStamp);
-        int dayOfMonth = TimeConversion.convertUnixTime2DayOfMonth(timeStamp);
-        int dayOfYear = TimeConversion.convertUnixTime2CorrectedDayOfYear(timeStamp);
-        int quarterHour = ((TimeConversion.convertUnixTime2MinuteOfDay(timeStamp) / 15) % 96);
-
+    public int getActivePowerAt(ZonedDateTime time) {
+        int month = TimeConversion.getCorrectedMonth(time);
+        int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(time);
+        int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(time);
+        int dayOfYear = TimeConversion.getCorrectedDayOfYear(time);
         int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
+        long daySecond = TimeConversion.getSecondsSinceDayStart(time);
+        int quarterHour = (int) ((daySecond / (15 * 60)) % 96);
 
 //		double factor1 = IH0Profile.getCorrectedBdewDynamizationValue(dayOfYear);
         double factor3 = IH0Profile.getBdewDynamizationValue(dayOfYear);
         double factor2 = 1.002891587; //H0-Profile and dynamization from csv does not exactly add up to 1000 kWh/a
 
-        return (int) Math.round((this.h0ProfileArrayScaled[season][weekday][quarterHour] * factor2 * factor3));
+        return (int) Math.round((this.h0ProfileArrayScaled[season][dayOfWeek][quarterHour] * factor2 * factor3));
     }
 
 

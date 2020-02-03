@@ -16,6 +16,7 @@ import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
 import osh.utils.time.TimeConversion;
 
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -128,7 +129,7 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
     @Override
     public void onNextTimeTick() {
 
-        long now = this.getTimeDriver().getCurrentEpochSecond();
+        ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         if (this.pvSwitchedOn && this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.MINUTE)) {
 

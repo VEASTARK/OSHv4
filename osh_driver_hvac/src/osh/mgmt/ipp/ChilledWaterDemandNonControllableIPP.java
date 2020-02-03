@@ -136,7 +136,8 @@ public class ChilledWaterDemandNonControllableIPP
                     if (date.getStartTimestamp() <= time
                             && date.getStartTimestamp() + date.getLength() >= time) {
 
-                        long secondsFromYearStart = TimeConversion.convertUnixTime2SecondsFromYearStart(time);
+                        long secondsFromYearStart =
+                                TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(time));
 
                         double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
                         this.coldWaterPower = Math.max(0, ((0.4415 * outdoorTemperature) - 9.6614) * 1000);

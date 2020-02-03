@@ -45,15 +45,15 @@ public class PvProfile {
     /**
      * IMPORTANT: Value <= 0 (Generating Power!)
      *
-     * @param timeStamp
+     * @param time
      * @return Value <= 0 in W
      */
-    public int getPowerAt(long timeStamp) {
-        int month = TimeConversion.convertUnixTime2MonthInt(timeStamp);
-        int time = TimeConversion.convertUnixTime2SecondsSinceMidnight(timeStamp);
+    public int getPowerAt(ZonedDateTime time) {
+        int month = TimeConversion.getCorrectedMonth(time);
+        long daySeconds = TimeConversion.getSecondsSinceDayStart(time);
 
         // Do NOT use Math.round()!!!
-        int interval = (int) ((double) time / (60 * 15));
+        int interval = (int) ((double) daySeconds / (60 * 15));
 
         int power = this.pvProfileArray[month][0][interval];
 

@@ -1,36 +1,31 @@
 package osh.utils.time;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.ChronoUnit;
 
 /**
+ * Contains utility-function for handling date-time objects.
  *
  * @author Florian Allerding, Kaibin Bao, Sebastian Kramer, Ingo Mauser, Till Schuberth
  */
 public class TimeConversion {
 
-    //Theoretically this should be adjusted for where the system is running
+    //This should be adjusted for where the system is running
     private static ZoneId zone = ZoneId.of("UTC");
 
     /**
-     * Sets the time-zone for all future calculation to the procided time-zone
+     * Sets the time-zone for all future calculation to the provided time-zone.
+     *
      * @param zone the new time-zone
      */
     public static void setZone(ZoneId zone) {
         TimeConversion.zone = zone;
     }
 
-    public static int convertUnixTime2Year(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        return zdt.getYear();
-    }
-
-    /**
-     * @param unixTime
-     * @return 1. Jan = 1
-     */
     public static int convertUnixTime2DayOfYear(long unixTime) {
         Instant time = Instant.ofEpochSecond(unixTime);
         ZonedDateTime zdt = time.atZone(zone);
@@ -38,268 +33,157 @@ public class TimeConversion {
     }
 
     /**
-     * @param unixTime
-     * @return 1. Jan = 0
-     */
-    public static int convertUnixTime2CorrectedDayOfYear(long unixTime) {
-        return convertUnixTime2DayOfYear(unixTime) - 1;
-    }
-
-    /**
-     * @param unixTime
-     * @return 1. day of month = 1
-     */
-    public static int convertUnixTime2DayOfMonth(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        return zdt.getDayOfMonth();
-    }
-
-    /**
-     * @param unixTime
-     * @return mon=0, tue=1...
-     */
-    public static int convertUnixTime2CorrectedWeekdayInt(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        return zdt.getDayOfWeek().getValue() - 1; //DoW indexes from Mon=1 to Sun=7 so we need to adjust
-    }
-
-    /**
-     * @param zdt
-     * @return mon=0, tue=1...
-     */
-    public static int convertTime2CorrectedWeekdayInt(ZonedDateTime zdt) {
-        return zdt.getDayOfWeek().getValue() - 1; //DoW indexes from Mon=1 to Sun=7 so we need to adjust
-    }
-
-    /**
-     * @param unixTime
-     * @return 01.01. 00:01 = 60
-     */
-    public static int convertUnixTime2SecondsFromYearStart(long unixTime) {
-        ZonedDateTime zdt = Instant.ofEpochSecond(unixTime).atZone(zone);
-        ZonedDateTime yearStart =
-                zdt.with(TemporalAdjusters.firstDayOfYear()).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        return (int) (unixTime - yearStart.toEpochSecond());
-    }
-
-    public static long getSecondsSinceYearStart(ZonedDateTime time) {
-        ZonedDateTime yearStart =
-                time.with(TemporalAdjusters.firstDayOfYear()).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        return time.toEpochSecond() - yearStart.toEpochSecond();
-    }
-
-    public static long getSecondsSinceDayStart(ZonedDateTime time) {
-        return time.toEpochSecond() - TimeConversion.getCurrentStartOfDay(time);
-    }
-
-    /**
-     * @param unixTime
-     * @return jan=1 (as ENUM -> getValue()), ...
-     */
-    public static Month convertUnixTime2Month(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        return zdt.getMonth();
-    }
-
-    /**
-     * @param unixTime
-     * @return jan=0, ... , dec=11
-     */
-    public static int convertUnixTime2MonthInt(long unixTime) {
-        //Month enum indexes from Jan=1 to Dec=12
-        return convertUnixTime2Month(unixTime).getValue() - 1;
-    }
-
-    /**
-     * @param zdt
-     * @return jan=0, ... , dec=11
-     */
-    public static int convertZonedDateTime2MonthInt(ZonedDateTime zdt) {
-        return zdt.getMonth().getValue() - 1;
-    }
-
-    /**
-     * @param unixTime
-     * @return seconds since midnight (1am=3600)
-     */
-    public static int convertUnixTime2SecondsSinceMidnight(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        ZonedDateTime midnight = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-        return (int) (unixTime - midnight.toEpochSecond());
-    }
-
-    /**
-     * @param time
-     * @return epoch seconds at the start of the current day
-     */
-    public static long getCurrentStartOfDay(ZonedDateTime time) {
-        return time.withHour(0).withMinute(0).withSecond(0).withNano(0).toEpochSecond();
-    }
-
-
-    /**
-     * @param currentUnixTime
-     * @return UnixTime this day 00:00
-     */
-    public static long getUnixTimeStampCurrentDayMidnight(long currentUnixTime) {
-        Instant time = Instant.ofEpochSecond(currentUnixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        ZonedDateTime midnight = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-        return midnight.toEpochSecond();
-    }
-
-    /**
-     * @param currentUnixTime
-     * @return zoned date time corresponding to the currentUnixTime
-     */
-    public static ZonedDateTime convertUnixTimeToZonedDateTime(long currentUnixTime) {
-        return Instant.ofEpochSecond(currentUnixTime).atZone(zone);
-    }
-
-    /**
-     * 1-based (i.e., month = 1, ..., and so on
+     * Returns the month-value of the given date as a zero-based index.
      *
-     * @param year
-     * @param month
-     * @param day
-     * @param hour
-     * @return
+     * @param time the date
+     * @return the month as a zero-based index (0 = january, ...)
      */
-    public static long componentTimeToTimestamp(int year, int month, int day, int hour) {
-        ZonedDateTime zdt = ZonedDateTime.of(year, month, day, hour, 0, 0, 0, zone);
-        return zdt.toEpochSecond();
-    }
-
-    public static long addPeriodToUnixTime(long unixTime, Period period) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        zdt = zdt.plus(period);
-        return zdt.toEpochSecond();
+    public static int getCorrectedMonth(ZonedDateTime time) {
+        return time.getMonthValue() - 1;
     }
 
     /**
-     * @param unixTime
-     * @param days     Day X
-     * @return StartOfXthDayAfterToday
-     */
-    public static long getStartOfXthDayAfterToday(long unixTime, long days) {
-        long midnight = getUnixTimeStampCurrentDayMidnight(unixTime);
-        Instant time = Instant.ofEpochSecond(midnight);
-        ZonedDateTime zdt = time.atZone(zone);
-        zdt = zdt.plusDays(days);
-        return zdt.toEpochSecond();
-    }
-
-
-    public static long getStartOfXthWeek(long unixTime, long weeks) {
-        long midnight = getUnixTimeStampCurrentDayMidnight(unixTime);
-        Instant time = Instant.ofEpochSecond(midnight);
-        ZonedDateTime zdt = time.atZone(zone);
-        zdt = zdt.plusWeeks(weeks);
-        DayOfWeek dow = zdt.getDayOfWeek();
-        int daysSinceMonday = dow.getValue() - 1;
-        zdt = zdt.minusDays(daysSinceMonday);
-        return zdt.toEpochSecond();
-    }
-
-    public static long getStartOfXthMonth(long unixTime, long months) {
-        long midnight = getUnixTimeStampCurrentDayMidnight(unixTime);
-        Instant time = Instant.ofEpochSecond(midnight);
-        ZonedDateTime zdt = time.atZone(zone);
-        zdt = zdt.plusMonths(months);
-        zdt = zdt.withDayOfMonth(1);
-        return zdt.toEpochSecond();
-    }
-
-    /**
-     * gets the index of the first weekday of the year
+     * Returns the day-of-year-value of the given date as a zero-based index.
      *
-     * @param year
-     * @return mon = 0, ...
-     */
-    public static int getCorrectedFirstWeekDayOfYear(int year) {
-        ZonedDateTime zdt = ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, zone);
-        return zdt.getDayOfWeek().getValue() - 1;
-    }
-
-    /**
-     * get the 0-based day-of-year
-     * @param time
-     * @return 0 = 01.01. ....
+     * @param time the date
+     * @return the day-of-year as a zero-based index (0 = 01.01., ...)
      */
     public static int getCorrectedDayOfYear(ZonedDateTime time) {
         return time.getDayOfYear() - 1;
     }
 
     /**
-     * get month of dayOfYear and year
+     * Returns the day-of-week-value of the given date as a zero-based index.
      *
-     * @param dayOfYear 1. jan = 0, ...
-     * @param year
-     * @return jan = 1, ... dec = 12
+     * @param time the date
+     * @return the day-of-week as a zero-based index (0 = monday, ...)
      */
-    public static int getMonthFromDayOfYearAndYear(int dayOfYear, int year) {
-        ZonedDateTime zdt = ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, zone);
-        zdt = zdt.plusDays(dayOfYear);
-
-        return zdt.getMonthValue();
+    public static int getCorrectedDayOfWeek(ZonedDateTime time) {
+        return time.getDayOfWeek().ordinal();
     }
 
     /**
-     * get day of month of dayOfYear and year
+     * Returns the day-of-month-value of the given date as a zero-based index.
      *
-     * @param dayOfYear 1. jan = 0, ...
-     * @param year
-     * @return 1. day of month = 1
+     * @param time the date
+     * @return the day-of-week as a zero-based index (0 = 1st, ...)
      */
-    public static int getDayOfMonthFromDayOfYearAndYear(int dayOfYear, int year) {
-        ZonedDateTime zdt = ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, zone);
-        zdt = zdt.plusDays(dayOfYear);
-
-        return zdt.getDayOfMonth();
+    public static int getCorrectedDayOfMonth(ZonedDateTime time) {
+        return time.getDayOfMonth() - 1;
     }
 
     /**
-     * gets minuteOfDay
+     * Returns the number of seconds passed since the start of the year at the given time.
      *
-     * @param unixTime
-     * @return minuteOfDay, 00:01 = 1
+     * @param time the time
+     * @return the number of seconds passed since the start of the year
      */
-    public static int convertUnixTime2MinuteOfDay(long unixTime) {
+    public static long getSecondsSinceYearStart(ZonedDateTime time) {
+        ZonedDateTime yearStart = time.truncatedTo(ChronoUnit.YEARS);
+        return Duration.between(yearStart, time).toSeconds();
+    }
+
+    /**
+     * Returns the number of seconds passed since the start of the day at the given time.
+     *
+     * @param time the time
+     * @return the number of seconds passed since the start of the day
+     */
+    public static long getSecondsSinceDayStart(ZonedDateTime time) {
+        return Duration.between(getStartOfDay(time), time).toSeconds();
+    }
+
+    /**
+     * Returns the number of minutes passed since the start of the day at the given time.
+     *
+     * @param time the time
+     * @return the number of minutes passed since the start of the day
+     */
+    public static int getMinutesSinceDayStart(ZonedDateTime time) {
+        return (int) Duration.between(getStartOfDay(time), time).toMinutes();
+    }
+
+    /**
+     * Returns the time at the start of the day of the given time.
+     *
+     * @param time the time
+     * @return the time at the start of the day
+     */
+    public static ZonedDateTime getStartOfDay(ZonedDateTime time) {
+        return time.truncatedTo(ChronoUnit.DAYS);
+    }
+
+    /**
+     * Returns the time at the start of the week of the given time.
+     *
+     * @param time the time
+     * @return the time at the start of the week
+     */
+    public static ZonedDateTime getStartOfWeek(ZonedDateTime time) {
+        return time.truncatedTo(ChronoUnit.WEEKS);
+    }
+
+    /**
+     * Returns the time at the start of the month of the given time.
+     *
+     * @param time the time
+     * @return the time at the start of the month
+     */
+    public static ZonedDateTime getStartOfMonth(ZonedDateTime time) {
+        return time.truncatedTo(ChronoUnit.MONTHS);
+    }
+
+    /**
+     * Returns the time at the start of the year of the given time.
+     *
+     * @param time the time
+     * @return the time at the start of the year
+     */
+    public static ZonedDateTime getStartOfYear(ZonedDateTime time) {
+        return time.truncatedTo(ChronoUnit.YEARS);
+    }
+
+    /**
+     * Returns the day-of-week-value of the given unix-time as a zero-based index.
+     *
+     * @param unixTime the unix-time
+     * @return the day-of-week as a zero-based index (0 = monday, ...)
+     */
+    public static int convertUnixTime2CorrectedDayOfWeek(long unixTime) {
         Instant time = Instant.ofEpochSecond(unixTime);
         ZonedDateTime zdt = time.atZone(zone);
-
-        return ((zdt.getHour() * 60 + zdt.getMinute()) % 1440);
+        return zdt.getDayOfWeek().getValue() - 1; //DoW indexes from Mon=1 to Sun=7 so we need to adjust
     }
 
     /**
-     * gets minuteOfDay
+     * Returns the amount of seconds that have passed since the start-of-day of the given unix-time.
      *
-     * @param time
-     * @return minuteOfDay, 00:01 = 1
+     * @param unixTime the unix-time
+     * @return the amount of seconds that have passed since the start-of-day
      */
-    public static int convertTime2MinuteOfDay(ZonedDateTime time) {
-        return ((time.getHour() * 60 + time.getMinute()) % 1440);
+    public static int convertUnixTime2SecondsSinceMidnight(long unixTime) {
+        Instant time = Instant.ofEpochSecond(unixTime);
+        ZonedDateTime zdt = time.atZone(zone);
+        return (int) getSecondsSinceDayStart(zdt);
     }
 
-    public static int getNumberOfDaysInYearFromTimeStamp(long timeStamp) {
-        int year = convertUnixTime2Year(timeStamp);
-
-        if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
-            // leap year
-            return 366;
-        } else {
-            // normal year
-            return 365;
-        }
+    /**
+     * Returns a {@link ZonedDateTime} object corresponding to the given unix-time.
+     *
+     * @param currentUnixTime the unix-time
+     * @return {@link ZonedDateTime} object corresponding to the currentUnixTime
+     */
+    public static ZonedDateTime convertUnixTimeToZonedDateTime(long currentUnixTime) {
+        return Instant.ofEpochSecond(currentUnixTime).atZone(zone);
     }
 
+    /**
+     * Returns the number of days in the year of the given time.
+     *
+     * @param time the time
+     * @return the number of days in the year
+     */
     public static int getNumberOfDaysInYearFromTime(ZonedDateTime time) {
         return (int) time.range(ChronoField.DAY_OF_YEAR).getMaximum();
     }
-
 }

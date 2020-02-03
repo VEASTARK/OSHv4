@@ -145,7 +145,7 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
     @Override
     public void onNextTimeTick() {
         if (this.pvSwitchedOn) {
-            long now = this.getTimeDriver().getCurrentEpochSecond();
+            ZonedDateTime now = this.getTimeDriver().getCurrentTime();
             this.setPower(Commodity.ACTIVEPOWER, this.profile.getPowerAt(now));
 
             if (this.getPower(Commodity.ACTIVEPOWER) != 0) {

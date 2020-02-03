@@ -13,6 +13,7 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
 import osh.utils.slp.IH0Profile;
+import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -131,8 +132,9 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
             // remain to keep backwards-compaitiblity. Fix in next update that breaks this (uncomment above lines and
             // delete the next one)
             long pastDayStart = (int) Math.abs((timeAtStart.toEpochSecond() / 86400 - i) % 365) * 86400;
+            ZonedDateTime pastDay = TimeConversion.convertUnixTimeToZonedDateTime(pastDayStart);
             for (int sec = 0; sec < 86400; sec++) {
-                int activeLoad = this.baseload.getActivePowerAt(pastDayStart + sec);
+                int activeLoad = this.baseload.getActivePowerAt(pastDay.plusSeconds(sec));
 
                 dayProfile.setLoad(Commodity.ACTIVEPOWER, sec, activeLoad);
 
@@ -162,7 +164,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
     public void onNextTimeTick() {
         this.setPower(
                 Commodity.ACTIVEPOWER,
-                this.baseload.getActivePowerAt(this.getTimeDriver().getCurrentEpochSecond()));
+                this.baseload.getActivePowerAt(this.getTimeDriver().getCurrentTime()));
         try {
             this.setPower(
                     Commodity.REACTIVEPOWER,

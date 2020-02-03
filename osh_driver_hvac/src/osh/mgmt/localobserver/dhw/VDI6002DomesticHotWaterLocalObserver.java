@@ -47,9 +47,9 @@ public class VDI6002DomesticHotWaterLocalObserver
 
     private void generatePrediction(ZonedDateTime time) {
 
-        int weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(time);
-        int month = TimeConversion.convertZonedDateTime2MonthInt(time);
-        long midnight = TimeConversion.getCurrentStartOfDay(time);
+        int weekDay = TimeConversion.getCorrectedDayOfWeek(time);
+        int month = TimeConversion.getCorrectedMonth(time);
+        long midnight = TimeConversion.getStartOfDay(time).toEpochSecond();
 
         this.predictedDemand = new SparseLoadProfile();
 
@@ -62,9 +62,9 @@ public class VDI6002DomesticHotWaterLocalObserver
         ZonedDateTime tomorrow = time.plusDays(1);
 
         //predict demand for the next day
-        long midNightTomorrow = TimeConversion.getCurrentStartOfDay(tomorrow);
-        weekDay = TimeConversion.convertTime2CorrectedWeekdayInt(tomorrow);
-        month = TimeConversion.convertZonedDateTime2MonthInt(tomorrow);
+        long midNightTomorrow = TimeConversion.getStartOfDay(tomorrow).toEpochSecond();
+        weekDay = TimeConversion.getCorrectedDayOfWeek(tomorrow);
+        month = TimeConversion.getCorrectedMonth(tomorrow);
 
         dayDemand = (this.avgYearlyDemand / 365.0) * this.correctionFactorMonth[month] * this.correctionFactorWeekday[weekDay] * 1000;
         for (int i = 0; i < 24; i++) {
