@@ -125,10 +125,10 @@ public class H0Profile15Minutes implements IH0Profile {
         double aggregate = 0;
 
         for (int d0 = 0; d0 < this.numberOfDaysInThisYear; d0++) {
-            time = time.plusDays(d0);
-            int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(time);
-            int month = TimeConversion.getCorrectedMonth(time);
-            int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(time);
+            ZonedDateTime advancedTime = time.plusDays(d0);
+            int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(advancedTime);
+            int month = advancedTime.getMonthValue();
+            int dayOfMonth = advancedTime.getDayOfMonth();
             int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
 
             this.correctionFactorForDay[d0] = IH0Profile.getBdewDynamizationValue(d0) * this.seasonCorrectionFactor[season] * this.seasonWeekdayCorrectionFactor[season][dayOfWeek];
