@@ -7,6 +7,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP
             UUID deviceId,
             IGlobalLogger logger,
             boolean toBeScheduled,
-            long referenceTime,
+            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             SparseLoadProfile powerPrediction,
             Commodity usedCommodity,

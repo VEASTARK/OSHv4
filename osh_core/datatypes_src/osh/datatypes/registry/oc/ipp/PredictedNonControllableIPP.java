@@ -9,6 +9,7 @@ import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.esc.LimitedCommodityStateMap;
 
+import java.time.ZonedDateTime;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
             UUID deviceId,
             IGlobalLogger logger,
             boolean toBeScheduled,
-            long referenceTime,
+            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             SparseLoadProfile predictedProfile,
             EnumSet<Commodity> usedCommodities,

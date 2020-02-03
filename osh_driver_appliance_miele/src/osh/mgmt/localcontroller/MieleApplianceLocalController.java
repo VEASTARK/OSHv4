@@ -341,7 +341,7 @@ public class MieleApplianceLocalController
                 ipp = new MieleApplianceNonControllableIPP(
                         this.getUUID(),
                         this.getGlobalLogger(),
-                        true
+                        true,
                         now,
                         this.getLocalObserver().getDeviceType(),
                         new SparseLoadProfile().merge(this.currentProfile, this.profileStarted.toEpochSecond()),
