@@ -33,7 +33,7 @@ public abstract class DeviceSimulationDriver
     /**
      * List of Commodities used by this device
      */
-    protected final ArrayList<Commodity> usedCommodities;
+    protected final EnumSet<Commodity> usedCommodities;
 
     // VARIABLES
     protected LimitedCommodityStateMap commodityInputStates;

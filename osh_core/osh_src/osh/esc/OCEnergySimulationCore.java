@@ -118,7 +118,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
 
     public void doActiveToPassiveExchange(
             UUIDCommodityMap activeCommodityStates,
-            InterdependentProblemPart<?, ?>[] passiveParts,
+            List<InterdependentProblemPart<?, ?>> passiveParts,
             Set<UUID> passiveUUIDs,
             AncillaryMeterState ancillaryMeterState) {
 
@@ -156,7 +156,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
 
     public void doPassiveToActiveExchange(
             AncillaryMeterState ancillaryMeterState,
-            InterdependentProblemPart<?, ?>[] activeParts,
+            List<InterdependentProblemPart<?, ?>> activeParts,
             Set<UUID> activeNodes,
             UUIDCommodityMap passiveStates) {
 

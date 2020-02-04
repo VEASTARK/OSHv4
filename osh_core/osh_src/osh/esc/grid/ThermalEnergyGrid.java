@@ -302,7 +302,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             AncillaryMeterState ancillaryMeterState) {
 
         if (this.hasBeenInitialized) {
-            this.doInitializedActiveToPassiveGridCalculation(passiveNodes, activeStates, totalInputStates, ancillaryMeterState);
+            this.doInitializedActiveToPassiveGridCalculation(activeStates, totalInputStates, ancillaryMeterState);
         } else {
 
             for (EnergyRelation<Thermal> rel : this.relationList) {
@@ -349,7 +349,6 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
     }
 
     private void doInitializedActiveToPassiveGridCalculation(
-            Set<UUID> passiveNodes,
             UUIDCommodityMap activeStates,
             UUIDCommodityMap totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
@@ -380,7 +379,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             UUIDCommodityMap totalInputStates) {
 
         if (this.hasBeenInitialized) {
-            this.doInitializedPassiveToActiveGridCalculation(passiveStates, activeNodes, totalInputStates);
+            this.doInitializedPassiveToActiveGridCalculation(passiveStates, totalInputStates);
         } else {
 
             for (EnergyRelation<Thermal> rel : this.relationList) {
@@ -426,7 +425,6 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
 
     private void doInitializedPassiveToActiveGridCalculation(
             UUIDCommodityMap passiveStates,
-            Set<UUID> activeNodes,
             UUIDCommodityMap totalInputStates) {
 
         for (InitializedEnergyRelation rel : this.initializedImprovedPassiveToActiveArray) {

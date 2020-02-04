@@ -5,6 +5,7 @@ import osh.eal.hal.interfaces.electricity.IHALElectricalPowerDetails;
 import osh.eal.hal.interfaces.thermal.IHALHotWaterPowerDetails;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -77,9 +78,7 @@ public class SmartHeaterOX
     }
 
     public long[] getTimestampOfLastChangePerSubElement() {
-        long[] clone = new long[this.timestampOfLastChangePerSubElement.length];
-        System.arraycopy(this.timestampOfLastChangePerSubElement, 0, clone, 0, this.timestampOfLastChangePerSubElement.length);
-        return clone;
+        return Arrays.copyOf(this.timestampOfLastChangePerSubElement, this.timestampOfLastChangePerSubElement.length);
     }
 
     @Override

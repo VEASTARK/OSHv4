@@ -15,12 +15,8 @@ public class LimitedCommodityStateMap implements Serializable {
      */
     private static final long serialVersionUID = 9167758959788863484L;
     private static final byte thermalTempIndex = 0;
-    private static final Commodity[] allCommodities = Commodity.values();
-    private static final int commodityCount = Commodity.values().length;
-    private static final boolean[] EMPTY_KEYSET = new boolean[commodityCount];
-    static {
-        Arrays.fill(EMPTY_KEYSET, false);
-    }
+    private static final EnumSet<Commodity> allCommodities = EnumSet.allOf(Commodity.class);
+    private static final int commodityCount = allCommodities.size();
 
     private static final Commodity[] allElectricalCommodities = {
             Commodity.ACTIVEPOWER,
@@ -32,23 +28,25 @@ public class LimitedCommodityStateMap implements Serializable {
         Collections.addAll(allElectricCommoditiesList, allElectricalCommodities);
     }
 
-    private double[] powers;
+    private final double[] powers;
     /*
      * 0 = voltage
      */
-    private double[][] addElectrical;
+    private final double[][] addElectrical;
     /*
      * 0 = temperature
      * 1 = mass flow
      */
-    private double[][] addThermal;
-    private final int[] ordinalToPowerMap = new int[commodityCount];
-    private final int[] ordinalToElectricityMap = new int[commodityCount];
-    private final int[] ordinalToThermalMap = new int[commodityCount];
+    private final double[][] addThermal;
+    private int[] ordinalToPowerMap = new int[commodityCount];
+    private int[] ordinalToElectricityMap = new int[commodityCount];
+    private int[] ordinalToThermalMap = new int[commodityCount];
     private final boolean[] keySet = new boolean[commodityCount];
     private int modCount;
 
-    public LimitedCommodityStateMap() {
+    private static LimitedCommodityStateMap baseMap = null;
+
+    public LimitedCommodityStateMap(boolean init) {
 
         this.powers = new double[commodityCount];
         for (int i = 0; i < commodityCount; i++) {
@@ -60,10 +58,8 @@ public class LimitedCommodityStateMap implements Serializable {
         this.addThermal = new double[commodityCount - electricParts][2];
         int electricCount = 0, thermalCount = 0;
 
-        for (int i = 0; i < commodityCount; i++) {
-            Commodity c = allCommodities[i];
-
-            this.ordinalToPowerMap[c.ordinal()] = i;
+        for (Commodity c : allCommodities) {
+            this.ordinalToPowerMap[c.ordinal()] = c.ordinal();
 
             if (allElectricCommoditiesList.contains(c)) {
                 this.ordinalToElectricityMap[c.ordinal()] = electricCount++;
@@ -71,6 +67,27 @@ public class LimitedCommodityStateMap implements Serializable {
                 this.ordinalToThermalMap[c.ordinal()] = thermalCount++;
             }
         }
+    }
+
+    public static LimitedCommodityStateMap getBase() {
+        if (baseMap == null) {
+            baseMap = new LimitedCommodityStateMap(true);
+        }
+        return baseMap;
+    }
+
+    public LimitedCommodityStateMap() {
+        this(LimitedCommodityStateMap.getBase());
+    }
+
+    public LimitedCommodityStateMap(LimitedCommodityStateMap other) {
+        this.powers = Arrays.copyOf(other.powers, other.powers.length);
+        this.addElectrical = new double[other.addElectrical.length][1];
+        this.addThermal = new double[other.addThermal.length][2];
+        this.ordinalToElectricityMap = Arrays.copyOf(other.ordinalToElectricityMap, other.ordinalToElectricityMap.length);
+        this.ordinalToThermalMap = Arrays.copyOf(other.ordinalToThermalMap, other.ordinalToThermalMap.length);
+        this.ordinalToPowerMap = Arrays.copyOf(other.ordinalToPowerMap, other.ordinalToPowerMap.length);
+        this.modCount = other.modCount;
     }
 
     public LimitedCommodityStateMap(EnumSet<Commodity> allPossibleCommodities) {
@@ -95,58 +112,6 @@ public class LimitedCommodityStateMap implements Serializable {
         }
 
         this.addElectrical = new double[electricCount][1];
-        this.addThermal = new double[thermalCount][2];
-    }
-
-    public LimitedCommodityStateMap(Commodity[] allPossibleCommodities) {
-
-        this.powers = new double[allPossibleCommodities.length];
-        for (int i = 0; i < commodityCount; i++) {
-            this.ordinalToPowerMap[i] = -1;
-            this.ordinalToElectricityMap[i] = -1;
-            this.ordinalToThermalMap[i] = -1;
-        }
-        int electricCount = 0, thermalCount = 0;
-
-        for (int i = 0; i < allPossibleCommodities.length; i++) {
-            Commodity c = allPossibleCommodities[i];
-
-            this.ordinalToPowerMap[c.ordinal()] = i;
-
-            if (allElectricCommoditiesList.contains(c)) {
-                this.ordinalToElectricityMap[c.ordinal()] = electricCount++;
-            } else {
-                this.ordinalToThermalMap[c.ordinal()] = thermalCount++;
-            }
-        }
-
-        this.addElectrical = new double[electricCount][1];
-        this.addThermal = new double[thermalCount][2];
-    }
-
-    public LimitedCommodityStateMap(List<Commodity> allPossibleCommodities) {
-
-        this.powers = new double[allPossibleCommodities.size()];
-        for (int i = 0; i < commodityCount; i++) {
-            this.ordinalToPowerMap[i] = -1;
-            this.ordinalToElectricityMap[i] = -1;
-            this.ordinalToThermalMap[i] = -1;
-        }
-        int electricityCount = 0, thermalCount = 0;
-
-        for (int i = 0; i < allPossibleCommodities.size(); i++) {
-            Commodity c = allPossibleCommodities.get(i);
-
-            this.ordinalToPowerMap[c.ordinal()] = i;
-
-            if (allElectricCommoditiesList.contains(c)) {
-                this.ordinalToElectricityMap[c.ordinal()] = electricityCount++;
-            } else {
-                this.ordinalToThermalMap[c.ordinal()] = thermalCount++;
-            }
-        }
-
-        this.addElectrical = new double[electricityCount][1];
         this.addThermal = new double[thermalCount][2];
     }
 

@@ -10,10 +10,13 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.GlobalController;
 import osh.core.oc.LocalController;
 import osh.datatypes.commodity.AncillaryCommodity;
+import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
+import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
+import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
@@ -317,9 +320,7 @@ public class OSHGlobalControllerJMetal
                 this.stepSize,
                 this.logDir);
 
-        List<InterdependentProblemPart<?, ?>> partsList = this.oshGlobalObserver.getProblemParts();
-        InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[partsList.size()];
-        problemParts = partsList.toArray(problemParts);
+        List<InterdependentProblemPart<?, ?>> problemParts = this.oshGlobalObserver.getProblemParts();
 
         Solution solution;
         SolutionWithFitness resultWithAll;
@@ -382,40 +383,65 @@ public class OSHGlobalControllerJMetal
                     now,
                     ignoreLoadProfileAfter,
                     optimisationRunRandomGenerator,
-                    this.getGlobalLogger(),
                     fitnessFunction,
                     this.stepSize);
 
-            problem.evaluateFinalTime(solution, this.logGa);
+            boolean extensiveLogging = (hasGUI || isReal) && solution.getDecisionVariables().length > 0;
+            AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
+
+            problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ancillaryMeter);
             problem.finalizeGrids();
 
             distributor.distributeSolution(solution, problemParts);
 
 
-            if ((hasGUI || isReal) && solution.getDecisionVariables().length > 0) {
+            if (extensiveLogging) {
+
                 TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
                 TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
                 TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
                 List<Schedule> schedules = new ArrayList<>();
-                AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
 
-                EnergyManagementProblem debugProblem = new EnergyManagementProblem(
-                        problemParts, this.ocESC, distributor, this.priceSignals,
-                        this.powerLimitSignals, now, ignoreLoadProfileAfter,
-                        optimisationRunRandomGenerator, this.getGlobalLogger(), fitnessFunction, this.stepSize);
+                for (InterdependentProblemPart<?, ?> part : problemParts) {
+                    schedules.add(part.getFinalInterdependentSchedule());
 
-                debugProblem.evaluateWithDebuggingInformation(
-                        solution,
-                        ancillaryMeter,
-                        predictedTankTemp,
-                        predictedHotWaterDemand,
-                        predictedHotWaterSupply,
-                        schedules,
-                        true,
-                        this.hotWaterTankID);
+                    //extract prediction about tank temperatures of the hot-water tank
+                    if (part.getUUID().equals(this.hotWaterTankID)) {
+                        @SuppressWarnings("unchecked")
+                        EAPredictionCommandExchange<TemperaturePrediction> prediction = (EAPredictionCommandExchange<TemperaturePrediction>) part.transformToFinalInterdependentPrediction(
+                                this.getUUID(),
+                                part.getUUID(),
+                                this.getTimeDriver().getCurrentTime());
 
-                //better be sure
-                debugProblem.finalizeGrids();
+                        predictedTankTemp = prediction.getPrediction().getTemperatureStates();
+                    }
+
+                    //extract information about hot-water demand and supply
+                    if (part.getAllOutputCommodities().contains(Commodity.DOMESTICHOTWATERPOWER)
+                            || part.getAllOutputCommodities().contains(Commodity.HEATINGHOTWATERPOWER)) {
+                        SparseLoadProfile loadProfile = part.getLoadProfile();
+
+                        for (long t = now; t < maxHorizon + this.stepSize; t += this.stepSize) {
+                            int domLoad = loadProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, t);
+                            int heatLoad = loadProfile.getLoadAt(Commodity.HEATINGHOTWATERPOWER, t);
+
+                            predictedHotWaterDemand.putIfAbsent(t, 0.0);
+                            predictedHotWaterSupply.putIfAbsent(t, 0.0);
+
+                            if (domLoad > 0) {
+                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
+                            } else if (domLoad < 0) {
+                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
+                            }
+
+                            if (heatLoad > 0) {
+                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
+                            } else if (heatLoad < 0) {
+                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
+                            }
+                        }
+                    }
+                }
 
                 this.getOCRegistry().publish(
                         GUIHotWaterPredictionStateExchange.class,

@@ -341,7 +341,7 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
 
 
         if (this.hasBeenInitialized) {
-            this.doInitializedPassiveToActiveCalculation(activeNodes, passiveStates, totalInputStates);
+            this.doInitializedPassiveToActiveCalculation(passiveStates, totalInputStates);
         } else {
             for (EnergyRelation<Electrical> rel : this.relationList) {
 
@@ -408,7 +408,6 @@ public class ElectricalEnergyGrid implements EnergyGrid, Serializable {
     }
 
     private void doInitializedPassiveToActiveCalculation(
-            Set<UUID> activeNodes,
             UUIDCommodityMap passiveStates,
             UUIDCommodityMap totalInputStates) {
 

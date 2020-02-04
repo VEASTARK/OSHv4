@@ -3,7 +3,6 @@ package osh.esc;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 
 import java.io.Serializable;
 import java.util.*;
@@ -17,37 +16,17 @@ public class UUIDCommodityMap implements Serializable {
 
     private Object2IntOpenHashMap<UUID> keyMap;
 
-    //	private EnumMap<Commodity, RealCommodityState>[] innerValues;
     private LimitedCommodityStateMap[] innerValues;
 
     private int[] partIdToArrayIdMap;
 
 
-    public UUIDCommodityMap(InterdependentProblemPart<?, ?>[] allParts,
-                            Object2IntOpenHashMap<UUID> uuidIntMap) {
-        this.initiateFromArrayWithMap(allParts, uuidIntMap);
-    }
-
-    public UUIDCommodityMap(InterdependentProblemPart<?, ?>[] allParts,
-                            Object2IntOpenHashMap<UUID> uuidIntMap,
-                            boolean makeNoMap) {
-
-        if (!makeNoMap) {
-            this.initiateFromArrayWithMap(allParts, uuidIntMap);
-        }
-        this.keyMap = null;
-        this.partIdToArrayIdMap = new int[uuidIntMap.size()];
-        this.innerValues = new LimitedCommodityStateMap[allParts.length];
-
-        Arrays.fill(this.partIdToArrayIdMap, -1);
-
-        for (int i = 0; i < allParts.length; i++) {
-            if (uuidIntMap.containsKey(allParts[i].getUUID())) {
-                this.partIdToArrayIdMap[allParts[i].getId()] = i;
-                this.innerValues[i] = new LimitedCommodityStateMap();
-            } else {
-                throw new IllegalArgumentException("no mapping for specified key");
-            }
+    public UUIDCommodityMap(UUIDCommodityMap other) {
+        this.keyMap = other.keyMap;
+        this.partIdToArrayIdMap = Arrays.copyOf(other.partIdToArrayIdMap, other.partIdToArrayIdMap.length);
+        this.innerValues = new LimitedCommodityStateMap[other.innerValues.length];
+        for (int i = 0; i < this.innerValues.length; i++) {
+            this.innerValues[i] = new LimitedCommodityStateMap(other.innerValues[i]);
         }
     }
 
@@ -73,41 +52,24 @@ public class UUIDCommodityMap implements Serializable {
         }
     }
 
-    public UUIDCommodityMap(List<InterdependentProblemPart<?, ?>> allParts, Object2IntOpenHashMap<UUID> uuidIntMap) {
-        this.keyMap = new Object2IntOpenHashMap<>(allParts.size());
-        this.partIdToArrayIdMap = new int[uuidIntMap.size()];
-        this.innerValues = new LimitedCommodityStateMap[allParts.size()];
-
-        this.keyMap.defaultReturnValue(-1);
-        Arrays.fill(this.partIdToArrayIdMap, -1);
-
-        for (int i = 0; i < allParts.size(); i++) {
-            if (uuidIntMap.containsKey(allParts.get(i).getUUID())) {
-                this.keyMap.put(allParts.get(i).getUUID(), i);
-                this.partIdToArrayIdMap[uuidIntMap.getInt(allParts.get(i).getUUID())] = i;
-            } else {
-                throw new IllegalArgumentException("no mapping for specified key");
-            }
-        }
-
-        for (int i = 0; i < this.innerValues.length; i++) {
-            this.innerValues[i] = new LimitedCommodityStateMap();
-        }
+    public UUIDCommodityMap(Set<UUID> allUUIDs, Object2IntOpenHashMap<UUID> uuidIntMap) {
+        this(allUUIDs, uuidIntMap, false);
     }
 
-    public UUIDCommodityMap(Set<UUID> allUUIDs, Object2IntOpenHashMap<UUID> uuidIntMap) {
-        this.keyMap = new Object2IntOpenHashMap<>(allUUIDs.size());
+    public UUIDCommodityMap(Set<UUID> allUUIDs, Object2IntOpenHashMap<UUID> uuidIntMap, boolean makeNoMap) {
+        if (makeNoMap) this.keyMap = null;
+        else this.keyMap = new Object2IntOpenHashMap<>(allUUIDs.size());
         this.partIdToArrayIdMap = new int[uuidIntMap.size()];
         this.innerValues = new LimitedCommodityStateMap[allUUIDs.size()];
 
-        this.keyMap.defaultReturnValue(-1);
+        if (!makeNoMap) this.keyMap.defaultReturnValue(-1);
         Arrays.fill(this.partIdToArrayIdMap, -1);
 
         Iterator<UUID> it = allUUIDs.iterator();
         for (int i = 0; i < allUUIDs.size(); i++) {
             UUID curr = it.next();
             if (uuidIntMap.containsKey(curr)) {
-                this.keyMap.put(curr, i);
+                if (!makeNoMap) this.keyMap.put(curr, i);
                 this.partIdToArrayIdMap[uuidIntMap.getInt(curr)] = i;
             } else {
                 throw new IllegalArgumentException("no mapping for specified key");
@@ -125,26 +87,6 @@ public class UUIDCommodityMap implements Serializable {
     @Deprecated
     protected UUIDCommodityMap() {
 
-    }
-
-    private void initiateFromArrayWithMap(InterdependentProblemPart<?, ?>[] allParts,
-                                          Object2IntOpenHashMap<UUID> uuidIntMap) {
-        this.keyMap = new Object2IntOpenHashMap<>(allParts.length);
-        this.partIdToArrayIdMap = new int[uuidIntMap.size()];
-        this.innerValues = new LimitedCommodityStateMap[allParts.length];
-
-        this.keyMap.defaultReturnValue(-1);
-        Arrays.fill(this.partIdToArrayIdMap, -1);
-
-        for (int i = 0; i < allParts.length; i++) {
-            if (uuidIntMap.containsKey(allParts[i].getUUID())) {
-                this.keyMap.put(allParts[i].getUUID(), i);
-                this.partIdToArrayIdMap[allParts[i].getId()] = i;
-                this.innerValues[i] = new LimitedCommodityStateMap();
-            } else {
-                throw new IllegalArgumentException("no mapping for specified key");
-            }
-        }
     }
 
     public void put(int id, LimitedCommodityStateMap stateMap) {

@@ -1,6 +1,7 @@
 package osh.driver.ihe;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Heating element with the following specifications:<br>
@@ -72,8 +73,8 @@ public class SmartHeaterModel implements Serializable {
         this.setTemperature = setTemperature;
         this.currentState = initialState;
         this.currentStates = convertStateToStates(initialState);
-        this.timestampOfLastChangePerSubElement = new long[timestampOfLastChangePerSubElement.length];
-        System.arraycopy(timestampOfLastChangePerSubElement, 0, this.timestampOfLastChangePerSubElement, 0, timestampOfLastChangePerSubElement.length);
+        this.timestampOfLastChangePerSubElement = Arrays.copyOf(timestampOfLastChangePerSubElement,
+                timestampOfLastChangePerSubElement.length);
     }
 
     public SmartHeaterModel() {

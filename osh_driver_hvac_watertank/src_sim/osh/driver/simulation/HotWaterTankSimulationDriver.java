@@ -13,6 +13,7 @@ import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 
 import java.time.Duration;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -184,7 +185,8 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
     @Override
     public LimitedCommodityStateMap getCommodityOutputStates() {
-        LimitedCommodityStateMap map = new LimitedCommodityStateMap(new Commodity[]{Commodity.HEATINGHOTWATERPOWER});
+        LimitedCommodityStateMap map =
+                new LimitedCommodityStateMap(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
         map.setTemperature(Commodity.HEATINGHOTWATERPOWER, this.waterTank.getCurrentWaterTemperature());
         return map;
     }

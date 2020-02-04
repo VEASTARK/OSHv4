@@ -14,72 +14,65 @@ import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.ea.Schedule;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.BinaryEncodedVariableInformation;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
-import osh.esc.IOCEnergySubject;
-import osh.esc.LimitedCommodityStateMap;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
-import osh.utils.DeepCopy;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
- * Problem to be solved by solver / optimizer
+ * Represents the optimization problem of the OSH simulation for use in JMetal algorithms.
  *
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class EnergyManagementProblem extends Problem {
 
-    private static final long serialVersionUID = 1L;
-    private final int STEP_SIZE;
-    final Set<UUID> passiveUUIDs = new HashSet<>();
-    final Set<UUID> activeNeedInputUUIDs = new HashSet<>();
-    final Object2IntOpenHashMap<UUID> uuidIntMap;
-    private final IFitness fitnessFunction;
-    // active nodes, need information about commodity input states (new IPP)
-    private final InterdependentProblemPart<?, ?>[] activeNeedsInput;
-    // active nodes
-    private final InterdependentProblemPart<?, ?>[] activeWorksAlone;
-    // passive nodes
-    private final InterdependentProblemPart<?, ?>[] passive;
-    // static PP
-    private final InterdependentProblemPart<?, ?>[] staticParts;
+    private static final long serialVersionUID = -4271677958277281538L;
+
     private final EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private final EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private final long ignoreLoadProfileBefore;
     private final long ignoreLoadProfileAfter;
-    private boolean multiThreading;
-    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedActiveNeedsInput;
-    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedActiveWorksAlone;
-    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedPassive;
-    private ObjectArrayList<InterdependentProblemPart<?, ?>[]> multiThreadedStatic;
-    private ObjectArrayList<OCEnergySimulationCore> multiOCs;
-    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesActiveNI;
-    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesActiveWA;
-    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesPassive;
-    private InterdependentProblemPart<?, ?>[] multiThreadedMasterCopiesStatic;
-    private Long maxReferenceTime;
-    private Long maxOptimizationHorizon;
-    private boolean keepPrediction;
-    private final OCEnergySimulationCore ocEnergySimulationCore;
+    private long maxReferenceTime;
+    private long maxOptimizationHorizon;
+
+    private final int stepSize;
+    private final IFitness fitnessFunction;
     private final SolutionDistributor distributor;
 
+    private final EnergyProblemDataContainer baseDataContainer;
+
+    //multithreading
+    private boolean multiThreadingInitialized;
+    private EnergyProblemDataContainer masterDataContainer;
+    private List<EnergyProblemDataContainer> multiThreadedDataList;
+    private final ReentrantLock multiThreadedLock = new ReentrantLock();
 
     /**
-     * CONSTRUCTOR
+     * Genererates a new Problem with the given constituents.
      *
+     * @param problemParts all problem-parts of this problem
+     * @param ocESC the energy-simulation-core to be used for the optimization loop
+     * @param distributor the solution distributor for this problem
+     * @param priceSignals the valid price-signals for this problem
+     * @param powerLimitSignals the valid power-limit-signals for this problem
+     * @param ignoreLoadProfileBefore the point in time before which all should be ignored for this optimization
+     * @param ignoreLoadProfileAfter the point in time after which all should be ignored for this optimization
+     * @param randomGenerator a generator for random numbers for use in this problem
+     * @param fitnessFunction the function determining which fitness an evaluated solution has
+     * @param stepSize the size of the time-steps to be used for the evaluation of solutions
      */
     public EnergyManagementProblem(
-            InterdependentProblemPart<?, ?>[] problemParts,
+            List<InterdependentProblemPart<?, ?>> problemParts,
             OCEnergySimulationCore ocESC,
             SolutionDistributor distributor,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
@@ -87,603 +80,310 @@ public class EnergyManagementProblem extends Problem {
             long ignoreLoadProfileBefore,
             long ignoreLoadProfileAfter,
             OSHRandomGenerator randomGenerator,
-            IGlobalLogger globalLogger,
             IFitness fitnessFunction,
-            int STEP_SIZE) {
+            int stepSize) {
         super(new PseudoRandom(randomGenerator));
 
-        List<InterdependentProblemPart<?, ?>> activeNeedsInput = new ArrayList<>();
-        List<InterdependentProblemPart<?, ?>> activeWorksAlone = new ArrayList<>();
-        List<InterdependentProblemPart<?, ?>> passive = new ArrayList<>();
-        List<InterdependentProblemPart<?, ?>> staticParts = new ArrayList<>();
-
+        this.distributor = distributor;
         this.priceSignals = priceSignals;
         this.powerLimitSignals = powerLimitSignals;
-
         this.ignoreLoadProfileBefore = ignoreLoadProfileBefore;
         this.ignoreLoadProfileAfter = ignoreLoadProfileAfter;
-
-        this.STEP_SIZE = STEP_SIZE;
-
-        if (ignoreLoadProfileBefore == ignoreLoadProfileAfter) {
-            //TODO remove load profile from problem
-        }
-
-        // ENERGY SIMULATION
-
-        // create EnergySimulationCore
-        this.ocEnergySimulationCore = ocESC;
-        this.distributor = distributor;
-
+        this.stepSize = stepSize;
         this.fitnessFunction = fitnessFunction;
 
+        //mapping of uuid to problem-part id, needed for the construction of UUIDCommodityMaps
+        Object2IntOpenHashMap<UUID> uuidIntMap = new Object2IntOpenHashMap<>();
+        uuidIntMap.defaultReturnValue(-1);
+
         Set<UUID> allUUIDs = new HashSet<>();
-        Set<UUID> activeUUIDs = new HashSet<>();
-        Set<UUID> passiveUUIDs = new HashSet<>();
 
-        this.uuidIntMap = new Object2IntOpenHashMap<>(problemParts.length);
-        this.uuidIntMap.defaultReturnValue(-1);
-
-        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap = new Object2ObjectOpenHashMap<>(problemParts.length);
-        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap = new Object2ObjectOpenHashMap<>(problemParts.length);
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
 
         for (InterdependentProblemPart<?, ?> part : problemParts) {
-            if (this.uuidIntMap.put(part.getUUID(), part.getId()) != -1) {
+            if (uuidIntMap.put(part.getUUID(), part.getId()) != -1) {
                 throw new IllegalArgumentException("multiple IPPs with same UUID");
             }
             if (!part.isCompletelyStatic()) {
                 allUUIDs.add(part.getUUID());
                 uuidOutputMap.put(part.getUUID(), part.getAllOutputCommodities());
-                uuidInputMap.put(part.getUUID(), part.getAllInputCommodities());
+                uuidInputMap.put(part.getUUID(), part.getAllOutputCommodities());
             }
         }
 
-        this.ocEnergySimulationCore.splitActivePassive(allUUIDs, activeUUIDs, passiveUUIDs);
+        Set<UUID> activeUUIDs = new HashSet<>();
+        Set<UUID> activeNeedsInputUUIDs = new HashSet<>();
+        Set<UUID> passiveUUIDs = new HashSet<>();
+        //splitting all parts into active and passive parts to enable two-step exchange
+        ocESC.splitActivePassive(allUUIDs, activeUUIDs, passiveUUIDs);
 
-        //split parts in 4 lists
-        // calc maxReferenceTime of parts
+        List<InterdependentProblemPart<?, ?>> allActivePPs = new ObjectArrayList<>();
+        List<InterdependentProblemPart<?, ?>> allPassivePPs = new ObjectArrayList<>();
+        List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPs = new ObjectArrayList<>();
+
+        //calculating all sub-collections and the maxReferenceTime used
         for (InterdependentProblemPart<?, ?> part : problemParts) {
             if (activeUUIDs.contains(part.getUUID())) {
+                allActivePPs.add(part);
                 if (part.isReactsToInputStates()) {
-                    activeNeedsInput.add(part);
-                } else {
-                    activeWorksAlone.add(part);
+                    activeNeedsInputUUIDs.add(part.getUUID());
+                    allActiveNeedsInputPPs.add(part);
                 }
             } else if (passiveUUIDs.contains(part.getUUID())) {
-                passive.add(part);
+                allPassivePPs.add(part);
             } else {
-                if (part.isCompletelyStatic())
-                    staticParts.add(part);
-                else
+                if (!part.isCompletelyStatic())
                     throw new IllegalArgumentException("part is neither active nor passive");
+                //we can ignore fully static parts for the calculation
+                activeUUIDs.remove(part.getUUID());
+                passiveUUIDs.remove(part.getUUID());
             }
 
-            if (this.maxReferenceTime == null) {
-                this.maxReferenceTime = part.getReferenceTime();
-            } else {
-                this.maxReferenceTime = Math.max(this.maxReferenceTime, part.getReferenceTime());
-            }
-        }
-
-        this.activeNeedsInput = activeNeedsInput.toArray(InterdependentProblemPart<?, ?>[]::new);
-        this.activeWorksAlone = activeWorksAlone.toArray(InterdependentProblemPart<?, ?>[]::new);
-        this.passive = passive.toArray(InterdependentProblemPart<?, ?>[]::new);
-        this.staticParts = staticParts.toArray(InterdependentProblemPart<?, ?>[]::new);
-
-        Set<UUID> allActive = new HashSet<>();
-
-        for (InterdependentProblemPart<?, ?> part : this.activeNeedsInput) {
-            allActive.add(part.getUUID());
-            this.activeNeedInputUUIDs.add(part.getUUID());
-        }
-        for (InterdependentProblemPart<?, ?> part : this.activeWorksAlone) {
-            allActive.add(part.getUUID());
-        }
-        for (InterdependentProblemPart<?, ?> part : this.passive) {
-            this.passiveUUIDs.add(part.getUUID());
-        }
-
-        this.ocEnergySimulationCore.initializeGrids(allActive, this.activeNeedInputUUIDs, passiveUUIDs,
-                this.uuidIntMap, uuidOutputMap, uuidInputMap);
-
-        this.maxOptimizationHorizon = this.maxReferenceTime;
-
-        // calc maxOptimizationHorizon
-        for (InterdependentProblemPart<?, ?> part : problemParts) {
+            this.maxReferenceTime = Math.max(this.maxReferenceTime, part.getReferenceTime());
             if (part instanceof ControllableIPP<?, ?>) {
                 this.maxOptimizationHorizon = Math.max(part.getOptimizationHorizon(), this.maxOptimizationHorizon);
             }
         }
 
+        //to keep backwards-cpmpatibility we need to reorder the parts slightly as a different order will lead to
+        // slight differences due to floating-point error TODO: remove with next backwards-compatibility breaking
+        // update and order by part-id (not uuid)
+        List<InterdependentProblemPart<?, ?>> allIPPsReordered = new ObjectArrayList<>(problemParts.size());
+        allIPPsReordered.addAll(allActiveNeedsInputPPs);
+        allIPPsReordered.addAll(allActivePPs.stream().filter(p -> !allActiveNeedsInputPPs.contains(p)).collect(Collectors.toList()));
+        allIPPsReordered.addAll(allPassivePPs);
+        allIPPsReordered.addAll(problemParts.stream().filter(p -> !allIPPsReordered.contains(p)).collect(Collectors.toList()));
+
+        ocESC.initializeGrids(activeUUIDs, activeNeedsInputUUIDs, passiveUUIDs,
+                uuidIntMap, uuidOutputMap, uuidInputMap);
+
+        UUIDCommodityMap baseActiveToPassiveMap = new UUIDCommodityMap(activeUUIDs, uuidIntMap, true);
+        UUIDCommodityMap basePassiveToActiveMap = new UUIDCommodityMap(passiveUUIDs, uuidIntMap, true);
+
+        this.baseDataContainer = new EnergyProblemDataContainer(allIPPsReordered, allActivePPs, allPassivePPs,
+                allActiveNeedsInputPPs, ocESC, baseActiveToPassiveMap, basePassiveToActiveMap);
+
         this.numberOfVariables_ = 1;
         this.numberOfObjectives_ = 1;
         this.numberOfConstraints_ = 0;
         this.problemName_ = "osh";
-
         this.solutionType_ = new BinarySolutionType(this);
 
         this.length_ = new int[this.numberOfVariables_];
         this.length_[0] =
                 ((BinaryEncodedVariableInformation) distributor.getVariableInformation(VariableEncoding.BINARY)).getBitCount();
-
     }
 
-    public void initMultithreading() {
-        this.multiThreading = true;
-        this.multiThreadedActiveNeedsInput = new ObjectArrayList<>();
-        this.multiThreadedActiveWorksAlone = new ObjectArrayList<>();
-        this.multiThreadedPassive = new ObjectArrayList<>();
-        this.multiThreadedStatic = new ObjectArrayList<>();
-        this.multiOCs = new ObjectArrayList<>();
+    /**
+     * Prepares this problem for use in a multi-threaded environment
+     */
+    public void initializeMultithreading() {
+        if (!this.multiThreadingInitialized) {
+            this.multiThreadingInitialized = true;
+            this.multiThreadedDataList = new ObjectArrayList<>();
 
-        this.multiThreadedMasterCopiesActiveNI = new InterdependentProblemPart<?, ?>[this.activeNeedsInput.length];
-        this.multiThreadedMasterCopiesActiveWA = new InterdependentProblemPart<?, ?>[this.activeWorksAlone.length];
-        this.multiThreadedMasterCopiesPassive = new InterdependentProblemPart<?, ?>[this.passive.length];
-        this.multiThreadedMasterCopiesStatic = new InterdependentProblemPart<?, ?>[this.staticParts.length];
+            //set logger to null so that deep copy does not try to copy it
+            IGlobalLogger temp = null;
+            for (InterdependentProblemPart<?, ?> part : this.baseDataContainer.getAllProblemParts()) {
+                temp = part.logger;
+                part.logger = null;
 
-        //set logger to null so that deep copy does not try to copy it
-        IGlobalLogger temp = null;
-        for (InterdependentProblemPart<?, ?> part : this.activeNeedsInput) {
-            temp = part.logger;
-            part.logger = null;
-            part.prepareForDeepCopy();
-        }
-        for (InterdependentProblemPart<?, ?> part : this.staticParts) {
-            temp = part.logger;
-            part.logger = null;
-            part.prepareForDeepCopy();
-        }
-        for (InterdependentProblemPart<?, ?> part : this.activeWorksAlone) {
-            temp = part.logger;
-            part.logger = null;
-            part.prepareForDeepCopy();
-            if (part instanceof NonControllableIPP<?, ?>) {
-                //initialize completely static IPP so we can save that time on every copy
-                part.initializeInterdependentCalculation(this.maxReferenceTime, this.STEP_SIZE, false, false);
+                part.initializeInterdependentCalculation(this.maxReferenceTime, this.stepSize, false, false);
+                part.prepareForDeepCopy();
             }
-        }
-        for (InterdependentProblemPart<?, ?> part : this.passive) {
-            temp = part.logger;
-            part.logger = null;
-            part.prepareForDeepCopy();
-            if (part instanceof NonControllableIPP<?, ?>) {
-                //initialize completely static IPP so we can save that time on every copy
-                part.initializeInterdependentCalculation(this.maxReferenceTime, this.STEP_SIZE, false, false);
+
+            this.masterDataContainer = this.baseDataContainer.getDeepCopy();
+
+            for (InterdependentProblemPart<?, ?> part : this.baseDataContainer.getAllProblemParts()) {
+                //restore logger to base data
+                part.logger = temp;
             }
-        }
-
-        //create one master copy per ProblemPart
-        for (int j = 0; j < this.activeNeedsInput.length; j++) {
-            InterdependentProblemPart<?, ?> part = this.activeNeedsInput[j];
-            this.multiThreadedMasterCopiesActiveNI[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-        }
-        for (int j = 0; j < this.activeWorksAlone.length; j++) {
-            InterdependentProblemPart<?, ?> part = this.activeWorksAlone[j];
-            this.multiThreadedMasterCopiesActiveWA[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-        }
-        for (int j = 0; j < this.passive.length; j++) {
-            InterdependentProblemPart<?, ?> part = this.passive[j];
-            this.multiThreadedMasterCopiesPassive[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-        }
-        for (int j = 0; j < this.staticParts.length; j++) {
-            InterdependentProblemPart<?, ?> part = this.staticParts[j];
-            this.multiThreadedMasterCopiesStatic[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-        }
-
-        //restore logger
-        for (InterdependentProblemPart<?, ?> part : this.activeNeedsInput) {
-            part.logger = temp;
-        }
-        for (InterdependentProblemPart<?, ?> part : this.activeWorksAlone) {
-            part.logger = temp;
-        }
-        for (InterdependentProblemPart<?, ?> part : this.passive) {
-            part.logger = temp;
-        }
-        for (InterdependentProblemPart<?, ?> part : this.staticParts) {
-            part.logger = temp;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private synchronized InterdependentProblemPart<?, ?>[][] requestIPPCopies() {
-        InterdependentProblemPart<?, ?>[][] ret = new InterdependentProblemPart<?, ?>[4][];
+    /**
+     * Requests a copy of all relevant data to be used for the evaluation of a solution.
+     *
+     * @return a container of all relevant data
+     */
+    private EnergyProblemDataContainer requestDataCopy() {
+        if (!this.multiThreadingInitialized) return this.baseDataContainer;
 
-        if (!this.multiThreadedActiveNeedsInput.isEmpty()) {
-            ret[0] = this.multiThreadedActiveNeedsInput.remove(0);
-            ret[1] = this.multiThreadedActiveWorksAlone.remove(0);
-            ret[2] = this.multiThreadedPassive.remove(0);
-            ret[3] = this.multiThreadedStatic.remove(0);
-        } else {
-            InterdependentProblemPart<?, ?>[] niList =
-                    new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesActiveNI.length];
-            InterdependentProblemPart<?, ?>[] waList = new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesActiveWA.length];
-            InterdependentProblemPart<?, ?>[] paList = new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesPassive.length];
-            InterdependentProblemPart<?, ?>[] stList = new InterdependentProblemPart<?, ?>[this.multiThreadedMasterCopiesStatic.length];
-
-            for (int j = 0; j < this.multiThreadedMasterCopiesActiveNI.length; j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesActiveNI[j];
-                niList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-            }
-            for (int j = 0; j < this.multiThreadedMasterCopiesActiveWA.length; j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesActiveWA[j];
-                waList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-            }
-            for (int j = 0; j < this.multiThreadedMasterCopiesPassive.length; j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesPassive[j];
-                paList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-            }
-            for (int j = 0; j < this.multiThreadedMasterCopiesStatic.length; j++) {
-                InterdependentProblemPart<?, ?> part = this.multiThreadedMasterCopiesStatic[j];
-                stList[j] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
-            }
-
-            ret[0] = niList;
-            ret[1] = waList;
-            ret[2] = paList;
-            ret[3] = stList;
-        }
-
-        return ret;
-    }
-
-    private synchronized OCEnergySimulationCore requestOCESC() {
-        if (!this.multiOCs.isEmpty()) {
-            return this.multiOCs.remove(0);
-        } else {
-            return (OCEnergySimulationCore) DeepCopy.copy(this.ocEnergySimulationCore);
+        this.multiThreadedLock.lock();
+        try {
+            if (!this.multiThreadedDataList.isEmpty()) return this.multiThreadedDataList.remove(0);
+            else return this.masterDataContainer.getDeepCopy();
+        } finally {
+            this.multiThreadedLock.unlock();
         }
     }
 
-    private synchronized void freeIPPCopies(InterdependentProblemPart<?, ?>[] needsI,
-                                            InterdependentProblemPart<?, ?>[] worksA,
-                                            InterdependentProblemPart<?, ?>[] passive,
-                                            InterdependentProblemPart<?, ?>[] staticParts) {
-        this.multiThreadedActiveNeedsInput.add(needsI);
-        this.multiThreadedActiveWorksAlone.add(worksA);
-        this.multiThreadedPassive.add(passive);
-        this.multiThreadedStatic.add(staticParts);
+    /**
+     * Frees the given copy of all relevant data to be used by another evaluation.
+     *
+     * @param dataContainer a container of all relevant data
+     */
+    private void freeDataCopy(EnergyProblemDataContainer dataContainer) {
+        if (this.multiThreadingInitialized) {
+            this.multiThreadedLock.lock();
+            try {
+                this.multiThreadedDataList.add(dataContainer);
+            } finally {
+                this.multiThreadedLock.unlock();
+            }
+        }
     }
 
-    private synchronized void freeOCESC(OCEnergySimulationCore ocesc) {
-        this.multiOCs.add(ocesc);
-    }
-
+    /**
+     * Returns all grids to a state before they were adjusted for this specific problem.
+     */
     public void finalizeGrids() {
-        this.ocEnergySimulationCore.finalizeGrids();
+        this.baseDataContainer.getOcESC().finalizeGrids();
+        this.multiThreadingInitialized = false;
     }
 
+    /**
+     * Resets the state of the multithreaded initialisation and evaluates the given solution with additional logging.
+     *
+     * @param solution the solution to be evaluated
+     * @param log flag if additional logging should be done
+     */
     public void evaluateFinalTime(Solution solution, boolean log) {
-        this.multiThreading = false;
-        this.keepPrediction = true;
-        this.evaluate(solution, log);
-        this.keepPrediction = false;
+        this.multiThreadingInitialized = false;
+        this.evaluate(solution, log, true, new AncillaryCommodityLoadProfile());
+        this.finalizeGrids();
+    }
+
+    /**
+     * Resets the state of the multithreaded initialisation and evaluates the given solution with additional logging
+     * and stores the resulting calculates loads in the given load profile.
+     *
+     * @param solution the solution to be evaluated
+     * @param log flag if additional logging should be done
+     * @param ancillaryMeter the load profile in which the resulting calculated load will be entered
+     */
+    public void evaluateFinalTime(Solution solution, boolean log, AncillaryCommodityLoadProfile ancillaryMeter) {
+        this.multiThreadingInitialized = false;
+        this.evaluate(solution, log, true, ancillaryMeter);
         this.finalizeGrids();
     }
 
     @Override
     public void evaluate(Solution solution) {
-        this.evaluate(solution, false);
+        this.evaluate(solution, false, true, new AncillaryCommodityLoadProfile());
     }
 
+    /**
+     * Evaluates the given solution with additonal logging depending on the given flags.
+     *
+     * @param solution the solution to be evaluated
+     * @param log flag if additional logging should be done
+     * @param keepPrediction flag if problem-parts should log their prediction about the future
+     * @param ancillaryMeter the load profile in which the resulting calculated load will be entered
+     */
+    private void evaluate(Solution solution, boolean log, boolean keepPrediction, AncillaryCommodityLoadProfile ancillaryMeter) {
 
-    private void evaluate(Solution solution, boolean log) {
+        EnergyProblemDataContainer dataContainer = this.requestDataCopy();
 
-        InterdependentProblemPart<?, ?>[] activeNeedsInput;
-        InterdependentProblemPart<?, ?>[] activeWorksAlone;
-        InterdependentProblemPart<?, ?>[] passive;
-        InterdependentProblemPart<?, ?>[] staticParts;
-        InterdependentProblemPart<?, ?>[] allIPPs;
-        OCEnergySimulationCore ocEnergySimulationCore;
+        List<InterdependentProblemPart<?, ?>> allIPPs = dataContainer.getAllProblemParts();
+        List<InterdependentProblemPart<?, ?>> allActive = dataContainer.getAllActivePPs();
+        List<InterdependentProblemPart<?, ?>> allPassive = dataContainer.getAllPassivePPs();
+        List<InterdependentProblemPart<?, ?>> allActiveNeedsInput = dataContainer.getAllActiveNeedsInputPPs();
+        OCEnergySimulationCore ocESC = dataContainer.getOcESC();
+        UUIDCommodityMap activeToPassiveMap = dataContainer.getActiveToPassiveMap();
+        UUIDCommodityMap passiveToActiveMap = dataContainer.getPassiveToActiveMap();
 
-        if (this.multiThreading) {
-            InterdependentProblemPart<?, ?>[][] copies = this.requestIPPCopies();
-            activeNeedsInput = copies[0];
-            activeWorksAlone = copies[1];
-            passive = copies[2];
-            staticParts = copies[3];
-            ocEnergySimulationCore = this.requestOCESC();
-        } else {
-            activeNeedsInput = this.activeNeedsInput;
-            activeWorksAlone = this.activeWorksAlone;
-            passive = this.passive;
-            staticParts = this.staticParts;
-            ocEnergySimulationCore = this.ocEnergySimulationCore;
-        }
-        allIPPs = new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length + passive.length + staticParts.length];
-        int index = 0;
-        for (InterdependentProblemPart<?, ?> part : activeNeedsInput) {
-            allIPPs[index++] = part;
-        }
-        for (InterdependentProblemPart<?, ?> part : activeWorksAlone) {
-            allIPPs[index++] = part;
-        }
-        for (InterdependentProblemPart<?, ?> part : passive) {
-            allIPPs[index++] = part;
-        }
-        for (InterdependentProblemPart<?, ?> part : staticParts) {
-            allIPPs[index++] = part;
-        }
+        //clear past information that may be still contained in the maps
+        activeToPassiveMap.clearInnerStates();
+        passiveToActiveMap.clearInnerStates();
 
+        //dummy sets as the method used outside of the optimization requires this
+        Set<UUID> passiveNodes = Collections.emptySet();
+        Set<UUID> activeNeedsInputNodes = Collections.emptySet();
+
+        //distribute the solution to be evaluated
         this.distributor.distributeSolution(solution, allIPPs);
 
-
-        try {
-            double fitness;
-
-            // calculate interdependent parts
-
-            // initialize
-            for (InterdependentProblemPart<?, ?> part : allIPPs) {
-                part.initializeInterdependentCalculation(
-                        this.maxReferenceTime,
-                        this.STEP_SIZE,
-                        false,
-                        this.keepPrediction
-                );
-            }
-
-            // go through step by step
-            AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
-            ancillaryMeter.initSequential();
-
-            InterdependentProblemPart<?, ?>[] allActiveArray =
-                    new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length];
-            index = 0;
-            for (InterdependentProblemPart<?, ?> part : activeNeedsInput) allActiveArray[index++] = part;
-            for (InterdependentProblemPart<?, ?> part : activeWorksAlone) allActiveArray[index++] = part;
-
-
-            // go through in steps of STEP_SIZE (in ticks)
-            //init the maps for the commodity states
-            UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActiveArray, this.uuidIntMap, true);
-
-            UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passive, this.uuidIntMap, true);
-
-            long t;
-
-            //let all passive states calculate their first state
-            for (InterdependentProblemPart<?, ?> part : passive) {
-                part.calculateNextStep();
-                passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
-            }
-
-            //dummy AncillaryMeterState, we don't know the state of the ancillaryMeter at t=t_start, thus set all to zero
-            AncillaryMeterState meterState = new AncillaryMeterState();
-
-            //send the first passive state to active nodes
-            ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs, passiveToActiveMap);
-
-            // iterate
-            for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
-
-                //let all active states calculate their next step
-                for (InterdependentProblemPart<?, ?> part : allActiveArray) {
-                    part.calculateNextStep();
-                    activeToPassiveMap.put(part.getId(), part.getCommodityOutputStates());
-                }
-
-                //send active state to passive nodes, save meter state
-                ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passive, this.passiveUUIDs, meterState);
-
-                //send loads to the ancillary meter profile
-                ancillaryMeter.setLoadSequential(meterState, t);
-
-                //let all passive states calculate their next step
-                for (InterdependentProblemPart<?, ?> part : passive) {
-                    part.calculateNextStep();
-                    passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
-                }
-
-                //send new passive states to active nodes
-                ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs,
-                        passiveToActiveMap);
-
-            }
-
-            ancillaryMeter.endSequential();
-            ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
-
-
-            // calculate variable fitness depending on price signals...
-            fitness = this.fitnessFunction.getFitnessValue(
-                    this.ignoreLoadProfileBefore,
-                    this.ignoreLoadProfileAfter,
-                    ancillaryMeter,
-                    this.priceSignals,
-                    this.powerLimitSignals
+        //reset all ipps to their initial state
+        for (InterdependentProblemPart<?, ?> part : allIPPs) {
+            part.initializeInterdependentCalculation(
+                    this.maxReferenceTime,
+                    this.stepSize,
+                    log,
+                    keepPrediction
             );
-
-            // add lukewarm cervisia (i.e. additional fixed costs...)
-            for (InterdependentProblemPart<?, ?> problempart : allIPPs) {
-                double add = problempart.getFinalInterdependentSchedule().getLukewarmCervisia();
-                fitness += add;
-
-                if (log && !((Binary) solution.getDecisionVariables()[0]).bits_.get(0) && add != 0) {
-                    OSH_gGAMultiThread.logCervisia(problempart.getDeviceType(), add);
-                }
-            }
-
-            solution.setObjective(0, fitness); //small value is good value
-            solution.setFitness(fitness);
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
-        if (this.multiThreading) {
-            this.freeIPPCopies(activeNeedsInput, activeWorksAlone, passive, staticParts);
-            this.freeOCESC(ocEnergySimulationCore);
-        }
-    }
 
-    public void evaluateWithDebuggingInformation(Solution solution,
-                                                 AncillaryCommodityLoadProfile ancillaryMeter,
-                                                 TreeMap<Long, Double> predictedTankTemp,
-                                                 TreeMap<Long, Double> predictedHotWaterDemand,
-                                                 TreeMap<Long, Double> predictedHotWaterSupply,
-                                                 List<Schedule> schedules,
-                                                 boolean keepPrediction,
-                                                 UUID hotWaterTankID) {
-
+        //initialize sequential entering of data
         ancillaryMeter.initSequential();
 
-        InterdependentProblemPart<?, ?>[] activeNeedsInput = this.activeNeedsInput;
-        InterdependentProblemPart<?, ?>[] activeWorksAlone = this.activeWorksAlone;
-        InterdependentProblemPart<?, ?>[] passive = this.passive;
-        InterdependentProblemPart<?, ?>[] staticParts = this.staticParts;
-
-        InterdependentProblemPart<?, ?>[] allIPPs =
-                new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length + passive.length + staticParts.length];
-        int index = 0;
-        for (InterdependentProblemPart<?, ?> part : activeNeedsInput) {
-            allIPPs[index++] = part;
-        }
-        for (InterdependentProblemPart<?, ?> part : activeWorksAlone) {
-            allIPPs[index++] = part;
-        }
-        for (InterdependentProblemPart<?, ?> part : passive) {
-            allIPPs[index++] = part;
-        }
-        for (InterdependentProblemPart<?, ?> part : staticParts) {
-            allIPPs[index++] = part;
+        //let all passive states calculate their first state
+        for (InterdependentProblemPart<?, ?> part : allPassive) {
+            part.calculateNextStep();
+            passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
         }
 
-        try {
+        //dummy AncillaryMeterState, we don't know the state of the ancillaryMeter at the start, thus set all to zero
+        AncillaryMeterState meterState = new AncillaryMeterState();
 
-            this.distributor.distributeSolution(solution, allIPPs);
+        //send the first passive state to active nodes
+        ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, activeNeedsInputNodes, passiveToActiveMap);
 
-            // calculate interdependent parts
+        // iterate
+        for (long t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.stepSize; t += this.stepSize) {
 
-            // initialize
-            for (InterdependentProblemPart<?, ?> part : allIPPs) {
-                part.initializeInterdependentCalculation(
-                        this.maxReferenceTime,
-                        this.STEP_SIZE,
-                        true,
-                        keepPrediction
-                );
+            //let all active states calculate their next step
+            for (InterdependentProblemPart<?, ?> part : allActive) {
+                part.calculateNextStep();
+                activeToPassiveMap.put(part.getId(), part.getCommodityOutputStates());
             }
 
-            InterdependentProblemPart<?, ?>[] allActiveArray =
-                    new InterdependentProblemPart<?, ?>[activeNeedsInput.length + activeWorksAlone.length];
-            index = 0;
-            for (InterdependentProblemPart<?, ?> part : activeNeedsInput) allActiveArray[index++] = part;
-            for (InterdependentProblemPart<?, ?> part : activeWorksAlone) allActiveArray[index++] = part;
+            //send active state to passive nodes, save meter state
+            ocESC.doActiveToPassiveExchange(activeToPassiveMap, allPassive, passiveNodes, meterState);
 
-            // go through in steps of STEP_SIZE (in ticks)
-            long t;
+            //send loads to the ancillary meter profile
+            ancillaryMeter.setLoadSequential(meterState, t);
 
-            //init the maps for the commodity states
-            UUIDCommodityMap activeToPassiveMap = new UUIDCommodityMap(allActiveArray, this.uuidIntMap);
-            UUIDCommodityMap passiveToActiveMap = new UUIDCommodityMap(passive, this.uuidIntMap);
-
-            //let all passive states calculate their first state
-            for (InterdependentProblemPart<?, ?> part : passive) {
+            //let all passive states calculate their next step
+            for (InterdependentProblemPart<?, ?> part : allPassive) {
                 part.calculateNextStep();
                 passiveToActiveMap.put(part.getId(), part.getCommodityOutputStates());
             }
 
-            for (IOCEnergySubject simSub : passive) {
-                LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
-                if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                    if (simSub.getUUID().equals(hotWaterTankID)) {
-                        predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
-                    }
-                } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                    if (simSub.getUUID().equals(hotWaterTankID)) {
-                        predictedTankTemp.put(this.maxReferenceTime, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
-                    }
-                }
-            }
+            //send new passive states to active nodes
+            ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, activeNeedsInputNodes, passiveToActiveMap);
 
-            //dummy AncillaryMeterState, we dont know the state of the ancillaryMeter at t=start, so set all to zero
-
-            AncillaryMeterState meterState = new AncillaryMeterState();
-
-            //send the first passive state to active nodes
-            this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs,
-                    passiveToActiveMap);
-
-            for (t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.STEP_SIZE; t += this.STEP_SIZE) {
-
-                activeToPassiveMap.clearInnerStates();
-
-                //let all active states calculate their next step
-                for (InterdependentProblemPart<?, ?> part : allActiveArray) {
-                    part.calculateNextStep();
-                    activeToPassiveMap.put(part.getUUID(), part.getCommodityOutputStates());
-                }
-
-                //generally setting demand to 0, will add to this if there is really a demand
-                predictedHotWaterDemand.put(t, 0.0);
-                predictedHotWaterSupply.put(t, 0.0);
-
-                for (IOCEnergySubject simSub : allActiveArray) {
-                    LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
-
-                    if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                        double demand = outputStates.getPower(Commodity.HEATINGHOTWATERPOWER);
-                        if (demand > 0.0) {
-                            Double current = predictedHotWaterDemand.get(t);
-                            predictedHotWaterDemand.put(t, current + demand);
-                        } else if (demand < 0.0) {
-                            Double current = predictedHotWaterSupply.get(t);
-                            predictedHotWaterSupply.put(t, current + demand);
-                        }
-                    } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                        double demand = outputStates.getPower(Commodity.DOMESTICHOTWATERPOWER);
-                        if (demand > 0.0) {
-                            Double current = predictedHotWaterDemand.get(t);
-                            predictedHotWaterDemand.put(t, current + demand);
-                        } else if (demand < 0.0) {
-                            Double current = predictedHotWaterSupply.get(t);
-                            predictedHotWaterSupply.put(t, current + demand);
-                        }
-                    }
-                }
-
-                //send active state to passive nodes, save meterstate
-                this.ocEnergySimulationCore.doActiveToPassiveExchange(activeToPassiveMap, passive, this.passiveUUIDs,
-                        meterState);
-
-                ancillaryMeter.setLoadSequential(meterState, t);
-
-                passiveToActiveMap.clearInnerStates();
-                //let all passive states calculate their next step
-                for (InterdependentProblemPart<?, ?> part : passive) {
-                    part.calculateNextStep();
-                    passiveToActiveMap.put(part.getUUID(), part.getCommodityOutputStates());
-                }
-
-                for (IOCEnergySubject simSub : passive) {
-
-                    LimitedCommodityStateMap outputStates = simSub.getCommodityOutputStates();
-                    if (outputStates != null && outputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-                        if (simSub.getUUID().equals(hotWaterTankID)) {
-                            predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER));
-                        }
-                    } else if (outputStates != null && outputStates.containsCommodity(Commodity.DOMESTICHOTWATERPOWER)) {
-                        if (simSub.getUUID().equals(hotWaterTankID)) {
-                            predictedTankTemp.put(t + this.STEP_SIZE, outputStates.getTemperature(Commodity.DOMESTICHOTWATERPOWER));
-                        }
-                    }
-                }
-
-                //send new passive states to active nodes
-                this.ocEnergySimulationCore.doPassiveToActiveExchange(meterState, activeNeedsInput, this.activeNeedInputUUIDs,
-                        passiveToActiveMap);
-            }
-            ancillaryMeter.endSequential();
-            ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
-
-            //add final schedules
-            for (InterdependentProblemPart<?, ?> part : allIPPs) {
-                schedules.add(part.getFinalInterdependentSchedule());
-            }
-
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
-    }
 
+        //mark that no more data will be added and the profile is finalized
+        ancillaryMeter.endSequential();
+        ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
+
+
+        // calculate variable fitness depending on price signals...
+        double fitness = this.fitnessFunction.getFitnessValue(
+                this.ignoreLoadProfileBefore,
+                this.ignoreLoadProfileAfter,
+                ancillaryMeter,
+                this.priceSignals,
+                this.powerLimitSignals
+        );
+
+        // add lukewarm cervisia (i.e. additional fixed costs...)
+        for (InterdependentProblemPart<?, ?> problempart : allIPPs) {
+            double add = problempart.getFinalInterdependentSchedule().getLukewarmCervisia();
+            fitness += add;
+
+            if (log && !((Binary) solution.getDecisionVariables()[0]).bits_.get(0) && add != 0) {
+                OSH_gGAMultiThread.logCervisia(problempart.getDeviceType(), add);
+            }
+        }
+
+        solution.setObjective(0, fitness);
+        solution.setFitness(fitness);
+
+        //free the used data for another evaluation
+        this.freeDataCopy(dataContainer);
+    }
 }

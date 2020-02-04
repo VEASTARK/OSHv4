@@ -4,12 +4,12 @@ import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
+import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.thermal.SimpleHotWaterTank;
-import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 
 import java.time.ZonedDateTime;
 import java.util.EnumSet;
@@ -21,7 +21,7 @@ import java.util.UUID;
  * @author Florian Allerding, Ingo Mauser, Till Schuberth
  */
 public class HotWaterTankNonControllableIPP
-        extends NonControllableIPP<ISolution, HotWaterTankPrediction> {
+        extends NonControllableIPP<ISolution, TemperaturePrediction> {
 
     private static final long serialVersionUID = -7474764554202830275L;
     private final double initialTemperature;
@@ -154,8 +154,8 @@ public class HotWaterTankNonControllableIPP
     }
 
     @Override
-    public HotWaterTankPrediction transformToFinalInterdependentPrediction() {
-        return new HotWaterTankPrediction(this.temperatureStates);
+    public TemperaturePrediction transformToFinalInterdependentPrediction() {
+        return new TemperaturePrediction(this.temperatureStates);
     }
 
 

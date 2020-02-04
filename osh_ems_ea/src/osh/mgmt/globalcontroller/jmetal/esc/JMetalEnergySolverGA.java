@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.EnumMap;
+import java.util.List;
 
 /**
  * New JMetalEnergySolverGA
@@ -70,7 +71,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
 
     @Override
     public SolutionWithFitness getSolutionAndFitness(
-            InterdependentProblemPart<?, ?>[] problemParts,
+            List<InterdependentProblemPart<?, ?>> problemParts,
             OCEnergySimulationCore ocESC,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
@@ -115,7 +116,6 @@ public class JMetalEnergySolverGA extends JMetalSolver {
                 ignoreLoadProfileBefore,
                 ignoreLoadProfileAfter,
                 this.randomGenerator,
-                this.logger,
                 fitnessFunction,
                 this.STEP_SIZE);
 
@@ -126,7 +126,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         //IMA:
         {
             algorithm = new OSH_gGAMultiThread(problem, true, this.timestamp, pw);
-            problem.initMultithreading();
+            problem.initializeMultithreading();
         }
 
 //        {
