@@ -158,26 +158,29 @@ public class HotWaterTankNonControllableIPP
         return new TemperaturePrediction(this.temperatureStates);
     }
 
-
     @Override
-    public Schedule getFinalInterdependentSchedule() {
+    public void finalizeInterdependentCervisia() {
+        super.finalizeInterdependentCervisia();
+
         //punish for losing power (having a lower temperature then at the start)
-        double cervisia;
         double tempDifference = this.firstTemperature - this.waterTank.getCurrentWaterTemperature();
 
-        cervisia =
+        double cervisia =
                 -this.waterTank.calculateEnergyDrawOff(
                         this.firstTemperature,
                         this.waterTank.getCurrentWaterTemperature())
                         * this.punishmentFactorPerWsPowerLost;
 
-        //if tank has higher temperature than at the beginning only give half of the cervizia
+        //if tank has higher temperature than at the beginning only give half of the cervisia
         if (tempDifference < 0) {
             cervisia /= 2.0;
         }
 
         this.addInterdependentCervisia(cervisia);
+    }
 
+    @Override
+    public Schedule getFinalInterdependentSchedule() {
         return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
     }
 

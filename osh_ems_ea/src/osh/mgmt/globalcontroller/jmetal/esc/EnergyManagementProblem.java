@@ -26,7 +26,7 @@ import osh.esc.UUIDCommodityMap;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -54,8 +54,8 @@ public class EnergyManagementProblem extends Problem {
     //multithreading
     private boolean multiThreadingInitialized;
     private EnergyProblemDataContainer masterDataContainer;
-    private List<EnergyProblemDataContainer> multiThreadedDataList;
-    private final ReentrantLock multiThreadedLock = new ReentrantLock();
+    private ConcurrentLinkedQueue<EnergyProblemDataContainer> multiThreadedQueue;
+
 
     /**
      * Genererates a new Problem with the given constituents.
@@ -181,7 +181,7 @@ public class EnergyManagementProblem extends Problem {
     public void initializeMultithreading() {
         if (!this.multiThreadingInitialized) {
             this.multiThreadingInitialized = true;
-            this.multiThreadedDataList = new ObjectArrayList<>();
+            this.multiThreadedQueue = new ConcurrentLinkedQueue<>();
 
             //set logger to null so that deep copy does not try to copy it
             IGlobalLogger temp = null;
@@ -210,13 +210,10 @@ public class EnergyManagementProblem extends Problem {
     private EnergyProblemDataContainer requestDataCopy() {
         if (!this.multiThreadingInitialized) return this.baseDataContainer;
 
-        this.multiThreadedLock.lock();
-        try {
-            if (!this.multiThreadedDataList.isEmpty()) return this.multiThreadedDataList.remove(0);
-            else return this.masterDataContainer.getDeepCopy();
-        } finally {
-            this.multiThreadedLock.unlock();
-        }
+        EnergyProblemDataContainer dataContainer = this.multiThreadedQueue.poll();
+
+        if (dataContainer != null) return dataContainer;
+        else return this.masterDataContainer.getDeepCopy();
     }
 
     /**
@@ -226,12 +223,7 @@ public class EnergyManagementProblem extends Problem {
      */
     private void freeDataCopy(EnergyProblemDataContainer dataContainer) {
         if (this.multiThreadingInitialized) {
-            this.multiThreadedLock.lock();
-            try {
-                this.multiThreadedDataList.add(dataContainer);
-            } finally {
-                this.multiThreadedLock.unlock();
-            }
+            this.multiThreadedQueue.add(dataContainer);
         }
     }
 
@@ -241,6 +233,7 @@ public class EnergyManagementProblem extends Problem {
     public void finalizeGrids() {
         this.baseDataContainer.getOcESC().finalizeGrids();
         this.multiThreadingInitialized = false;
+        this.multiThreadedQueue = null;
     }
 
     /**
@@ -250,9 +243,7 @@ public class EnergyManagementProblem extends Problem {
      * @param log flag if additional logging should be done
      */
     public void evaluateFinalTime(Solution solution, boolean log) {
-        this.multiThreadingInitialized = false;
-        this.evaluate(solution, log, true, new AncillaryCommodityLoadProfile());
-        this.finalizeGrids();
+        this.evaluateFinalTime(solution, log, new AncillaryCommodityLoadProfile());
     }
 
     /**
@@ -271,7 +262,7 @@ public class EnergyManagementProblem extends Problem {
 
     @Override
     public void evaluate(Solution solution) {
-        this.evaluate(solution, false, true, new AncillaryCommodityLoadProfile());
+        this.evaluate(solution, false, false, new AncillaryCommodityLoadProfile());
     }
 
     /**
@@ -372,7 +363,8 @@ public class EnergyManagementProblem extends Problem {
 
         // add lukewarm cervisia (i.e. additional fixed costs...)
         for (InterdependentProblemPart<?, ?> problempart : allIPPs) {
-            double add = problempart.getFinalInterdependentSchedule().getLukewarmCervisia();
+            problempart.finalizeInterdependentCervisia();
+            double add = problempart.getInterdependentCervisia();
             fitness += add;
 
             if (log && !((Binary) solution.getDecisionVariables()[0]).bits_.get(0) && add != 0) {

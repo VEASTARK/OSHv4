@@ -390,7 +390,6 @@ public class OSHGlobalControllerJMetal
             AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
 
             problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ancillaryMeter);
-            problem.finalizeGrids();
 
             distributor.distributeSolution(solution, problemParts);
 

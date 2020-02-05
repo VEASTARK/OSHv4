@@ -185,10 +185,6 @@ public class LimitedCommodityStateMap implements Serializable {
     }
 
     public void clear() {
-//		Arrays.fill(powers, 0);
-//		Arrays.fill(addElectrical, new double[1]);
-//		Arrays.fill(addThermal, new double[2]);
-//		Arrays.fill(keySet, false);
         ArrayUtils.fillArrayBoolean(this.keySet, false);
         this.modCount = 0;
     }

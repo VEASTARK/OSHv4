@@ -40,7 +40,7 @@ public abstract class PreCalculatedNonControllableIPP
      * @param deviceId the identifier of the devide that is represented by this problem-part
      * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
-     * @param referenceTime the starting-time this problem-part represents at the moment
+     * @param timeStamp the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
      * @param allOutputCommodities all possible commodities that can be emitted by this problem-part
      * @param compressionType the type of compression to use for this problem-part

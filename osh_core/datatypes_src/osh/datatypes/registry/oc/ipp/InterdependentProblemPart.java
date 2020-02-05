@@ -374,6 +374,8 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         this.loadProfile = loadProfile;
     }
 
+    public void finalizeInterdependentCervisia() {};
+
     /**
      * Returns the additional costs incurred by this problem-part over the optimization loop (e.g. start-stop costs).
      *

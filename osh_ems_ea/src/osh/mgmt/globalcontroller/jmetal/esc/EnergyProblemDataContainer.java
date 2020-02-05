@@ -123,6 +123,11 @@ public class EnergyProblemDataContainer {
         return this.passiveToActiveMap;
     }
 
+    /**
+     * Returns a deep-copy of this data-container.
+     *
+     * @return a deep-copy of this container
+     */
     public EnergyProblemDataContainer getDeepCopy() {
         List<InterdependentProblemPart<?, ?>> allPPsCopy =
                 new ObjectArrayList<>(this.allProblemParts.size());
@@ -134,7 +139,10 @@ public class EnergyProblemDataContainer {
                 new ObjectArrayList<>(this.allActiveNeedsInputPPs.size());
 
         for (InterdependentProblemPart<?, ?> part : this.allProblemParts) {
-            allPPsCopy.add((InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+            //we do not need to copy completely static ipps
+            if (!part.isCompletelyStatic()) {
+                allPPsCopy.add((InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+            }
         }
 
         for (InterdependentProblemPart<?, ?> part : allPPsCopy) {
