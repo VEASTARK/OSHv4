@@ -3,7 +3,7 @@ package osh.esc.grid.instances;
 import osh.datatypes.commodity.Commodity;
 import osh.esc.grid.EnergyRelation;
 import osh.esc.grid.EnergySourceSink;
-import osh.esc.grid.carrier.Thermal;
+import osh.esc.grid.carrier.ThermalConnection;
 
 import java.util.UUID;
 
@@ -57,72 +57,72 @@ public class ESHLThermalEnergyGrid extends GridInstance {
 
         // Combined Hot Water Storage <-> CHP
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     chp,
                     combinedHotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // CHP <-> Meter
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     chp,
                     meter,
-                    new Thermal(Commodity.NATURALGASPOWER),
-                    new Thermal(Commodity.NATURALGASPOWER));
+                    new ThermalConnection(Commodity.NATURALGASPOWER),
+                    new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
         }
 
         // Combined Hot Water Storage <-> Electric Heater
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     electricHeater,
                     combinedHotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Combined Hot Water Storage <-> Domestic Hot Water Usage
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     dhwu,
                     combinedHotWaterStorage,
-                    new Thermal(Commodity.DOMESTICHOTWATERPOWER),
-                    new Thermal(Commodity.DOMESTICHOTWATERPOWER));
+                    new ThermalConnection(Commodity.DOMESTICHOTWATERPOWER),
+                    new ThermalConnection(Commodity.DOMESTICHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Combined Hot Water Storage <-> Heating Hot Water Usage
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     spaceHeating,
                     combinedHotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Combined Hot Water Storage <-> Space Heating
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     spaceHeating,
                     combinedHotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
 
         // Chilled Water Storage <-> Space Cooling
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     spaceCooling,
                     chilledWaterStorage,
-                    new Thermal(Commodity.COLDWATERPOWER),
-                    new Thermal(Commodity.COLDWATERPOWER));
+                    new ThermalConnection(Commodity.COLDWATERPOWER),
+                    new ThermalConnection(Commodity.COLDWATERPOWER));
             this.relationList.add(relation);
         }
 

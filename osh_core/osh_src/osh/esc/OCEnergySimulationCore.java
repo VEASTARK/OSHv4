@@ -8,8 +8,8 @@ import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.eal.hal.exceptions.HALManagerException;
-import osh.esc.grid.EnergyGrid;
 import osh.esc.grid.EnergySimulationTypes;
+import osh.esc.grid.IEnergyGrid;
 
 import java.io.Serializable;
 import java.util.*;
@@ -28,8 +28,8 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
     private static final long serialVersionUID = 350474217178426943L;
     UUIDCommodityMap a2pInputStateMap;
     UUIDCommodityMap p2aInputStateMap;
-    private EnergyGrid[] allGrids;
-    private EnergyGrid[] thermalGrids;
+    private IEnergyGrid[] allGrids;
+    private IEnergyGrid[] thermalGrids;
 
     /**
      * CONSTRUCTOR
@@ -39,9 +39,9 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
             String meterUUID) throws HALManagerException {
         super(grids, meterUUID);
 
-        this.allGrids = new EnergyGrid[this.grids.size()];
+        this.allGrids = new IEnergyGrid[this.grids.size()];
         this.allGrids = this.grids.values().toArray(this.allGrids);
-        this.thermalGrids = new EnergyGrid[1];
+        this.thermalGrids = new IEnergyGrid[1];
         this.thermalGrids[0] = this.grids.get(EnergySimulationTypes.THERMAL);
     }
 
@@ -49,13 +49,13 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
      * CONSTRUCTOR
      */
     public OCEnergySimulationCore(
-            Map<EnergySimulationTypes, EnergyGrid> grids,
+            Map<EnergySimulationTypes, IEnergyGrid> grids,
             UUID meterUUID) {
         super(grids, meterUUID);
 
-        this.allGrids = new EnergyGrid[this.grids.size()];
+        this.allGrids = new IEnergyGrid[this.grids.size()];
         this.allGrids = this.grids.values().toArray(this.allGrids);
-        this.thermalGrids = new EnergyGrid[1];
+        this.thermalGrids = new IEnergyGrid[1];
         this.thermalGrids[0] = this.grids.get(EnergySimulationTypes.THERMAL);
     }
 
@@ -85,8 +85,9 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
         uuidInputMapWithMeter.put(this.meterUUID, EnumSet.allOf(Commodity.class));
 
 
-        for (Entry<EnergySimulationTypes, EnergyGrid> grid : this.grids.entrySet()) {
-            grid.getValue().initializeGrid(allActiveNodes, activeNeedsInputNodes, passiveNodes, uuidToIntMapWithMeter, uuidOutputMapWithMeter);
+        for (Entry<EnergySimulationTypes, IEnergyGrid> grid : this.grids.entrySet()) {
+            grid.getValue().initializeGrid(allActiveNodes, activeNeedsInputNodes, passiveNodes, uuidToIntMapWithMeter
+                    , uuidOutputMapWithMeter, uuidInputMapWithMeter);
         }
 
         ObjectOpenHashSet<UUID> passiveWithMeter = new ObjectOpenHashSet<>(passiveNodes);
@@ -98,7 +99,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
     }
 
     public void finalizeGrids() {
-        for (Entry<EnergySimulationTypes, EnergyGrid> grid : this.grids.entrySet()) {
+        for (Entry<EnergySimulationTypes, IEnergyGrid> grid : this.grids.entrySet()) {
             grid.getValue().finalizeGrid();
         }
     }
@@ -125,10 +126,10 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
         // input states
         UUIDCommodityMap totalInputStates = this.getA2PInputStateMap();
 
-        // ancillary commodities input states
+        //reset meter
         ancillaryMeterState.clear();
 
-        for (EnergyGrid grid : this.allGrids) {
+        for (IEnergyGrid grid : this.allGrids) {
             grid.doActiveToPassiveCalculation(
                     passiveUUIDs,
                     activeCommodityStates,
@@ -138,19 +139,13 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
 
         // inform subjects about states
         for (InterdependentProblemPart<?, ?> _simSubject : passiveParts) {
-
-            AncillaryMeterState clonedAncillaryMeterState = null;
             LimitedCommodityStateMap simSubjState = null;
 
             if (_simSubject.isReactsToInputStates()) {
                 simSubjState = totalInputStates.get(_simSubject.getId());
             }
-            // clone ancillaryMeter if needed
-            if (_simSubject.isNeedsAncillaryMeterState()) {
-                clonedAncillaryMeterState = ancillaryMeterState.clone();
-            }
 
-            _simSubject.setCommodityInputStates(simSubjState, clonedAncillaryMeterState);
+            _simSubject.setCommodityInputStates(simSubjState, ancillaryMeterState);
         }
     }
 
@@ -166,7 +161,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
         //dont do calculation for electrical grid atm, because only voltage is exchanged which has no influence
         //TODO: as soon as voltage etc. becomes important uncomment first row
 //		for (EnergyGrid grid : allGrids) {
-        for (EnergyGrid grid : this.thermalGrids) {
+        for (IEnergyGrid grid : this.thermalGrids) {
             grid.doPassiveToActiveCalculation(
                     activeNodes,
                     passiveStates,
@@ -177,18 +172,12 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
         // inform subjects about states
         for (InterdependentProblemPart<?, ?> _simSubject : activeParts) {
             LimitedCommodityStateMap simSubjState = null;
-            AncillaryMeterState clonedAncillaryMeterState = null;
 
             if (_simSubject.isReactsToInputStates()) {
                 simSubjState = totalInputStates.get(_simSubject.getId());
             }
 
-            // clone AncillaryMeter AncillaryCommodities if needed
-            if (_simSubject.isNeedsAncillaryMeterState()) {
-                clonedAncillaryMeterState = ancillaryMeterState.clone();
-            }
-
-            _simSubject.setCommodityInputStates(simSubjState, clonedAncillaryMeterState);
+            _simSubject.setCommodityInputStates(simSubjState, ancillaryMeterState);
         }
     }
 
@@ -199,7 +188,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
         Set<UUID> allActive = new HashSet<>();
         Set<UUID> allPassive = new HashSet<>();
 
-        for (EnergyGrid grid : this.grids.values()) {
+        for (IEnergyGrid grid : this.grids.values()) {
             allActive.addAll(grid.getActiveUUIDs());
             allPassive.addAll(grid.getPassiveUUIDs());
         }

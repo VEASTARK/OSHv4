@@ -7,14 +7,14 @@ import java.io.Serializable;
 /**
  * @author Ingo Mauser
  */
-public class Electrical extends RealConnectionType implements Serializable {
+public class ElectricalConnection extends RealConnectionType implements Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = -8016297442193124095L;
 
-    public Electrical(Commodity commodity) {
+    public ElectricalConnection(Commodity commodity) {
         super(commodity);
     }
 
@@ -22,7 +22,7 @@ public class Electrical extends RealConnectionType implements Serializable {
      * only for serialisation, do not use normally
      */
     @Deprecated
-    protected Electrical() {
+    protected ElectricalConnection() {
 
     }
 

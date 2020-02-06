@@ -5,8 +5,8 @@ import osh.datatypes.commodity.AncillaryMeterState;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.EnergySimulationCore;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.grid.EnergyGrid;
 import osh.esc.grid.EnergySimulationTypes;
+import osh.esc.grid.IEnergyGrid;
 
 import java.io.Serializable;
 import java.util.*;
@@ -39,7 +39,7 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
      * CONSTRUCTOR
      */
     public SimEnergySimulationCore(
-            Map<EnergySimulationTypes, EnergyGrid> grids,
+            Map<EnergySimulationTypes, IEnergyGrid> grids,
             UUID meterUUID) {
         super(grids, meterUUID);
     }
@@ -77,7 +77,7 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
         Map<UUID, LimitedCommodityStateMap> totalInputStates = new HashMap<>();
 //		EnumMap<AncillaryCommodity,AncillaryCommodityState> ancillaryMeterState = new EnumMap<>(AncillaryCommodity.class);
         AncillaryMeterState ancillaryMeterState = new AncillaryMeterState();
-        for (Entry<EnergySimulationTypes, EnergyGrid> grid : this.grids.entrySet()) {
+        for (Entry<EnergySimulationTypes, IEnergyGrid> grid : this.grids.entrySet()) {
             grid.getValue().doCalculation(simSubjCommodityStates, totalInputStates, ancillaryMeterState);
         }
 

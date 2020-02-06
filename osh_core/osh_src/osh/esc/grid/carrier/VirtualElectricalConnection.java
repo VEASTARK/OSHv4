@@ -5,9 +5,9 @@ import osh.datatypes.commodity.AncillaryCommodity;
 /**
  * @author Ingo Mauser
  */
-public class VirtualElectrical extends VirtualConnectionType {
+public class VirtualElectricalConnection extends VirtualConnectionType {
 
-    public VirtualElectrical(AncillaryCommodity commodity) {
+    public VirtualElectricalConnection(AncillaryCommodity commodity) {
         super(commodity);
     }
 

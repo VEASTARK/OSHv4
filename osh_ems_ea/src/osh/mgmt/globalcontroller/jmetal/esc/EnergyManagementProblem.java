@@ -108,7 +108,7 @@ public class EnergyManagementProblem extends Problem {
             if (!part.isCompletelyStatic()) {
                 allUUIDs.add(part.getUUID());
                 uuidOutputMap.put(part.getUUID(), part.getAllOutputCommodities());
-                uuidInputMap.put(part.getUUID(), part.getAllOutputCommodities());
+                uuidInputMap.put(part.getUUID(), part.getAllInputCommodities());
             }
         }
 

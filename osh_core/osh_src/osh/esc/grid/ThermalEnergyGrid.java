@@ -11,7 +11,7 @@ import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.UUIDCommodityMap;
-import osh.esc.grid.carrier.Thermal;
+import osh.esc.grid.carrier.ThermalConnection;
 import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
@@ -22,25 +22,26 @@ import java.util.*;
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class ThermalEnergyGrid implements EnergyGrid, Serializable {
+public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = 6032713739337800610L;
 
-    private final Set<EnergySourceSink> sourceSinkList = new HashSet<>();
-
-    private final Set<UUID> meterUUIDs = new ObjectOpenHashSet<>();
-
-    private final List<EnergyRelation<Thermal>> relationList = new ObjectArrayList<>();
+    //meter
+    private final UUID meterUUID;
+    private int meterId;
+    //energy-relations
+    private final List<EnergyRelation<ThermalConnection>> relationList = new ObjectArrayList<>();
     private final Set<UUID> activeUUIDs = new ObjectOpenHashSet<>();
     private final Set<UUID> passiveUUIDs = new ObjectOpenHashSet<>();
+    //initialized and improved (shortened) energy relations
     private InitializedEnergyRelation[] initializedImprovedActiveToPassiveArray;
     private InitializedEnergyRelation[] initializedImprovedPassiveToActiveArray;
     private boolean hasBeenInitialized;
-    private boolean isSingular;
-    private int singularMeter = -1;
+    //re-useable storage to prevent excessive memory operations
+    private double productionPower;
 
     public ThermalEnergyGrid(String layoutFilePath) throws JAXBException, FileNotFoundException {
 
@@ -56,17 +57,12 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
                 this.activeUUIDs.add(UUID.fromString(conn.getActiveEntityUUID()));
                 this.passiveUUIDs.add(UUID.fromString(conn.getPassiveEntityUUID()));
 
-                this.sourceSinkList.add(act);
-                this.sourceSinkList.add(pass);
-
                 this.relationList.add(new EnergyRelation<>(act, pass,
-                        new Thermal(Commodity.fromString(conn.getActiveToPassiveCommodity())),
-                        new Thermal(Commodity.fromString(conn.getPassiveToActiveCommodity()))));
+                        new ThermalConnection(Commodity.fromString(conn.getActiveToPassiveCommodity())),
+                        new ThermalConnection(Commodity.fromString(conn.getPassiveToActiveCommodity()))));
             }
-
-            for (String uuid : layout.getMeterUUIDs()) {
-                this.meterUUIDs.add(UUID.fromString(uuid));
-            }
+            //TODO: update grid-layout to only have one meter in next update that breaks backwards-compatibility
+            this.meterUUID = UUID.fromString(layout.getMeterUUIDs().get(0));
 
         } else
             throw new IllegalArgumentException("layoutFile not instance of GridLayout-class (should not be possible)");
@@ -81,20 +77,21 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
      */
     @Deprecated
     protected ThermalEnergyGrid() {
-        // NOTHING
+        this.meterUUID = null;
     }
 
     @Override
     public void initializeGrid(Set<UUID> allActiveNodes, Set<UUID> activeNeedsInputNodes,
                                Set<UUID> passiveNodes, Object2IntOpenHashMap<UUID> uuidToIntMap,
-                               Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap) {
+                               Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap,
+                               Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap) {
 
         List<InitializedEnergyRelation> initializedImprovedActiveToPassiveList = new ObjectArrayList<>();
         List<InitializedEnergyRelation> initializedImprovedPassiveToActiveList = new ObjectArrayList<>();
         Map<UUID, InitializedEnergyRelation> tempA2PHelpMap = new Object2ObjectOpenHashMap<>();
         Map<UUID, InitializedEnergyRelation> tempP2AHelpMap = new Object2ObjectOpenHashMap<>();
 
-        for (EnergyRelation<Thermal> rel : this.relationList) {
+        for (EnergyRelation<ThermalConnection> rel : this.relationList) {
 
             UUID activeId = rel.getActiveEntity().getDeviceUuid();
             UUID passiveId = rel.getPassiveEntity().getDeviceUuid();
@@ -102,28 +99,23 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             boolean activeTypeNI = activeNeedsInputNodes.contains(activeId);
             boolean activeType = allActiveNodes.contains(activeId);
             boolean passiveType = passiveNodes.contains(passiveId);
-            boolean isMeter = this.meterUUIDs.contains(passiveId);
 
             //if both exist and an exchange should be made add to the respective lists
-            if (activeType && (passiveType || isMeter) && uuidOutputMap.get(activeId).contains(rel.getActiveToPassive().getCommodity())) {
+            if (activeType && (passiveType || passiveId.equals(this.meterUUID))
+                    && uuidOutputMap.get(activeId).contains(rel.getActiveToPassive().getCommodity())
+                    && uuidInputMap.get(passiveId).contains(rel.getActiveToPassive().getCommodity())) {
 
-                InitializedEnergyRelation relNew = tempA2PHelpMap.get(activeId);
-
-                if (relNew == null) {
-                    relNew = new InitializedEnergyRelation(uuidToIntMap.getInt(activeId), new ObjectArrayList<>());
-                    tempA2PHelpMap.put(activeId, relNew);
-                }
+                InitializedEnergyRelation relNew = tempA2PHelpMap.computeIfAbsent(activeId,
+                        k -> new InitializedEnergyRelation(uuidToIntMap.getInt(activeId), new ObjectArrayList<>()));
 
                 relNew.addEnergyTarget(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(passiveId), rel.getActiveToPassive().getCommodity()));
             }
-            if (activeTypeNI && passiveType && uuidOutputMap.get(passiveId).contains(rel.getPassiveToActive().getCommodity())) {
+            if (activeTypeNI && passiveType
+                    && uuidOutputMap.get(activeId).contains(rel.getPassiveToActive().getCommodity())
+                    && uuidInputMap.get(passiveId).contains(rel.getPassiveToActive().getCommodity())) {
 
-                InitializedEnergyRelation relNew = tempP2AHelpMap.get(passiveId);
-
-                if (relNew == null) {
-                    relNew = new InitializedEnergyRelation(uuidToIntMap.getInt(passiveId), new ObjectArrayList<>());
-                    tempP2AHelpMap.put(passiveId, relNew);
-                }
+                InitializedEnergyRelation relNew = tempP2AHelpMap.computeIfAbsent(passiveId,
+                        k -> new InitializedEnergyRelation(uuidToIntMap.getInt(passiveId), new ObjectArrayList<>()));
 
                 relNew.addEnergyTarget(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(activeId), rel.getPassiveToActive().getCommodity()));
             }
@@ -141,20 +133,15 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
         this.initializedImprovedPassiveToActiveArray = new InitializedEnergyRelation[initializedImprovedPassiveToActiveList.size()];
         this.initializedImprovedPassiveToActiveArray = initializedImprovedPassiveToActiveList.toArray(this.initializedImprovedPassiveToActiveArray);
 
-        this.hasBeenInitialized = true;
+        this.meterId = uuidToIntMap.getInt(this.meterUUID);
 
-        if (this.meterUUIDs.size() == 1) {
-            this.isSingular = true;
-            this.singularMeter = uuidToIntMap.getInt(this.meterUUIDs.iterator().next());
-        }
+        this.hasBeenInitialized = true;
     }
 
     @Override
     public void finalizeGrid() {
         this.hasBeenInitialized = false;
-
-        this.isSingular = false;
-        this.singularMeter = -1;
+        this.meterId = -1;
     }
 
     @Override
@@ -163,192 +150,19 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             Map<UUID, LimitedCommodityStateMap> totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
 
-        for (EnergyRelation<Thermal> rel : this.relationList) {
-
-            UUID activeId = rel.getActiveEntity().getDeviceUuid();
-            UUID passiveId = rel.getPassiveEntity().getDeviceUuid();
-
-            if (localCommodityStates.containsKey(activeId)
-                    || localCommodityStates.containsKey(passiveId)) {
-
-                Commodity activeCommodity = rel.getActiveToPassive().getCommodity();
-                Commodity passiveCommodity = rel.getPassiveToActive().getCommodity();
-
-                LimitedCommodityStateMap activeLocalCommodities = localCommodityStates.get(activeId);
-                LimitedCommodityStateMap passiveLocalCommodities = localCommodityStates.get(passiveId);
-
-                boolean hasActive = activeLocalCommodities != null && activeLocalCommodities.containsCommodity(activeCommodity);
-                boolean hasPassive = passiveLocalCommodities != null && passiveLocalCommodities.containsCommodity(passiveCommodity);
-
-                if (!hasActive && !hasPassive) {
-                    continue;
-                }
-
-                // update active part...
-                if (hasPassive) {
-                    // Active Part has no input state power
-
-                    LimitedCommodityStateMap activeMap = totalInputStates.get(activeId);
-                    if (activeMap == null) {
-                        activeMap = new LimitedCommodityStateMap();
-                        totalInputStates.put(activeId, activeMap);
-                    }
-
-                    this.updateActivePart(activeMap, passiveLocalCommodities, passiveCommodity);
-                    //TODO mass flow
-
-
-                    // do not consider power: active part determines it's own power
-                }
-
-                // update passive part...
-                if (hasActive) {
-                    LimitedCommodityStateMap passiveMap = totalInputStates.get(passiveId);
-                    if (passiveMap == null) {
-                        passiveMap = new LimitedCommodityStateMap();
-                        totalInputStates.put(passiveId, passiveMap);
-                    }
-
-                    this.updatePassivePart(passiveMap, activeLocalCommodities, activeCommodity);
-                }
-            }
-        }
-        // calculate ancillary states
-        this.calculateMeter(totalInputStates, ancillaryMeterState);
-    }
-
-    private void calculateMeter(
-            UUIDCommodityMap totalInputStates,
-            AncillaryMeterState ancillaryMeterState) {
-        if (this.hasBeenInitialized && this.isSingular) {
-            this.calculateInitializedMeter(totalInputStates, ancillaryMeterState);
-        } else {
-            this.calculateMeterAll(totalInputStates, ancillaryMeterState);
-        }
-    }
-
-    private void calculateInitializedMeter(
-            UUIDCommodityMap totalInputStates,
-            AncillaryMeterState ancillaryMeterState) {
-        if (ancillaryMeterState != null) {
-            // ancillary THERMAL calculation
-            ancillaryMeterState.setPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL, totalInputStates.get(this.singularMeter).getPower(Commodity.NATURALGASPOWER));
-        }
-    }
-
-    private void calculateMeter(
-            Map<UUID, LimitedCommodityStateMap> totalInputStates,
-            AncillaryMeterState ancillaryMeterState) {
-        if (ancillaryMeterState != null) {
-            for (UUID meter : this.meterUUIDs) {
-                // ancillary THERMAL calculation
-                LimitedCommodityStateMap calculatedMeterState = totalInputStates.get(meter);
-
-                // Gas Power
-                {
-                    if (calculatedMeterState == null) {
-//						System.out.println("Probably no heating device in configuration!");
-                    } else {
-                        ancillaryMeterState.setPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL,
-                                calculatedMeterState.getPower(Commodity.NATURALGASPOWER));
-                    }
-                }
-            }
-        }
-    }
-
-    private void calculateMeterAll(
-            UUIDCommodityMap totalInputStates,
-            AncillaryMeterState ancillaryMeterState) {
-        if (ancillaryMeterState != null) {
-            for (UUID meter : this.meterUUIDs) {
-                // ancillary THERMAL calculation
-                LimitedCommodityStateMap calculatedMeterState = totalInputStates.get(meter);
-
-                // Gas Power
-                {
-                    if (calculatedMeterState == null) {
-//						System.out.println("Probably no heating device in configuration!");
-                    } else if (calculatedMeterState.containsCommodity(Commodity.NATURALGASPOWER)) {
-
-                        ancillaryMeterState.setPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL,
-                                calculatedMeterState.getPower(Commodity.NATURALGASPOWER));
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public Set<UUID> getMeterUUIDs() {
-        return this.meterUUIDs;
-    }
-
-    @Override
-    public Set<UUID> getActiveUUIDs() {
-        return this.activeUUIDs;
-    }
-
-    @Override
-    public Set<UUID> getPassiveUUIDs() {
-        return this.passiveUUIDs;
+        GridUtils.doCalculation(
+                localCommodityStates,
+                totalInputStates,
+                ancillaryMeterState,
+                this.relationList,
+                this::updateActivePart,
+                this::updatePassivePart,
+                this::calculateMeter);
     }
 
     @Override
     public void doActiveToPassiveCalculation(
             Set<UUID> passiveNodes,
-            UUIDCommodityMap activeStates,
-            UUIDCommodityMap totalInputStates,
-            AncillaryMeterState ancillaryMeterState) {
-
-        if (this.hasBeenInitialized) {
-            this.doInitializedActiveToPassiveGridCalculation(activeStates, totalInputStates, ancillaryMeterState);
-        } else {
-
-            for (EnergyRelation<Thermal> rel : this.relationList) {
-
-                UUID activeId = rel.getActiveEntity().getDeviceUuid();
-                UUID passiveId = rel.getPassiveEntity().getDeviceUuid();
-
-                int activeType = 2;
-                int passiveType = 2;
-
-                if (!this.hasBeenInitialized) {
-                    activeType = activeStates.containsKey(activeId) ? 2 : 0;
-                    passiveType = passiveNodes.contains(passiveId) ? 2 : 0;
-
-                    if (this.meterUUIDs.contains(passiveId))
-                        passiveType = 2;
-                    if (this.meterUUIDs.contains(activeId))
-                        activeType = 2;
-                }
-
-                //if sum of types > 2 both exists and an exchange should be made
-                if (activeType + passiveType > 2) {
-
-                    Commodity activeCommodity = rel.getActiveToPassive().getCommodity();
-
-                    LimitedCommodityStateMap activeLocalCommodities = activeStates.get(activeId);
-
-                    if (activeLocalCommodities == null || !activeLocalCommodities.containsCommodity(activeCommodity)) {
-                        continue;
-                    }
-
-                    // update passive part...
-                    LimitedCommodityStateMap passiveMap = totalInputStates.get(passiveId);
-                    if (passiveMap == null) {
-                        passiveMap = new LimitedCommodityStateMap();
-                        totalInputStates.put(passiveId, passiveMap);
-                    }
-                    this.updatePassivePart(passiveMap, activeLocalCommodities, activeCommodity);
-                }
-            }
-
-            this.calculateMeter(totalInputStates, ancillaryMeterState);
-        }
-    }
-
-    private void doInitializedActiveToPassiveGridCalculation(
             UUIDCommodityMap activeStates,
             UUIDCommodityMap totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
@@ -369,7 +183,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
                 }
             }
         }
-        this.calculateInitializedMeter(totalInputStates, ancillaryMeterState);
+        this.populateMeter(activeStates, totalInputStates, ancillaryMeterState);
     }
 
     @Override
@@ -378,56 +192,7 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             UUIDCommodityMap passiveStates,
             UUIDCommodityMap totalInputStates) {
 
-        if (this.hasBeenInitialized) {
-            this.doInitializedPassiveToActiveGridCalculation(passiveStates, totalInputStates);
-        } else {
-
-            for (EnergyRelation<Thermal> rel : this.relationList) {
-
-                UUID activeId = rel.getActiveEntity().getDeviceUuid();
-                UUID passiveId = rel.getPassiveEntity().getDeviceUuid();
-
-                int activeType = activeNodes.contains(activeId) ? 2 : 0;
-                int passiveType = passiveStates.containsKey(passiveId) ? 2 : 0;
-
-                if (this.meterUUIDs.contains(passiveId))
-                    passiveType = 2;
-                if (this.meterUUIDs.contains(activeId))
-                    activeType = 2;
-
-                //if sum of types > 2 both exists and an exchange should be made
-                if (activeType + passiveType > 2) {
-
-                    Commodity passiveCommodity = rel.getPassiveToActive().getCommodity();
-
-                    LimitedCommodityStateMap passiveLocalCommodities = passiveStates.get(passiveId);
-
-                    if (passiveLocalCommodities == null
-                            || !passiveLocalCommodities.containsCommodity(passiveCommodity)) {
-                        continue;
-                    }
-
-                    // update active part...
-
-                    // Active Part has no input state power
-                    LimitedCommodityStateMap activeMap = totalInputStates.get(activeId);
-                    if (activeMap == null) {
-                        activeMap = new LimitedCommodityStateMap();
-                        totalInputStates.put(activeId, activeMap);
-                    }
-                    this.updateActivePart(activeMap, passiveLocalCommodities, passiveCommodity);
-                    //TODO mass flow
-                    // do not consider power: active part determines it's own power
-                }
-            }
-        }
-    }
-
-    private void doInitializedPassiveToActiveGridCalculation(
-            UUIDCommodityMap passiveStates,
-            UUIDCommodityMap totalInputStates) {
-
-        for (InitializedEnergyRelation rel : this.initializedImprovedPassiveToActiveArray) {
+        for (InitializedEnergyRelation rel : initializedImprovedPassiveToActiveArray) {
 
             LimitedCommodityStateMap passiveMap = passiveStates.get(rel.getSourceId());
 
@@ -459,5 +224,51 @@ public class ThermalEnergyGrid implements EnergyGrid, Serializable {
             Commodity passiveCommodity) {
 
         activeMap.setTemperature(passiveCommodity, passiveMap.getTemperatureWithoutCheck(passiveCommodity));
+    }
+
+    private void calculateMeter(
+            Map<UUID, LimitedCommodityStateMap> localCommodityStates,
+            Map<UUID, LimitedCommodityStateMap> totalInputStates,
+            AncillaryMeterState ancillaryMeterState) {
+        if (ancillaryMeterState != null) {
+
+            LimitedCommodityStateMap calculatedMeterState = totalInputStates.get(this.meterUUID);
+
+            if (calculatedMeterState != null) {
+                ancillaryMeterState.setPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL,
+                        calculatedMeterState.getPower(Commodity.NATURALGASPOWER));
+            }
+        }
+    }
+
+    private void populateMeter(UUIDCommodityMap localCommodityStates, UUIDCommodityMap totalInputStates, AncillaryMeterState meterState) {
+
+        this.calcPowers(localCommodityStates, totalInputStates.get(this.meterId));
+        this.populateMainPowers(meterState, this.productionPower);
+    }
+
+    private void calcPowers(UUIDCommodityMap localCommodityStates, LimitedCommodityStateMap superMeterMap) {
+        this.productionPower = superMeterMap.getPower(Commodity.NATURALGASPOWER);
+    }
+
+    private void populateMainPowers(AncillaryMeterState meterState, double meterPower) {
+        if (meterPower > 0) {
+            meterState.setPower(AncillaryCommodity.NATURALGASPOWEREXTERNAL, meterPower);
+        }
+    }
+
+    @Override
+    public UUID getMeterUUID() {
+        return this.meterUUID;
+    }
+
+    @Override
+    public Set<UUID> getActiveUUIDs() {
+        return this.activeUUIDs;
+    }
+
+    @Override
+    public Set<UUID> getPassiveUUIDs() {
+        return this.passiveUUIDs;
     }
 }

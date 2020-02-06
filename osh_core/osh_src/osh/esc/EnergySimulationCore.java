@@ -3,8 +3,8 @@ package osh.esc;
 import osh.configuration.system.GridConfig;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.grid.ElectricalEnergyGrid;
-import osh.esc.grid.EnergyGrid;
 import osh.esc.grid.EnergySimulationTypes;
+import osh.esc.grid.IEnergyGrid;
 import osh.esc.grid.ThermalEnergyGrid;
 
 import javax.xml.bind.JAXBException;
@@ -25,7 +25,7 @@ public abstract class EnergySimulationCore implements Serializable {
      */
     private static final long serialVersionUID = 2812564530571697308L;
 
-    protected Map<EnergySimulationTypes, EnergyGrid> grids = new EnumMap<>(EnergySimulationTypes.class);
+    protected Map<EnergySimulationTypes, IEnergyGrid> grids = new EnumMap<>(EnergySimulationTypes.class);
     protected UUID meterUUID;
 
 
@@ -51,7 +51,7 @@ public abstract class EnergySimulationCore implements Serializable {
     /**
      * CONSTRUCTOR with grids and UUID
      */
-    public EnergySimulationCore(Map<EnergySimulationTypes, EnergyGrid> grids, UUID meterUUID) {
+    public EnergySimulationCore(Map<EnergySimulationTypes, IEnergyGrid> grids, UUID meterUUID) {
         super();
         this.grids = grids;
         this.meterUUID = meterUUID;
@@ -66,7 +66,7 @@ public abstract class EnergySimulationCore implements Serializable {
     }
 
 
-    public Map<EnergySimulationTypes, EnergyGrid> getGrids() {
+    public Map<EnergySimulationTypes, IEnergyGrid> getGrids() {
         return this.grids;
     }
 
