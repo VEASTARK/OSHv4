@@ -71,7 +71,7 @@ public class EnergyManagementProblem extends Problem {
      * @param stepSize the size of the time-steps to be used for the evaluation of solutions
      */
     public EnergyManagementProblem(
-            List<InterdependentProblemPart<?, ?>> problemParts,
+            InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             SolutionDistributor distributor,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
@@ -97,8 +97,10 @@ public class EnergyManagementProblem extends Problem {
 
         Set<UUID> allUUIDs = new HashSet<>();
 
-        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
-        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap = new Object2ObjectOpenHashMap<>(problemParts.size());
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidOutputMap =
+                new Object2ObjectOpenHashMap<>(problemParts.length);
+        Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap =
+                new Object2ObjectOpenHashMap<>(problemParts.length);
 
         for (InterdependentProblemPart<?, ?> part : problemParts) {
             if (uuidIntMap.put(part.getUUID(), part.getId()) != -1) {
@@ -117,20 +119,22 @@ public class EnergyManagementProblem extends Problem {
         //splitting all parts into active and passive parts to enable two-step exchange
         ocESC.splitActivePassive(allUUIDs, activeUUIDs, passiveUUIDs);
 
-        List<InterdependentProblemPart<?, ?>> allActivePPs = new ArrayList<>();
-        List<InterdependentProblemPart<?, ?>> allPassivePPs = new ArrayList<>();
-        List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPs = new ArrayList<>();
+        InterdependentProblemPart<?, ?>[] allActivePPs = new InterdependentProblemPart[activeUUIDs.size()];
+        InterdependentProblemPart<?, ?>[] allPassivePPs = new InterdependentProblemPart[passiveUUIDs.size()];
+        List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPsList = new ArrayList<>();
+
+        int activeIndex = 0, passiveIndex = 0;
 
         //calculating all sub-collections and the maxReferenceTime used
         for (InterdependentProblemPart<?, ?> part : problemParts) {
             if (activeUUIDs.contains(part.getUUID())) {
-                allActivePPs.add(part);
+                allActivePPs[activeIndex++] = part;
                 if (part.isReactsToInputStates()) {
                     activeNeedsInputUUIDs.add(part.getUUID());
-                    allActiveNeedsInputPPs.add(part);
+                    allActiveNeedsInputPPsList.add(part);
                 }
             } else if (passiveUUIDs.contains(part.getUUID())) {
-                allPassivePPs.add(part);
+                allPassivePPs[passiveIndex++] = part;
             } else {
                 if (!part.isCompletelyStatic())
                     throw new IllegalArgumentException("part is neither active nor passive");
@@ -148,11 +152,18 @@ public class EnergyManagementProblem extends Problem {
         //to keep backwards-cpmpatibility we need to reorder the parts slightly as a different order will lead to
         // slight differences due to floating-point error TODO: remove with next backwards-compatibility breaking
         // update and order by part-id (not uuid)
-        List<InterdependentProblemPart<?, ?>> allIPPsReordered = new ArrayList<>(problemParts.size());
-        allIPPsReordered.addAll(allActiveNeedsInputPPs);
-        allIPPsReordered.addAll(allActivePPs.stream().filter(p -> !allActiveNeedsInputPPs.contains(p)).collect(Collectors.toList()));
-        allIPPsReordered.addAll(allPassivePPs);
-        allIPPsReordered.addAll(problemParts.stream().filter(p -> !allIPPsReordered.contains(p)).collect(Collectors.toList()));
+        List<InterdependentProblemPart<?, ?>> allIPPsReorderedList = new ArrayList<>(problemParts.length);
+        allIPPsReorderedList.addAll(allActiveNeedsInputPPsList);
+        allIPPsReorderedList.addAll(Arrays.stream(allActivePPs).filter(p -> !allActiveNeedsInputPPsList.contains(p)).collect(Collectors.toList()));
+        allIPPsReorderedList.addAll(Arrays.stream(allPassivePPs).collect(Collectors.toList()));
+        allIPPsReorderedList.addAll(Arrays.stream(problemParts).filter(p -> !allIPPsReorderedList.contains(p)).collect(Collectors.toList()));
+
+        InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs =
+                new InterdependentProblemPart[allActiveNeedsInputPPsList.size()];
+        allActiveNeedsInputPPs = allActiveNeedsInputPPsList.toArray(allActiveNeedsInputPPs);
+        InterdependentProblemPart<?, ?>[] allIPPsReordered =
+                new InterdependentProblemPart[allIPPsReorderedList.size()];
+        allIPPsReordered = allIPPsReorderedList.toArray(allIPPsReordered);
 
         ocESC.initializeGrids(activeUUIDs, activeNeedsInputUUIDs, passiveUUIDs,
                 uuidIntMap, uuidOutputMap, uuidInputMap);
@@ -276,10 +287,10 @@ public class EnergyManagementProblem extends Problem {
 
         EnergyProblemDataContainer dataContainer = this.requestDataCopy();
 
-        List<InterdependentProblemPart<?, ?>> allIPPs = dataContainer.getAllProblemParts();
-        List<InterdependentProblemPart<?, ?>> allActive = dataContainer.getAllActivePPs();
-        List<InterdependentProblemPart<?, ?>> allPassive = dataContainer.getAllPassivePPs();
-        List<InterdependentProblemPart<?, ?>> allActiveNeedsInput = dataContainer.getAllActiveNeedsInputPPs();
+        InterdependentProblemPart<?, ?>[] allIPPs = dataContainer.getAllProblemParts();
+        InterdependentProblemPart<?, ?>[] allActive = dataContainer.getAllActivePPs();
+        InterdependentProblemPart<?, ?>[] allPassive = dataContainer.getAllPassivePPs();
+        InterdependentProblemPart<?, ?>[] allActiveNeedsInput = dataContainer.getAllActiveNeedsInputPPs();
         OCEnergySimulationCore ocESC = dataContainer.getOcESC();
         UUIDCommodityMap activeToPassiveMap = dataContainer.getActiveToPassiveMap();
         UUIDCommodityMap passiveToActiveMap = dataContainer.getPassiveToActiveMap();

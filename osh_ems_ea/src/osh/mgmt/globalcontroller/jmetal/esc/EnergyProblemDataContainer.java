@@ -5,8 +5,7 @@ import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 import osh.utils.DeepCopy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -16,10 +15,10 @@ import java.util.Objects;
  */
 public class EnergyProblemDataContainer {
 
-    private final List<InterdependentProblemPart<?, ?>> allProblemParts;
-    private final List<InterdependentProblemPart<?, ?>> allActivePPs;
-    private final List<InterdependentProblemPart<?, ?>> allPassivePPs;
-    private final List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPs;
+    private final InterdependentProblemPart<?, ?>[] allProblemParts;
+    private final InterdependentProblemPart<?, ?>[] allActivePPs;
+    private final InterdependentProblemPart<?, ?>[] allPassivePPs;
+    private final InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs;
     private final OCEnergySimulationCore ocESC;
     private final UUIDCommodityMap activeToPassiveMap;
     private final UUIDCommodityMap passiveToActiveMap;
@@ -36,10 +35,10 @@ public class EnergyProblemDataContainer {
      * @param activeToPassiveMap the map used for active-to-passive exchange
      * @param passiveToActiveMap the map used for passive-to-active exchange
      */
-    public EnergyProblemDataContainer(List<InterdependentProblemPart<?, ?>> allProblemParts,
-                                      List<InterdependentProblemPart<?, ?>> allActivePPs,
-                                      List<InterdependentProblemPart<?, ?>> allPassivePPs,
-                                      List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPs,
+    public EnergyProblemDataContainer(InterdependentProblemPart<?, ?>[] allProblemParts,
+                                      InterdependentProblemPart<?, ?>[] allActivePPs,
+                                      InterdependentProblemPart<?, ?>[] allPassivePPs,
+                                      InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs,
                                       OCEnergySimulationCore ocESC,
                                       UUIDCommodityMap activeToPassiveMap,
                                       UUIDCommodityMap passiveToActiveMap) {
@@ -65,7 +64,7 @@ public class EnergyProblemDataContainer {
      *
      * @return a list of all problem-parts
      */
-    public List<InterdependentProblemPart<?, ?>> getAllProblemParts() {
+    public InterdependentProblemPart<?, ?>[] getAllProblemParts() {
         return this.allProblemParts;
     }
 
@@ -74,7 +73,7 @@ public class EnergyProblemDataContainer {
      *
      * @return a list of all active problem-parts
      */
-    public List<InterdependentProblemPart<?, ?>> getAllActivePPs() {
+    public InterdependentProblemPart<?, ?>[] getAllActivePPs() {
         return this.allActivePPs;
     }
 
@@ -83,7 +82,7 @@ public class EnergyProblemDataContainer {
      *
      * @return a list of all passive problem-parts
      */
-    public List<InterdependentProblemPart<?, ?>> getAllPassivePPs() {
+    public InterdependentProblemPart<?, ?>[] getAllPassivePPs() {
         return this.allPassivePPs;
     }
 
@@ -92,7 +91,7 @@ public class EnergyProblemDataContainer {
      *
      * @return a list of all active problem-parts that need input
      */
-    public List<InterdependentProblemPart<?, ?>> getAllActiveNeedsInputPPs() {
+    public InterdependentProblemPart<?, ?>[] getAllActiveNeedsInputPPs() {
         return this.allActiveNeedsInputPPs;
     }
 
@@ -129,31 +128,32 @@ public class EnergyProblemDataContainer {
      * @return a deep-copy of this container
      */
     public EnergyProblemDataContainer getDeepCopy() {
-        List<InterdependentProblemPart<?, ?>> allPPsCopy =
-                new ArrayList<>(this.allProblemParts.size());
-        List<InterdependentProblemPart<?, ?>> allActivePPsCopy =
-                new ArrayList<>(this.allActivePPs.size());
-        List<InterdependentProblemPart<?, ?>> allPassivePPsCopy =
-                new ArrayList<>(this.allPassivePPs.size());
-        List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPsCopy =
-                new ArrayList<>(this.allActiveNeedsInputPPs.size());
+        InterdependentProblemPart<?, ?>[] allPPsCopy =
+                new InterdependentProblemPart<?, ?>[(int) (this.allProblemParts.length - Arrays.stream(this.allProblemParts).filter(InterdependentProblemPart::isCompletelyStatic).count())];
+        InterdependentProblemPart<?, ?>[] allActivePPsCopy =
+                new InterdependentProblemPart<?, ?>[this.allActivePPs.length];
+        InterdependentProblemPart<?, ?>[] allPassivePPsCopy =
+                new InterdependentProblemPart<?, ?>[this.allPassivePPs.length];
+        InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPsCopy =
+                new InterdependentProblemPart<?, ?>[this.allActiveNeedsInputPPs.length];
 
+        int allIndex = 0, activeIndex = 0, passiveIndex = 0, activeNeedsInputIndex = 0;
         for (InterdependentProblemPart<?, ?> part : this.allProblemParts) {
             //we do not need to copy completely static ipps
             if (!part.isCompletelyStatic()) {
-                allPPsCopy.add((InterdependentProblemPart<?, ?>) DeepCopy.copy(part));
+                allPPsCopy[allIndex++] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
             }
         }
 
         for (InterdependentProblemPart<?, ?> part : allPPsCopy) {
-            if (this.allActivePPs.stream().anyMatch(p -> p.getId() == part.getId())) {
-                allActivePPsCopy.add(part);
+            if (Arrays.stream(this.allActivePPs).anyMatch(p -> p.getId() == part.getId())) {
+                allActivePPsCopy[activeIndex++] = part;
             }
-            if (this.allPassivePPs.stream().anyMatch(p -> p.getId() == part.getId())) {
-                allPassivePPsCopy.add(part);
+            if (Arrays.stream(this.allPassivePPs).anyMatch(p -> p.getId() == part.getId())) {
+                allPassivePPsCopy[passiveIndex++] = part;
             }
-            if (this.allActiveNeedsInputPPs.stream().anyMatch(p -> p.getId() == part.getId())) {
-                allActiveNeedsInputPPsCopy.add(part);
+            if (Arrays.stream(this.allActiveNeedsInputPPs).anyMatch(p -> p.getId() == part.getId())) {
+                allActiveNeedsInputPPsCopy[activeNeedsInputIndex++] = part;
             }
         }
 

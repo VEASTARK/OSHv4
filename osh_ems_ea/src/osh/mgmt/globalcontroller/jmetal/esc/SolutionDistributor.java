@@ -14,7 +14,6 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.RealEncodedVaria
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 
 import java.util.BitSet;
-import java.util.List;
 
 /**
  * Collection and distribution class for information about encoding variables one-way and decoding provided solutions
@@ -42,7 +41,7 @@ public class SolutionDistributor {
      *
      * @param problemParts all problem parts to gather encdoing information from
      */
-    public void gatherVariableInformation(List<InterdependentProblemPart<? extends ISolution, ? extends IPrediction>> problemParts) {
+    public void gatherVariableInformation(InterdependentProblemPart<? extends ISolution, ? extends IPrediction>[] problemParts) {
         this.binaryVariableInformation = this.gatherBinaryVariableInformation(problemParts);
         this.realVariableInformation = this.gatherRealVariableInformation(problemParts);
     }
@@ -54,10 +53,10 @@ public class SolutionDistributor {
      * @param problemParts the given problem-parts
      * @return encoding information of the merged problem from all given problem-parts
      */
-    private BinaryEncodedVariableInformation gatherBinaryVariableInformation(List<InterdependentProblemPart<?
-            extends ISolution, ? extends IPrediction>> problemParts) {
+    private BinaryEncodedVariableInformation gatherBinaryVariableInformation(InterdependentProblemPart<?
+            extends ISolution, ? extends IPrediction>[] problemParts) {
 
-        this.solutionPositionsForBinary = new int[problemParts.size()][2];
+        this.solutionPositionsForBinary = new int[problemParts.length][2];
         int bitCount = 0;
 
         for (InterdependentProblemPart<?, ?> ipp : problemParts) {
@@ -78,12 +77,12 @@ public class SolutionDistributor {
      * @param problemParts the given problem-parts
      * @return encoding information of the merged problem from all given problem-parts
      */
-    private RealEncodedVariableInformation gatherRealVariableInformation(List<InterdependentProblemPart<?
-            extends ISolution, ? extends IPrediction>> problemParts) {
+    private RealEncodedVariableInformation gatherRealVariableInformation(InterdependentProblemPart<?
+            extends ISolution, ? extends IPrediction>[] problemParts) {
 
-        this.solutionPositionsForReal = new int[problemParts.size()][2];
+        this.solutionPositionsForReal = new int[problemParts.length][2];
         int variableCount = 0;
-        double[][][] boundaries = new double[problemParts.size()][][];
+        double[][][] boundaries = new double[problemParts.length][][];
 
         for (InterdependentProblemPart<?, ?> ipp : problemParts) {
 
@@ -127,8 +126,8 @@ public class SolutionDistributor {
      * @param solution the encoded solution
      * @param problemParts the problem-parts to distribute the solution to
      */
-    public void distributeSolution(Solution solution, List<InterdependentProblemPart<? extends ISolution, ? extends
-                IPrediction>> problemParts) {
+    public void distributeSolution(Solution solution, InterdependentProblemPart<? extends ISolution, ? extends
+                IPrediction>[] problemParts) {
 
         if (solution.getType().getClass() == BinarySolutionType.class) {
             this.distributeBinarySolution(((Binary) solution.getDecisionVariables()[0]).bits_, problemParts);
@@ -137,8 +136,8 @@ public class SolutionDistributor {
         }
     }
 
-    private void distributeBinarySolution(BitSet solution, List<InterdependentProblemPart<? extends ISolution, ? extends
-            IPrediction>> problemParts) {
+    private void distributeBinarySolution(BitSet solution, InterdependentProblemPart<? extends ISolution, ? extends
+            IPrediction>[] problemParts) {
 
         for (InterdependentProblemPart<?, ?> ipp : problemParts) {
 
@@ -153,8 +152,8 @@ public class SolutionDistributor {
         }
     }
 
-    private void distributeRealSolution(Double[] solution, List<InterdependentProblemPart<? extends ISolution, ? extends
-            IPrediction>> problemParts) {
+    private void distributeRealSolution(Double[] solution, InterdependentProblemPart<? extends ISolution, ? extends
+            IPrediction>[] problemParts) {
 
         assert (solution.length == this.realVariableInformation.getVariableCount());
 

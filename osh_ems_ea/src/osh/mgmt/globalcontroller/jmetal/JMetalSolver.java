@@ -11,7 +11,6 @@ import osh.esc.OCEnergySimulationCore;
 
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.List;
 
 /**
  * @author Till Schuberth, Ingo Mauser
@@ -48,7 +47,7 @@ public class JMetalSolver extends Optimizer {
 
 
     public SolutionWithFitness getSolution(
-            List<InterdependentProblemPart<?, ?>> problemParts,
+            InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
@@ -65,7 +64,7 @@ public class JMetalSolver extends Optimizer {
     }
 
     public SolutionWithFitness getSolutionAndFitness (
-            List<InterdependentProblemPart<?, ?>> problemParts,
+            InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,

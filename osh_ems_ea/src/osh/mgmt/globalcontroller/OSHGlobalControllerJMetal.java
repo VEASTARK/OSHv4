@@ -320,7 +320,9 @@ public class OSHGlobalControllerJMetal
                 this.stepSize,
                 this.logDir);
 
-        List<InterdependentProblemPart<?, ?>> problemParts = this.oshGlobalObserver.getProblemParts();
+        List<InterdependentProblemPart<?, ?>> problemPartsList = this.oshGlobalObserver.getProblemParts();
+        InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[problemPartsList.size()];
+        problemParts = problemPartsList.toArray(problemParts);
 
         Solution solution;
         SolutionWithFitness resultWithAll;
