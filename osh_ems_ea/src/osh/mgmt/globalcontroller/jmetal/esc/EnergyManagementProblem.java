@@ -2,7 +2,6 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import jmetal.core.Problem;
 import jmetal.core.Solution;
 import jmetal.encodings.solutionType.BinarySolutionType;
@@ -118,9 +117,9 @@ public class EnergyManagementProblem extends Problem {
         //splitting all parts into active and passive parts to enable two-step exchange
         ocESC.splitActivePassive(allUUIDs, activeUUIDs, passiveUUIDs);
 
-        List<InterdependentProblemPart<?, ?>> allActivePPs = new ObjectArrayList<>();
-        List<InterdependentProblemPart<?, ?>> allPassivePPs = new ObjectArrayList<>();
-        List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPs = new ObjectArrayList<>();
+        List<InterdependentProblemPart<?, ?>> allActivePPs = new ArrayList<>();
+        List<InterdependentProblemPart<?, ?>> allPassivePPs = new ArrayList<>();
+        List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPs = new ArrayList<>();
 
         //calculating all sub-collections and the maxReferenceTime used
         for (InterdependentProblemPart<?, ?> part : problemParts) {
@@ -149,7 +148,7 @@ public class EnergyManagementProblem extends Problem {
         //to keep backwards-cpmpatibility we need to reorder the parts slightly as a different order will lead to
         // slight differences due to floating-point error TODO: remove with next backwards-compatibility breaking
         // update and order by part-id (not uuid)
-        List<InterdependentProblemPart<?, ?>> allIPPsReordered = new ObjectArrayList<>(problemParts.size());
+        List<InterdependentProblemPart<?, ?>> allIPPsReordered = new ArrayList<>(problemParts.size());
         allIPPsReordered.addAll(allActiveNeedsInputPPs);
         allIPPsReordered.addAll(allActivePPs.stream().filter(p -> !allActiveNeedsInputPPs.contains(p)).collect(Collectors.toList()));
         allIPPsReordered.addAll(allPassivePPs);
@@ -289,10 +288,6 @@ public class EnergyManagementProblem extends Problem {
         activeToPassiveMap.clearInnerStates();
         passiveToActiveMap.clearInnerStates();
 
-        //dummy sets as the method used outside of the optimization requires this
-        Set<UUID> passiveNodes = Collections.emptySet();
-        Set<UUID> activeNeedsInputNodes = Collections.emptySet();
-
         //distribute the solution to be evaluated
         this.distributor.distributeSolution(solution, allIPPs);
 
@@ -319,7 +314,7 @@ public class EnergyManagementProblem extends Problem {
         AncillaryMeterState meterState = new AncillaryMeterState();
 
         //send the first passive state to active nodes
-        ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, activeNeedsInputNodes, passiveToActiveMap);
+        ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, passiveToActiveMap);
 
         // iterate
         for (long t = this.maxReferenceTime; t < this.maxOptimizationHorizon + this.stepSize; t += this.stepSize) {
@@ -331,7 +326,7 @@ public class EnergyManagementProblem extends Problem {
             }
 
             //send active state to passive nodes, save meter state
-            ocESC.doActiveToPassiveExchange(activeToPassiveMap, allPassive, passiveNodes, meterState);
+            ocESC.doActiveToPassiveExchange(activeToPassiveMap, allPassive, meterState);
 
             //send loads to the ancillary meter profile
             ancillaryMeter.setLoadSequential(meterState, t);
@@ -343,7 +338,7 @@ public class EnergyManagementProblem extends Problem {
             }
 
             //send new passive states to active nodes
-            ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, activeNeedsInputNodes, passiveToActiveMap);
+            ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, passiveToActiveMap);
 
         }
 

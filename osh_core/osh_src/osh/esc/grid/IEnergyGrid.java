@@ -57,13 +57,11 @@ public interface IEnergyGrid {
     /**
      * Exchanges only energy information from active to passive devices. Only to be used inside the optimization loop.
      *
-     * @param passiveNodes set of all passive devices
      * @param activeStates all output energy information of active devices
      * @param totalInputStates map-storage for all resulting energy information from the exchange
      * @param ancillaryMeterState virtual meter
      */
     void doActiveToPassiveCalculation(
-            Set<UUID> passiveNodes,
             UUIDCommodityMap activeStates,
             UUIDCommodityMap totalInputStates,
             AncillaryMeterState ancillaryMeterState);
@@ -71,12 +69,10 @@ public interface IEnergyGrid {
     /**
      * Exchanges only energy information from passive to active devices. Only to be used inside the optimization loop.
      *
-     * @param activeNodes set of all active devices
      * @param passiveStates all output energy information of passive devices
      * @param totalInputStates map-storage for all resulting energy information from the exchange
      */
     void doPassiveToActiveCalculation(
-            Set<UUID> activeNodes,
             UUIDCommodityMap passiveStates,
             UUIDCommodityMap totalInputStates);
 

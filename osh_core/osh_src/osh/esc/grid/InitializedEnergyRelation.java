@@ -1,8 +1,7 @@
 package osh.esc.grid;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
 import java.io.Serializable;
+import java.util.List;
 
 public class InitializedEnergyRelation implements Serializable {
 
@@ -13,12 +12,12 @@ public class InitializedEnergyRelation implements Serializable {
 
     //	private UUID sourceId;
     private int sourceId;
-    private ObjectArrayList<InitializedEnergyRelationTarget> targets;
     private InitializedEnergyRelationTarget[] targetsArray;
 
-    public InitializedEnergyRelation(int sourceId, ObjectArrayList<InitializedEnergyRelationTarget> targets) {
+    public InitializedEnergyRelation(int sourceId, List<InitializedEnergyRelationTarget> targets) {
         this.sourceId = sourceId;
-        this.targets = targets;
+        this.targetsArray = new InitializedEnergyRelationTarget[targets.size()];
+        this.targetsArray = targets.toArray(this.targetsArray);
     }
 
     /**
@@ -26,12 +25,6 @@ public class InitializedEnergyRelation implements Serializable {
      */
     @Deprecated
     protected InitializedEnergyRelation() {
-    }
-
-    public void addEnergyTarget(InitializedEnergyRelationTarget target) {
-        if (!this.targets.contains(target)) {
-            this.targets.add(target);
-        }
     }
 
     public int getSourceId() {
@@ -42,17 +35,7 @@ public class InitializedEnergyRelation implements Serializable {
         this.sourceId = sourceId;
     }
 
-    public void transformToArrayTargets() {
-        this.targetsArray = new InitializedEnergyRelationTarget[this.targets.size()];
-        this.targetsArray = this.targets.toArray(this.targetsArray);
-    }
-
     public InitializedEnergyRelationTarget[] getTargets() {
         return this.targetsArray;
     }
-
-    public void setTargets(InitializedEnergyRelationTarget[] targetsArray) {
-        this.targetsArray = targetsArray;
-    }
-
 }

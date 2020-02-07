@@ -120,7 +120,6 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
     public void doActiveToPassiveExchange(
             UUIDCommodityMap activeCommodityStates,
             List<InterdependentProblemPart<?, ?>> passiveParts,
-            Set<UUID> passiveUUIDs,
             AncillaryMeterState ancillaryMeterState) {
 
         // input states
@@ -131,7 +130,6 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
 
         for (IEnergyGrid grid : this.allGrids) {
             grid.doActiveToPassiveCalculation(
-                    passiveUUIDs,
                     activeCommodityStates,
                     totalInputStates,
                     ancillaryMeterState);
@@ -152,7 +150,6 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
     public void doPassiveToActiveExchange(
             AncillaryMeterState ancillaryMeterState,
             List<InterdependentProblemPart<?, ?>> activeParts,
-            Set<UUID> activeNodes,
             UUIDCommodityMap passiveStates) {
 
         // input states
@@ -163,7 +160,6 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
 //		for (EnergyGrid grid : allGrids) {
         for (IEnergyGrid grid : this.thermalGrids) {
             grid.doPassiveToActiveCalculation(
-                    activeNodes,
                     passiveStates,
                     totalInputStates);
         }

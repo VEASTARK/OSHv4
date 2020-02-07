@@ -139,8 +139,8 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
                                Object2ObjectOpenHashMap<UUID, EnumSet<Commodity>> uuidInputMap) {
 
 
-        List<InitializedEnergyRelation> initializedImprovedActiveToPassiveList;
-        Map<UUID, InitializedEnergyRelation> tempHelpMap = new Object2ObjectOpenHashMap<>();
+        final List<InitializedEnergyRelation> initializedImprovedActiveToPassiveList = new ObjectArrayList<>();
+        Map<UUID, List<InitializedEnergyRelationTarget>> tempHelpMap = new Object2ObjectOpenHashMap<>();
 
         for (EnergyRelation<ElectricalConnection> rel : this.relationList) {
 
@@ -154,15 +154,14 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
             if (activeType && passiveType
                     && uuidOutputMap.get(activeId).contains(rel.getActiveToPassive().getCommodity())
                     && uuidInputMap.get(passiveId).contains(rel.getActiveToPassive().getCommodity())) {
-                InitializedEnergyRelation relNew = tempHelpMap.computeIfAbsent(activeId,
-                        k -> new InitializedEnergyRelation(uuidToIntMap.getInt(activeId), new ObjectArrayList<>()));
+                List<InitializedEnergyRelationTarget> targets = tempHelpMap.computeIfAbsent(activeId,
+                        k -> new ObjectArrayList<>());
 
-                relNew.addEnergyTarget(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(passiveId), rel.getActiveToPassive().getCommodity()));
+                targets.add(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(passiveId), rel.getActiveToPassive().getCommodity()));
             }
         }
 
-        initializedImprovedActiveToPassiveList = new ObjectArrayList<>(tempHelpMap.values());
-        initializedImprovedActiveToPassiveList.forEach(InitializedEnergyRelation::transformToArrayTargets);
+        tempHelpMap.forEach((k, v) -> initializedImprovedActiveToPassiveList.add(new InitializedEnergyRelation(uuidToIntMap.getInt(k), v)));
 
         this.initializedImprovedActiveToPassiveArray = new InitializedEnergyRelation[initializedImprovedActiveToPassiveList.size()];
         this.initializedImprovedActiveToPassiveArray = initializedImprovedActiveToPassiveList.toArray(this.initializedImprovedActiveToPassiveArray);
@@ -306,7 +305,6 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
 
     @Override
     public void doActiveToPassiveCalculation(
-            Set<UUID> passiveNodes,
             UUIDCommodityMap activeStates,
             UUIDCommodityMap totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
@@ -336,7 +334,6 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
 
     @Override
     public void doPassiveToActiveCalculation(
-            Set<UUID> activeNodes,
             UUIDCommodityMap passiveStates,
             UUIDCommodityMap totalInputStates) {
 

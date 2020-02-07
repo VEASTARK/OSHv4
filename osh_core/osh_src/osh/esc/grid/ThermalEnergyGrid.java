@@ -88,8 +88,8 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
 
         List<InitializedEnergyRelation> initializedImprovedActiveToPassiveList = new ObjectArrayList<>();
         List<InitializedEnergyRelation> initializedImprovedPassiveToActiveList = new ObjectArrayList<>();
-        Map<UUID, InitializedEnergyRelation> tempA2PHelpMap = new Object2ObjectOpenHashMap<>();
-        Map<UUID, InitializedEnergyRelation> tempP2AHelpMap = new Object2ObjectOpenHashMap<>();
+        Map<UUID, List<InitializedEnergyRelationTarget>> tempA2PHelpMap = new Object2ObjectOpenHashMap<>();
+        Map<UUID, List<InitializedEnergyRelationTarget>> tempP2AHelpMap = new Object2ObjectOpenHashMap<>();
 
         for (EnergyRelation<ThermalConnection> rel : this.relationList) {
 
@@ -105,30 +105,27 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
                     && uuidOutputMap.get(activeId).contains(rel.getActiveToPassive().getCommodity())
                     && uuidInputMap.get(passiveId).contains(rel.getActiveToPassive().getCommodity())) {
 
-                InitializedEnergyRelation relNew = tempA2PHelpMap.computeIfAbsent(activeId,
-                        k -> new InitializedEnergyRelation(uuidToIntMap.getInt(activeId), new ObjectArrayList<>()));
+                List<InitializedEnergyRelationTarget> targets = tempA2PHelpMap.computeIfAbsent(activeId,
+                        k -> new ObjectArrayList<>());
 
-                relNew.addEnergyTarget(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(passiveId), rel.getActiveToPassive().getCommodity()));
+                targets.add(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(passiveId), rel.getActiveToPassive().getCommodity()));
             }
             if (activeTypeNI && passiveType
                     && uuidOutputMap.get(activeId).contains(rel.getPassiveToActive().getCommodity())
                     && uuidInputMap.get(passiveId).contains(rel.getPassiveToActive().getCommodity())) {
 
-                InitializedEnergyRelation relNew = tempP2AHelpMap.computeIfAbsent(passiveId,
-                        k -> new InitializedEnergyRelation(uuidToIntMap.getInt(passiveId), new ObjectArrayList<>()));
+                List<InitializedEnergyRelationTarget> targets = tempP2AHelpMap.computeIfAbsent(passiveId,
+                        k -> new ObjectArrayList<>());
 
-                relNew.addEnergyTarget(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(activeId), rel.getPassiveToActive().getCommodity()));
+                targets.add(new InitializedEnergyRelationTarget(uuidToIntMap.getInt(activeId), rel.getPassiveToActive().getCommodity()));
             }
         }
 
-        initializedImprovedActiveToPassiveList.addAll(tempA2PHelpMap.values());
-        initializedImprovedActiveToPassiveList.forEach(InitializedEnergyRelation::transformToArrayTargets);
+        tempA2PHelpMap.forEach((k, v) -> initializedImprovedActiveToPassiveList.add(new InitializedEnergyRelation(uuidToIntMap.getInt(k), v)));
+        tempP2AHelpMap.forEach((k, v) -> initializedImprovedPassiveToActiveList.add(new InitializedEnergyRelation(uuidToIntMap.getInt(k), v)));
 
         this.initializedImprovedActiveToPassiveArray = new InitializedEnergyRelation[initializedImprovedActiveToPassiveList.size()];
         this.initializedImprovedActiveToPassiveArray = initializedImprovedActiveToPassiveList.toArray(this.initializedImprovedActiveToPassiveArray);
-
-        initializedImprovedPassiveToActiveList.addAll(tempP2AHelpMap.values());
-        initializedImprovedPassiveToActiveList.forEach(InitializedEnergyRelation::transformToArrayTargets);
 
         this.initializedImprovedPassiveToActiveArray = new InitializedEnergyRelation[initializedImprovedPassiveToActiveList.size()];
         this.initializedImprovedPassiveToActiveArray = initializedImprovedPassiveToActiveList.toArray(this.initializedImprovedPassiveToActiveArray);
@@ -162,7 +159,6 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
 
     @Override
     public void doActiveToPassiveCalculation(
-            Set<UUID> passiveNodes,
             UUIDCommodityMap activeStates,
             UUIDCommodityMap totalInputStates,
             AncillaryMeterState ancillaryMeterState) {
@@ -188,7 +184,6 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
 
     @Override
     public void doPassiveToActiveCalculation(
-            Set<UUID> activeNodes,
             UUIDCommodityMap passiveStates,
             UUIDCommodityMap totalInputStates) {
 

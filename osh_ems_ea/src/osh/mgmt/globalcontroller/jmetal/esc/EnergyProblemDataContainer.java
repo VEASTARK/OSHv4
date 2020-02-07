@@ -1,11 +1,11 @@
 package osh.mgmt.globalcontroller.jmetal.esc;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 import osh.utils.DeepCopy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -130,13 +130,13 @@ public class EnergyProblemDataContainer {
      */
     public EnergyProblemDataContainer getDeepCopy() {
         List<InterdependentProblemPart<?, ?>> allPPsCopy =
-                new ObjectArrayList<>(this.allProblemParts.size());
+                new ArrayList<>(this.allProblemParts.size());
         List<InterdependentProblemPart<?, ?>> allActivePPsCopy =
-                new ObjectArrayList<>(this.allActivePPs.size());
+                new ArrayList<>(this.allActivePPs.size());
         List<InterdependentProblemPart<?, ?>> allPassivePPsCopy =
-                new ObjectArrayList<>(this.allPassivePPs.size());
+                new ArrayList<>(this.allPassivePPs.size());
         List<InterdependentProblemPart<?, ?>> allActiveNeedsInputPPsCopy =
-                new ObjectArrayList<>(this.allActiveNeedsInputPPs.size());
+                new ArrayList<>(this.allActiveNeedsInputPPs.size());
 
         for (InterdependentProblemPart<?, ?> part : this.allProblemParts) {
             //we do not need to copy completely static ipps
