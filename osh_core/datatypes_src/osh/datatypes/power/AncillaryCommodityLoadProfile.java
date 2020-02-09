@@ -54,7 +54,8 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
     }
 
     public SortedSet<Long> getAllLoadChangesFor(AncillaryCommodity ac, long from, long to) {
-        return this.commodities.get(ac).subMap(from, to).keySet();
+        //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
+        return this.commodities.get(ac).subMap(from + 1, to).keySet();
     }
 
     @Override

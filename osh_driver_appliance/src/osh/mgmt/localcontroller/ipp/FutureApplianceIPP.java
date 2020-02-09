@@ -15,6 +15,7 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryFullRang
 import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
+import osh.esc.ArrayUtils;
 import osh.esc.LimitedCommodityStateMap;
 
 import java.time.ZonedDateTime;
@@ -537,6 +538,7 @@ public class FutureApplianceIPP
         //power values in multiple profiles, iterate
         //check if device not already done (delay in scheduling, ipp did not arrive, ...)
         else if (this.initializedStartingTimes.length > 1){
+            ArrayUtils.fillArrayDouble(this.powers, 0.0);
             while (currentTime < end) {
 
                 if (currentTime > this.initializedStartingTimes[index]) {
@@ -548,12 +550,11 @@ public class FutureApplianceIPP
                     double factor = (currentEnd - currentTime);
                     long subtractionFactor = this.initializedStartingTimes[index - 1];
 
-                    int j = 0;
-                    for (Commodity c : this.usedCommodities) {
-                        powers[j] += (this.sequentialIterators[index - 1]
-                                .getAverageLoadFromTillSequentialNotRounded(c, (currentTime - subtractionFactor),
+                    for (int j = 0; j < this.usedCommodities.length; j++) {
+                        this.powers[j] += (this.sequentialIterators[index - 1]
+                                .getAverageLoadFromTillSequentialNotRounded(this.usedCommodities[j],
+                                        (currentTime - subtractionFactor),
                                         (currentEnd - subtractionFactor)) * factor);
-                        j++;
                     }
 
                     currentTime = this.initializedStartingTimes[index];
@@ -561,16 +562,14 @@ public class FutureApplianceIPP
                 }
             }
 
-            int j = 0;
-            for (Commodity c : this.usedCommodities) {
-                powers[j] = Math.round(powers[j] / this.getStepSize());
-                if (powers[j] != 0) {
-                    this.internalInterdependentOutputStates.setPower(c, powers[j]);
+            for (int j = 0; j < this.usedCommodities.length; j++) {
+                this.powers[j] = Math.round(this.powers[j] / this.getStepSize());
+                if (this.powers[j] != 0) {
+                    this.internalInterdependentOutputStates.setPower(this.usedCommodities[j], this.powers[j]);
                     hasValues = true;
                 } else {
-                    this.internalInterdependentOutputStates.resetCommodity(c);
+                    this.internalInterdependentOutputStates.resetCommodity(this.usedCommodities[j]);
                 }
-                j++;
             }
         }
 

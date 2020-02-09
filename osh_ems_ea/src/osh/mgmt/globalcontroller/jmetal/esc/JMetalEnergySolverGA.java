@@ -129,7 +129,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         }
 
 //        {
-//            algorithm = new OSH_gGASingleThread(problem, true, timestamp, pw);
+//            algorithm = new OSH_gGASingleThread(problem, true, this.timestamp, pw);
 //        }
 
         /* Algorithm parameters */

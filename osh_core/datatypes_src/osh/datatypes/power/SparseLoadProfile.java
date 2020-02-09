@@ -31,7 +31,8 @@ public class SparseLoadProfile extends LoadProfile<Commodity> {
             if (from < this.endingTimeOfProfile) {
                 currentEntry.put(c, loadProfile.floorEntry(from));
 
-                ObjectIterator<Long2IntMap.Entry> it = Long2IntMaps.fastIterator(loadProfile.subMap(from, till));
+                //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
+                ObjectIterator<Long2IntMap.Entry> it = Long2IntMaps.fastIterator(loadProfile.subMap(from + 1, till));
                 iterators.put(c, it);
 
                 nextEntry.put(c, (it.hasNext() ? it.next() : null));

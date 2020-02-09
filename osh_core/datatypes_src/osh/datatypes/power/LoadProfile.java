@@ -60,7 +60,8 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
     }
 
     public ObjectIterator<Long2IntMap.Entry> getIteratorForSubMap(C c, long from, long to) {
-        return Long2IntMaps.fastIterator(this.commodities.get(c).subMap(from, to));
+        //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
+        return Long2IntMaps.fastIterator(this.commodities.get(c).subMap(from + 1, to));
     }
 
     public ObjectIterator<Long2IntMap.Entry> getIteratorForType(C c) {
@@ -240,12 +241,13 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
 
         //no other values for the requested time period
         if (higherKey == Long2IntTreeMap.INVALID_KEY || higherKey >= maxTime) {
-            avg = ((double) currentEntry.getIntValue()) * ((double) (maxTime - currentTime) / (double) (end - start));
+            avg = currentEntry.getIntValue() * ((double) (maxTime - currentTime) / (end - start));
             return (int) Math.round(avg);
         }
 
+        //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
         ObjectIterator<Long2IntMap.Entry> entryIterator =
-                Long2IntMaps.fastIterator(loadProfile.subMap(start, maxTime));
+                Long2IntMaps.fastIterator(loadProfile.subMap(start + 1, maxTime));
         Long2IntMap.Entry nextEntry = entryIterator.next();
         while (nextEntry.getLongKey() == currentEntry.getLongKey()) nextEntry = entryIterator.next();
 
@@ -390,6 +392,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
 
                 compressedMap.put(lastValueSavedKey, (int) lastValueSaved);
 
+                //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
                 for (ObjectIterator<Long2IntMap.Entry> it =
                      Long2IntMaps.fastIterator(map.tailMap(map.firstLongKey() + 1)); it.hasNext(); ) {
                     Long2IntMap.Entry e = it.next();
@@ -470,6 +473,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
 
                 compressedMap.put(lastKey, lastValue);
 
+                //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
                 for (ObjectIterator<Long2IntMap.Entry> it =
                      Long2IntMaps.fastIterator(map.tailMap(map.firstLongKey() + 1)); it.hasNext(); ) {
                     Long2IntMap.Entry e = it.next();
