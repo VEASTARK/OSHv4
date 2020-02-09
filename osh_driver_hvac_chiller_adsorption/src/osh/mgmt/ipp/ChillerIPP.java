@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -46,21 +45,21 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     private final static int BITS_PER_ACTIVATION = 4;
 
     //TODO move to config
-    private final int typicalStandbyActivePower = 10; // [W]
-    private final int typicalRunningActivePower = 420; // [W]
+    private static final int typicalStandbyActivePower = 10; // [W]
+    private static final int typicalRunningActivePower = 420; // [W]
     /**
      * is AdChiller on at the beginning
      */
     private final boolean initialAdChillerState;
     private final Map<Long, Double> temperaturePrediction;
     // temperature control
-    private final double coldWaterStorageMinTemp = 10.0;
-    private final double coldWaterStorageMaxTemp = 15.0;
-    private final double hotWaterStorageMinTemp = 55.0;
+    private static final double coldWaterStorageMinTemp = 10.0;
+    private static final double coldWaterStorageMaxTemp = 15.0;
+    private static final double hotWaterStorageMinTemp = 55.0;
     /**
      * delta T below maximum cold water temperature (for forced cooling)
      */
-    private final double hysteresis = 1.0;
+    private static final double hysteresis = 1.0;
 //	private double hotWaterStorageMaxTemp = 80.0;
     private boolean initialState;
     private ArrayList<Activation> interdependentStartingTimes;
@@ -86,7 +85,6 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
      */
     public ChillerIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
@@ -95,13 +93,11 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
             int compressionValue) {
         super(
                 deviceId,
-                logger,
                 timeStamp,
                 toBeScheduled,
                 false, //needsAncillaryMeterStates
                 true, //reactsToInputStates
                 timeStamp.toEpochSecond() + RELATIVE_HORIZON,
-                timeStamp.toEpochSecond(),
                 DeviceTypes.ADSORPTIONCHILLER,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -117,6 +113,24 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         this.temperaturePrediction = temperaturePrediction;
 
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
+    }
+
+    public ChillerIPP(ChillerIPP other) {
+        super(other);
+
+        this.initialAdChillerState = other.initialAdChillerState;
+
+        this.temperaturePrediction = null;
+
+        this.initialState = other.initialState;
+        this.interdependentStartingTimes = null;
+
+        this.interdependentLastState = other.interdependentLastState;
+        this.currentColdWaterTemperature = other.currentColdWaterTemperature;
+        this.currentHotWaterTemperature = other.currentHotWaterTemperature;
+
+        this.activationBits = null;
+        this.currentActivationRunningTime = other.currentActivationRunningTime;
     }
 
     private static int getNecessaryNumberOfBits(int relativeHorizon) {
@@ -156,17 +170,13 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
 
     @Override
     protected void interpretNewSolution() {
-        this.activationBits = getActivationBits(this.currentSolution);
+        this.activationBits = this.getActivationBits(this.currentSolution);
     }
 
     @Override
     public void calculateNextStep() {
 
         // update water temperatures
-        if (this.interdependentInputStates == null) {
-            this.logger.logDebug("No interdependentInputStates available.");
-        }
-
         this.currentHotWaterTemperature = this.interdependentInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
         this.currentColdWaterTemperature = this.interdependentInputStates.getTemperature(Commodity.COLDWATERPOWER);
 
@@ -180,23 +190,23 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         // AdChiller control (forced on/off)
         if (this.interdependentLastState) {
             // cold water too cold -> off
-            if (this.currentColdWaterTemperature < this.coldWaterStorageMinTemp) {
+            if (this.currentColdWaterTemperature < coldWaterStorageMinTemp) {
                 minColdWaterTankTemperatureOff = true;
                 chillerNewState = false;
-            } else if (this.currentColdWaterTemperature >= this.coldWaterStorageMaxTemp - this.hysteresis
-                    && this.currentColdWaterTemperature <= this.coldWaterStorageMaxTemp) {
+            } else if (this.currentColdWaterTemperature >= coldWaterStorageMaxTemp - hysteresis
+                    && this.currentColdWaterTemperature <= coldWaterStorageMaxTemp) {
                 chillerNewState = true;
                 chillerHysteresisOn = true;
             }
             // hot water too cold or hot water too hot -> off
-            if (this.currentHotWaterTemperature < this.hotWaterStorageMinTemp) {
+            if (this.currentHotWaterTemperature < hotWaterStorageMinTemp) {
                 minHotWaterTankTemperatureOff = true;
                 chillerNewState = false;
             }
             //TODO add hot water maximum temperature control
         } else {
-            if (this.currentColdWaterTemperature > this.coldWaterStorageMaxTemp
-                    && this.currentHotWaterTemperature > this.hotWaterStorageMinTemp) {
+            if (this.currentColdWaterTemperature > coldWaterStorageMaxTemp
+                    && this.currentHotWaterTemperature > hotWaterStorageMinTemp) {
                 chillerHysteresisOn = true;
                 chillerNewState = true;
             }
@@ -222,7 +232,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
 
 
         // calculate power values
-        double activePower = this.typicalStandbyActivePower;
+        double activePower = typicalStandbyActivePower;
         double hotWaterPower = 0;
         double coldWaterPower = 0;
 
@@ -241,7 +251,7 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
                 long secondsFromYearStart =
                         TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.getInterdependentTime()));
                 double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
-                activePower = this.typicalRunningActivePower;
+                activePower = typicalRunningActivePower;
                 coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);
                 hotWaterPower = (-1) * coldWaterPower / AdsorptionChillerModel.cop(this.currentHotWaterTemperature, outdoorTemperature);
             }
@@ -285,11 +295,11 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
             return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
             if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
-                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), this.typicalStandbyActivePower);
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), typicalStandbyActivePower);
                 this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
                 this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getInterdependentTime(), 0);
 
-                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getLoadProfile().getEndingTimeOfProfile(), this.typicalStandbyActivePower);
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getLoadProfile().getEndingTimeOfProfile(), typicalStandbyActivePower);
                 this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getLoadProfile().getEndingTimeOfProfile(), 0);
                 this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getLoadProfile().getEndingTimeOfProfile(), 0);
             }
@@ -356,10 +366,12 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
-        this.setReferenceTime(currentTime);
-        this.setOptimizationHorizon(maxHorizon);
+        if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
+            this.setReferenceTime(currentTime);
+            this.setOptimizationHorizon(maxHorizon);
 
-        this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
+            this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
+        }
     }
 
     // HELPER STUFF
@@ -399,6 +411,11 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     @Override
     public String problemToString() {
         return "Chiller IPP";
+    }
+
+    @Override
+    public ChillerIPP getClone() {
+        return new ChillerIPP(this);
     }
 
     // ### to string ###

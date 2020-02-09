@@ -1,19 +1,54 @@
 package osh.datatypes.power;
 
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntMaps;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.dataStructures.fastutil.Long2IntTreeMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class SparseLoadProfile extends LoadProfile<Commodity> {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1683959091461015374L;
-
     public SparseLoadProfile() {
         super(Commodity.class);
+    }
+
+    public SequentialSparseLoadProfileIterator initSequentialAverageLoad(long from, long till) {
+
+        EnumMap<Commodity, Long2IntMap.Entry> currentEntry = new EnumMap<>(this.enumType);
+        EnumMap<Commodity, Long2IntMap.Entry> nextEntry = new EnumMap<>(this.enumType);
+        EnumMap<Commodity, ObjectIterator<Long2IntMap.Entry>> iterators = new EnumMap<>(this.enumType);
+
+        for (Commodity c : this.getEnumValues()) {
+
+            Long2IntTreeMap loadProfile = this.getLoadProfile(c);
+
+            if (from < this.endingTimeOfProfile) {
+                currentEntry.put(c, loadProfile.floorEntry(from));
+
+                ObjectIterator<Long2IntMap.Entry> it = Long2IntMaps.fastIterator(loadProfile.subMap(from, till));
+                iterators.put(c, it);
+
+                nextEntry.put(c, (it.hasNext() ? it.next() : null));
+            } else {
+                currentEntry.put(c, null);
+                iterators.put(c, null);
+                nextEntry.put(c, null);
+            }
+        }
+
+        return new SequentialSparseLoadProfileIterator(currentEntry, nextEntry, iterators,
+                this.getEndingTimeOfProfile());
+    }
+
+    public SequentialSparseLoadProfileIterator initSequentialAverageLoad(long from) {
+
+        return this.initSequentialAverageLoad(from, Long.MAX_VALUE);
     }
 
     /************************
@@ -254,66 +289,17 @@ public class SparseLoadProfile extends LoadProfile<Commodity> {
         return clone;
     }
 
+    @Override
     public EnumMap<Commodity, Map<Long, Integer>> convertToSimpleMap() {
-        EnumMap<Commodity, Map<Long, Integer>> ret = new EnumMap<>(Commodity.class);
-
-        for (Entry<Commodity, TreeMap<Long, Tick>> en : this.commodities.entrySet()) {
-
-            if (en.getValue().isEmpty()) {
-                continue;
-            }
-
-            TreeMap<Long, Integer> map = new TreeMap<>();
-            ret.put(en.getKey(), map);
-
-            Iterator<Entry<Long, Tick>> it = en.getValue().entrySet()
-                    .iterator();
-
-            Entry<Long, Tick> entry = this.getNext(it, this.endingTimeOfProfile);
-
-            while (entry != null) {
-                map.put(entry.getKey(), entry.getValue().value);
-                entry = this.getNext(it, this.endingTimeOfProfile);
-            }
-
-            if (!map.isEmpty()) {
-                map.put(this.endingTimeOfProfile, map.floorEntry(this.endingTimeOfProfile).getValue());
-                //just to be sure
-                map.put(this.endingTimeOfProfile + 1, 0);
-            }
-        }
-        return ret;
+        EnumMap<Commodity, Map<Long, Integer>> map = new EnumMap<>(Commodity.class);
+        this.convertToSimpleMap(map, this.getEndingTimeOfProfile());
+        return map;
     }
 
+    @Override
     public EnumMap<Commodity, Map<Long, Integer>> convertToSimpleMap(long maxTime) {
-        long endingTime = Math.min(maxTime, this.endingTimeOfProfile);
-        EnumMap<Commodity, Map<Long, Integer>> ret = new EnumMap<>(Commodity.class);
-
-        for (Entry<Commodity, TreeMap<Long, Tick>> en : this.commodities.entrySet()) {
-
-            if (en.getValue().isEmpty()) {
-                continue;
-            }
-
-            TreeMap<Long, Integer> map = new TreeMap<>();
-            ret.put(en.getKey(), map);
-
-            Iterator<Entry<Long, Tick>> it = en.getValue().entrySet()
-                    .iterator();
-
-            Entry<Long, Tick> entry = this.getNext(it, endingTime);
-
-            while (entry != null) {
-                map.put(entry.getKey(), entry.getValue().value);
-                entry = this.getNext(it, endingTime);
-            }
-
-            if (!map.isEmpty()) {
-                map.put(endingTime, map.floorEntry(endingTime).getValue());
-                //just to be sure
-                map.put(endingTime + 1, 0);
-            }
-        }
-        return ret;
+        EnumMap<Commodity, Map<Long, Integer>> map = new EnumMap<>(Commodity.class);
+        this.convertToSimpleMap(map, maxTime);
+        return map;
     }
 }

@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
@@ -32,22 +31,19 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
      * Constructs this miele device problem-part.
 
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param logger the global logger
-     * @param referenceTime the starting-time this problem-part represents at the moment
+     * @param timestamp the starting-time this problem-part represents at the moment
      * @param predictedPVProfile the predicted heating power profile
      * @param compressionType the type of compression to use for this problem-part
      * @param compressionValue the associated compression value to be used for compression
      */
     public PvNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             SparseLoadProfile predictedPVProfile,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
         super(deviceId,
-                logger,
                 false,
                 timestamp,
                 DeviceTypes.PVSYSTEM,
@@ -55,6 +51,15 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
+    }
+
+    public PvNonControllableIPP(PvNonControllableIPP other) {
+        super(other);
+    }
+
+    @Override
+    public PvNonControllableIPP getClone() {
+        return new PvNonControllableIPP(this);
     }
 
     @Override

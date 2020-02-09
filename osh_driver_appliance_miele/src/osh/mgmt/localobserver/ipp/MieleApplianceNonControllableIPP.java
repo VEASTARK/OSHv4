@@ -1,7 +1,6 @@
 package osh.mgmt.localobserver.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
@@ -32,9 +31,8 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
      * Constructs this miele device problem-part.
 
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
-     * @param referenceTime the starting-time this problem-part represents at the moment
+     * @param timestamp the starting-time this problem-part represents at the moment
      * @param powerPrediction the predicted heating power profile
      * @param deviceType the type of device that is represented by this problem-part
      * @param compressionType the type of compression to use for this problem-part
@@ -42,7 +40,6 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
      */
     public MieleApplianceNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             boolean toBeScheduled,
             ZonedDateTime timestamp,
             DeviceTypes deviceType,
@@ -52,7 +49,6 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
 
         super(
                 deviceId,
-                logger,
                 toBeScheduled,
                 timestamp,
                 deviceType,
@@ -60,6 +56,15 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
+    }
+
+    public MieleApplianceNonControllableIPP(MieleApplianceNonControllableIPP other) {
+        super(other);
+    }
+
+    @Override
+    public MieleApplianceNonControllableIPP getClone() {
+        return new MieleApplianceNonControllableIPP(this);
     }
 
     @Override

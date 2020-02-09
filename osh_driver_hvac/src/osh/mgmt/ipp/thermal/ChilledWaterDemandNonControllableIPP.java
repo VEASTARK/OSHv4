@@ -2,7 +2,6 @@ package osh.mgmt.ipp.thermal;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.power.LoadProfileCompressionTypes;
@@ -32,7 +31,6 @@ public class ChilledWaterDemandNonControllableIPP
      */
     public ChilledWaterDemandNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timeStamp,
             boolean toBeScheduled,
             ArrayList<ChillerCalendarDate> dates,
@@ -41,7 +39,6 @@ public class ChilledWaterDemandNonControllableIPP
             int compressionValue) {
         super(
                 deviceId,
-                logger,
                 toBeScheduled,
                 timeStamp,
                 DeviceTypes.SPACECOOLING,
@@ -61,7 +58,18 @@ public class ChilledWaterDemandNonControllableIPP
             this.dates.add(date);
         }
 
-        this.temperaturePrediction = temperaturePrediction;
+        this.temperaturePrediction = Collections.unmodifiableMap(temperaturePrediction);
+    }
+
+    public ChilledWaterDemandNonControllableIPP(ChilledWaterDemandNonControllableIPP other) {
+        super(other);
+        this.dates = other.dates;
+        this.temperaturePrediction = other.temperaturePrediction;
+    }
+
+    @Override
+    public ChilledWaterDemandNonControllableIPP getClone() {
+        return new ChilledWaterDemandNonControllableIPP(this);
     }
 
 

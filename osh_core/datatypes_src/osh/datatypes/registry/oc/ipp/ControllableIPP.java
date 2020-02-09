@@ -1,7 +1,6 @@
 package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
@@ -42,32 +41,28 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
      */
     public ControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             long optimizationHorizon,
-            long referenceTime,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
-        super(deviceId, logger, timestamp, toBeScheduled, needsAncillaryMeterState,
-                reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities, compressionType,
+        super(deviceId, timestamp, toBeScheduled, needsAncillaryMeterState,
+                reactsToInputStates, false, deviceType, allOutputCommodities, compressionType,
                 compressionValue, new BinaryVariableTranslator(), new RealVariableTranslator());
         this.optimizationHorizon = optimizationHorizon;
     }
 
     public ControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             long optimizationHorizon,
-            long referenceTime,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             EnumSet<Commodity> allInputCommodities,
@@ -75,11 +70,16 @@ public abstract class ControllableIPP<PhenotypeType extends ISolution, Predictio
             int compressionValue,
             AbstractVariableTranslator<BitSet> binaryTranslator,
             AbstractVariableTranslator<double[]> realTranslator) {
-        super(deviceId, logger, timestamp, toBeScheduled, needsAncillaryMeterState,
-                reactsToInputStates, false, referenceTime, deviceType, allOutputCommodities,
+        super(deviceId, timestamp, toBeScheduled, needsAncillaryMeterState,
+                reactsToInputStates, false, deviceType, allOutputCommodities,
                 compressionType, compressionValue, binaryTranslator, realTranslator);
         this.optimizationHorizon = optimizationHorizon;
         this.setAllInputCommodities(allInputCommodities);
+    }
+
+    public ControllableIPP(ControllableIPP<PhenotypeType, PredictionType> other) {
+        super(other);
+        this.optimizationHorizon = other.optimizationHorizon;
     }
 
     @Override

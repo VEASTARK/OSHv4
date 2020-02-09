@@ -187,7 +187,6 @@ public class SpaceHeatingLocalObserver
         ThermalDemandNonControllableIPP ipp =
                 new ThermalDemandNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         false,
                         now,
                         this.getDeviceType(),

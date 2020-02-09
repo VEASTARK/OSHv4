@@ -9,7 +9,6 @@ import jmetal.encodings.variable.Binary;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
 import jmetal.util.PseudoRandom;
 import osh.core.OSHRandomGenerator;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
@@ -194,21 +193,12 @@ public class EnergyManagementProblem extends Problem {
             this.multiThreadedQueue = new ConcurrentLinkedQueue<>();
 
             //set logger to null so that deep copy does not try to copy it
-            IGlobalLogger temp = null;
             for (InterdependentProblemPart<?, ?> part : this.baseDataContainer.getAllProblemParts()) {
-                temp = part.logger;
-                part.logger = null;
-
                 part.initializeInterdependentCalculation(this.maxReferenceTime, this.stepSize, false, false);
                 part.prepareForDeepCopy();
             }
 
             this.masterDataContainer = this.baseDataContainer.getDeepCopy();
-
-            for (InterdependentProblemPart<?, ?> part : this.baseDataContainer.getAllProblemParts()) {
-                //restore logger to base data
-                part.logger = temp;
-            }
         }
     }
 
@@ -350,7 +340,6 @@ public class EnergyManagementProblem extends Problem {
 
             //send new passive states to active nodes
             ocESC.doPassiveToActiveExchange(meterState, allActiveNeedsInput, passiveToActiveMap);
-
         }
 
         //mark that no more data will be added and the profile is finalized

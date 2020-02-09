@@ -16,26 +16,20 @@ import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
-import java.io.Serializable;
 import java.util.*;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
-
-    /**
-     *
-     */
-    private static final long serialVersionUID = 6032713739337800610L;
+public class ThermalEnergyGrid implements IEnergyGrid {
 
     //meter
     private final UUID meterUUID;
     private int meterId;
     //energy-relations
-    private final List<EnergyRelation<ThermalConnection>> relationList = new ObjectArrayList<>();
-    private final Set<UUID> activeUUIDs = new ObjectOpenHashSet<>();
-    private final Set<UUID> passiveUUIDs = new ObjectOpenHashSet<>();
+    private final List<EnergyRelation<ThermalConnection>> relationList;
+    private final Set<UUID> activeUUIDs;
+    private final Set<UUID> passiveUUIDs;
     //initialized and improved (shortened) energy relations
     private InitializedEnergyRelation[] initializedImprovedActiveToPassiveArray;
     private InitializedEnergyRelation[] initializedImprovedPassiveToActiveArray;
@@ -44,6 +38,10 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
     private double productionPower;
 
     public ThermalEnergyGrid(String layoutFilePath) throws JAXBException, FileNotFoundException {
+
+        this.relationList = new ObjectArrayList<>();
+        this.activeUUIDs = new ObjectOpenHashSet<>();
+        this.passiveUUIDs = new ObjectOpenHashSet<>();
 
         Object unmarshalled = XMLSerialization.file2Unmarshal(layoutFilePath, GridLayout.class);
 
@@ -72,12 +70,16 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
             throw new IllegalArgumentException("Same UUID is active and passive");
     }
 
-    /**
-     * only for serialisation, do not use normally
-     */
-    @Deprecated
-    protected ThermalEnergyGrid() {
-        this.meterUUID = null;
+    public ThermalEnergyGrid(ThermalEnergyGrid other) {
+        this.meterUUID = other.meterUUID;
+        this.meterId = other.meterId;
+        this.relationList = other.relationList;
+        this.activeUUIDs = other.activeUUIDs;
+        this.passiveUUIDs = other.passiveUUIDs;
+        this.initializedImprovedActiveToPassiveArray = other.initializedImprovedActiveToPassiveArray;
+        this.initializedImprovedPassiveToActiveArray = other.initializedImprovedPassiveToActiveArray;
+        this.hasBeenInitialized = other.hasBeenInitialized;
+        this.productionPower = 0;
     }
 
     @Override
@@ -265,5 +267,10 @@ public class ThermalEnergyGrid implements IEnergyGrid, Serializable {
     @Override
     public Set<UUID> getPassiveUUIDs() {
         return this.passiveUUIDs;
+    }
+
+    @Override
+    public ThermalEnergyGrid getClone() {
+        return new ThermalEnergyGrid(this);
     }
 }

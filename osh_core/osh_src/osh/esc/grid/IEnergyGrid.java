@@ -97,4 +97,6 @@ public interface IEnergyGrid {
      */
     Set<UUID> getPassiveUUIDs();
 
+    IEnergyGrid getClone();
+
 }

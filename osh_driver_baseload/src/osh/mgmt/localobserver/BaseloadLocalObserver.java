@@ -180,7 +180,6 @@ public class BaseloadLocalObserver
     private void updateIPP() {
         BaseloadIPP ipp = new BaseloadIPP(
                 this.getUUID(),
-                this.getGlobalLogger(),
                 false,
                 this.getTimeDriver().getCurrentTime(),
                 DeviceTypes.BASELOAD,

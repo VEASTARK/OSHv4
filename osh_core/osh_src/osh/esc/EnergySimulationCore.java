@@ -9,7 +9,6 @@ import osh.esc.grid.ThermalEnergyGrid;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
-import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +17,7 @@ import java.util.UUID;
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
-public abstract class EnergySimulationCore implements Serializable {
-
-    /**
-     * Serial ID
-     */
-    private static final long serialVersionUID = 2812564530571697308L;
+public abstract class EnergySimulationCore {
 
     protected Map<EnergySimulationTypes, IEnergyGrid> grids = new EnumMap<>(EnergySimulationTypes.class);
     protected UUID meterUUID;
@@ -56,15 +50,6 @@ public abstract class EnergySimulationCore implements Serializable {
         this.grids = grids;
         this.meterUUID = meterUUID;
     }
-
-    /**
-     * CONSTRUCTOR for serialization, do NOT use!
-     */
-    @Deprecated
-    protected EnergySimulationCore() {
-
-    }
-
 
     public Map<EnergySimulationTypes, IEnergyGrid> getGrids() {
         return this.grids;

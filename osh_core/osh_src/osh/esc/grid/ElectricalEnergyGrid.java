@@ -12,6 +12,7 @@ import osh.configuration.grid.LayoutConnection;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
+import osh.esc.ArrayUtils;
 import osh.esc.LimitedCommodityStateMap;
 import osh.esc.UUIDCommodityMap;
 import osh.esc.grid.carrier.ElectricalConnection;
@@ -23,30 +24,24 @@ import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
-import java.io.Serializable;
 import java.util.*;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
-
-    /**
-     * Serial ID
-     */
-    private static final long serialVersionUID = 420822007199349391L;
+public class ElectricalEnergyGrid implements IEnergyGrid {
 
     //meter
     private final UUID meterUUID;
     private int meterId;
     //energy-relations
-    private final List<EnergyRelation<ElectricalConnection>> relationList = new ObjectArrayList<>();
-    private final Set<UUID> activeUUIDs = new ObjectOpenHashSet<>();
-    private final Set<UUID> passiveUUIDs = new ObjectOpenHashSet<>();
+    private final List<EnergyRelation<ElectricalConnection>> relationList;
+    private final Set<UUID> activeUUIDs;
+    private final Set<UUID> passiveUUIDs;
 
     //device information
-    private final EnumMap<GridDeviceType, Set<UUID>> devicesByType = new EnumMap<>(GridDeviceType.class);
-    private final EnumMap<GridDeviceType, IntSet> devicesByTypeAsId = new EnumMap<>(GridDeviceType.class);
+    private final EnumMap<GridDeviceType, Set<UUID>> devicesByType;
+    private final EnumMap<GridDeviceType, IntSet> devicesByTypeAsId;
 
     //initialized and improved (shortened) energy relations
     private InitializedEnergyRelation[] initializedImprovedActiveToPassiveArray;
@@ -83,6 +78,12 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
      * @throws FileNotFoundException when the layout cannot be found at the given path
      */
     public ElectricalEnergyGrid(String layoutFilePath) throws JAXBException, FileNotFoundException {
+
+        this.relationList = new ObjectArrayList<>();
+        this.activeUUIDs = new ObjectOpenHashSet<>();
+        this.passiveUUIDs = new ObjectOpenHashSet<>();
+        this.devicesByType = new EnumMap<>(GridDeviceType.class);
+        this.devicesByTypeAsId = new EnumMap<>(GridDeviceType.class);
 
         Object unmarshalled = XMLSerialization.file2Unmarshal(layoutFilePath, GridLayout.class);
 
@@ -124,13 +125,35 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
             throw new IllegalArgumentException("Same UUID is active and passive");
     }
 
-    /**
-     * only for serialisation, do not use normally
-     */
-    @Deprecated
-    protected ElectricalEnergyGrid() {
-        this.meterUUID = null;
+    public ElectricalEnergyGrid(ElectricalEnergyGrid other) {
+        this.meterUUID = other.meterUUID;
+        this.meterId = other.meterId;
+
+        this.relationList = other.relationList;
+        this.activeUUIDs = other.activeUUIDs;
+        this.passiveUUIDs = other.passiveUUIDs;
+
+        this.devicesByType = other.devicesByType;
+        this.devicesByTypeAsId = other.devicesByTypeAsId;
+
+        this.initializedImprovedActiveToPassiveArray = other.initializedImprovedActiveToPassiveArray;
+
+        this.isSingular = other.isSingular;
+        this.singularPvDevice = other.singularPvDevice;
+        this.singularChpDevice = other.singularChpDevice;
+        this.singularBatDevice = other.singularBatDevice;
+        this.hasBeenInitialized = other.hasBeenInitialized;
+        this.hasBat = other.hasBat;
+        this.hasPV = other.hasPV;
+        this.hasCHP = other.hasCHP;
+
+        ArrayUtils.fillArrayDouble(this.productionPowers, 0.0);
+        ArrayUtils.fillArrayDouble(this.mainPowers, 0.0);
+        ArrayUtils.fillArrayDouble(this.productionShares, 0.0);
+
+        this.initializeFunction();
     }
+
 
     @Override
     public void initializeGrid(Set<UUID> allActiveNodes, Set<UUID> activeNeedsInputNodes,
@@ -203,6 +226,12 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
         this.hasCHP = this.devicesByType.get(GridDeviceType.CHP).stream().anyMatch(e -> (allActiveNodes.contains(e) || passiveNodes.contains(e)));
         this.hasBat = this.devicesByType.get(GridDeviceType.BATTERY).stream().anyMatch(e -> (allActiveNodes.contains(e) || passiveNodes.contains(e)));
 
+        this.initializeFunction();
+
+        this.hasBeenInitialized = true;
+    }
+
+    private void initializeFunction() {
         this.calcPowerShares = () -> { };
 
         if (!this.hasPV && !this.hasCHP && !this.hasBat) {
@@ -253,8 +282,6 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
                 this.calcPowerShares = this::calcAllPowerShares;
             }
         }
-
-        this.hasBeenInitialized = true;
     }
 
     @Override
@@ -619,5 +646,10 @@ public class ElectricalEnergyGrid implements IEnergyGrid, Serializable {
     @Override
     public Set<UUID> getPassiveUUIDs() {
         return this.passiveUUIDs;
+    }
+
+    @Override
+    public ElectricalEnergyGrid getClone() {
+        return new ElectricalEnergyGrid(this);
     }
 }

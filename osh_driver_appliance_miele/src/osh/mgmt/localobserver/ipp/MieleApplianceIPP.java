@@ -2,7 +2,6 @@ package osh.mgmt.localobserver.ipp;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -50,7 +49,6 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
      */
     public MieleApplianceIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             long earliestStartTime,
             long latestStartTime,
@@ -64,13 +62,11 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
 
         super(
                 deviceId,
-                logger,
                 timestamp,
                 toBeScheduled,
                 false, //does not need ancillary meter
                 false, //does not react to input states
                 optimizationHorizon,
-                timestamp.toEpochSecond(),
                 deviceType,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
@@ -84,6 +80,17 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
         this.predicted = predicted;
 
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
+    }
+
+    public MieleApplianceIPP(MieleApplianceIPP other) {
+        super(other);
+
+        this.earliestStartTime = other.earliestStartTime;
+        this.latestStartTime = other.latestStartTime;
+        this.profile = other.profile;
+        this.predicted = other.predicted;
+        this.allOutputStates = other.allOutputStates;
+        this.outputStatesCalculatedFor = other.outputStatesCalculatedFor;
     }
 
     @Override
@@ -174,18 +181,25 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
-        this.setReferenceTime(currentTime);
-        this.setOptimizationHorizon(maxHorizon);
-        if (this.earliestStartTime < currentTime) {
-            this.earliestStartTime = Math.min(currentTime, this.latestStartTime);
+        if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
+            this.setReferenceTime(currentTime);
+            this.setOptimizationHorizon(maxHorizon);
+            if (this.earliestStartTime < currentTime) {
+                this.earliestStartTime = Math.min(currentTime, this.latestStartTime);
+            }
+            this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
         }
-        this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
     }
 
     @Override
     public String problemToString() {
         return "MieleIPP Profile: " + this.profile.toStringShort() + " DoF:" + this.earliestStartTime + "-" + this.latestStartTime
                 + "(" + (this.latestStartTime - this.earliestStartTime) + ")" + (this.predicted ? " (predicted)" : "");
+    }
+
+    @Override
+    public MieleApplianceIPP getClone() {
+        return new MieleApplianceIPP(this);
     }
 
     public long getStartTime(DecodedSolutionWrapper solution) {

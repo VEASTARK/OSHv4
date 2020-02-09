@@ -26,14 +26,14 @@ public class SmartHeaterModel implements Serializable {
      */
     private static final long serialVersionUID = 3818872291707857561L;
     private final int setTemperature;
-    private final int powerDelta = 100;
+    private static final int powerDelta = 100;
 
     // available states                0    1     2     3     4     5     6     7
-    private final int[] powerStates = {0, 500, 1000, 1500, 2000, 2500, 3000, 3500};
+    private static final int[] powerStates = {0, 500, 1000, 1500, 2000, 2500, 3000, 3500};
 
     // minimum on and off times
-    private final int[] minOnTimes = {10, 10, 10};
-    private final int[] minOffTimes = {110, 170, 230};
+    private static final int[] minOnTimes = {10, 10, 10};
+    private static final int[] minOffTimes = {110, 170, 230};
 
     // ### variables ###
     /**
@@ -77,6 +77,15 @@ public class SmartHeaterModel implements Serializable {
                 timestampOfLastChangePerSubElement.length);
     }
 
+    public SmartHeaterModel(SmartHeaterModel other) {
+        this.setTemperature = other.setTemperature;
+        this.currentState = other.currentState;
+        this.currentStates = Arrays.copyOf(other.currentStates, other.currentStates.length);
+        this.timestampOfLastChangePerSubElement = Arrays.copyOf(other.timestampOfLastChangePerSubElement,
+                other.timestampOfLastChangePerSubElement.length);
+        this.timestampOfLastChange = 0;
+    }
+
     public SmartHeaterModel() {
         this.setTemperature = 0;
     }
@@ -102,7 +111,7 @@ public class SmartHeaterModel implements Serializable {
 
         // power delta
         double usedPower = availablePower;
-        usedPower += this.powerDelta; // safety margin of 100W
+        usedPower += powerDelta; // safety margin of 100W
 
         // power used by smart heater
         int selfUsePower = this.currentState * 500;
@@ -137,10 +146,10 @@ public class SmartHeaterModel implements Serializable {
         for (int i = 0; i < 3; i++) {
             if (toBeSwitched[i]) {
                 long diff = now - this.timestampOfLastChangePerSubElement[i];
-                if (newStates[i] && diff < this.minOffTimes[i]) {
+                if (newStates[i] && diff < minOffTimes[i]) {
                     //switch on violation
                     timeViolation = true;
-                } else if (!newStates[i] && diff < this.minOnTimes[i]) {
+                } else if (!newStates[i] && diff < minOnTimes[i]) {
                     //switch off violation
                     timeViolation = true;
                 }
@@ -157,7 +166,7 @@ public class SmartHeaterModel implements Serializable {
      * @return [W] > 0
      */
     public double getPower() {
-        return this.powerStates[this.currentState];
+        return powerStates[this.currentState];
     }
 
     public int getCurrentState() {
@@ -254,6 +263,10 @@ public class SmartHeaterModel implements Serializable {
     public long[] getPowerTierRunTimes() {
         return new long[]{this.powerTierRunTimes[0], this.powerTierRunTimes[1], this.powerTierRunTimes[2],
                 this.powerTierRunTimes[3], this.powerTierRunTimes[4], this.powerTierRunTimes[5], this.powerTierRunTimes[6]};
+    }
+
+    public int getSetTemperature() {
+        return this.setTemperature;
     }
 
 //	public int[] getMinCircuitTimeViolatedCounter() {

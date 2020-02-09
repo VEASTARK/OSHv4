@@ -85,7 +85,6 @@ public class HotWaterTankLocalObserver
         if (now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
                     this.currentTemperature,
                     this.tankCapacity,
@@ -111,7 +110,6 @@ public class HotWaterTankLocalObserver
                     this.getGlobalLogger().logDebug("Temperature prediction was wrong by >2.5 degree for two consecutive minutes, reschedule");
                     HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                             this.getUUID(),
-                            this.getGlobalLogger(),
                             now,
                             this.currentTemperature,
                             this.tankCapacity,
@@ -159,7 +157,6 @@ public class HotWaterTankLocalObserver
                 HotWaterTankNonControllableIPP ex;
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         this.getTimeDriver().getCurrentTime(),
                         this.currentTemperature,
                         this.tankCapacity,

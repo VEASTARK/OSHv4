@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -62,7 +61,6 @@ public class DachsChpNonControllableIPP
      */
     public DachsChpNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timeStamp,
             boolean toBeScheduled,
             int minRuntime,
@@ -77,7 +75,6 @@ public class DachsChpNonControllableIPP
 
         super(
                 deviceId,
-                logger,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
@@ -104,6 +101,20 @@ public class DachsChpNonControllableIPP
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
+    public DachsChpNonControllableIPP(DachsChpNonControllableIPP other) {
+        super(other);
+
+        this.initialChpState = other.initialChpState;
+        this.minRuntime = other.minRuntime;
+
+        this.masterModel = other.masterModel;
+
+        this.hotWaterStorageMinTemp = other.hotWaterStorageMinTemp;
+        this.hotWaterStorageMaxTemp = other.hotWaterStorageMaxTemp;
+        this.currentWaterTemperature = other.currentWaterTemperature;
+        this.fixedCostPerStart = other.fixedCostPerStart;
+    }
+
 
     // ### interdependent problem part stuff ###
 
@@ -127,10 +138,6 @@ public class DachsChpNonControllableIPP
         boolean chpNewState = this.interdependentLastState;
 
         // update water temperature
-
-        if (this.interdependentInputStates == null) {
-            this.getGlobalLogger().logDebug("No interdependentInputStates available.");
-        }
 
         this.currentWaterTemperature = this.interdependentInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
 
@@ -238,5 +245,10 @@ public class DachsChpNonControllableIPP
     @Override
     public String problemToString() {
         return "[" + this.getTimestamp() + "] DachsChpNonControllableIPP";
+    }
+
+    @Override
+    public DachsChpNonControllableIPP getClone() {
+        return new DachsChpNonControllableIPP(this);
     }
 }

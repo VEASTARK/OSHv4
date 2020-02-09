@@ -127,7 +127,6 @@ public class VDI6002DomesticHotWaterLocalObserver
         ThermalDemandNonControllableIPP ipp =
                 new ThermalDemandNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         false,
                         now,
                         this.getDeviceType(),

@@ -8,7 +8,6 @@ import osh.esc.LimitedCommodityStateMap;
 import osh.esc.grid.EnergySimulationTypes;
 import osh.esc.grid.IEnergyGrid;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -18,12 +17,7 @@ import java.util.Map.Entry;
  *
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class SimEnergySimulationCore extends EnergySimulationCore implements Serializable {
-
-    /**
-     * Serial ID
-     */
-    private static final long serialVersionUID = -4085403098636042133L;
+public class SimEnergySimulationCore extends EnergySimulationCore {
 
     /**
      * CONSTRUCTOR
@@ -42,13 +36,6 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
             Map<EnergySimulationTypes, IEnergyGrid> grids,
             UUID meterUUID) {
         super(grids, meterUUID);
-    }
-
-    /**
-     * CONSTRUCTOR for serialization, do NOT use!
-     */
-    @Deprecated
-    protected SimEnergySimulationCore() {
     }
 
     public AncillaryMeterState doNextEnergySimulation(

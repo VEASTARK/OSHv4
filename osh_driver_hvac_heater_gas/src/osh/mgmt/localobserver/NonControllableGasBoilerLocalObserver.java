@@ -78,7 +78,6 @@ public class NonControllableGasBoilerLocalObserver
         if (this.lastTimeIPPSent == null || now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
                     this.minTemperature,
                     this.maxTemperature,
@@ -125,7 +124,6 @@ public class NonControllableGasBoilerLocalObserver
                 // build SIPP
                 GasBoilerNonControllableIPP sipp = new GasBoilerNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         now,
                         this.minTemperature,
                         this.maxTemperature,

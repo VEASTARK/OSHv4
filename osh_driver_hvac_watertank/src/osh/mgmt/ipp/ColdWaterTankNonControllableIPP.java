@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -24,9 +23,10 @@ public class ColdWaterTankNonControllableIPP
 
     private static final long serialVersionUID = -7475173612656137600L;
     private final double initialTemperature;
-    private final double tankCapacity = 3000.0;
-    private final double tankDiameter = 1.0;
-    private final double ambientTemperature = 20.0;
+    private static final double tankCapacity = 3000.0;
+    private static final double tankDiameter = 1.0;
+    private static final double ambientTemperature = 20.0;
+
     private SimpleColdWaterTank waterTank;
 
     /**
@@ -34,14 +34,12 @@ public class ColdWaterTankNonControllableIPP
      */
     public ColdWaterTankNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timeStamp,
             double initialTemperature,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(
                 deviceId,
-                logger,
                 false, //does not cause scheduling
                 false, //does not need ancillary meter state as Input State
                 true, // reacts to input states
@@ -54,6 +52,12 @@ public class ColdWaterTankNonControllableIPP
 
         this.initialTemperature = initialTemperature;
         this.setAllInputCommodities(EnumSet.of(Commodity.COLDWATERPOWER));
+    }
+
+    public ColdWaterTankNonControllableIPP(ColdWaterTankNonControllableIPP other) {
+        super(other);
+        this.initialTemperature = other.initialTemperature;
+        this.waterTank = null;
     }
 
     /**
@@ -86,10 +90,10 @@ public class ColdWaterTankNonControllableIPP
         super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
         this.waterTank = new SimpleColdWaterTank(
-                this.tankCapacity,
-                this.tankDiameter,
+                tankCapacity,
+                tankDiameter,
                 this.initialTemperature,
-                this.ambientTemperature);
+                ambientTemperature);
 
         this.waterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp().toEpochSecond());
     }
@@ -126,6 +130,11 @@ public class ColdWaterTankNonControllableIPP
     @Override
     public String problemToString() {
         return "FIXME FIRST !!!! [" + this.getReferenceTime() + "] ColdWaterTank current temperature = " + (this.waterTank != null ? this.waterTank.getCurrentWaterTemperature() : null);
+    }
+
+    @Override
+    public ColdWaterTankNonControllableIPP getClone() {
+        return new ColdWaterTankNonControllableIPP(this);
     }
 
 }

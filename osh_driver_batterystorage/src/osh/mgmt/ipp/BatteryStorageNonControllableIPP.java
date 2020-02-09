@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -49,7 +48,6 @@ public class BatteryStorageNonControllableIPP
      */
     public BatteryStorageNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime now,
             double batteryInitialStateOfCharge,
             double batteryInitialStateOfHealth,
@@ -70,7 +68,6 @@ public class BatteryStorageNonControllableIPP
 
         super(
                 deviceId,
-                logger,
                 false, //does not cause scheduling
                 true, //needs ancillary meter state as Input State
                 false, //reacts to input states
@@ -94,6 +91,24 @@ public class BatteryStorageNonControllableIPP
         this.inverterMaxComplexPower = inverterMaxComplexPower;
         this.inverterMinPower = inverterMinPower;
         this.inverterMaxPower = inverterMaxPower;
+    }
+
+    public BatteryStorageNonControllableIPP(BatteryStorageNonControllableIPP other) {
+        super(other);
+        this.batteryInitialStateOfCharge = other.batteryInitialStateOfCharge;
+        this.batteryInitialStateOfHealth = other.batteryInitialStateOfHealth;
+        this.batteryStandingLoss = other.batteryStandingLoss;
+        this.batteryMinChargingState = other.batteryMinChargingState;
+        this.batteryMaxChargingState = other.batteryMaxChargingState;
+        this.batteryMinChargePower = other.batteryMinChargePower;
+        this.batteryMaxChargePower = other.batteryMaxChargePower;
+        this.batteryMinDischargePower = other.batteryMinDischargePower;
+        this.batteryMaxDischargePower = other.batteryMaxDischargePower;
+        this.inverterMinComplexPower = other.inverterMinComplexPower;
+        this.inverterMaxComplexPower = other.inverterMaxComplexPower;
+        this.inverterMinPower = other.inverterMinPower;
+        this.inverterMaxPower = other.inverterMaxPower;
+
     }
 
     /**
@@ -194,8 +209,6 @@ public class BatteryStorageNonControllableIPP
                 this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(),
                         this.inverterModel.getActivePower());
             }
-        } else {
-            this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
         this.incrementInterdependentTime();
@@ -224,5 +237,10 @@ public class BatteryStorageNonControllableIPP
                 + (this.inverterModel != null ? this.inverterModel.getActivePower() : "N/A")
                 + " initialStateOfCharge="
                 + this.batteryInitialStateOfCharge;
+    }
+
+    @Override
+    public BatteryStorageNonControllableIPP getClone() {
+        return new BatteryStorageNonControllableIPP(this);
     }
 }

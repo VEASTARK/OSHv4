@@ -1,7 +1,6 @@
 package osh.mgmt.localobserver.baseload.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
@@ -31,9 +30,8 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
     /**
      * Constructs this baseload problem-part.
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
-     * @param referenceTime the starting-time this problem-part represents at the moment
+     * @param timestamp the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
      * @param baseload the predicted baseload power profile
      * @param compressionType the type of compression to use for this problem-part
@@ -41,7 +39,6 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
      */
     public BaseloadIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             boolean toBeScheduled,
             ZonedDateTime timestamp,
             DeviceTypes deviceType,
@@ -49,7 +46,6 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId,
-                logger,
                 toBeScheduled,
                 timestamp,
                 deviceType,
@@ -57,6 +53,15 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
+    }
+
+    public BaseloadIPP(BaseloadIPP other) {
+        super(other);
+    }
+
+    @Override
+    public BaseloadIPP getClone() {
+        return new BaseloadIPP(this);
     }
 
     @Override

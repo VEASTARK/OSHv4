@@ -2,7 +2,6 @@ package osh.datatypes.registry.oc.ipp;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.power.LoadProfileCompressionTypes;
@@ -38,7 +37,6 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
      * Constructs this simplified problem-part with the given information.
      *
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param referenceTime the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
@@ -49,7 +47,6 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
      */
     public PredictedNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             boolean toBeScheduled,
             ZonedDateTime referenceTime,
             DeviceTypes deviceType,
@@ -58,7 +55,6 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId,
-                logger,
                 toBeScheduled,
                 referenceTime,
                 deviceType,
@@ -68,6 +64,12 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
 
         this.usedCommodities = usedCommodities;
         this.predictedProfile = predictedProfile.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
+    }
+
+    public PredictedNonControllableIPP(PredictedNonControllableIPP other) {
+        super (other);
+        this.usedCommodities = other.usedCommodities;
+        this.predictedProfile = other.predictedProfile;
     }
 
     @Override
@@ -128,7 +130,7 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
     }
 
     @Override
-    public Schedule getFinalInterdependentSchedule() {
+    public final Schedule getFinalInterdependentSchedule() {
         if (this.getLoadProfile() != null) {
             return new Schedule(this.getLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {

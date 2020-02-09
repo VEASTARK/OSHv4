@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -24,10 +23,8 @@ public class SmartHeaterNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
     private static final long serialVersionUID = -7540136211941577232L;
-    private final int temperatureSetting;
-    private final int initialState;
-    private final long[] timestampOfLastChangePerSubElement;
-    private SmartHeaterModel model;
+    private SmartHeaterModel masterModel;
+    private SmartHeaterModel actualModel;
 
 
     /**
@@ -38,7 +35,6 @@ public class SmartHeaterNonControllableIPP
      */
     public SmartHeaterNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timeStamp,
             int temperatureSetting,
             int initialState,
@@ -48,7 +44,6 @@ public class SmartHeaterNonControllableIPP
 
         super(
                 deviceId,
-                logger,
                 false, //does not cause scheduling
                 true, //needs ancillary meter state as Input State
                 true, //reacts to input states
@@ -59,16 +54,17 @@ public class SmartHeaterNonControllableIPP
                 compressionType,
                 compressionValue);
 
-        this.temperatureSetting = temperatureSetting;
-        this.initialState = initialState;
-        this.timestampOfLastChangePerSubElement = timestampOfLastChangePerSubElement;
-
-        this.model = new SmartHeaterModel(
+        this.masterModel = new SmartHeaterModel(
                 temperatureSetting,
                 initialState,
                 timestampOfLastChangePerSubElement);
 
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
+    }
+
+    public SmartHeaterNonControllableIPP(SmartHeaterNonControllableIPP other) {
+        super(other);
+        this.masterModel = new SmartHeaterModel(other.masterModel);
     }
 
 
@@ -79,9 +75,6 @@ public class SmartHeaterNonControllableIPP
     @Deprecated
     protected SmartHeaterNonControllableIPP() {
         super();
-        this.temperatureSetting = 0;
-        this.initialState = 0;
-        this.timestampOfLastChangePerSubElement = null;
     }
 
 
@@ -104,10 +97,7 @@ public class SmartHeaterNonControllableIPP
 
         super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
 
-        this.model = new SmartHeaterModel(
-                this.temperatureSetting,
-                this.initialState,
-                this.timestampOfLastChangePerSubElement);
+        this.actualModel = new SmartHeaterModel(this.masterModel);
     }
 
     @Override
@@ -143,21 +133,19 @@ public class SmartHeaterNonControllableIPP
             double temperature = this.interdependentInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
 
             // update state
-            this.model.updateAvailablePower(this.getInterdependentTime(), availablePower, temperature);
+            this.actualModel.updateAvailablePower(this.getInterdependentTime(), availablePower, temperature);
 
             // update interdependentOutputStates
             this.internalInterdependentOutputStates.setPower(
-                    Commodity.ACTIVEPOWER, this.model.getPower());
+                    Commodity.ACTIVEPOWER, this.actualModel.getPower());
             this.internalInterdependentOutputStates.setPower(
-                    Commodity.HEATINGHOTWATERPOWER, -this.model.getPower());
+                    Commodity.HEATINGHOTWATERPOWER, -this.actualModel.getPower());
             this.setOutputStates(this.internalInterdependentOutputStates);
 
             if (this.getLoadProfile() != null) {
-                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) this.model.getPower());
-                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) -this.model.getPower());
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) this.actualModel.getPower());
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) -this.actualModel.getPower());
             }
-        } else {
-            this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
         this.incrementInterdependentTime();
@@ -181,6 +169,12 @@ public class SmartHeaterNonControllableIPP
 
     @Override
     public String problemToString() {
-        return "[" + this.getReferenceTime() + "] SmartHeaterNonControllableIPP setTemperature=" + this.temperatureSetting + " initialState=" + this.initialState;
+        return "[" + this.getReferenceTime() + "] SmartHeaterNonControllableIPP setTemperature=" + this.masterModel.getSetTemperature() + " " +
+                "currentState=" + this.masterModel.getCurrentState();
+    }
+
+    @Override
+    public SmartHeaterNonControllableIPP getClone() {
+        return new SmartHeaterNonControllableIPP(this);
     }
 }

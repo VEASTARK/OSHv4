@@ -52,7 +52,6 @@ public class SpaceCoolingLocalObserver
             ChilledWaterDemandNonControllableIPP ipp =
                     new ChilledWaterDemandNonControllableIPP(
                             this.getUUID(),
-                            this.getGlobalLogger(),
                             this.getTimeDriver().getCurrentTime(),
                             false,
                             this.dates,

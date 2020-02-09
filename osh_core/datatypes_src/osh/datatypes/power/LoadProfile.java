@@ -1,76 +1,57 @@
 package osh.datatypes.power;
 
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntMaps;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import osh.utils.dataStructures.fastutil.Long2IntTreeMap;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
 import java.util.EnumMap;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Sebastian Kramer, Ingo Mauser, Till Schuberth
  */
 @XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>, Serializable {
+public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> {
 
-    private static final long serialVersionUID = 4196506764284322858L;
     protected final Class<C> enumType;
-    protected EnumMap<C, TreeMap<Long, Tick>> commodities;
+    protected EnumMap<C, Long2IntTreeMap> commodities;
     protected long endingTimeOfProfile;
-    private EnumMap<C, Entry<Long, Tick>> currentEntry;
-    private EnumMap<C, Entry<Long, Tick>> nextEntry;
-    private EnumMap<C, Iterator<Entry<Long, Tick>>> iterators;
-
-    //for serilization
-    @Deprecated
-    public LoadProfile() {
-        this.enumType = null;
-    }
 
     public LoadProfile(Class<C> enumType) {
         this.commodities = new EnumMap<>(enumType);
         this.enumType = enumType;
         for (C commodity : this.getEnumValues()) {
-            TreeMap<Long, Tick> profile = new TreeMap<>();
-            this.commodities.put(commodity, profile);
+            this.commodities.put(commodity, new Long2IntTreeMap());
         }
 
         this.endingTimeOfProfile = 0;
     }
 
-    protected TreeMap<Long, Tick> getLoadProfile(C commodity) {
-        return this.commodities.get(commodity);
+    protected Long2IntTreeMap getLoadProfile(C c) {
+        return this.commodities.computeIfAbsent(c, k -> new Long2IntTreeMap());
     }
 
-    public void setLoad(C commodity, long t, int power) {
-        Tick v = new Tick();
-        v.value = power;
-
-        TreeMap<Long, Tick> loadProfile = this.getLoadProfile(commodity);
-        if (loadProfile == null) {
-            loadProfile = new TreeMap<>();
-            this.commodities.put(commodity, loadProfile);
-        }
-
-        loadProfile.put(t, v);
+    public void setLoad(C c, long t, int power) {
+        Long2IntTreeMap loadProfile = this.getLoadProfile(c);
+        loadProfile.put(t, power);
         if (this.endingTimeOfProfile < t + 1) {
-            if (this.endingTimeOfProfile != t
-                    || power != 0) {
-                this.endingTimeOfProfile = t + 1;
-            }
+            this.endingTimeOfProfile = t + 1;
         }
     }
 
-    protected <T> Entry<Long, T> getNext(
-            Iterator<Entry<Long, T>> it,
+    protected Long2IntMap.Entry getNext(
+            ObjectIterator<Long2IntMap.Entry> it,
             long duration) {
         if (it.hasNext()) {
-            Entry<Long, T> e = it.next();
-            if (e.getKey() < duration)
+            Long2IntMap.Entry e = it.next();
+            if (e.getLongKey() < duration)
                 return e;
             else
                 return null;
@@ -78,11 +59,15 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
             return null;
     }
 
-    public Iterator<Entry<Long, Tick>> getIteratorForSubMap(C c, long from, long to) {
-        return this.commodities.get(c).subMap(from, false, to, false).entrySet().iterator();
+    public ObjectIterator<Long2IntMap.Entry> getIteratorForSubMap(C c, long from, long to) {
+        return Long2IntMaps.fastIterator(this.commodities.get(c).subMap(from, to));
     }
 
-    public Entry<Long, Tick> getFloorEntry(C c, long t) {
+    public ObjectIterator<Long2IntMap.Entry> getIteratorForType(C c) {
+        return Long2IntMaps.fastIterator(this.commodities.get(c));
+    }
+
+    public Long2IntMap.Entry getFloorEntry(C c, long t) {
         return this.commodities.get(c).floorEntry(t);
     }
 
@@ -109,132 +94,6 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
             LoadProfile<C> other,
             long offset);
 
-//	protected void mergeOther(
-//			LoadProfile<C> other, 
-//			long offset,
-//			LoadProfile<C> merged) {
-//
-//		merged.setEndingTimeOfProfile(Math.max(this.endingTimeOfProfile, other.endingTimeOfProfile + offset));
-//
-//		for (C commodity : getEnumValues()) {
-//			TreeMap<Long, Tick> loadProfile1 = this.getLoadProfile(commodity);
-//			TreeMap<Long, Tick> loadProfile2 = other.getLoadProfile(commodity);
-//			
-//			TreeMap<Long, Tick> result;
-//			TreeMap<Long, Tick> toMerge;
-//			TreeMap<Long, Tick> cloned;
-//			long newOffset;
-//			long endingTime;
-//			long otherEndingTime;
-//			if (loadProfile1.size() > loadProfile2.size()) {
-//				result = new TreeMap<Long, Tick>(loadProfile1);
-//				toMerge = loadProfile2;
-//				newOffset = offset;
-//				endingTime = other.endingTimeOfProfile;
-//				cloned = loadProfile1;
-//				otherEndingTime = this.endingTimeOfProfile;
-//			} else {
-//				result = new TreeMap<Long, Tick>(loadProfile2);
-//				result.forEach((k, v) -> k += offset);
-//				toMerge = loadProfile1;
-//				newOffset = 0;
-//				endingTime = this.endingTimeOfProfile;
-//				cloned = loadProfile2;
-//				otherEndingTime = other.endingTimeOfProfile;
-//			}
-//			
-//
-//			Iterator<Entry<Long, Tick>> currentIterator = toMerge.entrySet()
-//					.iterator();
-//			Entry<Long, Tick> currentToMerge = getNext(currentIterator, endingTime);
-//			Entry<Long, Tick> nextToMerge = getNext(currentIterator, endingTime);
-//			
-//			Iterator<Entry<Long, Tick>> otherIterator = cloned.subMap(currentToMerge.getKey(), false, 
-//					otherEndingTime, true).entrySet()
-//					.iterator();
-//			Entry<Long, Tick> currentOther = cloned.floorEntry(currentToMerge.getKey());
-//			Entry<Long, Tick> nextOther = getNext(otherIterator, otherEndingTime);
-//
-//			while (currentToMerge != null) {
-//
-//				if (entry1.getKey() < entry2.getKey() + offset) {
-//					merged.setLoad(commodity, entry1.getKey(),
-//							entry1.getValue().value + activeValue2);
-//
-//					activeValue1 = entry1.getValue().value;
-//
-//					entry1 = getNext(iSet1, this.endingTimeOfProfile);
-//				} else if (entry1.getKey() > entry2.getKey() + offset) {
-//					merged.setLoad(commodity, entry2.getKey() + offset,
-//							activeValue1 + entry2.getValue().value);
-//
-//					activeValue2 = entry2.getValue().value;
-//
-//					entry2 = getNext(iSet2, other.endingTimeOfProfile);
-//				} else /* (entry1.getKey() == entry2.getKey() + offset) */{
-//					merged.setLoad(commodity, entry2.getKey() + offset,
-//							entry1.getValue().value + entry2.getValue().value);
-//
-//					activeValue1 = entry1.getValue().value;
-//					activeValue2 = entry2.getValue().value;
-//
-//					entry1 = getNext(iSet1, this.endingTimeOfProfile);
-//					entry2 = getNext(iSet2, other.endingTimeOfProfile);
-//				}
-//			}
-//
-//			while (entry1 != null) { // 1st profile still has data points
-//				if (entry1.getKey() < other.endingTimeOfProfile + offset) {
-//					merged.setLoad(commodity, entry1.getKey(),
-//							entry1.getValue().value + activeValue2);
-//					activeValue1 = entry1.getValue().value;
-//				} else { // 2nd profile has ended
-//					if (activeValue2 != 0) {
-//						merged.setLoad(commodity, other.endingTimeOfProfile + offset,
-//								activeValue1);
-//						activeValue2 = 0;
-//					}
-//					merged.setLoad(commodity, entry1.getKey(),
-//							entry1.getValue().value + activeValue2);
-//				}
-//
-//				entry1 = getNext(iSet1, this.endingTimeOfProfile);
-//			}
-//			while (entry2 != null) {
-//				if (entry2.getKey() + offset < this.endingTimeOfProfile) {
-//					merged.setLoad(commodity, entry2.getKey() + offset,
-//							entry2.getValue().value + activeValue1);
-//					activeValue2 = entry2.getValue().value;
-//				} else {
-//					if (activeValue1 != 0) {
-//						merged.setLoad(commodity, endingTimeOfProfile, activeValue2);
-//						activeValue1 = 0;
-//					}
-//					merged.setLoad(commodity, entry2.getKey() + offset,
-//							entry2.getValue().value + activeValue1);
-//				}
-//
-//				entry2 = getNext(iSet2, other.endingTimeOfProfile);
-//			}
-//
-//			// handling the end of profiles
-//			if (activeValue1 != 0 && activeValue2 != 0) {
-//				if (this.endingTimeOfProfile > other.endingTimeOfProfile + offset) {
-//					merged.setLoad(commodity, other.endingTimeOfProfile + offset,
-//							activeValue1);
-//				} else if (this.endingTimeOfProfile < other.endingTimeOfProfile + offset) {
-//					merged.setLoad(commodity, this.endingTimeOfProfile, activeValue2);
-//				} else { /* == */
-//					assert (this.endingTimeOfProfile == merged.endingTimeOfProfile);
-//				}
-//			} else if (activeValue2 != 0) {
-//				merged.setLoad(commodity, other.endingTimeOfProfile + offset, activeValue1);
-//			} else if (activeValue1 != 0) {
-//				merged.setLoad(commodity, endingTimeOfProfile, activeValue2);
-//			}
-//		}
-//	}
-
     protected void merge(
             LoadProfile<C> other,
             long offset,
@@ -243,42 +102,37 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
         merged.endingTimeOfProfile = Math.max(this.endingTimeOfProfile, other.endingTimeOfProfile + offset);
 
         for (C commodity : this.getEnumValues()) {
-            TreeMap<Long, Tick> loadProfile1 = this.getLoadProfile(commodity);
-            TreeMap<Long, Tick> loadProfile2 = other.getLoadProfile(commodity);
+            ObjectIterator<Long2IntMap.Entry> iSet1 = Long2IntMaps.fastIterator(this.getLoadProfile(commodity));
+            ObjectIterator<Long2IntMap.Entry> iSet2 = Long2IntMaps.fastIterator(other.getLoadProfile(commodity));
 
-            Iterator<Entry<Long, Tick>> iSet1 = loadProfile1.entrySet()
-                    .iterator();
-            Iterator<Entry<Long, Tick>> iSet2 = loadProfile2.entrySet()
-                    .iterator();
-
-            Entry<Long, Tick> entry1 = this.getNext(iSet1, this.endingTimeOfProfile);
-            Entry<Long, Tick> entry2 = this.getNext(iSet2, other.endingTimeOfProfile);
+            Long2IntMap.Entry entry1 = this.getNext(iSet1, this.endingTimeOfProfile);
+            Long2IntMap.Entry entry2 = this.getNext(iSet2, other.endingTimeOfProfile);
 
             int activeValue1 = 0;
             int activeValue2 = 0;
 
             while (entry1 != null && entry2 != null) {
 
-                if (entry1.getKey() < entry2.getKey() + offset) {
-                    merged.setLoad(commodity, entry1.getKey(),
-                            entry1.getValue().value + activeValue2);
+                if (entry1.getLongKey() < entry2.getLongKey() + offset) {
+                    merged.setLoad(commodity, entry1.getLongKey(),
+                            entry1.getIntValue() + activeValue2);
 
-                    activeValue1 = entry1.getValue().value;
+                    activeValue1 = entry1.getIntValue();
 
                     entry1 = this.getNext(iSet1, this.endingTimeOfProfile);
-                } else if (entry1.getKey() > entry2.getKey() + offset) {
-                    merged.setLoad(commodity, entry2.getKey() + offset,
-                            activeValue1 + entry2.getValue().value);
+                } else if (entry1.getLongKey() > entry2.getLongKey() + offset) {
+                    merged.setLoad(commodity, entry2.getLongKey() + offset,
+                            activeValue1 + entry2.getIntValue());
 
-                    activeValue2 = entry2.getValue().value;
+                    activeValue2 = entry2.getIntValue();
 
                     entry2 = this.getNext(iSet2, other.endingTimeOfProfile);
                 } else /* (entry1.getKey() == entry2.getKey() + offset) */ {
-                    merged.setLoad(commodity, entry2.getKey() + offset,
-                            entry1.getValue().value + entry2.getValue().value);
+                    merged.setLoad(commodity, entry2.getLongKey() + offset,
+                            entry1.getIntValue() + entry2.getIntValue());
 
-                    activeValue1 = entry1.getValue().value;
-                    activeValue2 = entry2.getValue().value;
+                    activeValue1 = entry1.getIntValue();
+                    activeValue2 = entry2.getIntValue();
 
                     entry1 = this.getNext(iSet1, this.endingTimeOfProfile);
                     entry2 = this.getNext(iSet2, other.endingTimeOfProfile);
@@ -286,34 +140,34 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
             }
 
             while (entry1 != null) { // 1st profile still has data points
-                if (entry1.getKey() < other.endingTimeOfProfile + offset) {
-                    merged.setLoad(commodity, entry1.getKey(),
-                            entry1.getValue().value + activeValue2);
-                    activeValue1 = entry1.getValue().value;
+                if (entry1.getLongKey() < other.endingTimeOfProfile + offset) {
+                    merged.setLoad(commodity, entry1.getLongKey(),
+                            entry1.getIntValue() + activeValue2);
+                    activeValue1 = entry1.getIntValue();
                 } else { // 2nd profile has ended
                     if (activeValue2 != 0) {
                         merged.setLoad(commodity, other.endingTimeOfProfile + offset,
                                 activeValue1);
                         activeValue2 = 0;
                     }
-                    merged.setLoad(commodity, entry1.getKey(),
-                            entry1.getValue().value + activeValue2);
+                    merged.setLoad(commodity, entry1.getLongKey(),
+                            entry1.getIntValue() + activeValue2);
                 }
 
                 entry1 = this.getNext(iSet1, this.endingTimeOfProfile);
             }
             while (entry2 != null) {
-                if (entry2.getKey() + offset < this.endingTimeOfProfile) {
-                    merged.setLoad(commodity, entry2.getKey() + offset,
-                            entry2.getValue().value + activeValue1);
-                    activeValue2 = entry2.getValue().value;
+                if (entry2.getLongKey() + offset < this.endingTimeOfProfile) {
+                    merged.setLoad(commodity, entry2.getLongKey() + offset,
+                            entry2.getIntValue() + activeValue1);
+                    activeValue2 = entry2.getIntValue();
                 } else {
                     if (activeValue1 != 0) {
                         merged.setLoad(commodity, this.endingTimeOfProfile, activeValue2);
                         activeValue1 = 0;
                     }
-                    merged.setLoad(commodity, entry2.getKey() + offset,
-                            entry2.getValue().value + activeValue1);
+                    merged.setLoad(commodity, entry2.getLongKey() + offset,
+                            entry2.getIntValue() + activeValue1);
                 }
 
                 entry2 = this.getNext(iSet2, other.endingTimeOfProfile);
@@ -347,40 +201,6 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
         return this.endingTimeOfProfile;
     }
 
-//	public int getAverageLoadFromTill(C commodity, long start, long end) {
-//		TreeMap<Long, Tick> loadProfile = getLoadProfile(commodity);
-//		
-//		if (start >= endingTimeOfProfile) {
-//			return 0;
-//		}
-//		double avg = 0.0;
-//		long currentTime = start;
-//		
-//		//checking if profile has values
-//		Entry<Long, Tick> entry = loadProfile.floorEntry(start);
-//		if (entry == null) 
-//			return 0;
-//		
-//		while (currentTime < end && currentTime < endingTimeOfProfile) {
-//			int powerVal = loadProfile.floorEntry(currentTime).getValue().value;
-//			Long nextChange = loadProfile.higherKey(currentTime);
-//			if (nextChange == null)
-//				nextChange = end;
-//			else if (nextChange > end)
-//				nextChange = end;
-//			if (nextChange > endingTimeOfProfile)
-//				nextChange = endingTimeOfProfile;
-//			
-//			avg += (double) powerVal * ((double) (nextChange - currentTime) / (double) (end - start));
-//			currentTime = nextChange;
-//		}
-//		
-////		if (avg == 0)
-////			System.out.println("No GOOD");
-//		
-//		return (int) Math.round(avg);
-//	}
-
     /**
      * EndingTime is defined as the point in time (timestamp) where
      * the profile stops having a value other than 0, NOT the length of the profile.
@@ -391,49 +211,48 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     }
 
     @Override
-    public int getLoadAt(C commodity, long t) {
-        TreeMap<Long, Tick> loadProfile = this.getLoadProfile(commodity);
-
+    public int getLoadAt(C c, long t) {
         if (t >= this.endingTimeOfProfile) {
-//			throw new IndexOutOfBoundsException();
             return 0;
         }
 
-        Entry<Long, Tick> entry = loadProfile.floorEntry(t);
-        return (entry == null) ? 0 : entry.getValue().value;
+        Long2IntMap.Entry entry = this.getLoadProfile(c).floorEntry(t);
+        return (entry == null) ? 0 : entry.getIntValue();
     }
 
     public int getAverageLoadFromTill(C commodity, long start, long end) {
-        TreeMap<Long, Tick> loadProfile = this.getLoadProfile(commodity);
-
         if (start >= this.endingTimeOfProfile) {
             return 0;
         }
+
+        Long2IntTreeMap loadProfile = this.getLoadProfile(commodity);
+
         double avg = 0.0;
         long currentTime = start;
         long maxTime = Math.min(end, this.endingTimeOfProfile);
 
         //checking if profile has values
-        Entry<Long, Tick> currentEntry = loadProfile.floorEntry(start);
+        Long2IntMap.Entry currentEntry = loadProfile.floorEntry(start);
         if (currentEntry == null)
             return 0;
 
-        Long higherKey = loadProfile.higherKey(currentTime);
+        long higherKey = loadProfile.higherKey(currentTime);
 
         //no other values for the requested time period
-        if (higherKey == null || higherKey >= maxTime) {
-            avg = currentEntry.getValue().value * ((double) (maxTime - currentTime) / (end - start));
+        if (higherKey == Long2IntTreeMap.INVALID_KEY || higherKey >= maxTime) {
+            avg = ((double) currentEntry.getIntValue()) * ((double) (maxTime - currentTime) / (double) (end - start));
             return (int) Math.round(avg);
-//			return currentEntry.getValue().value;
         }
 
-        Iterator<Entry<Long, Tick>> entryIterator = loadProfile.subMap(start, false, maxTime, false).entrySet().iterator();
-        Entry<Long, Tick> nextEntry = entryIterator.next();
+        ObjectIterator<Long2IntMap.Entry> entryIterator =
+                Long2IntMaps.fastIterator(loadProfile.subMap(start, maxTime));
+        Long2IntMap.Entry nextEntry = entryIterator.next();
+        while (nextEntry.getLongKey() == currentEntry.getLongKey()) nextEntry = entryIterator.next();
 
         while (nextEntry != null) {
-            long nextChange = nextEntry.getKey();
+            long nextChange = nextEntry.getLongKey();
 
-            avg += currentEntry.getValue().value * ((double) (nextChange - currentTime) / (end - start));
+            avg += ((double) currentEntry.getIntValue()) * ((double) (nextChange - currentTime) / (double) (end - start));
             currentTime = nextChange;
             currentEntry = nextEntry;
 
@@ -445,103 +264,10 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
         }
 
         if (currentTime < maxTime) {
-            avg += currentEntry.getValue().value * ((double) (maxTime - currentTime) / (end - start));
+            avg += currentEntry.getIntValue() * ((double) (maxTime - currentTime) / (end - start));
         }
 
         return (int) Math.round(avg);
-    }
-
-    public void removeSequentialPriming() {
-        this.currentEntry = null;
-        this.nextEntry = null;
-        this.iterators = null;
-    }
-
-    public void initSequentialAverageLoad(long from, long till) {
-
-        this.currentEntry = new EnumMap<>(this.enumType);
-        this.nextEntry = new EnumMap<>(this.enumType);
-        this.iterators = new EnumMap<>(this.enumType);
-
-        for (C c : this.getEnumValues()) {
-
-            TreeMap<Long, Tick> loadProfile = this.getLoadProfile(c);
-
-            if (from < this.endingTimeOfProfile) {
-                this.currentEntry.put(c, loadProfile.floorEntry(from));
-
-                Iterator<Entry<Long, Tick>> it = loadProfile.subMap(from, false, till, true).entrySet().iterator();
-                this.iterators.put(c, it);
-
-                this.nextEntry.put(c, (it.hasNext() ? it.next() : null));
-            } else {
-                this.currentEntry.put(c, null);
-                this.iterators.put(c, null);
-                this.nextEntry.put(c, null);
-            }
-        }
-    }
-
-    public void initSequentialAverageLoad(long from) {
-
-        this.initSequentialAverageLoad(from, Long.MAX_VALUE);
-    }
-
-    public int getAverageLoadFromTillSequential(C commodity, long start, long end) {
-        return (int) Math.round(this.getAverageLoadFromTillSequentialNotRounded(commodity, start, end));
-    }
-
-    public double getAverageLoadFromTillSequentialNotRounded(C commodity, long start, long end) {
-
-        if (start >= this.endingTimeOfProfile) {
-            return 0;
-        }
-        Entry<Long, Tick> current = this.currentEntry.get(commodity);
-
-        //checking if profile has values
-        if (current == null)
-            return 0;
-
-        double avg = 0.0;
-        long currentTime = start;
-        double span = end - start;
-        long maxTime = Math.min(end, this.endingTimeOfProfile);
-
-//
-        Entry<Long, Tick> next = this.nextEntry.get(commodity);
-
-        //no other values for the requested time period
-        if (next == null || next.getKey() >= maxTime) {
-//			avg = ((double) current.getValue().value) * (((double) (maxTime - currentTime)) / span);
-//			return avg;
-            return current.getValue().value;
-        }
-
-        Iterator<Entry<Long, Tick>> entryIterator = this.iterators.get(commodity);
-
-        while (next != null && next.getKey() < maxTime) {
-            long nextChange = next.getKey();
-
-            avg += current.getValue().value * (nextChange - currentTime);
-            currentTime = nextChange;
-            current = next;
-
-            if (entryIterator.hasNext()) {
-                next = entryIterator.next();
-            } else {
-                next = null;
-            }
-        }
-
-        if (currentTime < maxTime) {
-            avg += current.getValue().value * (maxTime - currentTime);
-        }
-
-        this.currentEntry.put(commodity, current);
-        this.nextEntry.put(commodity, next);
-//		iterators.put(commodity, entryIterator);
-
-        return (avg / span);
     }
 
     @Override
@@ -557,48 +283,28 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
      */
     @Override
     public void cutOffNegativeTimeValues() {
-        boolean modified = false;
-
-        for (TreeMap<Long, Tick> ticks : this.commodities.values()) {
-            Entry<Long, Tick> lastProcessed = null;
-            while (!ticks.isEmpty() && ticks.firstKey() < 0) {
-                lastProcessed = ticks.firstEntry();
-                ticks.remove(lastProcessed.getKey());
+        for (Long2IntTreeMap load : this.commodities.values()) {
+            int lastVal = 0;
+            boolean modified = false;
+            while(load.firstLongKey() < 0) {
+                lastVal = load.get(load.firstLongKey());
+                load.remove(load.firstLongKey());
                 modified = true;
             }
-            if (lastProcessed != null && !ticks.isEmpty() && ticks.firstKey() > 0) {
-                ticks.put(0L, lastProcessed.getValue());
+            if (modified) {
+                load.put(0, lastVal);
             }
-        }
-
-        if (modified) this.recalculateIntegrals();
-    }
-
-    private void recalculateIntegrals() {
-        for (Entry<C, TreeMap<Long, Tick>> ticks : this.commodities.entrySet()) {
-            //we could really recalculate all integrals in here, but I prefer
-            //to do all the calculations in one place to minimize errors
-            //this method is a bit slower, but won't take too much more
-            //processing time.
-
-            TreeMap<Long, Tick> newTicks = new TreeMap<>();
-            for (Entry<Long, Tick> t : ticks.getValue().entrySet()) {
-                newTicks.put(t.getKey(), t.getValue());
-            }
-            this.commodities.put(ticks.getKey(), newTicks);
         }
     }
 
     public void multiplyLoadsWithFactor(double factor) {
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
-            TreeMap<Long, Tick> originalLoadProfile = es.getValue();
-
-            for (Entry<Long, Tick> entry : originalLoadProfile.entrySet()) {
-                Tick newTick = new Tick();
-                newTick.value = (int) Math.round(entry.getValue().value * factor);
-                originalLoadProfile.put(entry.getKey(), newTick);
-            }
+        for (Long2IntTreeMap map : this.commodities.values()) {
+            Long2IntMaps.fastForEach(map, e -> e.setValue((int) Math.round(e.getIntValue() * factor)));
         }
+    }
+
+    public void multiplyLoadsWithFactor(double factor, C c) {
+        Long2IntMaps.fastForEach(this.getLoadProfile(c), e -> e.setValue((int) Math.round(e.getIntValue() * factor)));
     }
 
     public abstract LoadProfile<C> getProfileWithoutDuplicateValues();
@@ -611,22 +317,22 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     // general
     protected void getProfileWithoutDuplicateValues(LoadProfile<C> compress) {
         for (C c : this.getEnumValues()) {
-            TreeMap<Long, Tick> map = this.commodities.get(c);
-            TreeMap<Long, Tick> otherMap = compress.commodities.get(c);
-            Iterator<Map.Entry<Long, Tick>> it = map.entrySet().iterator();
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            Long2IntTreeMap otherMap = compress.getLoadProfile(c);
+            ObjectIterator<Long2IntMap.Entry> it = Long2IntMaps.fastIterator(map);
 
             if (!it.hasNext())
                 continue;
 
-            Entry<Long, Tick> lastValue = it.next();
-            otherMap.put(lastValue.getKey(), lastValue.getValue());
+            Long2IntMap.Entry lastValue = it.next();
+            otherMap.put(lastValue.getLongKey(), lastValue.getIntValue());
 
             while (it.hasNext()) {
-                Entry<Long, Tick> e = it.next();
+                Long2IntMap.Entry e = it.next();
 
-                if (!lastValue.getValue().equals(e.getValue())) {
+                if (lastValue.getIntValue() != e.getIntValue()) {
                     lastValue = e;
-                    otherMap.put(lastValue.getKey(), lastValue.getValue());
+                    otherMap.put(lastValue.getLongKey(), lastValue.getIntValue());
                 }
             }
         }
@@ -655,157 +361,89 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
             final double powerEps, LoadProfile<C> compressed) {
 
         for (C c : this.getEnumValues()) {
-            TreeMap<Long, Tick> map = this.commodities.get(c);
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            Long2IntTreeMap compressedMap = compressed.getLoadProfile(c);
 
-            double lastValueSaved = Double.MAX_VALUE;
-            long lastValueSavedKey = Long.MIN_VALUE;
+            double lastValueSaved;
+            long lastValueSavedKey;
 
-            double momentaryAvg = Double.MAX_VALUE;
-            double momentaryAvgMax = Double.MIN_VALUE;
-            double momentaryAvgMin = Double.MAX_VALUE;
+            double momentaryAvg;
+            double momentaryAvgMax;
+            double momentaryAvgMin;
 
-            Tick lastLookedAtTick = null;
-            long lastLookedAtKey = Long.MIN_VALUE;
+            long lastLookedAtKey;
+            int lastLookedAtValue;
 
             long counter = 0;
 
-            for (Iterator<Map.Entry<Long, Tick>> it = map.entrySet().iterator(); it.hasNext(); ) {
-                Entry<Long, Tick> e = it.next();
-                // if last -> set value
-                if (!it.hasNext()) {
-                    compressed.setLoad(c, e.getKey(), e.getValue().value);
+            //store first value
+            if (!map.isEmpty()) {
+                lastValueSavedKey = map.firstLongKey();
+                lastLookedAtValue = map.get(lastValueSavedKey);
 
-                    if (lastLookedAtTick != null) {
-                        // write previous average value...
+                lastValueSaved = lastLookedAtValue;
+                lastLookedAtKey = lastValueSavedKey;
+
+                momentaryAvg = lastValueSaved;
+                momentaryAvgMax = lastValueSaved;
+                momentaryAvgMin = lastValueSaved;
+
+                compressedMap.put(lastValueSavedKey, (int) lastValueSaved);
+
+                for (ObjectIterator<Long2IntMap.Entry> it =
+                     Long2IntMaps.fastIterator(map.tailMap(map.firstLongKey() + 1)); it.hasNext(); ) {
+                    Long2IntMap.Entry e = it.next();
+                    // if last sample -> store sample
+                    if (!it.hasNext()) {
+                        compressed.setLoad(c, e.getLongKey(), e.getIntValue());
+
+                        if (lastLookedAtKey != Long2IntTreeMap.INVALID_KEY) {
+                            // write previous average value...
+                            compressed.setLoad(c, lastValueSavedKey, (int) Math.round(momentaryAvg));
+                        }
+                    }
+                    //if difference of avg to min/max/lastValue/nowValue > powerEps --> store new sample
+                    else if (Math.abs(momentaryAvg - momentaryAvgMax) > powerEps
+                            || Math.abs(momentaryAvg - momentaryAvgMin) > powerEps
+                            || Math.abs(momentaryAvg - lastValueSaved) > powerEps
+                            || Math.abs(momentaryAvg - e.getIntValue()) > powerEps) {
+
+                        long diffToLastKey = e.getLongKey() - lastLookedAtKey;
+                        momentaryAvg = (lastLookedAtValue * diffToLastKey + momentaryAvg * counter) / (diffToLastKey + counter);
+
                         compressed.setLoad(c, lastValueSavedKey, (int) Math.round(momentaryAvg));
+
+                        lastValueSavedKey = e.getLongKey();
+                        lastValueSaved = e.getIntValue();
+
+                        lastLookedAtKey = e.getLongKey();
+                        lastLookedAtValue = e.getIntValue();
+
+                        momentaryAvg = lastValueSaved;
+                        momentaryAvgMax = lastValueSaved;
+                        momentaryAvgMin = lastValueSaved;
+
+                        counter = 0;
                     }
-                }
-                // first value
-                else if (lastLookedAtTick == null) {
-                    compressed.setLoad(c, e.getKey(), e.getValue().value);
+                    // difference is to small, update avg/min/max etc.
+                    else {
+                        long diffToLastKey = e.getLongKey() - lastLookedAtKey;
+                        momentaryAvg = (lastLookedAtValue * diffToLastKey + momentaryAvg * counter) / (diffToLastKey + counter);
 
-                    lastValueSavedKey = e.getKey();
-                    lastValueSaved = e.getValue().value;
+                        lastLookedAtKey = e.getLongKey();
+                        lastLookedAtValue = e.getIntValue();
 
-                    lastLookedAtTick = e.getValue();
-                    lastLookedAtKey = e.getKey();
+                        if (e.getIntValue() > momentaryAvgMax) {
+                            momentaryAvgMax = e.getIntValue();
+                        } else if (e.getIntValue() < momentaryAvgMin) {
+                            momentaryAvgMin = e.getIntValue();
+                        }
 
-                    momentaryAvg = lastValueSaved;
-                    momentaryAvgMax = lastValueSaved;
-                    momentaryAvgMin = lastValueSaved;
-
-                    counter = 0;
-                }
-                //if difference of avg to min/max/lastValue/nowValue > powerEps --> save
-                else if (Math.abs(momentaryAvg - momentaryAvgMax) > powerEps
-                        || Math.abs(momentaryAvg - momentaryAvgMin) > powerEps
-                        || Math.abs(momentaryAvg - lastValueSaved) > powerEps
-                        || Math.abs(momentaryAvg - e.getValue().value) > powerEps) {
-
-                    long diffToLastKey = e.getKey() - lastLookedAtKey;
-                    momentaryAvg = (lastLookedAtTick.value * diffToLastKey + momentaryAvg * counter) / (diffToLastKey + counter);
-
-                    compressed.setLoad(c, lastValueSavedKey, (int) Math.round(momentaryAvg));
-
-                    lastValueSavedKey = e.getKey();
-                    lastValueSaved = e.getValue().value;
-
-                    lastLookedAtTick = e.getValue();
-                    lastLookedAtKey = e.getKey();
-
-                    momentaryAvg = lastValueSaved;
-                    momentaryAvgMax = lastValueSaved;
-                    momentaryAvgMin = lastValueSaved;
-
-                    counter = 0;
-                }
-                //diff to small, update avg/min/max etc.
-                else {
-                    long diffToLastKey = e.getKey() - lastLookedAtKey;
-                    momentaryAvg = (lastLookedAtTick.value * diffToLastKey + momentaryAvg * counter) / (diffToLastKey + counter);
-
-                    lastLookedAtKey = e.getKey();
-                    lastLookedAtTick = e.getValue();
-
-                    if (e.getValue().value > momentaryAvgMax) {
-                        momentaryAvgMax = e.getValue().value;
-                    } else if (e.getValue().value < momentaryAvgMin) {
-                        momentaryAvgMin = e.getValue().value;
+                        counter += diffToLastKey;
                     }
-
-                    counter += diffToLastKey;
                 }
             }
-
-
-//			double lastAvgToSave = Double.MAX_VALUE;
-//			long lastKeyToSave = Long.MIN_VALUE;
-//			Tick lastValueTickToSave = null;
-//			int lastValueTickValueToSave = 0;
-//
-//			long lastKey = Long.MIN_VALUE;
-//			int lastTickValue = 0;
-//
-//			long counter = 0;
-//
-//			for (Iterator<Map.Entry<Long, Tick>> it = map.entrySet().iterator(); it.hasNext();) {
-//				Entry<Long,Tick> e = it.next();
-//				// if last -> set value
-//				if (it.hasNext() == false) {
-//					compressed.setLoad(c, e.getKey(), e.getValue().value);
-//
-//					if (lastValueTickToSave != null) {
-//						// write previous average value...
-//						compressed.setLoad(c, lastKeyToSave, (int) Math.round(lastAvgToSave));
-//					}
-//				}
-//				// first value
-//				else if (lastValueTickToSave == null) {
-//					compressed.setLoad(c, e.getKey(), e.getValue().value);
-//
-//					lastKeyToSave = e.getKey();
-//					lastValueTickToSave = e.getValue();
-//					lastValueTickValueToSave = e.getValue().value;
-//					lastAvgToSave = lastValueTickValueToSave;
-//
-//					lastKey = lastKeyToSave;
-//					lastTickValue = lastValueTickValueToSave;
-//					counter = 0;
-//				}
-//				// difference to previous value is too small -> update avg
-////				else if (Math.abs(e.getValue().value - lastValueTickValueToSave) < powerEps) {
-////					long diffToLastKey = e.getKey() - lastKeyToSave;
-////					int currentValue = e.getValue().value;
-////					lastAvg = (lastAvg * diffToLastKey + currentValue) / (diffToLastKey + 1);
-//
-//				else if (Math.abs(e.getValue().value - lastAvgToSave) < powerEps) {
-//					long diffToLastKey = e.getKey() - lastKey;
-//					lastAvgToSave = (lastTickValue * diffToLastKey + lastAvgToSave * counter) / (diffToLastKey + counter);
-//
-//					lastKey = e.getKey();
-//					lastTickValue = e.getValue().value;
-//
-//					counter = counter + diffToLastKey;
-//				}
-//				// difference to previous is big enough -> set avg and add new datapoint
-//				else {
-//					long diffToLastKey = e.getKey() - lastKey;
-//					lastAvgToSave = (lastTickValue * diffToLastKey + lastAvgToSave * counter) / (diffToLastKey + counter);
-//
-//					compressed.setLoad(c, lastKeyToSave, (int) Math.round(lastAvgToSave));
-//
-//					lastKeyToSave = e.getKey();
-//					lastValueTickToSave = e.getValue();
-//					lastValueTickValueToSave = e.getValue().value;
-//					lastAvgToSave = lastValueTickValueToSave;
-//
-//					lastKey = e.getKey();
-//					lastTickValue = e.getValue().value;
-//					counter = 0;
-//				}
-//			}
         }
-
         compressed.endingTimeOfProfile = this.endingTimeOfProfile;
     }
 
@@ -817,44 +455,47 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     protected void getCompressedProfileByTimeSlot(final int time, LoadProfile<C> compressed) {
 
         for (C c : this.getEnumValues()) {
-            TreeMap<Long, Tick> map = this.commodities.get(c);
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            Long2IntTreeMap compressedMap = compressed.getLoadProfile(c);
 
-            Tick lastTick = null;
-            double lastAvg = Double.MAX_VALUE;
-            long lastKey = Long.MIN_VALUE;
+            double lastAvg;
+            long lastKey;
+            int lastValue;
 
-            for (Iterator<Map.Entry<Long, Tick>> it = map.entrySet().iterator(); it.hasNext(); ) {
-                Entry<Long, Tick> e = it.next();
-                // if last -> set value
-                if (!it.hasNext()) {
-                    compressed.setLoad(c, e.getKey(), e.getValue().value);
+            //store first value
+            if (!map.isEmpty()) {
+                lastKey = map.firstLongKey();
+                lastValue = map.get(lastKey);
+                lastAvg = lastValue;
 
-                    if (lastTick != null) {
-                        // write last value...
-                        compressed.setLoad(c, lastKey, (int) Math.round(lastAvg));
+                compressedMap.put(lastKey, lastValue);
+
+                for (ObjectIterator<Long2IntMap.Entry> it =
+                     Long2IntMaps.fastIterator(map.tailMap(map.firstLongKey() + 1)); it.hasNext(); ) {
+                    Long2IntMap.Entry e = it.next();
+                    // if last -> set value
+                    if (!it.hasNext()) {
+                        compressed.setLoad(c, e.getLongKey(), e.getIntValue());
+
+                        if (lastKey != Long2IntTreeMap.INVALID_KEY) {
+                            // write last value...
+                            compressed.setLoad(c, lastKey, (int) Math.round(lastAvg));
+                        }
                     }
-                }
-                // first value
-                else if (lastTick == null) {
-                    compressed.setLoad(c, e.getKey(), e.getValue().value);
+                    // difference to previous value is too small -> update avg
+                    else if (Math.abs(e.getLongKey() - lastKey) < time) {
+                        long diffToLastKey = e.getLongKey() - lastKey;
+                        int currentValue = e.getIntValue();
+                        lastAvg = (lastAvg * diffToLastKey + currentValue) / (diffToLastKey + 1);
+                    }
+                    // difference to previous is big enough -> set avg and add new datapoint
+                    else {
+                        compressed.setLoad(c, lastKey, (int) Math.round(lastAvg));
 
-                    lastKey = e.getKey();
-                    lastTick = e.getValue();
-                    lastAvg = e.getValue().value;
-                }
-                // difference to previous value is too small -> update avg
-                else if (Math.abs(e.getKey() - lastKey) < time) {
-                    long diffToLastKey = e.getKey() - lastKey;
-                    int currentValue = e.getValue().value;
-                    lastAvg = (lastAvg * diffToLastKey + currentValue) / (diffToLastKey + 1);
-                }
-                // difference to previous is big enough -> set avg and add new datapoint
-                else {
-                    compressed.setLoad(c, lastKey, (int) Math.round(lastAvg));
-
-                    lastKey = e.getKey();
-                    lastTick = e.getValue();
-                    lastAvg = e.getValue().value;
+                        lastKey = e.getLongKey();
+                        lastValue = e.getIntValue();
+                        lastAvg = lastValue;
+                    }
                 }
             }
         }
@@ -872,16 +513,8 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     public abstract LoadProfile<C> clone();
 
     protected void clone(LoadProfile<C> newLoadProfile) {
-
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
-            TreeMap<Long, Tick> originalLoadProfile = es.getValue();
-            TreeMap<Long, Tick> newProfile = new TreeMap<>();
-
-            for (Entry<Long, Tick> entry : originalLoadProfile.entrySet()) {
-                newProfile.put(entry.getKey(), entry.getValue().clone());
-            }
-
-            newLoadProfile.commodities.put(es.getKey(), newProfile);
+        for (C c : this.getEnumValues()) {
+            newLoadProfile.commodities.put(c, new Long2IntTreeMap(this.getLoadProfile(c)));
         }
 
         newLoadProfile.endingTimeOfProfile = this.endingTimeOfProfile;
@@ -896,20 +529,14 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     public abstract LoadProfile<C> cloneAfter(long timestamp);
 
     protected void cloneAfter(long timestamp, LoadProfile<C> newLoadProfile) {
-
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
-            TreeMap<Long, Tick> originalLoadProfile = es.getValue();
-            TreeMap<Long, Tick> newProfile = new TreeMap<>();
-
-            Entry<Long, Tick> startCorrection = originalLoadProfile.floorEntry(timestamp);
-
-            if (startCorrection != null)
-                newProfile.put(timestamp, startCorrection.getValue());
-            for (Entry<Long, Tick> entry : originalLoadProfile.tailMap(timestamp).entrySet()) {
-                newProfile.put(entry.getKey(), entry.getValue().clone());
+        for (C c : this.getEnumValues()) {
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            newLoadProfile.commodities.put(c, new Long2IntTreeMap(map.tailMap(timestamp)));
+            if (!map.isEmpty() && !map.containsKey(timestamp)) {
+                Long2IntMap.Entry lastEntry = map.floorEntry(timestamp);
+                if (lastEntry != null)
+                    newLoadProfile.setLoad(c, timestamp, lastEntry.getIntValue());
             }
-
-            newLoadProfile.commodities.put(es.getKey(), newProfile);
         }
 
         newLoadProfile.endingTimeOfProfile = this.endingTimeOfProfile;
@@ -924,53 +551,56 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     public abstract LoadProfile<C> cloneBefore(long timestamp);
 
     protected void cloneBefore(long timestamp, LoadProfile<C> newLoadProfile) {
-
-        long maxEntry = 0;
-
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
-            TreeMap<Long, Tick> originalLoadProfile = es.getValue();
-            TreeMap<Long, Tick> newProfile = new TreeMap<>();
-
-
-            for (Entry<Long, Tick> entry : originalLoadProfile.headMap(timestamp).entrySet()) {
-                newProfile.put(entry.getKey(), entry.getValue().clone());
+        for (C c : this.getEnumValues()) {
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            newLoadProfile.commodities.put(c, new Long2IntTreeMap(map.headMap(timestamp)));
+            if (!map.isEmpty() && map.containsKey(timestamp)) {
+                newLoadProfile.setLoad(c, timestamp, map.get(timestamp));
             }
-
-            Long highestKey = originalLoadProfile.lowerKey(timestamp);
-
-            if (highestKey != null && highestKey > maxEntry) {
-                maxEntry = highestKey;
-            }
-
-            newLoadProfile.commodities.put(es.getKey(), newProfile);
         }
 
-        newLoadProfile.endingTimeOfProfile = maxEntry + 1;
+        newLoadProfile.endingTimeOfProfile = Math.min(timestamp, this.endingTimeOfProfile);
     }
 
     public abstract LoadProfile<C> cloneWithOffset(long offset);
 
     protected void cloneWithOffset(long offset, LoadProfile<C> newLoadProfile) {
 
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
-            TreeMap<Long, Tick> originalLoadProfile = es.getValue();
-            TreeMap<Long, Tick> newProfile = new TreeMap<>();
-
-            for (Entry<Long, Tick> entry : originalLoadProfile.entrySet()) {
-                newProfile.put(entry.getKey() + offset, entry.getValue().clone());
-            }
-
-            newLoadProfile.commodities.put(es.getKey(), newProfile);
+        for (C c : this.getEnumValues()) {
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            Long2IntTreeMap newMap = new Long2IntTreeMap();
+            Long2IntMaps.fastForEach(map, e -> newMap.put(e.getLongKey() + offset, e.getIntValue()));
+            newLoadProfile.commodities.put(c, newMap);
         }
 
         newLoadProfile.endingTimeOfProfile = this.endingTimeOfProfile + offset;
+    }
+
+    public abstract EnumMap<C, Map<Long, Integer>> convertToSimpleMap();
+
+    public abstract EnumMap<C, Map<Long, Integer>> convertToSimpleMap(long maxTime);
+
+    void convertToSimpleMap(EnumMap<C, Map<Long, Integer>> simpleMap, long maxTime) {
+        long endingTime = Math.min(maxTime, this.endingTimeOfProfile);
+
+        for (C c : this.getEnumValues()) {
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            HashMap<Long, Integer> clone = new HashMap<>(map);
+            if (!map.isEmpty()) {
+                Long2IntMap.Entry en = map.floorEntry(endingTime);
+                clone.put(endingTime, en != null ? en.getIntValue() : 0);
+                //just to be sure
+                clone.put(endingTime + 1, 0);
+            }
+            simpleMap.put(c, clone);
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder returnValue = new StringBuilder();
 
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
+        for (Entry<C, Long2IntTreeMap> es : this.commodities.entrySet()) {
             returnValue.append("Profile for ").append(this.enumType.getSimpleName()).append(" ").append(es.getKey()).append(": ").append(es.getValue().toString());
         }
 
@@ -983,9 +613,9 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
     public String toStringShort() {
         StringBuilder returnValue = new StringBuilder("[ ");
 
-        for (Entry<C, TreeMap<Long, Tick>> es : this.commodities.entrySet()) {
-            TreeMap<Long, Tick> map = es.getValue();
-            if (map != null && map.lastEntry() != null) {
+        for (Entry<C, Long2IntTreeMap> es : this.commodities.entrySet()) {
+            Long2IntTreeMap map = es.getValue();
+            if (map != null && !map.isEmpty()) {
                 returnValue.append(es.getKey()).append(", ");
             }
         }
@@ -995,74 +625,5 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C>,
 
     protected C[] getEnumValues() {
         return this.enumType.getEnumConstants();
-    }
-
-    @XmlType
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public class Tick implements Serializable {
-        /**
-         * Serial
-         */
-        public static final long serialVersionUID = 3044446898974710703L;
-        public int value;
-//		public long positiveIntegral;
-//		public long negativeIntegral;
-
-
-        public Tick() {
-        }
-
-        public Tick(int value) {
-            this.value = value;
-        }
-
-        public Tick(Tick other) {
-            this.value = other.value;
-//			this.positiveIntegral = other.positiveIntegral;
-//			this.negativeIntegral = other.negativeIntegral;
-        }
-
-        @Override
-        public String toString() {
-            return this.value + "W";
-        }
-
-        public String toLongString() {
-            return this.value + "W  P/Q+";// + positiveIntegral + "Ws  P/Q-" + negativeIntegral
-            //+ "Ws";
-        }
-
-        @Override
-        public Tick clone() {
-            return new Tick(this);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-//			result = prime * result + (int) (negativeIntegral ^ (negativeIntegral >>> 32));
-//			result = prime * result + (int) (positiveIntegral ^ (positiveIntegral >>> 32));
-            result = prime * result + this.value;
-            return result;
-        }
-
-
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (this.getClass() != obj.getClass())
-                return false;
-            Tick other = (Tick) obj;
-//			if (negativeIntegral != other.negativeIntegral)
-//				return false;
-//			if (positiveIntegral != other.positiveIntegral)
-//				return false;
-            return this.value == other.value;
-        }
     }
 }

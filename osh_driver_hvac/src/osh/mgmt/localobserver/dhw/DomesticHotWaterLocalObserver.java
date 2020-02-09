@@ -185,7 +185,6 @@ public class DomesticHotWaterLocalObserver
         ThermalDemandNonControllableIPP ipp =
                 new ThermalDemandNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         false,
                         now,
                         this.getDeviceType(),

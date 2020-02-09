@@ -11,7 +11,6 @@ import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.grid.EnergySimulationTypes;
 import osh.esc.grid.IEnergyGrid;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -20,12 +19,8 @@ import java.util.Map.Entry;
  *
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class OCEnergySimulationCore extends EnergySimulationCore implements Serializable {
+public class OCEnergySimulationCore extends EnergySimulationCore {
 
-    /**
-     * Serial ID
-     */
-    private static final long serialVersionUID = 350474217178426943L;
     UUIDCommodityMap a2pInputStateMap;
     UUIDCommodityMap p2aInputStateMap;
     private IEnergyGrid[] allGrids;
@@ -59,12 +54,21 @@ public class OCEnergySimulationCore extends EnergySimulationCore implements Seri
         this.thermalGrids[0] = this.grids.get(EnergySimulationTypes.THERMAL);
     }
 
-    /**
-     * CONSTRUCTOR for serialization, do NOT use!
-     */
-    @Deprecated
-    protected OCEnergySimulationCore() {
+    public OCEnergySimulationCore(OCEnergySimulationCore other) {
+        super(other.grids, other.meterUUID);
+        this.a2pInputStateMap = new UUIDCommodityMap(other.a2pInputStateMap);
+        this.p2aInputStateMap = new UUIDCommodityMap(other.p2aInputStateMap);
+        this.allGrids = new IEnergyGrid[other.allGrids.length];
+        this.thermalGrids = new IEnergyGrid[other.thermalGrids.length];
 
+        int index = 0;
+        for (IEnergyGrid grid : other.allGrids) {
+            this.allGrids[index++] = grid.getClone();
+        }
+        index = 0;
+        for (IEnergyGrid grid : other.thermalGrids) {
+            this.thermalGrids[index++] = grid.getClone();
+        }
     }
 
     public void initializeGrids(

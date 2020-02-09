@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -56,11 +55,6 @@ public class DachsChpIPP
 
     private double currentWaterTemperature;
 
-    @SuppressWarnings("unused")
-    private int noForcedOffs;
-    @SuppressWarnings("unused")
-    private int noForcedOns;
-
     private ArrayList<Activation> interdependentStartingTimes;
     private long interdependentTimeOfFirstBit;
     private boolean interdependentLastState;
@@ -76,7 +70,6 @@ public class DachsChpIPP
      */
     public DachsChpIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timeStamp,
             boolean toBeScheduled,
             boolean initialState,
@@ -95,13 +88,11 @@ public class DachsChpIPP
             int compressionValue
     ) {
         super(deviceId,
-                logger,
                 timeStamp,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 timeStamp.toEpochSecond() + relativeHorizon,
-                timeStamp.toEpochSecond(),
                 DeviceTypes.CHPPLANT,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -124,13 +115,36 @@ public class DachsChpIPP
         this.masterModel = chpModel;
 
         this.fixedCostPerStart = fixedCostPerStart;
-
         this.forcedOnOffStepMultiplier = forcedOnOffStepMultiplier;
         this.forcedOffAdditionalCost = forcedOffAdditionalCost;
-
         this.chpOnCervisiaStepSizeMultiplier = chpOnCervisiaStepSizeMultiplier;
 
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
+    }
+
+    public DachsChpIPP(DachsChpIPP other) {
+        super(other);
+        this.initialState = other.initialState;
+        this.minRunTime = other.minRunTime;
+
+        this.hotWaterStorageMinTemp = other.hotWaterStorageMinTemp;
+        this.hotWaterStorageMaxTemp = other.hotWaterStorageMaxTemp;
+        this.hysteresis = other.hysteresis;
+        this.currentWaterTemperature = other.currentWaterTemperature;
+
+        this.fixedCostPerStart = other.fixedCostPerStart;
+        this.forcedOnOffStepMultiplier = other.forcedOnOffStepMultiplier;
+        this.forcedOffAdditionalCost = other.forcedOffAdditionalCost;
+        this.chpOnCervisiaStepSizeMultiplier = other.chpOnCervisiaStepSizeMultiplier;
+
+        this.interdependentStartingTimes = null;
+        this.interdependentTimeOfFirstBit = other.interdependentTimeOfFirstBit;
+        this.interdependentLastState = other.interdependentLastState;
+
+        this.ab = null;
+
+        this.masterModel = other.masterModel.clone();
+        this.actualModel = null;
     }
 
     /**
@@ -166,9 +180,6 @@ public class DachsChpIPP
 
         this.interdependentStartingTimes = null;
         this.interdependentTimeOfFirstBit = this.getReferenceTime();
-
-        this.noForcedOffs = 0;
-        this.noForcedOns = 0;
 
         this.interdependentLastState = this.initialState;
 
@@ -219,7 +230,6 @@ public class DachsChpIPP
                 if (this.currentWaterTemperature > this.hotWaterStorageMaxTemp) {
                     // hot water too hot -> OFF
                     chpOn = false;
-                    this.noForcedOffs++;
 
                 }
             } else {
@@ -227,7 +237,6 @@ public class DachsChpIPP
                 if (this.currentWaterTemperature <= this.hotWaterStorageMinTemp) {
                     // hot water too cold -> ON
                     chpOn = true;
-                    this.noForcedOns++;
                 } else if (this.interdependentLastState && this.currentWaterTemperature <= this.hotWaterStorageMinTemp + this.hysteresis) {
                     //hysteresis keep on
                     chpOn = true;
@@ -422,9 +431,11 @@ public class DachsChpIPP
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
-        this.setReferenceTime(currentTime);
-        this.setOptimizationHorizon(maxHorizon);
-        this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
+        if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
+            this.setReferenceTime(currentTime);
+            this.setOptimizationHorizon(maxHorizon);
+            this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
+        }
     }
 
     private boolean[] getActivationBits(
@@ -479,6 +490,11 @@ public class DachsChpIPP
     @Override
     public String problemToString() {
         return "DachsChpIPP [" + this.getReferenceTime() + "] [" + this.getOptimizationHorizon() + "]";
+    }
+
+    @Override
+    public DachsChpIPP getClone() {
+        return new DachsChpIPP(this);
     }
 
     @Override

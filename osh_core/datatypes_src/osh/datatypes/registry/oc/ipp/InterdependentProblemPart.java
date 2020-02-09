@@ -1,7 +1,6 @@
 package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -20,7 +19,6 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding
 import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.EnumSet;
@@ -31,13 +29,11 @@ import java.util.UUID;
  */
 public abstract class InterdependentProblemPart<PhenotypeType extends ISolution, PredictionType extends IPrediction>
         extends StateExchange
-        implements IOCEnergySubject, Serializable {
+        implements IOCEnergySubject {
 
     private static final long serialVersionUID = 1852491971934065038L;
-    public IGlobalLogger logger;
 
     //## input & output states ##
-
     protected LimitedCommodityStateMap interdependentInputStates;
     //states for internal use (so we dont have to constantly instantiate new Maps (time intensive)
     protected LimitedCommodityStateMap internalInterdependentOutputStates;
@@ -65,24 +61,24 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     private UUID deviceID;
 
     //## information about needed information of this ipp ##
-    private boolean toBeScheduled;
+    private final boolean toBeScheduled;
     /**
      * flag if problem part needs ancillary meter state as an input state
      */
-    private boolean needsAncillaryMeterState;
+    private final boolean needsAncillaryMeterState;
     /**
      * flag if problem part needs input (is interdependent and thus dynamic),
      * if false part will not receive any input states
      */
-    private boolean reactsToInputStates;
+    private final boolean reactsToInputStates;
     /**
      * flag if the problem part is completely static and will provide no load values
      */
-    private boolean isCompletelyStatic;
+    private final boolean isCompletelyStatic;
 
     private int id;
     // necessary to distinguish PV power / CHP power / device power / appliance power for pricing
-    private DeviceTypes deviceType;
+    private final DeviceTypes deviceType;
     private transient SparseLoadProfile loadProfile;
 
 
@@ -92,7 +88,11 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     @Deprecated
     protected InterdependentProblemPart() {
         super();
-        this.logger = null;
+        this.toBeScheduled = false;
+        this.needsAncillaryMeterState = false;
+        this.reactsToInputStates = false;
+        this.isCompletelyStatic = false;
+        this.deviceType = null;
     }
 
     /**
@@ -100,13 +100,11 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      */
     public InterdependentProblemPart(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            long referenceTime,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
@@ -118,19 +116,51 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
 
         this.deviceID = deviceId;
 
-        this.logger = logger;
-
         this.toBeScheduled = toBeScheduled;
         this.needsAncillaryMeterState = needsAncillaryMeterState;
         this.reactsToInputStates = reactsToInputStates;
         this.isCompletelyStatic = isCompletelyStatic;
-        this.referenceTime = referenceTime;
+        this.referenceTime = timestamp.toEpochSecond();
         this.deviceType = deviceType;
         this.allOutputCommodities = allOutputCommodities;
         this.compressionType = compressionType;
         this.compressionValue = compressionValue;
         this.internalInterdependentOutputStates = new LimitedCommodityStateMap(allOutputCommodities);
         this.solutionHandler = new IPPSolutionHandler(binaryTranslator, realTranslator);
+    }
+
+    public InterdependentProblemPart(InterdependentProblemPart<PhenotypeType, PredictionType> other) {
+        super(other.getSender(), other.getTimestamp());
+
+        this.deviceID = other.deviceID;
+        this.toBeScheduled = other.toBeScheduled;
+        this.needsAncillaryMeterState = other.needsAncillaryMeterState;
+        this.reactsToInputStates = other.reactsToInputStates;
+        this.isCompletelyStatic = other.isCompletelyStatic;
+        this.referenceTime = other.referenceTime;
+        this.deviceType = other.deviceType;
+        this.allOutputCommodities = other.allOutputCommodities;
+        this.allInputCommodities = other.allInputCommodities;
+        this.compressionType = other.compressionType;
+        this.compressionValue = other.compressionValue;
+        this.internalInterdependentOutputStates = new LimitedCommodityStateMap(other.internalInterdependentOutputStates);
+        this.solutionHandler = other.solutionHandler;
+
+        this.interdependentInputStates = null;
+        this.interdependentOutputStates = null;
+        this.ancillaryMeterState = null;
+
+        this.interdependentTime = other.interdependentTime;
+        this.stepSize = other.stepSize;
+        this.referenceTime = other.referenceTime;
+        this.compressionType = other.compressionType;
+        this.compressionValue = other.compressionValue;
+
+        this.currentSolution = null;
+        this.interdependentCervisia = 0.0;
+
+        this.id = other.id;
+        this.loadProfile = other.loadProfile == null ? null : new SparseLoadProfile();
     }
 
     @Override
@@ -275,10 +305,6 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     }
 
     // Getters & Setters
-
-    public IGlobalLogger getGlobalLogger() {
-        return this.logger;
-    }
 
     public boolean isToBeScheduled() {
         return this.toBeScheduled;
@@ -431,5 +457,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     public String toString() {
         return this.problemToString();
     }
+
+    public abstract InterdependentProblemPart<PhenotypeType, PredictionType> getClone();
 
 }

@@ -1,7 +1,6 @@
 package osh.mgmt.localcontroller.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
@@ -35,7 +34,6 @@ public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction>
      */
     public FutureAppliancesStaticIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             DeviceTypes deviceType,
@@ -45,7 +43,6 @@ public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction>
 
         super(
                 deviceId,
-                logger,
                 timestamp,
                 toBeScheduled,
                 deviceType,
@@ -55,4 +52,12 @@ public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction>
                 "FutureStaticApplianceIPP");
     }
 
+    public FutureAppliancesStaticIPP(FutureAppliancesStaticIPP other) {
+        super(other);
+    }
+
+    @Override
+    public FutureAppliancesStaticIPP getClone() {
+        return new FutureAppliancesStaticIPP(this);
+    }
 }

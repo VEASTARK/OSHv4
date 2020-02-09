@@ -81,7 +81,6 @@ public class ESHLHotWaterTankLocalObserver
         if (this.lastTimeIPPSent == null || now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
                     this.currentTemperature,
                     this.tankCapacity,
@@ -102,7 +101,6 @@ public class ESHLHotWaterTankLocalObserver
             if (predEntry != null && Math.abs(predEntry.getValue() - this.currentTemperature) > 2) {
                 HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         now,
                         this.currentTemperature,
                         this.tankCapacity,
@@ -144,7 +142,6 @@ public class ESHLHotWaterTankLocalObserver
                 HotWaterTankNonControllableIPP ex;
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         this.getTimeDriver().getCurrentTime(),
                         this.currentTemperature,
                         this.tankCapacity,

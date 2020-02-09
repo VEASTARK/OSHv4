@@ -4,18 +4,15 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 
 import java.util.Arrays;
-import java.util.NavigableSet;
-import java.util.TreeMap;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.SortedSet;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodity> {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -3370495091976922940L;
     private static final AncillaryCommodity[] ancillaryCommodityValues = AncillaryCommodity.values();
     private final int[] sequentialFloorValues =
             new int[AncillaryCommodity.values().length];
@@ -23,24 +20,13 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
 
     public AncillaryCommodityLoadProfile() {
         super(AncillaryCommodity.class);
-
-        for (AncillaryCommodity c : this.getEnumValues()) {
-            TreeMap<Long, Tick> loadProfile = new TreeMap<>();
-            this.commodities.put(c, loadProfile);
-        }
     }
 
     public void initSequential() {
         Arrays.fill(this.sequentialFloorValues, Integer.MAX_VALUE);
-//		for (AncillaryCommodity ac : getEnumValues()) {
-//			sequentialMap.put(ac, new SimulatedSortedMap());
-//		}
     }
 
     public void endSequential() {
-//		for (AncillaryCommodity ac : getEnumValues()) {
-//			commodities.put(ac, new TreeMap<Long, Tick>(sequentialMap.get(ac)));
-//		}
     }
 
     /**
@@ -52,7 +38,7 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
      * @param state the ancillary meter states
      * @param t     the time to put the ancillary meter values
      */
-    public void setLoadSequential(AncillaryMeterState state, Long t) {
+    public void setLoadSequential(AncillaryMeterState state, long t) {
 
         double[] allPowers = state.getAllPowerStates();
 
@@ -61,14 +47,14 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
             int oldPower = this.sequentialFloorValues[i];
 
             if (oldPower != power) {
-                this.commodities.get(ancillaryCommodityValues[i]).put(t, new Tick(power));
+                this.commodities.get(ancillaryCommodityValues[i]).put(t, power);
                 this.sequentialFloorValues[i] = power;
             }
         }
     }
 
-    public NavigableSet<Long> getAllLoadChangesFor(AncillaryCommodity ac, long from, long to) {
-        return this.commodities.get(ac).subMap(from, false, to, false).navigableKeySet();
+    public SortedSet<Long> getAllLoadChangesFor(AncillaryCommodity ac, long from, long to) {
+        return this.commodities.get(ac).subMap(from, to).keySet();
     }
 
     @Override
@@ -134,5 +120,19 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
         AncillaryCommodityLoadProfile clone = new AncillaryCommodityLoadProfile();
         this.cloneWithOffset(offset, clone);
         return clone;
+    }
+
+    @Override
+    public EnumMap<AncillaryCommodity, Map<Long, Integer>> convertToSimpleMap() {
+        EnumMap<AncillaryCommodity, Map<Long, Integer>> map = new EnumMap<>(AncillaryCommodity.class);
+        this.convertToSimpleMap(map, this.getEndingTimeOfProfile());
+        return map;
+    }
+
+    @Override
+    public EnumMap<AncillaryCommodity, Map<Long, Integer>> convertToSimpleMap(long maxTime) {
+        EnumMap<AncillaryCommodity, Map<Long, Integer>> map = new EnumMap<>(AncillaryCommodity.class);
+        this.convertToSimpleMap(map, maxTime);
+        return map;
     }
 }

@@ -312,7 +312,6 @@ public class MieleApplianceLocalController
 
             ipp = new MieleApplianceIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now, //now
                     now.toEpochSecond(), //earliest starting time
                     this.latestStart.toEpochSecond(),
@@ -340,7 +339,6 @@ public class MieleApplianceLocalController
             if (this.profileStarted != null) {
                 ipp = new MieleApplianceNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         true,
                         now,
                         this.getLocalObserver().getDeviceType(),
@@ -359,7 +357,6 @@ public class MieleApplianceLocalController
 
                 ipp = new MieleApplianceNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         true, now,
                         this.getLocalObserver().getDeviceType(), new SparseLoadProfile(),
                         // reschedule

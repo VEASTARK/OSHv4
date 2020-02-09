@@ -1,7 +1,6 @@
 package osh.mgmt.ipp.thermal;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
@@ -32,7 +31,6 @@ public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP
      * Constructs this hot-water-demand problem-part.
      *
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param referenceTime the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
@@ -42,7 +40,6 @@ public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP
      */
     public ThermalDemandNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             boolean toBeScheduled,
             ZonedDateTime referenceTime,
             DeviceTypes deviceType,
@@ -51,7 +48,6 @@ public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId,
-                logger,
                 toBeScheduled,
                 referenceTime,
                 deviceType,
@@ -59,6 +55,15 @@ public class ThermalDemandNonControllableIPP extends PredictedNonControllableIPP
                 EnumSet.of(usedCommodity),
                 compressionType,
                 compressionValue);
+    }
+
+    public ThermalDemandNonControllableIPP(ThermalDemandNonControllableIPP other) {
+        super(other);
+    }
+
+    @Override
+    public ThermalDemandNonControllableIPP getClone() {
+        return new ThermalDemandNonControllableIPP(this);
     }
 
     @Override

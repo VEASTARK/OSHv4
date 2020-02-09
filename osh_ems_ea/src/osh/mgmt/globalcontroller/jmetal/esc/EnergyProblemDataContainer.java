@@ -3,7 +3,6 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
-import osh.utils.DeepCopy;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -141,7 +140,7 @@ public class EnergyProblemDataContainer {
         for (InterdependentProblemPart<?, ?> part : this.allProblemParts) {
             //we do not need to copy completely static ipps
             if (!part.isCompletelyStatic()) {
-                allPPsCopy[allIndex++] = (InterdependentProblemPart<?, ?>) DeepCopy.copy(part);
+                allPPsCopy[allIndex++] = part.getClone();
             }
         }
 
@@ -159,7 +158,7 @@ public class EnergyProblemDataContainer {
 
         return new EnergyProblemDataContainer(allPPsCopy, allActivePPsCopy,
                 allPassivePPsCopy, allActiveNeedsInputPPsCopy,
-                (OCEnergySimulationCore) DeepCopy.copy(this.ocESC),
+                new OCEnergySimulationCore(this.ocESC),
                 new UUIDCommodityMap(this.activeToPassiveMap),
                 new UUIDCommodityMap(this.passiveToActiveMap));
     }

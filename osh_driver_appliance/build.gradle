@@ -16,6 +16,7 @@ dependencies {
     implementation project(":osh_core")
     implementation project(":osh_en50523")
 
+    implementation group: 'it.unimi.dsi', name: 'fastutil'
     implementation group: 'javax.xml.bind', name: 'jaxb-api'
     implementation group: 'org.apache.commons', name: 'commons-math3'
 }

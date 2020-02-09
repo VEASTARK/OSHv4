@@ -1,7 +1,6 @@
 package osh.mgmt.localcontroller.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -9,6 +8,7 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.ILoadProfile;
 import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.power.SequentialSparseLoadProfileIterator;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryFullRangeVariableTranslator;
@@ -18,6 +18,7 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.esc.LimitedCommodityStateMap;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -41,11 +42,12 @@ public class FutureApplianceIPP
      */
     private long latestStartingTime;
 
-    private final double cervisiaDofUsedFactor = 0.01;
+    private static final double cervisiaDofUsedFactor = 0.01;
 
     private ApplianceProgramConfigurationStatus acp;
     private SparseLoadProfile[][] compressedDLProfiles;
     private SparseLoadProfile[] initializedLoadProfiles;
+    private SequentialSparseLoadProfileIterator[] sequentialIterators;
     private long[] initializedStartingTimes;
 
     /**
@@ -67,8 +69,9 @@ public class FutureApplianceIPP
      */
     private int[] sumOfAllMaxValues; // to be updated when rescheduled
 
-    private EnumSet<Commodity> usedCommodities;
+    private Commodity[] usedCommodities;
     private int lastUsedIndex;
+    private double[] powers;
 
     /**
      * CONSTRUCTOR
@@ -84,12 +87,10 @@ public class FutureApplianceIPP
      */
     public FutureApplianceIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             long optimizationHorizon,
             DeviceTypes deviceType,
-            long referenceTime,
             long earliestStartingTime,
             long latestStartingTime,
             ApplianceProgramConfigurationStatus acp,
@@ -98,13 +99,11 @@ public class FutureApplianceIPP
 
         super(
                 deviceId,
-                logger,
                 timestamp,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 false, //does not react to input states
                 optimizationHorizon,
-                referenceTime,
                 deviceType,
                 EnumSet.noneOf(Commodity.class), //we will calculate this and set in our constructor so this is a dummy value
                 EnumSet.noneOf(Commodity.class),
@@ -148,7 +147,9 @@ public class FutureApplianceIPP
         }
 
         this.allOutputCommodities = tempUsedComm.clone();
-        this.usedCommodities = tempUsedComm.clone();
+        this.powers = new double[tempUsedComm.size()];
+        this.usedCommodities = new Commodity[tempUsedComm.size()];
+        this.usedCommodities = tempUsedComm.toArray(this.usedCommodities);
         this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.allOutputCommodities);
 
         // recalculate partition of solution ("header")
@@ -159,8 +160,6 @@ public class FutureApplianceIPP
 
         int[][][] minMaxTimes = acp.getMinMaxDurations();
 
-//		getGlobalLogger().logDebug("earliestStartingTime=" + earliestStartingTime);
-//		getGlobalLogger().logDebug("latestStartingTime" + latestStartingTime);
 
         // recalculate max values (max lengths of phases)
         this.maxValues = calculateMaxValuesArray(
@@ -174,12 +173,32 @@ public class FutureApplianceIPP
             this.sumOfAllMaxValues[i] = 0;
             for (int j = 0; j < this.maxValues[i].length; j++) {
                 this.sumOfAllMaxValues[i] += this.maxValues[i][j];
-//				getGlobalLogger().logDebug("maxValues["+i+"]["+j+"]" + maxValues[i][j]);
-//				getGlobalLogger().logDebug("sumOfAllMaxValues[" + i + "]=" + sumOfAllMaxValues[i]);
             }
         }
 
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
+    }
+
+    public FutureApplianceIPP(FutureApplianceIPP other) {
+        super(other);
+
+        this.earliestStartingTime = other.earliestStartingTime;
+        this.latestStartingTime = other.latestStartingTime;
+
+        this.acp = other.acp;
+        this.compressedDLProfiles = other.compressedDLProfiles;
+        this.initializedLoadProfiles = null;
+        this.sequentialIterators = null;
+        this.initializedStartingTimes = null;
+        this.currentSolution = other.currentSolution;
+
+        this.header = other.header;
+        this.maxValues = other.maxValues;
+        this.sumOfAllMaxValues = other.sumOfAllMaxValues;
+        this.usedCommodities = Arrays.copyOf(other.usedCommodities, other.usedCommodities.length);
+        this.powers = Arrays.copyOf(other.powers, other.powers.length);
+
+        this.lastUsedIndex = other.lastUsedIndex;
     }
 
     /**
@@ -345,7 +364,7 @@ public class FutureApplianceIPP
         if (selectedTDOF.length > 0 && availableTDoF > 0) {
             if (selectedTDOF[0] > 0) {
                 //starting later is better
-                this.addInterdependentCervisia(-((double) selectedTDOF[0] / availableTDoF) * this.cervisiaDofUsedFactor);
+                this.addInterdependentCervisia(-((double) selectedTDOF[0] / availableTDoF) * cervisiaDofUsedFactor);
             }
         }
 
@@ -414,23 +433,26 @@ public class FutureApplianceIPP
 
         EnumSet<Commodity> tempUsedComm = EnumSet.noneOf(Commodity.class);
         boolean sameCommodities = true;
+        this.sequentialIterators = new SequentialSparseLoadProfileIterator[this.initializedLoadProfiles.length];
 
         for (int i = 0; i < this.initializedLoadProfiles.length; i++) {
             for (Commodity c : this.allOutputCommodities) {
                 if (!tempUsedComm.contains(c) &&
                         this.initializedLoadProfiles[i].getFloorEntry(c, maxReferenceTime) != null) {
                     tempUsedComm.add(c);
-                    sameCommodities &= this.usedCommodities.contains(c);
+                    sameCommodities &= Arrays.asList(this.usedCommodities).contains(c);
                 }
             }
 
             long relativeStart = Math.abs(Math.min(this.initializedStartingTimes[i] - maxReferenceTime, 0));
-            this.initializedLoadProfiles[i].initSequentialAverageLoad(relativeStart);
+            this.sequentialIterators[i] = this.initializedLoadProfiles[i].initSequentialAverageLoad(relativeStart);
         }
 
         if (!sameCommodities) {
-            this.usedCommodities = tempUsedComm.clone();
-            this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.usedCommodities);
+            this.powers = new double[tempUsedComm.size()];
+            this.usedCommodities = new Commodity[tempUsedComm.size()];
+            this.usedCommodities = tempUsedComm.toArray(this.usedCommodities);
+            this.internalInterdependentOutputStates = new LimitedCommodityStateMap(tempUsedComm);
         } else {
             this.internalInterdependentOutputStates.clear();
         }
@@ -476,14 +498,6 @@ public class FutureApplianceIPP
      */
     @Override
     public void prepareForDeepCopy() {
-        if (this.getLoadProfile() != null) {
-            this.getLoadProfile().removeSequentialPriming();
-        }
-        if (this.initializedLoadProfiles != null) {
-            for (SparseLoadProfile initializedLoadProfile : this.initializedLoadProfiles) {
-                initializedLoadProfile.removeSequentialPriming();
-            }
-        }
     }
 
 
@@ -499,7 +513,7 @@ public class FutureApplianceIPP
         int index = this.lastUsedIndex;
         long currentTime = this.getInterdependentTime();
 
-        double[] powers = new double[this.usedCommodities.size()];
+//        double[] powers = new double[this.usedCommodities.size()];
 
         boolean hasValues = false;
 
@@ -508,11 +522,11 @@ public class FutureApplianceIPP
             long subtractionFactor = this.initializedStartingTimes[index - 1];
             int j = 0;
             for (Commodity c : this.usedCommodities) {
-                powers[j] = Math.round(this.initializedLoadProfiles[index - 1]
+                this.powers[j] = Math.round(this.sequentialIterators[index - 1]
                         .getAverageLoadFromTillSequentialNotRounded(c, (currentTime - subtractionFactor), (end - subtractionFactor)));
 
-                if (powers[j] != 0) {
-                    this.internalInterdependentOutputStates.setPower(c, powers[j]);
+                if (this.powers[j] != 0) {
+                    this.internalInterdependentOutputStates.setPower(c, this.powers[j]);
                     hasValues = true;
                 } else {
                     this.internalInterdependentOutputStates.resetCommodity(c);
@@ -536,7 +550,7 @@ public class FutureApplianceIPP
 
                     int j = 0;
                     for (Commodity c : this.usedCommodities) {
-                        powers[j] += (this.initializedLoadProfiles[index - 1]
+                        powers[j] += (this.sequentialIterators[index - 1]
                                 .getAverageLoadFromTillSequentialNotRounded(c, (currentTime - subtractionFactor),
                                         (currentEnd - subtractionFactor)) * factor);
                         j++;
@@ -643,47 +657,49 @@ public class FutureApplianceIPP
         // (from recalculate encoding)
         // earliest starting time has been reached...
 
-        this.setReferenceTime(currentTime);
-        this.setOptimizationHorizon(maxHorizon);
+        if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
+            this.setReferenceTime(currentTime);
+            this.setOptimizationHorizon(maxHorizon);
 
-        if (this.earliestStartingTime < currentTime) {
+            if (this.earliestStartingTime < currentTime) {
 
-            // shorten tDoF
+                // shorten tDoF
 
-            // if time is running out...
-            if (currentTime > this.latestStartingTime) {
-                // tDoF = 0;
-                this.earliestStartingTime = this.latestStartingTime;
-            } else {
-                // adjust minMaxValues in ACP
-                int[][][] minMaxTimes = this.acp.getMinMaxDurations();
-                for (int i = 0; i < minMaxTimes.length; i++) {
-                    minMaxTimes[i][0][0] += (currentTime - this.earliestStartingTime);
+                // if time is running out...
+                if (currentTime > this.latestStartingTime) {
+                    // tDoF = 0;
+                    this.earliestStartingTime = this.latestStartingTime;
+                } else {
+                    // adjust minMaxValues in ACP
+                    int[][][] minMaxTimes = this.acp.getMinMaxDurations();
+                    for (int i = 0; i < minMaxTimes.length; i++) {
+                        minMaxTimes[i][0][0] += (currentTime - this.earliestStartingTime);
+                    }
+
+                    // adjust time frame from optimization
+                    this.earliestStartingTime = currentTime;
                 }
 
-                // adjust time frame from optimization
-                this.earliestStartingTime = currentTime;
-            }
-
-            this.header = calculateHeader(
-                    this.earliestStartingTime,
-                    this.latestStartingTime,
-                    this.acp);
-            this.maxValues = calculateMaxValuesArray(
-                    this.earliestStartingTime,
-                    this.latestStartingTime,
-                    this.acp.getMinMaxDurations());
-            // calculate sum of all max values (for determination of how to distribute tdof)
-            this.sumOfAllMaxValues = new int[this.maxValues.length];
-            for (int i = 0; i < this.maxValues.length; i++) {
-                this.sumOfAllMaxValues[i] = 0;
-                for (int j = 0; j < this.maxValues[i].length; j++) {
-                    this.sumOfAllMaxValues[i] += this.maxValues[i][j];
+                this.header = calculateHeader(
+                        this.earliestStartingTime,
+                        this.latestStartingTime,
+                        this.acp);
+                this.maxValues = calculateMaxValuesArray(
+                        this.earliestStartingTime,
+                        this.latestStartingTime,
+                        this.acp.getMinMaxDurations());
+                // calculate sum of all max values (for determination of how to distribute tdof)
+                this.sumOfAllMaxValues = new int[this.maxValues.length];
+                for (int i = 0; i < this.maxValues.length; i++) {
+                    this.sumOfAllMaxValues[i] = 0;
+                    for (int j = 0; j < this.maxValues[i].length; j++) {
+                        this.sumOfAllMaxValues[i] += this.maxValues[i][j];
+                    }
                 }
             }
+
+            this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
         }
-
-        this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
     }
 
     // ### to string ###
@@ -691,6 +707,11 @@ public class FutureApplianceIPP
     @Override
     public String problemToString() {
         return "[" + this.getReferenceTime() + "] [" + this.getOptimizationHorizon() + "] FutureApplianceIPP : EST=" + this.earliestStartingTime + " LST=" + this.latestStartingTime;// + " minMaxValues=" + StringToArray.arrayToString(array);
+    }
+
+    @Override
+    public FutureApplianceIPP getClone() {
+        return new FutureApplianceIPP(this);
     }
 
     @Override

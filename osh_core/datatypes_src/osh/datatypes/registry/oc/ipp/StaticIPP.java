@@ -1,7 +1,6 @@
 package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -39,7 +38,6 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
      */
     public StaticIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             DeviceTypes deviceType,
@@ -50,7 +48,6 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
 
         super(
                 deviceId,
-                logger,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 false, //does not react to input states
@@ -65,9 +62,15 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
         this.description = description;
     }
 
+    public StaticIPP(StaticIPP<PhenotypeType, PredictionType> other) {
+        super(other);
+        this.schedule = other.schedule;
+        this.description = other.description;
+    }
+
 
     @Override
-    public void initializeInterdependentCalculation(
+    public final void initializeInterdependentCalculation(
             long maxReferenceTime,
             int stepSize,
             boolean createLoadProfile,
@@ -77,29 +80,24 @@ public abstract class StaticIPP<PhenotypeType extends ISolution, PredictionType 
     }
 
     @Override
-    public void calculateNextStep() {
+    public final void calculateNextStep() {
         // do nothing
     }
 
     @Override
-    public Schedule getFinalInterdependentSchedule() {
+    public final Schedule getFinalInterdependentSchedule() {
         return this.schedule;
     }
 
-//	@Override
-//	public Schedule getSchedule(BitSet solution) {
-//		return schedule;
-//	}
-
     @Override
-    public void recalculateEncoding(long currentTime, long maxHorizon) {
+    public final void recalculateEncoding(long currentTime, long maxHorizon) {
         this.setReferenceTime(currentTime);
     }
 
     // ### to string ###
 
     @Override
-    public String problemToString() {
+    public final String problemToString() {
         return "[" + this.getReferenceTime() + "] " + this.description;
     }
 

@@ -1,7 +1,6 @@
 package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
@@ -36,7 +35,6 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
      */
     public NonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
@@ -48,19 +46,21 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
             int compressionValue) {
         super(
                 deviceId,
-                logger,
                 timeStamp,
                 toBeScheduled,
                 needsAncillaryMeterState,
                 reactsToInputStates,
                 isCompletelyStatic,
-                timeStamp.toEpochSecond(),
                 deviceType,
                 allOutputCommodities,
                 compressionType,
                 compressionValue,
                 null,
                 null);
+    }
+
+    public NonControllableIPP(NonControllableIPP<PhenotypeType, PredictionType> other) {
+        super(other);
     }
 
     @Override

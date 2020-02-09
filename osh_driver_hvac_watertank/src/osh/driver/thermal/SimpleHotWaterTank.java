@@ -27,4 +27,8 @@ public class SimpleHotWaterTank extends SimpleWaterTank {
                 ambientTemperature);
     }
 
+    public SimpleHotWaterTank(SimpleHotWaterTank other) {
+        super(other);
+    }
+
 }

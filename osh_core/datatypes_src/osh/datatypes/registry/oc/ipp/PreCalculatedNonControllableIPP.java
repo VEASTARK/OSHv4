@@ -1,7 +1,6 @@
 package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
@@ -38,7 +37,6 @@ public abstract class PreCalculatedNonControllableIPP
      * Constructs this simplified problem-part with the given information.
      *
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param logger the global logger
      * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param timeStamp the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
@@ -48,7 +46,6 @@ public abstract class PreCalculatedNonControllableIPP
      */
     public PreCalculatedNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             boolean toBeScheduled,
             ZonedDateTime timeStamp,
             DeviceTypes deviceType,
@@ -57,7 +54,6 @@ public abstract class PreCalculatedNonControllableIPP
             int compressionValue) {
         super(
                 deviceId,
-                logger,
                 toBeScheduled,
                 false,
                 false,
@@ -67,6 +63,13 @@ public abstract class PreCalculatedNonControllableIPP
                 allOutputCommodities,
                 compressionType,
                 compressionValue);
+    }
+
+    public PreCalculatedNonControllableIPP(PreCalculatedNonControllableIPP other) {
+        super(other);
+        this.allOutputStates = other.allOutputStates;
+        this.maxHorizon = other.maxHorizon;
+        this.outputStatesCalculatedFor = other.outputStatesCalculatedFor;
     }
 
     /**
@@ -79,7 +82,7 @@ public abstract class PreCalculatedNonControllableIPP
 
 
     @Override
-    public void calculateNextStep() {
+    public final void calculateNextStep() {
         int index = (int) ((this.getInterdependentTime() - this.outputStatesCalculatedFor) / this.getStepSize());
         if (index >= this.allOutputStates.length) {
             this.setOutputStates(null);
@@ -90,7 +93,7 @@ public abstract class PreCalculatedNonControllableIPP
     }
 
     @Override
-    public void recalculateEncoding(long currentTime, long maxHorizon) {
+    public final void recalculateEncoding(long currentTime, long maxHorizon) {
         this.setReferenceTime(currentTime);
         this.maxHorizon = maxHorizon;
     }
