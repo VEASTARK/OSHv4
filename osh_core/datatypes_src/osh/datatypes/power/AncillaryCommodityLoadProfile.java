@@ -1,12 +1,12 @@
 package osh.datatypes.power;
 
+import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.SortedSet;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
@@ -53,7 +53,7 @@ public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodit
         }
     }
 
-    public SortedSet<Long> getAllLoadChangesFor(AncillaryCommodity ac, long from, long to) {
+    public LongSortedSet getAllLoadChangesFor(AncillaryCommodity ac, long from, long to) {
         //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
         return this.commodities.get(ac).subMap(from + 1, to).keySet();
     }

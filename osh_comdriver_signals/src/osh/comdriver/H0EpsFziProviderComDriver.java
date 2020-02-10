@@ -253,15 +253,13 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
                 epochSecond,
                 signalEnd,
                 this.signalConstantPeriod,
-                this.activePowerAutoConsumptionPV,
-                AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION);
+                this.activePowerAutoConsumptionPV);
 
         PriceSignal newPriceSignalAutoConsCHP = VirtualPriceSignalGenerator.getConstantPriceSignal(
                 epochSecond,
                 signalEnd,
                 this.signalConstantPeriod,
-                this.activePowerAutoConsumptionCHP,
-                AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION);
+                this.activePowerAutoConsumptionCHP);
 
         PriceSignal newPriceSignalExternal = VirtualPriceSignalGenerator.getRandomH0BasedPriceSignal(
                 epochSecond,
@@ -274,29 +272,25 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
                 this.getOSH().getRandomGenerator(),
                 false,
                 0,
-                0,
-                AncillaryCommodity.ACTIVEPOWEREXTERNAL);
+                0);
 
         PriceSignal newPriceSignalFeedInPV = VirtualPriceSignalGenerator.getConstantPriceSignal(
                 epochSecond,
                 signalEnd,
                 this.signalConstantPeriod,
-                this.activePowerFeedInPV,
-                AncillaryCommodity.PVACTIVEPOWERFEEDIN);
+                this.activePowerFeedInPV);
 
         PriceSignal newPriceSignalFeedInCHP = VirtualPriceSignalGenerator.getConstantPriceSignal(
                 epochSecond,
                 signalEnd,
                 this.signalConstantPeriod,
-                this.activePowerFeedInCHP,
-                AncillaryCommodity.CHPACTIVEPOWERFEEDIN);
+                this.activePowerFeedInCHP);
 
         PriceSignal newPriceSignalNaturalGas = VirtualPriceSignalGenerator.getConstantPriceSignal(
                 epochSecond,
                 signalEnd,
                 this.signalConstantPeriod,
-                this.naturalGasPowerPrice,
-                AncillaryCommodity.NATURALGASPOWEREXTERNAL);
+                this.naturalGasPowerPrice);
 
         EnumMap<AncillaryCommodity, PriceSignal> newPriceSignal = new EnumMap<>(AncillaryCommodity.class);
         newPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newPriceSignalExternal);

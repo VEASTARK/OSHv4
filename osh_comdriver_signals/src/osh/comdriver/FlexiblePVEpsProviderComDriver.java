@@ -177,31 +177,31 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         this.pVPriceSignal = this.readCsvPriceSignal(this.filePathActivePowerFeedInPVPriceSignal);
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);
         }
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.REACTIVEPOWEREXTERNAL)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.REACTIVEPOWEREXTERNAL, this.reactivePowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.reactivePowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, newSignal);
         }
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.NATURALGASPOWEREXTERNAL)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.NATURALGASPOWEREXTERNAL, this.naturalGasPowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.naturalGasPowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newSignal);
         }
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.PVACTIVEPOWERFEEDIN)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERFEEDIN, this.pVPriceSignal);
+            PriceSignal newSignal = this.generatePriceSignal(this.pVPriceSignal);
             this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newSignal);
         }
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.CHPACTIVEPOWERFEEDIN)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, this.activePowerFeedInCHP);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInCHP);
             this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newSignal);
         }
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, this.activePowerAutoConsumptionPV);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerAutoConsumptionPV);
             this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, newSignal);
         }
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION)) {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, this.activePowerAutoConsumptionCHP);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerAutoConsumptionCHP);
             this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, newSignal);
         }
 
@@ -229,31 +229,31 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
 
         if (!now.isBefore(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
+                PriceSignal newSignal = this.generatePriceSignal(this.activePowerPrice);
                 this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);
             }
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.REACTIVEPOWEREXTERNAL)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.REACTIVEPOWEREXTERNAL, this.reactivePowerPrice);
+                PriceSignal newSignal = this.generatePriceSignal(this.reactivePowerPrice);
                 this.currentPriceSignal.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, newSignal);
             }
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.NATURALGASPOWEREXTERNAL)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.NATURALGASPOWEREXTERNAL, this.naturalGasPowerPrice);
+                PriceSignal newSignal = this.generatePriceSignal(this.naturalGasPowerPrice);
                 this.currentPriceSignal.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newSignal);
             }
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.PVACTIVEPOWERFEEDIN)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERFEEDIN, this.pVPriceSignal);
+                PriceSignal newSignal = this.generatePriceSignal(this.pVPriceSignal);
                 this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newSignal);
             }
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.CHPACTIVEPOWERFEEDIN)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, this.activePowerFeedInCHP);
+                PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInCHP);
                 this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newSignal);
             }
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, this.activePowerAutoConsumptionPV);
+                PriceSignal newSignal = this.generatePriceSignal(this.activePowerAutoConsumptionPV);
                 this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, newSignal);
             }
             if (this.activeAncillaryCommodities.contains(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION)) {
-                PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, this.activePowerAutoConsumptionCHP);
+                PriceSignal newSignal = this.generatePriceSignal(this.activePowerAutoConsumptionCHP);
                 this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, newSignal);
             }
 
@@ -294,7 +294,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
     }
 
 
-    private PriceSignal generatePriceSignal(AncillaryCommodity commodity, List<Double> priceSignalYear) {
+    private PriceSignal generatePriceSignal(List<Double> priceSignalYear) {
         PriceSignal priceSignal;
 
 
@@ -306,7 +306,6 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
             long timeTillEndOfDay = 86400 - timeSinceMidnight;
 
             priceSignal = PriceSignalGenerator.getFlexiblePriceSignal(
-                    commodity,
                     TimeConversion.getSecondsSinceYearStart(time),
                     now,
                     now + timeTillEndOfDay + this.signalAvailableFor,
@@ -317,7 +316,6 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
             // generate every 12 hours
 
             priceSignal = PriceSignalGenerator.getFlexiblePriceSignal(
-                    commodity,
                     TimeConversion.getSecondsSinceYearStart(time),
                     now,
                     now + this.signalPeriod,
@@ -328,7 +326,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         return priceSignal;
     }
 
-    private PriceSignal generatePriceSignal(AncillaryCommodity commodity, double price) {
+    private PriceSignal generatePriceSignal(double price) {
         PriceSignal priceSignal;
 
 
@@ -339,7 +337,6 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
             long timeTillEndOfDay = 86400 - timeSinceMidnight;
 
             priceSignal = PriceSignalGenerator.getConstantPriceSignal(
-                    commodity,
                     now,
                     now + timeTillEndOfDay + this.signalAvailableFor,
                     this.resolutionOfPriceSignal,
@@ -349,7 +346,6 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
             // generate every 12 hours
 
             priceSignal = PriceSignalGenerator.getConstantPriceSignal(
-                    commodity,
                     now,
                     now + this.signalPeriod,
                     this.resolutionOfPriceSignal,

@@ -59,7 +59,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     private double reactivePowerPrice;
     //	private double activePowerFeedInCHP = 5.0;
     private boolean newSignalReceived;
-    private ArrayList<PriceSignal> newSignals;
+    private EnumMap<AncillaryCommodity, PriceSignal> newSignals;
 
 
     public RemsEpsProviderComDriver(
@@ -72,28 +72,22 @@ public class RemsEpsProviderComDriver extends CALComDriver {
 
     //PS needs to be relative from now
     public void setNewSignal(PriceSignal signal) {
-        this.newSignals = new ArrayList<>();
+        this.newSignals = new EnumMap<>(AncillaryCommodity.class);
         long now = this.getTimeDriver().getCurrentEpochSecond();
-        PriceSignal ps = new PriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL);
+        PriceSignal ps = new PriceSignal(signal.getPrices(), now);
         ps.setKnownPriceInterval(now, now + signal.getPriceUnknownAtAndAfter());
-        for (Entry<Long, Double> en : signal.getPrices().entrySet()) {
-            ps.setPrice(en.getKey() + now, en.getValue());
-        }
-        this.newSignals.add(ps);
+        this.newSignals.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL,ps);
         this.newSignalReceived = true;
     }
 
-    public void setNewSignals(ArrayList<PriceSignal> signals) {
-        this.newSignals = new ArrayList<>(signals.size());
+    public void setNewSignals(EnumMap<AncillaryCommodity, PriceSignal> signals) {
+        this.newSignals = new EnumMap<>(AncillaryCommodity.class);
         long now = this.getTimeDriver().getCurrentEpochSecond();
 
-        for (PriceSignal signal : signals) {
-            PriceSignal ps = new PriceSignal(signal.getCommodity());
-            ps.setKnownPriceInterval(now, now + signal.getPriceUnknownAtAndAfter());
-            for (Entry<Long, Double> en : signal.getPrices().entrySet()) {
-                ps.setPrice(en.getKey() + now, en.getValue());
-            }
-            this.newSignals.add(ps);
+        for (Entry<AncillaryCommodity, PriceSignal> signal : signals.entrySet()) {
+            PriceSignal ps = new PriceSignal(signal.getValue().getPrices(), now);
+            ps.setKnownPriceInterval(now, now + signal.getValue().getPriceUnknownAtAndAfter());
+            this.newSignals.put(signal.getKey(), ps);
         }
 
         this.newSignalReceived = true;
@@ -107,23 +101,23 @@ public class RemsEpsProviderComDriver extends CALComDriver {
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.REACTIVEPOWEREXTERNAL, this.reactivePowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.reactivePowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.NATURALGASPOWEREXTERNAL, this.naturalGasPowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.naturalGasPowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERFEEDIN, this.activePowerFeedInPV);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInPV);
             this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, this.activePowerFeedInCHP);
+            PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInCHP);
             this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newSignal);
         }
 
@@ -155,28 +149,28 @@ public class RemsEpsProviderComDriver extends CALComDriver {
             allRelevantCommodities.add(AncillaryCommodity.REACTIVEPOWEREXTERNAL);
 
 
-            for (PriceSignal signal : this.newSignals) {
-                this.currentPriceSignal.put(signal.getCommodity(), signal);
-                allRelevantCommodities.remove(signal.getCommodity());
+            for (Entry<AncillaryCommodity, PriceSignal> signal : this.newSignals.entrySet()) {
+                this.currentPriceSignal.put(signal.getKey(), signal.getValue());
+                allRelevantCommodities.remove(signal.getKey());
             }
 
             for (AncillaryCommodity vc : allRelevantCommodities) {
 
                 //TODO: Fix
                 if (vc == AncillaryCommodity.ACTIVEPOWEREXTERNAL) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
+                    PriceSignal newSignal = this.generatePriceSignal(this.activePowerPrice);
                     this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);
                 } else if (vc == AncillaryCommodity.REACTIVEPOWEREXTERNAL) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.REACTIVEPOWEREXTERNAL, this.reactivePowerPrice);
+                    PriceSignal newSignal = this.generatePriceSignal(this.reactivePowerPrice);
                     this.currentPriceSignal.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, newSignal);
                 } else if (vc == AncillaryCommodity.NATURALGASPOWEREXTERNAL) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.NATURALGASPOWEREXTERNAL, this.naturalGasPowerPrice);
+                    PriceSignal newSignal = this.generatePriceSignal(this.naturalGasPowerPrice);
                     this.currentPriceSignal.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newSignal);
                 } else if (vc == AncillaryCommodity.PVACTIVEPOWERFEEDIN) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERFEEDIN, this.activePowerFeedInPV);
+                    PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInPV);
                     this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newSignal);
                 } else if (vc == AncillaryCommodity.CHPACTIVEPOWERFEEDIN) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, this.activePowerFeedInCHP);
+                    PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInCHP);
                     this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newSignal);
                 }
             }
@@ -207,19 +201,19 @@ public class RemsEpsProviderComDriver extends CALComDriver {
 
                 //TODO: Fix
                 if (vc == AncillaryCommodity.ACTIVEPOWEREXTERNAL) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL, this.activePowerPrice);
+                    PriceSignal newSignal = this.generatePriceSignal(this.activePowerPrice);
                     this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, newSignal);
                 } else if (vc == AncillaryCommodity.REACTIVEPOWEREXTERNAL) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.REACTIVEPOWEREXTERNAL, this.reactivePowerPrice);
+                    PriceSignal newSignal = this.generatePriceSignal(this.reactivePowerPrice);
                     this.currentPriceSignal.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, newSignal);
                 } else if (vc == AncillaryCommodity.NATURALGASPOWEREXTERNAL) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.NATURALGASPOWEREXTERNAL, this.naturalGasPowerPrice);
+                    PriceSignal newSignal = this.generatePriceSignal(this.naturalGasPowerPrice);
                     this.currentPriceSignal.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newSignal);
                 } else if (vc == AncillaryCommodity.PVACTIVEPOWERFEEDIN) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERFEEDIN, this.activePowerFeedInPV);
+                    PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInPV);
                     this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newSignal);
                 } else if (vc == AncillaryCommodity.CHPACTIVEPOWERFEEDIN) {
-                    PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, this.activePowerFeedInCHP);
+                    PriceSignal newSignal = this.generatePriceSignal(this.activePowerFeedInCHP);
                     this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newSignal);
                 }
             }
@@ -245,7 +239,7 @@ public class RemsEpsProviderComDriver extends CALComDriver {
     }
 
 
-    private PriceSignal generatePriceSignal(AncillaryCommodity commodity, double price) {
+    private PriceSignal generatePriceSignal(double price) {
         PriceSignal priceSignal;
 
         long now = this.getTimeDriver().getCurrentEpochSecond();
@@ -255,7 +249,6 @@ public class RemsEpsProviderComDriver extends CALComDriver {
             long timeTillEndOfDay = 86400 - timeSinceMidnight;
 
             priceSignal = PriceSignalGenerator.getConstantPriceSignal(
-                    commodity,
                     now,
                     now + timeTillEndOfDay + this.signalAvailableFor,
                     this.signalConstantPeriod,
@@ -265,7 +258,6 @@ public class RemsEpsProviderComDriver extends CALComDriver {
             // generate every 12 hours
 
             priceSignal = PriceSignalGenerator.getConstantPriceSignal(
-                    commodity,
                     now,
                     now + this.signalPeriod,
                     this.signalConstantPeriod,

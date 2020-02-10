@@ -77,7 +77,7 @@ public class PriceSignalThread extends Thread {
         Statement statement;
         String query;
         ResultSet resultSet;
-        PriceSignal pricesignal = new PriceSignal(this.commodity);
+        PriceSignal pricesignal = new PriceSignal();
 
         long startTimeForSPS = this.getStartOfHourInSeconds();
         long endTimeForSPS = startTimeForSPS + 36 * 3600; //get the sps for the next 36h!

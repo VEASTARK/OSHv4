@@ -148,7 +148,7 @@ public class RandomPlsProviderComDriver extends CALComDriver {
 
                 pls.setPowerLimit(time, upperLimit, lowerLimit);
             }
-            System.out.println(pls.getLimits());
+            System.out.println(pls.toString());
 
             pls.setKnownPowerLimitInterval(now, now + this.signalPeriod);
 
