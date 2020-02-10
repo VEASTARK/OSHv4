@@ -13,10 +13,6 @@ import java.util.UUID;
 public class DofStateExchange extends StateExchange {
 
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -281161281421829514L;
     private Duration device1stDegreeOfFreedom;
     private Duration device2ndDegreeOfFreedom;
 

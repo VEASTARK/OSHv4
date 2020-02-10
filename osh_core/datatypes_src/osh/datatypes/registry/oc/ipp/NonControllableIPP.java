@@ -5,7 +5,6 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
 
 import java.time.ZonedDateTime;
 import java.util.BitSet;
@@ -13,40 +12,41 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a non-controllable device.
+ *
  * @author Sebastian Kramer, Ingo Mauser
  */
 public abstract class NonControllableIPP<PhenotypeType extends ISolution, PredictionType extends IPrediction>
         extends InterdependentProblemPart<PhenotypeType, PredictionType> {
 
-    private static final long serialVersionUID = -6744029462291912653L;
-
-
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected NonControllableIPP() {
-        super();
-    }
-
-    /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable problem-part with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param needsAncillaryMeterState if this problem-part needs the virtual ancillary meter for it's calculation
+     * @param reactsToInputStates if this problem-part  reacts to any input information inside the optimization loop
+     * @param isCompletelyStatic if this problem part is completely static and will not provide any input/output
+     * @param deviceType type of device represented by this problem-part
+     * @param allOutputCommodities set of all energy types this problem-part produces or consumes.
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public NonControllableIPP(
             UUID deviceId,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean needsAncillaryMeterState,
             boolean reactsToInputStates,
             boolean isCompletelyStatic,
-            ZonedDateTime timeStamp,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(
                 deviceId,
-                timeStamp,
+                timestamp,
                 toBeScheduled,
                 needsAncillaryMeterState,
                 reactsToInputStates,
@@ -59,13 +59,15 @@ public abstract class NonControllableIPP<PhenotypeType extends ISolution, Predic
                 null);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given non-controllable problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the non-controllable problem-part to copy
+     */
     public NonControllableIPP(NonControllableIPP<PhenotypeType, PredictionType> other) {
         super(other);
-    }
-
-    @Override
-    public final PhenotypeType transformToPhenotype(DecodedSolutionWrapper solution) {
-        return null;
     }
 
     @Override

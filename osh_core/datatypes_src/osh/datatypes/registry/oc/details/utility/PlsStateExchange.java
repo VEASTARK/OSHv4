@@ -15,10 +15,6 @@ import java.util.UUID;
  */
 public class PlsStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 7026114115887147889L;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
 
 

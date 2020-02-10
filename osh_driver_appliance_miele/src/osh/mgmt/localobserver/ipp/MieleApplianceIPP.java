@@ -19,41 +19,43 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a controllable miele device.
+ *
  * @author Ingo Mauser
  */
 public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = -665656608383318760L;
-
     private long earliestStartTime;
-    private long latestStartTime;
-    private boolean predicted;
+    private final long latestStartTime;
+    private final boolean predicted;
 
-    private SparseLoadProfile profile;
+    private final SparseLoadProfile profile;
 
     private LimitedCommodityStateMap[] allOutputStates;
     private long outputStatesCalculatedFor;
 
-
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected MieleApplianceIPP() {
-        super();
-    }
-
-    /**
-     * CONSTRUCTOR
+     * Constructs this controllable miele-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param earliestStartTime the earliest starting-time of the device
+     * @param latestStartTime the latest starting-time of the device
+     * @param profile the profile of the device to be turned on
+     * @param predicted flag if this is a real planned run or a predicted one
+     * @param optimizationHorizon the optimization horizon
+     * @param deviceType type of device represented by this problem-part
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public MieleApplianceIPP(
             UUID deviceId,
             ZonedDateTime timestamp,
+            boolean toBeScheduled,
             long earliestStartTime,
             long latestStartTime,
             SparseLoadProfile profile,
-            boolean toBeScheduled,
             boolean predicted,
             long optimizationHorizon,
             DeviceTypes deviceType,
@@ -82,6 +84,13 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given controllable miele-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the controllable miele-ipp to copy
+     */
     public MieleApplianceIPP(MieleApplianceIPP other) {
         super(other);
 
@@ -94,15 +103,15 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
     }
 
     @Override
-    public void initializeInterdependentCalculation(long maxReferenceTime,
+    public void initializeInterdependentCalculation(long interdependentStartingTime,
                                                     int stepSize, boolean createLoadProfile,
                                                     boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         SparseLoadProfile lp = this.profile.cloneWithOffset(this.earliestStartTime + this.getStartOffset(this.currentSolution));
 
-        long time = maxReferenceTime;
+        long time = interdependentStartingTime;
         ObjectArrayList<LimitedCommodityStateMap> tempOutputStates = new ObjectArrayList<>();
 
         while (time < lp.getEndingTimeOfProfile()) {
@@ -127,7 +136,7 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
         this.allOutputStates = new LimitedCommodityStateMap[tempOutputStates.size()];
         this.allOutputStates = tempOutputStates.toArray(this.allOutputStates);
 
-        this.outputStatesCalculatedFor = maxReferenceTime;
+        this.outputStatesCalculatedFor = interdependentStartingTime;
 
         if (this.getLoadProfile() != null) {
             this.setLoadProfile(lp);
@@ -158,25 +167,13 @@ public class MieleApplianceIPP extends ControllableIPP<ISolution, IPrediction> {
     }
 
     @Override
-    public String solutionToString() {
-        if (this.currentSolution == null)
-            return "ERROR: no solution";
-        return "start time: " +  this.getStartTime(this.currentSolution);
-    }
-
-    @Override
     public Schedule getFinalInterdependentSchedule() {
         return new Schedule(this.getLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
     }
 
     @Override
-    public ISolution transformToPhenotype(DecodedSolutionWrapper solution) {
-        return new MieleSolution(this.getStartTime(solution), this.predicted);
-    }
-
-    @Override
     public ISolution transformToFinalInterdependentPhenotype() {
-        return this.transformToPhenotype(this.currentSolution);
+        return new MieleSolution(this.getStartTime(this.currentSolution), this.predicted);
     }
 
     @Override

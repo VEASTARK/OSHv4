@@ -11,10 +11,6 @@ import java.util.UUID;
  */
 public class SwitchDriverDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 8607636973727654406L;
     protected boolean on;
 
     public SwitchDriverDetails(UUID sender, ZonedDateTime timestamp) {

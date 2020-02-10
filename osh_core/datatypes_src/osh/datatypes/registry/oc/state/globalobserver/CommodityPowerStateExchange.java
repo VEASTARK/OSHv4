@@ -17,10 +17,6 @@ import java.util.UUID;
  */
 public class CommodityPowerStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 2451111383309555786L;
     private final EnumMap<Commodity, Double> powerState;
     private final DeviceTypes deviceType;
 

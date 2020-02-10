@@ -13,7 +13,6 @@ import java.util.UUID;
  */
 public class DofSetCommandExchange extends CommandExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = -3381723233858020252L;
     private final Integer firstDof;
     private final Integer secondDoF;
 

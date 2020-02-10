@@ -15,23 +15,31 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
+ * Represents a problem-part for a cold-water demand.
+ *
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Julian Feder
  */
 public class ChilledWaterDemandNonControllableIPP
         extends PreCalculatedNonControllableIPP {
-
-    private static final long serialVersionUID = 3835919942638394624L;
 
     private final ArrayList<ChillerCalendarDate> dates;
     private final Map<Long, Double> temperaturePrediction;
 
 
     /**
-     * CONSTRUCTOR
+     * Constructs this chilled-water demand problem-part with the given information.
+     *
+     * @param deviceId the identifier of the devide that is represented by this problem-part
+     * @param timestamp the starting-time this problem-part represents at the moment
+     * @param toBeScheduled flag if this problem-part should cause a scheduling
+     * @param dates collection of planned calender dates of usage
+     * @param temperaturePrediction prediction of outside temperatures
+     * @param compressionType the type of compression to use for this problem-part
+     * @param compressionValue the associated compression value to be used for compression
      */
     public ChilledWaterDemandNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             ArrayList<ChillerCalendarDate> dates,
             Map<Long, Double> temperaturePrediction,
@@ -39,8 +47,8 @@ public class ChilledWaterDemandNonControllableIPP
             int compressionValue) {
         super(
                 deviceId,
+                timestamp,
                 toBeScheduled,
-                timeStamp,
                 DeviceTypes.SPACECOOLING,
                EnumSet.of(Commodity.COLDWATERPOWER),
                 compressionType,
@@ -61,6 +69,13 @@ public class ChilledWaterDemandNonControllableIPP
         this.temperaturePrediction = Collections.unmodifiableMap(temperaturePrediction);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given chilled-water problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the chilled-water problem-part to copy
+     */
     public ChilledWaterDemandNonControllableIPP(ChilledWaterDemandNonControllableIPP other) {
         super(other);
         this.dates = other.dates;
@@ -73,26 +88,14 @@ public class ChilledWaterDemandNonControllableIPP
     }
 
 
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected ChilledWaterDemandNonControllableIPP() {
-        super();
-        this.temperaturePrediction = new HashMap<>();
-        this.dates = new ArrayList<>();
-    }
-
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean calculateLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, calculateLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, calculateLoadProfile, keepPrediction);
 
         ArrayList<ChillerCalendarDate> datesForEvaluation = new ArrayList<>();
         for (ChillerCalendarDate chillerCalendarDate : this.dates) {
@@ -105,8 +108,8 @@ public class ChilledWaterDemandNonControllableIPP
             datesForEvaluation.add(date);
         }
 
-        if (this.outputStatesCalculatedFor != maxReferenceTime) {
-            long time = maxReferenceTime;
+        if (this.outputStatesCalculatedFor != interdependentStartingTime) {
+            long time = interdependentStartingTime;
             ObjectArrayList<LimitedCommodityStateMap> tempAllOutputStates = new ObjectArrayList<>();
             double coldWaterPower;
 
@@ -153,7 +156,7 @@ public class ChilledWaterDemandNonControllableIPP
             this.allOutputStates = tempAllOutputStates.toArray(this.allOutputStates);
             if (this.getLoadProfile() != null)
                 this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, time, 0);
-            this.outputStatesCalculatedFor = maxReferenceTime;
+            this.outputStatesCalculatedFor = interdependentStartingTime;
         }
         this.setOutputStates(null);
 

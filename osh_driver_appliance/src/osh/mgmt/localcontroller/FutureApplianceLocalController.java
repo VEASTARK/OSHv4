@@ -344,10 +344,10 @@ public class FutureApplianceLocalController
                     now,
                     toBeScheduled,
                     optimizationHorizon.toEpochSecond(),
-                    this.getLocalObserver().getDeviceType(),
                     this.earliestStartingTime.toEpochSecond(),
                     this.latestStartingTime.toEpochSecond(),
                     this.acp,
+                    this.getLocalObserver().getDeviceType(),
                     this.compressionType,
                     this.compressionValue);
 

@@ -195,7 +195,6 @@ public class EnergyManagementProblem extends Problem {
             //set logger to null so that deep copy does not try to copy it
             for (InterdependentProblemPart<?, ?> part : this.baseDataContainer.getAllProblemParts()) {
                 part.initializeInterdependentCalculation(this.maxReferenceTime, this.stepSize, false, false);
-                part.prepareForDeepCopy();
             }
 
             this.masterDataContainer = this.baseDataContainer.getDeepCopy();

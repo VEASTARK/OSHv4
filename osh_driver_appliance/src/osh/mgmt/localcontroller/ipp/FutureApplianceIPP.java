@@ -24,15 +24,12 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a controllable household-device.
+ *
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class FutureApplianceIPP
         extends ControllableIPP<ISolution, IPrediction> {
-
-
-    private static final long serialVersionUID = 3070293649618474988L;
-
-    // NOTE: tDoF = latestStartingTime - earliestStartingTime
 
     /**
      * earliest starting time for the device
@@ -41,12 +38,12 @@ public class FutureApplianceIPP
     /**
      * latest starting time for the device
      */
-    private long latestStartingTime;
+    private final long latestStartingTime;
 
     private static final double cervisiaDofUsedFactor = 0.01;
 
     private ApplianceProgramConfigurationStatus acp;
-    private SparseLoadProfile[][] compressedDLProfiles;
+    private final SparseLoadProfile[][] compressedDLProfiles;
     private SparseLoadProfile[] initializedLoadProfiles;
     private SequentialSparseLoadProfileIterator[] sequentialIterators;
     private long[] initializedStartingTimes;
@@ -75,26 +72,28 @@ public class FutureApplianceIPP
     private double[] powers;
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected FutureApplianceIPP() {
-        super();
-    }
-
-    /**
-     * CONSTRUCTOR
+     * Constructs this controllable household-device with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param optimizationHorizon the optimization horizon
+     * @param earliestStartingTime the earliest starting-time of the device
+     * @param latestStartingTime the latest starting-time of the device
+     * @param acp the configuration profile of the household-device
+     * @param deviceType type of device represented by this problem-part
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public FutureApplianceIPP(
             UUID deviceId,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
             long optimizationHorizon,
-            DeviceTypes deviceType,
             long earliestStartingTime,
             long latestStartingTime,
             ApplianceProgramConfigurationStatus acp,
+            DeviceTypes deviceType,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
@@ -180,6 +179,13 @@ public class FutureApplianceIPP
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given controllable household-device-ipp that is as
+     * shallow as possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the controllable household-device-ipp to copy
+     */
     public FutureApplianceIPP(FutureApplianceIPP other) {
         super(other);
 
@@ -338,12 +344,12 @@ public class FutureApplianceIPP
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         // get eDoF values
         int selectedProfile =
@@ -439,13 +445,13 @@ public class FutureApplianceIPP
         for (int i = 0; i < this.initializedLoadProfiles.length; i++) {
             for (Commodity c : this.allOutputCommodities) {
                 if (!tempUsedComm.contains(c) &&
-                        this.initializedLoadProfiles[i].getFloorEntry(c, maxReferenceTime) != null) {
+                        this.initializedLoadProfiles[i].getFloorEntry(c, interdependentStartingTime) != null) {
                     tempUsedComm.add(c);
                     sameCommodities &= Arrays.asList(this.usedCommodities).contains(c);
                 }
             }
 
-            long relativeStart = Math.abs(Math.min(this.initializedStartingTimes[i] - maxReferenceTime, 0));
+            long relativeStart = Math.abs(Math.min(this.initializedStartingTimes[i] - interdependentStartingTime, 0));
             this.sequentialIterators[i] = this.initializedLoadProfiles[i].initSequentialAverageLoad(relativeStart);
         }
 
@@ -492,17 +498,6 @@ public class FutureApplianceIPP
     protected void interpretNewSolution() {
         //do nothing, solution will be interpreted in initializeInterdependentCalculation
     }
-
-    /*
-     * the method for sequential averages in our load profiles uses entrys and iterators which
-     * cannot be serialised, so they have to be destroyed prior to deep copying
-     */
-    @Override
-    public void prepareForDeepCopy() {
-    }
-
-
-    // ### INTERPRET SOLUTION ###
 
     @Override
     public void calculateNextStep() {
@@ -604,28 +599,6 @@ public class FutureApplianceIPP
     //TODo: find better solution (for mapping from 2^x to real length)
 
     @Override
-    public ISolution transformToPhenotype(DecodedSolutionWrapper solution) {
-        int selectedProfile = getSelectedProfileFromSolution(
-                solution,
-                this.header,
-                this.acp.getDynamicLoadProfiles());
-        long availableTDoF = this.latestStartingTime - this.earliestStartingTime;
-        int[] selectedTimeOfTDOF = getSelectedTimeFromTDOFFromSolution(
-                solution,
-                this.header,
-                availableTDoF,
-                this.maxValues[selectedProfile],
-                this.sumOfAllMaxValues[selectedProfile]);
-        return new GenericApplianceSolution(
-                this.acp.getAcpID(),
-                getStartingTimes(
-                        this.earliestStartingTime,
-                        selectedTimeOfTDOF,
-                        this.acp.getMinMaxDurations()[selectedProfile]),
-                selectedProfile);
-    }
-
-    @Override
     public ISolution transformToFinalInterdependentPhenotype() {
         int selectedProfile = getSelectedProfileFromSolution(
                 this.currentSolution,
@@ -647,8 +620,6 @@ public class FutureApplianceIPP
                         this.acp.getMinMaxDurations()[selectedProfile]),
                 selectedProfile);
     }
-
-    // MISC
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -701,8 +672,6 @@ public class FutureApplianceIPP
         }
     }
 
-    // ### to string ###
-
     @Override
     public String problemToString() {
         return "[" + this.getReferenceTime() + "] [" + this.getOptimizationHorizon() + "] FutureApplianceIPP : EST=" + this.earliestStartingTime + " LST=" + this.latestStartingTime;// + " minMaxValues=" + StringToArray.arrayToString(array);
@@ -712,10 +681,4 @@ public class FutureApplianceIPP
     public FutureApplianceIPP getClone() {
         return new FutureApplianceIPP(this);
     }
-
-    @Override
-    public String solutionToString() {
-        return "FutureApplianceIPP solution";
-    }
-
 }

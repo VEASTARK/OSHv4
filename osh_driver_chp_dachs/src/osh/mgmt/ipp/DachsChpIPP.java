@@ -20,17 +20,17 @@ import osh.utils.time.TimeConversion;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a controllable dachs combinded-heating-plant (chp).
+ *
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Sebastian Kramer
  */
 public class DachsChpIPP
         extends ControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = 7540352071581934211L;
     /**
      * slot length in [s]
      */
@@ -61,16 +61,33 @@ public class DachsChpIPP
 
     private boolean[] ab;
 
-    private GenericChpModel masterModel;
+    private final GenericChpModel masterModel;
     private GenericChpModel actualModel;
 
-
     /**
-     * CONSTRUCTOR
+     * Constructs this controllable chp-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialState the initial operating state of the chp
+     * @param minRunTime the minimum time the chp needs to stay on
+     * @param chpModel a model of the chp
+     * @param relativeHorizon the relative optimization horizon
+     * @param hotWaterStorageMinTemp the minimum hot-water temperature needed to kept
+     * @param hotWaterStorageMaxTemp the maximum hot-water temperature allowed
+     * @param hysteresis the temperature above the minimum temeperature the chp will be kept on to reach
+     * @param currentWaterTemperature the current hot-water temperature
+     * @param fixedCostPerStart the additional cervisia costs per start of the chp
+     * @param forcedOnOffStepMultiplier the additional cervisia costs per forced on/off per step-size
+     * @param forcedOffAdditionalCost the additional cervisia costs per forced off
+     * @param chpOnCervisiaStepSizeMultiplier the additional cervisia costs when on per step-size
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public DachsChpIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean initialState,
             int minRunTime,
@@ -88,11 +105,11 @@ public class DachsChpIPP
             int compressionValue
     ) {
         super(deviceId,
-                timeStamp,
+                timestamp,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
-                timeStamp.toEpochSecond() + relativeHorizon,
+                timestamp.toEpochSecond() + relativeHorizon,
                 DeviceTypes.CHPPLANT,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -122,6 +139,13 @@ public class DachsChpIPP
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given controllable chp-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the controllable chp-ipp to copy
+     */
     public DachsChpIPP(DachsChpIPP other) {
         super(other);
         this.initialState = other.initialState;
@@ -147,36 +171,14 @@ public class DachsChpIPP
         this.actualModel = null;
     }
 
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected DachsChpIPP() {
-        super();
-        this.initialState = true;
-        this.minRunTime = 0;
-        this.hotWaterStorageMinTemp = 0;
-        this.hotWaterStorageMaxTemp = 0;
-        this.hysteresis = 0;
-        this.currentWaterTemperature = 0;
-    }
-
-
-    // ### interdependent problem part stuff ###
-
-    private static int getNecessaryNumberOfBits(int relativeHorizon) {
-        return (int) (relativeHorizon / TIME_PER_SLOT) * BITS_PER_ACTIVATION;
-    }
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.interdependentStartingTimes = null;
         this.interdependentTimeOfFirstBit = this.getReferenceTime();
@@ -387,49 +389,6 @@ public class DachsChpIPP
     }
 
     @Override
-    public ActivationList transformToPhenotype(DecodedSolutionWrapper solution) {
-        ArrayList<Activation> startTimes = new ArrayList<>();
-        long timeOfFirstBit = this.getReferenceTime();
-
-        boolean[] activationBits = this.getActivationBits(timeOfFirstBit, solution);
-        Activation currentActivation = null;
-
-        long duration = 0;
-        for (int i = 0; i < activationBits.length; i++) {
-            if (activationBits[i]) {
-                // turn on
-                if (currentActivation == null) {
-                    currentActivation = new Activation();
-                    currentActivation.startTime = TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * TIME_PER_SLOT);
-                    currentActivation.duration = Duration.ZERO;
-                    duration = TIME_PER_SLOT;
-                } else {
-                    duration += TIME_PER_SLOT;
-                }
-            } else {
-                // turn off
-                if (currentActivation != null) {
-                    currentActivation.duration = Duration.ofSeconds(duration);
-                    duration = 0;
-                    startTimes.add(currentActivation);
-                    currentActivation = null;
-                }
-            }
-        }
-
-        if (currentActivation != null) {
-            currentActivation.duration = Duration.ofSeconds(duration);
-            startTimes.add(currentActivation);
-        }
-
-        ActivationList chpPhenotype = new ActivationList();
-        chpPhenotype.setList(startTimes);
-        return chpPhenotype;
-    }
-
-    // ### helper stuff ###
-
-    @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
             this.setReferenceTime(currentTime);
@@ -485,8 +444,6 @@ public class DachsChpIPP
         return Math.round((float) (this.getOptimizationHorizon() - this.getReferenceTime()) / TIME_PER_SLOT) * BITS_PER_ACTIVATION;
     }
 
-    // ### to string ###
-
     @Override
     public String problemToString() {
         return "DachsChpIPP [" + this.getReferenceTime() + "] [" + this.getOptimizationHorizon() + "]";
@@ -495,11 +452,5 @@ public class DachsChpIPP
     @Override
     public DachsChpIPP getClone() {
         return new DachsChpIPP(this);
-    }
-
-    @Override
-    public String solutionToString() {
-        boolean[] ab = this.getActivationBits(this.getReferenceTime(), this.currentSolution);
-        return "[" + this.getReferenceTime() + "] [" + this.getOptimizationHorizon() + "] " + Arrays.toString(ab);
     }
 }

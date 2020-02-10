@@ -12,10 +12,6 @@ import java.util.UUID;
  */
 public class DeviceMetaOCDetails extends StateExchange implements Cloneable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -6362041571466196750L;
     private String name;
     private String location;
 

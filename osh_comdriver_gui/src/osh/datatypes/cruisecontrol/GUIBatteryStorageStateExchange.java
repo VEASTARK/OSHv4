@@ -14,8 +14,6 @@ public class GUIBatteryStorageStateExchange
         extends BatteryStorageOCSX
         implements EqualData<BatteryStorageOCSX> {
 
-    private static final long serialVersionUID = 2308641394864672076L;
-
 
     public GUIBatteryStorageStateExchange(
             UUID sender,

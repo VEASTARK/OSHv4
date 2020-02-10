@@ -11,10 +11,6 @@ import java.util.UUID;
  */
 public class ElectricPowerOCDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 827260439992008634L;
     protected int activePower;
     protected int reactivePower;
     public ElectricPowerOCDetails(UUID sender, ZonedDateTime timestamp, int activePower,

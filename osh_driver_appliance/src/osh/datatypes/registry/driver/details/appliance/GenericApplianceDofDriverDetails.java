@@ -16,11 +16,6 @@ import java.util.UUID;
 public class GenericApplianceDofDriverDetails extends StateExchange {
 
     /**
-     *
-     */
-    private static final long serialVersionUID = -1441502884455073409L;
-
-    /**
      * DoF for initial scheduling
      */
     protected int appliance1stDof;

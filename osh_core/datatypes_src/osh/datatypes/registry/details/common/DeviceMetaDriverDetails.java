@@ -4,17 +4,11 @@ import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.registry.StateExchange;
 
-import javax.xml.bind.annotation.XmlType;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@XmlType
 public class DeviceMetaDriverDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 4956177889110340703L;
     protected String name;
     protected String location;
 
@@ -24,15 +18,6 @@ public class DeviceMetaDriverDetails extends StateExchange {
     protected boolean configured;
 
     protected String icon;
-
-    /**
-     * for JAXB
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    protected DeviceMetaDriverDetails() {
-        super();
-    }
 
     /**
      * CONSTRUCTOR

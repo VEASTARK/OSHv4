@@ -17,25 +17,31 @@ import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a non-controllable self-adjusting smart-heater.
+ *
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class SmartHeaterNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = -7540136211941577232L;
-    private SmartHeaterModel masterModel;
+    private final SmartHeaterModel masterModel;
     private SmartHeaterModel actualModel;
 
 
     /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable problem-part with the given information.
      *
-     * @param deviceId
-     * @param timeStamp
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param temperatureSetting the target temperature for the heater
+     * @param initialState the initial operating state of the heater
+     * @param timestampOfLastChangePerSubElement if this problem-part  reacts to any input information inside the optimization loop
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public SmartHeaterNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             int temperatureSetting,
             int initialState,
             long[] timestampOfLastChangePerSubElement,
@@ -44,11 +50,11 @@ public class SmartHeaterNonControllableIPP
 
         super(
                 deviceId,
+                timestamp,
                 false, //does not cause scheduling
                 true, //needs ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.INSERTHEATINGELEMENT,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
@@ -68,16 +74,6 @@ public class SmartHeaterNonControllableIPP
     }
 
 
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected SmartHeaterNonControllableIPP() {
-        super();
-    }
-
-
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         this.setReferenceTime(currentTime);
@@ -85,17 +81,14 @@ public class SmartHeaterNonControllableIPP
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.actualModel = new SmartHeaterModel(this.masterModel);
     }
@@ -164,8 +157,6 @@ public class SmartHeaterNonControllableIPP
             return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {

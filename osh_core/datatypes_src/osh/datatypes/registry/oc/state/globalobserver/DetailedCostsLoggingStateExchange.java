@@ -15,11 +15,6 @@ import java.util.UUID;
  */
 public class DetailedCostsLoggingStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 2936707619450436755L;
-
     private final EnumMap<AncillaryCommodity, Integer> map;
 
     private final EnumMap<AncillaryCommodity, PriceSignal> ps;

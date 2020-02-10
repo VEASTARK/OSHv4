@@ -19,6 +19,8 @@ import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a non-controllable simple adsorption cooler.
+ *
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Julian Feder
  */
 public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPrediction> {
@@ -31,10 +33,6 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
      * slot length in [s]
      */
     public final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
-    /**
-     *
-     */
-    private static final long serialVersionUID = -8273266479216299094L;
     private static final int typicalStandbyActivePower = 10; // [W]
     private static final int typicalRunningActivePower = 420; // [W]
     /**
@@ -70,14 +68,19 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
     private double currentHotWaterTemperature;
 
     /**
-     * CONSTRUCTOR
+     * Constructs this chiller non-controllable problem-part with the given information.
      *
-     * @param deviceId
-     * @param timeStamp
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialAdChillerState the initial operation state of the chiller
+     * @param temperaturePrediction prediction of outside temperatures
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public ChillerNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -85,11 +88,11 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
             int compressionValue) {
         super(
                 deviceId,
+                timestamp,
                 toBeScheduled,
                 false, //needsAncillaryMeterState
                 true, //reactsToInputStates
                 false, //is not static
-                timeStamp,
                 DeviceTypes.ADSORPTIONCHILLER,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -104,6 +107,13 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER, Commodity.COLDWATERPOWER));
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given chiller ipp that is as shallow as possible while
+     * still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the chiller ipp to copy
+     */
     public ChillerNonControllableIPP(ChillerNonControllableIPP other) {
         super(other);
 
@@ -120,11 +130,11 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.interdependentLastState = this.initialAdChillerState;
     }

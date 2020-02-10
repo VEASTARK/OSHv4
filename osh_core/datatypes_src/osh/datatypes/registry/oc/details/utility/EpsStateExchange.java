@@ -15,10 +15,6 @@ import java.util.UUID;
  */
 public class EpsStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -4956166786914687416L;
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private boolean causeScheduling;
 

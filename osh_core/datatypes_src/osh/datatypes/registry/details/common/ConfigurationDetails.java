@@ -14,10 +14,6 @@ import java.util.UUID;
 
 public class ConfigurationDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -8016555994484536360L;
     private ConfigurationStatus configurationStatus;
     private UUID usedBy;
 

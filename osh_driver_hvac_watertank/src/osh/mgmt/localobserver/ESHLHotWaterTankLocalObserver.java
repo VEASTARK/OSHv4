@@ -82,12 +82,12 @@ public class ESHLHotWaterTankLocalObserver
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     now,
+                    false,
                     this.currentTemperature,
                     this.tankCapacity,
                     this.tankDiameter,
                     this.ambientTemperature,
                     (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
-                    false,
                     this.compressionType,
                     this.compressionValue);
             this.getOCRegistry().publish(
@@ -102,12 +102,12 @@ public class ESHLHotWaterTankLocalObserver
                 HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         now,
+                        true,
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
                         this.ambientTemperature,
                         (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
-                        true,
                         this.compressionType,
                         this.compressionValue);
                 this.getOCRegistry().publish(
@@ -143,12 +143,12 @@ public class ESHLHotWaterTankLocalObserver
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getTimeDriver().getCurrentTime(),
+                        false,
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
                         this.ambientTemperature,
                         (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
-                        false,
                         this.compressionType,
                         this.compressionValue);
                 this.getOCRegistry().publish(

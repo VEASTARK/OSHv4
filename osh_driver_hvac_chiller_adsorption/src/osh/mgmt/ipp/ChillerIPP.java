@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a controllable simple adsorption cooler.
+ *
  * @author Julian Feder, Sebastian Kramer, Ingo Mauser
  */
 public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
@@ -41,7 +43,6 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
      * slot length in [s]
      */
     public final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
-    private static final long serialVersionUID = -515441464083361208L;
     private final static int BITS_PER_ACTIVATION = 4;
 
     //TODO move to config
@@ -81,11 +82,18 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     private int currentActivationRunningTime;
 
     /**
-     * CONSTRUCTOR
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialAdChillerState the initial operation state of the chiller
+     * @param temperaturePrediction prediction of outside temperatures
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public ChillerIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -93,11 +101,11 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
             int compressionValue) {
         super(
                 deviceId,
-                timeStamp,
+                timestamp,
                 toBeScheduled,
                 false, //needsAncillaryMeterStates
                 true, //reactsToInputStates
-                timeStamp.toEpochSecond() + RELATIVE_HORIZON,
+                timestamp.toEpochSecond() + RELATIVE_HORIZON,
                 DeviceTypes.ADSORPTIONCHILLER,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -115,6 +123,13 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given chiller ipp that is as shallow as possible while
+     * still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the chiller ipp to copy
+     */
     public ChillerIPP(ChillerIPP other) {
         super(other);
 
@@ -133,21 +148,14 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         this.currentActivationRunningTime = other.currentActivationRunningTime;
     }
 
-    private static int getNecessaryNumberOfBits(int relativeHorizon) {
-        return (int) (RELATIVE_HORIZON / TIME_PER_SLOT) * BITS_PER_ACTIVATION;
-    }
-
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         // used for iteration in interdependent calculation
         this.interdependentStartingTimes = null;
@@ -356,14 +364,6 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     }
 
 
-    // ### OLD STUFF (best guess schedule, not interdependent)
-
-    @Override
-    public ActivationList transformToPhenotype(DecodedSolutionWrapper solution) {
-        return null;
-    }
-
-
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
@@ -373,8 +373,6 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
             this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
         }
     }
-
-    // HELPER STUFF
 
     private boolean[] getActivationBits(
             DecodedSolutionWrapper solution) {
@@ -416,12 +414,5 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     @Override
     public ChillerIPP getClone() {
         return new ChillerIPP(this);
-    }
-
-    // ### to string ###
-
-    @Override
-    public String solutionToString() {
-        return "Chiller IPP solution";
     }
 }

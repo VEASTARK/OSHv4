@@ -5,7 +5,7 @@ import osh.esc.LimitedCommodityStateMap;
 import osh.registry.interfaces.IProvidesIdentity;
 
 /**
- * Marks that the entity consumes or produces energy
+ * Marks that the entity consumes or produces energy.
  *
  * @author Ingo Mauser, Sebastian Kramer
  */

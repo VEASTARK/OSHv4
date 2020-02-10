@@ -14,10 +14,6 @@ import java.util.UUID;
  */
 public class MieleApplianceDriverDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5818061135587946337L;
     protected Duration expectedProgramDuration;
     protected ZonedDateTime startTime;
     protected Duration programRemainingTime;

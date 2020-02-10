@@ -10,10 +10,7 @@ import java.util.UUID;
  */
 public class LogThis extends CommandExchange {
 
-    private static final long serialVersionUID = 5173636358971480331L;
-
     private final IAnnotatedForLogging toLog;
-
 
     /**
      * CONSTRUCTOR

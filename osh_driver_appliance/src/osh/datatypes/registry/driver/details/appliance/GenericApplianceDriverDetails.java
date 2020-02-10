@@ -15,10 +15,6 @@ import java.util.UUID;
 
 public class GenericApplianceDriverDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -8899173740986326637L;
     private EN50523DeviceState state;
     private String stateTextDE;
 

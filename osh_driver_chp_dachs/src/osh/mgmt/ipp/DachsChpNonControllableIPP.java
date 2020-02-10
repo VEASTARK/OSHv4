@@ -15,9 +15,10 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a non-controllable dachs combinded-heating-plant (chp).
+ *
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Julian Feder, Sebastian Kramer
  */
-@SuppressWarnings("unused")
 public class DachsChpNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
@@ -25,21 +26,17 @@ public class DachsChpNonControllableIPP
      * slot length in [s]
      */
     public final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
-    /**
-     *
-     */
-    private static final long serialVersionUID = -1505828917459842280L;
-    GenericChpModel masterModel;
-    GenericChpModel actualModel;
-    private double fixedCostPerStart;
-    private boolean initialChpState;
-    private int minRuntime;
+    private final GenericChpModel masterModel;
+    private GenericChpModel actualModel;
+    private final double fixedCostPerStart;
+    private final boolean initialChpState;
+    private final int minRuntime;
 
 
     // ### interdependent stuff ###
     // temperature control
-    private double hotWaterStorageMinTemp;
-    private double hotWaterStorageMaxTemp;
+    private final double hotWaterStorageMinTemp;
+    private final double hotWaterStorageMaxTemp;
     private boolean interdependentLastState;
     /**
      * from hot water tank IPP
@@ -48,20 +45,24 @@ public class DachsChpNonControllableIPP
 
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected DachsChpNonControllableIPP() {
-        super();
-    }
-
-    /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable chp-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param minRuntime the minimum time the chp needs to stay on
+     * @param chpModel a model of the chp
+     * @param initialChpState the initial operating state of the chp
+     * @param hotWaterStorageMinTemp the minimum hot-water temperature needed to kept
+     * @param hotWaterStorageMaxTemp the maximum hot-water temperature allowed
+     * @param currentWaterTemperature the current hot-water temperature
+     * @param fixedCostPerStart the additional cervisia costs per start of the chp
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public DachsChpNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             int minRuntime,
             GenericChpModel chpModel,
@@ -75,11 +76,11 @@ public class DachsChpNonControllableIPP
 
         super(
                 deviceId,
+                timestamp,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.CHPPLANT,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -101,6 +102,13 @@ public class DachsChpNonControllableIPP
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given non-controllable chp-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the non-controllable chp-ipp to copy
+     */
     public DachsChpNonControllableIPP(DachsChpNonControllableIPP other) {
         super(other);
 
@@ -115,17 +123,14 @@ public class DachsChpNonControllableIPP
         this.fixedCostPerStart = other.fixedCostPerStart;
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.interdependentLastState = this.initialChpState;
 
@@ -216,7 +221,6 @@ public class DachsChpNonControllableIPP
         this.incrementInterdependentTime();
     }
 
-
     @Override
     public Schedule getFinalInterdependentSchedule() {
 
@@ -239,8 +243,6 @@ public class DachsChpNonControllableIPP
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         this.setReferenceTime(currentTime);
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {

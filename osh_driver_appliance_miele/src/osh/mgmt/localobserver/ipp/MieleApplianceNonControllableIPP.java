@@ -17,22 +17,12 @@ import java.util.UUID;
  */
 public class MieleApplianceNonControllableIPP extends PredictedNonControllableIPP {
 
-    private static final long serialVersionUID = -6645742166303833918L;
-
-    /**
-     * No-arg constructor for serialization.
-     */
-    @Deprecated
-    protected MieleApplianceNonControllableIPP() {
-        super();
-    }
-
     /**
      * Constructs this miele device problem-part.
 
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param timestamp the starting-time this problem-part represents at the moment
+     * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param powerPrediction the predicted heating power profile
      * @param deviceType the type of device that is represented by this problem-part
      * @param compressionType the type of compression to use for this problem-part
@@ -40,8 +30,8 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
      */
     public MieleApplianceNonControllableIPP(
             UUID deviceId,
-            boolean toBeScheduled,
             ZonedDateTime timestamp,
+            boolean toBeScheduled,
             DeviceTypes deviceType,
             SparseLoadProfile powerPrediction,
             LoadProfileCompressionTypes compressionType,
@@ -49,8 +39,8 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
 
         super(
                 deviceId,
-                toBeScheduled,
                 timestamp,
+                toBeScheduled,
                 deviceType,
                 powerPrediction,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
@@ -58,6 +48,13 @@ public class MieleApplianceNonControllableIPP extends PredictedNonControllableIP
                 compressionValue);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given miele device problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the miele device problem-part to copy
+     */
     public MieleApplianceNonControllableIPP(MieleApplianceNonControllableIPP other) {
         super(other);
     }

@@ -17,21 +17,11 @@ import java.util.UUID;
  */
 public class BaseloadIPP extends PredictedNonControllableIPP {
 
-    private static final long serialVersionUID = 8909519723717425836L;
-
-    /**
-     * No-arg constructor for serialization.
-     */
-    @Deprecated
-    protected BaseloadIPP() {
-        super();
-    }
-
     /**
      * Constructs this baseload problem-part.
      * @param deviceId the identifier of the devide that is represented by this problem-part
-     * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param timestamp the starting-time this problem-part represents at the moment
+     * @param toBeScheduled flag if this problem-part should cause a scheduling
      * @param deviceType the type of device that is represented by this problem-part
      * @param baseload the predicted baseload power profile
      * @param compressionType the type of compression to use for this problem-part
@@ -39,15 +29,15 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
      */
     public BaseloadIPP(
             UUID deviceId,
-            boolean toBeScheduled,
             ZonedDateTime timestamp,
+            boolean toBeScheduled,
             DeviceTypes deviceType,
             SparseLoadProfile baseload,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId,
-                toBeScheduled,
                 timestamp,
+                toBeScheduled,
                 deviceType,
                 baseload,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
@@ -55,6 +45,13 @@ public class BaseloadIPP extends PredictedNonControllableIPP {
                 compressionValue);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given baseload-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the baseload-ipp to copy
+     */
     public BaseloadIPP(BaseloadIPP other) {
         super(other);
     }

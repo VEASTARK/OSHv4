@@ -19,12 +19,6 @@ import java.util.UUID;
 public abstract class PreCalculatedNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-
-    /**
-     *
-     */
-    private static final long serialVersionUID = 6115879812569415975L;
-
     /**
      * all pre-calculated output states of this problem-part
      */
@@ -37,8 +31,8 @@ public abstract class PreCalculatedNonControllableIPP
      * Constructs this simplified problem-part with the given information.
      *
      * @param deviceId the identifier of the devide that is represented by this problem-part
+     * @param timestamp the starting-time this problem-part represents at the moment
      * @param toBeScheduled flag if this problem-part should cause a scheduling
-     * @param timeStamp the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
      * @param allOutputCommodities all possible commodities that can be emitted by this problem-part
      * @param compressionType the type of compression to use for this problem-part
@@ -46,40 +40,38 @@ public abstract class PreCalculatedNonControllableIPP
      */
     public PreCalculatedNonControllableIPP(
             UUID deviceId,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
-            ZonedDateTime timeStamp,
             DeviceTypes deviceType,
             EnumSet<Commodity> allOutputCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(
                 deviceId,
+                timestamp,
                 toBeScheduled,
                 false,
                 false,
                 false, //is not static
-                timeStamp,
                 deviceType,
                 allOutputCommodities,
                 compressionType,
                 compressionValue);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given simplified problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the simplified problem-part to copy
+     */
     public PreCalculatedNonControllableIPP(PreCalculatedNonControllableIPP other) {
         super(other);
         this.allOutputStates = other.allOutputStates;
         this.maxHorizon = other.maxHorizon;
         this.outputStatesCalculatedFor = other.outputStatesCalculatedFor;
     }
-
-    /**
-     * No-arg constructor for serialization.
-     */
-    @Deprecated
-    protected PreCalculatedNonControllableIPP() {
-        super();
-    }
-
 
     @Override
     public final void calculateNextStep() {

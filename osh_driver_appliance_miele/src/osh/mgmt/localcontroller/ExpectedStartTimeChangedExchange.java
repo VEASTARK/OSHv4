@@ -12,10 +12,6 @@ import java.util.UUID;
  */
 public class ExpectedStartTimeChangedExchange extends EventExchange implements IPromiseToBeImmutable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 806696758718863420L;
     private final ZonedDateTime expectedStartTime;
 
 
@@ -30,5 +26,4 @@ public class ExpectedStartTimeChangedExchange extends EventExchange implements I
     public ZonedDateTime getExpectedStartTime() {
         return this.expectedStartTime;
     }
-
 }

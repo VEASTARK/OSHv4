@@ -9,10 +9,7 @@ import java.util.UUID;
 
 @XmlRootElement
 public class ExpectedStartTimeExchange extends StateExchange {
-    /**
-     *
-     */
-    private static final long serialVersionUID = -5083812677185394953L;
+
     private ZonedDateTime expectedStartTime;
 
     public ExpectedStartTimeExchange(UUID sender, ZonedDateTime timestamp) {

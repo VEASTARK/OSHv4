@@ -16,12 +16,13 @@ import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a cold-water tank.
+ *
  * @author Florian Allerding, Ingo Mauser, Till Schuberth
  */
 public class ColdWaterTankNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = -7475173612656137600L;
     private final double initialTemperature;
     private static final double tankCapacity = 3000.0;
     private static final double tankDiameter = 1.0;
@@ -30,21 +31,27 @@ public class ColdWaterTankNonControllableIPP
     private SimpleColdWaterTank waterTank;
 
     /**
-     * CONSTRUCTOR
+     * Constructs this cold-water tank ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param initialTemperature the intial temperature of the watertank
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public ColdWaterTankNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             double initialTemperature,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(
                 deviceId,
+                timestamp,
                 false, //does not cause scheduling
                 false, //does not need ancillary meter state as Input State
                 true, // reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.COLDWATERSTORAGE,
                 EnumSet.of(Commodity.COLDWATERPOWER),
                 compressionType,
@@ -54,22 +61,18 @@ public class ColdWaterTankNonControllableIPP
         this.setAllInputCommodities(EnumSet.of(Commodity.COLDWATERPOWER));
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given cold-water tank ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the cold-water tank ipp to copy
+     */
     public ColdWaterTankNonControllableIPP(ColdWaterTankNonControllableIPP other) {
         super(other);
         this.initialTemperature = other.initialTemperature;
         this.waterTank = null;
     }
-
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected ColdWaterTankNonControllableIPP() {
-        super();
-        this.initialTemperature = 0;
-    }
-
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -77,17 +80,14 @@ public class ColdWaterTankNonControllableIPP
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.waterTank = new SimpleColdWaterTank(
                 tankCapacity,
@@ -119,13 +119,10 @@ public class ColdWaterTankNonControllableIPP
         this.incrementInterdependentTime();
     }
 
-
     @Override
     public Schedule getFinalInterdependentSchedule() {
         return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {
@@ -136,5 +133,4 @@ public class ColdWaterTankNonControllableIPP
     public ColdWaterTankNonControllableIPP getClone() {
         return new ColdWaterTankNonControllableIPP(this);
     }
-
 }

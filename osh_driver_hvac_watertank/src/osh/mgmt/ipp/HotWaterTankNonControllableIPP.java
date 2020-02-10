@@ -17,43 +17,54 @@ import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a hot-water tank.
+ *
  * @author Florian Allerding, Ingo Mauser, Till Schuberth
  */
 public class HotWaterTankNonControllableIPP
         extends NonControllableIPP<ISolution, TemperaturePrediction> {
 
-    private static final long serialVersionUID = -7474764554202830275L;
-    private SimpleHotWaterTank masterWaterTank;
+    private final SimpleHotWaterTank masterWaterTank;
     private SimpleHotWaterTank actualWaterTank;
     private Double firstTemperature;
     //6ct per kWh ThermalPower (= gas price per kWh)
-    private double punishmentFactorPerWsPowerLost;
+    private final double punishmentFactorPerWsPowerLost;
 
     private TreeMap<Long, Double> temperatureStates;
 
-
     /**
-     * CONSTRUCTOR
+     * Constructs this hot-water tank ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialTemperature the intial temperature of the watertank
+     * @param tankCapacity the capacity of the watertank
+     * @param tankDiameter the diameter of the watertank
+     * @param ambientTemperature the ambient temperature around the watertank
+     * @param punishmentFactorPerWsLost the punishment factor per ws lost over the optimization loop
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public HotWaterTankNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
+            boolean toBeScheduled,
             double initialTemperature,
             double tankCapacity,
             double tankDiameter,
             double ambientTemperature,
             double punishmentFactorPerWsLost,
-            boolean causeScheduling,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
         super(
                 deviceId,
-                causeScheduling, //does not cause scheduling
+                timestamp,
+                toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.HOTWATERSTORAGE,
                 EnumSet.of(Commodity.HEATINGHOTWATERPOWER,
                         Commodity.DOMESTICHOTWATERPOWER),
@@ -67,6 +78,13 @@ public class HotWaterTankNonControllableIPP
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER, Commodity.DOMESTICHOTWATERPOWER));
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given hot-water tank ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the hot-water tank ipp to copy
+     */
     public HotWaterTankNonControllableIPP(HotWaterTankNonControllableIPP other) {
         super(other);
         this.masterWaterTank = new SimpleHotWaterTank(other.masterWaterTank);
@@ -78,32 +96,20 @@ public class HotWaterTankNonControllableIPP
     }
 
 
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected HotWaterTankNonControllableIPP() {
-        super();
-    }
-
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         // get new temperature of tank
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         if (keepPrediction)
             this.temperatureStates = new TreeMap<>();
@@ -177,8 +183,6 @@ public class HotWaterTankNonControllableIPP
     public Schedule getFinalInterdependentSchedule() {
         return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {

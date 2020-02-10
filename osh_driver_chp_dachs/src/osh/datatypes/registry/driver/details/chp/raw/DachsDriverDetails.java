@@ -2,7 +2,6 @@ package osh.datatypes.registry.driver.details.chp.raw;
 
 import osh.datatypes.registry.StateExchange;
 
-import javax.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,13 +11,7 @@ import java.util.UUID;
 /**
  * @author Kaibin Bao, Ingo Mauser
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "DachsDriverDetails")
-@XmlType
-@SuppressWarnings("unused")
 public class DachsDriverDetails extends StateExchange {
-
-    private static final long serialVersionUID = 1449180454003778385L;
 
     // Dachs
     private String hkaBdAnforderungModulAnzahl;
@@ -83,17 +76,7 @@ public class DachsDriverDetails extends StateExchange {
 
     private String wartungCachefStehtAn;
 
-    @XmlTransient
     private HashMap<String, String> values;
-
-
-    /**
-     * for JAXB only
-     */
-    @Deprecated
-    public DachsDriverDetails() {
-        super();
-    }
 
     /**
      * CONSTRUCTOR
@@ -109,7 +92,6 @@ public class DachsDriverDetails extends StateExchange {
         return this.values;
     }
 
-    //	@Transient
     public void setValues(Map<String, String> values) {
         this.values = new HashMap<>(values);
         for (Entry<String, String> e : values.entrySet()) {

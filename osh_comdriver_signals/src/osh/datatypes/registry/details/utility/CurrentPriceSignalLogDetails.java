@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlType;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -15,16 +14,9 @@ import java.util.UUID;
 /**
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
-@XmlType
 @Entity
 @Table(name = "log_currentpricesignal")
 public class CurrentPriceSignalLogDetails extends StateExchange {
-
-
-    /**
-     * SERIAL
-     */
-    private static final long serialVersionUID = -852140511093577391L;
 
     @Transient
     protected AncillaryCommodity ancillaryCommodityEnum;

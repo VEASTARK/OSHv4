@@ -19,26 +19,15 @@ import java.util.UUID;
  */
 public abstract class PredictedNonControllableIPP extends PreCalculatedNonControllableIPP {
 
-    private static final long serialVersionUID = 4986064304539182805L;
-
     protected final SparseLoadProfile predictedProfile;
-    private EnumSet<Commodity> usedCommodities;
-
-    /**
-     * No-arg constructor for serialization.
-     */
-    @Deprecated
-    protected PredictedNonControllableIPP() {
-        super();
-        this.predictedProfile = null;
-    }
+    private final EnumSet<Commodity> usedCommodities;
 
     /**
      * Constructs this simplified problem-part with the given information.
      *
      * @param deviceId the identifier of the devide that is represented by this problem-part
+     * @param timestamp the starting-time this problem-part represents at the moment
      * @param toBeScheduled flag if this problem-part should cause a scheduling
-     * @param referenceTime the starting-time this problem-part represents at the moment
      * @param deviceType the type of device that is represented by this problem-part
      * @param predictedProfile the predicted power profile of this problem-part
      * @param usedCommodities all possible commodities that can be emitted by this problem-part
@@ -47,16 +36,16 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
      */
     public PredictedNonControllableIPP(
             UUID deviceId,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
-            ZonedDateTime referenceTime,
             DeviceTypes deviceType,
             SparseLoadProfile predictedProfile,
             EnumSet<Commodity> usedCommodities,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(deviceId,
+                timestamp,
                 toBeScheduled,
-                referenceTime,
                 deviceType,
                 usedCommodities,
                 compressionType,
@@ -66,6 +55,13 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
         this.predictedProfile = predictedProfile.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given simplified problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the simplified problem-part to copy
+     */
     public PredictedNonControllableIPP(PredictedNonControllableIPP other) {
         super (other);
         this.usedCommodities = other.usedCommodities;
@@ -74,19 +70,19 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         if (this.getLoadProfile() != null) {
             this.setLoadProfile(this.predictedProfile.cloneAfter(this.getReferenceTime()));
         }
 
-        if (this.outputStatesCalculatedFor != maxReferenceTime) {
-            long time = maxReferenceTime;
+        if (this.outputStatesCalculatedFor != interdependentStartingTime) {
+            long time = interdependentStartingTime;
             ObjectArrayList<LimitedCommodityStateMap> tempAllOutputStates = new ObjectArrayList<>();
 
             while (time < this.maxHorizon) {
@@ -125,7 +121,7 @@ public abstract class PredictedNonControllableIPP extends PreCalculatedNonContro
             this.allOutputStates = new LimitedCommodityStateMap[tempAllOutputStates.size()];
             this.allOutputStates = tempAllOutputStates.toArray(this.allOutputStates);
 
-            this.outputStatesCalculatedFor = maxReferenceTime;
+            this.outputStatesCalculatedFor = interdependentStartingTime;
         }
     }
 

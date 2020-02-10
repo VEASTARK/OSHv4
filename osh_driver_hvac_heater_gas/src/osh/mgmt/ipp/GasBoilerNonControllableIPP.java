@@ -15,25 +15,39 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a non-controllable simple gas-boiler.
+ *
  * @author Sebastian Kramer, Ingo Mauser
  */
 public class GasBoilerNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = 1001003082323078089L;
-
     private final double MIN_TEMPERATURE;
     private final double MAX_TEMPERATURE;
 
-    private GasBoilerModel masterModel;
+    private final GasBoilerModel masterModel;
     private GasBoilerModel actualModel;
 
     /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable gas-boiler-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param minTemperature the minimum hot-water temperature needed to kept
+     * @param maxTemperature the maximum hot-water temperature allowed
+     * @param initialState the initial operating state of the gas-boiler
+     * @param maxHotWaterPower the maximum heating power of the gas-boiler
+     * @param maxGasPower the maximum gas consumption of the gas-boiler
+     * @param typicalActivePowerOn the typical active power consumption when on
+     * @param typicalActivePowerOff the typical active power consumption when off
+     * @param typicalReactivePowerOn the typical reactive power consumption when on
+     * @param typicalReactivePowerOff the typical reactive power consumption when off
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public GasBoilerNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             double minTemperature,
             double maxTemperature,
             boolean initialState,
@@ -48,11 +62,11 @@ public class GasBoilerNonControllableIPP
 
         super(
                 deviceId,
+                timestamp,
                 false, //does not cause a scheduling
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.GASHEATING,
                 EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
@@ -69,24 +83,19 @@ public class GasBoilerNonControllableIPP
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given non-controllable gas-boiler-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the non-controllable gas-boiler-ipp to copy
+     */
     public GasBoilerNonControllableIPP(GasBoilerNonControllableIPP other) {
         super(other);
         this.MIN_TEMPERATURE = other.MIN_TEMPERATURE;
         this.MAX_TEMPERATURE = other.MAX_TEMPERATURE;
         this.masterModel = other.masterModel;
     }
-
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected GasBoilerNonControllableIPP() {
-        super();
-        this.MIN_TEMPERATURE = 0;
-        this.MAX_TEMPERATURE = 0;
-    }
-
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -98,12 +107,12 @@ public class GasBoilerNonControllableIPP
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.actualModel = new GasBoilerModel(this.masterModel);
     }

@@ -18,13 +18,13 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a non-controllable battery storage.
+ *
  * @author Sebastian Kramer, Jan Mueller
  */
-@SuppressWarnings("unused")
 public class BatteryStorageNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = 1063856793735351671L;
     private final double batteryInitialStateOfCharge;
     private final double batteryInitialStateOfHealth;
     private final int batteryStandingLoss;
@@ -42,13 +42,30 @@ public class BatteryStorageNonControllableIPP
     private SimpleBatteryStorageModel batteryModel;
     private SimpleBatteryLogic batteryLogic;
 
-
     /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable battery-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param batteryInitialStateOfCharge
+     * @param batteryInitialStateOfHealth
+     * @param batteryStandingLoss
+     * @param batteryMinChargingState
+     * @param batteryMaxChargingState
+     * @param batteryMinChargePower
+     * @param batteryMaxChargePower
+     * @param batteryMinDischargePower
+     * @param batteryMaxDischargePower
+     * @param inverterMinComplexPower
+     * @param inverterMaxComplexPower
+     * @param inverterMinPower
+     * @param inverterMaxPower
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public BatteryStorageNonControllableIPP(
             UUID deviceId,
-            ZonedDateTime now,
+            ZonedDateTime timestamp,
             double batteryInitialStateOfCharge,
             double batteryInitialStateOfHealth,
             int batteryStandingLoss,
@@ -68,11 +85,11 @@ public class BatteryStorageNonControllableIPP
 
         super(
                 deviceId,
+                timestamp,
                 false, //does not cause scheduling
                 true, //needs ancillary meter state as Input State
                 false, //reacts to input states
                 false, //is not static
-                now,
                 DeviceTypes.BATTERYSTORAGE,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
@@ -93,6 +110,13 @@ public class BatteryStorageNonControllableIPP
         this.inverterMaxPower = inverterMaxPower;
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given non-controllable battery-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the non-controllable battery-ipp to copy
+     */
     public BatteryStorageNonControllableIPP(BatteryStorageNonControllableIPP other) {
         super(other);
         this.batteryInitialStateOfCharge = other.batteryInitialStateOfCharge;
@@ -111,46 +135,20 @@ public class BatteryStorageNonControllableIPP
 
     }
 
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected BatteryStorageNonControllableIPP() {
-        super();
-        this.batteryInitialStateOfHealth = 0;
-        this.batteryInitialStateOfCharge = 0;
-        this.batteryStandingLoss = 0;
-        this.batteryMinChargingState = 0;
-        this.batteryMaxChargingState = 0;
-        this.batteryMinChargePower = 0;
-        this.batteryMinDischargePower = 0;
-        this.batteryMaxChargePower = 0;
-        this.inverterMinComplexPower = 0;
-        this.inverterMaxComplexPower = 0;
-        this.inverterMaxPower = 0;
-        this.inverterMinPower = 0;
-        this.batteryMaxDischargePower = 0;
-    }
-
-
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         this.setReferenceTime(currentTime);
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        super.initializeInterdependentCalculation(maxReferenceTime, stepSize, createLoadProfile, keepPrediction);
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.inverterModel = new SimpleInverterModel(
                 this.inverterMinComplexPower,
@@ -227,8 +225,6 @@ public class BatteryStorageNonControllableIPP
             return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {

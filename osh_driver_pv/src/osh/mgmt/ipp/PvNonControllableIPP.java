@@ -17,18 +17,8 @@ import java.util.UUID;
  */
 public class PvNonControllableIPP extends PredictedNonControllableIPP {
 
-    private static final long serialVersionUID = 4737054684215212047L;
-
     /**
-     * No-arg constructor for serialization.
-     */
-    @Deprecated
-    protected PvNonControllableIPP() {
-        super();
-    }
-
-    /**
-     * Constructs this miele device problem-part.
+     * Constructs this pv problem-part.
 
      * @param deviceId the identifier of the devide that is represented by this problem-part
      * @param timestamp the starting-time this problem-part represents at the moment
@@ -44,8 +34,8 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
             int compressionValue) {
 
         super(deviceId,
-                false,
                 timestamp,
+                false,
                 DeviceTypes.PVSYSTEM,
                 predictedPVProfile,
                 EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
@@ -53,6 +43,13 @@ public class PvNonControllableIPP extends PredictedNonControllableIPP {
                 compressionValue);
     }
 
+    /**
+     * Limited copy-constructor that constructs a copy of the given pv problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the pv problem-part to copy
+     */
     public PvNonControllableIPP(PvNonControllableIPP other) {
         super(other);
     }

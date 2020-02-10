@@ -56,8 +56,8 @@ public class ESHLSpaceHeatingLocalObserver
             ThermalDemandNonControllableIPP ipp =
                     new ThermalDemandNonControllableIPP(
                             this.getUUID(),
-                            false,
                             this.getTimeDriver().getCurrentTime(),
+                            false,
                             this.getDeviceType(),
                             this.predictedDemand.clone(),
                             Commodity.HEATINGHOTWATERPOWER,

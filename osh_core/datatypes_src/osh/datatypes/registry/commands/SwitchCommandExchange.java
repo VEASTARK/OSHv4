@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public class SwitchCommandExchange extends CommandExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = -4073123591294900927L;
     private final boolean newState;
 
     public SwitchCommandExchange(UUID sender, UUID receiver, ZonedDateTime timestamp, boolean newState) {
@@ -23,6 +22,4 @@ public class SwitchCommandExchange extends CommandExchange implements IPromiseTo
     public boolean isNewState() {
         return this.newState;
     }
-
-
 }
