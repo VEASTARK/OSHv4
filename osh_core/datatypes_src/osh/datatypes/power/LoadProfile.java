@@ -274,7 +274,8 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
 
     @Override
     public Long getNextLoadChange(C commodity, long t) {
-        return this.getLoadProfile(commodity).higherKey(t);
+        long higherKey = this.getLoadProfile(commodity).higherKey(t);
+        return higherKey == Long2IntTreeMap.INVALID_KEY ? null : higherKey;
     }
 
     /**
