@@ -99,25 +99,25 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
 
         // save as current state
         CurrentPriceSignalLogDetails priceSignalDetails = new CurrentPriceSignalLogDetails(this.getUUID(), now);
-        priceSignalDetails.setCommodity(pricesignal.getCommodity());
+        priceSignalDetails.setCommodity(AncillaryCommodity.ACTIVEPOWEREXTERNAL);
         priceSignalDetails.getPricePerUnit(pricesignal.getPrice(now.toEpochSecond()));
 
         this.currentPriceSignal.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, pricesignal);
 
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.REACTIVEPOWEREXTERNAL, this.reactivePowerPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.reactivePowerPrice);
             this.currentPriceSignal.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.NATURALGASPOWEREXTERNAL, this.naturalGasPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.naturalGasPrice);
             this.currentPriceSignal.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.PVACTIVEPOWERFEEDIN, this.pvFeedInPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.pvFeedInPrice);
             this.currentPriceSignal.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newSignal);
         }
         {
-            PriceSignal newSignal = this.generatePriceSignal(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, this.chpFeedInPrice);
+            PriceSignal newSignal = this.generatePriceSignal(this.chpFeedInPrice);
             this.currentPriceSignal.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newSignal);
         }
 
@@ -135,7 +135,7 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
         //NOTHING
     }
 
-    private PriceSignal generatePriceSignal(AncillaryCommodity commodity, double price) {
+    private PriceSignal generatePriceSignal(double price) {
         PriceSignal priceSignal;
 
         long now = this.getTimeDriver().getCurrentEpochSecond();
@@ -154,7 +154,6 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
             long timeTillEndOfDay = 86400 - timeSinceMidnight;
 
             priceSignal = PriceSignalGenerator.getConstantPriceSignal(
-                    commodity,
                     now - 100,
                     now + timeTillEndOfDay + this.signalAvailableFor,
                     this.signalConstantPeriod,
@@ -164,7 +163,6 @@ public class DBPriceSignalProviderComDriver extends CALComDriver {
             // generate every 12 hours
 
             priceSignal = PriceSignalGenerator.getConstantPriceSignal(
-                    commodity,
                     now - 100,
                     now + this.signalPeriod,
                     this.signalConstantPeriod,

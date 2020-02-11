@@ -2,7 +2,6 @@ package osh.comdriver.signals;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import osh.core.OSHRandomGenerator;
-import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.utils.slp.IH0Profile;
 import osh.utils.time.TimeConversion;
@@ -37,8 +36,7 @@ public class VirtualPriceSignalGenerator {
             OSHRandomGenerator randomGenerator,
             boolean deviatePrice,
             double maxDeviationMinPriceInPercent,
-            double maxDeviationMaxPriceInPercent,
-            AncillaryCommodity commodity) {
+            double maxDeviationMaxPriceInPercent) {
 
         // set deviation to zero if random deviation is off
         double deviationMaxPriceInPercent = maxDeviationMaxPriceInPercent;
@@ -48,7 +46,7 @@ public class VirtualPriceSignalGenerator {
             deviationMaxPriceInPercent = 0;
         }
 
-        PriceSignal complexPriceSignal = new PriceSignal(commodity);
+        PriceSignal complexPriceSignal = new PriceSignal();
 
         double newComplexPowerPriceMin = minPrice + deviationMinPriceInPercent * minPrice;
         double newComplexPowerPriceMax = maxPrice - deviationMaxPriceInPercent * maxPrice;
@@ -145,10 +143,9 @@ public class VirtualPriceSignalGenerator {
             long startTime,
             long endTime,
             long constantPeriod,
-            double price,
-            AncillaryCommodity commodity) {
+            double price) {
 
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
 
         for (long i = 0; i < ((endTime - startTime) / constantPeriod); i++) {
 
@@ -166,10 +163,9 @@ public class VirtualPriceSignalGenerator {
             long endTime,
             long constantPeriod,
             double powerPriceStart,
-            double powerPriceEnd,
-            AncillaryCommodity commodity) {
+            double powerPriceEnd) {
 
-        PriceSignal complexPriceSignal = new PriceSignal(commodity);
+        PriceSignal complexPriceSignal = new PriceSignal();
 
         long numberOfPriceSteps = (endTime - startTime) / constantPeriod;
 
@@ -196,10 +192,9 @@ public class VirtualPriceSignalGenerator {
             long constantPeriod,
             double complexPowerPriceStart,
             double complexPowerPricePeak,
-            double complexPowerPriceEnd,
-            AncillaryCommodity commodity) {
+            double complexPowerPriceEnd) {
 
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
 
         // adjust peakTime
         long adjustedPeakTime = startTime + Math.round((double) (peakTime - startTime) / constantPeriod) * constantPeriod;

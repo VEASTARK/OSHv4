@@ -9,7 +9,6 @@ import osh.driver.chp.model.GenericChpModel;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
@@ -429,7 +428,7 @@ public class DachsChpSimulationDriver
     public void setCommodityInputStates(
             LimitedCommodityStateMap inputStates,
 //			EnumMap<AncillaryCommodity,AncillaryCommodityState> ancillaryInputStates) {
-            AncillaryMeterState ancillaryMeterState) throws EnergySimulationException {
+            AncillaryMeterState ancillaryMeterState) {
         super.setCommodityInputStates(inputStates, ancillaryMeterState);
         // TODO temperature in (later...)
         if (inputStates != null) {

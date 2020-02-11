@@ -15,10 +15,6 @@ import java.util.UUID;
 public class MieleDofStateExchange extends StateExchange implements IPromiseToBeImmutable {
 
     /**
-     *
-     */
-    private static final long serialVersionUID = 1795073842080845700L;
-    /**
      * the duration, NOT an absolute point in time!
      */
     private final Duration lastDof;

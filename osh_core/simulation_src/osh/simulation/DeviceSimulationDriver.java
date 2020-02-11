@@ -10,7 +10,6 @@ import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.simulation.energy.IDeviceEnergySubject;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.ScreenplayType;
@@ -34,7 +33,7 @@ public abstract class DeviceSimulationDriver
     /**
      * List of Commodities used by this device
      */
-    protected final ArrayList<Commodity> usedCommodities;
+    protected final EnumSet<Commodity> usedCommodities;
 
     // VARIABLES
     protected LimitedCommodityStateMap commodityInputStates;
@@ -266,8 +265,7 @@ public abstract class DeviceSimulationDriver
     @Override
     public void setCommodityInputStates(
             LimitedCommodityStateMap inputStates,
-            AncillaryMeterState ancillaryMeterState)
-            throws EnergySimulationException {
+            AncillaryMeterState ancillaryMeterState) {
         this.commodityInputStates = inputStates;
         this.ancillaryMeterState = ancillaryMeterState;
     }

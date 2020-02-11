@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public class WaterStorageOCSX extends StateExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = 7810796095763895290L;
     private final UUID tankId;
     private final double currentTemp;
     private final double minTemp;

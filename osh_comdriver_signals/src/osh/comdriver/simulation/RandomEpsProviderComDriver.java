@@ -137,7 +137,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
         for (int i = 0; i < this.pricesToSet.length; i++) {
             AncillaryCommodity ac = this.pricesToSet[i];
 
-            PriceSignal ps = new PriceSignal(ac);
+            PriceSignal ps = new PriceSignal();
             long time = now - 1;
             double price = -1;
             while (price < 1) {
@@ -160,7 +160,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
                 }
                 ps.setPrice(time, price);
             }
-            System.out.println(ps.getPrices());
+            System.out.println(ps.toString());
 
             ps.setKnownPriceInterval(now, now + this.signalPeriod);
 

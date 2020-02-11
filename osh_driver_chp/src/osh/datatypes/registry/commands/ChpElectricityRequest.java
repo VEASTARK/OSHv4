@@ -12,9 +12,7 @@ import java.util.UUID;
  */
 public class ChpElectricityRequest extends CommandExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = 2650396121767761563L;
     private final boolean on;
-
 
     public ChpElectricityRequest(
             UUID sender,
@@ -26,10 +24,7 @@ public class ChpElectricityRequest extends CommandExchange implements IPromiseTo
         this.on = on;
     }
 
-
     public boolean isOn() {
         return this.on;
     }
-
-
 }

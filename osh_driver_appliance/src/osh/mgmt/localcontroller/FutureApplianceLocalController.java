@@ -239,10 +239,8 @@ public class FutureApplianceLocalController
             // IPP for OFF or ENDPROGAMMED
             ipp = new FutureAppliancesStaticIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
                     toBeScheduled,
-                    0,
                     this.getLocalObserver().getDeviceType(),
                     new Schedule(new SparseLoadProfile(), 0.0, this.getLocalObserver().getDeviceType().toString()),
                     this.compressionType,
@@ -343,19 +341,13 @@ public class FutureApplianceLocalController
             // construct EAPart
             ipp = new FutureApplianceIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
-                    FutureApplianceIPP.calculateBitCount(
-                            this.earliestStartingTime.toEpochSecond(),
-                            this.latestStartingTime.toEpochSecond(),
-                            this.acp),
                     toBeScheduled,
                     optimizationHorizon.toEpochSecond(),
-                    this.getLocalObserver().getDeviceType(),
-                    now.toEpochSecond(),
                     this.earliestStartingTime.toEpochSecond(),
                     this.latestStartingTime.toEpochSecond(),
                     this.acp,
+                    this.getLocalObserver().getDeviceType(),
                     this.compressionType,
                     this.compressionValue);
 

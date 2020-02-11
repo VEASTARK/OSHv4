@@ -25,4 +25,8 @@ public class SimpleColdWaterTank extends SimpleWaterTank {
                 ambientTemperature);
     }
 
+    public SimpleColdWaterTank(SimpleColdWaterTank other) {
+        super(other);
+    }
+
 }

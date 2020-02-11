@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -15,17 +14,17 @@ import osh.driver.simulation.batterystorage.SimpleBatteryStorageModel;
 import osh.driver.simulation.inverter.SimpleInverterModel;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a non-controllable battery storage.
+ *
  * @author Sebastian Kramer, Jan Mueller
  */
-@SuppressWarnings("unused")
 public class BatteryStorageNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = 1063856793735351671L;
     private final double batteryInitialStateOfCharge;
     private final double batteryInitialStateOfHealth;
     private final int batteryStandingLoss;
@@ -42,16 +41,31 @@ public class BatteryStorageNonControllableIPP
     private SimpleInverterModel inverterModel;
     private SimpleBatteryStorageModel batteryModel;
     private SimpleBatteryLogic batteryLogic;
-    private SparseLoadProfile lp = new SparseLoadProfile();
-
 
     /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable battery-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param batteryInitialStateOfCharge
+     * @param batteryInitialStateOfHealth
+     * @param batteryStandingLoss
+     * @param batteryMinChargingState
+     * @param batteryMaxChargingState
+     * @param batteryMinChargePower
+     * @param batteryMaxChargePower
+     * @param batteryMinDischargePower
+     * @param batteryMaxDischargePower
+     * @param inverterMinComplexPower
+     * @param inverterMaxComplexPower
+     * @param inverterMinPower
+     * @param inverterMaxPower
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public BatteryStorageNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             double batteryInitialStateOfCharge,
             double batteryInitialStateOfHealth,
             int batteryStandingLoss,
@@ -71,14 +85,13 @@ public class BatteryStorageNonControllableIPP
 
         super(
                 deviceId,
-                logger,
+                timestamp,
                 false, //does not cause scheduling
                 true, //needs ancillary meter state as Input State
                 false, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.BATTERYSTORAGE,
-                new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER},
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
 
@@ -98,27 +111,29 @@ public class BatteryStorageNonControllableIPP
     }
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
+     * Limited copy-constructor that constructs a copy of the given non-controllable battery-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the non-controllable battery-ipp to copy
      */
-    @Deprecated
-    protected BatteryStorageNonControllableIPP() {
-        super();
-        this.batteryInitialStateOfHealth = 0;
-        this.batteryInitialStateOfCharge = 0;
-        this.batteryStandingLoss = 0;
-        this.batteryMinChargingState = 0;
-        this.batteryMaxChargingState = 0;
-        this.batteryMinChargePower = 0;
-        this.batteryMinDischargePower = 0;
-        this.batteryMaxChargePower = 0;
-        this.inverterMinComplexPower = 0;
-        this.inverterMaxComplexPower = 0;
-        this.inverterMaxPower = 0;
-        this.inverterMinPower = 0;
-        this.batteryMaxDischargePower = 0;
-    }
+    public BatteryStorageNonControllableIPP(BatteryStorageNonControllableIPP other) {
+        super(other);
+        this.batteryInitialStateOfCharge = other.batteryInitialStateOfCharge;
+        this.batteryInitialStateOfHealth = other.batteryInitialStateOfHealth;
+        this.batteryStandingLoss = other.batteryStandingLoss;
+        this.batteryMinChargingState = other.batteryMinChargingState;
+        this.batteryMaxChargingState = other.batteryMaxChargingState;
+        this.batteryMinChargePower = other.batteryMinChargePower;
+        this.batteryMaxChargePower = other.batteryMaxChargePower;
+        this.batteryMinDischargePower = other.batteryMinDischargePower;
+        this.batteryMaxDischargePower = other.batteryMaxDischargePower;
+        this.inverterMinComplexPower = other.inverterMinComplexPower;
+        this.inverterMaxComplexPower = other.inverterMaxComplexPower;
+        this.inverterMinPower = other.inverterMinPower;
+        this.inverterMaxPower = other.inverterMaxPower;
 
+    }
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -126,29 +141,14 @@ public class BatteryStorageNonControllableIPP
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.stepSize = stepSize;
-        if (createLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
-
-        // used for iteration in interdependent calculation
-        this.interdependentTime = this.getReferenceTime();
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-        this.ancillaryMeterState = null;
-
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.inverterModel = new SimpleInverterModel(
                 this.inverterMinComplexPower,
@@ -188,7 +188,7 @@ public class BatteryStorageNonControllableIPP
                     availablePower,
                     this.batteryModel,
                     this.inverterModel,
-                    this.stepSize,
+                    this.getStepSize(),
                     0,
                     0,
                     0,
@@ -202,31 +202,29 @@ public class BatteryStorageNonControllableIPP
                     Commodity.REACTIVEPOWER, this.inverterModel.getReactivePower());
             this.setOutputStates(this.internalInterdependentOutputStates);
 
-            if (this.lp != null) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, this.inverterModel.getActivePower());
-                this.lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, this.inverterModel.getActivePower());
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), this.inverterModel.getActivePower());
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(),
+                        this.inverterModel.getActivePower());
             }
-        } else {
-            this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, 0);
+        if (this.getLoadProfile() != null) {
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), 0);
             }
-            return new Schedule(this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue), 0, this.getDeviceType().toString());
+            return new Schedule(this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {
@@ -235,5 +233,10 @@ public class BatteryStorageNonControllableIPP
                 + (this.inverterModel != null ? this.inverterModel.getActivePower() : "N/A")
                 + " initialStateOfCharge="
                 + this.batteryInitialStateOfCharge;
+    }
+
+    @Override
+    public BatteryStorageNonControllableIPP getClone() {
+        return new BatteryStorageNonControllableIPP(this);
     }
 }

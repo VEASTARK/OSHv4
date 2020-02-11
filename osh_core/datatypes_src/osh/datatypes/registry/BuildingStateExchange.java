@@ -9,8 +9,6 @@ import java.util.UUID;
 
 public class BuildingStateExchange extends StateExchange {
 
-    private static final long serialVersionUID = -6624430081473462447L;
-
     private ZonedDateTime currentTime;
     private double currentActivePower;
     private double currentActivePowerConsumption;
@@ -27,11 +25,6 @@ public class BuildingStateExchange extends StateExchange {
     private double currentActivePowerExternal;
     private double currentReactivePowerExternal;
     private double currentGasPowerExternal;
-
-    @Deprecated
-    protected BuildingStateExchange() {
-    }
-
 
     public BuildingStateExchange(BuildingStateExchange other) {
         super(other.getSender(), other.getTimestamp());
@@ -81,10 +74,6 @@ public class BuildingStateExchange extends StateExchange {
         this.currentReactivePowerExternal = currentReactivePowerExternal;
         this.currentGasPowerExternal = currentGasPowerExternal;
         System.out.println("HHSE erzeugt");
-    }
-
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
     }
 
     public double getCurrentActivePowerConsumption() {

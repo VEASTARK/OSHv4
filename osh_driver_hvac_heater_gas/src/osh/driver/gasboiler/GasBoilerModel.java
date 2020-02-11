@@ -45,6 +45,18 @@ public class GasBoilerModel implements Serializable {
         }
     }
 
+    public GasBoilerModel(GasBoilerModel other) {
+        this.MAX_HOT_WATER_POWER = other.MAX_HOT_WATER_POWER;
+        this.MAX_GAS_POWER = other.MAX_GAS_POWER;
+        this.TYPICAL_ACTIVE_POWER_ON = other.TYPICAL_ACTIVE_POWER_ON;
+        this.TYPICAL_ACTIVE_POWER_OFF = other.TYPICAL_ACTIVE_POWER_OFF;
+        this.TYPICAL_REACTIVE_POWER_ON = other.TYPICAL_REACTIVE_POWER_ON;
+        this.TYPICAL_REACTIVE_POWER_OFF = other.TYPICAL_REACTIVE_POWER_OFF;
+
+        this.currentHotWaterPower = other.currentHotWaterPower;
+        this.currentGasPower = other.currentGasPower;
+    }
+
     protected GasBoilerModel() {
         this.MAX_HOT_WATER_POWER = 0;
         this.MAX_GAS_POWER = 0;

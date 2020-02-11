@@ -14,10 +14,6 @@ import java.util.UUID;
  */
 public class PvIntelligentOCSX extends StateExchange implements IPromiseToBeImmutable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -889391896803816383L;
     private final UUID pvIntelligentId;
     private final double pMaxLim;
     private final double qMaxLim;

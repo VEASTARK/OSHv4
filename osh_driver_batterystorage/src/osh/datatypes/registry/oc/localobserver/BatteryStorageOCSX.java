@@ -13,7 +13,6 @@ import java.util.UUID;
  */
 public class BatteryStorageOCSX extends StateExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = -8893900933803816383L;
     private final UUID batteryId;
     private final double stateOfCharge;
     private final double minStateOfCharge;

@@ -219,9 +219,7 @@ public class CSVImporter {
 
             for (int i = 0; i < lines.size(); i++) {
                 String[] splitLine = lines.get(i).split(delimiter);
-                array[i] = new String[splitLine.length];
-
-                System.arraycopy(splitLine, 0, array[i], 0, splitLine.length);
+                array[i] = Arrays.copyOf(splitLine, splitLine.length);
             }
 
             csvReader.close();

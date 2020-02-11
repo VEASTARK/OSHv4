@@ -17,10 +17,6 @@ import java.util.UUID;
  */
 public class GenericApplianceProgramDriverDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -3542084220556069585L;
     protected String programName;
     protected String phaseName;
     protected ZonedDateTime startTime;

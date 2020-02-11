@@ -17,6 +17,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.esc.OCEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
@@ -26,10 +27,7 @@ import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.EnumMap;
-import java.util.List;
 
 /**
  * New JMetalEnergySolverGA
@@ -72,7 +70,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
 
     @Override
     public SolutionWithFitness getSolutionAndFitness(
-            List<InterdependentProblemPart<?, ?>> problemParts,
+            InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
@@ -80,20 +78,24 @@ public class JMetalEnergySolverGA extends JMetalSolver {
             IFitness fitnessFunction) throws Exception {
 
 
-        //TODO: find something to get a fast fitness
-//		// return if all DOF=0
-        int numberOfBits = 0;
-        for (InterdependentProblemPart<?, ?> i : problemParts) {
-            numberOfBits += i.getBitCount();
-        }
-
         // DECLARATION
         EnergyManagementProblem problem;            // The problem to solve
+        SolutionDistributor distributor = new SolutionDistributor();
         OSH_gGAMultiThread algorithm;        // The algorithm to use
         Operator mutation;            // Mutation operator
         Operator crossover;
         Operator selection;
 //		HashMap parameters;			// Operator parameters
+
+        distributor.gatherVariableInformation(problemParts);
+
+        //abort if there is nothing to optimize
+        if (distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables()) {
+            Solution emptySolution = new Solution();
+            emptySolution.setDecisionVariables(new Binary[0]);
+            emptySolution.setFitness(0.0);
+            return new SolutionWithFitness(emptySolution, 0.0);
+        }
 
         // calculate ignoreLoadProfileAfter (Optimization Horizon)
         long ignoreLoadProfileAfter = ignoreLoadProfileBefore;
@@ -107,13 +109,12 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         problem = new EnergyManagementProblem(
                 problemParts,
                 ocESC,
-                this.bitPositions,
+                distributor,
                 priceSignals,
                 powerLimitSignals,
                 ignoreLoadProfileBefore,
                 ignoreLoadProfileAfter,
                 this.randomGenerator,
-                this.logger,
                 fitnessFunction,
                 this.STEP_SIZE);
 
@@ -124,30 +125,12 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         //IMA:
         {
             algorithm = new OSH_gGAMultiThread(problem, true, this.timestamp, pw);
-            problem.initMultithreading();
+            problem.initializeMultithreading();
         }
 
-// 		{ 			
-//			algorithm = new OSH_gGASingleThread(problem, true, timestamp, pw);
-//		}
-
-        // IMA: no longer possible as there is probably a battery storage of smart heater
-        // SEKR: batterystorage or smartheater are either smart (and so will have a bitcount) or stupid and will not need optimization
-        // SHORT CUT IFF NOTHING HAS TO BE OPTIMIZED
-        if (numberOfBits == 0) {
-            Solution solution = new Solution(problem);
-            problem.evaluate(solution);
-
-            List<BitSet> emptySolution = new ArrayList<>();
-            problemParts.forEach(p -> emptySolution.add(new BitSet()));
-
-            SolutionWithFitness result = new SolutionWithFitness(new BitSet(), emptySolution, solution.getFitness());
-
-            //better be sure
-            problem.finalizeGrids();
-
-            return result;
-        }
+//        {
+//            algorithm = new OSH_gGASingleThread(problem, true, this.timestamp, pw);
+//        }
 
         /* Algorithm parameters */
         algorithm.setInputParameter("maxEvaluations", this.gaparameters.getNumEvaluations());
@@ -188,18 +171,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         /* Execute the Algorithm */
         SolutionSet population = algorithm.execute();
 
-        Binary s = (Binary) population.best(this.fitnessComparator).getDecisionVariables()[0];
-
-        ArrayList<BitSet> resultBitSet = new ArrayList<>();
-        for (InterdependentProblemPart<?, ?> part : problemParts) {
-            int bitPos = this.bitPositions[part.getId()][0];
-            int bitPosEnd = this.bitPositions[part.getId()][1];
-            resultBitSet.add(s.bits_.get(bitPos, bitPosEnd));
-            if ((part.getBitCount() == 0 && (bitPosEnd - bitPos) != 0)
-                    || (part.getBitCount() > 0 && (bitPosEnd - bitPos) != part.getBitCount())) {
-                throw new IllegalArgumentException("bit-count mismatch");
-            }
-        }
+        Solution s = population.best(this.fitnessComparator);
 
         pw.flush();
         pw.close();
@@ -214,12 +186,10 @@ public class JMetalEnergySolverGA extends JMetalSolver {
             }
         }
 
-        double returnFitness = population.best(this.fitnessComparator).getObjective(0);
-
         //better be sure
         problem.finalizeGrids();
 
-        return new SolutionWithFitness(s.bits_, resultBitSet, returnFitness);
+        return new SolutionWithFitness(s, s.getObjective(0));
     }
 }
 

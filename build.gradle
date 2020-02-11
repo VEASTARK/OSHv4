@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group 'de.edu.veastark'
-    version '4.1-RC'
+    version '4.1'
 }
 
 jar.enabled = false

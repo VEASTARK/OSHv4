@@ -1,7 +1,7 @@
 package osh.datatypes.commodity;
 
 import javax.xml.bind.annotation.XmlEnumValue;
-import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.StringTokenizer;
 
 /**
@@ -60,7 +60,7 @@ public enum Commodity {
         throw new IllegalArgumentException(v);
     }
 
-    public static ArrayList<Commodity> parseCommodityArray(String str) throws IllegalArgumentException {
+    public static EnumSet<Commodity> parseCommodityArray(String str) throws IllegalArgumentException {
         String processed = str;
         while (processed.startsWith("["))
             processed = processed.substring(1);
@@ -69,13 +69,13 @@ public enum Commodity {
             processed = processed.substring(0, processed.length() - 1);
 
         StringTokenizer strTok = new StringTokenizer(processed, ",");
-        ArrayList<Commodity> commodityList = new ArrayList<>();
+        EnumSet<Commodity> commoditySet = EnumSet.noneOf(Commodity.class);
 
         while (strTok.hasMoreElements()) {
             Commodity uuid = Commodity.fromString(strTok.nextToken());
-            commodityList.add(uuid);
+            commoditySet.add(uuid);
         }
-        return commodityList;
+        return commoditySet;
     }
 
     @Override

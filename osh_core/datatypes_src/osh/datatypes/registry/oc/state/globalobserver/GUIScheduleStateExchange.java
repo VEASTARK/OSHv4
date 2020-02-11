@@ -13,10 +13,6 @@ import java.util.UUID;
  */
 public class GUIScheduleStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -9037948484261116427L;
     private final List<Schedule> schedules;
     private final int stepSize;
 

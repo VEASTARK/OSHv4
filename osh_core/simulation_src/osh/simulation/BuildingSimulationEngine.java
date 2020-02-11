@@ -9,7 +9,6 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
-import osh.esc.exception.EnergySimulationException;
 import osh.simulation.energy.IDeviceEnergySubject;
 import osh.simulation.energy.SimEnergySimulationCore;
 import osh.simulation.exception.SimulationEngineException;
@@ -282,11 +281,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
         AncillaryMeterState ancillaryMeterState;
 
         // #1 EnergySimulation
-        try {
-            ancillaryMeterState = this.energySimulationCore.doNextEnergySimulation(this.energySimSubjectsList);
-        } catch (EnergySimulationException ex) {
-            throw new SimulationEngineException(ex);
-        }
+        ancillaryMeterState = this.energySimulationCore.doNextEnergySimulation(this.energySimSubjectsList);
 
         // #2 Notify the Subject that the next Simulation Tick begins
         //    Simulation Pre-tick Hook

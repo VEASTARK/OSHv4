@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -9,6 +8,10 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryBiStateVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealSimulatedBiStateTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
 import osh.datatypes.time.Activation;
 import osh.datatypes.time.ActivationList;
 import osh.driver.chiller.AdsorptionChillerModel;
@@ -17,11 +20,13 @@ import osh.utils.time.TimeConversion;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a controllable simple adsorption cooler.
+ *
  * @author Julian Feder, Sebastian Kramer, Ingo Mauser
  */
 public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
@@ -38,38 +43,32 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
      * slot length in [s]
      */
     public final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
-    private static final long serialVersionUID = -515441464083361208L;
     private final static int BITS_PER_ACTIVATION = 4;
 
     //TODO move to config
-    private final int typicalStandbyActivePower = 10; // [W]
-    private final int typicalRunningActivePower = 420; // [W]
+    private static final int typicalStandbyActivePower = 10; // [W]
+    private static final int typicalRunningActivePower = 420; // [W]
     /**
      * is AdChiller on at the beginning
      */
     private final boolean initialAdChillerState;
     private final Map<Long, Double> temperaturePrediction;
     // temperature control
-    private final double coldWaterStorageMinTemp = 10.0;
-    private final double coldWaterStorageMaxTemp = 15.0;
-    private final double hotWaterStorageMinTemp = 55.0;
+    private static final double coldWaterStorageMinTemp = 10.0;
+    private static final double coldWaterStorageMaxTemp = 15.0;
+    private static final double hotWaterStorageMinTemp = 55.0;
     /**
      * delta T below maximum cold water temperature (for forced cooling)
      */
-    private final double hysteresis = 1.0;
+    private static final double hysteresis = 1.0;
 //	private double hotWaterStorageMaxTemp = 80.0;
     private boolean initialState;
     private ArrayList<Activation> interdependentStartingTimes;
 
     // ### interdependent stuff ###
     /**
-     * used for iteration in interdependent calculation (ancillary time in the future)
-     */
-    private long interdependentTime;
-    /**
      * running times of chiller
      */
-    private double interdependentCervisia;
     private boolean interdependentLastState;
     /**
      * from cold water tank IPP
@@ -81,15 +80,20 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     private double currentHotWaterTemperature = 60;
     private boolean[] activationBits;
     private int currentActivationRunningTime;
-    private SparseLoadProfile loadProfile;
 
     /**
-     * CONSTRUCTOR
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialAdChillerState the initial operation state of the chiller
+     * @param temperaturePrediction prediction of outside temperatures
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public ChillerIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -97,76 +101,90 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
             int compressionValue) {
         super(
                 deviceId,
-                logger,
-                timeStamp,
-                getNecessaryNumberOfBits(RELATIVE_HORIZON),
+                timestamp,
                 toBeScheduled,
                 false, //needsAncillaryMeterStates
                 true, //reactsToInputStates
-                timeStamp.toEpochSecond() + RELATIVE_HORIZON,
-                timeStamp.toEpochSecond(),
+                timestamp.toEpochSecond() + RELATIVE_HORIZON,
                 DeviceTypes.ADSORPTIONCHILLER,
-                new Commodity[]{Commodity.ACTIVEPOWER,
+                EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
                         Commodity.HEATINGHOTWATERPOWER,
-                        Commodity.COLDWATERPOWER},
+                        Commodity.COLDWATERPOWER),
+                EnumSet.of(Commodity.HEATINGHOTWATERPOWER, Commodity.COLDWATERPOWER),
                 compressionType,
-                compressionValue);
+                compressionValue,
+                new BinaryBiStateVariableTranslator(BITS_PER_ACTIVATION),
+                new RealSimulatedBiStateTranslator(BITS_PER_ACTIVATION));
 
         this.initialAdChillerState = initialAdChillerState;
         this.temperaturePrediction = temperaturePrediction;
+
+        this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
     }
 
-    private static int getNecessaryNumberOfBits(int relativeHorizon) {
-        return (int) (RELATIVE_HORIZON / TIME_PER_SLOT) * BITS_PER_ACTIVATION;
+    /**
+     * Limited copy-constructor that constructs a copy of the given chiller ipp that is as shallow as possible while
+     * still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the chiller ipp to copy
+     */
+    public ChillerIPP(ChillerIPP other) {
+        super(other);
+
+        this.initialAdChillerState = other.initialAdChillerState;
+
+        this.temperaturePrediction = null;
+
+        this.initialState = other.initialState;
+        this.interdependentStartingTimes = null;
+
+        this.interdependentLastState = other.interdependentLastState;
+        this.currentColdWaterTemperature = other.currentColdWaterTemperature;
+        this.currentHotWaterTemperature = other.currentHotWaterTemperature;
+
+        this.activationBits = null;
+        this.currentActivationRunningTime = other.currentActivationRunningTime;
     }
-
-
-    // ### interdependent problem part stuff ###
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
+
         // used for iteration in interdependent calculation
         this.interdependentStartingTimes = null;
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-
-        if (createLoadProfile) {
-            this.loadProfile = new SparseLoadProfile();
-        } else {
-            this.loadProfile = null;
-        }
-
-        this.stepSize = stepSize;
-
-        this.interdependentCervisia = 0.0;
-
-        if (maxReferenceTime != this.getReferenceTime()) {
-            this.recalculateEncoding(maxReferenceTime, maxReferenceTime + RELATIVE_HORIZON);
-        }
-        this.interdependentTime = this.getReferenceTime();
-
-        this.activationBits = this.getActivationBits(this.getReferenceTime(), solution, null);
 
         this.interdependentLastState = this.initialAdChillerState;
-
         this.currentActivationRunningTime = 0;
+    }
+
+    private void updateSolutionInformation(long referenceTime, long maxHorizon) {
+
+        int slots = (int) Math.ceil(((double) (maxHorizon - referenceTime)) / ((float) TIME_PER_SLOT));
+        double[][] boundaries = new double[slots][];
+
+        for (int i = 0; i < slots; i++) {
+            boundaries[i] = new double[]{0, 2};
+        }
+
+        this.solutionHandler.updateVariableInformation(VariableType.LONG, slots, boundaries);
+    }
+
+    @Override
+    protected void interpretNewSolution() {
+        this.activationBits = this.getActivationBits(this.currentSolution);
     }
 
     @Override
     public void calculateNextStep() {
 
         // update water temperatures
-        if (this.interdependentInputStates == null) {
-            this.logger.logDebug("No interdependentInputStates available.");
-        }
-
         this.currentHotWaterTemperature = this.interdependentInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
         this.currentColdWaterTemperature = this.interdependentInputStates.getTemperature(Commodity.COLDWATERPOWER);
 
@@ -180,29 +198,29 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         // AdChiller control (forced on/off)
         if (this.interdependentLastState) {
             // cold water too cold -> off
-            if (this.currentColdWaterTemperature < this.coldWaterStorageMinTemp) {
+            if (this.currentColdWaterTemperature < coldWaterStorageMinTemp) {
                 minColdWaterTankTemperatureOff = true;
                 chillerNewState = false;
-            } else if (this.currentColdWaterTemperature >= this.coldWaterStorageMaxTemp - this.hysteresis
-                    && this.currentColdWaterTemperature <= this.coldWaterStorageMaxTemp) {
+            } else if (this.currentColdWaterTemperature >= coldWaterStorageMaxTemp - hysteresis
+                    && this.currentColdWaterTemperature <= coldWaterStorageMaxTemp) {
                 chillerNewState = true;
                 chillerHysteresisOn = true;
             }
             // hot water too cold or hot water too hot -> off
-            if (this.currentHotWaterTemperature < this.hotWaterStorageMinTemp) {
+            if (this.currentHotWaterTemperature < hotWaterStorageMinTemp) {
                 minHotWaterTankTemperatureOff = true;
                 chillerNewState = false;
             }
             //TODO add hot water maximum temperature control
         } else {
-            if (this.currentColdWaterTemperature > this.coldWaterStorageMaxTemp
-                    && this.currentHotWaterTemperature > this.hotWaterStorageMinTemp) {
+            if (this.currentColdWaterTemperature > coldWaterStorageMaxTemp
+                    && this.currentHotWaterTemperature > hotWaterStorageMinTemp) {
                 chillerHysteresisOn = true;
                 chillerNewState = true;
             }
         }
 
-        int i = (int) ((this.interdependentTime - this.getReferenceTime()) / TIME_PER_SLOT);
+        int i = (int) ((this.getInterdependentTime() - this.getReferenceTime()) / TIME_PER_SLOT);
 
         if (!chillerHysteresisOn
                 && !minColdWaterTankTemperatureOff
@@ -217,39 +235,39 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
 
         if (chillerNewState) {
             // the later the better AND the less the better
-            this.interdependentCervisia += 0.0001 * (this.activationBits.length - i);
+            this.addInterdependentCervisia(0.0001 * (this.activationBits.length - i));
         }
 
 
         // calculate power values
-        double activePower = this.typicalStandbyActivePower;
+        double activePower = typicalStandbyActivePower;
         double hotWaterPower = 0;
         double coldWaterPower = 0;
 
         if ((chillerNewState && !this.interdependentLastState)
                 || (chillerNewState && this.currentActivationRunningTime % 60 == 0)
                 || (!chillerNewState && this.interdependentLastState)
-                || (this.interdependentTime == this.getReferenceTime())) {
+                || (this.getInterdependentTime() == this.getReferenceTime())) {
 
             if (chillerNewState) {
-                if (this.temperaturePrediction.get((this.interdependentTime / 300) * 300) == null) {
+                if (this.temperaturePrediction.get((this.getInterdependentTime() / 300) * 300) == null) {
                     @SuppressWarnings("unused")
-                    long time = (this.interdependentTime / 300) * 300;
+                    long time = (this.getInterdependentTime() / 300) * 300;
                     @SuppressWarnings("unused")
                     int debug = 0;
                 }
                 long secondsFromYearStart =
-                        TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.interdependentTime));
+                        TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.getInterdependentTime()));
                 double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
-                activePower = this.typicalRunningActivePower;
+                activePower = typicalRunningActivePower;
                 coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);
                 hotWaterPower = (-1) * coldWaterPower / AdsorptionChillerModel.cop(this.currentHotWaterTemperature, outdoorTemperature);
             }
 
-            if (this.loadProfile != null) {
-                this.loadProfile.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, (int) activePower);
-                this.loadProfile.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, (int) hotWaterPower);
-                this.loadProfile.setLoad(Commodity.COLDWATERPOWER, this.interdependentTime, (int) coldWaterPower);
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) activePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) hotWaterPower);
+                this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getInterdependentTime(), (int) coldWaterPower);
             }
 
             this.internalInterdependentOutputStates.setPower(Commodity.ACTIVEPOWER, activePower);
@@ -265,13 +283,13 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
         if (chillerNewState && !this.interdependentLastState) {
             // fixed costs per start, i.e., costs to turn on the CHP
             // (not the variable costs for letting the CHP run)
-            this.interdependentCervisia += 10.0;
+            this.addInterdependentCervisia(10.0);
         }
 
         this.interdependentLastState = chillerNewState;
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
         if (chillerNewState) {
-            this.currentActivationRunningTime += this.stepSize;
+            this.currentActivationRunningTime += this.getStepSize();
         } else {
             this.currentActivationRunningTime = 0;
         }
@@ -281,24 +299,29 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     @Override
     public Schedule getFinalInterdependentSchedule() {
 
-        if (this.loadProfile == null) {
-            return new Schedule(new SparseLoadProfile(), this.interdependentCervisia, this.getDeviceType().toString());
+        if (this.getLoadProfile() == null) {
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            if (this.loadProfile.getEndingTimeOfProfile() > 0) {
-                this.loadProfile.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, this.typicalStandbyActivePower);
-                this.loadProfile.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, 0);
-                this.loadProfile.setLoad(Commodity.COLDWATERPOWER, this.interdependentTime, 0);
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), typicalStandbyActivePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getInterdependentTime(), 0);
+
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getLoadProfile().getEndingTimeOfProfile(), typicalStandbyActivePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getLoadProfile().getEndingTimeOfProfile(), 0);
+                this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getLoadProfile().getEndingTimeOfProfile(), 0);
             }
 
-            SparseLoadProfile slp = this.loadProfile.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue);
-            return new Schedule(slp, this.interdependentCervisia, this.getDeviceType().toString());
+            SparseLoadProfile slp = this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue);
+            return new Schedule(slp, this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 
     @Override
-    public ISolution transformToFinalInterdependentPhenotype(BitSet solution) {
+    public ISolution transformToFinalInterdependentPhenotype() {
 
-        boolean[] ab = this.getActivationBits(this.getReferenceTime(), solution, null);
+        boolean[] ab = this.getActivationBits(this.currentSolution);
 
         this.interdependentStartingTimes = new ArrayList<>();
         long timeOfFirstBit = this.getReferenceTime();
@@ -341,81 +364,55 @@ public class ChillerIPP extends ControllableIPP<ISolution, IPrediction> {
     }
 
 
-    // ### OLD STUFF (best guess schedule, not interdependent)
-
-    @Override
-    public ActivationList transformToPhenotype(BitSet solution) {
-        return null;
-    }
-
-
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
-        this.setReferenceTime(currentTime);
-        this.setOptimizationHorizon(maxHorizon);
-        this.setBitCount(this.getNecessaryNumberOfBits());
+        if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
+            this.setReferenceTime(currentTime);
+            this.setOptimizationHorizon(maxHorizon);
+
+            this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
+        }
     }
 
-    // HELPER STUFF
-
     private boolean[] getActivationBits(
-            long now,
-            BitSet solution,
-            AdditionalInfo ai) {
+            DecodedSolutionWrapper solution) {
 
-        if (ai != null) {
-            ai.noForcedOffs = 0;
-            ai.noForcedOns = 0;
-        }
+        long[] solutionArray = solution.getLongArray();
+        boolean[] ret = new boolean[solutionArray.length];
 
-        int bitCount = this.getNecessaryNumberOfBits();
-        boolean[] ret = new boolean[bitCount / BITS_PER_ACTIVATION];
+        boolean currentState = this.initialAdChillerState;
 
-        boolean lastState = this.initialState;
+        for (int i = 0; i < solutionArray.length; i++) {
 
-        for (int i = 0; i < bitCount; i += BITS_PER_ACTIVATION) {
-            boolean chpOn;
-
-            // automaton
-            boolean anded = true, ored = false; // and / or
-            for (int j = 0; j < BITS_PER_ACTIVATION; j++) {
-                anded &= solution.get(i + j);
-                ored |= solution.get(i + j);
-            }
-            if (!anded && ored) { // bits are not all equal
-                chpOn = lastState; // keep last state
+            if (solutionArray[i] == 2
+                    || (solutionArray[i] == 0 && !currentState)
+                    || (solutionArray[i] == 1 && currentState)) {
+                ret[i] = currentState;
             } else {
-                chpOn = solution.get(i); // all 1 -> on, all 0 -> off
+                //TODO: implement maxRuntime
+                //TODO minRuntime
+
+                ret[i] = solutionArray[i] == 1 && !currentState;
             }
 
-            lastState = chpOn;
-
-            ret[i / BITS_PER_ACTIVATION] = chpOn;
+            currentState = ret[i];
         }
 
         return ret;
     }
 
-    private int getNecessaryNumberOfBits() {
-        return (int) (Math.ceil((double) (this.getOptimizationHorizon() - this.getReferenceTime()) / TIME_PER_SLOT) * BITS_PER_ACTIVATION);
+    @Override
+    public long getOptimizationHorizon() {
+        return this.getReferenceTime() + RELATIVE_HORIZON;
     }
 
     @Override
     public String problemToString() {
-        AdditionalInfo ai = new AdditionalInfo();
-        this.getActivationBits(this.getReferenceTime(), new BitSet(), ai);
-        return "Chiller IPP , forced ons:" + ai.noForcedOns;
+        return "Chiller IPP";
     }
-
-    // ### to string ###
 
     @Override
-    public String solutionToString(BitSet bits) {
-        return "Chiller IPP solution";
-    }
-
-    private static class AdditionalInfo {
-        public int noForcedOffs;
-        public int noForcedOns;
+    public ChillerIPP getClone() {
+        return new ChillerIPP(this);
     }
 }

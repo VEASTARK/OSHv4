@@ -10,7 +10,7 @@ public class SimpleWaterTank extends WaterTank {
     /**
      * specific heat capacity [J / (kg * K)]
      */
-    private final double avgThermalCapacityOfWater = 4190.0;
+    private static final double avgThermalCapacityOfWater = 4190.0;
 
     /**
      * tank capacity [liters]
@@ -72,13 +72,22 @@ public class SimpleWaterTank extends WaterTank {
 
         // Geometry: cylinder
         // (currently not relevant)
-        this.tankDiameter = tankDiameter;
-        this.tankHeight = tankCapacity / 1000.0 / (Math.PI * (tankDiameter / 2.0) * (tankDiameter / 2.0));
-        this.tankSurface = tankDiameter * Math.PI * this.tankHeight + 2 * 0.5 * tankDiameter * Math.PI;
+        this.tankHeight = tankCapacity / 1000.0 / (Math.PI * (this.tankDiameter / 2.0) * (this.tankDiameter / 2.0));
+        this.tankSurface = this.tankDiameter * Math.PI * this.tankHeight + 2 * 0.5 * this.tankDiameter * Math.PI;
 
-        this.thermalCapacityOfTank = this.avgThermalCapacityOfWater * this.tankCapacity;
+        this.thermalCapacityOfTank = avgThermalCapacityOfWater * this.tankCapacity;
     }
 
+    public SimpleWaterTank(SimpleWaterTank other) {
+        this.tankDiameter = other.tankDiameter;
+        this.tankCapacity = other.tankCapacity;
+        this.normalizedEnergyLoss = other.normalizedEnergyLoss;
+        this.waterTemperature = other.waterTemperature;
+        this.ambientTemperature = other.ambientTemperature;
+        this.tankHeight = other.tankHeight;
+        this.tankSurface = other.tankSurface;
+        this.thermalCapacityOfTank = other.thermalCapacityOfTank;
+    }
 
     public void reduceByStandingHeatLoss(long seconds) {
         this.addEnergy(this.calcStandingHeatLoss(seconds));
@@ -124,7 +133,7 @@ public class SimpleWaterTank extends WaterTank {
      */
     public double calculatePowerDrawOff(double oldTemperature, double newTemperature, long timeDifference) {
         double deltaTheta = newTemperature - oldTemperature;
-        double energy = deltaTheta * this.avgThermalCapacityOfWater * this.tankCapacity;
+        double energy = deltaTheta * avgThermalCapacityOfWater * this.tankCapacity;
         return energy / timeDifference;
     }
 
@@ -135,7 +144,7 @@ public class SimpleWaterTank extends WaterTank {
      */
     public double calculateEnergyDrawOff(double oldTemperature, double newTemperature) {
         double deltaTheta = newTemperature - oldTemperature;
-        return deltaTheta * this.avgThermalCapacityOfWater * this.tankCapacity;
+        return deltaTheta * avgThermalCapacityOfWater * this.tankCapacity;
     }
 
     public double setCurrentWaterTemperature(double temperature) {

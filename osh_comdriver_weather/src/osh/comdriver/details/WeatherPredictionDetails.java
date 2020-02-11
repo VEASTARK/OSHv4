@@ -15,11 +15,6 @@ import java.util.UUID;
 
 public class WeatherPredictionDetails extends StateExchange {
 
-    /**
-     * SERIAL
-     */
-    private static final long serialVersionUID = -2129466555073434421L;
-
     private final PredictedWeatherMap openWeatherMap;
 
     /**

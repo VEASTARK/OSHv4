@@ -14,7 +14,6 @@ import java.util.UUID;
  */
 public class PriceSignalCommandExchange extends CommandExchange {
 
-    private static final long serialVersionUID = 3519660001234351000L;
     private final EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
 
     /**

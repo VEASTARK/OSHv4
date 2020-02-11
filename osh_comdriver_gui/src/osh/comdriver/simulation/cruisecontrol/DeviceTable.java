@@ -30,9 +30,8 @@ class DeviceTable extends JPanel {
         this.table.getColumnModel().getColumn(0).setPreferredWidth(20);
         this.table.getColumnModel().getColumn(1).setPreferredWidth(150);
         this.table.getColumnModel().getColumn(2).setPreferredWidth(150);
-        this.table.getColumnModel().getColumn(3).setPreferredWidth(10);
-        this.table.getColumnModel().getColumn(4).setPreferredWidth(40);
-        this.table.getColumnModel().getColumn(5).setPreferredWidth(400);
+        this.table.getColumnModel().getColumn(3).setPreferredWidth(40);
+        this.table.getColumnModel().getColumn(4).setPreferredWidth(400);
         JScrollPane sp = new JScrollPane(this.table);
         sp.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
         sp.setAlignmentX(CENTER_ALIGNMENT);
@@ -83,7 +82,7 @@ class DeviceTable extends JPanel {
 
         @Override
         public int getColumnCount() {
-            return 6;
+            return 5;
         }
 
         @Override
@@ -96,10 +95,8 @@ class DeviceTable extends JPanel {
                 case 2:
                     return "Name";
                 case 3:
-                    return "+Bits";
-                case 4:
                     return "Reschedule";
-                case 5:
+                case 4:
                     return "String representation";
                 default:
                     return null;
@@ -110,13 +107,11 @@ class DeviceTable extends JPanel {
         public Class<?> getColumnClass(int columnIndex) {
             switch (columnIndex) {
                 case 0:
-                case 3:
-                    return Integer.class;
                 case 1:
                     return UUID.class;
                 case 2:
+                case 3:
                 case 4:
-                case 5:
                     return String.class;
                 default:
                     return null;
@@ -139,10 +134,8 @@ class DeviceTable extends JPanel {
                 case 2:
                     return this.data[rowIndex].getName();
                 case 3:
-                    return this.data[rowIndex].getBits();
-                case 4:
                     return this.data[rowIndex].getReschedule();
-                case 5:
+                case 4:
                     return this.data[rowIndex].getRepresentation();
                 default:
                     return null;

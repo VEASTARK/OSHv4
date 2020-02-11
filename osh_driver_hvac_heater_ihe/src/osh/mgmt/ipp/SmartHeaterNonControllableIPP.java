@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -13,42 +12,36 @@ import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.ihe.SmartHeaterModel;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a non-controllable self-adjusting smart-heater.
+ *
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class SmartHeaterNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = -7540136211941577232L;
-    private final int temperatureSetting;
-    private final int initialState;
-    private final long[] timestampOfLastChangePerSubElement;
-    private SmartHeaterModel model;
-
-
-    // ### interdependent stuff ###
-    /**
-     * used for iteration in interdependent calculation
-     */
-    private long interdependentTime;
-
-    private SparseLoadProfile lp;
+    private final SmartHeaterModel masterModel;
+    private SmartHeaterModel actualModel;
 
 
     /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable problem-part with the given information.
      *
-     * @param deviceId
-     * @param timeStamp
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param temperatureSetting the target temperature for the heater
+     * @param initialState the initial operating state of the heater
+     * @param timestampOfLastChangePerSubElement if this problem-part  reacts to any input information inside the optimization loop
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public SmartHeaterNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             int temperatureSetting,
             int initialState,
             long[] timestampOfLastChangePerSubElement,
@@ -57,40 +50,27 @@ public class SmartHeaterNonControllableIPP
 
         super(
                 deviceId,
-                logger,
+                timestamp,
                 false, //does not cause scheduling
                 true, //needs ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.INSERTHEATINGELEMENT,
-                new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER},
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
 
-        this.temperatureSetting = temperatureSetting;
-        this.initialState = initialState;
-        this.timestampOfLastChangePerSubElement = timestampOfLastChangePerSubElement;
-
-        this.model = new SmartHeaterModel(
+        this.masterModel = new SmartHeaterModel(
                 temperatureSetting,
                 initialState,
                 timestampOfLastChangePerSubElement);
 
-        this.allInputCommodities = new Commodity[]{Commodity.HEATINGHOTWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
-
-    /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected SmartHeaterNonControllableIPP() {
-        super();
-        this.temperatureSetting = 0;
-        this.initialState = 0;
-        this.timestampOfLastChangePerSubElement = null;
+    public SmartHeaterNonControllableIPP(SmartHeaterNonControllableIPP other) {
+        super(other);
+        this.masterModel = new SmartHeaterModel(other.masterModel);
     }
 
 
@@ -101,34 +81,16 @@ public class SmartHeaterNonControllableIPP
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.stepSize = stepSize;
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
-        if (createLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
-
-        // used for iteration in interdependent calculation
-        this.interdependentTime = this.getReferenceTime();
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-        this.ancillaryMeterState = null;
-
-        this.model = new SmartHeaterModel(
-                this.temperatureSetting,
-                this.initialState,
-                this.timestampOfLastChangePerSubElement);
+        this.actualModel = new SmartHeaterModel(this.masterModel);
     }
 
     @Override
@@ -164,44 +126,46 @@ public class SmartHeaterNonControllableIPP
             double temperature = this.interdependentInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
 
             // update state
-            this.model.updateAvailablePower(this.interdependentTime, availablePower, temperature);
+            this.actualModel.updateAvailablePower(this.getInterdependentTime(), availablePower, temperature);
 
             // update interdependentOutputStates
             this.internalInterdependentOutputStates.setPower(
-                    Commodity.ACTIVEPOWER, this.model.getPower());
+                    Commodity.ACTIVEPOWER, this.actualModel.getPower());
             this.internalInterdependentOutputStates.setPower(
-                    Commodity.HEATINGHOTWATERPOWER, -this.model.getPower());
+                    Commodity.HEATINGHOTWATERPOWER, -this.actualModel.getPower());
             this.setOutputStates(this.internalInterdependentOutputStates);
 
-            if (this.lp != null) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, (int) this.model.getPower());
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, (int) -this.model.getPower());
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) this.actualModel.getPower());
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) -this.actualModel.getPower());
             }
-        } else {
-            this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, 0);
-//				lp.setLoad(Commodity.REACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, 0);
+        if (this.getLoadProfile() != null) {
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
             }
-            return new Schedule(this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue), 0, this.getDeviceType().toString());
+            return new Schedule(this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 
-    // ### to string ###
-
     @Override
     public String problemToString() {
-        return "[" + this.getReferenceTime() + "] SmartHeaterNonControllableIPP setTemperature=" + this.temperatureSetting + " initialState=" + this.initialState;
+        return "[" + this.getReferenceTime() + "] SmartHeaterNonControllableIPP setTemperature=" + this.masterModel.getSetTemperature() + " " +
+                "currentState=" + this.masterModel.getCurrentState();
+    }
+
+    @Override
+    public SmartHeaterNonControllableIPP getClone() {
+        return new SmartHeaterNonControllableIPP(this);
     }
 }

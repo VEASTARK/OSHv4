@@ -127,8 +127,8 @@ public class H0Profile15Minutes implements IH0Profile {
         for (int d0 = 0; d0 < this.numberOfDaysInThisYear; d0++) {
             ZonedDateTime advancedTime = time.plusDays(d0);
             int dayOfWeek = TimeConversion.getCorrectedDayOfWeek(advancedTime);
-            int month = advancedTime.getMonthValue();
-            int dayOfMonth = advancedTime.getDayOfMonth();
+            int month = TimeConversion.getCorrectedMonth(advancedTime);
+            int dayOfMonth = TimeConversion.getCorrectedDayOfMonth(advancedTime);
             int season = this.getSeasonIndexFromDayMonth(dayOfMonth, month);
 
             this.correctionFactorForDay[d0] = IH0Profile.getBdewDynamizationValue(d0) * this.seasonCorrectionFactor[season] * this.seasonWeekdayCorrectionFactor[season][dayOfWeek];
@@ -173,36 +173,36 @@ public class H0Profile15Minutes implements IH0Profile {
          */
 
         //def. Winter
-        if (month < 3 || month > 10)
+        if (month < 2 || month > 9)
             return 0;
 
         //def. summer
-        if (month > 5 && month < 9)
+        if (month > 4 && month < 8)
             return 1;
 
         //def. intermediate
-        if (month == 4 || month == 10)
+        if (month == 3 || month == 9)
             return 2;
 
         //winter or intermediate
-        if (month == 3) {
-            if (day < 21)
+        if (month == 2) {
+            if (day < 20)
                 return 0;
             else
                 return 2;
         }
 
         //intermediate or summer
-        if (month == 5) {
-            if (day < 15)
+        if (month == 4) {
+            if (day < 14)
                 return 2;
             else
                 return 1;
         }
 
         //summer or intermediate
-        if (month == 9) {
-            if (day < 15)
+        if (month == 8) {
+            if (day < 14)
                 return 1;
             else
                 return 2;

@@ -8,11 +8,6 @@ import java.util.UUID;
 
 public class GUIHotWaterPredictionStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5935603463467532593L;
-
     private final TreeMap<Long, Double> predictedTankTemp;
     private final TreeMap<Long, Double> predictedHotWaterDemand;
     private final TreeMap<Long, Double> predictedHotWaterSupply;

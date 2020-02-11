@@ -11,12 +11,7 @@ import java.util.UUID;
  */
 public class ElectricCurrentOCDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 3976808627342188832L;
     private double current;
-
 
     /**
      * CONSTRUCTOR

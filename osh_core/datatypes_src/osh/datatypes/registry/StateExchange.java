@@ -1,6 +1,5 @@
 package osh.datatypes.registry;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -9,14 +8,7 @@ import java.util.UUID;
  * @author Florian Allerding, Kaibin Bao, Till Schuberth, Ingo Mauser
  */
 
-public abstract class StateExchange extends AbstractExchange implements Serializable {
-
-    private static final long serialVersionUID = -701677297851327328L;
-
-    @Deprecated
-    protected StateExchange() {
-        super();
-    }
+public abstract class StateExchange extends AbstractExchange {
 
     /**
      * CONSTRUCTOR

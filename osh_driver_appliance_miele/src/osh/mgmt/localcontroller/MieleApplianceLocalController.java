@@ -312,12 +312,11 @@ public class MieleApplianceLocalController
 
             ipp = new MieleApplianceIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now, //now
+                    true, //reschedule
                     now.toEpochSecond(), //earliest starting time
                     this.latestStart.toEpochSecond(),
                     this.currentProfile.clone(),
-                    true, //reschedule
                     false,
                     this.latestStart.toEpochSecond() + this.currentProfile.getEndingTimeOfProfile(),
                     this.getLocalObserver().getDeviceType(),
@@ -340,11 +339,10 @@ public class MieleApplianceLocalController
             if (this.profileStarted != null) {
                 ipp = new MieleApplianceNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         now,
-                        new SparseLoadProfile().merge(this.currentProfile, this.profileStarted.toEpochSecond()),
-                        true, // reschedule
+                        true,
                         this.getLocalObserver().getDeviceType(),
+                        new SparseLoadProfile().merge(this.currentProfile, this.profileStarted.toEpochSecond()),
                         this.compressionType,
                         this.compressionValue
                 );
@@ -359,11 +357,10 @@ public class MieleApplianceLocalController
 
                 ipp = new MieleApplianceNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         now,
-                        new SparseLoadProfile(),
-                        true, // reschedule
-                        this.getLocalObserver().getDeviceType(),
+                        true,
+                        this.getLocalObserver().getDeviceType(), new SparseLoadProfile(),
+                        // reschedule
                         this.compressionType,
                         this.compressionValue
                 );

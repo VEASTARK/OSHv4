@@ -13,6 +13,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     implementation group: 'io.reactivex.rxjava2', name: 'rxjava'
+    implementation group: 'it.unimi.dsi', name: 'fastutil'
     implementation group: 'javax.activation', name: 'javax.activation-api'
     implementation group: 'javax.persistence', name: 'javax.persistence-api'
     implementation group: 'javax.xml.bind', name: 'jaxb-api'

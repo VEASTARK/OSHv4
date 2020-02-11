@@ -463,7 +463,6 @@ public class DachsChpLocalController
 
         ex = new DachsChpIPP(
                 this.getUUID(),
-                this.getGlobalLogger(),
                 now,
                 toBeScheduled,
                 currentState,

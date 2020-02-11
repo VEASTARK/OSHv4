@@ -1,7 +1,6 @@
 package osh.mgmt.localcontroller.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -9,27 +8,28 @@ import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.ILoadProfile;
 import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.datatypes.power.SequentialSparseLoadProfileIterator;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.BinaryFullRangeVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.RealVariableTranslator;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableType;
+import osh.esc.ArrayUtils;
 import osh.esc.LimitedCommodityStateMap;
-import osh.utils.BitSetConverter;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a controllable household-device.
+ *
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class FutureApplianceIPP
         extends ControllableIPP<ISolution, IPrediction> {
-
-
-    private static final long serialVersionUID = 3070293649618474988L;
-    public static final Commodity[] DEFAULT_COMMODITIES = {};
-
-    // NOTE: tDoF = latestStartingTime - earliestStartingTime
 
     /**
      * earliest starting time for the device
@@ -38,13 +38,14 @@ public class FutureApplianceIPP
     /**
      * latest starting time for the device
      */
-    private long latestStartingTime;
+    private final long latestStartingTime;
 
-    private final double cervisiaDofUsedFactor = 0.01;
+    private static final double cervisiaDofUsedFactor = 0.01;
 
     private ApplianceProgramConfigurationStatus acp;
-    private SparseLoadProfile[][] compressedDLProfiles;
+    private final SparseLoadProfile[][] compressedDLProfiles;
     private SparseLoadProfile[] initializedLoadProfiles;
+    private SequentialSparseLoadProfileIterator[] sequentialIterators;
     private long[] initializedStartingTimes;
 
     /**
@@ -66,61 +67,50 @@ public class FutureApplianceIPP
      */
     private int[] sumOfAllMaxValues; // to be updated when rescheduled
 
-
-    // ### IPP STUFF ###
-    /**
-     * used for iteration in interdependent calculation
-     */
-    private long interdependentTime;
-
-    private SparseLoadProfile lp;
-
-    private double cervisia;
-
     private Commodity[] usedCommodities;
     private int lastUsedIndex;
+    private double[] powers;
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected FutureApplianceIPP() {
-        super();
-    }
-
-    /**
-     * CONSTRUCTOR
+     * Constructs this controllable household-device with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param optimizationHorizon the optimization horizon
+     * @param earliestStartingTime the earliest starting-time of the device
+     * @param latestStartingTime the latest starting-time of the device
+     * @param acp the configuration profile of the household-device
+     * @param deviceType type of device represented by this problem-part
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public FutureApplianceIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
-            int bitCount,
             boolean toBeScheduled,
             long optimizationHorizon,
-            DeviceTypes deviceType,
-            long referenceTime,
             long earliestStartingTime,
             long latestStartingTime,
             ApplianceProgramConfigurationStatus acp,
+            DeviceTypes deviceType,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
         super(
                 deviceId,
-                logger,
                 timestamp,
-                bitCount,
                 toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 false, //does not react to input states
                 optimizationHorizon,
-                referenceTime,
                 deviceType,
-                DEFAULT_COMMODITIES, //we will calculate this and set in our constructor so this is a dummy value
+                EnumSet.noneOf(Commodity.class), //we will calculate this and set in our constructor so this is a dummy value
+                EnumSet.noneOf(Commodity.class),
                 compressionType,
-                compressionValue);
+                compressionValue,
+                new BinaryFullRangeVariableTranslator(),
+                new RealVariableTranslator());
 
         this.earliestStartingTime = earliestStartingTime;
         this.latestStartingTime = latestStartingTime;
@@ -156,8 +146,11 @@ public class FutureApplianceIPP
             }
         }
 
-        this.allOutputCommodities = new Commodity[tempUsedComm.size()];
-        this.allOutputCommodities = tempUsedComm.toArray(this.allOutputCommodities);
+        this.allOutputCommodities = tempUsedComm.clone();
+        this.powers = new double[tempUsedComm.size()];
+        this.usedCommodities = new Commodity[tempUsedComm.size()];
+        this.usedCommodities = tempUsedComm.toArray(this.usedCommodities);
+        this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.allOutputCommodities);
 
         // recalculate partition of solution ("header")
         this.header = calculateHeader(
@@ -167,8 +160,6 @@ public class FutureApplianceIPP
 
         int[][][] minMaxTimes = acp.getMinMaxDurations();
 
-//		getGlobalLogger().logDebug("earliestStartingTime=" + earliestStartingTime);
-//		getGlobalLogger().logDebug("latestStartingTime" + latestStartingTime);
 
         // recalculate max values (max lengths of phases)
         this.maxValues = calculateMaxValuesArray(
@@ -182,10 +173,39 @@ public class FutureApplianceIPP
             this.sumOfAllMaxValues[i] = 0;
             for (int j = 0; j < this.maxValues[i].length; j++) {
                 this.sumOfAllMaxValues[i] += this.maxValues[i][j];
-//				getGlobalLogger().logDebug("maxValues["+i+"]["+j+"]" + maxValues[i][j]);
-//				getGlobalLogger().logDebug("sumOfAllMaxValues[" + i + "]=" + sumOfAllMaxValues[i]);
             }
         }
+
+        this.updateSolutionInformation(this.getReferenceTime(), this.getOptimizationHorizon());
+    }
+
+    /**
+     * Limited copy-constructor that constructs a copy of the given controllable household-device-ipp that is as
+     * shallow as possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the controllable household-device-ipp to copy
+     */
+    public FutureApplianceIPP(FutureApplianceIPP other) {
+        super(other);
+
+        this.earliestStartingTime = other.earliestStartingTime;
+        this.latestStartingTime = other.latestStartingTime;
+
+        this.acp = other.acp;
+        this.compressedDLProfiles = other.compressedDLProfiles;
+        this.initializedLoadProfiles = null;
+        this.sequentialIterators = null;
+        this.initializedStartingTimes = null;
+        this.currentSolution = other.currentSolution;
+
+        this.header = other.header;
+        this.maxValues = other.maxValues;
+        this.sumOfAllMaxValues = other.sumOfAllMaxValues;
+        this.usedCommodities = Arrays.copyOf(other.usedCommodities, other.usedCommodities.length);
+        this.powers = Arrays.copyOf(other.powers, other.powers.length);
+
+        this.lastUsedIndex = other.lastUsedIndex;
     }
 
     /**
@@ -198,39 +218,10 @@ public class FutureApplianceIPP
             long latestStartTime,
             ApplianceProgramConfigurationStatus acp) {
         int[] header = new int[3];
-        header[0] = getProfilesBitCount(
-                acp);
-        header[1] = getTDOFLengthBitCount(
-                earliestStartTime,
-                latestStartTime);
-        header[2] = getMaxNumberOfPhases(
-                acp);
+        header[0] = acp.getDynamicLoadProfiles().length;
+        header[1] = (int) (latestStartTime - earliestStartTime);
+        header[2] = getMaxNumberOfPhases(acp);
         return header;
-    }
-
-    private static int getProfilesBitCount(
-            ApplianceProgramConfigurationStatus acp) {
-
-        int length = acp.getDynamicLoadProfiles().length;
-
-        // only one profile available -> no DoF
-        if (length < 2) {
-            return 0;
-        } else {
-            return (int) Math.ceil(Math.log(length) / Math.log(2));
-        }
-    }
-
-    /**
-     * Necessary bits for tDoF (bits per pause)
-     */
-    private static int getTDOFLengthBitCount(
-            long earliestStartTime,
-            long latestStartTime) {
-        if (earliestStartTime > latestStartTime) {
-            return 0;
-        }
-        return (int) Math.ceil(Math.log(latestStartTime - earliestStartTime + 1) / Math.log(2));
     }
 
     /**
@@ -246,35 +237,11 @@ public class FutureApplianceIPP
     }
 
     /**
-     * returns the needed amount of bits for the EA
-     *
-     * @param earliestStartTime
-     * @param latestStartTime
-     */
-    public static int calculateBitCount(
-            long earliestStartTime,
-            long latestStartTime,
-            ApplianceProgramConfigurationStatus acp) {
-        /*
-         * header (3-dim)<br>
-         * [0] = # bits for alternative profiles (gray encoded binary string)<br>
-         * [1] = # bits for tDoF (gray encoded binary string)<br>
-         * [2] = max # of phases
-         */
-        int[] header = calculateHeader(
-                earliestStartTime,
-                latestStartTime,
-                acp);
-
-        return header[0] + header[1] * header[2];
-    }
-
-    /**
      * Get selected tDoF times for phases<br>
      * [...] = time in ticks
      */
     private static int[] getSelectedTimeFromTDOFFromSolution(
-            BitSet solution,
+            DecodedSolutionWrapper solution,
             int[] header,
             long availableTDoF,
             int[] maxValues,
@@ -282,47 +249,32 @@ public class FutureApplianceIPP
 
         /*
          * header (3-dim)<br>
-         * [0] = # bits for alternative profiles (gray encoded binary string)<br>
-         * [1] = # bits for tDoF (gray encoded binary string)<br>
+         * [0] = # alternative profiles count <br>
+         * [1] = # tDoF <br>
          * [2] = max # of phases
          */
 
-        int noProfileBits = header[0];
-        int noTDOFBits = header[1];
         int maxNoOfPhases = header[2];
+
+        long[] solutionArray = solution.getLongArray();
+        int startIndex = header[0] == 1 ? 0 : 1;
 
         // is there a tDoF?
         if (maxNoOfPhases > 0) {
-            // calculate sum of total bit value of all tDoF partitions bit values
-            int sumOfAllBitValues = 0;
-            int currentBit = noProfileBits;
+            // calculate sum of all values of all tDoF partitions
+            int sumOfAllValues = 0;
             for (int i = 0; i < maxNoOfPhases; i++) {
-                BitSet subset = solution.get(currentBit, currentBit + noTDOFBits);
                 if (maxValues[i] > 0) {
-                    sumOfAllBitValues += BitSetConverter.gray2long(subset);
+                    sumOfAllValues += solutionArray[i + startIndex];
                 }
-                currentBit += noTDOFBits;
             }
 
             // calculate partition
             int[] returnValue = new int[maxNoOfPhases];
 
-            currentBit = noProfileBits;
             for (int i = 0; i < maxNoOfPhases; i++) {
-                BitSet subset = solution.get(currentBit, currentBit + noTDOFBits);
-                // IMPORTANT: remember the following!
-                // IMPORTANT: this could lead to rounding errors -> program may end sooner than expected
-                // IMPORTANT: keep cast to double (totalBitValue)
-//				int value = Math.min(
-//						(int) (((double) gray2long(subset) * availableTDoF) / (double) sumOfAllBitValues),
-//						maxValues[i]);
-
-                int firstVal = (int) BitSetConverter.gray2long(subset);
-                //TODO minValues[]
-                int value = (int) Math.min(Math.round(((double) (firstVal * availableTDoF)) / sumOfAllBitValues), maxValues[i]);
+                int value = (int) Math.min(Math.round(((double) (solutionArray[i + startIndex] * availableTDoF)) / sumOfAllValues), maxValues[i]);
                 returnValue[i] = value;
-                // move to next bunch of bits...
-                currentBit += noTDOFBits;
             }
 
             return returnValue;
@@ -360,16 +312,15 @@ public class FutureApplianceIPP
      * returns [NUMBER]
      */
     private static int getSelectedProfileFromSolution(
-            BitSet solution,
+            DecodedSolutionWrapper solution,
             int[] header,
             ILoadProfile<Commodity>[][] dlp) {
         // there is only one profile that can be selected
-        if (header[0] == 0) {
+        if (header[0] == 1) {
             return 0;
+        } else {
+            return (int) solution.getLongArray()[0];
         }
-        int profilesBits = header[0];
-        BitSet subset = solution.get(0, profilesBits);
-        return (int) Math.floor(BitSetConverter.gray2long(subset) / Math.pow(2, profilesBits) * dlp.length);
     }
 
     private static int[][] calculateMaxValuesArray(
@@ -393,28 +344,17 @@ public class FutureApplianceIPP
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.stepSize = stepSize;
-
-        // INFO: maxReferenceTime = starting point of interdependent calculation
-
-        // TYPICAL OLD STUFF
-        this.cervisia = 0;
-        this.interdependentTime = maxReferenceTime;
-        this.setOutputStates(null);
-
-        // build final load profile
-//		SparseLoadProfile returnProfile = new SparseLoadProfile();
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         // get eDoF values
         int selectedProfile =
                 getSelectedProfileFromSolution(
-                        solution,
+                        this.currentSolution,
                         this.header,
                         this.acp.getDynamicLoadProfiles());
 
@@ -422,7 +362,7 @@ public class FutureApplianceIPP
         long availableTDoF = this.latestStartingTime - this.earliestStartingTime;
         int[] selectedTDOF =
                 getSelectedTimeFromTDOFFromSolution(
-                        solution,
+                        this.currentSolution,
                         this.header,
                         availableTDoF,
                         this.maxValues[selectedProfile],
@@ -431,16 +371,11 @@ public class FutureApplianceIPP
         if (selectedTDOF.length > 0 && availableTDoF > 0) {
             if (selectedTDOF[0] > 0) {
                 //starting later is better
-                this.cervisia -= ((double) selectedTDOF[0] / availableTDoF) * this.cervisiaDofUsedFactor;
+                this.addInterdependentCervisia(-((double) selectedTDOF[0] / availableTDoF) * cervisiaDofUsedFactor);
             }
         }
 
-//		getGlobalLogger().logDebug("availableTDoF=" +  availableTDoF);
-//		getGlobalLogger().logDebug(maxValues[selectedProfile][0] + " . " + maxValues[selectedProfile][1] + " . " + maxValues[selectedProfile][2]);
-//		getGlobalLogger().logDebug(selectedTDOF[0] + " . " + selectedTDOF[1] + " . " + selectedTDOF[2]);
-
         // get stuff of the selected profile
-//		SparseLoadProfile[] selectedDlp = acp.getDynamicLoadProfiles()[selectedProfile];
         SparseLoadProfile[] selectedDlp = this.compressedDLProfiles[selectedProfile];
         this.initializedLoadProfiles = new SparseLoadProfile[selectedDlp.length];
 
@@ -463,9 +398,6 @@ public class FutureApplianceIPP
                 long availableLength = selectedDlp[i].getEndingTimeOfProfile(); // is has relative times
                 if (availableLength == selectedMinMaxTimes[i][0] + selectedTDOF[i]) {
                     // shortcut
-//					returnProfile = (SparseLoadProfile) returnProfile.merge(
-//							selectedDlp[i],
-//							selectedStartingTimes[i]);
                     this.initializedLoadProfiles[i] = selectedDlp[i];
                 } else {
                     // profile has to be stripped-down or enlarged...
@@ -474,9 +406,6 @@ public class FutureApplianceIPP
                         SparseLoadProfile tempLP = selectedDlp[i].clone();
                         tempLP.setEndingTimeOfProfile(selectedMinMaxTimes[i][0] - selectedTDOF[i]);
                         this.initializedLoadProfiles[i] = tempLP;
-//						returnProfile = returnProfile.merge(
-//								tempLP,
-//								selectedStartingTimes[i]);
                     } else {
                         // enlarge...
                         int number = (int) ((selectedMinMaxTimes[i][0] + selectedTDOF[i]) / availableLength);
@@ -485,9 +414,6 @@ public class FutureApplianceIPP
                             SparseLoadProfile longerProfile = selectedDlp[i].clone();
                             longerProfile.setEndingTimeOfProfile(number);
                             this.initializedLoadProfiles[i] = longerProfile;
-//							returnProfile = returnProfile.merge(
-//									longerProfile,
-//									selectedStartingTimes[i]);
                         } else {
                             SparseLoadProfile lengthened = selectedDlp[i].clone();
                             for (int j = 1; j < number; j++) {
@@ -496,11 +422,6 @@ public class FutureApplianceIPP
                                         selectedStartingTimes[i] + j * availableLength);
                             }
                             // n-times the full profile
-//							for (int j = 0; j < number; j++) {
-//								returnProfile = returnProfile.merge(
-//										selectedDlp[i],
-//										selectedStartingTimes[i] + j * availableLength);
-//							}
                             int remainingPartial = (int) ((selectedMinMaxTimes[i][0] + selectedTDOF[i]) % availableLength);
                             // plus partial stripped-down profile...
                             SparseLoadProfile tempLP = selectedDlp[i].clone();
@@ -509,9 +430,6 @@ public class FutureApplianceIPP
                                     tempLP,
                                     selectedStartingTimes[i] + number * availableLength);
                             this.initializedLoadProfiles[i] = lengthened;
-//							returnProfile = returnProfile.merge(
-//									tempLP,
-//									selectedStartingTimes[i]  + number * availableLength);
                         }
                     }
                 }
@@ -520,87 +438,102 @@ public class FutureApplianceIPP
             }
         }
 
-//		this.lp = returnProfile;
-        this.lp = new SparseLoadProfile();
-
         EnumSet<Commodity> tempUsedComm = EnumSet.noneOf(Commodity.class);
+        boolean sameCommodities = true;
+        this.sequentialIterators = new SequentialSparseLoadProfileIterator[this.initializedLoadProfiles.length];
 
         for (int i = 0; i < this.initializedLoadProfiles.length; i++) {
             for (Commodity c : this.allOutputCommodities) {
                 if (!tempUsedComm.contains(c) &&
-                        this.initializedLoadProfiles[i].getFloorEntry(c, maxReferenceTime) != null) {
+                        this.initializedLoadProfiles[i].getFloorEntry(c, interdependentStartingTime) != null) {
                     tempUsedComm.add(c);
+                    sameCommodities &= Arrays.asList(this.usedCommodities).contains(c);
                 }
             }
 
-            long relativeStart = Math.abs(Math.min(this.initializedStartingTimes[i] - maxReferenceTime, 0));
-            this.initializedLoadProfiles[i].initSequentialAverageLoad(relativeStart);
+            long relativeStart = Math.abs(Math.min(this.initializedStartingTimes[i] - interdependentStartingTime, 0));
+            this.sequentialIterators[i] = this.initializedLoadProfiles[i].initSequentialAverageLoad(relativeStart);
         }
 
-        this.usedCommodities = new Commodity[tempUsedComm.size()];
-        this.usedCommodities = tempUsedComm.toArray(this.usedCommodities);
-
-        this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.usedCommodities);
+        if (!sameCommodities) {
+            this.powers = new double[tempUsedComm.size()];
+            this.usedCommodities = new Commodity[tempUsedComm.size()];
+            this.usedCommodities = tempUsedComm.toArray(this.usedCommodities);
+            this.internalInterdependentOutputStates = new LimitedCommodityStateMap(tempUsedComm);
+        } else {
+            this.internalInterdependentOutputStates.clear();
+        }
 
         this.lastUsedIndex = 0;
-
-//		lp.initSequentialAverageLoad(maxReferenceTime);
-
     }
 
+    private void updateSolutionInformation(long referenceTime, long maxHorizon) {
 
-    // ### CALCULATE BIT COUNT ###
+        int variableCount = this.header[2];
+        double[][] boundaries;
 
-    /*
-     * the method for sequential averages in our load profiles uses entrys and iterators which
-     * cannot be serialised, so they have to be destroyed prior to deep copying
-     */
+        if (this.header[0] > 1) {
+            variableCount++;
+        }
+
+        boundaries = new double[variableCount][];
+        int startIndex = 0;
+
+        if (this.header[0] > 1) {
+            boundaries[0] = new double[]{0, this.header[0] - 1};
+            startIndex++;
+        }
+
+        for (int i = 0; i < this.header[2]; i++) {
+            boundaries[i + startIndex] = new double[]{0, this.header[1]};
+        }
+
+        this.solutionHandler.updateVariableInformation(VariableType.LONG, variableCount, boundaries);
+
+        //fix for not controllable devices (inductioncooktop, oven) or devices with no tDof
+        this.currentSolution = new DecodedSolutionWrapper(new long[variableCount]);
+    }
+
     @Override
-    public void prepareForDeepCopy() {
-        if (this.lp != null) {
-            this.lp.removeSequentialPriming();
-        }
-        if (this.initializedLoadProfiles != null) {
-            for (SparseLoadProfile initializedLoadProfile : this.initializedLoadProfiles) {
-                initializedLoadProfile.removeSequentialPriming();
-            }
-        }
+    protected void interpretNewSolution() {
+        //do nothing, solution will be interpreted in initializeInterdependentCalculation
     }
-
-
-    // ### INTERPRET SOLUTION ###
 
     @Override
     public void calculateNextStep() {
         // no next step...
         // ...but give power
 
-        long end = this.interdependentTime + this.stepSize;
+        long end = this.getInterdependentTime() + this.getStepSize();
 
         int index = this.lastUsedIndex;
-        long currentTime = this.interdependentTime;
+        long currentTime = this.getInterdependentTime();
 
-        double[] powers = new double[this.usedCommodities.length];
+//        double[] powers = new double[this.usedCommodities.size()];
 
         boolean hasValues = false;
 
         //all power values in one profile
         if (end < this.initializedStartingTimes[index]) {
             long subtractionFactor = this.initializedStartingTimes[index - 1];
-            for (int j = 0; j < this.usedCommodities.length; j++) {
-                powers[j] = Math.round(this.initializedLoadProfiles[index - 1]
-                        .getAverageLoadFromTillSequentialNotRounded(this.usedCommodities[j], (currentTime - subtractionFactor), (end - subtractionFactor)));
+            int j = 0;
+            for (Commodity c : this.usedCommodities) {
+                this.powers[j] = Math.round(this.sequentialIterators[index - 1]
+                        .getAverageLoadFromTillSequentialNotRounded(c, (currentTime - subtractionFactor), (end - subtractionFactor)));
 
-                if (powers[j] != 0) {
-                    this.internalInterdependentOutputStates.setPower(this.usedCommodities[j], powers[j]);
+                if (this.powers[j] != 0) {
+                    this.internalInterdependentOutputStates.setPower(c, this.powers[j]);
                     hasValues = true;
                 } else {
-                    this.internalInterdependentOutputStates.resetCommodity(this.usedCommodities[j]);
+                    this.internalInterdependentOutputStates.resetCommodity(c);
                 }
+                j++;
             }
         }
         //power values in multiple profiles, iterate
-        else {
+        //check if device not already done (delay in scheduling, ipp did not arrive, ...)
+        else if (this.initializedStartingTimes.length > 1){
+            ArrayUtils.fillArrayDouble(this.powers, 0.0);
             while (currentTime < end) {
 
                 if (currentTime > this.initializedStartingTimes[index]) {
@@ -613,8 +546,10 @@ public class FutureApplianceIPP
                     long subtractionFactor = this.initializedStartingTimes[index - 1];
 
                     for (int j = 0; j < this.usedCommodities.length; j++) {
-                        powers[j] += (this.initializedLoadProfiles[index - 1]
-                                .getAverageLoadFromTillSequentialNotRounded(this.usedCommodities[j], (currentTime - subtractionFactor), (currentEnd - subtractionFactor)) * factor);
+                        this.powers[j] += (this.sequentialIterators[index - 1]
+                                .getAverageLoadFromTillSequentialNotRounded(this.usedCommodities[j],
+                                        (currentTime - subtractionFactor),
+                                        (currentEnd - subtractionFactor)) * factor);
                     }
 
                     currentTime = this.initializedStartingTimes[index];
@@ -623,9 +558,9 @@ public class FutureApplianceIPP
             }
 
             for (int j = 0; j < this.usedCommodities.length; j++) {
-                powers[j] = Math.round(powers[j] / this.stepSize);
-                if (powers[j] != 0) {
-                    this.internalInterdependentOutputStates.setPower(this.usedCommodities[j], powers[j]);
+                this.powers[j] = Math.round(this.powers[j] / this.getStepSize());
+                if (this.powers[j] != 0) {
+                    this.internalInterdependentOutputStates.setPower(this.usedCommodities[j], this.powers[j]);
                     hasValues = true;
                 } else {
                     this.internalInterdependentOutputStates.resetCommodity(this.usedCommodities[j]);
@@ -639,7 +574,7 @@ public class FutureApplianceIPP
             this.setOutputStates(null);
         }
 
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
 
@@ -650,50 +585,28 @@ public class FutureApplianceIPP
         // IMPORTANT: cervisia currently not in use and unchecked
 
         //we dont merge the phases anymore (it's faster that way) so for a schedule we have to do it here now
-        if (this.initializedLoadProfiles != null) {
-            this.lp = new SparseLoadProfile();
+        if (this.initializedLoadProfiles != null && this.getLoadProfile() != null) {
+            SparseLoadProfile lp = new SparseLoadProfile();
             for (int i = 0; i < this.initializedLoadProfiles.length; i++) {
-                this.lp.merge(this.initializedLoadProfiles[i], this.initializedStartingTimes[i]);
+                lp = lp.merge(this.initializedLoadProfiles[i], this.initializedStartingTimes[i]);
             }
+            this.setLoadProfile(lp);
         }
 
-        return new Schedule(this.lp, this.cervisia, this.getDeviceType().toString());
+        return new Schedule(this.getLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
     }
 
     //TODo: find better solution (for mapping from 2^x to real length)
 
     @Override
-    public ISolution transformToPhenotype(BitSet solution) {
+    public ISolution transformToFinalInterdependentPhenotype() {
         int selectedProfile = getSelectedProfileFromSolution(
-                solution,
+                this.currentSolution,
                 this.header,
                 this.acp.getDynamicLoadProfiles());
         long availableTDoF = this.latestStartingTime - this.earliestStartingTime;
         int[] selectedTimeOfTDOF = getSelectedTimeFromTDOFFromSolution(
-                solution,
-                this.header,
-                availableTDoF,
-                this.maxValues[selectedProfile],
-                this.sumOfAllMaxValues[selectedProfile]);
-        return new GenericApplianceSolution(
-                this.acp.getAcpID(),
-                getStartingTimes(
-                        this.earliestStartingTime,
-                        selectedTimeOfTDOF,
-                        this.acp.getMinMaxDurations()[selectedProfile]),
-                selectedProfile);
-    }
-
-    @Override
-    public ISolution transformToFinalInterdependentPhenotype(
-            BitSet solution) {
-        int selectedProfile = getSelectedProfileFromSolution(
-                solution,
-                this.header,
-                this.acp.getDynamicLoadProfiles());
-        long availableTDoF = this.latestStartingTime - this.earliestStartingTime;
-        int[] selectedTimeOfTDOF = getSelectedTimeFromTDOFFromSolution(
-                solution,
+                this.currentSolution,
                 this.header,
                 availableTDoF,
                 this.maxValues[selectedProfile],
@@ -708,60 +621,56 @@ public class FutureApplianceIPP
                 selectedProfile);
     }
 
-    // MISC
-
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
         // RECALCULATE
         // (from recalculate encoding)
         // earliest starting time has been reached...
 
-        this.setReferenceTime(currentTime);
+        if (currentTime != this.getReferenceTime() || maxHorizon != this.getOptimizationHorizon()) {
+            this.setReferenceTime(currentTime);
+            this.setOptimizationHorizon(maxHorizon);
 
-        if (this.earliestStartingTime < currentTime) {
+            if (this.earliestStartingTime < currentTime) {
 
-            // shorten tDoF
+                // shorten tDoF
 
-            // if time is running out...
-            if (currentTime > this.latestStartingTime) {
-                // tDoF = 0;
-                this.earliestStartingTime = this.latestStartingTime;
-            } else {
-                // adjust minMaxValues in ACP
-                int[][][] minMaxTimes = this.acp.getMinMaxDurations();
-                for (int i = 0; i < minMaxTimes.length; i++) {
-                    minMaxTimes[i][0][0] += (currentTime - this.earliestStartingTime);
+                // if time is running out...
+                if (currentTime > this.latestStartingTime) {
+                    // tDoF = 0;
+                    this.earliestStartingTime = this.latestStartingTime;
+                } else {
+                    // adjust minMaxValues in ACP
+                    int[][][] minMaxTimes = this.acp.getMinMaxDurations();
+                    for (int i = 0; i < minMaxTimes.length; i++) {
+                        minMaxTimes[i][0][0] += (currentTime - this.earliestStartingTime);
+                    }
+
+                    // adjust time frame from optimization
+                    this.earliestStartingTime = currentTime;
                 }
 
-                // adjust time frame from optimization
-                this.earliestStartingTime = currentTime;
-            }
-
-            this.setBitCount(
-                    calculateBitCount(
-                            this.earliestStartingTime,
-                            this.latestStartingTime,
-                            this.acp));
-            this.header = calculateHeader(
-                    this.earliestStartingTime,
-                    this.latestStartingTime,
-                    this.acp);
-            this.maxValues = calculateMaxValuesArray(
-                    this.earliestStartingTime,
-                    this.latestStartingTime,
-                    this.acp.getMinMaxDurations());
-            // calculate sum of all max values (for determination of how to distribute tdof)
-            this.sumOfAllMaxValues = new int[this.maxValues.length];
-            for (int i = 0; i < this.maxValues.length; i++) {
-                this.sumOfAllMaxValues[i] = 0;
-                for (int j = 0; j < this.maxValues[i].length; j++) {
-                    this.sumOfAllMaxValues[i] += this.maxValues[i][j];
+                this.header = calculateHeader(
+                        this.earliestStartingTime,
+                        this.latestStartingTime,
+                        this.acp);
+                this.maxValues = calculateMaxValuesArray(
+                        this.earliestStartingTime,
+                        this.latestStartingTime,
+                        this.acp.getMinMaxDurations());
+                // calculate sum of all max values (for determination of how to distribute tdof)
+                this.sumOfAllMaxValues = new int[this.maxValues.length];
+                for (int i = 0; i < this.maxValues.length; i++) {
+                    this.sumOfAllMaxValues[i] = 0;
+                    for (int j = 0; j < this.maxValues[i].length; j++) {
+                        this.sumOfAllMaxValues[i] += this.maxValues[i][j];
+                    }
                 }
             }
+
+            this.updateSolutionInformation(currentTime, this.getOptimizationHorizon());
         }
     }
-
-    // ### to string ###
 
     @Override
     public String problemToString() {
@@ -769,8 +678,7 @@ public class FutureApplianceIPP
     }
 
     @Override
-    public String solutionToString(BitSet bits) {
-        return "FutureApplianceIPP solution";
+    public FutureApplianceIPP getClone() {
+        return new FutureApplianceIPP(this);
     }
-
 }
