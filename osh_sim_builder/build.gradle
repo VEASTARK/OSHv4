@@ -42,7 +42,7 @@ task constructSingleHHConfig(type: JavaExec) {
     group = "Construction"
     description = "constructs the configuration files for a single HH simlation"
     classpath = sourceSets.main.runtimeClasspath
-    main = "constructsimulation.constructSimulationPackage"
+    main = "constructsimulation.configuration.general.Generate"
 }
 
 task constructMultipleSingleHHConfig(type: JavaExec) {
