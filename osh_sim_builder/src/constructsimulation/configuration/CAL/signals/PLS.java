@@ -8,6 +8,7 @@ import constructsimulation.generation.parameter.CreateConfigurationParameter;
 import osh.configuration.cal.AssignedComDevice;
 import osh.configuration.system.ComDeviceTypes;
 import osh.configuration.system.ConfigurationParameter;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.EnumMap;
@@ -59,12 +60,12 @@ public class PLS {
     public static AssignedComDevice generatePLS() {
 
         Map<String, String> params = new HashMap<>();
-        params.put("newSignalAfterThisPeriod", String.valueOf(newSignalAfter.toSeconds()));
-        params.put("signalPeriod", String.valueOf(signalPeriod.toSeconds()));
-        params.put("activeLowerLimit", String.valueOf(activeLowerLimit));
-        params.put("activeUpperLimit", String.valueOf(activeUpperLimit));
-        params.put("reactiveLowerLimit", String.valueOf(reactiveLowerLimit));
-        params.put("reactiveUpperLimit", String.valueOf(reactiveUpperLimit));
+        params.put(ParameterConstants.Signal.newSignal, String.valueOf(newSignalAfter.toSeconds()));
+        params.put(ParameterConstants.Signal.signalPeriod, String.valueOf(signalPeriod.toSeconds()));
+        params.put(ParameterConstants.PLS.activeLowerLimit, String.valueOf(activeLowerLimit));
+        params.put(ParameterConstants.PLS.activeUpperLimit, String.valueOf(activeUpperLimit));
+        params.put(ParameterConstants.PLS.reactiveLowerLimit, String.valueOf(reactiveLowerLimit));
+        params.put(ParameterConstants.PLS.reactiveUpperLimit, String.valueOf(reactiveUpperLimit));
 
         AssignedComDevice dev = CreateComDevice.createComDevice(
                 ComDeviceTypes.ELECTRICITY,

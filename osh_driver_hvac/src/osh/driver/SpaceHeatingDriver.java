@@ -14,6 +14,7 @@ import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.SpaceHeatingPredictionObserverExchange;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.utils.physics.TemperatureUtil;
+import osh.utils.string.ParameterConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,14 +44,14 @@ public class SpaceHeatingDriver
         super(osh, deviceID, driverConfig);
 
         try {
-            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter("compressionType"));
+            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionType));
         } catch (Exception e) {
             this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
             this.getGlobalLogger().logWarning("Can't get compressionType, using the default value: " + this.compressionType);
         }
 
         try {
-            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter("compressionValue"));
+            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionValue));
         } catch (Exception e) {
             this.compressionValue = 100;
             this.getGlobalLogger().logWarning("Can't get compressionValue, using the default value: " + this.compressionValue);

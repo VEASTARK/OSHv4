@@ -9,6 +9,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -62,28 +63,28 @@ public class Battery {
     public static AssignedDevice generateBattery() {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("minChargingState", String.valueOf(minChargingState));
-        params.put("maxChargingState", String.valueOf(maxChargingState));
-        params.put("minDischargingPower", String.valueOf(minDischargePower));
-        params.put("maxDischargingPower", String.valueOf(maxDischargePower));
-        params.put("minChargingPower", String.valueOf(minChargePower));
-        params.put("maxChargingPower", String.valueOf(maxChargePower));
-        params.put("minInverterPower", String.valueOf(minInverterPower));
-        params.put("maxInverterPower", String.valueOf(maxInverterPower));
+        params.put(ParameterConstants.Battery.minChargingState, String.valueOf(minChargingState));
+        params.put(ParameterConstants.Battery.maxChargingState, String.valueOf(maxChargingState));
+        params.put(ParameterConstants.Battery.minDischargingPower, String.valueOf(minDischargePower));
+        params.put(ParameterConstants.Battery.maxDischargingPower, String.valueOf(maxDischargePower));
+        params.put(ParameterConstants.Battery.minChargingPower, String.valueOf(minChargePower));
+        params.put(ParameterConstants.Battery.maxChargingPower, String.valueOf(maxChargePower));
+        params.put(ParameterConstants.Battery.minInverterPower, String.valueOf(minInverterPower));
+        params.put(ParameterConstants.Battery.maxInverterPower, String.valueOf(maxInverterPower));
 
-        params.put("newIppAfter", String.valueOf(newIppAfter.toSeconds()));
-        params.put("triggerIppIfDeltaSoCBigger", String.valueOf(triggerIppIfDeltaSoCBigger));
-        params.put("rescheduleAfter", String.valueOf(rescheduleAfter.toSeconds()));
-        params.put("batteryCycle", String.valueOf(batteryCycles));
-        params.put("batteryType", String.valueOf(batteryType));
-        params.put("roomTemperature", String.valueOf(roomTemperature));
+        params.put(ParameterConstants.IPP.newIPPAfter, String.valueOf(newIppAfter.toSeconds()));
+        params.put(ParameterConstants.IPP.triggerIppIfDeltaSoc, String.valueOf(triggerIppIfDeltaSoCBigger));
+        params.put(ParameterConstants.IPP.rescheduleAfter, String.valueOf(rescheduleAfter.toSeconds()));
+        params.put(ParameterConstants.Battery.batteryCycle, String.valueOf(batteryCycles));
+        params.put(ParameterConstants.Battery.batteryType, String.valueOf(batteryType));
+        params.put(ParameterConstants.Battery.roomTemperature, String.valueOf(roomTemperature));
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.compressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.BATTERYSTORAGE,

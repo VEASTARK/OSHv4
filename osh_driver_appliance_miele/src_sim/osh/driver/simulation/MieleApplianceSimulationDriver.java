@@ -7,6 +7,7 @@ import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.eal.hal.exceptions.HALException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 import osh.utils.xml.XMLSerialization;
 
 import java.util.List;
@@ -51,14 +52,14 @@ public abstract class MieleApplianceSimulationDriver
             OSHParameterCollection driverConfig) throws HALException {
         super(osh, deviceID, driverConfig);
 
-        String profileSourceName = driverConfig.getParameter("profilesource");
+        String profileSourceName = driverConfig.getParameter(ParameterConstants.General_Devices.profileSource);
         try {
             this.deviceProfile = (DeviceProfile) XMLSerialization.file2Unmarshal(profileSourceName, DeviceProfile.class);
         } catch (Exception ex) {
             this.getGlobalLogger().logError("An error occurred while loading the device profile: " + ex.getMessage());
         }
 
-        this.device2ndDof = Integer.parseInt(driverConfig.getParameter("device2nddof"));
+        this.device2ndDof = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Appliances.secondTDof));
 
         this.programDuration = this.deviceProfile.getProfileTicks().getProfileTick().size();
 

@@ -16,6 +16,7 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.csv.CSVImporter;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
@@ -58,18 +59,19 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
                                                    OSHParameterCollection driverConfig) throws HALException, SimulationSubjectException {
         super(osh, deviceID, driverConfig);
 
-        this.drawOffTypesFile = driverConfig.getParameter("drawOffTypesFile");
+        this.drawOffTypesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.drawOffFile);
         if (this.drawOffTypesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
-        this.weekDayHourProbabilitiesFile = driverConfig.getParameter("weekDayHourProbabilitiesFile");
+        this.weekDayHourProbabilitiesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.probabilitiesFile);
         if (this.drawOffTypesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
         try {
-            this.avgYearlyDemand = Double.parseDouble(this.getDriverConfig().getParameter("avgYearlyDemamd"));
+            this.avgYearlyDemand =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.WaterDemand.averageYearlyDemand));
         } catch (Exception e) {
             this.avgYearlyDemand = 700;
             this.getGlobalLogger().logWarning("Can't get avgYearlyDemand, using the default value: " + this.avgYearlyDemand);

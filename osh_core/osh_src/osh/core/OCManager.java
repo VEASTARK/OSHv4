@@ -15,6 +15,7 @@ import osh.core.oc.*;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.OCEnergySimulationCore;
+import osh.utils.string.ParameterConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +106,8 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
         this.globalControllerParameterCollection.loadCollection(ocConfig
                 .getGlobalControllerParameters());
 
-        this.globalControllerParameterCollection.setParameter("optimizationMainRandomSeed", ocConfig.getOptimizationMainRandomSeed());
+        this.globalControllerParameterCollection.setParameter(ParameterConstants.Optimization.optimizationRandomSeed,
+                ocConfig.getOptimizationMainRandomSeed());
 
         try {
             globalObserverClass = Class.forName(ocConfig.getGlobalObserverClass());

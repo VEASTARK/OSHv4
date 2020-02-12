@@ -11,6 +11,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.*;
@@ -173,22 +174,24 @@ public class Appliances {
 
             HashMap<String, String> params = new HashMap<>();
 
-            params.put("usedcommodities", Arrays.toString(usedCommodities[i][type.ordinal()]));
-            params.put("devicemax1stdof", String.valueOf(isControllable ? firstTDOF[i].toSeconds() : 0));
-            params.put("device2nddof", String.valueOf((isControllable && useSecondTDof) ? secondTDOF[i].toSeconds() : 0));
+            params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities[i][type.ordinal()]));
+            params.put(ParameterConstants.Appliances.firstTDoF, String.valueOf(isControllable ? firstTDOF[i].toSeconds() : 0));
+            params.put(ParameterConstants.Appliances.secondTDof, String.valueOf((isControllable && useSecondTDof) ?
+                    secondTDOF[i].toSeconds() : 0));
 
-            params.put("averageyearlyruns", String.valueOf(averageYearlyRuns[i][HouseConfig.personCount - 1]));
-            params.put("h0filename", h0FilePath);
-            params.put("h0classname", h0ClassName);
+            params.put(ParameterConstants.Appliances.averageYearlyRuns,
+                    String.valueOf(averageYearlyRuns[i][HouseConfig.personCount - 1]));
+            params.put(ParameterConstants.General_Devices.h0Filename, h0FilePath);
+            params.put(ParameterConstants.General_Devices.h0Classname, h0ClassName);
 
-            params.put("probabilityfilename", probabilityFilePaths[i]);
-            params.put("profilesource", profileSourcesPaths[i][type.ordinal()]);
-            params.put("configurationshares", Arrays.toString(configurationShares[i]));
+            params.put(ParameterConstants.Appliances.probabilityFile, probabilityFilePaths[i]);
+            params.put(ParameterConstants.General_Devices.profileSource, profileSourcesPaths[i][type.ordinal()]);
+            params.put(ParameterConstants.Appliances.configurationShares, Arrays.toString(configurationShares[i]));
 
-            if (!params.containsKey("compressionType"))
-                params.put("compressionType", GeneralConfig.compressionType.toString());
-            if (!params.containsKey("compressionValue"))
-                params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+            if (!params.containsKey(ParameterConstants.Compression.compressionType))
+                params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+            if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+                params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
 
             AssignedDevice dev = CreateDevice.createDevice(

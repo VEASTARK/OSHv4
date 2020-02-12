@@ -13,8 +13,8 @@ import osh.esc.LimitedCommodityStateMap;
 import osh.esc.exception.EnergySimulationException;
 import osh.simulation.energy.IDeviceEnergySubject;
 import osh.simulation.exception.SimulationSubjectException;
-import osh.simulation.screenplay.ScreenplayType;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
 import java.util.*;
 
@@ -67,7 +67,7 @@ public abstract class DeviceSimulationDriver
 
         // get Commodities used by this device
         {
-            String commoditiesArray = driverConfig.getParameter("usedcommodities");
+            String commoditiesArray = driverConfig.getParameter(ParameterConstants.General_Devices.usedCommodities);
             if (commoditiesArray != null) {
                 this.usedCommodities = Commodity.parseCommodityArray(commoditiesArray);
             } else {
@@ -81,32 +81,17 @@ public abstract class DeviceSimulationDriver
             this.setPower(c, 0);
         }
 
-        // if DeviceClassification.APPLIANCE (but info at this point not yet available!)
-        // all conditions after first && should NOT be necessary (but remain for safety reasons)
-        if (driverConfig.getParameter("screenplaytype") != null) {
-
-            ScreenplayType screenplayType = ScreenplayType.fromValue(driverConfig.getParameter("screenplaytype"));
-
-            if (screenplayType == ScreenplayType.STATIC) {
-                // screenplay is loaded from file...
-            } else if (screenplayType == ScreenplayType.DYNAMIC) {
-                // NOTHING here...
-            } else {
-                throw new RuntimeException("value \"screenplayType\" for variable \"screenplaytype\": unknown value!");
-            }
-        } else {
-            throw new RuntimeException("variable \"screenplaytype\" : missing!");
-        }
-
         try {
-            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter("compressionType"));
+            this.compressionType =
+                    LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionType));
         } catch (Exception e) {
             this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
             this.getGlobalLogger().logWarning("Can't get compressionType, using the default value: " + this.compressionType);
         }
 
         try {
-            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter("compressionValue"));
+            this.compressionValue =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionValue));
         } catch (Exception e) {
             this.compressionValue = 100;
             this.getGlobalLogger().logWarning("Can't get compressionValue, using the default value: " + this.compressionValue);

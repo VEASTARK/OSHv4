@@ -10,6 +10,7 @@ import osh.configuration.cal.AssignedComDevice;
 import osh.configuration.system.ComDeviceTypes;
 import osh.configuration.system.ConfigurationParameter;
 import osh.datatypes.commodity.AncillaryCommodity;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.*;
@@ -94,30 +95,30 @@ public class EPS {
     static {
         //electricity
         priceMap.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, 30.0);
-        nameMap.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, "activePowerPrice");
+        nameMap.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, ParameterConstants.EPS.activePrice);
         priceMap.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, 0.0);
-        nameMap.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, "reactivePowerPrice");
+        nameMap.put(AncillaryCommodity.REACTIVEPOWEREXTERNAL, ParameterConstants.EPS.reactivePrice);
 
         //production
         priceMap.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, 10.0);
-        nameMap.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, "activePowerFeedInPV");
+        nameMap.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, ParameterConstants.EPS.pvFeedInPrice);
         priceMap.put(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, 0.0);
-        nameMap.put(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, "activePowerAutoConsumptionPV");
+        nameMap.put(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, ParameterConstants.EPS.pvAutoConsumptionPrice);
 
         priceMap.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, 9.0);
-        nameMap.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, "activePowerFeedInCHP");
+        nameMap.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, ParameterConstants.EPS.chpFeedInPrice);
         priceMap.put(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, 5.0);
-        nameMap.put(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, "activePowerAutoConsumptionCHP");
+        nameMap.put(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, ParameterConstants.EPS.chpAutoConsumptionPrice);
 
         priceMap.put(AncillaryCommodity.BATTERYACTIVEPOWERFEEDIN, 0.0);
-        nameMap.put(AncillaryCommodity.BATTERYACTIVEPOWERFEEDIN, "activePowerFeedInBattery");
+        nameMap.put(AncillaryCommodity.BATTERYACTIVEPOWERFEEDIN, ParameterConstants.EPS.batteryFeedInPrice);
         priceMap.put(AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION, 0.0);
-        nameMap.put(AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION, "activePowerAutoConsumptionBattery");
+        nameMap.put(AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION, ParameterConstants.EPS.batteryAutoConsumptionPrice);
         priceMap.put(AncillaryCommodity.BATTERYACTIVEPOWERCONSUMPTION, 0.0);
-        nameMap.put(AncillaryCommodity.BATTERYACTIVEPOWERCONSUMPTION, "activePowerConsumptionBattery");
+        nameMap.put(AncillaryCommodity.BATTERYACTIVEPOWERCONSUMPTION, ParameterConstants.EPS.batteryConsumptionPrice);
 
         priceMap.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, 8.0);
-        nameMap.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, "naturalGasPowerPrice");
+        nameMap.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, ParameterConstants.EPS.gasPrice);
     }
 
     static {
@@ -146,28 +147,27 @@ public class EPS {
     public static AssignedComDevice generateEps() {
         Map<String, String> params = new HashMap<>();
 
-        params.put("newSignalAfterThisPeriod", String.valueOf(newSignalAfter.toSeconds()));
-        params.put("signalPeriod", String.valueOf(signalPeriod.toSeconds()));
-        params.put("resolutionOfPriceSignal", String.valueOf(resolutionOfPriceSignal));
-        params.put("signalConstantPeriod", String.valueOf(signalConstantPeriod));
+        params.put(ParameterConstants.Signal.newSignal, String.valueOf(newSignalAfter.toSeconds()));
+        params.put(ParameterConstants.Signal.signalPeriod, String.valueOf(signalPeriod.toSeconds()));
+        params.put(ParameterConstants.EPS.resolution, String.valueOf(resolutionOfPriceSignal));
+        params.put(ParameterConstants.Signal.signalConstantPeriod, String.valueOf(signalConstantPeriod));
 
         for (AncillaryCommodity ac : ancillaryCommodities) {
             params.put(nameMap.get(ac), String.valueOf(priceMap.get(ac)));
         }
 
-        params.put("resolutionOfPriceSignal", String.valueOf(resolutionOfPriceSignal));
-        params.put("ancillaryCommodities", Arrays.toString(ancillaryCommodities));
+        params.put(ParameterConstants.EPS.ancillaryCommodities, Arrays.toString(ancillaryCommodities));
 
         if (epsType == EPSTypes.H0) {
-            params.put("h0Filename", h0Filename);
-            params.put("h0Classname", h0ClassName);
-            params.put("activePowerExternalSupplyMin", String.valueOf(activePowerExternalSupplyMin));
-            params.put("activePowerExternalSupplyAvg", String.valueOf(activePowerExternalSupplyAvg));
-            params.put("activePowerExternalSupplyMax", String.valueOf(activePowerExternalSupplyMax));
+            params.put(ParameterConstants.General_Devices.h0Filename, h0Filename);
+            params.put(ParameterConstants.General_Devices.h0Classname, h0ClassName);
+            params.put(ParameterConstants.EPS.activePriceSupplyMin, String.valueOf(activePowerExternalSupplyMin));
+            params.put(ParameterConstants.EPS.activePriceSupplyAvg, String.valueOf(activePowerExternalSupplyAvg));
+            params.put(ParameterConstants.EPS.activePriceSupplyMax, String.valueOf(activePowerExternalSupplyMax));
         } else if (epsType == EPSTypes.CSV) {
-            params.put("filePathPriceSignal", csvPriceDynamicFilePath);
+            params.put(ParameterConstants.EPS.filePathPriceSignal, csvPriceDynamicFilePath);
         } else if (epsType == EPSTypes.PVFEEDIN) {
-            params.put("filePathActivePowerFeedInPVPriceSignal", pvFeedInEPEXFilePath);
+            params.put(ParameterConstants.EPS.filePathPVPriceSignal, pvFeedInEPEXFilePath);
         } else if (epsType == EPSTypes.WIKHOURLY2015 || epsType == EPSTypes.WIKHOURLY2020
                 || epsType == EPSTypes.WIKHOURLY2025 || epsType == EPSTypes.WIK_BASED_THESIS
                 || epsType == EPSTypes.HOURLY_ALTERNATING) {
@@ -199,7 +199,7 @@ public class EPS {
                 }
             }
 
-            params.put("activePowerPrices", activePrices);
+            params.put(ParameterConstants.EPS.activePriceArray, activePrices);
         } else if (epsType == EPSTypes.WIKWEEKDAY2015
                 || epsType == EPSTypes.WIKWEEKDAY2020
                 || epsType == EPSTypes.WIKWEEKDAY2025) {
@@ -208,7 +208,7 @@ public class EPS {
                     (epsType == EPSTypes.WIKWEEKDAY2020 ? wikWeekDayPrices[1] :
                             wikWeekDayPrices[2]);
 
-            params.put("activePowerPrices", activePrices);
+            params.put(ParameterConstants.EPS.activePriceArray, activePrices);
         }
 
         AssignedComDevice dev = CreateComDevice.createComDevice(

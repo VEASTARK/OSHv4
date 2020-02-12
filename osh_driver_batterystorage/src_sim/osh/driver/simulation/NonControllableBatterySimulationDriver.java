@@ -11,6 +11,7 @@ import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.BatteryStorageOX;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -61,31 +62,33 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
         super(osh, deviceID, driverConfig);
 
         // Battery parameters
-        this.batteryMinChargingState = Integer.parseInt(driverConfig.getParameter("minChargingState"));
-        this.batteryMaxChargingState = Integer.parseInt(driverConfig.getParameter("maxChargingState"));
-        this.batteryMinDischargePower = Integer.parseInt(driverConfig.getParameter("minDischargingPower"));
-        this.batteryMaxDischargePower = Integer.parseInt(driverConfig.getParameter("maxDischargingPower"));
-        this.batteryMinChargePower = Integer.parseInt(driverConfig.getParameter("minChargingPower"));
-        this.batteryMaxChargePower = Integer.parseInt(driverConfig.getParameter("maxChargingPower"));
+        this.batteryMinChargingState = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.minChargingState));
+        this.batteryMaxChargingState = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.maxChargingState));
+        this.batteryMinDischargePower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.minDischargingPower));
+        this.batteryMaxDischargePower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.minDischargingPower));
+        this.batteryMinChargePower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.minChargingPower));
+        this.batteryMaxChargePower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.maxChargingPower));
 
         //FIXME (also in standing loss calculation)
         this.standingLoss = 0;
 
         //Inverter parameters
-        this.inverterMinPower = Integer.parseInt(driverConfig.getParameter("minInverterPower"));
-        this.inverterMaxPower = Integer.parseInt(driverConfig.getParameter("maxInverterPower"));
+        this.inverterMinPower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.minInverterPower));
+        this.inverterMaxPower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Battery.maxInverterPower));
         this.inverterMinComplexPower = this.inverterMinPower;
         this.inverterMaxComplexPower = this.inverterMaxPower;
 
         try {
-            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
+            this.newIppAfter =
+                    Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIppAfter = Duration.ofHours(1); // 1 hour
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter.getSeconds());
         }
 
         try {
-            this.triggerIppIfDeltaSoCBigger = Integer.parseInt(this.getDriverConfig().getParameter("triggerIppIfDeltaSoCBigger"));
+            this.triggerIppIfDeltaSoCBigger =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.IPP.triggerIppIfDeltaSoc));
         } catch (Exception e) {
             this.triggerIppIfDeltaSoCBigger = 100;
             this.getGlobalLogger().logWarning("Can't get triggerIppIfDeltaSoCBigger, using the default value: " + this.triggerIppIfDeltaSoCBigger);

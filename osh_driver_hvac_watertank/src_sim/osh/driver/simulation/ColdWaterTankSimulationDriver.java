@@ -7,6 +7,7 @@ import osh.driver.thermal.SimpleColdWaterTank;
 import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.ColdWaterTankObserverExchange;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
         // tank capacity in liters
         double tankCapacity;
         try {
-            tankCapacity = Double.parseDouble(driverConfig.getParameter("tankCapacity"));
+            tankCapacity = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.tankCapacity));
         } catch (Exception e) {
             tankCapacity = 3000.0;
             this.getGlobalLogger().logWarning("Can't get tankCapacity, using the default value: " + tankCapacity);
@@ -43,7 +44,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double tankDiameter;
         try {
-            tankDiameter = Double.parseDouble(driverConfig.getParameter("tankDiameter"));
+            tankDiameter = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.tankDiameter));
         } catch (Exception e) {
             tankDiameter = 1.0;
             this.getGlobalLogger().logWarning("Can't get tankDiameter, using the default value: " + tankDiameter);
@@ -51,7 +52,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double initialTemperature;
         try {
-            initialTemperature = Double.parseDouble(driverConfig.getParameter("initialTemperature"));
+            initialTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.initialTemperature));
         } catch (Exception e) {
             initialTemperature = 14.0;
             this.getGlobalLogger().logWarning("Can't get initialTemperature, using the default value: " + initialTemperature);
@@ -59,7 +60,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double ambientTemperature;
         try {
-            ambientTemperature = Double.parseDouble(driverConfig.getParameter("ambientTemperature"));
+            ambientTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.ambientTemperature));
         } catch (Exception e) {
             ambientTemperature = 20.0;
             this.getGlobalLogger().logWarning("Can't get ambientTemperature, using the default value: " + ambientTemperature);

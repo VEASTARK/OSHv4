@@ -8,6 +8,7 @@ import osh.datatypes.registry.details.common.TemperatureDetails;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.string.ParameterConstants;
 
 import java.util.UUID;
 
@@ -38,14 +39,15 @@ public abstract class WaterTankDriver
         super(osh, deviceID, driverConfig);
 
         try {
-            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter("compressionType"));
+            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionType));
         } catch (Exception e) {
             this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
             this.getGlobalLogger().logWarning("Can't get compressionType, using the default value: " + this.compressionType);
         }
 
         try {
-            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter("compressionValue"));
+            this.compressionValue =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionValue));
         } catch (Exception e) {
             this.compressionValue = 100;
             this.getGlobalLogger().logWarning("Can't get compressionValue, using the default value: " + this.compressionValue);

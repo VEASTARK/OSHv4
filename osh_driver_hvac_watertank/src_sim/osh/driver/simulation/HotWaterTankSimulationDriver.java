@@ -11,6 +11,7 @@ import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -47,7 +48,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
         // tank capacity in liters
         double tankCapacity;
         try {
-            tankCapacity = Double.parseDouble(driverConfig.getParameter("tankCapacity"));
+            tankCapacity = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.tankCapacity));
         } catch (Exception e) {
             tankCapacity = 750;
             this.getGlobalLogger().logWarning("Can't get tankCapacity, using the default value: " + tankCapacity);
@@ -55,7 +56,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double tankDiameter;
         try {
-            tankDiameter = Double.parseDouble(driverConfig.getParameter("tankDiameter"));
+            tankDiameter = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.tankDiameter));
         } catch (Exception e) {
             tankDiameter = 0.5;
             this.getGlobalLogger().logWarning("Can't get tankDiameter, using the default value: " + tankDiameter);
@@ -63,7 +64,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double initialTemperature;
         try {
-            initialTemperature = Double.parseDouble(driverConfig.getParameter("initialTemperature"));
+            initialTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.initialTemperature));
         } catch (Exception e) {
             initialTemperature = 70.0;
             this.getGlobalLogger().logWarning("Can't get initialTemperature, using the default value: " + initialTemperature);
@@ -71,21 +72,23 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double ambientTemperature;
         try {
-            ambientTemperature = Double.parseDouble(driverConfig.getParameter("ambientTemperature"));
+            ambientTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.ambientTemperature));
         } catch (Exception e) {
             ambientTemperature = 20.0;
             this.getGlobalLogger().logWarning("Can't get ambientTemperature, using the default value: " + ambientTemperature);
         }
 
         try {
-            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
+            this.newIppAfter =
+                    Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIppAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
         }
 
         try {
-            this.triggerIppIfDeltaTempBigger = Double.parseDouble(this.getDriverConfig().getParameter("triggerIppIfDeltaTempBigger"));
+            this.triggerIppIfDeltaTempBigger =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.IPP.triggerIppIfDeltaTemp));
         } catch (Exception e) {
             this.triggerIppIfDeltaTempBigger = 0.5;
             this.getGlobalLogger().logWarning("Can't get triggerIppIfDeltaTempBigger, using the default value: " + this.triggerIppIfDeltaTempBigger);

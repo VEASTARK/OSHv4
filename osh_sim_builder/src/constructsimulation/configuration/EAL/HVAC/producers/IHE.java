@@ -9,6 +9,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -50,16 +51,16 @@ public class IHE {
     public static AssignedDevice generateIHE() {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("temperatureSetting", String.valueOf(maxHotWaterTemperature));
-        params.put("newIppAfter", String.valueOf(newIPPAfter));
-        params.put("triggerIppIfDeltaTempBigger", String.valueOf(triggerIfDeltaTempBigger));
+        params.put(ParameterConstants.IHE.temperatureSetting, String.valueOf(maxHotWaterTemperature));
+        params.put(ParameterConstants.IPP.newIPPAfter, String.valueOf(newIPPAfter));
+        params.put(ParameterConstants.IPP.triggerIppIfDeltaTemp, String.valueOf(triggerIfDeltaTempBigger));
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.compressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.INSERTHEATINGELEMENT,

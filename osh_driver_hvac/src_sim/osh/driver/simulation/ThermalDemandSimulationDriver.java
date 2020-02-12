@@ -15,6 +15,7 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
@@ -53,7 +54,7 @@ public abstract class ThermalDemandSimulationDriver
             throws SimulationSubjectException, HALException {
         super(osh, deviceID, driverConfig);
 
-        this.inputSourceFile = driverConfig.getParameter("sourcefile");
+        this.inputSourceFile = driverConfig.getParameter(ParameterConstants.WaterDemand.sourceFile);
         if (this.inputSourceFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal ESHL Simulation missing!");
         }
@@ -61,21 +62,21 @@ public abstract class ThermalDemandSimulationDriver
         this.demandData = new ThermalDemandData(this.inputSourceFile, hotWaterType);
 
         try {
-            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter("pastDaysPrediction"));
+            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Prediction.pastDaysPrediction));
         } catch (Exception e) {
             this.pastDaysPrediction = 14;
             this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
         }
 
         try {
-            this.weightForOtherWeekday = Float.parseFloat(driverConfig.getParameter("weightForOtherWeekday"));
+            this.weightForOtherWeekday = Float.parseFloat(driverConfig.getParameter(ParameterConstants.Prediction.weightForOtherWeekday));
         } catch (Exception e) {
             this.weightForOtherWeekday = 1.0f;
             this.getGlobalLogger().logWarning("Can't get weightForOtherWeekday, using the default value: " + this.weightForOtherWeekday);
         }
 
         try {
-            this.weightForSameWeekday = Float.parseFloat(driverConfig.getParameter("weightForSameWeekday"));
+            this.weightForSameWeekday = Float.parseFloat(driverConfig.getParameter(ParameterConstants.Prediction.weightForSameWeekday));
         } catch (Exception e) {
             this.weightForSameWeekday = 5.0f;
             this.getGlobalLogger().logWarning("Can't get weightForSameWeekday, using the default value: " + this.weightForSameWeekday);

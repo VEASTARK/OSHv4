@@ -9,6 +9,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -59,24 +60,24 @@ public class GasHeating {
      */
     public static AssignedDevice generateGas() {
         Map<String, String> params = new HashMap<>();
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("maxGasPower", String.valueOf(maxGasPower));
-        params.put("newIppAfter", String.valueOf(newIppAfter.toSeconds()));
-        params.put("typicalActivePowerOn", String.valueOf(typicalActivePowerOn));
-        params.put("typicalActivePowerOff", String.valueOf(typicalActivePowerOff));
-        params.put("typicalReactivePowerOn", String.valueOf(typicalReactivePowerOn));
-        params.put("typicalReactivePowerOff", String.valueOf(typicalReactivePowerOff));
+        params.put(ParameterConstants.GasBoiler.maxGasPower, String.valueOf(maxGasPower));
+        params.put(ParameterConstants.IPP.newIPPAfter, String.valueOf(newIppAfter.toSeconds()));
+        params.put(ParameterConstants.GasBoiler.activePowerOn, String.valueOf(typicalActivePowerOn));
+        params.put(ParameterConstants.GasBoiler.activePowerOff, String.valueOf(typicalActivePowerOff));
+        params.put(ParameterConstants.GasBoiler.reactivePowerOn, String.valueOf(typicalReactivePowerOn));
+        params.put(ParameterConstants.GasBoiler.reactivePowerOff, String.valueOf(typicalReactivePowerOff));
 
-        params.put("currentHotWaterStorageMinTemp", String.valueOf(minTemperature));
-        params.put("currentHotWaterStorageMaxTemp", String.valueOf(maxTemperature));
+        params.put(ParameterConstants.GasBoiler.hotWaterStorageMinTemp, String.valueOf(minTemperature));
+        params.put(ParameterConstants.GasBoiler.hotWaterStorageMaxTemp, String.valueOf(maxTemperature));
 
-        params.put("maxHotWaterPower", String.valueOf(maxHotWaterPower));
+        params.put(ParameterConstants.GasBoiler.maxHotWaterPower, String.valueOf(maxHotWaterPower));
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.compressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.GASHEATING,

@@ -16,6 +16,7 @@ import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
+import osh.utils.string.ParameterConstants;
 
 import java.util.*;
 
@@ -139,17 +140,17 @@ public class JMetalSolver extends Optimizer {
         //algorithm = new NonElitistES(problem, mu, lambda);
 
         /* Algorithm parameters */
-        algorithm.setInputParameter("maxEvaluations", evaluations);
+        algorithm.setInputParameter(ParameterConstants.EA.maxEvaluations, evaluations);
 
         /* Mutation and Crossover for Real codification */
         parameters = new HashMap();
-        parameters.put("probability", 1.0 / 30);
+        parameters.put(ParameterConstants.EA.probability, 1.0 / 30);
         mutation = MutationFactory.getMutationOperator(
                 "BitFlipMutation",
                 parameters,
                 this.randomGenerator);
 
-        algorithm.addOperator("mutation", mutation);
+        algorithm.addOperator(ParameterConstants.EA.mutation, mutation);
 
         /* Execute the Algorithm */
         SolutionSet population = algorithm.execute();

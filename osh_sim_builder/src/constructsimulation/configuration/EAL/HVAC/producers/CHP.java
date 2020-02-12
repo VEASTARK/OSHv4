@@ -9,6 +9,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -72,31 +73,30 @@ public class CHP {
     public static AssignedDevice generateCHP() {
         Map<String, String> params = new HashMap<>();
 
-        /*String usedcommodities*/
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("typicalActivePower", String.valueOf(typicalActivePower));
-        params.put("typicalThermalPower", String.valueOf(typicalThermalPower));
-        params.put("typicalAddditionalThermalPower", String.valueOf(typicalAdditionalThermalPower));
-        params.put("typicalGasPower", String.valueOf(typicalGasPower));
-        params.put("hotWaterTankUuid", String.valueOf(hotWaterTankUuid));
-        params.put("rescheduleAfter", String.valueOf(rescheduleAfter.toSeconds()));
-        params.put("newIPPAfter", String.valueOf(newIPPAfter.toSeconds()));
-        params.put("relativeHorizonIPP", String.valueOf(relativeHorizonIPP.toSeconds()));
-        params.put("currentHotWaterStorageMinTemp", String.valueOf(currentHotWaterStorageMinTemp));
-        params.put("currentHotWaterStorageMaxTemp", String.valueOf(currentHotWaterStorageMaxTemp));
-        params.put("forcedOnHysteresis", String.valueOf(forcedOnHysteresis));
-        params.put("cosPhi", String.valueOf(cosPhi));
-        params.put("fixedCostPerStart", String.valueOf(fixedCostPerStart));
-        params.put("forcedOnOffStepMultiplier", String.valueOf(forcedOnOffStepMultiplier));
-        params.put("forcedOffAdditionalCost", String.valueOf(forcedOffAdditionalCost));
-        params.put("chpOnCervisiaStepSizeMultiplier", String.valueOf(onCervisiaStepSizeMultiplier));
-        params.put("minRuntime", String.valueOf(minRuntime.toSeconds()));
+        params.put(ParameterConstants.CHP.activePower, String.valueOf(typicalActivePower));
+        params.put(ParameterConstants.CHP.thermalPower, String.valueOf(typicalThermalPower));
+        params.put(ParameterConstants.CHP.additionalThermalPower, String.valueOf(typicalAdditionalThermalPower));
+        params.put(ParameterConstants.CHP.gasPower, String.valueOf(typicalGasPower));
+        params.put(ParameterConstants.CHP.hotWaterTankUUID, String.valueOf(hotWaterTankUuid));
+        params.put(ParameterConstants.IPP.rescheduleAfter, String.valueOf(rescheduleAfter.toSeconds()));
+        params.put(ParameterConstants.IPP.newIPPAfter, String.valueOf(newIPPAfter.toSeconds()));
+        params.put(ParameterConstants.IPP.relativeHorizon, String.valueOf(relativeHorizonIPP.toSeconds()));
+        params.put(ParameterConstants.TemperatureRestrictions.hotWaterStorageMinTemp, String.valueOf(currentHotWaterStorageMinTemp));
+        params.put(ParameterConstants.TemperatureRestrictions.hotWaterStorageMaxTemp, String.valueOf(currentHotWaterStorageMaxTemp));
+        params.put(ParameterConstants.TemperatureRestrictions.forcedOnHysteresis, String.valueOf(forcedOnHysteresis));
+        params.put(ParameterConstants.CHP.cosPhi, String.valueOf(cosPhi));
+        params.put(ParameterConstants.CHP.fixedCostPerStart, String.valueOf(fixedCostPerStart));
+        params.put(ParameterConstants.CHP.forcedOnOffStepMultiplier, String.valueOf(forcedOnOffStepMultiplier));
+        params.put(ParameterConstants.CHP.forcedOffAdditionalCost, String.valueOf(forcedOffAdditionalCost));
+        params.put(ParameterConstants.CHP.cervisiaStepSizeMultiplier, String.valueOf(onCervisiaStepSizeMultiplier));
+        params.put(ParameterConstants.CHP.minRuntime, String.valueOf(minRuntime.toSeconds()));
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.compressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.CHPPLANT,

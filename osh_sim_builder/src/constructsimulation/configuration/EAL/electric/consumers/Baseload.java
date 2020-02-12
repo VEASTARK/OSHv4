@@ -12,6 +12,7 @@ import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,21 +62,22 @@ public class Baseload {
     public static AssignedDevice generateBaseload() {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("h0filename", h0Filename);
-        params.put("h0classname", h0ClassName);
+        params.put(ParameterConstants.General_Devices.h0Filename, h0Filename);
+        params.put(ParameterConstants.General_Devices.h0Classname, h0ClassName);
 
-        params.put("baseloadyearlyconsumption", String.valueOf(avgYearlyBaseloadConsumption[HouseConfig.personCount - 1]));
-        params.put("baseloadcosphi", String.valueOf(cosPhi));
-        params.put("baseloadisinductive", String.valueOf(isInductive));
+        params.put(ParameterConstants.Baseload.yearlyConsumption,
+                String.valueOf(avgYearlyBaseloadConsumption[HouseConfig.personCount - 1]));
+        params.put(ParameterConstants.Baseload.cosPhi, String.valueOf(cosPhi));
+        params.put(ParameterConstants.Baseload.isInductive, String.valueOf(isInductive));
 
-        params.put("pastDaysPrediction", String.valueOf(pastDaysPrediction));
-        params.put("weightForOtherWeekday", String.valueOf(weightForOtherWeekday));
-        params.put("weightForSameWeekday", String.valueOf(weightForSameWeekday));
+        params.put(ParameterConstants.Prediction.pastDaysPrediction, String.valueOf(pastDaysPrediction));
+        params.put(ParameterConstants.Prediction.weightForOtherWeekday, String.valueOf(weightForOtherWeekday));
+        params.put(ParameterConstants.Prediction.weightForSameWeekday, String.valueOf(weightForSameWeekday));
 
-        params.put("compressionType", compressionType.toString());
-        params.put("compressionValue", String.valueOf(compressionValue));
+        params.put(ParameterConstants.Compression.compressionType, compressionType.toString());
+        params.put(ParameterConstants.Compression.compressionValue, String.valueOf(compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.BASELOAD,

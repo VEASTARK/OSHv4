@@ -4,13 +4,13 @@ import osh.cal.CALComDriver;
 import osh.cal.ICALExchange;
 import osh.comdriver.signals.PriceSignalGenerator;
 import osh.configuration.OSHParameterCollection;
-import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.io.BufferedReader;
@@ -62,63 +62,61 @@ public class CsvEpsProviderComDriver extends CALComDriver {
 
         try {
             this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
-                    "newSignalAfterThisPeriod")));
+                    ParameterConstants.Signal.newSignal)));
         } catch (Exception e) {
             this.newSignalAfterThisPeriod = Duration.ofHours(12); //12 hours
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
         try {
-            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter("signalPeriod"));
+            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.Signal.signalPeriod));
         } catch (Exception e) {
             this.signalPeriod = 129600; //36 hours
             this.getGlobalLogger().logWarning("Can't get signalPeriod, using the default value: " + this.signalPeriod);
         }
 
         try {
-            this.resolutionOfPriceSignal = Integer.parseInt(this.getComConfig().getParameter("resolutionOfPriceSignal"));
+            this.resolutionOfPriceSignal =
+                    Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.Signal.signalConstantPeriod));
         } catch (Exception e) {
             this.resolutionOfPriceSignal = 3600; //1 hour
             this.getGlobalLogger().logWarning("Can't get resolutionOfPriceSignal, using the default value: " + this.resolutionOfPriceSignal);
         }
 
         try {
-            this.naturalGasPowerPrice = Double.parseDouble(this.getComConfig().getParameter("naturalGasPowerPrice"));
+            this.naturalGasPowerPrice = Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.gasPrice));
         } catch (Exception e) {
             this.naturalGasPowerPrice = 7.0;
             this.getGlobalLogger().logWarning("Can't get naturalGasPowerPrice, using the default value: " + this.naturalGasPowerPrice);
         }
 
         try {
-            this.activePowerFeedInPV = Double.parseDouble(this.getComConfig().getParameter("activePowerFeedInPV"));
+            this.activePowerFeedInPV =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.pvFeedInPrice));
         } catch (Exception e) {
             this.activePowerFeedInPV = 10.0;
             this.getGlobalLogger().logWarning("Can't get activePowerFeedInPV, using the default value: " + this.activePowerFeedInPV);
         }
 
         try {
-            this.activePowerFeedInCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerFeedInCHP"));
+            this.activePowerFeedInCHP =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.chpFeedInPrice));
         } catch (Exception e) {
             this.activePowerFeedInCHP = 5.0;
             this.getGlobalLogger().logWarning("Can't get activePowerFeedInCHP, using the default value: " + this.activePowerFeedInCHP);
         }
 
         try {
-            this.activePowerAutoConsumptionPV = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionPV"));
+            this.activePowerAutoConsumptionPV =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.pvAutoConsumptionPrice));
         } catch (Exception e) {
             this.activePowerAutoConsumptionPV = 0.0;
             this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionPV, using the default value: " + this.activePowerAutoConsumptionPV);
         }
 
         try {
-            this.activePowerAutoConsumptionCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionCHP"));
-        } catch (Exception e) {
-            this.activePowerFeedInCHP = 0.0;
-            this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionCHP, using the default value: " + this.activePowerAutoConsumptionCHP);
-        }
-
-        try {
-            this.activePowerAutoConsumptionCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionCHP"));
+            this.activePowerAutoConsumptionCHP =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.chpAutoConsumptionPrice));
         } catch (Exception e) {
             this.activePowerFeedInCHP = 0.0;
             this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionCHP, using the default value: " + this.activePowerAutoConsumptionCHP);
@@ -127,7 +125,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         String ancillaryCommoditiesAsArray;
 
         try {
-            ancillaryCommoditiesAsArray = driverConfig.getParameter("ancillaryCommodities");
+            ancillaryCommoditiesAsArray = driverConfig.getParameter(ParameterConstants.EPS.ancillaryCommodities);
             if (ancillaryCommoditiesAsArray == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -141,7 +139,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
                 .collect(Collectors.toList());
 
         try {
-            this.filePathPriceSignal = this.getComConfig().getParameter("filePathPriceSignal");
+            this.filePathPriceSignal = this.getComConfig().getParameter(ParameterConstants.EPS.filePathPriceSignal);
             if (this.filePathPriceSignal == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -167,7 +165,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
     }
 
     @Override
-    public void onSystemIsUp() throws OSHException {
+    public void onSystemIsUp() {
 
         this.readCsvPriceSignal();
         this.generateNewPriceSignal();

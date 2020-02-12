@@ -10,6 +10,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,8 +47,8 @@ public class PV {
     public static String ev0FilePath = FileReferenceStorage.ev0_filePath;
     public static String ev0FileExtension = ".csv";
 
-    public static String pvComplexPowerMax = "10000";
-    public static String pvCosPhiMax = "-0.8";
+    public static int pvComplexPowerMax = 10000;
+    public static double pvCosPhiMax = -0.8;
     public static String hollDriverName = osh.driver.simulation.PvSimulationDriverHollData.class.getName();
     public static String ev0DriverName = osh.driver.simulation.PvSimulationDriverEv0.class.getName();
 
@@ -62,25 +63,25 @@ public class PV {
     public static AssignedDevice generatePV() {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("nominalpower", String.valueOf(wattsPeak));
-        params.put("pastDaysPrediction", String.valueOf(pastDaysPrediction));
-        params.put("complexpowermax", String.valueOf(pvComplexPowerMax));
-        params.put("cosphimax", String.valueOf(pvCosPhiMax));
+        params.put(ParameterConstants.PV.nominalPower, String.valueOf(wattsPeak));
+        params.put(ParameterConstants.Prediction.pastDaysPrediction, String.valueOf(pastDaysPrediction));
+        params.put(ParameterConstants.PV.complexPowerMax, String.valueOf(pvComplexPowerMax));
+        params.put(ParameterConstants.PV.cosPhiMax, String.valueOf(pvCosPhiMax));
 
         if (usePVHOLL) {
-            params.put("profileNominalPower", String.valueOf(profileNominalPowerHOLL));
-            params.put("pathToFiles", hollFilePath);
-            params.put("fileExtension", hollFileExtension);
+            params.put(ParameterConstants.PV.profileNominalPower, String.valueOf(profileNominalPowerHOLL));
+            params.put(ParameterConstants.General_Devices.filePath, hollFilePath);
+            params.put(ParameterConstants.General_Devices.fileExtension, hollFileExtension);
         } else {
-            params.put("profilesource", ev0FilePath + ev0FileExtension);
+            params.put(ParameterConstants.General_Devices.profileSource, ev0FilePath + ev0FileExtension);
         }
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.compressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.PVSYSTEM,

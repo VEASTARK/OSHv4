@@ -11,6 +11,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,17 +50,17 @@ public class SpaceHeating {
     public static AssignedDevice generateHeating() {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("sourcefile", String.format(sourceFileName, HouseConfig.personCount));
-        params.put("pastDaysPrediction", String.valueOf(pastDaysPrediction));
-        params.put("weightForOtherWeekday", String.valueOf(weightForOtherWeekday));
-        params.put("weightForSameWeekday", String.valueOf(weightForSameWeekday));
+        params.put(ParameterConstants.WaterDemand.sourceFile, String.format(sourceFileName, HouseConfig.personCount));
+        params.put(ParameterConstants.Prediction.pastDaysPrediction, String.valueOf(pastDaysPrediction));
+        params.put(ParameterConstants.Prediction.weightForOtherWeekday, String.valueOf(weightForOtherWeekday));
+        params.put(ParameterConstants.Prediction.weightForSameWeekday, String.valueOf(weightForSameWeekday));
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.hvacCompressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.hvacCompressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.hvacCompressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.hvacCompressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.SPACEHEATING,

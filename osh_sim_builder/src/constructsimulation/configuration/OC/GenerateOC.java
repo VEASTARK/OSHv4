@@ -5,6 +5,7 @@ import constructsimulation.configuration.general.UUIDStorage;
 import constructsimulation.generation.parameter.CreateConfigurationParameter;
 import osh.configuration.oc.OCConfiguration;
 import osh.configuration.system.ConfigurationParameter;
+import osh.utils.string.ParameterConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,17 +47,17 @@ public class GenerateOC {
 
         Map<String, String> params = new HashMap<>();
 
-        params.put("epsoptimizationobjective", String.valueOf(CostConfig.epsOptimizationObjective));
-        params.put("plsoptimizationobjective", String.valueOf(CostConfig.plsOptimizationObjective));
-        params.put("varoptimizationobjective", String.valueOf(CostConfig.varOptimizationObjective));
+        params.put(ParameterConstants.Optimization.epsObjective, String.valueOf(CostConfig.epsOptimizationObjective));
+        params.put(ParameterConstants.Optimization.plsObjective, String.valueOf(CostConfig.plsOptimizationObjective));
+        params.put(ParameterConstants.Optimization.varObjective, String.valueOf(CostConfig.varOptimizationObjective));
 
-        params.put("upperOverlimitFactor", String.valueOf(CostConfig.upperOverLimitFactor));
-        params.put("lowerOverlimitFactor", String.valueOf(CostConfig.lowerOverLimitFactor));
+        params.put(ParameterConstants.Optimization.upperOverlimitFactor, String.valueOf(CostConfig.upperOverLimitFactor));
+        params.put(ParameterConstants.Optimization.lowerOverlimitFactor, String.valueOf(CostConfig.lowerOverLimitFactor));
 
-        params.put("stepSize", String.valueOf(escStepSize));
+        params.put(ParameterConstants.Optimization.stepSize, String.valueOf(escStepSize));
 
-        params.put("hotWaterTankUUID", String.valueOf(UUIDStorage.hotWaterTankUUID));
-        params.put("coldWaterTankUUID", String.valueOf(UUIDStorage.coldWaterTankUUID));
+        params.put(ParameterConstants.Optimization.hotWaterTankUUID, String.valueOf(UUIDStorage.hotWaterTankUUID));
+        params.put(ParameterConstants.Optimization.coldWaterTankUUID, String.valueOf(UUIDStorage.coldWaterTankUUID));
 
         for (Map.Entry<String, String> en : params.entrySet()) {
             ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(

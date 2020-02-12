@@ -3,6 +3,7 @@ package osh.mgmt.globalcontroller.jmetal;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
+import osh.utils.string.ParameterConstants;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -39,18 +40,18 @@ public class GAParameters implements Cloneable {
 
         //crossOverProbability
         this.crossoverParameters = new HashMap();
-        this.crossoverParameters.put("probability", String.valueOf(0.7));
-        this.crossoverParameters.put("points", String.valueOf(2));
+        this.crossoverParameters.put(ParameterConstants.EA.probability, String.valueOf(0.7));
+        this.crossoverParameters.put(ParameterConstants.EA.points, String.valueOf(2));
         //mutationProbability
         this.mutationParameters = new HashMap();
-        this.mutationParameters.put("probability", String.valueOf(0.1));
+        this.mutationParameters.put(ParameterConstants.EA.probability, String.valueOf(0.1));
 
         this.selectionParameters = new HashMap();
 
         this.stoppingRules = new HashMap<>();
         HashMap ruleParams = new HashMap();
-        ruleParams.put("populationSize", this.popSize);
-        ruleParams.put("maxEvaluations", this.numEvaluations);
+        ruleParams.put(ParameterConstants.EA.populationSize, this.popSize);
+        ruleParams.put(ParameterConstants.EA.maxEvaluations, this.numEvaluations);
         this.stoppingRules.put("EvaluationsStoppingRule", ruleParams);
     }
 

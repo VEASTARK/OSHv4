@@ -4,6 +4,7 @@ import constructsimulation.configuration.general.Util;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
+import osh.utils.string.ParameterConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,14 +50,14 @@ public class EAConfig {
         if (type == OperatorType.SELECTION) {
             //Nothing for now
         } else if (type == OperatorType.RECOMBINATION) {
-            list.add(Util.generateClassedParameter("probability", crossoverProbability));
+            list.add(Util.generateClassedParameter(ParameterConstants.EA.probability, crossoverProbability));
             if (operatorName.equals("SingleBinaryNPointsCrossover")) {
-                list.add(Util.generateClassedParameter("points", crossoverPoints));
+                list.add(Util.generateClassedParameter(ParameterConstants.EA.points, crossoverPoints));
             }
         } else {
-            list.add(Util.generateClassedParameter("probability", mutationProbability));
+            list.add(Util.generateClassedParameter(ParameterConstants.EA.probability, mutationProbability));
             if (operatorName.equals("BitFlipAutoProbMutation")) {
-                list.add(Util.generateClassedParameter("autoProbMutationFactor", autoProbMutationFactor));
+                list.add(Util.generateClassedParameter(ParameterConstants.EA.autoProbMutationFactor, autoProbMutationFactor));
             }
         }
 
@@ -71,16 +72,18 @@ public class EAConfig {
         if (useMaxEvaluations) {
             StoppingRule src = new StoppingRule();
             src.setStoppingRuleName("EvaluationsStoppingRule");
-            src.getRuleParameters().add(Util.generateClassedParameter("populationSize", popSize));
-            src.getRuleParameters().add(Util.generateClassedParameter("maxEvaluations", numEvaluations));
+            src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.populationSize, popSize));
+            src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.maxEvaluations, numEvaluations));
             stoppingRules.add(src);
         }
 
         if (useMinDeltaFitness) {
             StoppingRule src = new StoppingRule();
             src.setStoppingRuleName("DeltaFitnessStoppingRule");
-            src.getRuleParameters().add(Util.generateClassedParameter("minDeltaFitnessPerc", minDeltaFitnessPercent));
-            src.getRuleParameters().add(Util.generateClassedParameter("maxGenerationsDeltaFitnessViolated", maxGenerationsViolations));
+            src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.minDeltaFitnessPercent,
+                    minDeltaFitnessPercent));
+            src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.maxGenerationsDeltaFitnessViolated,
+                    maxGenerationsViolations));
             stoppingRules.add(src);
         }
 

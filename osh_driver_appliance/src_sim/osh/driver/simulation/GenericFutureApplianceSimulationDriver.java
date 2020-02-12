@@ -19,6 +19,7 @@ import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import javax.xml.bind.JAXBContext;
@@ -163,7 +164,7 @@ public class GenericFutureApplianceSimulationDriver
 
         // get WashingParametersConfigurations profile file
         {
-            String configurationsFile = driverConfig.getParameter("profilesource");
+            String configurationsFile = driverConfig.getParameter(ParameterConstants.General_Devices.profileSource);
             if (configurationsFile != null) {
                 JAXBContext jaxbWMParameters = JAXBContext.newInstance("osh.configuration.appliance");
                 Unmarshaller unmarshallerConfigurations = jaxbWMParameters.createUnmarshaller();
@@ -177,18 +178,6 @@ public class GenericFutureApplianceSimulationDriver
                 throw new HALException("Appliance configurations are missing!");
             }
         }
-
-//		SEKR: Already done by superclass(DeviceSimulationDriver)
-//		// get Commodities used by this device
-//		{
-//			String commoditiesArray = driverConfig.getParameter("usedcommodities");
-//			if (commoditiesArray != null) {
-//				usedCommodities = Commodity.parseCommodityArray(commoditiesArray);
-//			}
-//			else {
-//				throw new HALException("Used Commodities are missing!");
-//			}
-//		}
 
         // default: OFF
         this.turnOff();
@@ -959,32 +948,28 @@ public class GenericFutureApplianceSimulationDriver
             int maxPossibleDof) {
         // generate DOFs with binary distribution
         int newDof = maxDof;
-        if (this.getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
-            int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(this.applianceConfigurations);
-            if (86400 / ((maxProgramDuration + 1) * actionCountPerDay) < 1 && actionCountPerDay > 1) {
-                return 0;
-                //we now have a run correction for this
+        int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(this.applianceConfigurations);
+        if (86400 / ((maxProgramDuration + 1) * actionCountPerDay) < 1 && actionCountPerDay > 1) {
+            return 0;
+            //we now have a run correction for this
 //				throw new RuntimeException("Program duration to long for multiple runs per day");
-            }
-
-            // in 15 minutes steps only
-            int stepSize = 900;
-            newDof /= stepSize;
-            //deviate
-            //E(X)=0.5*max=28800s=8h or E(X)=0.5*max=14400s=4h or similar
-            BinomialDistribution binDistribution = new BinomialDistribution(newDof, 0.5);
-            double rand = randomGen.getNextDouble();
-            int newValue = 0;
-            for (int i = 0; i < newDof; i++) {
-                if (binDistribution.cumulativeProbability(i) > rand) {
-                    newValue = i;
-                    break;
-                }
-            }
-            return Math.min(newValue * stepSize, maxPossibleDof);
         }
 
-        return 0;
+        // in 15 minutes steps only
+        int stepSize = 900;
+        newDof /= stepSize;
+        //deviate
+        //E(X)=0.5*max=28800s=8h or E(X)=0.5*max=14400s=4h or similar
+        BinomialDistribution binDistribution = new BinomialDistribution(newDof, 0.5);
+        double rand = randomGen.getNextDouble();
+        int newValue = 0;
+        for (int i = 0; i < newDof; i++) {
+            if (binDistribution.cumulativeProbability(i) > rand) {
+                newValue = i;
+                break;
+            }
+        }
+        return Math.min(newValue * stepSize, maxPossibleDof);
     }
 
     private long checkForBlockedSeconds() {
@@ -1032,7 +1017,7 @@ public class GenericFutureApplianceSimulationDriver
             if (this.isControllable()) {
                 long lastPossibleEnd = this.configurationStartedAt.plus(this.lastSet1sttDof).plusSeconds(
                         + XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)) + 100).toEpochSecond();
+                                this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)) + 100).toEpochSecond();
                 otherLast = Math.max(lastPossibleEnd, otherLast);
             }
 

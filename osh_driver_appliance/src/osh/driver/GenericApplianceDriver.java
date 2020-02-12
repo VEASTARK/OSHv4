@@ -19,6 +19,7 @@ import osh.en50523.EN50523DeviceState;
 import osh.en50523.EN50523DeviceStateRemoteControl;
 import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
+import osh.utils.string.ParameterConstants;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -133,7 +134,7 @@ public abstract class GenericApplianceDriver
 
         // get Configurations file
         {
-            String configurationsFile = driverConfig.getParameter("profilesource");
+            String configurationsFile = driverConfig.getParameter(ParameterConstants.General_Devices.profileSource);
             if (configurationsFile != null) {
                 JAXBContext jaxbWMParameters = JAXBContext.newInstance("osh.configuration.appliance");
                 Unmarshaller unmarshallerConfigurations = jaxbWMParameters.createUnmarshaller();

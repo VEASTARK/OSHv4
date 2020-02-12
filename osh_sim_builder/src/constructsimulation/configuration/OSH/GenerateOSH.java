@@ -7,6 +7,7 @@ import constructsimulation.generation.parameter.CreateConfigurationParameter;
 import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.GridConfig;
 import osh.configuration.system.OSHConfiguration;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -86,17 +87,17 @@ public class GenerateOSH {
 
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("logH0", String.valueOf(logH0));
-        params.put("logEpsPls", String.valueOf(logEpsPls));
-        params.put("logDetailedPower", String.valueOf(logDetailedPower));
-        params.put("logIntervalls", String.valueOf(logIntervals));
-        params.put("logDevices", String.valueOf(logDevices));
-        params.put("logBaseload", String.valueOf(logBaseload));
-        params.put("logHotWater", String.valueOf(logHotWater));
-        params.put("logWaterTank", String.valueOf(logWaterTank));
-        params.put("logGA", String.valueOf(logGA));
-        params.put("logSmartHeater", String.valueOf(logSmartHeater));
-        params.put("loggingIntervalls", Arrays.toString(
+        params.put(ParameterConstants.Logging.logH0, String.valueOf(logH0));
+        params.put(ParameterConstants.Logging.logEpsPls, String.valueOf(logEpsPls));
+        params.put(ParameterConstants.Logging.logDetailedPower, String.valueOf(logDetailedPower));
+        params.put(ParameterConstants.Logging.logIntervals, String.valueOf(logIntervals));
+        params.put(ParameterConstants.Logging.logDevices, String.valueOf(logDevices));
+        params.put(ParameterConstants.Logging.logBaseload, String.valueOf(logBaseload));
+        params.put(ParameterConstants.Logging.logHotWater, String.valueOf(logHotWater));
+        params.put(ParameterConstants.Logging.logWaterTank, String.valueOf(logWaterTank));
+        params.put(ParameterConstants.Logging.logGA, String.valueOf(logGA));
+        params.put(ParameterConstants.Logging.logSmartHeater, String.valueOf(logSmartHeater));
+        params.put(ParameterConstants.Logging.loggingIntervals, Arrays.toString(
                 Arrays.stream(loggingIntervals).map(Arrays::toString).toArray(String[]::new)));
 
         for (Map.Entry<String, String> en : params.entrySet()) {

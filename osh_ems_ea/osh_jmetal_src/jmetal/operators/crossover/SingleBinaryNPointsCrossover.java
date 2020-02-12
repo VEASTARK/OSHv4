@@ -27,6 +27,7 @@ import jmetal.encodings.variable.Binary;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
+import osh.utils.string.ParameterConstants;
 
 import java.util.*;
 
@@ -59,10 +60,10 @@ public class SingleBinaryNPointsCrossover extends Crossover {
     public SingleBinaryNPointsCrossover(HashMap<String, Object> parameters, PseudoRandom pseudoRandom) {
         super(parameters, pseudoRandom);
 
-        if (parameters.get("probability") != null)
-            this.crossoverProbability_ = (Double) parameters.get("probability");
-        if (parameters.get("points") != null)
-            this.points_ = (Integer) parameters.get("points");
+        if (parameters.get(ParameterConstants.EA.probability) != null)
+            this.crossoverProbability_ = (Double) parameters.get(ParameterConstants.EA.probability);
+        if (parameters.get(ParameterConstants.EA.points) != null)
+            this.points_ = (Integer) parameters.get(ParameterConstants.EA.points);
     } // SingleBinaryNPointsCrossover
 
 

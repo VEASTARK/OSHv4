@@ -11,6 +11,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,24 +67,26 @@ public class Domestic {
 
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
 
         if (!useVDI6002Simulator) {
-            params.put("sourcefile", String.format(eshlDrawOffProfileFileName, HouseConfig.personCount));
-            params.put("pastDaysPrediction", String.valueOf(pastDaysPrediction));
-            params.put("weightForOtherWeekday", String.valueOf(weightForOtherWeekday));
-            params.put("weightForSameWeekday", String.valueOf(weightForSameWeekday));
+            params.put(ParameterConstants.WaterDemand.sourceFile, String.format(eshlDrawOffProfileFileName,
+                    HouseConfig.personCount));
+            params.put(ParameterConstants.Prediction.pastDaysPrediction, String.valueOf(pastDaysPrediction));
+            params.put(ParameterConstants.Prediction.weightForOtherWeekday, String.valueOf(weightForOtherWeekday));
+            params.put(ParameterConstants.Prediction.weightForSameWeekday, String.valueOf(weightForSameWeekday));
         } else {
-            params.put("drawOffTypesFile", vdiDrawOffProfileFileName);
-            params.put("weekDayHourProbabilitiesFile", weekDayHourProbabilityFileName);
-            params.put("avgYearlyDemamd", String.valueOf(yearlyDomesticHotWaterEnergyUsed[HouseConfig.personCount - 1]));
+            params.put(ParameterConstants.WaterDemand.drawOffFile, vdiDrawOffProfileFileName);
+            params.put(ParameterConstants.WaterDemand.probabilitiesFile, weekDayHourProbabilityFileName);
+            params.put(ParameterConstants.WaterDemand.averageYearlyDemand,
+                    String.valueOf(yearlyDomesticHotWaterEnergyUsed[HouseConfig.personCount - 1]));
         }
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.hvacCompressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.hvacCompressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.hvacCompressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.hvacCompressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.DOMESTICHOTWATER,

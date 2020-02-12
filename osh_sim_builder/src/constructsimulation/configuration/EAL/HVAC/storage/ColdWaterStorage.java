@@ -9,6 +9,7 @@ import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.DeviceClassification;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,17 +46,17 @@ public class ColdWaterStorage {
     public static AssignedDevice generateColdStorage() {
         HashMap<String, String> params = new HashMap<>();
 
-        params.put("usedcommodities", Arrays.toString(usedCommodities));
+        params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
 
-        params.put("tankCapacity", String.valueOf(tankSize));
-        params.put("tankDiameter", String.valueOf(tankDiameter));
-        params.put("initialTemperature", String.valueOf(initialTemperature));
-        params.put("ambientTemperature", String.valueOf(ambientTemperature));
+        params.put(ParameterConstants.WaterTank.tankCapacity, String.valueOf(tankSize));
+        params.put(ParameterConstants.WaterTank.tankDiameter, String.valueOf(tankDiameter));
+        params.put(ParameterConstants.WaterTank.initialTemperature, String.valueOf(initialTemperature));
+        params.put(ParameterConstants.WaterTank.ambientTemperature, String.valueOf(ambientTemperature));
 
-        if (!params.containsKey("compressionType"))
-            params.put("compressionType", GeneralConfig.compressionType.toString());
-        if (!params.containsKey("compressionValue"))
-            params.put("compressionValue", String.valueOf(GeneralConfig.compressionValue));
+        if (!params.containsKey(ParameterConstants.Compression.compressionType))
+            params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
+        if (!params.containsKey(ParameterConstants.Compression.compressionValue))
+            params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
                 DeviceTypes.HOTWATERSTORAGE,

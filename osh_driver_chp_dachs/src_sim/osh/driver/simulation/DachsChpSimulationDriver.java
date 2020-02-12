@@ -17,6 +17,7 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -93,35 +94,36 @@ public class DachsChpSimulationDriver
         super(osh, deviceID, driverConfig);
 
         try {
-            this.typicalActivePower = Integer.parseInt(this.getDriverConfig().getParameter("typicalActivePower"));
+            this.typicalActivePower = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.CHP.activePower));
         } catch (Exception e) {
             this.typicalActivePower = -5500;
             this.getGlobalLogger().logWarning("Can't get typicalActivePower, using the default value: " + this.typicalActivePower);
         }
 
         try {
-            this.typicalThermalPower = Integer.parseInt(this.getDriverConfig().getParameter("typicalThermalPower"));
+            this.typicalThermalPower = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.CHP.thermalPower));
         } catch (Exception e) {
             this.typicalThermalPower = -12500;
             this.getGlobalLogger().logWarning("Can't get typicalThermalPower, using the default value: " + this.typicalThermalPower);
         }
 
         try {
-            this.typicalAdditionalThermalPower = Integer.parseInt(this.getDriverConfig().getParameter("typicalAddditionalThermalPower"));
+            this.typicalAdditionalThermalPower =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.CHP.additionalThermalPower));
         } catch (Exception e) {
             this.typicalAdditionalThermalPower = 0;
             this.getGlobalLogger().logWarning("Can't get typicalAdditionalThermalPower, using the default value: " + this.typicalAdditionalThermalPower);
         }
 
         try {
-            this.typicalGasPower = Integer.parseInt(this.getDriverConfig().getParameter("typicalGasPower"));
+            this.typicalGasPower = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.CHP.gasPower));
         } catch (Exception e) {
             this.typicalGasPower = 20500;
             this.getGlobalLogger().logWarning("Can't get typicalGasPower, using the default value: " + this.typicalGasPower);
         }
 
         try {
-            this.hotWaterTankUuid = UUID.fromString(this.getDriverConfig().getParameter("hotWaterTankUuid"));
+            this.hotWaterTankUuid = UUID.fromString(this.getDriverConfig().getParameter(ParameterConstants.CHP.hotWaterTankUUID));
         } catch (Exception e) {
             this.hotWaterTankUuid = UUID.fromString("00000000-0000-4857-4853-000000000000");
             this.getGlobalLogger().logWarning("Can't get hotWaterTankUuid, using the default value: " + this.hotWaterTankUuid);
@@ -129,84 +131,91 @@ public class DachsChpSimulationDriver
 
         try {
             this.rescheduleAfter = Duration.ofSeconds(Integer.parseInt(this.getDriverConfig().getParameter(
-                    "rescheduleAfter")));
+                    ParameterConstants.IPP.rescheduleAfter)));
         } catch (Exception e) {
             this.rescheduleAfter = Duration.ofHours(4);
             this.getGlobalLogger().logWarning("Can't get rescheduleAfter, using the default value: " + this.rescheduleAfter);
         }
 
         try {
-            this.newIPPAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIPPAfter")));
+            this.newIPPAfter =
+                    Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIPPAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIPPAfter, using the default value: " + this.newIPPAfter);
         }
 
         try {
-            this.relativeHorizonIPP = Integer.parseInt(this.getDriverConfig().getParameter("relativeHorizonIPP"));
+            this.relativeHorizonIPP = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.IPP.relativeHorizon));
         } catch (Exception e) {
             this.relativeHorizonIPP = 18 * 3600; // 18 hours
             this.getGlobalLogger().logWarning("Can't get relativeHorizonIPP, using the default value: " + this.relativeHorizonIPP);
         }
 
         try {
-            this.currentHotWaterStorageMinTemp = Double.parseDouble(this.getDriverConfig().getParameter("currentHotWaterStorageMinTemp"));
+            this.currentHotWaterStorageMinTemp =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.TemperatureRestrictions.hotWaterStorageMinTemp));
         } catch (Exception e) {
             this.currentHotWaterStorageMinTemp = 60;
             this.getGlobalLogger().logWarning("Can't get currentHotWaterStorageMinTemp, using the default value: " + this.currentHotWaterStorageMinTemp);
         }
 
         try {
-            this.currentHotWaterStorageMaxTemp = Double.parseDouble(this.getDriverConfig().getParameter("currentHotWaterStorageMaxTemp"));
+            this.currentHotWaterStorageMaxTemp =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.TemperatureRestrictions.hotWaterStorageMaxTemp));
         } catch (Exception e) {
             this.currentHotWaterStorageMaxTemp = 80;
             this.getGlobalLogger().logWarning("Can't get currentHotWaterStorageMaxTemp, using the default value: " + this.currentHotWaterStorageMaxTemp);
         }
 
         try {
-            this.forcedOnHysteresis = Double.parseDouble(this.getDriverConfig().getParameter("forcedOnHysteresis"));
+            this.forcedOnHysteresis =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.TemperatureRestrictions.forcedOnHysteresis));
         } catch (Exception e) {
             this.forcedOnHysteresis = 5.0;
             this.getGlobalLogger().logWarning("Can't get forcedOnHysteresis, using the default value: " + this.forcedOnHysteresis);
         }
 
         try {
-            this.fixedCostPerStart = Double.parseDouble(this.getDriverConfig().getParameter("fixedCostPerStart"));
+            this.fixedCostPerStart = Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.CHP.fixedCostPerStart));
         } catch (Exception e) {
             this.fixedCostPerStart = 8.0;
             this.getGlobalLogger().logWarning("Can't get fixedCostPerStart, using the default value: " + this.fixedCostPerStart);
         }
 
         try {
-            this.forcedOnOffStepMultiplier = Double.parseDouble(this.getDriverConfig().getParameter("forcedOnOffStepMultiplier"));
+            this.forcedOnOffStepMultiplier =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.CHP.forcedOnOffStepMultiplier));
         } catch (Exception e) {
             this.forcedOnOffStepMultiplier = 0.1;
             this.getGlobalLogger().logWarning("Can't get forcedOnOffStepMultiplier, using the default value: " + this.forcedOnOffStepMultiplier);
         }
 
         try {
-            this.forcedOffAdditionalCost = Integer.parseInt(this.getDriverConfig().getParameter("forcedOffAdditionalCost"));
+            this.forcedOffAdditionalCost =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.CHP.forcedOffAdditionalCost));
         } catch (Exception e) {
             this.forcedOffAdditionalCost = 10;
             this.getGlobalLogger().logWarning("Can't get forcedOffAdditionalCost, using the default value: " + this.forcedOffAdditionalCost);
         }
 
         try {
-            this.chpOnCervisiaStepSizeMultiplier = Double.parseDouble(this.getDriverConfig().getParameter("chpOnCervisiaStepSizeMultiplier"));
+            this.chpOnCervisiaStepSizeMultiplier =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.CHP.cervisiaStepSizeMultiplier));
         } catch (Exception e) {
             this.chpOnCervisiaStepSizeMultiplier = 0.0000001;
             this.getGlobalLogger().logWarning("Can't get chpOnCervisiaStepSizeMultiplier, using the default value: " + this.chpOnCervisiaStepSizeMultiplier);
         }
 
         try {
-            this.minRuntime = Integer.parseInt(this.getDriverConfig().getParameter("minRuntime"));
+            this.minRuntime = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.CHP.minRuntime));
         } catch (Exception e) {
             this.minRuntime = 15 * 60;
             this.getGlobalLogger().logWarning("Can't get minRuntime, using the default value: " + this.minRuntime);
         }
 
         try {
-            this.cosPhi = Double.parseDouble(this.getDriverConfig().getParameter("cosPhi"));
+            this.cosPhi = Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.CHP.cosPhi));
         } catch (Exception e) {
             this.cosPhi = 0.9;
             this.getGlobalLogger().logWarning("Can't get cosPhi, using the default value: " + this.cosPhi);

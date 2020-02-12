@@ -28,7 +28,6 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
 import osh.simulation.exception.SimulationEngineException;
-import osh.simulation.screenplay.ScreenplayType;
 import osh.utils.xml.XMLSerialization;
 
 import java.time.ZonedDateTime;
@@ -47,7 +46,6 @@ public class OSHLifeCycleManager {
 
     private SimulationEngine simEngine;
     private boolean hasSimEngine;
-    private ScreenplayType screenPlayType;
 
     private LifeCycleStates currentState;
 
@@ -149,11 +147,9 @@ public class OSHLifeCycleManager {
             Long optimizationMainRandomSeed,
             String runID,
             String configurationID,
-            String logDir,
-            ScreenplayType screenPlayType) throws LifeCycleManagerException {
+            String logDir) throws LifeCycleManagerException {
 
         this.hasSimEngine = true;
-        this.screenPlayType = screenPlayType;
 
         this.initOSHReadInFiles(
                 oshConfigFile,
@@ -368,7 +364,7 @@ public class OSHLifeCycleManager {
                     this.ealManager.loadConfiguration(ealConfig, forcedStartTime, this.simEngine);
                 } else {
                     this.ealManager.loadConfiguration(ealConfig, forcedStartTime, Long.valueOf(oshConfig.getRandomSeed()), oshConfig.getEngineParameters(),
-                            this.screenPlayType, oshConfig.getGridConfigurations(), oshConfig.getMeterUUID());
+                            oshConfig.getGridConfigurations(), oshConfig.getMeterUUID());
                     this.simEngine = this.ealManager.getSimEngine();
                 }
             } else {
