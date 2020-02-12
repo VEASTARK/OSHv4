@@ -52,7 +52,6 @@ public class NonControllableInverterBatteryStorageObserver
             // build SIPP
             BatteryStorageNonControllableIPP sipp = new BatteryStorageNonControllableIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
                     ox.getBatteryStateOfCharge(),
                     ox.getBatteryStateOfHealth(),

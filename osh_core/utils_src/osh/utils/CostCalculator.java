@@ -1,19 +1,16 @@
 package osh.utils;
 
-import it.unimi.dsi.fastutil.longs.LongAVLTreeSet;
+import it.unimi.dsi.fastutil.longs.*;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.power.LoadProfile;
 import osh.datatypes.power.PowerInterval;
 
 import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.SortedSet;
 
 /**
  * @author Ingo Mauser, Sebastian Kramer
@@ -218,12 +215,12 @@ public class CostCalculator {
 
 //			SortedSet<Long> varPowerChanges = calcLoadChanges(new AncillaryCommodity[]{AncillaryCommodity.REACTIVEPOWEREXTERNAL},
 //					ancillaryMeter, startCalc, endCalc);
-            SortedSet<Long> varPowerChanges = calcSingularLoadChanges(AncillaryCommodity.NATURALGASPOWEREXTERNAL,
+            LongSortedSet varPowerChanges = calcSingularLoadChanges(AncillaryCommodity.NATURALGASPOWEREXTERNAL,
                     ancillaryMeter, startCalc, endCalc);
-            SortedSet<Long> varPriceChanges = calcPriceChanges(new AncillaryCommodity[]{AncillaryCommodity.REACTIVEPOWEREXTERNAL},
+            LongSortedSet varPriceChanges = calcPriceChanges(new AncillaryCommodity[]{AncillaryCommodity.REACTIVEPOWEREXTERNAL},
                     priceSignals, startCalc, endCalc);
 
-            SortedSet<Long> varLimitChanges = null;
+            LongSortedSet varLimitChanges = null;
 
             //pls == 2 --> we need to respect PLS for ReactivePower, see PLS for ActivePower
             if (plsOptimizationObjective == 2)
@@ -384,18 +381,18 @@ public class CostCalculator {
         return new double[]{epsCosts / WsTOkWHDivisor, plsCosts / WsTOkWHDivisor, gasCosts / WsTOkWHDivisor, feedInCostsPV / WsTOkWHDivisor, feedInCostsCHP / WsTOkWHDivisor, autoConsumptionCosts / WsTOkWHDivisor};
     }
 
-    private static SortedSet<Long> calcSingularLoadChanges(AncillaryCommodity ancillaryCommodity, AncillaryCommodityLoadProfile ancillaryMeter,
+    private static LongSortedSet calcSingularLoadChanges(AncillaryCommodity ancillaryCommodity, AncillaryCommodityLoadProfile ancillaryMeter,
                                                            long startTime, long endTime) {
-        LongAVLTreeSet loadChanges = new LongAVLTreeSet(ancillaryMeter.getAllLoadChangesFor(ancillaryCommodity, startTime, endTime));
+        LongSortedSet loadChanges = new LongAVLTreeSet(ancillaryMeter.getAllLoadChangesFor(ancillaryCommodity, startTime, endTime));
         loadChanges.add(endTime);
         loadChanges.add(Long.MAX_VALUE);
 
         return loadChanges;
     }
 
-    private static SortedSet<Long> calcPriceChanges(AncillaryCommodity[] relevantCommodities, EnumMap<AncillaryCommodity, PriceSignal> prices,
+    private static LongSortedSet calcPriceChanges(AncillaryCommodity[] relevantCommodities, EnumMap<AncillaryCommodity, PriceSignal> prices,
                                                     long startTime, long endTime) {
-        SortedSet<Long> priceChanges = new LongAVLTreeSet();
+        LongSortedSet priceChanges = new LongAVLTreeSet();
         priceChanges.add(endTime);
         priceChanges.add(Long.MAX_VALUE);
 
@@ -406,7 +403,7 @@ public class CostCalculator {
             if (ps != null) {
                 Long time = ps.getNextPriceChange(startTime);
                 while (time != null && time < endTime) {
-                    priceChanges.add(time);
+                    priceChanges.add(time.longValue());
                     time = ps.getNextPriceChange(time);
                 }
             }
@@ -414,10 +411,10 @@ public class CostCalculator {
         return priceChanges;
     }
 
-    private static SortedSet<Long> calcPowerIntervalChanges(AncillaryCommodity[] relevantCommodities,
+    private static LongSortedSet calcPowerIntervalChanges(AncillaryCommodity[] relevantCommodities,
                                                             EnumMap<AncillaryCommodity, PowerLimitSignal> limits,
                                                             long startTime, long endTime) {
-        SortedSet<Long> limitChanges = new LongAVLTreeSet();
+        LongSortedSet limitChanges = new LongAVLTreeSet();
         limitChanges.add(endTime);
         limitChanges.add(Long.MAX_VALUE);
 
@@ -428,7 +425,7 @@ public class CostCalculator {
             if (pls != null) {
                 Long time = pls.getNextPowerLimitChange(startTime);
                 while (time != null && time < endTime) {
-                    limitChanges.add(time);
+                    limitChanges.add(time.longValue());
                     time = pls.getNextPowerLimitChange(time);
                 }
             }
@@ -437,12 +434,12 @@ public class CostCalculator {
     }
 
     private static double calcActivePowerCosts(
-            Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>> activePowerIterator,
-            Iterator<Entry<Long, Double>> activePowerPriceIterator,
-            Iterator<Entry<Long, PowerInterval>> activePowerLimitIterator,
-            Entry<Long, LoadProfile<AncillaryCommodity>.Tick> initialActivePower,
-            Entry<Long, Double> initialActivePowerPrice,
-            Entry<Long, PowerInterval> initialActivePowerLimit,
+            ObjectIterator<Long2IntMap.Entry> activePowerIterator,
+            ObjectIterator<Long2DoubleMap.Entry> activePowerPriceIterator,
+            ObjectIterator<Long2ObjectMap.Entry<PowerInterval>> activePowerLimitIterator,
+            Long2IntMap.Entry initialActivePower,
+            Long2DoubleMap.Entry initialActivePowerPrice,
+            Long2ObjectMap.Entry<PowerInterval> initialActivePowerLimit,
             int plsOptimizationObjective,
             int epsOptimizationObjective,
             double upperOverLimitFactor,
@@ -450,17 +447,17 @@ public class CostCalculator {
             long startCalc,
             long endCalc) {
 
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick> currentLoadChange = initialActivePower;
-        Entry<Long, Double> currentPriceChange = initialActivePowerPrice;
-        Entry<Long, PowerInterval> currentLimitChange = initialActivePowerLimit;
+        Long2IntMap.Entry currentLoadChange = initialActivePower;
+        Long2DoubleMap.Entry currentPriceChange = initialActivePowerPrice;
+        Long2ObjectMap.Entry<PowerInterval> currentLimitChange = initialActivePowerLimit;
 
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick> nextLoadChange = activePowerIterator.hasNext() ? activePowerIterator.next() : null;
-        Entry<Long, Double> nextPriceChange = activePowerPriceIterator.hasNext() ? activePowerPriceIterator.next() : null;
-        Entry<Long, PowerInterval> nextLimitChange = plsOptimizationObjective == 0 ? null : (activePowerLimitIterator.hasNext() ? activePowerLimitIterator.next() : null);
+        Long2IntMap.Entry nextLoadChange = activePowerIterator.hasNext() ? activePowerIterator.next() : null;
+        Long2DoubleMap.Entry nextPriceChange = activePowerPriceIterator.hasNext() ? activePowerPriceIterator.next() : null;
+        Long2ObjectMap.Entry<PowerInterval> nextLimitChange = plsOptimizationObjective == 0 ? null : (activePowerLimitIterator.hasNext() ? activePowerLimitIterator.next() : null);
 
-        Long nextLoadChangeKey = nextLoadChange == null ? Long.MAX_VALUE : nextLoadChange.getKey();
-        Long nextPriceChangeKey = nextPriceChange == null ? Long.MAX_VALUE : nextPriceChange.getKey();
-        Long nextLimitChangeKey = nextLimitChange == null ? Long.MAX_VALUE : nextLimitChange.getKey();
+        long nextLoadChangeKey = nextLoadChange == null ? Long.MAX_VALUE : nextLoadChange.getLongKey();
+        long nextPriceChangeKey = nextPriceChange == null ? Long.MAX_VALUE : nextPriceChange.getLongKey();
+        long nextLimitChangeKey = nextLimitChange == null ? Long.MAX_VALUE : nextLimitChange.getLongKey();
 
         long currentTime = startCalc;
         double costs = 0;
@@ -476,8 +473,8 @@ public class CostCalculator {
             // get time factor (constant time in [s] and price is [cents/kWh], whereas load/power is in [W])
             double timeFactor = minNextChange - currentTime;
 
-            int power = currentLoadChange.getValue().value;
-            double price = currentPriceChange.getValue();
+            int power = currentLoadChange.getIntValue();
+            double price = currentPriceChange.getDoubleValue();
 
             if (power > 0)
                 costs += timeFactor * power * price;
@@ -503,7 +500,7 @@ public class CostCalculator {
                 currentLoadChange = nextLoadChange;
                 if (activePowerIterator.hasNext()) {
                     nextLoadChange = activePowerIterator.next();
-                    nextLoadChangeKey = nextLoadChange.getKey();
+                    nextLoadChangeKey = nextLoadChange.getLongKey();
                 } else {
                     nextLoadChange = null;
                     nextLoadChangeKey = Long.MAX_VALUE;
@@ -513,7 +510,7 @@ public class CostCalculator {
                 currentPriceChange = nextPriceChange;
                 if (activePowerPriceIterator.hasNext()) {
                     nextPriceChange = activePowerPriceIterator.next();
-                    nextPriceChangeKey = nextPriceChange.getKey();
+                    nextPriceChangeKey = nextPriceChange.getLongKey();
                 } else {
                     nextPriceChange = null;
                     nextPriceChangeKey = Long.MAX_VALUE;
@@ -523,7 +520,7 @@ public class CostCalculator {
                 currentLimitChange = nextLimitChange;
                 if (activePowerLimitIterator.hasNext()) {
                     nextLimitChange = activePowerLimitIterator.next();
-                    nextLimitChangeKey = nextLimitChange.getKey();
+                    nextLimitChangeKey = nextLimitChange.getLongKey();
                 } else {
                     nextLimitChange = null;
                     nextLimitChangeKey = Long.MAX_VALUE;
@@ -536,8 +533,8 @@ public class CostCalculator {
         if (currentTime < endCalc) {
             double timeFactor = endCalc - currentTime;
 
-            int power = currentLoadChange.getValue().value;
-            double price = currentPriceChange.getValue();
+            int power = currentLoadChange.getIntValue();
+            double price = currentPriceChange.getDoubleValue();
 
             if (power > 0)
                 costs += timeFactor * power * price;
@@ -565,10 +562,10 @@ public class CostCalculator {
     }
 
     private static double calcGasCosts(
-            Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>> gasPowerIterator,
-            Iterator<Entry<Long, Double>> gasPowerPriceIterator,
-            Entry<Long, LoadProfile<AncillaryCommodity>.Tick> initialGasPower,
-            Entry<Long, Double> initialGasPowerPrice,
+            ObjectIterator<Long2IntMap.Entry> gasPowerIterator,
+            ObjectIterator<Long2DoubleMap.Entry> gasPowerPriceIterator,
+            Long2IntMap.Entry initialGasPower,
+            Long2DoubleMap.Entry initialGasPowerPrice,
             int plsOptimizationObjective,
             int epsOptimizationObjective,
             double upperOverLimitFactor,
@@ -576,14 +573,14 @@ public class CostCalculator {
             long startCalc,
             long endCalc) {
 
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick> currentLoad = initialGasPower;
-        Entry<Long, Double> currentPrice = initialGasPowerPrice;
+        Long2IntMap.Entry currentLoad = initialGasPower;
+        Long2DoubleMap.Entry currentPrice = initialGasPowerPrice;
 
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick> nextLoadChange = gasPowerIterator.hasNext() ? gasPowerIterator.next() : null;
-        Entry<Long, Double> nextPriceChange = gasPowerPriceIterator.hasNext() ? gasPowerPriceIterator.next() : null;
+        Long2IntMap.Entry nextLoadChange = gasPowerIterator.hasNext() ? gasPowerIterator.next() : null;
+        Long2DoubleMap.Entry nextPriceChange = gasPowerPriceIterator.hasNext() ? gasPowerPriceIterator.next() : null;
 
-        Long nextLoadChangeKey = nextLoadChange == null ? Long.MAX_VALUE : nextLoadChange.getKey();
-        Long nextPriceChangeKey = nextPriceChange == null ? Long.MAX_VALUE : nextPriceChange.getKey();
+        long nextLoadChangeKey = nextLoadChange == null ? Long.MAX_VALUE : nextLoadChange.getLongKey();
+        long nextPriceChangeKey = nextPriceChange == null ? Long.MAX_VALUE : nextPriceChange.getLongKey();
 
         long currentTime = startCalc;
         double costs = 0;
@@ -599,8 +596,8 @@ public class CostCalculator {
             // get time factor (constant time in [s] and price is [cents/kWh], whereas load/power is in [W])
             double timeFactor = minNextChange - currentTime;
 
-            int power = currentLoad.getValue().value;
-            double price = currentPrice.getValue();
+            int power = currentLoad.getIntValue();
+            double price = currentPrice.getDoubleValue();
 
             if (power > 0)
                 costs += timeFactor * power * price;
@@ -609,7 +606,7 @@ public class CostCalculator {
                 currentLoad = nextLoadChange;
                 if (gasPowerIterator.hasNext()) {
                     nextLoadChange = gasPowerIterator.next();
-                    nextLoadChangeKey = nextLoadChange.getKey();
+                    nextLoadChangeKey = nextLoadChange.getLongKey();
                 } else {
                     nextLoadChange = null;
                     nextLoadChangeKey = Long.MAX_VALUE;
@@ -619,7 +616,7 @@ public class CostCalculator {
                 currentPrice = nextPriceChange;
                 if (gasPowerPriceIterator.hasNext()) {
                     nextPriceChange = gasPowerPriceIterator.next();
-                    nextPriceChangeKey = nextPriceChange.getKey();
+                    nextPriceChangeKey = nextPriceChange.getLongKey();
                 } else {
                     nextPriceChange = null;
                     nextPriceChangeKey = Long.MAX_VALUE;
@@ -632,8 +629,8 @@ public class CostCalculator {
         if (currentTime < endCalc) {
             double timeFactor = endCalc - currentTime;
 
-            int power = currentLoad.getValue().value;
-            double price = currentPrice.getValue();
+            int power = currentLoad.getIntValue();
+            double price = currentPrice.getDoubleValue();
 
             if (power > 0)
                 costs += timeFactor * power * price;
@@ -657,14 +654,14 @@ public class CostCalculator {
                 ? new AncillaryCommodity[]{AncillaryCommodity.PVACTIVEPOWERFEEDIN, AncillaryCommodity.CHPACTIVEPOWERFEEDIN}
                 : new AncillaryCommodity[]{AncillaryCommodity.PVACTIVEPOWERFEEDIN};
 
-        Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>>[] feedInIterators
-                = (Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>>[]) new Iterator[relevantFeedInCommodities.length];
-        Iterator<Entry<Long, Double>>[] feedInPriceIterator
-                = (Iterator<Entry<Long, Double>>[]) new Iterator[relevantFeedInCommodities.length];
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[] initialFeedInPower
-                = (Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[]) new Entry<?, ?>[relevantFeedInCommodities.length];
-        Entry<Long, Double>[] initialFeedInPrice
-                = (Entry<Long, Double>[]) new Entry<?, ?>[relevantFeedInCommodities.length];
+        ObjectIterator<Long2IntMap.Entry>[] feedInIterators
+                = (ObjectIterator<Long2IntMap.Entry>[]) new ObjectIterator[relevantFeedInCommodities.length];
+        ObjectIterator<Long2DoubleMap.Entry>[] feedInPriceIterator
+                = (ObjectIterator<Long2DoubleMap.Entry>[]) new ObjectIterator[relevantFeedInCommodities.length];
+        Long2IntMap.Entry[] initialFeedInPower
+                = new Long2IntMap.Entry[relevantFeedInCommodities.length];
+        Long2DoubleMap.Entry[] initialFeedInPrice
+                = new Long2DoubleMap.Entry[relevantFeedInCommodities.length];
 
         for (int i = 0; i < relevantFeedInCommodities.length; i++) {
             feedInIterators[i] = ancillaryMeter.getIteratorForSubMap(relevantFeedInCommodities[i], startCalc, endCalc);
@@ -691,14 +688,13 @@ public class CostCalculator {
                 endCalc);
     }
 
-    @SuppressWarnings("unchecked")
     private static double calcFeedInCosts(
-            Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>>[] feedInIterators,
-            Iterator<Entry<Long, Double>>[] feedInPriceIterator,
-            Iterator<Entry<Long, PowerInterval>> activePowerLimitIterator,
-            Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[] initialFeedInPower,
-            Entry<Long, Double>[] initialFeedInPrice,
-            Entry<Long, PowerInterval> initialFeedInLimit,
+            ObjectIterator<Long2IntMap.Entry>[] feedInIterators,
+            ObjectIterator<Long2DoubleMap.Entry>[] feedInPriceIterator,
+            ObjectIterator<Long2ObjectMap.Entry<PowerInterval>> activePowerLimitIterator,
+            Long2IntMap.Entry[] initialFeedInPower,
+            Long2DoubleMap.Entry[] initialFeedInPrice,
+            Long2ObjectMap.Entry<PowerInterval> initialFeedInLimit,
             int plsOptimizationObjective,
             double lowerOverLimitFactor,
             long startCalc,
@@ -707,18 +703,18 @@ public class CostCalculator {
         int typeCount = feedInIterators.length;
         int nonNullCount = typeCount * 2 + 1; //typeCount times loads and prices and the powerlimit
 
-        Entry<Long, PowerInterval> currentLimit = initialFeedInLimit;
+        Long2ObjectMap.Entry<PowerInterval> currentLimit = initialFeedInLimit;
 
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[] nextLoadChange = (Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[]) new Entry<?, ?>[typeCount];
-        Entry<Long, Double>[] nextPriceChange = (Entry<Long, Double>[]) new Entry<?, ?>[typeCount];
+        Long2IntMap.Entry[] nextLoadChange = new Long2IntMap.Entry[typeCount];
+        Long2DoubleMap.Entry[] nextPriceChange = new Long2DoubleMap.Entry[typeCount];
 
-        Long[] nextLoadChangeKey = new Long[typeCount];
-        Long[] nextPriceChangeKey = new Long[typeCount];
+        long[] nextLoadChangeKey = new long[typeCount];
+        long[] nextPriceChangeKey = new long[typeCount];
 
         for (int i = 0; i < typeCount; i++) {
             if (feedInIterators[i].hasNext()) {
                 nextLoadChange[i] = feedInIterators[i].next();
-                nextLoadChangeKey[i] = nextLoadChange[i].getKey();
+                nextLoadChangeKey[i] = nextLoadChange[i].getLongKey();
             } else {
                 nextLoadChange[i] = null;
                 nextLoadChangeKey[i] = Long.MAX_VALUE;
@@ -727,7 +723,7 @@ public class CostCalculator {
 
             if (feedInPriceIterator[i].hasNext()) {
                 nextPriceChange[i] = feedInPriceIterator[i].next();
-                nextPriceChangeKey[i] = nextPriceChange[i].getKey();
+                nextPriceChangeKey[i] = nextPriceChange[i].getLongKey();
             } else {
                 nextPriceChange[i] = null;
                 nextPriceChangeKey[i] = Long.MAX_VALUE;
@@ -735,8 +731,8 @@ public class CostCalculator {
             }
         }
 
-        Entry<Long, PowerInterval> nextLimitChange = plsOptimizationObjective == 0 ? null : (activePowerLimitIterator.hasNext() ? activePowerLimitIterator.next() : null);
-        Long nextLimitChangeKey = nextLimitChange == null ? Long.MAX_VALUE : nextLimitChange.getKey();
+        Long2ObjectMap.Entry<PowerInterval>  nextLimitChange = plsOptimizationObjective == 0 ? null : (activePowerLimitIterator.hasNext() ? activePowerLimitIterator.next() : null);
+        long nextLimitChangeKey = nextLimitChange == null ? Long.MAX_VALUE : nextLimitChange.getLongKey();
 
         if (nextLimitChange == null) {
             nonNullCount--;
@@ -764,10 +760,10 @@ public class CostCalculator {
             int totalFeedInPower = 0;
 
             for (int i = 0; i < typeCount; i++) {
-                int power = initialFeedInPower[i].getValue().value;
+                int power = initialFeedInPower[i].getIntValue();
 
                 if (power < 0) {
-                    totalFeedInCosts += timeFactor * power * initialFeedInPrice[i].getValue();
+                    totalFeedInCosts += timeFactor * power * initialFeedInPrice[i].getDoubleValue();
                     totalFeedInPower += power;
                 }
             }
@@ -786,7 +782,7 @@ public class CostCalculator {
                     initialFeedInPower[i] = nextLoadChange[i];
                     if (feedInIterators[i].hasNext()) {
                         nextLoadChange[i] = feedInIterators[i].next();
-                        nextLoadChangeKey[i] = nextLoadChange[i].getKey();
+                        nextLoadChangeKey[i] = nextLoadChange[i].getLongKey();
                     } else {
                         nextLoadChange[i] = null;
                         nextLoadChangeKey[i] = Long.MAX_VALUE;
@@ -798,7 +794,7 @@ public class CostCalculator {
                     initialFeedInPrice[i] = nextPriceChange[i];
                     if (feedInPriceIterator[i].hasNext()) {
                         nextPriceChange[i] = feedInPriceIterator[i].next();
-                        nextPriceChangeKey[i] = nextPriceChange[i].getKey();
+                        nextPriceChangeKey[i] = nextPriceChange[i].getLongKey();
                     } else {
                         nextPriceChange[i] = null;
                         nextPriceChangeKey[i] = Long.MAX_VALUE;
@@ -811,7 +807,7 @@ public class CostCalculator {
                 currentLimit = nextLimitChange;
                 if (activePowerLimitIterator.hasNext()) {
                     nextLimitChange = activePowerLimitIterator.next();
-                    nextLimitChangeKey = nextLimitChange.getKey();
+                    nextLimitChangeKey = nextLimitChange.getLongKey();
                 } else {
                     nextLimitChange = null;
                     nextLimitChangeKey = Long.MAX_VALUE;
@@ -829,10 +825,10 @@ public class CostCalculator {
             int totalFeedInPower = 0;
 
             for (int i = 0; i < typeCount; i++) {
-                int power = initialFeedInPower[i].getValue().value;
+                int power = initialFeedInPower[i].getIntValue();
 
                 if (power < 0) {
-                    double price = initialFeedInPrice[i].getValue();
+                    double price = initialFeedInPrice[i].getDoubleValue();
 
                     totalFeedInCosts += timeFactor * power * price;
                     totalFeedInPower += power;
@@ -863,14 +859,12 @@ public class CostCalculator {
                 ? new AncillaryCommodity[]{AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION}
                 : new AncillaryCommodity[]{AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION};
 
-        Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>>[] autoConsIterators
-                = (Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>>[]) new Iterator[relevantAutoConsumptionCommodities.length];
-        Iterator<Entry<Long, Double>>[] autoConsPriceIterator
-                = (Iterator<Entry<Long, Double>>[]) new Iterator[relevantAutoConsumptionCommodities.length];
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[] initialAutoConsPower
-                = (Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[]) new Entry<?, ?>[relevantAutoConsumptionCommodities.length];
-        Entry<Long, Double>[] initialAutoConsPrice
-                = (Entry<Long, Double>[]) new Entry<?, ?>[relevantAutoConsumptionCommodities.length];
+        ObjectIterator<Long2IntMap.Entry>[] autoConsIterators
+                = (ObjectIterator<Long2IntMap.Entry>[]) new ObjectIterator[relevantAutoConsumptionCommodities.length];
+        ObjectIterator<Long2DoubleMap.Entry>[] autoConsPriceIterator
+                = (ObjectIterator<Long2DoubleMap.Entry>[]) new ObjectIterator[relevantAutoConsumptionCommodities.length];
+        Long2IntMap.Entry[] initialAutoConsPower = new Long2IntMap.Entry[relevantAutoConsumptionCommodities.length];
+        Long2DoubleMap.Entry[] initialAutoConsPrice = new Long2DoubleMap.Entry[relevantAutoConsumptionCommodities.length];
 
         for (int i = 0; i < relevantAutoConsumptionCommodities.length; i++) {
             autoConsIterators[i] = ancillaryMeter.getIteratorForSubMap(relevantAutoConsumptionCommodities[i], startCalc, endCalc);
@@ -889,28 +883,27 @@ public class CostCalculator {
                 endCalc);
     }
 
-    @SuppressWarnings("unchecked")
     private static double calcAutoConsumptionCosts(
-            Iterator<Entry<Long, LoadProfile<AncillaryCommodity>.Tick>>[] autoConsIterators,
-            Iterator<Entry<Long, Double>>[] autoConsPriceIterator,
-            Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[] initialAutoConsPower,
-            Entry<Long, Double>[] initialAutoConsPrice,
+            ObjectIterator<Long2IntMap.Entry>[] autoConsIterators,
+            ObjectIterator<Long2DoubleMap.Entry>[] autoConsPriceIterator,
+            Long2IntMap.Entry[] initialAutoConsPower,
+            Long2DoubleMap.Entry[] initialAutoConsPrice,
             long startCalc,
             long endCalc) {
 
         int typeCount = autoConsIterators.length;
         int nonNullCount = typeCount * 2; //typeCount times loads and prices
 
-        Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[] nextLoadChange = (Entry<Long, LoadProfile<AncillaryCommodity>.Tick>[]) new Entry<?, ?>[typeCount];
-        Entry<Long, Double>[] nextPriceChange = (Entry<Long, Double>[]) new Entry<?, ?>[typeCount];
+        Long2IntMap.Entry[] nextLoadChange = new Long2IntMap.Entry[typeCount];
+        Long2DoubleMap.Entry[] nextPriceChange = new Long2DoubleMap.Entry[typeCount];
 
-        Long[] nextLoadChangeKey = new Long[typeCount];
-        Long[] nextPriceChangeKey = new Long[typeCount];
+        long[] nextLoadChangeKey = new long[typeCount];
+        long[] nextPriceChangeKey = new long[typeCount];
 
         for (int i = 0; i < typeCount; i++) {
             if (autoConsIterators[i].hasNext()) {
                 nextLoadChange[i] = autoConsIterators[i].next();
-                nextLoadChangeKey[i] = nextLoadChange[i].getKey();
+                nextLoadChangeKey[i] = nextLoadChange[i].getLongKey();
             } else {
                 nextLoadChange[i] = null;
                 nextLoadChangeKey[i] = Long.MAX_VALUE;
@@ -919,7 +912,7 @@ public class CostCalculator {
 
             if (autoConsPriceIterator[i].hasNext()) {
                 nextPriceChange[i] = autoConsPriceIterator[i].next();
-                nextPriceChangeKey[i] = nextPriceChange[i].getKey();
+                nextPriceChangeKey[i] = nextPriceChange[i].getLongKey();
             } else {
                 nextPriceChange[i] = null;
                 nextPriceChangeKey[i] = Long.MAX_VALUE;
@@ -946,10 +939,10 @@ public class CostCalculator {
             double timeFactor = minNextChange - currentTime;
 
             for (int i = 0; i < typeCount; i++) {
-                int power = initialAutoConsPower[i].getValue().value;
+                int power = initialAutoConsPower[i].getIntValue();
 
                 if (power < 0) {
-                    costs += timeFactor * power * initialAutoConsPrice[i].getValue();
+                    costs += timeFactor * power * initialAutoConsPrice[i].getDoubleValue();
                 }
             }
 
@@ -959,7 +952,7 @@ public class CostCalculator {
                     initialAutoConsPower[i] = nextLoadChange[i];
                     if (autoConsIterators[i].hasNext()) {
                         nextLoadChange[i] = autoConsIterators[i].next();
-                        nextLoadChangeKey[i] = nextLoadChange[i].getKey();
+                        nextLoadChangeKey[i] = nextLoadChange[i].getLongKey();
                     } else {
                         nextLoadChange[i] = null;
                         nextLoadChangeKey[i] = Long.MAX_VALUE;
@@ -971,7 +964,7 @@ public class CostCalculator {
                     initialAutoConsPrice[i] = nextPriceChange[i];
                     if (autoConsPriceIterator[i].hasNext()) {
                         nextPriceChange[i] = autoConsPriceIterator[i].next();
-                        nextPriceChangeKey[i] = nextPriceChange[i].getKey();
+                        nextPriceChangeKey[i] = nextPriceChange[i].getLongKey();
                     } else {
                         nextPriceChange[i] = null;
                         nextPriceChangeKey[i] = Long.MAX_VALUE;
@@ -987,10 +980,10 @@ public class CostCalculator {
             double timeFactor = endCalc - currentTime;
 
             for (int i = 0; i < typeCount; i++) {
-                int power = initialAutoConsPower[i].getValue().value;
+                int power = initialAutoConsPower[i].getIntValue();
 
                 if (power < 0) {
-                    costs += timeFactor * power * initialAutoConsPrice[i].getValue();
+                    costs += timeFactor * power * initialAutoConsPrice[i].getDoubleValue();
                 }
             }
         }
@@ -998,18 +991,18 @@ public class CostCalculator {
         return costs;
     }
 
-    private static double calcVarPower(SortedSet<Long> varPowerChanges, SortedSet<Long> varPriceChanges,
-                                       SortedSet<Long> varLimitChanges, double upperOverLimitFactor, double lowerOverLimitFactor,
+    private static double calcVarPower(LongSortedSet varPowerChanges, LongSortedSet varPriceChanges,
+                                       LongSortedSet varLimitChanges, double upperOverLimitFactor, double lowerOverLimitFactor,
                                        long startCalc, long endCalc, AncillaryCommodityLoadProfile ancillaryMeter, PriceSignal varPriceSignal,
                                        PowerLimitSignal varLimit) {
 
-        Long nextLoadChange = null;
-        Long nextPriceChange = null;
-        Long nextLimitChange = varLimitChanges == null ? Long.MAX_VALUE : null;
+        long nextLoadChange = Long.MIN_VALUE;
+        long nextPriceChange = Long.MIN_VALUE;
+        long nextLimitChange = varLimitChanges == null ? Long.MAX_VALUE : Long.MIN_VALUE;
 
-        Iterator<Long> loadCh = varPowerChanges.iterator();
-        Iterator<Long> priceCh = varPriceChanges.iterator();
-        Iterator<Long> limitCh = varLimitChanges == null ? null : varLimitChanges.iterator();
+        LongIterator loadCh = varPowerChanges.iterator();
+        LongIterator priceCh = varPriceChanges.iterator();
+        LongIterator limitCh = varLimitChanges == null ? null : varLimitChanges.iterator();
 
         long currentTime = startCalc;
         double costs = 0;
@@ -1017,45 +1010,45 @@ public class CostCalculator {
         while (currentTime < endCalc) { //iterate over load changes
 
             //look for the next change in price or load
-            if (nextLoadChange == null)
-                nextLoadChange = loadCh.next();
-            if (nextPriceChange == null)
-                nextPriceChange = priceCh.next();
-            if (nextLimitChange == null)
-                nextLimitChange = limitCh.next();
+            if (nextLoadChange == Long.MIN_VALUE)
+                nextLoadChange = loadCh.nextLong();
+            if (nextPriceChange == Long.MIN_VALUE)
+                nextPriceChange = priceCh.nextLong();
+            if (nextLimitChange == Long.MIN_VALUE)
+                nextLimitChange = limitCh.nextLong();
             long minNextChange;
 
             if (nextLoadChange < nextPriceChange && nextLoadChange < nextLimitChange) {
                 minNextChange = nextLoadChange;
-                nextLoadChange = null;
+                nextLoadChange = Long.MIN_VALUE;
             } else if (nextPriceChange < nextLoadChange && nextPriceChange < nextLimitChange) {
                 minNextChange = nextPriceChange;
-                nextPriceChange = null;
+                nextPriceChange = Long.MIN_VALUE;
             } else if (nextLimitChange < nextLoadChange && nextLimitChange < nextPriceChange) {
                 minNextChange = nextLimitChange;
-                nextLimitChange = null;
+                nextLimitChange = Long.MIN_VALUE;
             } else {
                 //all are the same
-                if (nextLoadChange.equals(nextPriceChange) && nextLoadChange.equals(nextLimitChange)) {
+                if (nextLoadChange == nextPriceChange && nextLoadChange == nextLimitChange) {
                     minNextChange = nextLoadChange;
-                    nextLoadChange = null;
-                    nextPriceChange = null;
-                    nextLimitChange = limitCh == null ? Long.MAX_VALUE : null;
+                    nextLoadChange = Long.MIN_VALUE;
+                    nextPriceChange = Long.MIN_VALUE;
+                    nextLimitChange = limitCh == null ? Long.MAX_VALUE : Long.MIN_VALUE;
                     //nextLoad == nextLimit < nextPrice
                 } else if (nextLoadChange < nextPriceChange) {
                     minNextChange = nextLoadChange;
-                    nextLoadChange = null;
-                    nextLimitChange = limitCh == null ? Long.MAX_VALUE : null;
+                    nextLoadChange = Long.MIN_VALUE;
+                    nextLimitChange = Long.MIN_VALUE;
                     //nextPrice == nextLimit < nextLoad
                 } else if (nextPriceChange < nextLoadChange) {
                     minNextChange = nextPriceChange;
-                    nextPriceChange = null;
-                    nextLimitChange = limitCh == null ? Long.MAX_VALUE : null;
+                    nextPriceChange = Long.MIN_VALUE;
+                    nextLimitChange = Long.MIN_VALUE;
                     //nextPrice == nextLoad < nextLimit
                 } else {
                     minNextChange = nextLoadChange;
-                    nextLoadChange = null;
-                    nextPriceChange = null;
+                    nextLoadChange = Long.MIN_VALUE;
+                    nextPriceChange = Long.MIN_VALUE;
                 }
             }
 

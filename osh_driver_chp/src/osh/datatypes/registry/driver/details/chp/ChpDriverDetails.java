@@ -2,10 +2,6 @@ package osh.datatypes.registry.driver.details.chp;
 
 import osh.datatypes.registry.StateExchange;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -13,16 +9,7 @@ import java.util.UUID;
 /**
  * @author Ingo Mauser
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "ChpDriverDetails")
-@XmlType
-
 public class ChpDriverDetails extends StateExchange {
-
-    /**
-     * Serial
-     */
-    private static final long serialVersionUID = 4269794621296448446L;
 
     // Heating request or power request? Or both?
     protected boolean powerGenerationRequest;

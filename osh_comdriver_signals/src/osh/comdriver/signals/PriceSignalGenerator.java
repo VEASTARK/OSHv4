@@ -1,6 +1,5 @@
 package osh.comdriver.signals;
 
-import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PriceSignal;
 import osh.utils.time.TimeConversion;
 
@@ -14,13 +13,12 @@ import java.util.TreeMap;
 public class PriceSignalGenerator {
 
     public static PriceSignal getConstantPriceSignal(
-            AncillaryCommodity commodity,
             long startTime,
             long endTime,
             long constantPeriod,
             double price) {
 
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
 
         for (long i = 0; i < ((endTime - startTime) / constantPeriod); i++) {
 
@@ -36,14 +34,13 @@ public class PriceSignalGenerator {
     }
 
     public static PriceSignal getPriceSignalOfTreeMap(
-            AncillaryCommodity commodity,
             long startTime,
             long endTime,
             long constantPeriod,
             TreeMap<Long, Double> prices) {
 
         Double lastValue = null;
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
 
         for (long i = 0; i < ((endTime - startTime) / constantPeriod); i++) {
 
@@ -70,13 +67,12 @@ public class PriceSignalGenerator {
     }
 
     public static PriceSignal getPriceSignalWeekday(
-            AncillaryCommodity commodity,
             long startTime,
             long endTime,
             long constantPeriod,
             Double[] pricesPerWeekDay) {
 
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
 
         long time = startTime;
         priceSignal.setPrice(time, pricesPerWeekDay[TimeConversion.convertUnixTime2CorrectedDayOfWeek(time)]);
@@ -98,14 +94,13 @@ public class PriceSignalGenerator {
     }
 
     public static PriceSignal getFlexiblePriceSignal(
-            AncillaryCommodity commodity,
             long secondsFromYearStart,
             long startTime,
             long endTime,
             long constantPeriod,
             List<Double> priceSignalYear) {
 
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
         double price;
 
         int startIndex = (int) (secondsFromYearStart / constantPeriod);
@@ -135,14 +130,13 @@ public class PriceSignalGenerator {
             long endTime,
             long constantPeriod,
             int periodsToSwitch,
-            AncillaryCommodity commodity,
             double priceMin,
             double priceMax,
             boolean startWithMinPrice) {
 
         boolean lowPricePeriod = startWithMinPrice;
 
-        PriceSignal priceSignal = new PriceSignal(commodity);
+        PriceSignal priceSignal = new PriceSignal();
 
         int counter = 0;
 

@@ -1,97 +1,100 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
+import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.thermal.SimpleHotWaterTank;
-import osh.esc.LimitedCommodityStateMap;
-import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.TreeMap;
 import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a hot-water tank.
+ *
  * @author Florian Allerding, Ingo Mauser, Till Schuberth
  */
 public class HotWaterTankNonControllableIPP
-        extends NonControllableIPP<ISolution, HotWaterTankPrediction> {
+        extends NonControllableIPP<ISolution, TemperaturePrediction> {
 
-    private static final long serialVersionUID = -7474764554202830275L;
-    private final double initialTemperature;
-    private final double tankCapacity;
-    private final double tankDiameter;
-    private final double ambientTemperature;
-    private SimpleHotWaterTank waterTank;
+    private final SimpleHotWaterTank masterWaterTank;
+    private SimpleHotWaterTank actualWaterTank;
     private Double firstTemperature;
     //6ct per kWh ThermalPower (= gas price per kWh)
-    private double punishmentFactorPerWsPowerLost;
+    private final double punishmentFactorPerWsPowerLost;
 
     private TreeMap<Long, Double> temperatureStates;
 
-
     /**
-     * CONSTRUCTOR
+     * Constructs this hot-water tank ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialTemperature the intial temperature of the watertank
+     * @param tankCapacity the capacity of the watertank
+     * @param tankDiameter the diameter of the watertank
+     * @param ambientTemperature the ambient temperature around the watertank
+     * @param punishmentFactorPerWsLost the punishment factor per ws lost over the optimization loop
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public HotWaterTankNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
+            boolean toBeScheduled,
             double initialTemperature,
             double tankCapacity,
             double tankDiameter,
             double ambientTemperature,
             double punishmentFactorPerWsLost,
-            boolean causeScheduling,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
         super(
                 deviceId,
-                logger,
-                causeScheduling, //does not cause scheduling
+                timestamp,
+                toBeScheduled,
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.HOTWATERSTORAGE,
-                new Commodity[]{
-                        Commodity.HEATINGHOTWATERPOWER,
-                        Commodity.DOMESTICHOTWATERPOWER
-                },
+                EnumSet.of(Commodity.HEATINGHOTWATERPOWER,
+                        Commodity.DOMESTICHOTWATERPOWER),
                 compressionType,
                 compressionValue);
 
-        this.initialTemperature = initialTemperature;
-        this.tankCapacity = tankCapacity;
-        this.tankDiameter = tankDiameter;
-        this.ambientTemperature = ambientTemperature;
+        this.masterWaterTank = new SimpleHotWaterTank(tankCapacity, tankDiameter, initialTemperature,
+                ambientTemperature);
         this.punishmentFactorPerWsPowerLost = punishmentFactorPerWsLost;
 
-        this.internalInterdependentOutputStates = new LimitedCommodityStateMap(this.allOutputCommodities);
-        this.allInputCommodities = new Commodity[]{Commodity.HEATINGHOTWATERPOWER, Commodity.DOMESTICHOTWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER, Commodity.DOMESTICHOTWATERPOWER));
     }
-
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
+     * Limited copy-constructor that constructs a copy of the given hot-water tank ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the hot-water tank ipp to copy
      */
-    @Deprecated
-    protected HotWaterTankNonControllableIPP() {
-        super();
-        this.initialTemperature = 0;
-        this.tankCapacity = 0;
-        this.tankDiameter = 0;
-        this.ambientTemperature = 0;
+    public HotWaterTankNonControllableIPP(HotWaterTankNonControllableIPP other) {
+        super(other);
+        this.masterWaterTank = new SimpleHotWaterTank(other.masterWaterTank);
+        this.actualWaterTank = null;
+        this.temperatureStates = null;
+
+        this.punishmentFactorPerWsPowerLost = other.punishmentFactorPerWsPowerLost;
+        this.firstTemperature = other.firstTemperature;
     }
+
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -99,38 +102,24 @@ public class HotWaterTankNonControllableIPP
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.interdependentTime = maxReferenceTime;
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         if (keepPrediction)
             this.temperatureStates = new TreeMap<>();
         else
             this.temperatureStates = null;
 
-        this.stepSize = stepSize;
-        this.waterTank = new SimpleHotWaterTank(
-                this.tankCapacity,
-                this.tankDiameter,
-                this.initialTemperature,
-                this.ambientTemperature);
+        this.actualWaterTank = new SimpleHotWaterTank(this.masterWaterTank);
 
-        this.waterTank.reduceByStandingHeatLoss(this.interdependentTime - this.getTimestamp().toEpochSecond());
-        this.firstTemperature = this.waterTank.getCurrentWaterTemperature();
-//		this.internalInterdependentOutputStates = new EnumMap<Commodity, RealCommodityState>(Commodity.class);
-        this.internalInterdependentOutputStates.clear();
-
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
+        this.actualWaterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp().toEpochSecond());
+        this.firstTemperature = this.actualWaterTank.getCurrentWaterTemperature();
     }
 
     @Override
@@ -140,88 +129,68 @@ public class HotWaterTankNonControllableIPP
 
             // update tank according to interdependentInputStates
             double hotWaterPower = 0;
-//			RealCommodityState heatWaterState = this.interdependentInputStates.get(Commodity.HEATINGHOTWATERPOWER);
-
-//			if (heatWaterState != null) {
-//				hotWaterPower -= heatWaterState.getPower();
-//
-//			}
-
-//			RealCommodityState domWaterState = this.interdependentInputStates.get(Commodity.DOMESTICHOTWATERPOWER);
-//
-//			if (domWaterState != null) {
-//				hotWaterPower -= domWaterState.getPower();
-//			}
 
             hotWaterPower -= this.interdependentInputStates.getPower(Commodity.HEATINGHOTWATERPOWER);
             hotWaterPower -= this.interdependentInputStates.getPower(Commodity.DOMESTICHOTWATERPOWER);
 
-            this.waterTank.addPowerOverTime(hotWaterPower, this.stepSize, null, null);
+            this.actualWaterTank.addPowerOverTime(hotWaterPower, this.getStepSize(), null, null);
         }
 
-        double currentTemp = this.waterTank.getCurrentWaterTemperature();
+        double currentTemp = this.actualWaterTank.getCurrentWaterTemperature();
 
         if (this.temperatureStates != null)
-            this.temperatureStates.put(this.interdependentTime, currentTemp);
+            this.temperatureStates.put(this.getInterdependentTime(), currentTemp);
 
         // update interdependentOutputStates
-//		this.interdependentOutputStates.clear();
-//		this.internalInterdependentOutputStates.put(
-//				Commodity.HEATINGHOTWATERPOWER, 
-//				new RealThermalCommodityState(
-//						Commodity.HEATINGHOTWATERPOWER, 
-//						0.0, 
-//						currentTemp, 
-//						null));
-//		this.internalInterdependentOutputStates.put(
-//				Commodity.DOMESTICHOTWATERPOWER, 
-//				new RealThermalCommodityState(
-//						Commodity.DOMESTICHOTWATERPOWER, 
-//						0.0, 
-//						currentTemp, 
-//						null));
         this.internalInterdependentOutputStates.setTemperature(Commodity.HEATINGHOTWATERPOWER, currentTemp);
         this.internalInterdependentOutputStates.setTemperature(Commodity.DOMESTICHOTWATERPOWER, currentTemp);
         this.setOutputStates(this.internalInterdependentOutputStates);
 
 
         // reduce be standing loss
-        this.waterTank.reduceByStandingHeatLoss(this.stepSize);
+        this.actualWaterTank.reduceByStandingHeatLoss(this.getStepSize());
 
-
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
     @Override
-    public HotWaterTankPrediction transformToFinalInterdependentPrediction(BitSet solution) {
-        return new HotWaterTankPrediction(this.temperatureStates);
+    public TemperaturePrediction transformToFinalInterdependentPrediction() {
+        return new TemperaturePrediction(this.temperatureStates);
     }
 
-
     @Override
-    public Schedule getFinalInterdependentSchedule() {
+    public void finalizeInterdependentCervisia() {
+        super.finalizeInterdependentCervisia();
+
         //punish for losing power (having a lower temperature then at the start)
-        double cervisia;
-        double tempDifference = this.firstTemperature - this.waterTank.getCurrentWaterTemperature();
+        double tempDifference = this.firstTemperature - this.actualWaterTank.getCurrentWaterTemperature();
 
-        cervisia =
-                -this.waterTank.calculateEnergyDrawOff(
+        double cervisia =
+                -this.actualWaterTank.calculateEnergyDrawOff(
                         this.firstTemperature,
-                        this.waterTank.getCurrentWaterTemperature())
+                        this.actualWaterTank.getCurrentWaterTemperature())
                         * this.punishmentFactorPerWsPowerLost;
 
-        //if tank has higher temperature than at the beginning only give half of the cervizia
+        //if tank has higher temperature than at the beginning only give half of the cervisia
         if (tempDifference < 0) {
             cervisia /= 2.0;
         }
 
-        return new Schedule(new SparseLoadProfile(), cervisia, this.getDeviceType().toString());
+        this.addInterdependentCervisia(cervisia);
     }
 
-    // ### to string ###
+    @Override
+    public Schedule getFinalInterdependentSchedule() {
+        return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
+    }
 
     @Override
     public String problemToString() {
-        return "[" + this.getReferenceTime() + "] HotWaterTankIPP initialTemperature=" + ((int) (this.initialTemperature * 10)) / 10.0;
+        return "[" + this.getReferenceTime() + "] HotWaterTankIPP initialTemperature=" + ((int) (this.masterWaterTank.getCurrentWaterTemperature() * 10)) / 10.0;
+    }
+
+    @Override
+    public HotWaterTankNonControllableIPP getClone() {
+        return new HotWaterTankNonControllableIPP(this);
     }
 }

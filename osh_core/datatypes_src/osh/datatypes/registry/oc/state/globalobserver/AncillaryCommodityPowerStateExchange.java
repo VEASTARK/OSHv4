@@ -13,7 +13,6 @@ import java.util.UUID;
  */
 public class AncillaryCommodityPowerStateExchange extends StateExchange {
 
-    private static final long serialVersionUID = 7876809071418906992L;
     private final EnumMap<AncillaryCommodity, Integer> map;
 
 

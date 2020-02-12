@@ -194,7 +194,7 @@ public class CsvEpsProviderComDriver extends CALComDriver {
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.ACTIVEPOWEREXTERNAL)) {
             int priceSignalFrom = relativeTimeFromYearStart / this.resolutionOfPriceSignal;
             int priceSignalTo = (relativeTimeFromYearStart + this.signalPeriod) / this.resolutionOfPriceSignal;
-            PriceSignal priceSignal = new PriceSignal(AncillaryCommodity.ACTIVEPOWEREXTERNAL);
+            PriceSignal priceSignal = new PriceSignal();
             for (int i = priceSignalFrom; i < priceSignalTo; i++) {
                 if (this.priceSignalYear.size() <= i) {
                     priceSignal.setPrice(yearStart + i * this.resolutionOfPriceSignal, 0.0);
@@ -204,72 +204,67 @@ public class CsvEpsProviderComDriver extends CALComDriver {
             }
             priceSignal.setKnownPriceInterval(signalStart, signalEnd);
             priceSignal.compress();
-            priceSignals.put(priceSignal.getCommodity(), priceSignal);
+            priceSignals.put(AncillaryCommodity.ACTIVEPOWEREXTERNAL, priceSignal);
         }
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.PVACTIVEPOWERFEEDIN)) {
             // PV ActivePower FeedIn
             PriceSignal newPriceSignalFeedInPV = PriceSignalGenerator.getConstantPriceSignal(
-                    AncillaryCommodity.PVACTIVEPOWERFEEDIN,
                     signalStart,
                     signalEnd,
                     this.signalPeriod,
                     this.activePowerFeedInPV);
             newPriceSignalFeedInPV.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalFeedInPV.compress();
-            priceSignals.put(newPriceSignalFeedInPV.getCommodity(), newPriceSignalFeedInPV);
+            priceSignals.put(AncillaryCommodity.PVACTIVEPOWERFEEDIN, newPriceSignalFeedInPV);
         }
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.CHPACTIVEPOWERFEEDIN)) {
             // CHP ActivePower FeedIn
             PriceSignal newPriceSignalFeedInCHP = PriceSignalGenerator.getConstantPriceSignal(
-                    AncillaryCommodity.CHPACTIVEPOWERFEEDIN,
                     signalStart,
                     signalEnd,
                     this.signalPeriod,
                     this.activePowerFeedInCHP);
             newPriceSignalFeedInCHP.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalFeedInCHP.compress();
-            priceSignals.put(newPriceSignalFeedInCHP.getCommodity(), newPriceSignalFeedInCHP);
+            priceSignals.put(AncillaryCommodity.CHPACTIVEPOWERFEEDIN, newPriceSignalFeedInCHP);
         }
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.NATURALGASPOWEREXTERNAL)) {
             // Natural Gas Power Price
             PriceSignal newPriceSignalNaturalGas = PriceSignalGenerator.getConstantPriceSignal(
-                    AncillaryCommodity.NATURALGASPOWEREXTERNAL,
                     signalStart,
                     signalEnd,
                     this.signalPeriod,
                     this.naturalGasPowerPrice);
             newPriceSignalNaturalGas.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalNaturalGas.compress();
-            priceSignals.put(newPriceSignalNaturalGas.getCommodity(), newPriceSignalNaturalGas);
+            priceSignals.put(AncillaryCommodity.NATURALGASPOWEREXTERNAL, newPriceSignalNaturalGas);
         }
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION)) {
             // Natural Gas Power Price
             PriceSignal newPriceSignalPVAutoConsumption = PriceSignalGenerator.getConstantPriceSignal(
-                    AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION,
                     signalStart,
                     signalEnd,
                     this.signalPeriod,
                     this.activePowerAutoConsumptionPV);
             newPriceSignalPVAutoConsumption.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalPVAutoConsumption.compress();
-            priceSignals.put(newPriceSignalPVAutoConsumption.getCommodity(), newPriceSignalPVAutoConsumption);
+            priceSignals.put(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION, newPriceSignalPVAutoConsumption);
         }
 
         if (this.activeAncillaryCommodities.contains(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION)) {
             // Natural Gas Power Price
             PriceSignal newPriceSignalCHPAutoConsumption = PriceSignalGenerator.getConstantPriceSignal(
-                    AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION,
                     signalStart,
                     signalEnd,
                     this.signalPeriod,
                     this.activePowerAutoConsumptionCHP);
             newPriceSignalCHPAutoConsumption.setKnownPriceInterval(signalStart, signalEnd);
             newPriceSignalCHPAutoConsumption.compress();
-            priceSignals.put(newPriceSignalCHPAutoConsumption.getCommodity(), newPriceSignalCHPAutoConsumption);
+            priceSignals.put(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION, newPriceSignalCHPAutoConsumption);
         }
 
         //now sending priceSignal

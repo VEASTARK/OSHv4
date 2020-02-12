@@ -15,12 +15,6 @@ public class GUIWaterStorageStateExchange
         implements EqualData<WaterStorageOCSX> {
 
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 7038499626567724690L;
-
-
     public GUIWaterStorageStateExchange(
             UUID sender,
             ZonedDateTime timestamp,

@@ -15,10 +15,6 @@ import java.util.UUID;
  */
 public class EpsPlsStateExchange extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5984069610430579990L;
     private final int epsOptimizationObjective;
     private final int plsOptimizationObjective;
     private final int varOptimizationObjective;

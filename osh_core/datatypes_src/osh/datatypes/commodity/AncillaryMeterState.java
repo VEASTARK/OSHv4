@@ -2,6 +2,7 @@ package osh.datatypes.commodity;
 
 import osh.esc.ArrayUtils;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -9,22 +10,17 @@ import java.util.Arrays;
  *
  * @author Sebastian Kramer
  */
-public class AncillaryMeterState {
+public class AncillaryMeterState implements Serializable {
+
+    private static final long serialVersionUID = -1849030207239247471L;
 
     private static final int enumValCount = AncillaryCommodity.values().length;
-    private static final double[] EMPTY_POWER = new double[enumValCount];
-    static {
-        Arrays.fill(EMPTY_POWER, 0.0);
-    }
     private double[] powerStates = new double[enumValCount];
 
-    public AncillaryMeterState() {
-//		Arrays.fill(powerStates, 0.0);
-    }
+    public AncillaryMeterState() {}
 
     public AncillaryMeterState(AncillaryMeterState other) {
-//		powerStates = new double[AncillaryCommodity.values().length];
-        this.powerStates = Arrays.copyOf(this.powerStates, enumValCount);
+        this.powerStates = Arrays.copyOf(other.powerStates, enumValCount);
     }
 
     public double getPower(AncillaryCommodity ancillaryCommodity) {
@@ -36,7 +32,6 @@ public class AncillaryMeterState {
     }
 
     public void clear() {
-//		Arrays.fill(powerStates, 0.0);
         ArrayUtils.fillArrayDouble(this.powerStates, 0.0);
     }
 
@@ -46,5 +41,24 @@ public class AncillaryMeterState {
 
     public AncillaryMeterState clone() {
         return new AncillaryMeterState(this);
+    }
+
+    public static class ImmutableAncillaryMeterState extends AncillaryMeterState {
+
+        private static final long serialVersionUID = -8438380085453609722L;
+
+        public ImmutableAncillaryMeterState(AncillaryMeterState other) {
+            super(other);
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setPower(AncillaryCommodity ancillaryCommodity, double power) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

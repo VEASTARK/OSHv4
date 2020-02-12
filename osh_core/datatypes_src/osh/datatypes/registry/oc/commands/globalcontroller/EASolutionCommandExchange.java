@@ -13,7 +13,6 @@ import java.util.UUID;
  */
 public class EASolutionCommandExchange<PhenotypeType extends ISolution> extends CommandExchange {
 
-    private static final long serialVersionUID = 4399537651455121419L;
     private final PhenotypeType phenotype;
 
     public EASolutionCommandExchange(
@@ -29,5 +28,4 @@ public class EASolutionCommandExchange<PhenotypeType extends ISolution> extends 
     public PhenotypeType getPhenotype() {
         return this.phenotype;
     }
-
 }

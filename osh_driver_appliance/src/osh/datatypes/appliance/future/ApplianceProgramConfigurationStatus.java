@@ -6,6 +6,7 @@ import osh.datatypes.power.SparseLoadProfile;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -115,8 +116,8 @@ public class ApplianceProgramConfigurationStatus implements Cloneable, Serializa
         for (int d0 = 0; d0 < this.minMaxDurations.length; d0++) {
             clonedMinMaxTimes[d0] = new int[this.minMaxDurations[d0].length][];
             for (int d1 = 0; d1 < this.minMaxDurations[d0].length; d1++) {
-                clonedMinMaxTimes[d0][d1] = new int[this.minMaxDurations[d0][d1].length];
-                System.arraycopy(this.minMaxDurations[d0][d1], 0, clonedMinMaxTimes[d0][d1], 0, this.minMaxDurations[d0][d1].length);
+                clonedMinMaxTimes[d0][d1] = Arrays.copyOf(this.minMaxDurations[d0][d1],
+                        this.minMaxDurations[d0][d1].length);
             }
         }
         return new ApplianceProgramConfigurationStatus(this.acpID, this.dynamicLoadProfiles, clonedMinMaxTimes, this.acpReferenceTime, this.doNotReschedule);

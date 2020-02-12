@@ -308,7 +308,6 @@ public class AdsorptionChillerLocalController
 
         ex = new ChillerIPP(
                 this.getUUID(),
-                this.getGlobalLogger(),
                 now,
                 toBeScheduled,
                 currentState,

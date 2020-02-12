@@ -90,7 +90,6 @@ public class SmartHeaterLocalObserver
     private void sendIPP(ZonedDateTime now) {
         SmartHeaterNonControllableIPP sipp = new SmartHeaterNonControllableIPP(
                 this.getUUID(),
-                this.getGlobalLogger(),
                 now,
                 this.temperatureSetting,
                 this.currentState,

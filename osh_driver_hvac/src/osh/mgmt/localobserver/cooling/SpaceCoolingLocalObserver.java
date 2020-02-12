@@ -10,7 +10,7 @@ import osh.driver.datatypes.cooling.ChillerCalendarDate;
 import osh.eal.hal.exchange.IHALExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.hal.exchange.SpaceCoolingObserverExchange;
-import osh.mgmt.ipp.ChilledWaterDemandNonControllableIPP;
+import osh.mgmt.ipp.thermal.ChilledWaterDemandNonControllableIPP;
 import osh.mgmt.localobserver.ThermalDemandLocalObserver;
 
 import java.util.ArrayList;
@@ -52,7 +52,6 @@ public class SpaceCoolingLocalObserver
             ChilledWaterDemandNonControllableIPP ipp =
                     new ChilledWaterDemandNonControllableIPP(
                             this.getUUID(),
-                            this.getGlobalLogger(),
                             this.getTimeDriver().getCurrentTime(),
                             false,
                             this.dates,

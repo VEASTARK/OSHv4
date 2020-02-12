@@ -11,12 +11,7 @@ import java.util.UUID;
  */
 public class ElectricVoltageOCDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 4347656947206748157L;
     protected double voltage;
-
 
     /**
      * CONSTRUCTOR
@@ -27,7 +22,6 @@ public class ElectricVoltageOCDetails extends StateExchange {
     public ElectricVoltageOCDetails(UUID sender, ZonedDateTime timestamp) {
         super(sender, timestamp);
     }
-
 
     public double getVoltage() {
         return this.voltage;

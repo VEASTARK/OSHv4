@@ -14,8 +14,6 @@ import java.util.UUID;
  */
 public class StopDeviceRequest extends CommandExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = -465373952181618356L;
-
     public StopDeviceRequest(UUID sender, UUID receiver, ZonedDateTime timestamp) {
         super(sender, receiver, timestamp);
     }

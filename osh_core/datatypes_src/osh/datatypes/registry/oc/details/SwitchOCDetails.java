@@ -11,12 +11,7 @@ import java.util.UUID;
  */
 public class SwitchOCDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -9070474430421146195L;
     private boolean on;
-
 
     /**
      * CONSTRUCTOR

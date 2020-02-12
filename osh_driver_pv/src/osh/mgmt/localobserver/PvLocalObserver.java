@@ -122,7 +122,7 @@ public class PvLocalObserver extends LocalObserver {
         //Prediction is always in relative Time from midnight, we need to extend it and then convert to absolute time
         SparseLoadProfile optimizationProfile = this.predictedPVProfile.merge(this.predictedPVProfile, 86400).cloneWithOffset(now);
 
-        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(), this.getGlobalLogger(),
+        PvNonControllableIPP ipp = new PvNonControllableIPP(this.getUUID(),
                 this.getTimeDriver().getCurrentTime(), optimizationProfile, this.compressionType, this.compressionValue);
 
         this.getOCRegistry().publish(InterdependentProblemPart.class, this, ipp);

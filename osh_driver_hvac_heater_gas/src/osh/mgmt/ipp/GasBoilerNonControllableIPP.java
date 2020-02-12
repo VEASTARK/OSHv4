@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -12,42 +11,43 @@ import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.gasboiler.GasBoilerModel;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
+ * Represents a problem-part for a non-controllable simple gas-boiler.
+ *
  * @author Sebastian Kramer, Ingo Mauser
  */
 public class GasBoilerNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = 1001003082323078089L;
-
     private final double MIN_TEMPERATURE;
     private final double MAX_TEMPERATURE;
-    private final int MAX_HOT_WATER_POWER;
-    private final int MAX_GAS_POWER;
-    private final boolean INITIAL_STATE;
 
-    private int typicalActivePowerOn;
-    private int typicalActivePowerOff;
-    private int typicalReactivePowerOn;
-    private int typicalReactivePowerOff;
-
-    private GasBoilerModel model;
-
-    // ### interdependent stuff ###
-
-    private SparseLoadProfile lp;
-
+    private final GasBoilerModel masterModel;
+    private GasBoilerModel actualModel;
 
     /**
-     * CONSTRUCTOR
+     * Constructs this non-controllable gas-boiler-ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param minTemperature the minimum hot-water temperature needed to kept
+     * @param maxTemperature the maximum hot-water temperature allowed
+     * @param initialState the initial operating state of the gas-boiler
+     * @param maxHotWaterPower the maximum heating power of the gas-boiler
+     * @param maxGasPower the maximum gas consumption of the gas-boiler
+     * @param typicalActivePowerOn the typical active power consumption when on
+     * @param typicalActivePowerOff the typical active power consumption when off
+     * @param typicalReactivePowerOn the typical reactive power consumption when on
+     * @param typicalReactivePowerOff the typical reactive power consumption when off
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public GasBoilerNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             double minTemperature,
             double maxTemperature,
             boolean initialState,
@@ -62,50 +62,40 @@ public class GasBoilerNonControllableIPP
 
         super(
                 deviceId,
-                logger,
+                timestamp,
                 false, //does not cause a scheduling
                 false, //does not need ancillary meter state as Input State
                 true, //reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.GASHEATING,
-                new Commodity[]{Commodity.ACTIVEPOWER,
+                EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
                         Commodity.HEATINGHOTWATERPOWER,
-                        Commodity.NATURALGASPOWER
-                },
+                        Commodity.NATURALGASPOWER),
                 compressionType,
                 compressionValue);
 
-        this.INITIAL_STATE = initialState;
         this.MIN_TEMPERATURE = minTemperature;
         this.MAX_TEMPERATURE = maxTemperature;
-        this.MAX_HOT_WATER_POWER = maxHotWaterPower;
-        this.MAX_GAS_POWER = maxGasPower;
-        this.typicalActivePowerOn = typicalActivePowerOn;
-        this.typicalActivePowerOff = typicalActivePowerOff;
-        this.typicalReactivePowerOn = typicalReactivePowerOn;
-        this.typicalReactivePowerOff = typicalReactivePowerOff;
-        this.model = new GasBoilerModel(this.MAX_HOT_WATER_POWER, this.MAX_GAS_POWER, typicalActivePowerOn, typicalActivePowerOff,
-                typicalReactivePowerOn, typicalReactivePowerOff, this.INITIAL_STATE);
+        this.masterModel = new GasBoilerModel(maxHotWaterPower, maxGasPower, typicalActivePowerOn,
+                typicalActivePowerOff, typicalReactivePowerOn, typicalReactivePowerOff, initialState);
 
-        this.allInputCommodities = new Commodity[]{Commodity.HEATINGHOTWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
     }
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
+     * Limited copy-constructor that constructs a copy of the given non-controllable gas-boiler-ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the non-controllable gas-boiler-ipp to copy
      */
-    @Deprecated
-    protected GasBoilerNonControllableIPP() {
-        super();
-        this.MIN_TEMPERATURE = 0;
-        this.MAX_TEMPERATURE = 0;
-        this.MAX_HOT_WATER_POWER = 0;
-        this.MAX_GAS_POWER = 0;
-        this.INITIAL_STATE = false;
+    public GasBoilerNonControllableIPP(GasBoilerNonControllableIPP other) {
+        super(other);
+        this.MIN_TEMPERATURE = other.MIN_TEMPERATURE;
+        this.MAX_TEMPERATURE = other.MAX_TEMPERATURE;
+        this.masterModel = other.masterModel;
     }
-
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -117,26 +107,14 @@ public class GasBoilerNonControllableIPP
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        // used for iteration in interdependent calculation
-        this.interdependentTime = this.getReferenceTime();
-        this.stepSize = stepSize;
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-
-        if (createLoadProfile)
-            this.lp = new SparseLoadProfile();
-        else
-            this.lp = null;
-
-        this.model = new GasBoilerModel(this.MAX_HOT_WATER_POWER, this.MAX_GAS_POWER, this.typicalActivePowerOn, this.typicalActivePowerOff,
-                this.typicalReactivePowerOn, this.typicalReactivePowerOff, this.INITIAL_STATE);
+        this.actualModel = new GasBoilerModel(this.masterModel);
     }
 
 
@@ -149,20 +127,22 @@ public class GasBoilerNonControllableIPP
             double currentTemperature = this.interdependentInputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
 
             // LOGIC
-            if (this.model.isOn() && currentTemperature > this.MAX_TEMPERATURE) {
-                this.model.switchOff();
-            } else if (!this.model.isOn() && currentTemperature < this.MIN_TEMPERATURE) {
-                this.model.switchOn();
+            if (this.actualModel.isOn() && currentTemperature > this.MAX_TEMPERATURE) {
+                this.actualModel.switchOff();
+            } else if (!this.actualModel.isOn() && currentTemperature < this.MIN_TEMPERATURE) {
+                this.actualModel.switchOn();
             }
 
-            double activePower = 0.0 + this.model.getActivePower();
-            double thermalPower = 0.0 + -this.model.getHotWaterPower();
-            double gasPower = 0.0 + this.model.getGasPower();
+            double activePower = 0.0 + this.actualModel.getActivePower();
+            double reactivePower = 0.0 + this.actualModel.getReactivePower();
+            double thermalPower = 0.0 + -this.actualModel.getHotWaterPower();
+            double gasPower = 0.0 + this.actualModel.getGasPower();
 
-            if (this.lp != null) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, (int) activePower);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, (int) thermalPower);
-                this.lp.setLoad(Commodity.NATURALGASPOWER, this.interdependentTime, (int) gasPower);
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) activePower);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), (int) reactivePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) thermalPower);
+                this.getLoadProfile().setLoad(Commodity.NATURALGASPOWER, this.getInterdependentTime(), (int) gasPower);
             }
 
             // update interdependentOutputStates
@@ -194,25 +174,25 @@ public class GasBoilerNonControllableIPP
             } else {
                 this.setOutputStates(null);
             }
-        } else {
-            this.getGlobalLogger().logDebug("interdependentInputStates == null");
         }
 
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.NATURALGASPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, 0);
+        if (this.getLoadProfile() != null) {
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.REACTIVEPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.NATURALGASPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
             }
-            return new Schedule(this.lp.getCompressedProfile(this.compressionType, this.compressionValue, this.compressionValue), 0, this.getDeviceType().toString());
+            return new Schedule(this.getLoadProfile().getCompressedProfile(this.compressionType,
+                    this.compressionValue, this.compressionValue), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 
@@ -220,7 +200,12 @@ public class GasBoilerNonControllableIPP
 
     @Override
     public String problemToString() {
-        return "[" + this.getReferenceTime() + "] GasHeatingNonControllableIPP ON=" + this.model.isOn() + " MIN=" + this.MIN_TEMPERATURE + " MAX=" + this.MAX_TEMPERATURE;
+        return "[" + this.getReferenceTime() + "] GasHeatingNonControllableIPP ON=" + this.masterModel.isOn() + " MIN=" + this.MIN_TEMPERATURE + " MAX=" + this.MAX_TEMPERATURE;
+    }
+
+    @Override
+    public GasBoilerNonControllableIPP getClone() {
+        return new GasBoilerNonControllableIPP(this);
     }
 
 }

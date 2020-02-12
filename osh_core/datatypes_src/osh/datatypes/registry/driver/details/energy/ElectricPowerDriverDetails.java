@@ -15,8 +15,6 @@ public class ElectricPowerDriverDetails extends StateExchange {
     /**
      * Electrical Power Details for Logging
      */
-    private static final long serialVersionUID = 4799921746955434387L;
-
     private UUID meterUuid;
 
     private double activePower;

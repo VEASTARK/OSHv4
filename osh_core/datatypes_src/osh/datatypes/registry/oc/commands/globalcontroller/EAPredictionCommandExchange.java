@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public class EAPredictionCommandExchange<PredictionType extends IPrediction> extends CommandExchange {
 
-    private static final long serialVersionUID = -8765943738508084657L;
     private final PredictionType prediction;
 
     public EAPredictionCommandExchange(
@@ -28,5 +27,4 @@ public class EAPredictionCommandExchange<PredictionType extends IPrediction> ext
     public PredictionType getPrediction() {
         return this.prediction;
     }
-
 }

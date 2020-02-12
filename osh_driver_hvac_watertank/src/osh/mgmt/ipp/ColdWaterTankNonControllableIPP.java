@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -12,60 +11,68 @@ import osh.datatypes.registry.oc.ipp.NonControllableIPP;
 import osh.driver.thermal.SimpleColdWaterTank;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a cold-water tank.
+ *
  * @author Florian Allerding, Ingo Mauser, Till Schuberth
  */
 public class ColdWaterTankNonControllableIPP
         extends NonControllableIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = -7475173612656137600L;
     private final double initialTemperature;
-    private final double tankCapacity = 3000.0;
-    private final double tankDiameter = 1.0;
-    private final double ambientTemperature = 20.0;
+    private static final double tankCapacity = 3000.0;
+    private static final double tankDiameter = 1.0;
+    private static final double ambientTemperature = 20.0;
+
     private SimpleColdWaterTank waterTank;
 
     /**
-     * CONSTRUCTOR
+     * Constructs this cold-water tank ipp with the given information.
+     *
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param initialTemperature the intial temperature of the watertank
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public ColdWaterTankNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             double initialTemperature,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
         super(
                 deviceId,
-                logger,
+                timestamp,
                 false, //does not cause scheduling
                 false, //does not need ancillary meter state as Input State
                 true, // reacts to input states
                 false, //is not static
-                timeStamp,
                 DeviceTypes.COLDWATERSTORAGE,
-                new Commodity[]{Commodity.COLDWATERPOWER},
+                EnumSet.of(Commodity.COLDWATERPOWER),
                 compressionType,
                 compressionValue);
 
         this.initialTemperature = initialTemperature;
-        this.allInputCommodities = new Commodity[]{Commodity.COLDWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.COLDWATERPOWER));
     }
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
+     * Limited copy-constructor that constructs a copy of the given cold-water tank ipp that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the cold-water tank ipp to copy
      */
-    @Deprecated
-    protected ColdWaterTankNonControllableIPP() {
-        super();
-        this.initialTemperature = 0;
+    public ColdWaterTankNonControllableIPP(ColdWaterTankNonControllableIPP other) {
+        super(other);
+        this.initialTemperature = other.initialTemperature;
+        this.waterTank = null;
     }
-
 
     @Override
     public void recalculateEncoding(long currentTime, long maxHorizon) {
@@ -73,28 +80,22 @@ public class ColdWaterTankNonControllableIPP
         //  better not...new IPP instead
     }
 
-
-    // ### interdependent problem part stuff ###
-
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
 
-        this.stepSize = stepSize;
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.waterTank = new SimpleColdWaterTank(
-                this.tankCapacity,
-                this.tankDiameter,
+                tankCapacity,
+                tankDiameter,
                 this.initialTemperature,
-                this.ambientTemperature);
+                ambientTemperature);
 
-        this.waterTank.reduceByStandingHeatLoss(maxReferenceTime - this.getTimestamp().toEpochSecond());
+        this.waterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp().toEpochSecond());
     }
 
     @Override
@@ -105,7 +106,7 @@ public class ColdWaterTankNonControllableIPP
             // update tank according to interdependentInputStates
             double coldWaterPower = this.interdependentInputStates.getPower(Commodity.COLDWATERPOWER);
             if (coldWaterPower != 0) {
-                this.waterTank.addPowerOverTime(coldWaterPower, this.stepSize, null, null);
+                this.waterTank.addPowerOverTime(coldWaterPower, this.getStepSize(), null, null);
             }
 
             // update interdependentOutputStates
@@ -114,21 +115,22 @@ public class ColdWaterTankNonControllableIPP
         }
 
         // reduce by standing loss
-        this.waterTank.reduceByStandingHeatLoss(this.stepSize);
-
+        this.waterTank.reduceByStandingHeatLoss(this.getStepSize());
+        this.incrementInterdependentTime();
     }
-
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
         return new Schedule(new SparseLoadProfile(), 0, this.getDeviceType().toString());
     }
 
-    // ### to string ###
-
     @Override
     public String problemToString() {
         return "FIXME FIRST !!!! [" + this.getReferenceTime() + "] ColdWaterTank current temperature = " + (this.waterTank != null ? this.waterTank.getCurrentWaterTemperature() : null);
     }
 
+    @Override
+    public ColdWaterTankNonControllableIPP getClone() {
+        return new ColdWaterTankNonControllableIPP(this);
+    }
 }

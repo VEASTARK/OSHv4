@@ -14,10 +14,7 @@ import java.util.UUID;
  */
 public class StartDeviceRequest extends CommandExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = -4843814099005430530L;
-
     public StartDeviceRequest(UUID sender, UUID receiver, ZonedDateTime timestamp) {
         super(sender, receiver, timestamp);
     }
-
 }

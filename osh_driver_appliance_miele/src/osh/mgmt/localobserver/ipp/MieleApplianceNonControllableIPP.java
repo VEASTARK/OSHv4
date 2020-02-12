@@ -1,172 +1,75 @@
 package osh.mgmt.localobserver.ipp;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.ea.Schedule;
-import osh.datatypes.ea.interfaces.IPrediction;
-import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
-import osh.datatypes.registry.oc.ipp.NonControllableIPP;
-import osh.esc.LimitedCommodityStateMap;
+import osh.datatypes.registry.oc.ipp.PredictedNonControllableIPP;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.EnumSet;
 import java.util.UUID;
 
 /**
- * @author Ingo Mauser
+ * Represents a specific, fully predicted problem-part for a miele household device.
+ *
+ * @author Ingo Mauser, Sebastian Kramer
  */
-public class MieleApplianceNonControllableIPP extends NonControllableIPP<ISolution, IPrediction> {
-
-    private static final long serialVersionUID = -5820880081859248470L;
-
-    private SparseLoadProfile profile;
-    private SparseLoadProfile lp;
-
-    private LimitedCommodityStateMap[] allOutputStates;
-    private long outputStatesCalculatedFor = Long.MIN_VALUE;
-
+public class MieleApplianceNonControllableIPP extends PredictedNonControllableIPP {
 
     /**
-     * CONSTRUCTOR
-     * for serialization only, do NOT use
-     */
-    @Deprecated
-    protected MieleApplianceNonControllableIPP() {
-        super();
-    }
+     * Constructs this miele device problem-part.
 
-    /**
-     * CONSTRUCTOR
+     * @param deviceId the identifier of the devide that is represented by this problem-part
+     * @param timestamp the starting-time this problem-part represents at the moment
+     * @param toBeScheduled flag if this problem-part should cause a scheduling
+     * @param powerPrediction the predicted heating power profile
+     * @param deviceType the type of device that is represented by this problem-part
+     * @param compressionType the type of compression to use for this problem-part
+     * @param compressionValue the associated compression value to be used for compression
      */
     public MieleApplianceNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
             ZonedDateTime timestamp,
-            SparseLoadProfile profile,
             boolean toBeScheduled,
             DeviceTypes deviceType,
+            SparseLoadProfile powerPrediction,
             LoadProfileCompressionTypes compressionType,
             int compressionValue) {
 
         super(
                 deviceId,
-                logger,
-                toBeScheduled,
-                false, //does not need ancillary meter
-                false, //does not react to input states
-                false, //is not static
                 timestamp,
+                toBeScheduled,
                 deviceType,
-                new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER},
+                powerPrediction,
+                EnumSet.of(Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER),
                 compressionType,
                 compressionValue);
-
-        this.profile = profile.cloneAfter(timestamp.toEpochSecond()).getCompressedProfile(this.compressionType,
-                this.compressionValue, this.compressionValue);
-
     }
 
-
-    @Override
-    public void initializeInterdependentCalculation(long maxReferenceTime,
-                                                    BitSet solution, int stepSize, boolean createLoadProfile,
-                                                    boolean keepPrediction) {
-
-        if (maxReferenceTime != this.getReferenceTime()) {
-            this.interdependentTime = maxReferenceTime;
-
-        } else
-            this.interdependentTime = this.getReferenceTime();
-
-        this.stepSize = stepSize;
-
-        if (createLoadProfile)
-            this.lp = this.profile.clone();
-        else
-            this.lp = null;
-
-
-        if (this.outputStatesCalculatedFor != maxReferenceTime) {
-            long time = maxReferenceTime;
-            ObjectArrayList<LimitedCommodityStateMap> tempOutputStates = new ObjectArrayList<>();
-
-            while (time < this.profile.getEndingTimeOfProfile()) {
-                LimitedCommodityStateMap output = null;
-
-                double activePower = this.profile.getAverageLoadFromTill(Commodity.ACTIVEPOWER, time, time + stepSize);
-                double reactivePower = this.profile.getAverageLoadFromTill(Commodity.REACTIVEPOWER, time, time + stepSize);
-
-                if (activePower != 0.0 || reactivePower != 0.0) {
-                    output = new LimitedCommodityStateMap(this.allOutputCommodities);
-                    output.setPower(Commodity.ACTIVEPOWER, activePower);
-                    output.setPower(Commodity.REACTIVEPOWER, reactivePower);
-                }
-                tempOutputStates.add(output);
-
-                time += stepSize;
-            }
-            //add zero if optimisation goes longer then the profile
-            LimitedCommodityStateMap output = new LimitedCommodityStateMap(new Commodity[]{Commodity.ACTIVEPOWER, Commodity.REACTIVEPOWER});
-            output.setPower(Commodity.ACTIVEPOWER, 0.0);
-            output.setPower(Commodity.REACTIVEPOWER, 0.0);
-            tempOutputStates.add(output);
-
-            this.allOutputStates = new LimitedCommodityStateMap[tempOutputStates.size()];
-            this.allOutputStates = tempOutputStates.toArray(this.allOutputStates);
-            this.outputStatesCalculatedFor = maxReferenceTime;
-        }
-    }
-
-
-    @Override
-    public void calculateNextStep() {
-        int index = (int) ((this.interdependentTime - this.outputStatesCalculatedFor) / this.stepSize);
-        if (index < this.allOutputStates.length) {
-            this.setOutputStates(this.allOutputStates[index]);
-        } else {
-            this.setOutputStates(null);
-        }
-        this.interdependentTime += this.stepSize;
-    }
-
-
-    @Override
-    public Schedule getFinalInterdependentSchedule() {
-        if (this.lp != null) {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(
-                        Commodity.ACTIVEPOWER,
-                        this.interdependentTime,
-                        0);
-                this.lp.setLoad(
-                        Commodity.REACTIVEPOWER,
-                        this.interdependentTime,
-                        0);
-            }
-
-            return new Schedule(this.lp, 0.0, this.getDeviceType().toString());
-        } else {
-            return new Schedule(new SparseLoadProfile(), 0.0, this.getDeviceType().toString());
-        }
+    /**
+     * Limited copy-constructor that constructs a copy of the given miele device problem-part that is as shallow as
+     * possible while still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the miele device problem-part to copy
+     */
+    public MieleApplianceNonControllableIPP(MieleApplianceNonControllableIPP other) {
+        super(other);
     }
 
     @Override
-    public void recalculateEncoding(long currentTime, long maxHorizon) {
-        this.setReferenceTime(currentTime);
+    public MieleApplianceNonControllableIPP getClone() {
+        return new MieleApplianceNonControllableIPP(this);
     }
 
     @Override
     public String problemToString() {
-        if (this.profile.getEndingTimeOfProfile() != 0) {
-            return "miele appliance running till " + this.profile.getEndingTimeOfProfile();
+        if (this.predictedProfile.getEndingTimeOfProfile() != 0) {
+            return "miele appliance running till " + this.predictedProfile.getEndingTimeOfProfile();
         } else {
             return "miele appliance not running";
         }
-
     }
-
 }

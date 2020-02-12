@@ -3,7 +3,7 @@ package osh.esc.grid.instances;
 import osh.datatypes.commodity.Commodity;
 import osh.esc.grid.EnergyRelation;
 import osh.esc.grid.EnergySourceSink;
-import osh.esc.grid.carrier.Electrical;
+import osh.esc.grid.carrier.ElectricalConnection;
 
 import java.util.*;
 
@@ -97,19 +97,19 @@ public class ESHLElectricalEnergyGrid extends GridInstance {
 
         // Meter <-> baseload
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.baseload,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.baseload,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
@@ -134,74 +134,74 @@ public class ESHLElectricalEnergyGrid extends GridInstance {
 
         // Meter <-> PVESHL
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.pvESHL,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER)
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER)
             );
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.pvESHL,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> battery
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.battery,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.battery,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> A/C inverter
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.acInverter,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.acInverter,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> IHE
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.ihe,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.ihe,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
@@ -226,128 +226,128 @@ public class ESHLElectricalEnergyGrid extends GridInstance {
 
         // Meter <-> Dachs CHP
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.chp,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.chp,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
 
         // Meter <-> Dishwasher
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceDW,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceDW,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> Cooktop / Induction Hob
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceIH,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceIH,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> Oven
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceOV,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceOV,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> Dryer
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceTD,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceTD,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> Washer
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceWM,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceWM,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
         // Meter <-> CoffeeSystem
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceCS,
                     this.meter,
-                    new Electrical(Commodity.ACTIVEPOWER),
-                    new Electrical(Commodity.ACTIVEPOWER));
+                    new ElectricalConnection(Commodity.ACTIVEPOWER),
+                    new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Electrical> relation = new EnergyRelation<>(
+            EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceCS,
                     this.meter,
-                    new Electrical(Commodity.REACTIVEPOWER),
-                    new Electrical(Commodity.REACTIVEPOWER));
+                    new ElectricalConnection(Commodity.REACTIVEPOWER),
+                    new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 

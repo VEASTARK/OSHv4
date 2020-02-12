@@ -60,7 +60,6 @@ public class ColdWaterTankLocalObserver
             ColdWaterTankNonControllableIPP ex;
             ex = new ColdWaterTankNonControllableIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
                     this.currentTemperature,
                     this.compressionType,
@@ -88,7 +87,6 @@ public class ColdWaterTankLocalObserver
                 ColdWaterTankNonControllableIPP ex;
                 ex = new ColdWaterTankNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         this.getTimeDriver().getCurrentTime(),
                         this.currentTemperature,
                         this.compressionType,

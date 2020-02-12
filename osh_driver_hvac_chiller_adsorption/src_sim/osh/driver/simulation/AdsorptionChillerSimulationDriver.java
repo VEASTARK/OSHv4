@@ -11,7 +11,6 @@ import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.hal.exchange.ChillerControllerExchange;
 import osh.hal.exchange.ChillerObserverExchange;
 import osh.simulation.DeviceSimulationDriver;
@@ -201,7 +200,7 @@ public class AdsorptionChillerSimulationDriver
     @Override
     public void setCommodityInputStates(
             LimitedCommodityStateMap inputStates,
-            AncillaryMeterState ancillaryMeterState) throws EnergySimulationException {
+            AncillaryMeterState ancillaryMeterState) {
 
         super.setCommodityInputStates(inputStates, ancillaryMeterState);
         if (inputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {

@@ -1,7 +1,6 @@
 package osh.mgmt.ipp;
 
 import osh.configuration.system.DeviceTypes;
-import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.interfaces.IPrediction;
@@ -13,12 +12,15 @@ import osh.driver.chiller.AdsorptionChillerModel;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
-import java.util.BitSet;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
 
 
 /**
+ * Represents a problem-part for a non-controllable simple adsorption cooler.
+ *
  * @author Ingo Mauser, Florian Allerding, Till Schuberth, Julian Feder
  */
 public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPrediction> {
@@ -31,12 +33,8 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
      * slot length in [s]
      */
     public final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
-    /**
-     *
-     */
-    private static final long serialVersionUID = -8273266479216299094L;
-    private final int typicalStandbyActivePower = 10; // [W]
-    private final int typicalRunningActivePower = 420; // [W]
+    private static final int typicalStandbyActivePower = 10; // [W]
+    private static final int typicalRunningActivePower = 420; // [W]
     /**
      * is AdChiller on at the beginning
      */
@@ -44,11 +42,11 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
     private final Map<Long, Double> temperaturePrediction;
 
     // temperature control
-    private final double coldWaterStorageMinTemp = 10.0;
-    private final double coldWaterStorageMaxTemp = 15.0;
+    private static final double coldWaterStorageMinTemp = 10.0;
+    private static final double coldWaterStorageMaxTemp = 15.0;
 
-    private final double hotWaterStorageMinTemp = 55.0;
-    private final double hotWaterStorageMaxTemp = 80.0;
+    private static final double hotWaterStorageMinTemp = 55.0;
+    private static final double hotWaterStorageMaxTemp = 80.0;
 
 //	/** delta T below maximum cold water temperature */
 //	private double hysteresis = 1.0;
@@ -56,37 +54,33 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
 
     // ### interdependent stuff ###
     /**
-     * used for iteration in interdependent calculation (ancillary time in the future)
-     */
-    private long interdependentTime;
-    /**
      * running times of chiller
      */
-    private double interdependentCervisia;
     private boolean interdependentLastState;
 
     /**
      * from cold water tank IPP
      */
-    private double currentColdWaterTemperature = 12;
+    private double currentColdWaterTemperature;
     /**
      * from hot water tank IPP
      */
-    private double currentHotWaterTemperature = 60;
-
-    private SparseLoadProfile lp;
-
+    private double currentHotWaterTemperature;
 
     /**
-     * CONSTRUCTOR
+     * Constructs this chiller non-controllable problem-part with the given information.
      *
-     * @param deviceId
-     * @param timeStamp
+     * @param deviceId the unique identifier of the underlying device
+     * @param timestamp the time-stamp of creation of this problem-part
+     * @param toBeScheduled if the publication of this problem-part should cause a rescheduling
+     * @param initialAdChillerState the initial operation state of the chiller
+     * @param temperaturePrediction prediction of outside temperatures
+     * @param compressionType type of compression to be used for load profiles
+     * @param compressionValue associated value to be used for compression
      */
     public ChillerNonControllableIPP(
             UUID deviceId,
-            IGlobalLogger logger,
-            ZonedDateTime timeStamp,
+            ZonedDateTime timestamp,
             boolean toBeScheduled,
             boolean initialAdChillerState,
             Map<Long, Double> temperaturePrediction,
@@ -94,25 +88,41 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
             int compressionValue) {
         super(
                 deviceId,
-                logger,
+                timestamp,
                 toBeScheduled,
                 false, //needsAncillaryMeterState
                 true, //reactsToInputStates
                 false, //is not static
-                timeStamp,
                 DeviceTypes.ADSORPTIONCHILLER,
-                new Commodity[]{Commodity.ACTIVEPOWER,
+                EnumSet.of(Commodity.ACTIVEPOWER,
                         Commodity.REACTIVEPOWER,
                         Commodity.HEATINGHOTWATERPOWER,
-                        Commodity.COLDWATERPOWER
-                },
+                        Commodity.COLDWATERPOWER),
                 compressionType,
                 compressionValue);
 
         this.initialAdChillerState = initialAdChillerState;
-        this.temperaturePrediction = temperaturePrediction;
+        this.temperaturePrediction = Collections.unmodifiableMap(temperaturePrediction);
 
-        this.allInputCommodities = new Commodity[]{Commodity.HEATINGHOTWATERPOWER, Commodity.COLDWATERPOWER};
+        this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER, Commodity.COLDWATERPOWER));
+    }
+
+    /**
+     * Limited copy-constructor that constructs a copy of the given chiller ipp that is as shallow as possible while
+     * still not conflicting with multithreaded use inside the optimization-loop. </br>
+     * NOT to be used to generate a complete deep copy!
+     *
+     * @param other the chiller ipp to copy
+     */
+    public ChillerNonControllableIPP(ChillerNonControllableIPP other) {
+        super(other);
+
+        this.initialAdChillerState = other.initialAdChillerState;
+        this.temperaturePrediction = other.temperaturePrediction;
+
+        this.interdependentLastState = other.interdependentLastState;
+        this.currentHotWaterTemperature = other.currentHotWaterTemperature;
+        this.currentColdWaterTemperature = other.currentColdWaterTemperature;
     }
 
 
@@ -120,30 +130,11 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
 
     @Override
     public void initializeInterdependentCalculation(
-            long maxReferenceTime,
-            BitSet solution,
+            long interdependentStartingTime,
             int stepSize,
             boolean createLoadProfile,
             boolean keepPrediction) {
-
-        // used for iteration in interdependent calculation
-        this.setOutputStates(null);
-        this.interdependentInputStates = null;
-
-        if (createLoadProfile) {
-            this.lp = new SparseLoadProfile();
-        } else {
-            this.lp = null;
-        }
-
-        if (this.getReferenceTime() != maxReferenceTime) {
-            this.setReferenceTime(maxReferenceTime);
-        }
-
-        this.stepSize = stepSize;
-
-        this.interdependentCervisia = 0.0;
-        this.interdependentTime = this.getReferenceTime();
+        super.initializeInterdependentCalculation(interdependentStartingTime, stepSize, createLoadProfile, keepPrediction);
 
         this.interdependentLastState = this.initialAdChillerState;
     }
@@ -170,17 +161,17 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
         // AdChiller control (forced on/off)
 
         if (this.interdependentLastState) {
-            if (this.currentColdWaterTemperature <= this.coldWaterStorageMinTemp) {
+            if (this.currentColdWaterTemperature <= coldWaterStorageMinTemp) {
                 chillerNewState = false;
             }
-            if (this.currentHotWaterTemperature < this.hotWaterStorageMinTemp
-                    || this.currentHotWaterTemperature > this.hotWaterStorageMaxTemp) {
+            if (this.currentHotWaterTemperature < hotWaterStorageMinTemp
+                    || this.currentHotWaterTemperature > hotWaterStorageMaxTemp) {
                 chillerNewState = false;
             }
         } else {
-            if (this.currentColdWaterTemperature > this.coldWaterStorageMaxTemp
-                    && this.currentHotWaterTemperature > this.hotWaterStorageMinTemp
-                    && this.currentHotWaterTemperature < this.hotWaterStorageMaxTemp) {
+            if (this.currentColdWaterTemperature > coldWaterStorageMaxTemp
+                    && this.currentHotWaterTemperature > hotWaterStorageMinTemp
+                    && this.currentHotWaterTemperature < hotWaterStorageMaxTemp) {
                 chillerNewState = true;
             }
         }
@@ -194,24 +185,24 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
 
 
         // calculate power values
-        double activePower = this.typicalStandbyActivePower;
+        double activePower = typicalStandbyActivePower;
         double hotWaterPower = 0;
         double coldWaterPower = 0;
 
         if (chillerNewState) {
-            long secondsFromYearStart = TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.interdependentTime));
+            long secondsFromYearStart = TimeConversion.getSecondsSinceYearStart(TimeConversion.convertUnixTimeToZonedDateTime(this.getInterdependentTime()));
             double outdoorTemperature = this.temperaturePrediction.get((secondsFromYearStart / 300) * 300); // keep it!!
-            activePower = this.typicalRunningActivePower;
+            activePower = typicalRunningActivePower;
             coldWaterPower = AdsorptionChillerModel.chilledWaterPower(this.currentHotWaterTemperature, outdoorTemperature);
         }
 
-        if (chillerNewState || this.interdependentLastState || this.interdependentTime == this.getReferenceTime()) {
+        if (chillerNewState || this.interdependentLastState || this.getInterdependentTime() == this.getReferenceTime()) {
 
 
-            if (this.lp != null) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, (int) activePower);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, (int) hotWaterPower);
-                this.lp.setLoad(Commodity.COLDWATERPOWER, this.interdependentTime, (int) coldWaterPower);
+            if (this.getLoadProfile() != null) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), (int) activePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), (int) hotWaterPower);
+                this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getInterdependentTime(), (int) coldWaterPower);
             }
 
             this.internalInterdependentOutputStates.setPower(
@@ -227,28 +218,28 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
         if (chillerNewState && !this.interdependentLastState) {
             // fixed costs per start, i.e., costs to turn on the CHP
             // (not the variable costs for letting the CHP run)
-            this.interdependentCervisia += 10.0;
+            this.addInterdependentCervisia(10.0);
         }
 
         this.interdependentLastState = chillerNewState;
-        this.interdependentTime += this.stepSize;
+        this.incrementInterdependentTime();
     }
 
 
     @Override
     public Schedule getFinalInterdependentSchedule() {
 
-        if (this.lp == null) {
-            return new Schedule(new SparseLoadProfile(), this.interdependentCervisia, this.getDeviceType().toString());
+        if (this.getLoadProfile() == null) {
+            return new Schedule(new SparseLoadProfile(), this.getInterdependentCervisia(), this.getDeviceType().toString());
         } else {
-            if (this.lp.getEndingTimeOfProfile() > 0) {
-                this.lp.setLoad(Commodity.ACTIVEPOWER, this.interdependentTime, this.typicalStandbyActivePower);
-                this.lp.setLoad(Commodity.HEATINGHOTWATERPOWER, this.interdependentTime, 0);
-                this.lp.setLoad(Commodity.COLDWATERPOWER, this.interdependentTime, 0);
+            if (this.getLoadProfile().getEndingTimeOfProfile() > 0) {
+                this.getLoadProfile().setLoad(Commodity.ACTIVEPOWER, this.getInterdependentTime(), typicalStandbyActivePower);
+                this.getLoadProfile().setLoad(Commodity.HEATINGHOTWATERPOWER, this.getInterdependentTime(), 0);
+                this.getLoadProfile().setLoad(Commodity.COLDWATERPOWER, this.getInterdependentTime(), 0);
             }
 
-            SparseLoadProfile slp = this.lp.getCompressedProfileByDiscontinuities(50);
-            return new Schedule(slp, this.interdependentCervisia, this.getDeviceType().toString());
+            SparseLoadProfile slp = this.getLoadProfile().getCompressedProfileByDiscontinuities(50);
+            return new Schedule(slp, this.getInterdependentCervisia(), this.getDeviceType().toString());
         }
     }
 
@@ -267,4 +258,8 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
         //NOTHING
     }
 
+    @Override
+    public ChillerNonControllableIPP getClone() {
+        return new ChillerNonControllableIPP(this);
+    }
 }

@@ -5,11 +5,9 @@ import osh.datatypes.commodity.AncillaryMeterState;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.EnergySimulationCore;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
-import osh.esc.grid.EnergyGrid;
 import osh.esc.grid.EnergySimulationTypes;
+import osh.esc.grid.IEnergyGrid;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -19,12 +17,7 @@ import java.util.Map.Entry;
  *
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class SimEnergySimulationCore extends EnergySimulationCore implements Serializable {
-
-    /**
-     * Serial ID
-     */
-    private static final long serialVersionUID = -4085403098636042133L;
+public class SimEnergySimulationCore extends EnergySimulationCore {
 
     /**
      * CONSTRUCTOR
@@ -40,21 +33,13 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
      * CONSTRUCTOR
      */
     public SimEnergySimulationCore(
-            Map<EnergySimulationTypes, EnergyGrid> grids,
+            Map<EnergySimulationTypes, IEnergyGrid> grids,
             UUID meterUUID) {
         super(grids, meterUUID);
     }
 
-    /**
-     * CONSTRUCTOR for serialization, do NOT use!
-     */
-    @Deprecated
-    protected SimEnergySimulationCore() {
-    }
-
     public AncillaryMeterState doNextEnergySimulation(
-            ArrayList<IDeviceEnergySubject> energySimulationSubjects)
-            throws EnergySimulationException {
+            ArrayList<IDeviceEnergySubject> energySimulationSubjects) {
 
         // Get output states
         Map<UUID, LimitedCommodityStateMap> simSubjCommodityStates = new HashMap<>();
@@ -79,14 +64,13 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
         Map<UUID, LimitedCommodityStateMap> totalInputStates = new HashMap<>();
 //		EnumMap<AncillaryCommodity,AncillaryCommodityState> ancillaryMeterState = new EnumMap<>(AncillaryCommodity.class);
         AncillaryMeterState ancillaryMeterState = new AncillaryMeterState();
-        for (Entry<EnergySimulationTypes, EnergyGrid> grid : this.grids.entrySet()) {
+        for (Entry<EnergySimulationTypes, IEnergyGrid> grid : this.grids.entrySet()) {
             grid.getValue().doCalculation(simSubjCommodityStates, totalInputStates, ancillaryMeterState);
         }
 
         // Get AncillaryState of Meter (grid connections)
 
         // Inform subjects about input states (total flow)
-        try {
             for (IEnergySubject _simSubject : energySimulationSubjects) {
                 UUID simSubjID = _simSubject.getUUID();
 //				EnumMap<Commodity,RealCommodityState> simSubjState = totalInputStates.get(simSubjID);
@@ -107,9 +91,6 @@ public class SimEnergySimulationCore extends EnergySimulationCore implements Ser
 
                 _simSubject.setCommodityInputStates(simSubjState, clonedAncillaryMeterState);
             }
-        } catch (EnergySimulationException ex) {
-            throw new EnergySimulationException(ex);
-        }
 
         return ancillaryMeterState;
     }

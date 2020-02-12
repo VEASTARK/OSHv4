@@ -16,12 +16,6 @@ import java.util.UUID;
 
 public class TemperatureDetails extends StateExchange {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 4909123900868946070L;
-
-
     private Double temperature;
 
     private HashMap<String, Double> auxiliaryTemperatures = new HashMap<>();

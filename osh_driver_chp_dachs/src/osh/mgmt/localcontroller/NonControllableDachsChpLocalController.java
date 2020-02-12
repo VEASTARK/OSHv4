@@ -79,14 +79,12 @@ public class NonControllableDachsChpLocalController
             boolean isRunning = mox.isRunning();
 
             // new IPP
-            boolean toBeScheduled = false;
             DachsChpNonControllableIPP sIPP = null;
             try {
                 sIPP = new DachsChpNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         now,
-                        toBeScheduled,
+                        false,
                         mox.getMinRuntime(),
                         new GenericChpModel(
                                 typicalActivePower,

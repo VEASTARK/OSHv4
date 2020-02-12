@@ -3,6 +3,7 @@ package osh.mgmt.localobserver;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.commodity.AncillaryCommodity;
+import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
@@ -16,7 +17,6 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
-import osh.mgmt.ipp.watertank.HotWaterTankPrediction;
 import osh.registry.interfaces.IDataRegistryListener;
 
 import java.time.Duration;
@@ -85,14 +85,13 @@ public class HotWaterTankLocalObserver
         if (now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
-                    this.getGlobalLogger(),
                     now,
+                    false,
                     this.currentTemperature,
                     this.tankCapacity,
                     this.tankDiameter,
                     this.ambientTemperature,
                     (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
-                    false,
                     this.compressionType,
                     this.compressionValue);
             this.getOCRegistry().publish(
@@ -111,14 +110,13 @@ public class HotWaterTankLocalObserver
                     this.getGlobalLogger().logDebug("Temperature prediction was wrong by >2.5 degree for two consecutive minutes, reschedule");
                     HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                             this.getUUID(),
-                            this.getGlobalLogger(),
                             now,
+                            true,
                             this.currentTemperature,
                             this.tankCapacity,
                             this.tankDiameter,
                             this.ambientTemperature,
                             (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
-                            true,
                             this.compressionType,
                             this.compressionValue);
                     this.getOCRegistry().publish(
@@ -152,7 +150,6 @@ public class HotWaterTankLocalObserver
             this.currentTemperature = ox.getTopTemperature();
 
             if (Math.abs(this.temperatureInLastIPP - this.currentTemperature) >= this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
-
                 this.tankCapacity = ox.getTankCapacity();
                 this.tankDiameter = ox.getTankDiameter();
                 this.ambientTemperature = ox.getAmbientTemperature();
@@ -160,14 +157,13 @@ public class HotWaterTankLocalObserver
                 HotWaterTankNonControllableIPP ex;
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
-                        this.getGlobalLogger(),
                         this.getTimeDriver().getCurrentTime(),
+                        false,
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
                         this.ambientTemperature,
                         (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
-                        false,
                         this.compressionType,
                         this.compressionValue);
                 this.getOCRegistry().publish(
@@ -218,7 +214,7 @@ public class HotWaterTankLocalObserver
         }
 
         if (exchange instanceof EAPredictionCommandExchange) {
-            EAPredictionCommandExchange<HotWaterTankPrediction> exs = ((EAPredictionCommandExchange<HotWaterTankPrediction>) exchange);
+            EAPredictionCommandExchange<TemperaturePrediction> exs = ((EAPredictionCommandExchange<TemperaturePrediction>) exchange);
             this.temperaturePrediction = exs.getPrediction().getTemperatureStates();
         }
     }

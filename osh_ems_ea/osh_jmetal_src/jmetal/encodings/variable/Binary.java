@@ -142,7 +142,6 @@ public class Binary extends Variable {
         this.bits_.set(bit, value);
     } //getNumberOfBits
 
-
     /**
      * Obtain the hamming distance between two binary strings
      *

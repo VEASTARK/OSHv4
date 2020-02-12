@@ -72,7 +72,6 @@ public class NonControllableAdsorptionChillerLocalController
         // new IPP
         ChillerNonControllableIPP ipp = new ChillerNonControllableIPP(
                 this.getUUID(),
-                this.getGlobalLogger(),
                 exchange.getTime(),
                 toBeScheduled,
                 currentState,

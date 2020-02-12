@@ -74,12 +74,9 @@ public class GenericApplianceSolution implements ISolution {
 
     @Override
     public GenericApplianceSolution clone() {
-        long[] startingTimes = new long[this.startingTimes.length];
-        System.arraycopy(this.startingTimes, 0, startingTimes, 0, this.startingTimes.length);
-
         return new GenericApplianceSolution(
                 this.acpUUID,
-                startingTimes,
+                Arrays.copyOf(this.startingTimes, this.startingTimes.length),
                 this.profileId);
     }
 

@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 public class ApplianceRequest extends CommandExchange implements IPromiseToBeImmutable {
 
-    private static final long serialVersionUID = -67829648900818704L;
     private final EN50523OIDExecutionOfACommandCommands command;
 
     public ApplianceRequest(UUID sender, UUID receiver, ZonedDateTime timestamp,

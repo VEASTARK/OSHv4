@@ -9,7 +9,6 @@ import osh.driver.ihe.SmartHeaterModel;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.esc.LimitedCommodityStateMap;
-import osh.esc.exception.EnergySimulationException;
 import osh.hal.exchange.SmartHeaterOX;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
@@ -153,7 +152,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     @Override
     public void setCommodityInputStates(
             LimitedCommodityStateMap inputStates,
-            AncillaryMeterState ancillaryMeterState) throws EnergySimulationException {
+            AncillaryMeterState ancillaryMeterState) {
         super.setCommodityInputStates(inputStates, ancillaryMeterState);
 
         if (inputStates != null) {

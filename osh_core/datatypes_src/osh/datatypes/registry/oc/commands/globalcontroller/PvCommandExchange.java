@@ -8,7 +8,6 @@ import java.util.UUID;
 
 public class PvCommandExchange extends CommandExchange {
 
-    private static final long serialVersionUID = -168998441819144791L;
     private Boolean newPvSwitchedOn;
     private Double reactivePowerTargetValue;
 

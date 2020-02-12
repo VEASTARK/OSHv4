@@ -3,7 +3,7 @@ package osh.esc.grid.instances;
 import osh.datatypes.commodity.Commodity;
 import osh.esc.grid.EnergyRelation;
 import osh.esc.grid.EnergySourceSink;
-import osh.esc.grid.carrier.Thermal;
+import osh.esc.grid.carrier.ThermalConnection;
 
 import java.util.UUID;
 
@@ -90,150 +90,150 @@ final EnergySourceSink adsorptionChiller =
 
         // GHD <-> Hot Water Storage
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.ghd,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.ghd,
                     this.meter,
-                    new Thermal(Commodity.NATURALGASPOWER),
-                    new Thermal(Commodity.NATURALGASPOWER));
+                    new ThermalConnection(Commodity.NATURALGASPOWER),
+                    new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
         }
 
 
         // IHE <-> Hot Water Storage
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.ihe,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
 
         // Dachs CHP <-> Hot Water Storage
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.chp,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.chp,
                     this.meter,
-                    new Thermal(Commodity.NATURALGASPOWER),
-                    new Thermal(Commodity.NATURALGASPOWER));
+                    new ThermalConnection(Commodity.NATURALGASPOWER),
+                    new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
         }
 
 
         // Hot Water Storage <-> Space Heating
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.spaceHeating,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Hot Water Storage <-> Domestic Hot Water
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.dhwUsage,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.DOMESTICHOTWATERPOWER),
-                    new Thermal(Commodity.DOMESTICHOTWATERPOWER));
+                    new ThermalConnection(Commodity.DOMESTICHOTWATERPOWER),
+                    new ThermalConnection(Commodity.DOMESTICHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Hot Water Storage <-> Dishwasher
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceDW,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Hot Water Storage <-> Dryer
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceTD,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Hot Water Storage <-> Washer
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceWM,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Cooktop
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceIH,
                     this.meter,
-                    new Thermal(Commodity.NATURALGASPOWER),
-                    new Thermal(Commodity.NATURALGASPOWER));
+                    new ThermalConnection(Commodity.NATURALGASPOWER),
+                    new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
         }
 
         // Oven
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceOV,
                     this.meter,
-                    new Thermal(Commodity.NATURALGASPOWER),
-                    new Thermal(Commodity.NATURALGASPOWER));
+                    new ThermalConnection(Commodity.NATURALGASPOWER),
+                    new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
         }
 
         // Cold Water Storage <-> Space Cooling
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.spaceCooling,
                     this.coldWaterStorage,
-                    new Thermal(Commodity.COLDWATERPOWER),
-                    new Thermal(Commodity.COLDWATERPOWER));
+                    new ThermalConnection(Commodity.COLDWATERPOWER),
+                    new ThermalConnection(Commodity.COLDWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Cold Water Storage <-> Adsorption Chiller
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.adsorptionChiller,
                     this.coldWaterStorage,
-                    new Thermal(Commodity.COLDWATERPOWER),
-                    new Thermal(Commodity.COLDWATERPOWER));
+                    new ThermalConnection(Commodity.COLDWATERPOWER),
+                    new ThermalConnection(Commodity.COLDWATERPOWER));
             this.relationList.add(relation);
         }
 
         // Hot Water Storage <-> Adsorption Chiller
         {
-            EnergyRelation<Thermal> relation = new EnergyRelation<>(
+            EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.adsorptionChiller,
                     this.hotWaterStorage,
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER),
-                    new Thermal(Commodity.HEATINGHOTWATERPOWER));
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER),
+                    new ThermalConnection(Commodity.HEATINGHOTWATERPOWER));
             this.relationList.add(relation);
         }
 
