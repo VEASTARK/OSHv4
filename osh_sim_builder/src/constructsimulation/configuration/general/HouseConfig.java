@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public class HouseConfig {
 
-    public static int personCount = 2;
+    public static int personCount = 4;
     public static UUID hhUUID = UUID.randomUUID();
     public static RunningType runningType = RunningType.SIMULATION;
 

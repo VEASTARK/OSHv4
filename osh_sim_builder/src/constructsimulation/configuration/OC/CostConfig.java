@@ -53,7 +53,7 @@ public class CostConfig {
      * > gasPower * NATURALGASPOWEREXTERNAL-Price<br>
      * > IMPORTANT: PV and CHP to grid depending on their power proportionally!<br>
      * <br> */
-    public static final int epsOptimizationObjective = 4;
+    public static int epsOptimizationObjective = 4;
 
     /*
      * Optimization Objective<br>
@@ -63,10 +63,10 @@ public class CostConfig {
      * 1: additional costs (overLimitFactor * ACTIVEPOWEREXTERNAL-price) for ACTIVEPOWEREXTERNAL limit violations<br>
      * 2: additional costs (overLimitFactor * POWEREXTERNAL-price) for ACTIVEPOWEREXTERNAL and REACTIVEPOWEREXTERNAL limit violations<br>
      * 3: ... */
-    public static final int plsOptimizationObjective = 1;
+    public static int plsOptimizationObjective = 1;
 
     //currently not in use TODO: reactivePower pricing...
-    public static final int varOptimizationObjective = 0;
+    public static int varOptimizationObjective = 0;
 
     /*
      * TODO: merge with previous
@@ -75,5 +75,6 @@ public class CostConfig {
      * determines additional costs if electricity consumption is above/below power limit<br>
      * 0: no additional costs
      * !0: additional costs */
-    public static final double overLimitFactor = 1.0;
+    public static double upperOverLimitFactor = 1.0;
+    public static double lowerOverLimitFactor = 1.0;
 }

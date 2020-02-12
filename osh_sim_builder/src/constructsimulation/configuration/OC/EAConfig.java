@@ -41,7 +41,7 @@ public class EAConfig {
 //	static boolean useMinDeltaFitness = false;
 
     //min. perc. amount of fitness change required
-    public static double minDeltaFitnessPercent = 5.0E-11;
+    public static double minDeltaFitnessPercent = 5.0E-15;
 
     private static List<ConfigurationParameter> generateOperatorParameters(OperatorType type, String operatorName) {
         List<ConfigurationParameter> list = new ArrayList<>();

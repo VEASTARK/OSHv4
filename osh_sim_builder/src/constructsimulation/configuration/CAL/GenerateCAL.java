@@ -17,6 +17,9 @@ public class GenerateCAL {
     public static CALConfiguration generateCAL(boolean applyConfigurations) {
         CALConfiguration calConfig = new CALConfiguration();
 
+        calConfig.getAssignedComDevices().addAll(CALSignals.generateDevices(applyConfigurations));
+        calConfig.getAssignedComDevices().addAll(CALAdditional.generateDevices(applyConfigurations));
+        
         return calConfig;
     }
 }

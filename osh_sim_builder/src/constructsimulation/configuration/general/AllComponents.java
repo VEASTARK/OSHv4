@@ -1,5 +1,6 @@
 package constructsimulation.configuration.general;
 
+import constructsimulation.configuration.CAL.CALAdditional;
 import constructsimulation.configuration.EAL.HVAC.HVACConsumers;
 import constructsimulation.configuration.EAL.HVAC.HVACProducers;
 import constructsimulation.configuration.EAL.HVAC.HVACStorage;
@@ -21,22 +22,25 @@ public class AllComponents {
         HVACProducers.useIHE = false;
 
         //hvacConsumers
-        HVACConsumers.useDomestic = false;
-        HVACConsumers.useSpaceHeating = false;
+        HVACConsumers.useDomestic = true;
+        HVACConsumers.useSpaceHeating = true;
 
         //hvacStorage
         HVACStorage.useHotWaterStorage = true;
-        HVACStorage.useColdWaterStorage = true;
+        HVACStorage.useColdWaterStorage = false;
 
 
         //electricProducers
         ElectricProducers.usePV = true;
 
         //electricConsumers
-        ElectricConsumers.useBaseload = false;
-        ElectricConsumers.useAppliances = false;
+        ElectricConsumers.useBaseload = true;
+        ElectricConsumers.useAppliances = true;
 
         //electricStorage
         ElectricStorage.useBattery = false;
+
+        //GUI
+        CALAdditional.useGUI = true;
     }
 }

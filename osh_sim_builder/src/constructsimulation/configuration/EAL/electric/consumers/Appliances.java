@@ -93,11 +93,11 @@ public class Appliances {
 
     */
     public static ApplianceType[] applianceTypesToUse = {
-            ApplianceType.STANDARD,     //DISHWASHER
+            ApplianceType.DELAYABLE,     //DISHWASHER
             ApplianceType.STANDARD,     //COOKTOP
             ApplianceType.STANDARD,     //STOVE
-            ApplianceType.STANDARD,     //TUMBLE_DRYER
-            ApplianceType.STANDARD      //WASHINGMACHINE
+            ApplianceType.DELAYABLE,     //TUMBLE_DRYER
+            ApplianceType.DELAYABLE      //WASHINGMACHINE
     };
     public static UUID[] applianceUuids = UUIDStorage.applianceUUID;
     public static String h0FilePath = FileReferenceStorage.h0Filename15Min;
@@ -197,8 +197,8 @@ public class Appliances {
                     applianceUuids[i],
                     driverName,
                     observerName,
-                    isControllable,
-                    isControllable ? controllerName : null);
+                    true,
+                    controllerName);
 
             for (Map.Entry<String, String> en : params.entrySet()) {
                 ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(

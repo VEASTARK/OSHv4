@@ -26,7 +26,6 @@ dependencies {
     implementation project(":osh_driver_appliance_miele")
     implementation project(":osh_driver_hvac")
     implementation project(":osh_driver_hvac_watertank")
-    implementation project(":osh_driver_smartmeter")
     implementation project(":osh_driver_smartmeter_bcontrol")
     implementation project(":osh_driver_smartplug")
     implementation project(":osh_driver_chp_dachs")

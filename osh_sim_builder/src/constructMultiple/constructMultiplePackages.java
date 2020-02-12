@@ -1,6 +1,20 @@
 package constructMultiple;
 
-import constructsimulation.constructSimulationPackage;
+import constructsimulation.configuration.CAL.CALAdditional;
+import constructsimulation.configuration.CAL.signals.EPS;
+import constructsimulation.configuration.EAL.HVAC.HVACProducers;
+import constructsimulation.configuration.EAL.HVAC.producers.CHP;
+import constructsimulation.configuration.EAL.HVAC.storage.HotWaterStorage;
+import constructsimulation.configuration.EAL.electric.ElectricProducers;
+import constructsimulation.configuration.EAL.electric.ElectricStorage;
+import constructsimulation.configuration.EAL.electric.consumers.Appliances;
+import constructsimulation.configuration.EAL.electric.producers.PV;
+import constructsimulation.configuration.OC.CostConfig;
+import constructsimulation.configuration.OC.EAConfig;
+import constructsimulation.configuration.OC.GenerateOC;
+import constructsimulation.configuration.OSH.GenerateOSH;
+import constructsimulation.configuration.general.Generate;
+import constructsimulation.configuration.general.HouseConfig;
 import constructsimulation.datatypes.EPSTypes;
 
 import java.io.*;
@@ -55,59 +69,60 @@ public class constructMultiplePackages {
     }
 
     private static void buildForConfig(HashMap<String, ?> config) {
-        constructSimulationPackage.showGui = false;
+        CALAdditional.useGUI = false;
 
         if (config.containsKey("eps"))
-            constructSimulationPackage.epsType = (EPSTypes) config.get("eps");
+            EPS.epsType = (EPSTypes) config.get("eps");
         if (config.containsKey("devices"))
-            constructSimulationPackage.genericAppliancesToSimulate =
+            Appliances.applianceTypesToUse =
                     DeviceConfiguration.getAppliancesValues((DeviceConfiguration) config.get("devices"));
         if (config.containsKey("heatingOrBattery")) {
             switch ((BatteryOrHeating) config.get("heatingOrBattery")) {
                 case BATTERY:
-                    constructSimulationPackage.useIHESmartHeater = false;
-                    constructSimulationPackage.useBatteryStorage = true;
+                    ElectricStorage.useBattery = true;
+                    HVACProducers.useIHE = false;
                     break;
                 case INSERTHEATING:
-                    constructSimulationPackage.useIHESmartHeater = true;
-                    constructSimulationPackage.useBatteryStorage = false;
+                    ElectricStorage.useBattery = false;
+                    HVACProducers.useIHE = true;
                     break;
                 case NONE:
-                    constructSimulationPackage.useIHESmartHeater = false;
-                    constructSimulationPackage.useBatteryStorage = false;
+                    ElectricStorage.useBattery = false;
+                    HVACProducers.useIHE = false;
                     break;
                 default:
                     throw new IllegalArgumentException();
             }
         }
         if (config.containsKey("tankSizes"))
-            constructSimulationPackage.tankSize = (Integer) config.get("tankSizes");
+            HotWaterStorage.tankSize = (Integer) config.get("tankSizes");
         if (config.containsKey("pvType")) {
             PVConfiguration pvConfig = (PVConfiguration) config.get("pvType");
-            constructSimulationPackage.pvComplexPowerMax = pvConfig.pvComplexPowerMax;
-            constructSimulationPackage.pvCosPhiMax = pvConfig.pvCosPhiMax;
-            constructSimulationPackage.pvNominalPower = pvConfig.pvNominalPower;
-            constructSimulationPackage.usePVRealHOLL = pvConfig.usePVRealHOLL;
+            PV.pvComplexPowerMax = pvConfig.pvComplexPowerMax;
+            PV.pvCosPhiMax = pvConfig.pvCosPhiMax;
+            PV.wattsPeak = pvConfig.pvNominalPower;
+            PV.usePVHOLL = pvConfig.usePVRealHOLL;
+            ElectricProducers.usePV = pvConfig.usePVRealHOLL;
         }
         if (config.containsKey("chpType")) {
             CHPConfiguration chpConfig = (CHPConfiguration) config.get("chpType");
             switch (chpConfig) {
                 case NONE: {
-                    constructSimulationPackage.useDachsCHP = false;
-                    constructSimulationPackage.intelligentCHPControl = false;
-                    constructSimulationPackage.useGasHeating = true;
+                    HVACProducers.useCHP = false;
+                    CHP.controllableCHP = false;
+                    HVACProducers.useGasHeating = true;
                     break;
                 }
                 case DUMB: {
-                    constructSimulationPackage.useDachsCHP = true;
-                    constructSimulationPackage.intelligentCHPControl = false;
-                    constructSimulationPackage.useGasHeating = false;
+                    HVACProducers.useCHP = true;
+                    CHP.controllableCHP = false;
+                    HVACProducers.useGasHeating = false;
                     break;
                 }
                 case INTELLIGENT: {
-                    constructSimulationPackage.useDachsCHP = true;
-                    constructSimulationPackage.intelligentCHPControl = true;
-                    constructSimulationPackage.useGasHeating = false;
+                    HVACProducers.useCHP = true;
+                    CHP.controllableCHP = true;
+                    HVACProducers.useGasHeating = false;
                     break;
                 }
                 default:
@@ -115,50 +130,41 @@ public class constructMultiplePackages {
             }
         }
         if (config.containsKey("persons")) {
-            constructSimulationPackage.numberOfPersons = (Integer) config.get("persons");
-            constructSimulationPackage.simPackage.getDynamicScreenplayArguments().getNumPersons().clear();
-            constructSimulationPackage.simPackage.getDynamicScreenplayArguments().getNumPersons().add((Integer) config.get("persons"));
-        }
-        if (config.containsKey("compression")) {
-            constructSimulationPackage.compressionType = ((CompressionConfiguration) config.get("compression")).compressionType;
-            constructSimulationPackage.compressionValue = ((CompressionConfiguration) config.get("compression")).compressionValue;
+            HouseConfig.personCount = (Integer) config.get("persons");
         }
         if (config.containsKey("escResolution")) {
-            constructSimulationPackage.stepSizeESCinOptimization = (Integer) config.get("escResolution");
+            GenerateOC.escStepSize = (Integer) config.get("escResolution");
         }
         if (config.containsKey("autoProbFactor")) {
-            constructSimulationPackage.autoProbMutationFactor = (Double) config.get("autoProbFactor");
+            EAConfig.autoProbMutationFactor = (Double) config.get("autoProbFactor");
         }
         if (config.containsKey("crossoverProb")) {
-            constructSimulationPackage.crossoverProbability = (Double) config.get("crossoverProb");
+            EAConfig.crossoverProbability = (Double) config.get("crossoverProb");
         }
         if (config.containsKey("epsOptimisationObjective")) {
-            constructSimulationPackage.simPackage.getEPSOptimizationObjectives().clear();
-            constructSimulationPackage.simPackage.getEPSOptimizationObjectives().add(
-                    (Integer) config.get("epsOptimisationObjective"));
+            CostConfig.epsOptimizationObjective = (Integer) config.get("epsOptimisationObjective");
         }
         if (config.containsKey("pls")) {
             PLSType plsType = (PLSType) config.get("pls");
 
-            constructSimulationPackage.simPackage.getPLSOptimizationObjectives().clear();
             if (plsType != PLSType.NONE) {
-                constructSimulationPackage.simPackage.getPLSOptimizationObjectives().add(1);
+                CostConfig.plsOptimizationObjective = 1;
             } else {
-                constructSimulationPackage.simPackage.getPLSOptimizationObjectives().add(0);
+                CostConfig.plsOptimizationObjective = 0;
             }
 
             if (plsType == PLSType.HALF_POS) {
-                constructSimulationPackage.upperOverlimitFactor = 1.0;
-                constructSimulationPackage.lowerOverlimitFactor = 0.0;
+                CostConfig.upperOverLimitFactor = 1.0;
+                CostConfig.lowerOverLimitFactor = 0.0;
             } else if (plsType == PLSType.HALF_NEG) {
-                constructSimulationPackage.upperOverlimitFactor = 0.0;
-                constructSimulationPackage.lowerOverlimitFactor = 1.0;
+                CostConfig.upperOverLimitFactor = 0.0;
+                CostConfig.lowerOverLimitFactor = 1.0;
             } else if (plsType == PLSType.FULL) {
-                constructSimulationPackage.upperOverlimitFactor = 1.0;
-                constructSimulationPackage.lowerOverlimitFactor = 1.0;
+                CostConfig.upperOverLimitFactor = 1.0;
+                CostConfig.lowerOverLimitFactor = 1.0;
             } else {
-                constructSimulationPackage.upperOverlimitFactor = 0.0;
-                constructSimulationPackage.lowerOverlimitFactor = 0.0;
+                CostConfig.upperOverLimitFactor = 0.0;
+                CostConfig.lowerOverLimitFactor = 0.0;
             }
         }
 
@@ -168,19 +174,19 @@ public class constructMultiplePackages {
         String name = configToString(config);
         pw.println("\"" + name + "\",");
 
-        constructSimulationPackage.generate(saveDirectory + "/" + name + "/");
+        Generate.generate(saveDirectory + "/" + name + "/");
     }
 
     private static void setLogValues() {
-        constructSimulationPackage.logH0 = constructMultipleData.logH0;
-        constructSimulationPackage.logEpsPls = constructMultipleData.logEpsPls;
-        constructSimulationPackage.logIntervals = constructMultipleData.logIntervals;
-        constructSimulationPackage.logDevices = constructMultipleData.logDevices;
-        constructSimulationPackage.logDetailedPower = constructMultipleData.logDetailedPower;
-        constructSimulationPackage.logHotWater = constructMultipleData.logHotWater;
-        constructSimulationPackage.logWaterTank = constructMultipleData.logWaterTank;
-        constructSimulationPackage.logGA = constructMultipleData.logGA;
-        constructSimulationPackage.logSmartHeater = constructMultipleData.logSmartHeater;
+        GenerateOSH.logH0 = constructMultipleData.logH0;
+        GenerateOSH.logEpsPls = constructMultipleData.logEpsPls;
+        GenerateOSH.logIntervals = constructMultipleData.logIntervals;
+        GenerateOSH.logDevices = constructMultipleData.logDevices;
+        GenerateOSH.logDetailedPower = constructMultipleData.logDetailedPower;
+        GenerateOSH.logHotWater = constructMultipleData.logHotWater;
+        GenerateOSH.logWaterTank = constructMultipleData.logWaterTank;
+        GenerateOSH.logGA = constructMultipleData.logGA;
+        GenerateOSH.logSmartHeater = constructMultipleData.logSmartHeater;
     }
 
     private static String configToString(HashMap<String, ?> config) {

@@ -50,7 +50,7 @@ public class CHP {
     public static Duration relativeHorizonIPP = GeneralConfig.relativeHorizon;
     public static double currentHotWaterStorageMinTemp = 60;
     public static double currentHotWaterStorageMaxTemp = 80;
-    public static double forcedOnHysteresis = 0.5;
+    public static double forcedOnHysteresis = 5.0;
     public static double fixedCostPerStart = 8.0;
     public static double forcedOnOffStepMultiplier = 0.1;
     public static int forcedOffAdditionalCost = 10;

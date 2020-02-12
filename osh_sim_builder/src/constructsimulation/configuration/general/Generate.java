@@ -75,6 +75,40 @@ public class Generate {
         generate(filePath, true);
     }
 
+    public static void generate(String filePath) {
+        //check package path
+        File fPackagePath = new File(filePath);
+
+        if (fPackagePath.exists()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            String line;
+            do {
+                System.out.println();
+                System.out.println("ERROR: package already exists. Delete (y/n)?");
+                try {
+                    line = reader.readLine();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } while (!line.equals("y") && !line.equals("n"));
+
+            if (line.equals("y")) {
+                deleteDirectory(fPackagePath);
+                if (fPackagePath.exists()) throw new RuntimeException("It still exists!");
+            } else {
+                System.out.println("Aborting...");
+                System.exit(1);
+            }
+        }
+
+        // create paths
+        fPackagePath.mkdirs();
+        File fSystem = new File(filePath + FileReferenceStorage.systemPath);
+        fSystem.mkdir();
+
+        generate(filePath, false);
+    }
+
     private static void generate(String filePath, boolean applyConfigurations) {
         String fileSuffix = ".xml";
 

@@ -37,7 +37,7 @@ public class PV {
     public static boolean usePVHOLL = true;
     public static boolean usePVEv0 = false;
     public static UUID pvUuid = UUIDStorage.pvUUID;
-    /* Use intelligent PV Inverter */
+
     public static int wattsPeak = 4000;
     public static int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
 

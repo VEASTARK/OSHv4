@@ -50,8 +50,8 @@ public class GenerateOC {
         params.put("plsoptimizationobjective", String.valueOf(CostConfig.plsOptimizationObjective));
         params.put("varoptimizationobjective", String.valueOf(CostConfig.varOptimizationObjective));
 
-        params.put("upperOverlimitFactor", String.valueOf(CostConfig.overLimitFactor));
-        params.put("lowerOverlimitFactor", String.valueOf(CostConfig.overLimitFactor));
+        params.put("upperOverlimitFactor", String.valueOf(CostConfig.upperOverLimitFactor));
+        params.put("lowerOverlimitFactor", String.valueOf(CostConfig.lowerOverLimitFactor));
 
         params.put("stepSize", String.valueOf(escStepSize));
 
