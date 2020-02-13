@@ -149,6 +149,10 @@ public class Appliances {
             /* WM */ {0.2, 0.5, 0.3}
     };
 
+    public static double[] hybridFactor = {
+            1.0, 1.0, 1.0, 1.0, 1.0
+    };
+
     public static String[] probabilityFilePaths = FileReferenceStorage.probabilityFilePaths;
     public static String[][] profileSourcesPaths = FileReferenceStorage.profileSourcesPaths;
 
@@ -187,6 +191,8 @@ public class Appliances {
             params.put(ParameterConstants.Appliances.probabilityFile, probabilityFilePaths[i]);
             params.put(ParameterConstants.General_Devices.profileSource, profileSourcesPaths[i][type.ordinal()]);
             params.put(ParameterConstants.Appliances.configurationShares, Arrays.toString(configurationShares[i]));
+
+            params.put(ParameterConstants.Appliances.hybridFactor, String.valueOf(hybridFactor[i]));
 
             if (!params.containsKey(ParameterConstants.Compression.compressionType))
                 params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());

@@ -69,6 +69,9 @@ public final class ParameterConstants {
         public static final String relativeHorizon = "relativeHorizonIPP";
         public static final String triggerIppIfDeltaTemp = "triggerIppIfDeltaTempBigger";
         public static final String triggerIppIfDeltaSoc = "triggerIppIfDeltaSoCBigger";
+
+        public static final String bitsPerSlot = "bitsPerSlot";
+        public static final String timePerSlot = "timePerSlot";
     }
 
     public static final class PV {
@@ -99,6 +102,7 @@ public final class ParameterConstants {
         public static final String averageYearlyRuns = "averageyearlyruns";
         public static final String probabilityFile = "probabilityfilename";
         public static final String configurationShares = "configurationshares";
+        public static final String hybridFactor = "hybridFactor";
     }
 
     public static final class Baseload {

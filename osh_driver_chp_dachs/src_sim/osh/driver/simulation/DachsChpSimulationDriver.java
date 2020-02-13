@@ -46,6 +46,8 @@ public class DachsChpSimulationDriver
     private Duration rescheduleAfter;
     private Duration newIPPAfter;
     private int relativeHorizonIPP;
+    private long timePerSlot;
+    private int bitsPerSlot;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
     private double forcedOnHysteresis;
@@ -152,6 +154,20 @@ public class DachsChpSimulationDriver
         }
 
         try {
+            this.timePerSlot = Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.timePerSlot));
+        } catch (Exception e) {
+            this.timePerSlot = 5 * 60;
+            this.getGlobalLogger().logWarning("Can't get timePerSlot, using the default value: " + this.timePerSlot);
+        }
+
+        try {
+            this.bitsPerSlot = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.IPP.bitsPerSlot));
+        } catch (Exception e) {
+            this.bitsPerSlot = 4;
+            this.getGlobalLogger().logWarning("Can't get bitsPerSlot, using the default value: " + this.bitsPerSlot);
+        }
+
+        try {
             this.currentHotWaterStorageMinTemp =
                     Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.TemperatureRestrictions.hotWaterStorageMinTemp));
         } catch (Exception e) {
@@ -253,6 +269,8 @@ public class DachsChpSimulationDriver
         observerExchange.setRescheduleAfter(this.rescheduleAfter);
         observerExchange.setNewIPPAfter(this.newIPPAfter);
         observerExchange.setRelativeHorizonIPP(this.relativeHorizonIPP);
+        observerExchange.setTimePerSlot(this.timePerSlot);
+        observerExchange.setBitsPerSlot(this.bitsPerSlot);
         observerExchange.setCurrentHotWaterStorageMinTemp(this.currentHotWaterStorageMinTemp);
         observerExchange.setCurrentHotWaterStorageMaxTemp(this.currentHotWaterStorageMaxTemp);
         observerExchange.setForcedOnHysteresis(this.forcedOnHysteresis);

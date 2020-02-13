@@ -3,12 +3,12 @@ package constructMultiple;
 public class PVConfiguration {
 
 
-    public final String pvComplexPowerMax;
-    public final String pvCosPhiMax;
+    public final int pvComplexPowerMax;
+    public final double pvCosPhiMax;
     public final int pvNominalPower;
     public final boolean usePVRealHOLL;
 
-    public PVConfiguration(String pvComplexPowerMax, String pvCosPhiMax,
+    public PVConfiguration(int pvComplexPowerMax, double pvCosPhiMax,
                            int pvNominalPower, boolean usePVRealESHL, boolean usePVRealHOLL) {
         this.pvComplexPowerMax = pvComplexPowerMax;
         this.pvCosPhiMax = pvCosPhiMax;

@@ -52,6 +52,8 @@ public class CHP {
     public static double currentHotWaterStorageMinTemp = 60;
     public static double currentHotWaterStorageMaxTemp = 80;
     public static double forcedOnHysteresis = 5.0;
+    public static int bitsPerSlot = 4;
+    public static long timePerSlot = 5 * 60;
     public static double fixedCostPerStart = 8.0;
     public static double forcedOnOffStepMultiplier = 0.1;
     public static int forcedOffAdditionalCost = 10;
@@ -87,6 +89,8 @@ public class CHP {
         params.put(ParameterConstants.TemperatureRestrictions.hotWaterStorageMaxTemp, String.valueOf(currentHotWaterStorageMaxTemp));
         params.put(ParameterConstants.TemperatureRestrictions.forcedOnHysteresis, String.valueOf(forcedOnHysteresis));
         params.put(ParameterConstants.CHP.cosPhi, String.valueOf(cosPhi));
+        params.put(ParameterConstants.IPP.bitsPerSlot, String.valueOf(bitsPerSlot));
+        params.put(ParameterConstants.IPP.timePerSlot, String.valueOf(timePerSlot));
         params.put(ParameterConstants.CHP.fixedCostPerStart, String.valueOf(fixedCostPerStart));
         params.put(ParameterConstants.CHP.forcedOnOffStepMultiplier, String.valueOf(forcedOnOffStepMultiplier));
         params.put(ParameterConstants.CHP.forcedOffAdditionalCost, String.valueOf(forcedOffAdditionalCost));

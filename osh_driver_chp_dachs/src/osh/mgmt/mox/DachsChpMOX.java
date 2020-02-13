@@ -25,6 +25,8 @@ public class DachsChpMOX implements IModelOfObservationExchange {
 
     // quasi static values
     private final ChpOperationMode operationMode;
+    private final long timePerSlot;
+    private final int bitsPerSlot;
     private final int typicalActivePower;
     private final int typicalReactivePower;
     private final int typicalGasPower;
@@ -57,6 +59,8 @@ public class DachsChpMOX implements IModelOfObservationExchange {
                        int thermalPower,
                        int gasPower,
                        ChpOperationMode operationMode,
+                       long timePerSlot,
+                       int bitsPerSlot,
                        int typicalActivePower,
                        int typicalReactivePower,
                        int typicalGasPower,
@@ -85,6 +89,8 @@ public class DachsChpMOX implements IModelOfObservationExchange {
         this.gasPower = gasPower;
 
         this.operationMode = operationMode;
+        this.timePerSlot = timePerSlot;
+        this.bitsPerSlot = bitsPerSlot;
         this.typicalActivePower = typicalActivePower;
         this.typicalReactivePower = typicalReactivePower;
         this.typicalGasPower = typicalGasPower;
@@ -154,6 +160,14 @@ public class DachsChpMOX implements IModelOfObservationExchange {
 
     public ChpOperationMode getOperationMode() {
         return this.operationMode;
+    }
+
+    public long getTimePerSlot() {
+        return this.timePerSlot;
+    }
+
+    public int getBitsPerSlot() {
+        return this.bitsPerSlot;
     }
 
     public Duration getRescheduleAfter() {
