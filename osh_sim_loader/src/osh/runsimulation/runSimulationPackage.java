@@ -64,7 +64,6 @@ public class runSimulationPackage {
             //		{0xd1ce63L, 0xd1ce63L},
             //		{0xd1ce64L, 0xd1ce64L},
     };
-    static private ZonedDateTime forcedStartTime; // 1.1.1970
 
     // logger for exceptions etc.
     /**
@@ -83,7 +82,7 @@ public class runSimulationPackage {
     public static void main(String[] args) {
 
         // reset starting time
-        forcedStartTime = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, ZoneId.of("UTC"));
+        ZonedDateTime forcedStartTime = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, ZoneId.of("UTC"));
 
         // iterate all configs
         for (String configID : configIDs) {

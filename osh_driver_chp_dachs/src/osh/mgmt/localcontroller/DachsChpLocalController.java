@@ -33,7 +33,7 @@ public class DachsChpLocalController
 
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     // quasi static values
-    private ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
+    private final ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
     private int typicalActivePower = Integer.MIN_VALUE;
     private int typicalReactivePower = Integer.MIN_VALUE;
     private int typicalGasPower = Integer.MIN_VALUE;
@@ -71,7 +71,7 @@ public class DachsChpLocalController
     private int lastThermalPower;
     private Duration currentRemainingRunningTime;
     private int currentActivePower = Integer.MIN_VALUE;
-    private int currentReactivePower = Integer.MIN_VALUE;
+    private final int currentReactivePower = Integer.MIN_VALUE;
     private int currentThermalPower = Integer.MIN_VALUE;
     private int currentGasPower = Integer.MIN_VALUE;
 

@@ -28,7 +28,7 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
     private int typicalReactivePowerOn;
     private int typicalReactivePowerOff;
 
-    private GasBoilerModel model;
+    private final GasBoilerModel model;
 
     private Duration newIppAfter;
 

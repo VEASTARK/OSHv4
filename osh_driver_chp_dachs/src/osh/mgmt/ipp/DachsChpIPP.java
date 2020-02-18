@@ -43,10 +43,10 @@ public class DachsChpIPP
     private final int minRunTime;
     // fixed costs per start, i.e., costs to turn on the CHP
     // (not the variable costs for letting the CHP run)
-    private double fixedCostPerStart;
-    private double forcedOnOffStepMultiplier;
-    private int forcedOffAdditionalCost;
-    private double chpOnCervisiaStepSizeMultiplier;
+    private final double fixedCostPerStart;
+    private final double forcedOnOffStepMultiplier;
+    private final int forcedOffAdditionalCost;
+    private final double chpOnCervisiaStepSizeMultiplier;
     //TODO add maxRunTime
     // temperature control
     private final double hotWaterStorageMinTemp;

@@ -36,7 +36,7 @@ public class SimulationHollSpaceCoolingSimulationDriver
     public void onNextTimeTick() {
         if (this.getTimeDriver().getCurrentEpochSecond() % 86400 == 0) {
             //SIMULATE REAL CALENDER
-            SimulationHollChillerCalendar calendar = new SimulationHollChillerCalendar(this.getRandomGenerator());
+            SimulationHollChillerCalendar calendar = new SimulationHollChillerCalendar(this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass()));
             this.dates = calendar.getDate(this.getTimeDriver().getCurrentEpochSecond());
         }
 

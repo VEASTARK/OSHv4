@@ -1,7 +1,7 @@
 package osh.driver.simulation;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.eal.hal.exceptions.HALException;
@@ -196,7 +196,7 @@ public abstract class ApplianceSimulationDriver
      */
     private int getRandomHourToRunBasedOnProbabilityMap(
             long timestamp,
-            OSHRandomGenerator randomGen) {
+            OSHRandom randomGen) {
         double randomDouble = randomGen.getNextDouble();
         int weekday = TimeConversion.convertUnixTime2CorrectedDayOfWeek(timestamp);
         int hour = 0;
@@ -218,7 +218,7 @@ public abstract class ApplianceSimulationDriver
             long timestamp,
             int middleOfPowerConsumption,
             double randomValue,
-            OSHRandomGenerator randomGen) {
+            OSHRandom randomGen) {
         int randomHour = this.getRandomHourToRunBasedOnProbabilityMap(timestamp, randomGen);
 
         double deviation = randomValue;
@@ -244,7 +244,7 @@ public abstract class ApplianceSimulationDriver
     /**
      * in case of use please override
      */
-    protected abstract int generateNewDof(boolean useRandomDof, int noActions, long applianceActionTimeTick, OSHRandomGenerator randomGen, int maxDof, int maxPossibleDof);
+    protected abstract int generateNewDof(boolean useRandomDof, int noActions, long applianceActionTimeTick, OSHRandom randomGen, int maxDof, int maxPossibleDof);
 
 
     @Override

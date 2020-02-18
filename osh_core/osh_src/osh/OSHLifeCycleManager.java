@@ -11,7 +11,7 @@ import osh.configuration.system.RunningType;
 import osh.core.DataBroker;
 import osh.core.LifeCycleStates;
 import osh.core.OCManager;
-import osh.core.OSHRandomGenerator;
+import osh.core.RandomDistributor;
 import osh.core.exceptions.LifeCycleManagerException;
 import osh.core.exceptions.OSHException;
 import osh.core.logging.IGlobalLogger;
@@ -32,7 +32,6 @@ import osh.simulation.screenplay.ScreenplayType;
 import osh.utils.xml.XMLSerialization;
 
 import java.time.ZonedDateTime;
-import java.util.Random;
 import java.util.UUID;
 
 public class OSHLifeCycleManager {
@@ -244,8 +243,7 @@ public class OSHLifeCycleManager {
 
         oshConfig.setRandomSeed(usedRandomSeed.toString());
 
-        this.theOrganicSmartHome.setRandomGenerator(
-                new OSHRandomGenerator(new Random(usedRandomSeed)));
+        this.theOrganicSmartHome.setRandomDistributor(new RandomDistributor(this.theOrganicSmartHome, usedRandomSeed));
         this.globalLogger.logInfo("Using random seed 0x" + Long.toHexString(usedRandomSeed));
 
         //assigning Registries
@@ -448,6 +446,7 @@ public class OSHLifeCycleManager {
             }
             case ON_SYSTEM_IS_UP: {
                 this.dataBroker.onSystemIsUp();
+                this.theOrganicSmartHome.getRandomDistributor().startClock();
                 this.ocManager.onSystemIsUp();
                 this.ealManager.onSystemIsUp();
                 this.calManager.onSystemIsUp();

@@ -25,10 +25,10 @@ import java.util.UUID;
  */
 public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
-    private IH0Profile baseload;
+    private final IH0Profile baseload;
 
-    private double cosPhi;
-    private boolean isInductive;
+    private final double cosPhi;
+    private final boolean isInductive;
 
     private int pastDaysPrediction;
     private float weightForOtherWeekday;

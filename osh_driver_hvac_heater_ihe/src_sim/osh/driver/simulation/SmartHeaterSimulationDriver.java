@@ -29,7 +29,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     private Duration newIppAfter;
     private int triggerIppIfDeltaTempBigger;
 
-    private SmartHeaterModel model;
+    private final SmartHeaterModel model;
     private double currentWaterTemperature;
 
     /**

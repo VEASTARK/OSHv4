@@ -2,7 +2,6 @@ package osh.datatypes.registry.oc.ipp.solutionEncoding.translators;
 
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.*;
 
-import java.io.Serializable;
 import java.util.BitSet;
 import java.util.Objects;
 
@@ -12,9 +11,7 @@ import java.util.Objects;
  *
  * @author Sebastian Kramer
  */
-public class IPPSolutionHandler implements Serializable {
-
-    private static final long serialVersionUID = -2563485448154473813L;
+public class IPPSolutionHandler {
 
     private final AbstractVariableTranslator<BitSet> binaryTranslator;
     private final AbstractVariableTranslator<double[]> realTranslator;
@@ -23,13 +20,9 @@ public class IPPSolutionHandler implements Serializable {
     private int variableCount;
     private double[][] variableBoundaries;
 
-    /**
-     * No-arg constructor for serialization.
-     */
-    public IPPSolutionHandler() {
-        this.binaryTranslator = null;
-        this.realTranslator = null;
-    }
+    private static final AbstractEncodedVariableInformation EMPTY_BINARY_VARIABLE = new BinaryEncodedVariableInformation(0);
+    private static final AbstractEncodedVariableInformation EMPTY_REAL_VARIABLE = new RealEncodedVariableInformation(0,
+            new double[][]{});
 
     /**
      * Constructs this solution handler with the given translators for binary and real encoding.
@@ -71,11 +64,10 @@ public class IPPSolutionHandler implements Serializable {
         //translators will be null for non-controllable ipps
         if (variableEncoding == VariableEncoding.BINARY) {
             return this.binaryTranslator != null ? this.binaryTranslator.getVariableInformation(this.variableType,
-                    this.variableCount, this.variableBoundaries) : new BinaryEncodedVariableInformation(0);
+                    this.variableCount, this.variableBoundaries) : EMPTY_BINARY_VARIABLE;
         } else {
             return this.realTranslator != null ? this.realTranslator.getVariableInformation(this.variableType,
-                    this.variableCount, this.variableBoundaries) : new RealEncodedVariableInformation(0,
-                    new double[][]{});
+                    this.variableCount, this.variableBoundaries) : EMPTY_REAL_VARIABLE;
         }
     }
 

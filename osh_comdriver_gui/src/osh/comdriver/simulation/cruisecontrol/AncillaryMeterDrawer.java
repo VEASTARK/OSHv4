@@ -35,7 +35,7 @@ public class AncillaryMeterDrawer extends JPanel {
         ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
     }
 
-    private ChartPanel panel;
+    private final ChartPanel panel;
 
     /**
      * A demonstration application showing how to create a simple time series

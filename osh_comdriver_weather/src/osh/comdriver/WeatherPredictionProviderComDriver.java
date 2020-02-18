@@ -37,7 +37,7 @@ public class WeatherPredictionProviderComDriver extends CALComDriver {
 
     private CurrentWeatherRequestThread reqCurrentRunnable;
     private Thread reqCurrentThread;
-    private UUID loggerUUID;
+    private final UUID loggerUUID;
 
 
     /**

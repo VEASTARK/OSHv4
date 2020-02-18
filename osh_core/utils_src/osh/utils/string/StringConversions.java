@@ -17,21 +17,21 @@ public class StringConversions {
     private static final Pattern COMMA_BRACKET = Pattern.compile(",?\\s?\\[");
 
     public static Long[] fromStringToLongArray(String s) {
-        s = BRACKETS.matcher(WHITE_SPACES.matcher(s).replaceAll("")).replaceAll("");
+        String trimmed = BRACKETS.matcher(WHITE_SPACES.matcher(s).replaceAll("")).replaceAll("");
 
-        return Arrays.stream(s.split(",")).map(Long::decode).toArray(Long[]::new);
+        return Arrays.stream(trimmed.split(",")).map(Long::decode).toArray(Long[]::new);
     }
 
     public static Double[] fromStringToDoubleArray(String s) {
-        s = BRACKETS.matcher(WHITE_SPACES.matcher(s).replaceAll("")).replaceAll("");
+        String trimmed = BRACKETS.matcher(WHITE_SPACES.matcher(s).replaceAll("")).replaceAll("");
 
-        return Arrays.stream(s.split(",")).map(Double::parseDouble).toArray(Double[]::new);
+        return Arrays.stream(trimmed.split(",")).map(Double::parseDouble).toArray(Double[]::new);
     }
 
     public static Long[][] fromStringTo2DimLongArray(String s) {
-        s = WHITE_SPACES.matcher(s).replaceAll("");
+        String trimmed = WHITE_SPACES.matcher(s).replaceAll("");
 
-        StringTokenizer st = new StringTokenizer(s, "]");
+        StringTokenizer st = new StringTokenizer(trimmed, "]");
         ArrayList<Long[]> list = new ArrayList<>();
 
         while (st.hasMoreTokens()) {
@@ -45,9 +45,9 @@ public class StringConversions {
     }
 
     public static Integer[] fromStringToIntegerArray(String s) {
-        s = BRACKETS.matcher(WHITE_SPACES.matcher(s).replaceAll("")).replaceAll("");
+        String trimmed = BRACKETS.matcher(WHITE_SPACES.matcher(s).replaceAll("")).replaceAll("");
 
-        return Arrays.stream(s.split(",")).map(Integer::decode).toArray(Integer[]::new);
+        return Arrays.stream(trimmed.split(",")).map(Integer::decode).toArray(Integer[]::new);
     }
 
     public static int[] fromStringToIntArray(String s) {
@@ -61,9 +61,9 @@ public class StringConversions {
     }
 
     public static Integer[][] fromStringTo2DimIntegerArray(String s) {
-        s = WHITE_SPACES.matcher(s).replaceAll("");
+        String trimmed = WHITE_SPACES.matcher(s).replaceAll("");
 
-        StringTokenizer st = new StringTokenizer(s, "]");
+        StringTokenizer st = new StringTokenizer(trimmed, "]");
         ArrayList<Integer[]> list = new ArrayList<>();
 
         while (st.hasMoreTokens()) {

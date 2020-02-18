@@ -67,14 +67,14 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     public static final long INVALID_KEY = Long.MIN_VALUE;
     private static final long serialVersionUID = -7046029254386353129L;
     {
-        allocatePaths();
+        this.allocatePaths();
     }
     /**
      * Creates a new empty tree map.
      */
     public Long2ObjectTreeMap() {
-        tree = null;
-        count = 0;
+        this.tree = null;
+        this.count = 0;
     }
     /**
      * Generates the comparator that will be actually used.
@@ -86,7 +86,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      * Otherwise, we adapt it using a helper static method.
      */
     private void setActualComparator() {
-        actualComparator = LongComparators.asLongComparator(storedComparator);
+        this.actualComparator = LongComparators.asLongComparator(this.storedComparator);
     }
     /**
      * Creates a new empty tree map with the given comparator.
@@ -96,8 +96,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     public Long2ObjectTreeMap(final Comparator<? super Long> c) {
         this();
-        storedComparator = c;
-        setActualComparator();
+        this.storedComparator = c;
+        this.setActualComparator();
     }
     /**
      * Creates a new tree map copying a given map.
@@ -107,7 +107,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     public Long2ObjectTreeMap(final Map<? extends Long, ? extends V> m) {
         this();
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map copying a given sorted map (and its
@@ -118,7 +118,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     public Long2ObjectTreeMap(final SortedMap<Long, V> m) {
         this(m.comparator());
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map copying a given map.
@@ -128,7 +128,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     public Long2ObjectTreeMap(final Long2ObjectMap<? extends V> m) {
         this();
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map copying a given sorted map (and its
@@ -139,7 +139,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     public Long2ObjectTreeMap(final Long2ObjectSortedMap<V> m) {
         this(m.comparator());
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map using the elements of two parallel arrays and the
@@ -201,7 +201,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
 
     final int compare(final long k1, final long k2) {
-        return actualComparator == null ? (Long.compare((k1), (k2))) : actualComparator.compare(k1, k2);
+        return this.actualComparator == null ? (Long.compare((k1), (k2))) : this.actualComparator.compare(k1, k2);
     }
     /**
      * Returns the entry corresponding to the given key, if it is in the tree;
@@ -213,9 +213,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      *         key exists.
      */
     final Entry<V> findKey(final long k) {
-        Entry<V> e = tree;
+        Entry<V> e = this.tree;
         int cmp;
-        while (e != null && (cmp = compare(k, e.key)) != 0)
+        while (e != null && (cmp = this.compare(k, e.key)) != 0)
             e = cmp < 0 ? e.left() : e.right();
         return e;
     }
@@ -229,9 +229,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      *         key or the greatest smaller key.
      */
     final Entry<V> locateKey(final long k) {
-        Entry<V> e = tree, last = tree;
+        Entry<V> e = this.tree, last = this.tree;
         int cmp = 0;
-        while (e != null && (cmp = compare(k, e.key)) != 0) {
+        while (e != null && (cmp = this.compare(k, e.key)) != 0) {
             last = e;
             e = cmp < 0 ? e.left() : e.right();
         }
@@ -244,14 +244,14 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     private transient boolean[] dirPath;
     private transient Entry<V>[] nodePath;
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings("unchecked")
     private void allocatePaths() {
-        dirPath = new boolean[64];
-        nodePath = new Entry[64];
+        this.dirPath = new boolean[64];
+        this.nodePath = new Entry[64];
     }
     @Override
     public V put(final long k, final V v) {
-        Entry<V> e = add(k);
+        Entry<V> e = this.add(k);
         final V oldValue = e.value;
         e.value = v;
         return oldValue;
@@ -271,29 +271,29 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * After execution of this method, modified is true iff a new entry has been
          * inserted.
          */
-        modified = false;
+        this.modified = false;
         int maxDepth = 0;
         Entry<V> e;
-        if (tree == null) { // The case of the empty tree is treated separately.
-            count++;
-            e = tree = lastEntry = firstEntry = new Entry<>(k, defRetValue);
+        if (this.tree == null) { // The case of the empty tree is treated separately.
+            this.count++;
+            e = this.tree = this.lastEntry = this.firstEntry = new Entry<>(k, this.defRetValue);
         } else {
-            Entry<V> p = tree;
+            Entry<V> p = this.tree;
             int cmp, i = 0;
             while (true) {
-                if ((cmp = compare(k, p.key)) == 0) {
+                if ((cmp = this.compare(k, p.key)) == 0) {
                     // We clean up the node path, or we could have stale references later.
                     while (i-- != 0)
-                        nodePath[i] = null;
+                        this.nodePath[i] = null;
                     return p;
                 }
-                nodePath[i] = p;
-                if (dirPath[i++] = cmp > 0) {
+                this.nodePath[i] = p;
+                if (this.dirPath[i++] = cmp > 0) {
                     if (p.succ()) {
-                        count++;
-                        e = new Entry<>(k, defRetValue);
+                        this.count++;
+                        e = new Entry<>(k, this.defRetValue);
                         if (p.right == null)
-                            lastEntry = e;
+                            this.lastEntry = e;
                         e.left = p;
                         e.right = p.right;
                         p.right(e);
@@ -302,10 +302,10 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                     p = p.right;
                 } else {
                     if (p.pred()) {
-                        count++;
-                        e = new Entry<>(k, defRetValue);
+                        this.count++;
+                        e = new Entry<>(k, this.defRetValue);
                         if (p.left == null)
-                            firstEntry = e;
+                            this.firstEntry = e;
                         e.right = p;
                         e.left = p.left;
                         p.left(e);
@@ -314,43 +314,43 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                     p = p.left;
                 }
             }
-            modified = true;
+            this.modified = true;
             maxDepth = i--;
-            while (i > 0 && !nodePath[i].black()) {
-                if (!dirPath[i - 1]) {
-                    Entry<V> y = nodePath[i - 1].right;
-                    if (!nodePath[i - 1].succ() && !y.black()) {
-                        nodePath[i].black(true);
+            while (i > 0 && !this.nodePath[i].black()) {
+                if (!this.dirPath[i - 1]) {
+                    Entry<V> y = this.nodePath[i - 1].right;
+                    if (!this.nodePath[i - 1].succ() && !y.black()) {
+                        this.nodePath[i].black(true);
                         y.black(true);
-                        nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].black(false);
                         i -= 2;
                     } else {
                         Entry<V> x;
-                        if (!dirPath[i])
-                            y = nodePath[i];
+                        if (!this.dirPath[i])
+                            y = this.nodePath[i];
                         else {
-                            x = nodePath[i];
+                            x = this.nodePath[i];
                             y = x.right;
                             x.right = y.left;
                             y.left = x;
-                            nodePath[i - 1].left = y;
+                            this.nodePath[i - 1].left = y;
                             if (y.pred()) {
                                 y.pred(false);
                                 x.succ(y);
                             }
                         }
-                        x = nodePath[i - 1];
+                        x = this.nodePath[i - 1];
                         x.black(false);
                         y.black(true);
                         x.left = y.right;
                         y.right = x;
                         if (i < 2)
-                            tree = y;
+                            this.tree = y;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = y;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = y;
                             else
-                                nodePath[i - 2].left = y;
+                                this.nodePath[i - 2].left = y;
                         }
                         if (y.succ()) {
                             y.succ(false);
@@ -359,39 +359,39 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                         break;
                     }
                 } else {
-                    Entry<V> y = nodePath[i - 1].left;
-                    if (!nodePath[i - 1].pred() && !y.black()) {
-                        nodePath[i].black(true);
+                    Entry<V> y = this.nodePath[i - 1].left;
+                    if (!this.nodePath[i - 1].pred() && !y.black()) {
+                        this.nodePath[i].black(true);
                         y.black(true);
-                        nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].black(false);
                         i -= 2;
                     } else {
                         Entry<V> x;
-                        if (dirPath[i])
-                            y = nodePath[i];
+                        if (this.dirPath[i])
+                            y = this.nodePath[i];
                         else {
-                            x = nodePath[i];
+                            x = this.nodePath[i];
                             y = x.left;
                             x.left = y.right;
                             y.right = x;
-                            nodePath[i - 1].right = y;
+                            this.nodePath[i - 1].right = y;
                             if (y.succ()) {
                                 y.succ(false);
                                 x.pred(y);
                             }
                         }
-                        x = nodePath[i - 1];
+                        x = this.nodePath[i - 1];
                         x.black(false);
                         y.black(true);
                         x.right = y.left;
                         y.left = x;
                         if (i < 2)
-                            tree = y;
+                            this.tree = y;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = y;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = y;
                             else
-                                nodePath[i - 2].left = y;
+                                this.nodePath[i - 2].left = y;
                         }
                         if (y.pred()) {
                             y.pred(false);
@@ -402,10 +402,10 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                 }
             }
         }
-        tree.black(true);
+        this.tree.black(true);
         // We clean up the node path, or we could have stale references later.
         while (maxDepth-- != 0)
-            nodePath[maxDepth] = null;
+            this.nodePath[maxDepth] = null;
         return e;
     }
     /*
@@ -415,57 +415,57 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
 
     @Override
     public V remove(final long k) {
-        modified = false;
-        if (tree == null)
-            return defRetValue;
-        Entry<V> p = tree;
+        this.modified = false;
+        if (this.tree == null)
+            return this.defRetValue;
+        Entry<V> p = this.tree;
         int cmp;
         int i = 0;
         final long kk = k;
         while (true) {
-            if ((cmp = compare(kk, p.key)) == 0)
+            if ((cmp = this.compare(kk, p.key)) == 0)
                 break;
-            dirPath[i] = cmp > 0;
-            nodePath[i] = p;
-            if (dirPath[i++]) {
+            this.dirPath[i] = cmp > 0;
+            this.nodePath[i] = p;
+            if (this.dirPath[i++]) {
                 if ((p = p.right()) == null) {
                     // We clean up the node path, or we could have stale references later.
                     while (i-- != 0)
-                        nodePath[i] = null;
-                    return defRetValue;
+                        this.nodePath[i] = null;
+                    return this.defRetValue;
                 }
             } else {
                 if ((p = p.left()) == null) {
                     // We clean up the node path, or we could have stale references later.
                     while (i-- != 0)
-                        nodePath[i] = null;
-                    return defRetValue;
+                        this.nodePath[i] = null;
+                    return this.defRetValue;
                 }
             }
         }
         if (p.left == null)
-            firstEntry = p.next();
+            this.firstEntry = p.next();
         if (p.right == null)
-            lastEntry = p.prev();
+            this.lastEntry = p.prev();
         if (p.succ()) {
             if (p.pred()) {
                 if (i == 0)
-                    tree = p.left;
+                    this.tree = p.left;
                 else {
-                    if (dirPath[i - 1])
-                        nodePath[i - 1].succ(p.right);
+                    if (this.dirPath[i - 1])
+                        this.nodePath[i - 1].succ(p.right);
                     else
-                        nodePath[i - 1].pred(p.left);
+                        this.nodePath[i - 1].pred(p.left);
                 }
             } else {
                 p.prev().right = p.right;
                 if (i == 0)
-                    tree = p.left;
+                    this.tree = p.left;
                 else {
-                    if (dirPath[i - 1])
-                        nodePath[i - 1].right = p.left;
+                    if (this.dirPath[i - 1])
+                        this.nodePath[i - 1].right = p.left;
                     else
-                        nodePath[i - 1].left = p.left;
+                        this.nodePath[i - 1].left = p.left;
                 }
             }
         } else {
@@ -477,31 +477,31 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                 if (!r.pred())
                     r.prev().right = r;
                 if (i == 0)
-                    tree = r;
+                    this.tree = r;
                 else {
-                    if (dirPath[i - 1])
-                        nodePath[i - 1].right = r;
+                    if (this.dirPath[i - 1])
+                        this.nodePath[i - 1].right = r;
                     else
-                        nodePath[i - 1].left = r;
+                        this.nodePath[i - 1].left = r;
                 }
                 color = r.black();
                 r.black(p.black());
                 p.black(color);
-                dirPath[i] = true;
-                nodePath[i++] = r;
+                this.dirPath[i] = true;
+                this.nodePath[i++] = r;
             } else {
                 Entry<V> s;
                 int j = i++;
                 while (true) {
-                    dirPath[i] = false;
-                    nodePath[i++] = r;
+                    this.dirPath[i] = false;
+                    this.nodePath[i++] = r;
                     s = r.left;
                     if (s.pred())
                         break;
                     r = s;
                 }
-                dirPath[j] = true;
-                nodePath[j] = s;
+                this.dirPath[j] = true;
+                this.nodePath[j] = s;
                 if (s.succ())
                     r.pred(s);
                 else
@@ -516,46 +516,46 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                 s.black(p.black());
                 p.black(color);
                 if (j == 0)
-                    tree = s;
+                    this.tree = s;
                 else {
-                    if (dirPath[j - 1])
-                        nodePath[j - 1].right = s;
+                    if (this.dirPath[j - 1])
+                        this.nodePath[j - 1].right = s;
                     else
-                        nodePath[j - 1].left = s;
+                        this.nodePath[j - 1].left = s;
                 }
             }
         }
         int maxDepth = i;
         if (p.black()) {
             for (; i > 0; i--) {
-                if (dirPath[i - 1] && !nodePath[i - 1].succ() || !dirPath[i - 1] && !nodePath[i - 1].pred()) {
-                    Entry<V> x = dirPath[i - 1] ? nodePath[i - 1].right : nodePath[i - 1].left;
+                if (this.dirPath[i - 1] && !this.nodePath[i - 1].succ() || !this.dirPath[i - 1] && !this.nodePath[i - 1].pred()) {
+                    Entry<V> x = this.dirPath[i - 1] ? this.nodePath[i - 1].right : this.nodePath[i - 1].left;
                     if (!x.black()) {
                         x.black(true);
                         break;
                     }
                 }
-                if (!dirPath[i - 1]) {
-                    Entry<V> w = nodePath[i - 1].right;
+                if (!this.dirPath[i - 1]) {
+                    Entry<V> w = this.nodePath[i - 1].right;
                     if (!w.black()) {
                         w.black(true);
-                        nodePath[i - 1].black(false);
-                        nodePath[i - 1].right = w.left;
-                        w.left = nodePath[i - 1];
+                        this.nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].right = w.left;
+                        w.left = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
-                        nodePath[i] = nodePath[i - 1];
-                        dirPath[i] = false;
-                        nodePath[i - 1] = w;
+                        this.nodePath[i] = this.nodePath[i - 1];
+                        this.dirPath[i] = false;
+                        this.nodePath[i - 1] = w;
                         if (maxDepth == i++)
                             maxDepth++;
-                        w = nodePath[i - 1].right;
+                        w = this.nodePath[i - 1].right;
                     }
                     if ((w.pred() || w.left.black()) && (w.succ() || w.right.black())) {
                         w.black(false);
@@ -566,52 +566,52 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                             w.black(false);
                             w.left = y.right;
                             y.right = w;
-                            w = nodePath[i - 1].right = y;
+                            w = this.nodePath[i - 1].right = y;
                             if (w.succ()) {
                                 w.succ(false);
                                 w.right.pred(w);
                             }
                         }
-                        w.black(nodePath[i - 1].black());
-                        nodePath[i - 1].black(true);
+                        w.black(this.nodePath[i - 1].black());
+                        this.nodePath[i - 1].black(true);
                         w.right.black(true);
-                        nodePath[i - 1].right = w.left;
-                        w.left = nodePath[i - 1];
+                        this.nodePath[i - 1].right = w.left;
+                        w.left = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
                         if (w.pred()) {
                             w.pred(false);
-                            nodePath[i - 1].succ(w);
+                            this.nodePath[i - 1].succ(w);
                         }
                         break;
                     }
                 } else {
-                    Entry<V> w = nodePath[i - 1].left;
+                    Entry<V> w = this.nodePath[i - 1].left;
                     if (!w.black()) {
                         w.black(true);
-                        nodePath[i - 1].black(false);
-                        nodePath[i - 1].left = w.right;
-                        w.right = nodePath[i - 1];
+                        this.nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].left = w.right;
+                        w.right = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
-                        nodePath[i] = nodePath[i - 1];
-                        dirPath[i] = true;
-                        nodePath[i - 1] = w;
+                        this.nodePath[i] = this.nodePath[i - 1];
+                        this.dirPath[i] = true;
+                        this.nodePath[i - 1] = w;
                         if (maxDepth == i++)
                             maxDepth++;
-                        w = nodePath[i - 1].left;
+                        w = this.nodePath[i - 1].left;
                     }
                     if ((w.pred() || w.left.black()) && (w.succ() || w.right.black())) {
                         w.black(false);
@@ -622,48 +622,48 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                             w.black(false);
                             w.right = y.left;
                             y.left = w;
-                            w = nodePath[i - 1].left = y;
+                            w = this.nodePath[i - 1].left = y;
                             if (w.pred()) {
                                 w.pred(false);
                                 w.left.succ(w);
                             }
                         }
-                        w.black(nodePath[i - 1].black());
-                        nodePath[i - 1].black(true);
+                        w.black(this.nodePath[i - 1].black());
+                        this.nodePath[i - 1].black(true);
                         w.left.black(true);
-                        nodePath[i - 1].left = w.right;
-                        w.right = nodePath[i - 1];
+                        this.nodePath[i - 1].left = w.right;
+                        w.right = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
                         if (w.succ()) {
                             w.succ(false);
-                            nodePath[i - 1].pred(w);
+                            this.nodePath[i - 1].pred(w);
                         }
                         break;
                     }
                 }
             }
-            if (tree != null)
-                tree.black(true);
+            if (this.tree != null)
+                this.tree.black(true);
         }
-        modified = true;
-        count--;
+        this.modified = true;
+        this.count--;
         // We clean up the node path, or we could have stale references later.
         while (maxDepth-- != 0)
-            nodePath[maxDepth] = null;
+            this.nodePath[maxDepth] = null;
         return p.value;
     }
     @Override
     public boolean containsValue(final Object v) {
         final ValueIterator i = new ValueIterator();
         Object ev;
-        int j = count;
+        int j = this.count;
         while (j-- != 0) {
             ev = i.next();
             if (Objects.equals(ev, v))
@@ -673,12 +673,12 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
     @Override
     public void clear() {
-        count = 0;
-        tree = null;
-        entries = null;
-        values = null;
-        keys = null;
-        firstEntry = lastEntry = null;
+        this.count = 0;
+        this.tree = null;
+        this.entries = null;
+        this.values = null;
+        this.keys = null;
+        this.firstEntry = this.lastEntry = null;
     }
     /**
      * This class represent an entry in a tree map.
@@ -718,7 +718,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         Entry(final long k, final V v) {
             super(k, v);
-            info = SUCC_MASK | PRED_MASK;
+            this.info = SUCC_MASK | PRED_MASK;
         }
         /**
          * Returns the left subtree.
@@ -726,7 +726,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * @return the left subtree ({@code null} if the left subtree is empty).
          */
         Entry<V> left() {
-            return (info & PRED_MASK) != 0 ? null : left;
+            return (this.info & PRED_MASK) != 0 ? null : this.left;
         }
         /**
          * Returns the right subtree.
@@ -734,7 +734,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * @return the right subtree ({@code null} if the right subtree is empty).
          */
         Entry<V> right() {
-            return (info & SUCC_MASK) != 0 ? null : right;
+            return (this.info & SUCC_MASK) != 0 ? null : this.right;
         }
         /**
          * Checks whether the left pointer is really a predecessor.
@@ -742,7 +742,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * @return true if the left pointer is a predecessor.
          */
         boolean pred() {
-            return (info & PRED_MASK) != 0;
+            return (this.info & PRED_MASK) != 0;
         }
         /**
          * Checks whether the right pointer is really a successor.
@@ -750,7 +750,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * @return true if the right pointer is a successor.
          */
         boolean succ() {
-            return (info & SUCC_MASK) != 0;
+            return (this.info & SUCC_MASK) != 0;
         }
         /**
          * Sets whether the left pointer is really a predecessor.
@@ -760,9 +760,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         void pred(final boolean pred) {
             if (pred)
-                info |= PRED_MASK;
+                this.info |= PRED_MASK;
             else
-                info &= ~PRED_MASK;
+                this.info &= ~PRED_MASK;
         }
         /**
          * Sets whether the right pointer is really a successor.
@@ -772,9 +772,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         void succ(final boolean succ) {
             if (succ)
-                info |= SUCC_MASK;
+                this.info |= SUCC_MASK;
             else
-                info &= ~SUCC_MASK;
+                this.info &= ~SUCC_MASK;
         }
         /**
          * Sets the left pointer to a predecessor.
@@ -783,8 +783,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          *            the predecessr.
          */
         void pred(final Entry<V> pred) {
-            info |= PRED_MASK;
-            left = pred;
+            this.info |= PRED_MASK;
+            this.left = pred;
         }
         /**
          * Sets the right pointer to a successor.
@@ -793,8 +793,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          *            the successor.
          */
         void succ(final Entry<V> succ) {
-            info |= SUCC_MASK;
-            right = succ;
+            this.info |= SUCC_MASK;
+            this.right = succ;
         }
         /**
          * Sets the left pointer to the given subtree.
@@ -803,7 +803,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          *            the new left subtree.
          */
         void left(final Entry<V> left) {
-            info &= ~PRED_MASK;
+            this.info &= ~PRED_MASK;
             this.left = left;
         }
         /**
@@ -813,7 +813,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          *            the new right subtree.
          */
         void right(final Entry<V> right) {
-            info &= ~SUCC_MASK;
+            this.info &= ~SUCC_MASK;
             this.right = right;
         }
         /**
@@ -822,7 +822,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * @return true iff this node is black.
          */
         boolean black() {
-            return (info & BLACK_MASK) != 0;
+            return (this.info & BLACK_MASK) != 0;
         }
         /**
          * Sets whether this node is black.
@@ -832,9 +832,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         void black(final boolean black) {
             if (black)
-                info |= BLACK_MASK;
+                this.info |= BLACK_MASK;
             else
-                info &= ~BLACK_MASK;
+                this.info &= ~BLACK_MASK;
         }
         /**
          * Computes the next entry in the set order.
@@ -843,7 +843,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         Entry<V> next() {
             Entry<V> next = this.right;
-            if ((info & SUCC_MASK) == 0)
+            if ((this.info & SUCC_MASK) == 0)
                 while ((next.info & PRED_MASK) == 0)
                     next = next.left;
             return next;
@@ -855,7 +855,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         Entry<V> prev() {
             Entry<V> prev = this.left;
-            if ((info & PRED_MASK) == 0)
+            if ((this.info & PRED_MASK) == 0)
                 while ((prev.info & SUCC_MASK) == 0)
                     prev = prev.right;
             return prev;
@@ -875,9 +875,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
             } catch (CloneNotSupportedException cantHappen) {
                 throw new InternalError();
             }
-            c.key = key;
-            c.value = value;
-            c.info = info;
+            c.key = this.key;
+            c.value = this.value;
+            c.info = this.info;
             return c;
         }
         @Override
@@ -886,15 +886,15 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<Long, V> e = (Map.Entry<Long, V>) o;
-            return ((key) == ((e.getKey()).longValue())) && Objects.equals(value, (e.getValue()));
+            return ((this.key) == ((e.getKey()).longValue())) && Objects.equals(this.value, (e.getValue()));
         }
         @Override
         public int hashCode() {
-            return it.unimi.dsi.fastutil.HashCommon.long2int(key) ^ ((value) == null ? 0 : (value).hashCode());
+            return it.unimi.dsi.fastutil.HashCommon.long2int(this.key) ^ ((this.value) == null ? 0 : (this.value).hashCode());
         }
         @Override
         public String toString() {
-            return key + "=>" + value;
+            return this.key + "=>" + this.value;
         }
         /*
          * public void prettyPrint() { prettyPrint(0); }
@@ -937,11 +937,11 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         }
         @Override
         public long getLongKey() {
-            return key;
+            return this.key;
         }
         @Override
         public K getValue() {
-            return value;
+            return this.value;
         }
         @Override
         public K setValue(final K value) {
@@ -954,7 +954,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                 return false;
             if (o instanceof Long2ObjectMap.Entry) {
                 final Long2ObjectMap.Entry<K> e = (Long2ObjectMap.Entry<K>) o;
-                return ((key) == (e.getLongKey())) && Objects.equals(value, e.getValue());
+                return ((this.key) == (e.getLongKey())) && Objects.equals(this.value, e.getValue());
             }
             final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
             final Object key = e.getKey();
@@ -965,47 +965,47 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         }
         @Override
         public int hashCode() {
-            return it.unimi.dsi.fastutil.HashCommon.long2int(key) ^ ((value) == null ? 0 : (value).hashCode());
+            return it.unimi.dsi.fastutil.HashCommon.long2int(this.key) ^ ((this.value) == null ? 0 : (this.value).hashCode());
         }
         @Override
         public String toString() {
-            return key + "->" + value;
+            return this.key + "->" + this.value;
         }
     }
 
     @Override
     public boolean containsKey(final long k) {
-        return findKey(k) != null;
+        return this.findKey(k) != null;
     }
     @Override
     public int size() {
-        return count;
+        return this.count;
     }
     @Override
     public boolean isEmpty() {
-        return count == 0;
+        return this.count == 0;
     }
 
     @Override
     public V get(final long k) {
-        final Entry<V> e = findKey(k);
-        return e == null ? defRetValue : e.value;
+        final Entry<V> e = this.findKey(k);
+        return e == null ? this.defRetValue : e.value;
     }
     @Override
     public long firstLongKey() {
-        if (tree == null)
+        if (this.tree == null)
             throw new NoSuchElementException();
-        return firstEntry.key;
+        return this.firstEntry.key;
     }
     @Override
     public long lastLongKey() {
-        if (tree == null)
+        if (this.tree == null)
             throw new NoSuchElementException();
-        return lastEntry.key;
+        return this.lastEntry.key;
     }
 
     public final long floorKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key > key) {
             Entry prev = en.prev();
             return prev == null ? INVALID_KEY : prev.key;
@@ -1015,7 +1015,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final long ceilingKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key < key) {
             Entry next = en.next();
             return next == null ? INVALID_KEY : next.key;
@@ -1025,7 +1025,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final long lowerKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key >= key) {
             Entry prev = en.prev();
             return prev == null ? INVALID_KEY : prev.key;
@@ -1035,7 +1035,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final long higherKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key <= key) {
             Entry next = en.next();
             return next == null ? INVALID_KEY : next.key;
@@ -1045,8 +1045,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final BasicEntry<V> floorEntry(long key) {
-        if (count == 0) return null;
-        Entry<V> en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry<V> en = this.locateKey(key);
         if (en.key > key) {
             return en.prev();
         } else {
@@ -1056,8 +1056,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final BasicEntry<V> ceilingEntry(long key) {
-        if (count == 0) return null;
-        Entry<V> en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry<V> en = this.locateKey(key);
         if (en.key < key) {
             return en.next();
         } else {
@@ -1066,8 +1066,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final BasicEntry<V> lowerEntry(long key) {
-        if (count == 0) return null;
-        Entry<V> en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry<V> en = this.locateKey(key);
         if (en.key >= key) {
             return en.prev();
         } else {
@@ -1077,8 +1077,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
     }
 
     public final BasicEntry<V> higherEntry(long key) {
-        if (count == 0) return null;
-        Entry<V> en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry<V> en = this.locateKey(key);
         if (en.key <= key) {
             return en.next();
         } else {
@@ -1118,76 +1118,76 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         int index = 0;
         TreeIterator() {
-            next = firstEntry;
+            this.next = Long2ObjectTreeMap.this.firstEntry;
         }
         TreeIterator(final long k) {
-            if ((next = locateKey(k)) != null) {
-                if (compare(next.key, k) <= 0) {
-                    prev = next;
-                    next = next.next();
+            if ((this.next = Long2ObjectTreeMap.this.locateKey(k)) != null) {
+                if (Long2ObjectTreeMap.this.compare(this.next.key, k) <= 0) {
+                    this.prev = this.next;
+                    this.next = this.next.next();
                 } else
-                    prev = next.prev();
+                    this.prev = this.next.prev();
             }
         }
         public boolean hasNext() {
-            return next != null;
+            return this.next != null;
         }
         public boolean hasPrevious() {
-            return prev != null;
+            return this.prev != null;
         }
         void updateNext() {
-            next = next.next();
+            this.next = this.next.next();
         }
         Entry<V> nextEntry() {
-            if (!hasNext())
+            if (!this.hasNext())
                 throw new NoSuchElementException();
-            curr = prev = next;
-            index++;
-            updateNext();
-            return curr;
+            this.curr = this.prev = this.next;
+            this.index++;
+            this.updateNext();
+            return this.curr;
         }
         void updatePrevious() {
-            prev = prev.prev();
+            this.prev = this.prev.prev();
         }
         Entry<V> previousEntry() {
-            if (!hasPrevious())
+            if (!this.hasPrevious())
                 throw new NoSuchElementException();
-            curr = next = prev;
-            index--;
-            updatePrevious();
-            return curr;
+            this.curr = this.next = this.prev;
+            this.index--;
+            this.updatePrevious();
+            return this.curr;
         }
         public int nextIndex() {
-            return index;
+            return this.index;
         }
         public int previousIndex() {
-            return index - 1;
+            return this.index - 1;
         }
         public void remove() {
-            if (curr == null)
+            if (this.curr == null)
                 throw new IllegalStateException();
             /*
              * If the last operation was a next(), we are removing an entry that preceeds
              * the current index, and thus we must decrement it.
              */
-            if (curr == prev)
-                index--;
-            next = prev = curr;
-            updatePrevious();
-            updateNext();
-            Long2ObjectTreeMap.this.remove(curr.key);
-            curr = null;
+            if (this.curr == this.prev)
+                this.index--;
+            this.next = this.prev = this.curr;
+            this.updatePrevious();
+            this.updateNext();
+            Long2ObjectTreeMap.this.remove(this.curr.key);
+            this.curr = null;
         }
         public int skip(final int n) {
             int i = n;
-            while (i-- != 0 && hasNext())
-                nextEntry();
+            while (i-- != 0 && this.hasNext())
+                this.nextEntry();
             return n - i - 1;
         }
         public int back(final int n) {
             int i = n;
-            while (i-- != 0 && hasPrevious())
-                previousEntry();
+            while (i-- != 0 && this.hasPrevious())
+                this.previousEntry();
             return n - i - 1;
         }
     }
@@ -1205,22 +1205,22 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         }
         @Override
         public Long2ObjectMap.Entry<V> next() {
-            return nextEntry();
+            return this.nextEntry();
         }
         @Override
         public Long2ObjectMap.Entry<V> previous() {
-            return previousEntry();
+            return this.previousEntry();
         }
     }
     @Override
     public ObjectSortedSet<Long2ObjectMap.Entry<V>> long2ObjectEntrySet() {
-        if (entries == null)
-            entries = new AbstractObjectSortedSet<Long2ObjectMap.Entry<V>>() {
+        if (this.entries == null)
+            this.entries = new AbstractObjectSortedSet<Long2ObjectMap.Entry<V>>() {
                 final Comparator<? super Long2ObjectMap.Entry<V>> comparator = (Comparator<Long2ObjectMap.Entry<V>>) (x,
                                                                                                                       y) -> Long2ObjectTreeMap.this.actualComparator.compare(x.getLongKey(), y.getLongKey());
                 @Override
                 public Comparator<? super Long2ObjectMap.Entry<V>> comparator() {
-                    return comparator;
+                    return this.comparator;
                 }
                 @Override
                 public ObjectBidirectionalIterator<Long2ObjectMap.Entry<V>> iterator() {
@@ -1239,7 +1239,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                     final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
                     if (e.getKey() == null || !(e.getKey() instanceof Long))
                         return false;
-                    final Entry<V> f = findKey(((Long) (e.getKey())).longValue());
+                    final Entry<V> f = Long2ObjectTreeMap.this.findKey(((Long) (e.getKey())).longValue());
                     return e.equals(f);
                 }
                 @Override
@@ -1250,7 +1250,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                     final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
                     if (e.getKey() == null || !(e.getKey() instanceof Long))
                         return false;
-                    final Entry<V> f = findKey(((Long) (e.getKey())).longValue());
+                    final Entry<V> f = Long2ObjectTreeMap.this.findKey(((Long) (e.getKey())).longValue());
                     if (f == null || !Objects.equals(f.getValue(), (e.getValue())))
                         return false;
                     Long2ObjectTreeMap.this.remove(f.key);
@@ -1258,7 +1258,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                 }
                 @Override
                 public int size() {
-                    return count;
+                    return Long2ObjectTreeMap.this.count;
                 }
                 @Override
                 public void clear() {
@@ -1266,27 +1266,27 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                 }
                 @Override
                 public Long2ObjectMap.Entry<V> first() {
-                    return firstEntry;
+                    return Long2ObjectTreeMap.this.firstEntry;
                 }
                 @Override
                 public Long2ObjectMap.Entry<V> last() {
-                    return lastEntry;
+                    return Long2ObjectTreeMap.this.lastEntry;
                 }
                 @Override
                 public ObjectSortedSet<Long2ObjectMap.Entry<V>> subSet(Long2ObjectMap.Entry<V> from,
                                                                        Long2ObjectMap.Entry<V> to) {
-                    return subMap(from.getLongKey(), to.getLongKey()).long2ObjectEntrySet();
+                    return Long2ObjectTreeMap.this.subMap(from.getLongKey(), to.getLongKey()).long2ObjectEntrySet();
                 }
                 @Override
                 public ObjectSortedSet<Long2ObjectMap.Entry<V>> headSet(Long2ObjectMap.Entry<V> to) {
-                    return headMap(to.getLongKey()).long2ObjectEntrySet();
+                    return Long2ObjectTreeMap.this.headMap(to.getLongKey()).long2ObjectEntrySet();
                 }
                 @Override
                 public ObjectSortedSet<Long2ObjectMap.Entry<V>> tailSet(Long2ObjectMap.Entry<V> from) {
-                    return tailMap(from.getLongKey()).long2ObjectEntrySet();
+                    return Long2ObjectTreeMap.this.tailMap(from.getLongKey()).long2ObjectEntrySet();
                 }
             };
-        return entries;
+        return this.entries;
     }
     /**
      * An iterator on the whole range of keys.
@@ -1306,11 +1306,11 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         }
         @Override
         public long nextLong() {
-            return nextEntry().key;
+            return this.nextEntry().key;
         }
         @Override
         public long previousLong() {
-            return previousEntry().key;
+            return this.previousEntry().key;
         }
     }
 
@@ -1337,9 +1337,9 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     @Override
     public LongSortedSet keySet() {
-        if (keys == null)
-            keys = new KeySet();
-        return keys;
+        if (this.keys == null)
+            this.keys = new KeySet();
+        return this.keys;
     }
     /**
      * An iterator on the whole range of values.
@@ -1351,15 +1351,14 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      * methods (and possibly their type-specific counterparts) so that they return
      * values instead of entries.
      */
-    @SuppressWarnings("unchecked")
     private final class ValueIterator extends TreeIterator implements ObjectListIterator<V> {
         @Override
         public V next() {
-            return (V) nextEntry().value;
+            return (V) this.nextEntry().value;
         }
         @Override
         public V previous() {
-            return (V) previousEntry().value;
+            return (V) this.previousEntry().value;
         }
     }
 
@@ -1375,30 +1374,30 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
      */
     @Override
     public ObjectCollection<V> values() {
-        if (values == null)
-            values = new AbstractObjectCollection<V>() {
+        if (this.values == null)
+            this.values = new AbstractObjectCollection<V>() {
                 @Override
                 public ObjectIterator<V> iterator() {
                     return new ValueIterator();
                 }
                 @Override
                 public boolean contains(final Object k) {
-                    return containsValue(k);
+                    return Long2ObjectTreeMap.this.containsValue(k);
                 }
                 @Override
                 public int size() {
-                    return count;
+                    return Long2ObjectTreeMap.this.count;
                 }
                 @Override
                 public void clear() {
                     Long2ObjectTreeMap.this.clear();
                 }
             };
-        return values;
+        return this.values;
     }
     @Override
     public LongComparator comparator() {
-        return actualComparator;
+        return this.actualComparator;
     }
     @Override
     public Long2ObjectSortedMap<V> headMap(long to) {
@@ -1478,13 +1477,13 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * @return true if is the key is in the submap range.
          */
         final boolean in(final long k) {
-            return (bottom || Long2ObjectTreeMap.this.compare(k, from) >= 0)
-                    && (top || Long2ObjectTreeMap.this.compare(k, to) < 0);
+            return (this.bottom || Long2ObjectTreeMap.this.compare(k, this.from) >= 0)
+                    && (this.top || Long2ObjectTreeMap.this.compare(k, this.to) < 0);
         }
         @Override
         public ObjectSortedSet<Entry<V>> long2ObjectEntrySet() {
-            if (entries == null)
-                entries = new AbstractObjectSortedSet<Entry<V>>() {
+            if (this.entries == null)
+                this.entries = new AbstractObjectSortedSet<Entry<V>>() {
                     @Override
                     public ObjectBidirectionalIterator<Entry<V>> iterator() {
                         return new SubmapEntryIterator();
@@ -1506,8 +1505,8 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                         final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
                         if (e.getKey() == null || !(e.getKey() instanceof Long))
                             return false;
-                        final Long2ObjectTreeMap.Entry<V> f = findKey(((Long) (e.getKey())).longValue());
-                        return f != null && in(f.key) && e.equals(f);
+                        final Long2ObjectTreeMap.Entry<V> f = Long2ObjectTreeMap.this.findKey(((Long) (e.getKey())).longValue());
+                        return f != null && Submap.this.in(f.key) && e.equals(f);
                     }
                     @Override
 
@@ -1517,15 +1516,15 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                         final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
                         if (e.getKey() == null || !(e.getKey() instanceof Long))
                             return false;
-                        final Long2ObjectTreeMap.Entry<V> f = findKey(((Long) (e.getKey())).longValue());
-                        if (f != null && in(f.key))
+                        final Long2ObjectTreeMap.Entry<V> f = Long2ObjectTreeMap.this.findKey(((Long) (e.getKey())).longValue());
+                        if (f != null && Submap.this.in(f.key))
                             Submap.this.remove(f.key);
                         return f != null;
                     }
                     @Override
                     public int size() {
                         int c = 0;
-                        for (Iterator<?> i = iterator(); i.hasNext(); i.next())
+                        for (Iterator<?> i = this.iterator(); i.hasNext(); i.next())
                             c++;
                         return c;
                     }
@@ -1539,27 +1538,27 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                     }
                     @Override
                     public Entry<V> first() {
-                        return firstEntry();
+                        return Submap.this.firstEntry();
                     }
                     @Override
                     public Entry<V> last() {
-                        return lastEntry();
+                        return Submap.this.lastEntry();
                     }
                     @Override
                     public ObjectSortedSet<Entry<V>> subSet(Entry<V> from,
                                                             Entry<V> to) {
-                        return subMap(from.getLongKey(), to.getLongKey()).long2ObjectEntrySet();
+                        return Submap.this.subMap(from.getLongKey(), to.getLongKey()).long2ObjectEntrySet();
                     }
                     @Override
                     public ObjectSortedSet<Entry<V>> headSet(Entry<V> to) {
-                        return headMap(to.getLongKey()).long2ObjectEntrySet();
+                        return Submap.this.headMap(to.getLongKey()).long2ObjectEntrySet();
                     }
                     @Override
                     public ObjectSortedSet<Entry<V>> tailSet(Entry<V> from) {
-                        return tailMap(from.getLongKey()).long2ObjectEntrySet();
+                        return Submap.this.tailMap(from.getLongKey()).long2ObjectEntrySet();
                     }
                 };
-            return entries;
+            return this.entries;
         }
         private class KeySet extends AbstractLong2ObjectSortedMap<V>.KeySet {
             @Override
@@ -1573,21 +1572,21 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         }
         @Override
         public LongSortedSet keySet() {
-            if (keys == null)
-                keys = new KeySet();
-            return keys;
+            if (this.keys == null)
+                this.keys = new KeySet();
+            return this.keys;
         }
         @Override
         public ObjectCollection<V> values() {
-            if (values == null)
-                values = new AbstractObjectCollection<V>() {
+            if (this.values == null)
+                this.values = new AbstractObjectCollection<V>() {
                     @Override
                     public ObjectIterator<V> iterator() {
                         return new SubmapValueIterator();
                     }
                     @Override
                     public boolean contains(final Object k) {
-                        return containsValue(k);
+                        return Submap.this.containsValue(k);
                     }
                     @Override
                     public int size() {
@@ -1598,12 +1597,12 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
                         Submap.this.clear();
                     }
                 };
-            return values;
+            return this.values;
         }
         @Override
 
         public boolean containsKey(final long k) {
-            return in(k) && Long2ObjectTreeMap.this.containsKey(k);
+            return this.in(k) && Long2ObjectTreeMap.this.containsKey(k);
         }
         @Override
         public boolean containsValue(final Object v) {
@@ -1621,25 +1620,25 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         public V get(final long k) {
             final Long2ObjectTreeMap.Entry<V> e;
             final long kk = k;
-            return in(kk) && (e = findKey(kk)) != null ? e.value : this.defRetValue;
+            return this.in(kk) && (e = Long2ObjectTreeMap.this.findKey(kk)) != null ? e.value : this.defRetValue;
         }
         @Override
         public V put(final long k, final V v) {
-            modified = false;
-            if (!in(k))
+            Long2ObjectTreeMap.this.modified = false;
+            if (!this.in(k))
                 throw new IllegalArgumentException("Key (" + k + ") out of range ["
-                        + (bottom ? "-" : String.valueOf(from)) + ", " + (top ? "-" : String.valueOf(to)) + ")");
+                        + (this.bottom ? "-" : String.valueOf(this.from)) + ", " + (this.top ? "-" : String.valueOf(this.to)) + ")");
             final V oldValue = Long2ObjectTreeMap.this.put(k, v);
-            return modified ? this.defRetValue : oldValue;
+            return Long2ObjectTreeMap.this.modified ? this.defRetValue : oldValue;
         }
         @Override
 
         public V remove(final long k) {
-            modified = false;
-            if (!in(k))
+            Long2ObjectTreeMap.this.modified = false;
+            if (!this.in(k))
                 return this.defRetValue;
             final V oldValue = Long2ObjectTreeMap.this.remove(k);
-            return modified ? oldValue : this.defRetValue;
+            return Long2ObjectTreeMap.this.modified ? oldValue : this.defRetValue;
         }
         @Override
         public int size() {
@@ -1657,29 +1656,29 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         }
         @Override
         public LongComparator comparator() {
-            return actualComparator;
+            return Long2ObjectTreeMap.this.actualComparator;
         }
         @Override
         public Long2ObjectSortedMap<V> headMap(final long to) {
-            if (top)
-                return new Submap(from, bottom, to, false);
-            return compare(to, this.to) < 0 ? new Submap(from, bottom, to, false) : this;
+            if (this.top)
+                return new Submap(this.from, this.bottom, to, false);
+            return Long2ObjectTreeMap.this.compare(to, this.to) < 0 ? new Submap(this.from, this.bottom, to, false) : this;
         }
         @Override
         public Long2ObjectSortedMap<V> tailMap(final long from) {
-            if (bottom)
-                return new Submap(from, false, to, top);
-            return compare(from, this.from) > 0 ? new Submap(from, false, to, top) : this;
+            if (this.bottom)
+                return new Submap(from, false, this.to, this.top);
+            return Long2ObjectTreeMap.this.compare(from, this.from) > 0 ? new Submap(from, false, this.to, this.top) : this;
         }
         @Override
         public Long2ObjectSortedMap<V> subMap(long from, long to) {
-            if (top && bottom)
+            if (this.top && this.bottom)
                 return new Submap(from, false, to, false);
-            if (!top)
-                to = compare(to, this.to) < 0 ? to : this.to;
-            if (!bottom)
-                from = compare(from, this.from) > 0 ? from : this.from;
-            if (!top && !bottom && from == this.from && to == this.to)
+            if (!this.top)
+                to = Long2ObjectTreeMap.this.compare(to, this.to) < 0 ? to : this.to;
+            if (!this.bottom)
+                from = Long2ObjectTreeMap.this.compare(from, this.from) > 0 ? from : this.from;
+            if (!this.top && !this.bottom && from == this.from && to == this.to)
                 return this;
             return new Submap(from, false, to, false);
         }
@@ -1690,22 +1689,22 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          *         empty.
          */
         public Long2ObjectTreeMap.Entry<V> firstEntry() {
-            if (tree == null)
+            if (Long2ObjectTreeMap.this.tree == null)
                 return null;
             // If this submap goes to -infinity, we return the main map first entry;
             // otherwise, we locate the start of the map.
             Long2ObjectTreeMap.Entry<V> e;
-            if (bottom)
-                e = firstEntry;
+            if (this.bottom)
+                e = Long2ObjectTreeMap.this.firstEntry;
             else {
-                e = locateKey(from);
+                e = Long2ObjectTreeMap.this.locateKey(this.from);
                 // If we find either the start or something greater we're OK.
-                if (compare(e.key, from) < 0)
+                if (Long2ObjectTreeMap.this.compare(e.key, this.from) < 0)
                     e = e.next();
             }
             // Finally, if this submap doesn't go to infinity, we check that the resulting
             // key isn't greater than the end.
-            if (e == null || !top && compare(e.key, to) >= 0)
+            if (e == null || !this.top && Long2ObjectTreeMap.this.compare(e.key, this.to) >= 0)
                 return null;
             return e;
         }
@@ -1716,35 +1715,35 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          *         empty.
          */
         public Long2ObjectTreeMap.Entry<V> lastEntry() {
-            if (tree == null)
+            if (Long2ObjectTreeMap.this.tree == null)
                 return null;
             // If this submap goes to infinity, we return the main map last entry;
             // otherwise, we locate the end of the map.
             Long2ObjectTreeMap.Entry<V> e;
-            if (top)
-                e = lastEntry;
+            if (this.top)
+                e = Long2ObjectTreeMap.this.lastEntry;
             else {
-                e = locateKey(to);
+                e = Long2ObjectTreeMap.this.locateKey(this.to);
                 // If we find something smaller than the end we're OK.
-                if (compare(e.key, to) >= 0)
+                if (Long2ObjectTreeMap.this.compare(e.key, this.to) >= 0)
                     e = e.prev();
             }
             // Finally, if this submap doesn't go to -infinity, we check that the resulting
             // key isn't smaller than the start.
-            if (e == null || !bottom && compare(e.key, from) < 0)
+            if (e == null || !this.bottom && Long2ObjectTreeMap.this.compare(e.key, this.from) < 0)
                 return null;
             return e;
         }
         @Override
         public long firstLongKey() {
-            Long2ObjectTreeMap.Entry<V> e = firstEntry();
+            Long2ObjectTreeMap.Entry<V> e = this.firstEntry();
             if (e == null)
                 throw new NoSuchElementException();
             return e.key;
         }
         @Override
         public long lastLongKey() {
-            Long2ObjectTreeMap.Entry<V> e = lastEntry();
+            Long2ObjectTreeMap.Entry<V> e = this.lastEntry();
             if (e == null)
                 throw new NoSuchElementException();
             return e.key;
@@ -1760,36 +1759,36 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          */
         private class SubmapIterator extends TreeIterator {
             SubmapIterator() {
-                next = firstEntry();
+                this.next = Submap.this.firstEntry();
             }
             SubmapIterator(final long k) {
                 this();
-                if (next != null) {
-                    if (!bottom && compare(k, next.key) < 0)
-                        prev = null;
-                    else if (!top && compare(k, (prev = lastEntry()).key) >= 0)
-                        next = null;
+                if (this.next != null) {
+                    if (!Submap.this.bottom && Long2ObjectTreeMap.this.compare(k, this.next.key) < 0)
+                        this.prev = null;
+                    else if (!Submap.this.top && Long2ObjectTreeMap.this.compare(k, (this.prev = Submap.this.lastEntry()).key) >= 0)
+                        this.next = null;
                     else {
-                        next = locateKey(k);
-                        if (compare(next.key, k) <= 0) {
-                            prev = next;
-                            next = next.next();
+                        this.next = Long2ObjectTreeMap.this.locateKey(k);
+                        if (Long2ObjectTreeMap.this.compare(this.next.key, k) <= 0) {
+                            this.prev = this.next;
+                            this.next = this.next.next();
                         } else
-                            prev = next.prev();
+                            this.prev = this.next.prev();
                     }
                 }
             }
             @Override
             void updatePrevious() {
-                prev = prev.prev();
-                if (!bottom && prev != null && Long2ObjectTreeMap.this.compare(prev.key, from) < 0)
-                    prev = null;
+                this.prev = this.prev.prev();
+                if (!Submap.this.bottom && this.prev != null && Long2ObjectTreeMap.this.compare(this.prev.key, Submap.this.from) < 0)
+                    this.prev = null;
             }
             @Override
             void updateNext() {
-                next = next.next();
-                if (!top && next != null && Long2ObjectTreeMap.this.compare(next.key, to) >= 0)
-                    next = null;
+                this.next = this.next.next();
+                if (!Submap.this.top && this.next != null && Long2ObjectTreeMap.this.compare(this.next.key, Submap.this.to) >= 0)
+                    this.next = null;
             }
         }
         private class SubmapEntryIterator extends SubmapIterator
@@ -1802,11 +1801,11 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
             }
             @Override
             public Entry<V> next() {
-                return nextEntry();
+                return this.nextEntry();
             }
             @Override
             public Entry<V> previous() {
-                return previousEntry();
+                return this.previousEntry();
             }
         }
         /**
@@ -1828,11 +1827,11 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
             }
             @Override
             public long nextLong() {
-                return nextEntry().key;
+                return this.nextEntry().key;
             }
             @Override
             public long previousLong() {
-                return previousEntry().key;
+                return this.previousEntry().key;
             }
         }
 
@@ -1846,15 +1845,14 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * methods (and possibly their type-specific counterparts) so that they return
          * values instead of entries.
          */
-        @SuppressWarnings("unchecked")
         private final class SubmapValueIterator extends SubmapIterator implements ObjectListIterator<V> {
             @Override
             public V next() {
-                return (V) nextEntry().value;
+                return (V) this.nextEntry().value;
             }
             @Override
             public V previous() {
-                return (V) previousEntry().value;
+                return (V) this.previousEntry().value;
             }
         }
     }
@@ -1881,11 +1879,11 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         c.values = null;
         c.entries = null;
         c.allocatePaths();
-        if (count != 0) {
+        if (this.count != 0) {
             // Also this apparently unfathomable code is derived from GNU libavl.
             Entry<V> e, p, q, rp = new Entry<>(), rq = new Entry<>();
             p = rp;
-            rp.left(tree);
+            rp.left(this.tree);
             q = rq;
             rq.pred(null);
             while (true) {
@@ -1926,7 +1924,7 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         return c;
     }
     private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {
-        int n = count;
+        int n = this.count;
         EntryIterator i = new EntryIterator();
         Entry<V> e;
         s.defaultWriteObject();
@@ -1977,11 +1975,11 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
         // The right subtree is the largest one.
         final int rightN = n / 2, leftN = n - rightN - 1;
         final Entry<V> top = new Entry<>();
-        top.left(readTree(s, leftN, pred, top));
+        top.left(this.readTree(s, leftN, pred, top));
         top.key = s.readLong();
         top.value = (V) s.readObject();
         top.black(true);
-        top.right(readTree(s, rightN, top, succ));
+        top.right(this.readTree(s, rightN, top, succ));
         if (n + 2 == ((n + 2) & -(n + 2)))
             top.right.black(false); // Quick test for determining whether n + 2 is a power of 2.
         return top;
@@ -1992,19 +1990,19 @@ public class Long2ObjectTreeMap<V> extends AbstractLong2ObjectSortedMap<V>
          * The storedComparator is now correctly set, but we must restore on-the-fly the
          * actualComparator.
          */
-        setActualComparator();
-        allocatePaths();
-        if (count != 0) {
-            tree = readTree(s, count, null, null);
+        this.setActualComparator();
+        this.allocatePaths();
+        if (this.count != 0) {
+            this.tree = this.readTree(s, this.count, null, null);
             Entry<V> e;
-            e = tree;
+            e = this.tree;
             while (e.left() != null)
                 e = e.left();
-            firstEntry = e;
-            e = tree;
+            this.firstEntry = e;
+            e = this.tree;
             while (e.right() != null)
                 e = e.right();
-            lastEntry = e;
+            this.lastEntry = e;
         }
     }
 }

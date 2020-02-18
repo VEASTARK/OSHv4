@@ -78,7 +78,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
     /**
      * Handler for en-/decoding of solutions and provision of encoding information to optimization algorithms.
      */
-    protected IPPSolutionHandler solutionHandler;
+    protected final IPPSolutionHandler solutionHandler;
     protected DecodedSolutionWrapper currentSolution;
     /**
      * Additional (non-monetary) costs produced during the optimization loops which would not be computed in the
@@ -86,7 +86,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      */
     private double interdependentCervisia;
 
-    private UUID deviceID;
+    private final UUID deviceID;
 
     /**
      * Flag if the publication of this problem-part should cause a rescheduling.

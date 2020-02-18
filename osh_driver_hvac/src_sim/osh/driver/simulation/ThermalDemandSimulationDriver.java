@@ -1,7 +1,7 @@
 package osh.driver.simulation;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
@@ -18,7 +18,10 @@ import osh.simulation.screenplay.SubjectAction;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Sebastian Kramer, Ingo Mauser
@@ -26,14 +29,14 @@ import java.util.*;
 public abstract class ThermalDemandSimulationDriver
         extends DeviceSimulationDriver {
 
-    private String inputSourceFile;
-    private ThermalDemandData demandData;
+    private final String inputSourceFile;
+    private final ThermalDemandData demandData;
 
     private int pastDaysPrediction;
     private float weightForOtherWeekday;
     private float weightForSameWeekday;
 
-    private Commodity hotWaterType;
+    private final Commodity hotWaterType;
 
     private boolean log;
 
@@ -129,7 +132,7 @@ public abstract class ThermalDemandSimulationDriver
 
     @Override
     public void onNextTimeTick() {
-        OSHRandomGenerator ownGen = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         int randomHourShift = 2; // % 2 == 0
 
@@ -137,8 +140,8 @@ public abstract class ThermalDemandSimulationDriver
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
         if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
 //			double demand = 0;
-            int randomNumber = ownGen.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
-            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
+            int randomNumber = rand.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
+            double demand = (0.5 + rand.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
                     , randomHourShift);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now - 3600, 0, 0);
 //			demand += 0.5 * demandData.getTotalThermalDemand(now, 0, 0);

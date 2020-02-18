@@ -39,7 +39,8 @@ public class GUIStatesComExchange extends CALComExchange {
         } else {
             synchronized (types) {
                 @SuppressWarnings("unchecked")
-                Class<? extends AbstractExchange>[] dte = (Class<? extends StateExchange>[]) types.toArray(new Class<?>[0]);
+                Class<? extends AbstractExchange>[] dte = new Class[types.size()];
+                dte = types.toArray(dte);
 
                 Set<Class<? extends AbstractExchange>> clonedTypes = new HashSet<>();
 
@@ -54,12 +55,13 @@ public class GUIStatesComExchange extends CALComExchange {
         } else {
             synchronized (states) {
                 @SuppressWarnings("unchecked")
-                Entry<UUID, ? extends StateExchange>[] dte = (Entry<UUID, ? extends StateExchange>[]) states.entrySet().toArray(new Entry<?, ?>[0]);
+                Entry<UUID, ? extends AbstractExchange>[] dte = new Entry[states.size()];
+                dte = states.entrySet().toArray(dte);
 
                 Map<UUID, StateExchange> clonedStates = new HashMap<>();
 
-                for (Entry<UUID, ? extends StateExchange> e : dte) {
-                    clonedStates.put(e.getKey(), e.getValue().clone()); //no cloning for key
+                for (Entry<UUID, ? extends AbstractExchange> e : dte) {
+                    clonedStates.put(e.getKey(), (StateExchange) e.getValue().clone()); //no cloning for key
                 }
 
                 this.states = clonedStates;

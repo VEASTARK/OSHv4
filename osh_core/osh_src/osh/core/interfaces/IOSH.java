@@ -2,7 +2,7 @@ package osh.core.interfaces;
 
 import osh.core.DataBroker;
 import osh.core.LifeCycleStates;
-import osh.core.OSHRandomGenerator;
+import osh.core.RandomDistributor;
 import osh.core.logging.IGlobalLogger;
 import osh.eal.EALTimeDriver;
 import osh.registry.TimeRegistry;
@@ -22,7 +22,7 @@ public interface IOSH {
 
     TimeRegistry getTimeRegistry();
 
-    OSHRandomGenerator getRandomGenerator();
+    RandomDistributor getRandomDistributor();
 
     LifeCycleStates getCurrentLifeCycleState();
 

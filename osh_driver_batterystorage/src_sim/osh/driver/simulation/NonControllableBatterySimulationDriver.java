@@ -25,24 +25,24 @@ public class NonControllableBatterySimulationDriver extends DeviceSimulationDriv
 
     private final int STEP_SIZE = 1;
 
-    private SimpleInverterModel inverterModel;
-    private SimpleBatteryStorageModel batteryModel;
-    private SimpleBatteryLogic batteryLogic;
+    private final SimpleInverterModel inverterModel;
+    private final SimpleBatteryStorageModel batteryModel;
+    private final SimpleBatteryLogic batteryLogic;
 
-    private int initialStateOfCharge;
+    private final int initialStateOfCharge;
 
-    private int batteryMinChargingState;
-    private int batteryMaxChargingState;
-    private int batteryMinDischargePower;
-    private int batteryMaxDischargePower;
-    private int batteryMinChargePower;
-    private int batteryMaxChargePower;
-    private int standingLoss;
+    private final int batteryMinChargingState;
+    private final int batteryMaxChargingState;
+    private final int batteryMinDischargePower;
+    private final int batteryMaxDischargePower;
+    private final int batteryMinChargePower;
+    private final int batteryMaxChargePower;
+    private final int standingLoss;
 
-    private int inverterMinPower;
-    private int inverterMaxPower;
-    private int inverterMinComplexPower;
-    private int inverterMaxComplexPower;
+    private final int inverterMinPower;
+    private final int inverterMaxPower;
+    private final int inverterMinComplexPower;
+    private final int inverterMaxComplexPower;
 
     private Duration newIppAfter;
     private int triggerIppIfDeltaSoCBigger;

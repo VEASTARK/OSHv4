@@ -21,7 +21,7 @@ import java.util.Map.Entry;
 public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> {
 
     protected final Class<C> enumType;
-    protected EnumMap<C, Long2IntTreeMap> commodities;
+    protected final EnumMap<C, Long2IntTreeMap> commodities;
     protected long endingTimeOfProfile;
 
     public LoadProfile(Class<C> enumType) {
@@ -342,13 +342,38 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
         compress.endingTimeOfProfile = this.endingTimeOfProfile;
     }
 
+    protected void removeDuplicateValues() {
+        for (C c : this.getEnumValues()) {
+            Long2IntTreeMap map = this.getLoadProfile(c);
+            Long2IntTreeMap otherMap = new Long2IntTreeMap();
+            ObjectIterator<Long2IntMap.Entry> it = Long2IntMaps.fastIterator(map);
+
+            if (!it.hasNext())
+                continue;
+
+            Long2IntMap.Entry lastValue = it.next();
+            otherMap.put(lastValue.getLongKey(), lastValue.getIntValue());
+
+            while (it.hasNext()) {
+                Long2IntMap.Entry e = it.next();
+
+                if (lastValue.getIntValue() != e.getIntValue()) {
+                    lastValue = e;
+                    otherMap.put(lastValue.getLongKey(), lastValue.getIntValue());
+                }
+            }
+
+            this.commodities.put(c, otherMap);
+        }
+    }
+
     public abstract LoadProfile<C> getCompressedProfile(LoadProfileCompressionTypes ct, final int powerEps, final int time);
 
     // general
     protected void getCompressedProfile(
             LoadProfileCompressionTypes ct, final int powerEps, final int time, LoadProfile<C> compress) {
         if (ct == null || time <= 0 || powerEps <= 0) {
-            compress = this.clone();
+            this.clone(compress);
             System.out.println("[ERROR][AbstractLoadProfile]: compression-type or -value is invalid (null or <= 0) " +
                     "returning clone of original profile");
         } else if (ct == LoadProfileCompressionTypes.DISCONTINUITIES) {
@@ -507,7 +532,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
         compressed.endingTimeOfProfile = this.endingTimeOfProfile;
         //if slot-value too low remove duplicate entries to speed up optimization
         if (time < 300) {
-            compressed = compressed.getProfileWithoutDuplicateValues();
+            compressed.removeDuplicateValues();
         }
     }
 
