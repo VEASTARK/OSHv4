@@ -38,7 +38,9 @@ subprojects {
         dependencies {
             dependency group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.+'
             dependency group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.+'
+            dependency group: 'com.fuzzylite', name: 'jfuzzylite', version: '5.+'
             dependency group: 'com.jcraft', name: 'jsch', version: '0.+'
+            dependency group: 'commons-io', name: 'commons-io', version: '2.+'
             dependency group: 'org.glassfish.jaxb', name: 'jaxb-core', version: '2.+'
             dependency group: 'org.glassfish.jaxb', name: 'jaxb-xjc', version: '2.+'
             dependency group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.+'
@@ -49,6 +51,8 @@ subprojects {
             dependency group: 'javax.xml.bind', name: 'jaxb-api', version: '2.+'
             dependency group: 'log4j', name: 'log4j', version: '1.+'
             dependency group: 'mysql', name: 'mysql-connector-java', version: '8.+'
+            dependency group: 'org.apache.commons', name: 'commons-collections4', version: '4.+'
+            dependency group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
             dependency group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
             dependency group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.+'
             dependency group: 'org.clojars.jarpiain', name: 'bacnet4j', version: '1.+'
