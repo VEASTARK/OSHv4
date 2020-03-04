@@ -4,6 +4,10 @@ sourceSets {
             srcDir 'src'
             srcDir 'osh_jmetal_src'
         }
+
+        resources {
+            srcDir 'resources'
+        }
     }
 }
 
