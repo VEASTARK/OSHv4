@@ -189,7 +189,7 @@ public class ThermalEnergyGrid implements IEnergyGrid {
             UUIDCommodityMap passiveStates,
             UUIDCommodityMap totalInputStates) {
 
-        for (InitializedEnergyRelation rel : initializedImprovedPassiveToActiveArray) {
+        for (InitializedEnergyRelation rel : this.initializedImprovedPassiveToActiveArray) {
 
             LimitedCommodityStateMap passiveMap = passiveStates.get(rel.getSourceId());
 

@@ -1,13 +1,12 @@
 package osh.driver.simulation.spacecooling;
 
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.driver.datatypes.cooling.ChillerCalendarDate;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * @author Julian Feder, Ingo Mauser
@@ -24,7 +23,7 @@ public class SimulationHollChillerCalendar
     static final int maxLengthOfDate = 4;
     static final int minPause = 2;
     static final int maxPause = 3;
-    private final OSHRandomGenerator random;
+    private final OSHRandom random;
     private long minTimeToAddNextDate;
 
     //HELPER VARIABLES
@@ -34,17 +33,16 @@ public class SimulationHollChillerCalendar
     /**
      * CONSTRUCTOR
      */
-    public SimulationHollChillerCalendar(OSHRandomGenerator random) {
+    public SimulationHollChillerCalendar(OSHRandom random) {
         super();
-        this.random = new OSHRandomGenerator(new Random(random.getNextLong()));
+        this.random = random;
     }
 
 
     public ArrayList<ChillerCalendarDate> getDate(long timestamp) {
 
         //TERMINE FÜR DEN TAG GENERIEREN
-        long initialNumber = this.random.getNextLong();
-        OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
+        OSHRandom newRandomGen = new OSHRandom(this.random.getNextLong());
 
         int datesPerDay = newRandomGen.getNextInt(maxDatesPerDay - minDatesPerDay + 1) + minDatesPerDay;
 

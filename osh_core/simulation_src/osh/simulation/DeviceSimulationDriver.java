@@ -51,7 +51,7 @@ public abstract class DeviceSimulationDriver
     // ### Static values ###
     private BuildingSimulationEngine simulationEngine;
     private ISimulationActionLogger simulationActionLogger;
-    private SortedSet<SubjectAction> actions;
+    private final SortedSet<SubjectAction> actions;
 
 
     /**

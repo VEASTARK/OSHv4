@@ -148,9 +148,8 @@ public abstract class SimulationEngine {
     /**
      * Simulate next time tick
      *
-     * @throws SimulationEngineException
      */
-    protected abstract void simulateNextTimeTick(long currentTick) throws SimulationEngineException;
+    protected abstract void simulateNextTimeTick(long currentTick);
 
     /**
      * start the simulation based on an external clock This function is

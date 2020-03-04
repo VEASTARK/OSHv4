@@ -2,8 +2,8 @@ package osh;
 
 import osh.core.DataBroker;
 import osh.core.LifeCycleStates;
-import osh.core.OSHRandomGenerator;
 import osh.core.OSHStatus;
+import osh.core.RandomDistributor;
 import osh.core.interfaces.IOSHCom;
 import osh.core.interfaces.IOSHDriver;
 import osh.core.interfaces.IOSHOC;
@@ -22,12 +22,12 @@ import osh.registry.TimeRegistry;
  */
 public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
 
-    /* default */ IGlobalLogger logger;
-    /* default */ OSHStatus oshstatus;
-    /* default */ EALTimeDriver timeDriver;
-    /* default */ OSHRandomGenerator randomGenerator;
-    /* default */ GlobalController globalcontroller;
-    /* default */ GlobalObserver globalobserver;
+    IGlobalLogger logger;
+    OSHStatus oshstatus;
+    EALTimeDriver timeDriver;
+    RandomDistributor randomDistributor;
+    GlobalController globalcontroller;
+    GlobalObserver globalobserver;
     private OSHLifeCycleManager lifeCycleManager;
     /**
      * ComRegistry (communication to external units (e.g. REMS and other OSH))
@@ -122,14 +122,13 @@ public class OSH implements IOSHOC, IOSHDriver, IOSHCom {
     }
 
     @Override
-    public OSHRandomGenerator getRandomGenerator() {
-        return this.randomGenerator;
+    public RandomDistributor getRandomDistributor() {
+        return this.randomDistributor;
     }
 
-    public void setRandomGenerator(OSHRandomGenerator randomGenerator) {
-        this.randomGenerator = randomGenerator;
+    public void setRandomDistributor(RandomDistributor randomDistributor) {
+        this.randomDistributor = randomDistributor;
     }
-
 
     public void setControllerBoxStatus(OSHStatus cbs) {
         this.oshstatus = cbs;

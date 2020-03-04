@@ -1,7 +1,7 @@
 package osh.driver.simulation.dhw;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
@@ -20,7 +20,6 @@ import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -28,14 +27,14 @@ import java.util.UUID;
  */
 public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDriver {
 
-    private String weekDayHourProbabilitiesFile;
+    private final String weekDayHourProbabilitiesFile;
     //d0 = hour, d1 = weekday
-    private double[][] weekDayHourProbabilities;
+    private final double[][] weekDayHourProbabilities;
     private double[][] cumulativeWeekDayHourProbabilities;
 
-    private String drawOffTypesFile;
+    private final String drawOffTypesFile;
     //d0 = hour, d1 = weekday
-    private double[][] drawOffTypes;
+    private final double[][] drawOffTypes;
     private double[] cumulativeProfileProbabilities;
 
     private double avgYearlyRuns;
@@ -173,15 +172,14 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
     @Override
     public void onNextTimeTick() {
 
-        long initialNumber = this.getRandomGenerator().getNextLong();
-        OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         if (this.dayProfile == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             if (this.dayProfile == null)
                 this.dayProfile = new SparseLoadProfile();
-            this.generateDailyDemandProfile(now, newRandomGen);
+            this.generateDailyDemandProfile(now, rand);
         }
 
         int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.getTimeDriver().getCurrentEpochSecond());
@@ -241,7 +239,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         // NOTHING
     }
 
-    private void generateDailyDemandProfile(ZonedDateTime now, OSHRandomGenerator randomGen) {
+    private void generateDailyDemandProfile(ZonedDateTime now, OSHRandom randomGen) {
 
         int month = TimeConversion.getCorrectedMonth(now);
         int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
@@ -314,7 +312,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
     }
 
-    private int getRandomHourBasedOnProbabilities(OSHRandomGenerator randomGen, int weekDay) {
+    private int getRandomHourBasedOnProbabilities(OSHRandom randomGen, int weekDay) {
 
         double randomNumber = randomGen.getNextDouble();
         int hour = 0;

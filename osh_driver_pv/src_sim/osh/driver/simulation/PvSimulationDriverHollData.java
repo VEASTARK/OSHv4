@@ -45,9 +45,9 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
     /**
      * according to inverter (technical, due to cosPhi: e.g. 0.8ind...0.8cap)
      */
-    private double cosPhiMax;
+    private final double cosPhiMax;
 
-    private PvProfileHollSingleton profile;
+    private final PvProfileHollSingleton profile;
 
     /**
      * CONSTRUCTOR

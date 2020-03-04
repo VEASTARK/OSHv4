@@ -1,7 +1,7 @@
 package osh.mgmt.globalcontroller.jmetal;
 
 import jmetal.core.Solution;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
@@ -18,7 +18,7 @@ import java.util.EnumMap;
 public class JMetalSolver extends Optimizer {
 
     protected final int STEP_SIZE;
-    protected final OSHRandomGenerator randomGenerator;
+    protected final OSHRandom randomGenerator;
     protected final IGlobalLogger logger;
     protected final boolean showDebugMessages;
     protected final Comparator<Solution> fitnessComparator = (o1, o2) -> {
@@ -36,7 +36,7 @@ public class JMetalSolver extends Optimizer {
      */
     public JMetalSolver(
             IGlobalLogger globalLogger,
-            OSHRandomGenerator randomGenerator,
+            OSHRandom randomGenerator,
             boolean showDebugMessages,
             int STEP_SIZE) {
         this.logger = globalLogger;

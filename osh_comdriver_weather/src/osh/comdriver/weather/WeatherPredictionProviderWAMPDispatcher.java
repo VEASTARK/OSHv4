@@ -29,10 +29,10 @@ public class WeatherPredictionProviderWAMPDispatcher {
     CurrentWeatherDetails weatherDetails;
     Subscription onDataSubscription;
     Scheduler rxScheduler = Schedulers.from(this.executor);
-    private String url = "ws://wamp-router:8080/ws";
-    private String realm = "eshl";
+    private final String url = "ws://wamp-router:8080/ws";
+    private final String realm = "eshl";
     //	private String realm = "realm1";
-    private String wampTopic = "eshl.openweathermap.v1.readout.currentweather";
+    private final String wampTopic = "eshl.openweathermap.v1.readout.currentweather";
     private WampClient client;
     private long lastLog;
 

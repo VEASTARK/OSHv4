@@ -1979,7 +1979,7 @@ public class Long2DoubleTreeMap extends AbstractLong2DoubleSortedMap implements 
      */
 
     private Entry readTree(final java.io.ObjectInputStream s, final int n, final Entry pred, final Entry succ)
-            throws java.io.IOException, ClassNotFoundException {
+            throws java.io.IOException {
         if (n == 1) {
             final Entry top = new Entry(s.readLong(), s.readDouble());
             top.pred(pred);

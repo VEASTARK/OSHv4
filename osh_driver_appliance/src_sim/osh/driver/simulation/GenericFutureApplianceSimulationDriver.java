@@ -3,7 +3,7 @@ package osh.driver.simulation;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.appliance.XsdApplianceProgramConfigurations;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
@@ -30,7 +30,10 @@ import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -131,13 +134,13 @@ public class GenericFutureApplianceSimulationDriver
     private double activePowerConsumption;
     private int totalRealizedNumberOfRuns;
     private int totalPlannedNumberOfRuns;
-    private int[] profileNumberOfRuns;
+    private final int[] profileNumberOfRuns;
     private double avgTotalRuns;
     private int totalNumberOfRunsProfile0;
     private int totalNumberOfRunsProfile1;
     private final int[] startTimes = new int[1440];
     private final int[] dofs = new int[1440];
-    private int[] profilesSelected;
+    private final int[] profilesSelected;
 
 
     /**
@@ -694,8 +697,7 @@ public class GenericFutureApplianceSimulationDriver
         //          the optimization)
         // Author: IMA
 
-        long initialNumber = this.getRandomGenerator().getNextLong();
-        OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         // get number of configurations
         int noOfPrograms = this.applianceConfigurations.getApplianceProgramConfiguration().size();
@@ -716,7 +718,7 @@ public class GenericFutureApplianceSimulationDriver
         int dailyRunsMin = (int) Math.floor(avgRunsToday);
         int dailyRunsMax = (int) Math.ceil(avgRunsToday);
         double probMax = avgRunsToday - dailyRunsMin;
-        double r = newRandomGen.getNextDouble();
+        double r = rand.getNextDouble();
         if (r < probMax) {
             runsToday += dailyRunsMax;
         } else {
@@ -765,7 +767,7 @@ public class GenericFutureApplianceSimulationDriver
             //generate configurationIDs
             for (int i = 0; i < runsToday; i++) {
                 // select one program randomly
-                double randomForProgramChoice = newRandomGen.getNextDouble();
+                double randomForProgramChoice = rand.getNextDouble();
                 int configurationForThisRun = 0;
                 for (double v : configurationDistribution) {
                     if (randomForProgramChoice > v) {
@@ -838,7 +840,7 @@ public class GenericFutureApplianceSimulationDriver
                     }
                 }
 
-                selectedStartTimeAndDofs = this.generateStartTimesAndTDofs(runsToday, selectedProfileLengths, newRandomGen, now, blockedSeconds, currentMax1stDof, lastDay);
+                selectedStartTimeAndDofs = this.generateStartTimesAndTDofs(runsToday, selectedProfileLengths, rand, now, blockedSeconds, currentMax1stDof, lastDay);
             }
 
             for (int i = 0; i < runsToday; i++) {
@@ -853,7 +855,7 @@ public class GenericFutureApplianceSimulationDriver
         }
     }
 
-    private Long[][] generateStartTimesAndTDofs(int numberToGenerate, int[] selectedProfileLengths, OSHRandomGenerator randomGen,
+    private Long[][] generateStartTimesAndTDofs(int numberToGenerate, int[] selectedProfileLengths, OSHRandom randomGen,
                                                 long now, long blockedSeconds, int currentMax1stTDof, boolean lastDay) {
 
         Long[][] values = new Long[numberToGenerate][2];
@@ -954,7 +956,7 @@ public class GenericFutureApplianceSimulationDriver
             boolean useRandomDof,
             int actionCountPerDay,
             long applianceActionTimeTick,
-            OSHRandomGenerator randomGen,
+            OSHRandom randomGen,
             int maxDof,
             int maxPossibleDof) {
         // generate DOFs with binary distribution

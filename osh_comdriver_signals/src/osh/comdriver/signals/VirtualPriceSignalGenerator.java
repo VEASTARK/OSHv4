@@ -1,7 +1,7 @@
 package osh.comdriver.signals;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.datatypes.limit.PriceSignal;
 import osh.utils.slp.IH0Profile;
 import osh.utils.time.TimeConversion;
@@ -33,7 +33,7 @@ public class VirtualPriceSignalGenerator {
             double avgPrice,
             double maxPrice,
             IH0Profile profile,
-            OSHRandomGenerator randomGenerator,
+            OSHRandom randomGenerator,
             boolean deviatePrice,
             double maxDeviationMinPriceInPercent,
             double maxDeviationMaxPriceInPercent) {

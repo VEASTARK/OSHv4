@@ -1,6 +1,6 @@
 package osh;
 
-import osh.core.OSHRandomGenerator;
+import osh.core.RandomDistributor;
 import osh.core.interfaces.IOSH;
 import osh.core.logging.IGlobalLogger;
 import osh.eal.EALTimeDriver;
@@ -30,8 +30,8 @@ public abstract class OSHComponent {
         return this.theOrganicSmartHome.getLogger();
     }
 
-    public OSHRandomGenerator getRandomGenerator() {
-        return this.theOrganicSmartHome.getRandomGenerator();
+    public RandomDistributor getRandomDistributor() {
+        return this.theOrganicSmartHome.getRandomDistributor();
     }
 
     protected IOSH getOSH() {

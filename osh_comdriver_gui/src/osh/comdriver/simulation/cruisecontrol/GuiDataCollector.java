@@ -34,12 +34,12 @@ public class GuiDataCollector {
     private final HashMap<UUID, Long> lastWaterRefresh = new HashMap<>();
     private final HashMap<UUID, Long> lastBatteryRefresh = new HashMap<>();
     private final int removeOlderThan = 4 * 86400;
-    private GuiMain driver;
+    private final GuiMain driver;
     private List<Schedule> schedules;
     private EnumMap<AncillaryCommodity, PriceSignal> ps;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
     private HashMap<UUID, EnumMap<Commodity, Double>> powerStates;
-    private boolean saveGraph;
+    private final boolean saveGraph;
     private TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
     private TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
     private TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();

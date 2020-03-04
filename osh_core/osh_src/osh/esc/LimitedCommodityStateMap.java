@@ -44,7 +44,7 @@ public class LimitedCommodityStateMap implements Serializable {
     private final boolean[] keySet = new boolean[commodityCount];
     private int modCount;
 
-    private static LimitedCommodityStateMap baseMap = null;
+    private static LimitedCommodityStateMap baseMap;
 
     public LimitedCommodityStateMap(boolean init) {
 

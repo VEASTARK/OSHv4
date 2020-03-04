@@ -3,7 +3,7 @@ package jmetal.operators.mutation;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 
 import java.util.HashMap;
 
@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class MutationFactory {
 
 
-    public static Mutation getMutationOperator(String name, HashMap parameters, OSHRandomGenerator halRandomGenerator) throws JMException {
+    public static Mutation getMutationOperator(String name, HashMap parameters, OSHRandom halRandomGenerator) throws JMException {
         PseudoRandom pseudoRandom = new PseudoRandom(halRandomGenerator);
         return getMutationOperator(name, parameters, pseudoRandom);
     }
