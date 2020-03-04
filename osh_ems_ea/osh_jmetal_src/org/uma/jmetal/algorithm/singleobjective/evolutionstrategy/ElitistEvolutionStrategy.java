@@ -7,7 +7,6 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -18,100 +17,110 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class ElitistEvolutionStrategy<S extends Solution<?>> extends AbstractEvolutionStrategy<S, S> {
-  private int mu;
-  private int lambda;
-  private int maxEvaluations;
-  private int evaluations;
-  private MutationOperator<S> mutation;
+    private final int mu;
+    private final int lambda;
+    private final int maxEvaluations;
+    private final MutationOperator<S> mutation;
+    private final Comparator<S> comparator;
+    private int evaluations;
 
-  private Comparator<S> comparator;
+    /**
+     * Constructor
+     */
+    public ElitistEvolutionStrategy(Problem<S> problem, int mu, int lambda, int maxEvaluations,
+                                    MutationOperator<S> mutation) {
+        super(problem);
+        this.mu = mu;
+        this.lambda = lambda;
+        this.maxEvaluations = maxEvaluations;
+        this.mutation = mutation;
 
-  /**
-   * Constructor
-   */
-  public ElitistEvolutionStrategy(Problem<S> problem, int mu, int lambda, int maxEvaluations,
-      MutationOperator<S> mutation) {
-    super(problem) ;
-    this.mu = mu;
-    this.lambda = lambda;
-    this.maxEvaluations = maxEvaluations;
-    this.mutation = mutation;
-
-    comparator = new ObjectiveComparator<S>(0);
-  }
-
-  @Override protected void initProgress() {
-    evaluations = mu;
-  }
-
-  @Override protected void updateProgress() {
-    evaluations += lambda;
-  }
-
-  @Override protected boolean isStoppingConditionReached() {
-    return evaluations >= maxEvaluations;
-  }
-
-  @Override protected List<S> createInitialPopulation() {
-    List<S> population = new ArrayList<>(mu);
-    for (int i = 0; i < mu; i++) {
-      S newIndividual = getProblem().createSolution();
-      population.add(newIndividual);
+        this.comparator = new ObjectiveComparator<>(0);
     }
 
-    return population;
-  }
-
-  @Override protected List<S> evaluatePopulation(List<S> population) {
-    for (S solution : population) {
-      getProblem().evaluate(solution);
+    @Override
+    protected void initProgress() {
+        this.evaluations = this.mu;
     }
 
-    return population;
-  }
-
-  @Override protected List<S> selection(List<S> population) {
-    return population;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override protected List<S> reproduction(List<S> population) {
-    List<S> offspringPopulation = new ArrayList<>(lambda + mu);
-    for (int i = 0; i < mu; i++) {
-      for (int j = 0; j < lambda / mu; j++) {
-        S offspring = (S)population.get(i).copy();
-        mutation.execute(offspring);
-        offspringPopulation.add(offspring);
-      }
+    @Override
+    protected void updateProgress() {
+        this.evaluations += this.lambda;
     }
 
-    return offspringPopulation;
-  }
-
-  @Override protected List<S> replacement(List<S> population,
-      List<S> offspringPopulation) {
-    for (int i = 0; i < mu; i++) {
-      offspringPopulation.add(population.get(i));
+    @Override
+    protected boolean isStoppingConditionReached() {
+        return this.evaluations >= this.maxEvaluations;
     }
 
-    Collections.sort(offspringPopulation, comparator) ;
+    @Override
+    protected List<S> createInitialPopulation() {
+        List<S> population = new ArrayList<>(this.mu);
+        for (int i = 0; i < this.mu; i++) {
+            S newIndividual = this.getProblem().createSolution();
+            population.add(newIndividual);
+        }
 
-    List<S> newPopulation = new ArrayList<>(mu);
-    for (int i = 0; i < mu; i++) {
-      newPopulation.add(offspringPopulation.get(i));
+        return population;
     }
-    return newPopulation;
-  }
 
-  @Override public S getResult() {
-    return getPopulation().get(0);
-  }
+    @Override
+    protected List<S> evaluatePopulation(List<S> population) {
+        for (S solution : population) {
+            this.getProblem().evaluate(solution);
+        }
 
-  @Override public String getName() {
-    return "ElitistEA" ;
-  }
+        return population;
+    }
 
-  @Override public String getDescription() {
-    return "Elitist Evolution Strategy Algorithm, i.e, (mu + lambda) EA" ;
-  }
+    @Override
+    protected List<S> selection(List<S> population) {
+        return population;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected List<S> reproduction(List<S> population) {
+        List<S> offspringPopulation = new ArrayList<>(this.lambda + this.mu);
+        for (int i = 0; i < this.mu; i++) {
+            for (int j = 0; j < this.lambda / this.mu; j++) {
+                S offspring = (S) population.get(i).copy();
+                this.mutation.execute(offspring);
+                offspringPopulation.add(offspring);
+            }
+        }
+
+        return offspringPopulation;
+    }
+
+    @Override
+    protected List<S> replacement(List<S> population,
+                                  List<S> offspringPopulation) {
+        for (int i = 0; i < this.mu; i++) {
+            offspringPopulation.add(population.get(i));
+        }
+
+        offspringPopulation.sort(this.comparator);
+
+        List<S> newPopulation = new ArrayList<>(this.mu);
+        for (int i = 0; i < this.mu; i++) {
+            newPopulation.add(offspringPopulation.get(i));
+        }
+        return newPopulation;
+    }
+
+    @Override
+    public S getResult() {
+        return this.getPopulation().get(0);
+    }
+
+    @Override
+    public String getName() {
+        return "ElitistEA";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Elitist Evolution Strategy Algorithm, i.e, (mu + lambda) EA";
+    }
 }

@@ -10,27 +10,26 @@ import org.uma.jmetal.util.AlgorithmBuilder;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class RandomSearchBuilder<S extends Solution<?>> implements AlgorithmBuilder<RandomSearch<S>> {
-  private Problem<S> problem ;
-  private int maxEvaluations ;
+    private final Problem<S> problem;
+    private int maxEvaluations;
 
-  /* Getter */
-  public int getMaxEvaluations() {
-    return maxEvaluations;
-  }
+    public RandomSearchBuilder(Problem<S> problem) {
+        this.problem = problem;
+        this.maxEvaluations = 25000;
+    }
 
+    /* Getter */
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-  public RandomSearchBuilder(Problem<S> problem) {
-    this.problem = problem ;
-    maxEvaluations = 25000 ;
-  }
+    public RandomSearchBuilder<S> setMaxEvaluations(int maxEvaluations) {
+        this.maxEvaluations = maxEvaluations;
 
-  public RandomSearchBuilder<S> setMaxEvaluations(int maxEvaluations) {
-    this.maxEvaluations = maxEvaluations ;
+        return this;
+    }
 
-    return this ;
-  }
-
-  public RandomSearch<S> build() {
-    return new RandomSearch<S>(problem, maxEvaluations) ;
-  }
+    public RandomSearch<S> build() {
+        return new RandomSearch<>(this.problem, this.maxEvaluations);
+    }
 } 

@@ -6,48 +6,48 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class AbstractIntegerDoubleProblem<S>
-  extends AbstractGenericProblem<S>
-  implements IntegerDoubleProblem<S> {
+        extends AbstractGenericProblem<S>
+        implements IntegerDoubleProblem<S> {
 
-  private int numberOfIntegerVariables ;
-  private int numberOfDoubleVariables ;
+    private int numberOfIntegerVariables;
+    private int numberOfDoubleVariables;
 
-  private List<Number> lowerLimit ;
-  private List<Number> upperLimit ;
+    private List<Number> lowerLimit;
+    private List<Number> upperLimit;
 
-  /* Getters */
-  public int getNumberOfDoubleVariables() {
-    return numberOfDoubleVariables;
-  }
+    /* Getters */
+    public int getNumberOfDoubleVariables() {
+        return this.numberOfDoubleVariables;
+    }
 
-  public int getNumberOfIntegerVariables() {
-    return numberOfIntegerVariables;
-  }
+    /* Setters */
+    protected void setNumberOfDoubleVariables(int numberOfDoubleVariables) {
+        this.numberOfDoubleVariables = numberOfDoubleVariables;
+    }
 
-	@Override
-	public Number getUpperBound(int index) {
-		return upperLimit.get(index);
-	}
+    public int getNumberOfIntegerVariables() {
+        return this.numberOfIntegerVariables;
+    }
 
-	@Override
-	public Number getLowerBound(int index) {
-		return lowerLimit.get(index);
-	}
+    protected void setNumberOfIntegerVariables(int numberOfIntegerVariables) {
+        this.numberOfIntegerVariables = numberOfIntegerVariables;
+    }
 
-  /* Setters */
-  protected void setNumberOfDoubleVariables(int numberOfDoubleVariables) {
-    this.numberOfDoubleVariables = numberOfDoubleVariables;
-  }
+    @Override
+    public Number getUpperBound(int index) {
+        return this.upperLimit.get(index);
+    }
 
-  protected void setNumberOfIntegerVariables(int numberOfIntegerVariables) {
-    this.numberOfIntegerVariables = numberOfIntegerVariables;
-  }
+    @Override
+    public Number getLowerBound(int index) {
+        return this.lowerLimit.get(index);
+    }
 
-  protected void setLowerLimit(List<Number> lowerLimit) {
-    this.lowerLimit = lowerLimit;
-  }
+    protected void setLowerLimit(List<Number> lowerLimit) {
+        this.lowerLimit = lowerLimit;
+    }
 
-  protected void setUpperLimit(List<Number> upperLimit) {
-    this.upperLimit = upperLimit;
-  }
+    protected void setUpperLimit(List<Number> upperLimit) {
+        this.upperLimit = upperLimit;
+    }
 }

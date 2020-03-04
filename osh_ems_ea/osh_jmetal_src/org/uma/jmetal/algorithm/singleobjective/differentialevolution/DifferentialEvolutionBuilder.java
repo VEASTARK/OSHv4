@@ -10,91 +10,92 @@ import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
 /**
  * DifferentialEvolutionBuilder class
+ *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class DifferentialEvolutionBuilder {
-  private DoubleProblem problem;
-  private int populationSize;
-  private int maxEvaluations;
-  private DifferentialEvolutionCrossover crossoverOperator;
-  private DifferentialEvolutionSelection selectionOperator;
-  private SolutionListEvaluator<DoubleSolution> evaluator;
+    private final DoubleProblem problem;
+    private int populationSize;
+    private int maxEvaluations;
+    private DifferentialEvolutionCrossover crossoverOperator;
+    private DifferentialEvolutionSelection selectionOperator;
+    private SolutionListEvaluator<DoubleSolution> evaluator;
 
-  public DifferentialEvolutionBuilder(DoubleProblem problem) {
-    this.problem = problem;
-    this.populationSize = 100;
-    this.maxEvaluations = 25000;
-    this.crossoverOperator = new DifferentialEvolutionCrossover(0.5, 0.5, "rand/1/bin");
-    this.selectionOperator = new DifferentialEvolutionSelection();
-    this.evaluator = new SequentialSolutionListEvaluator<DoubleSolution>();
-  }
-
-  public DifferentialEvolutionBuilder setPopulationSize(int populationSize) {
-    if (populationSize < 0) {
-      throw new JMetalException("Population size is negative: " + populationSize);
+    public DifferentialEvolutionBuilder(DoubleProblem problem) {
+        this.problem = problem;
+        this.populationSize = 100;
+        this.maxEvaluations = 25000;
+        this.crossoverOperator = new DifferentialEvolutionCrossover(0.5, 0.5, "rand/1/bin");
+        this.selectionOperator = new DifferentialEvolutionSelection();
+        this.evaluator = new SequentialSolutionListEvaluator<>();
     }
 
-    this.populationSize = populationSize;
+    public DifferentialEvolutionBuilder setCrossover(DifferentialEvolutionCrossover crossover) {
+        this.crossoverOperator = crossover;
 
-    return this;
-  }
-
-  public DifferentialEvolutionBuilder setMaxEvaluations(int maxEvaluations) {
-    if (maxEvaluations < 0) {
-      throw new JMetalException("MaxEvaluations is negative: " + maxEvaluations);
+        return this;
     }
 
-    this.maxEvaluations = maxEvaluations;
+    public DifferentialEvolutionBuilder setSelection(DifferentialEvolutionSelection selection) {
+        this.selectionOperator = selection;
 
-    return this;
-  }
+        return this;
+    }
 
-  public DifferentialEvolutionBuilder setCrossover(DifferentialEvolutionCrossover crossover) {
-    this.crossoverOperator = crossover;
+    public DifferentialEvolution build() {
+        return new DifferentialEvolution(this.problem, this.maxEvaluations, this.populationSize, this.crossoverOperator,
+                this.selectionOperator, this.evaluator);
+    }
 
-    return this;
-  }
+    /* Getters */
+    public DoubleProblem getProblem() {
+        return this.problem;
+    }
 
-  public DifferentialEvolutionBuilder setSelection(DifferentialEvolutionSelection selection) {
-    this.selectionOperator = selection;
+    public int getPopulationSize() {
+        return this.populationSize;
+    }
 
-    return this;
-  }
+    public DifferentialEvolutionBuilder setPopulationSize(int populationSize) {
+        if (populationSize < 0) {
+            throw new JMetalException("Population size is negative: " + populationSize);
+        }
 
-  public DifferentialEvolutionBuilder setSolutionListEvaluator(SolutionListEvaluator<DoubleSolution> evaluator) {
-    this.evaluator = evaluator;
+        this.populationSize = populationSize;
 
-    return this;
-  }
+        return this;
+    }
 
-  public DifferentialEvolution build() {
-    return new DifferentialEvolution(problem, maxEvaluations, populationSize, crossoverOperator,
-        selectionOperator, evaluator);
-  }
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-  /* Getters */
-  public DoubleProblem getProblem() {
-    return problem;
-  }
+    public DifferentialEvolutionBuilder setMaxEvaluations(int maxEvaluations) {
+        if (maxEvaluations < 0) {
+            throw new JMetalException("MaxEvaluations is negative: " + maxEvaluations);
+        }
 
-  public int getPopulationSize() {
-    return populationSize;
-  }
+        this.maxEvaluations = maxEvaluations;
 
-  public int getMaxEvaluations() {
-    return maxEvaluations;
-  }
+        return this;
+    }
 
-  public DifferentialEvolutionCrossover getCrossoverOperator() {
-    return crossoverOperator;
-  }
+    public DifferentialEvolutionCrossover getCrossoverOperator() {
+        return this.crossoverOperator;
+    }
 
-  public DifferentialEvolutionSelection getSelectionOperator() {
-    return selectionOperator;
-  }
+    public DifferentialEvolutionSelection getSelectionOperator() {
+        return this.selectionOperator;
+    }
 
-  public SolutionListEvaluator<DoubleSolution> getSolutionListEvaluator() {
-    return evaluator;
-  }
+    public SolutionListEvaluator<DoubleSolution> getSolutionListEvaluator() {
+        return this.evaluator;
+    }
+
+    public DifferentialEvolutionBuilder setSolutionListEvaluator(SolutionListEvaluator<DoubleSolution> evaluator) {
+        this.evaluator = evaluator;
+
+        return this;
+    }
 }
 

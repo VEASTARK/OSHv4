@@ -15,7 +15,6 @@ import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -25,178 +24,177 @@ import java.util.List;
  * "Optimal antenna placement using a new multi-objective chc algorithm".
  * GECCO '07: Proceedings of the 9th annual conference on Genetic and
  * evolutionary computation. London, England. July 2007.
- *
+ * <p>
  * Implementation of MOCHC following the scheme used in jMetal4.5 and former versions, i.e, without
  * implementing the {@link AbstractGeneticAlgorithm} interface.
  */
 @SuppressWarnings("serial")
 public class MOCHC45 implements Algorithm<List<BinarySolution>> {
-  private BinaryProblem problem;
+    private final BinaryProblem problem;
+    private final int populationSize;
+    private final int maxEvaluations;
+    private final int convergenceValue;
+    private final double preservedPopulation;
+    private final double initialConvergenceCount;
+    private final CrossoverOperator<BinarySolution> crossover;
+    private final MutationOperator<BinarySolution> cataclysmicMutation;
+    private final SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection;
+    private final SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection;
+    private List<BinarySolution> population;
+    private int evaluations;
+    private int minimumDistance;
+    private int size;
+    private Comparator<BinarySolution> comparator;
 
-  private List<BinarySolution> population ;
-  private int populationSize ;
-  private int maxEvaluations;
-  private int convergenceValue;
-  private double preservedPopulation;
-  private double initialConvergenceCount;
-  private CrossoverOperator<BinarySolution> crossover;
-  private MutationOperator<BinarySolution> cataclysmicMutation;
-  private SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection;
-  private SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection;
-  private int evaluations;
-  private int minimumDistance;
-  private int size;
-  private Comparator<BinarySolution> comparator;
-
-  /**
-   * Constructor
-   */
-  public MOCHC45(BinaryProblem problem, int populationSize, int maxEvaluations, int convergenceValue,
-                 double preservedPopulation, double initialConvergenceCount,
-                 CrossoverOperator<BinarySolution> crossoverOperator,
-                 MutationOperator<BinarySolution> cataclysmicMutation,
-                 SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection,
-                 SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection,
-                 SolutionListEvaluator<BinarySolution> evaluator) {
-    super();
-    this.problem = problem;
-    this.populationSize = populationSize;
-    this.maxEvaluations = maxEvaluations;
-    this.convergenceValue = convergenceValue;
-    this.preservedPopulation = preservedPopulation;
-    this.initialConvergenceCount = initialConvergenceCount;
-    this.crossover = crossoverOperator;
-    this.cataclysmicMutation = cataclysmicMutation;
-    this.newGenerationSelection = newGenerationSelection;
-    this.parentSelection = parentSelection;
-  }
-
-  @Override
-  public String getName() {
-    return "MOCHC45";
-  }
-
-  @Override
-  public String getDescription() {
-    return "Multiobjective CHC algorithm";
-  }
-
-  @Override
-  public void run() {
-    for (int i = 0; i < problem.getNumberOfVariables(); i++) {
-      size += problem.getNumberOfBits(i);
-    }
-    minimumDistance = (int) Math.floor(this.initialConvergenceCount * size);
-
-    comparator = new CrowdingDistanceComparator<BinarySolution>();
-
-    evaluations = 0 ;
-    population = new ArrayList<>() ;
-    for (int i = 0; i < populationSize; i++) {
-      BinarySolution newIndividual = problem.createSolution();
-      problem.evaluate(newIndividual);
-      population.add(newIndividual);
-      evaluations ++ ;
+    /**
+     * Constructor
+     */
+    public MOCHC45(BinaryProblem problem, int populationSize, int maxEvaluations, int convergenceValue,
+                   double preservedPopulation, double initialConvergenceCount,
+                   CrossoverOperator<BinarySolution> crossoverOperator,
+                   MutationOperator<BinarySolution> cataclysmicMutation,
+                   SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection,
+                   SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection,
+                   SolutionListEvaluator<BinarySolution> evaluator) {
+        super();
+        this.problem = problem;
+        this.populationSize = populationSize;
+        this.maxEvaluations = maxEvaluations;
+        this.convergenceValue = convergenceValue;
+        this.preservedPopulation = preservedPopulation;
+        this.initialConvergenceCount = initialConvergenceCount;
+        this.crossover = crossoverOperator;
+        this.cataclysmicMutation = cataclysmicMutation;
+        this.newGenerationSelection = newGenerationSelection;
+        this.parentSelection = parentSelection;
     }
 
-    boolean finishCondition = false ;
+    @Override
+    public String getName() {
+        return "MOCHC45";
+    }
 
-    while (!finishCondition) {
-      List<BinarySolution> offspringPopulation = new ArrayList<>(populationSize) ;
-      for (int i = 0; i < population.size()/2; i++) {
-        List<BinarySolution> parents = new ArrayList<>(2) ;
-        parents.add(parentSelection.execute(population)) ;
-        parents.add(parentSelection.execute(population)) ;
+    @Override
+    public String getDescription() {
+        return "Multiobjective CHC algorithm";
+    }
 
-        if (hammingDistance(parents.get(0), parents.get(1)) >= minimumDistance) {
-          List<BinarySolution> offspring = crossover.execute(parents);
-          problem.evaluate(offspring.get(0));
-          problem.evaluate(offspring.get(1));
-          offspringPopulation.add(offspring.get(0));
-          offspringPopulation.add(offspring.get(1));
-
-          evaluations += 2 ;
+    @Override
+    public void run() {
+        for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
+            this.size += this.problem.getNumberOfBits(i);
         }
-      }
+        this.minimumDistance = (int) Math.floor(this.initialConvergenceCount * this.size);
 
-      List<BinarySolution> union = new ArrayList<>();
-      union.addAll(population);
-      union.addAll(offspringPopulation);
+        this.comparator = new CrowdingDistanceComparator<>();
 
-      List<BinarySolution> newPopulation = newGenerationSelection.execute(union);
-
-      if (SolutionListUtils.solutionListsAreEquals(population, newPopulation)) {
-        minimumDistance--;
-      }
-
-      if (minimumDistance <= -convergenceValue) {
-        minimumDistance = (int) (1.0 / size * (1 - 1.0 / size) * size);
-
-        int preserve = (int) Math.floor(preservedPopulation * population.size());
-        newPopulation = new ArrayList<>(populationSize);
-        Collections.sort(population, comparator);
-        for (int i = 0; i < preserve; i++) {
-          newPopulation.add((BinarySolution) population.get(i).copy());
+        this.evaluations = 0;
+        this.population = new ArrayList<>();
+        for (int i = 0; i < this.populationSize; i++) {
+            BinarySolution newIndividual = this.problem.createSolution();
+            this.problem.evaluate(newIndividual);
+            this.population.add(newIndividual);
+            this.evaluations++;
         }
-        for (int i = preserve; i < populationSize; i++) {
-          BinarySolution solution = (BinarySolution) population.get(i).copy();
-          cataclysmicMutation.execute(solution);
-          problem.evaluate(solution);
-          //problem.evaluateConstraints(solution);
-          newPopulation.add(solution);
-          evaluations ++ ;
+
+        boolean finishCondition = false;
+
+        while (!finishCondition) {
+            List<BinarySolution> offspringPopulation = new ArrayList<>(this.populationSize);
+            for (int i = 0; i < this.population.size() / 2; i++) {
+                List<BinarySolution> parents = new ArrayList<>(2);
+                parents.add(this.parentSelection.execute(this.population));
+                parents.add(this.parentSelection.execute(this.population));
+
+                if (this.hammingDistance(parents.get(0), parents.get(1)) >= this.minimumDistance) {
+                    List<BinarySolution> offspring = this.crossover.execute(parents);
+                    this.problem.evaluate(offspring.get(0));
+                    this.problem.evaluate(offspring.get(1));
+                    offspringPopulation.add(offspring.get(0));
+                    offspringPopulation.add(offspring.get(1));
+
+                    this.evaluations += 2;
+                }
+            }
+
+            List<BinarySolution> union = new ArrayList<>();
+            union.addAll(this.population);
+            union.addAll(offspringPopulation);
+
+            List<BinarySolution> newPopulation = this.newGenerationSelection.execute(union);
+
+            if (SolutionListUtils.solutionListsAreEquals(this.population, newPopulation)) {
+                this.minimumDistance--;
+            }
+
+            if (this.minimumDistance <= -this.convergenceValue) {
+                this.minimumDistance = (int) (1.0 / this.size * (1 - 1.0 / this.size) * this.size);
+
+                int preserve = (int) Math.floor(this.preservedPopulation * this.population.size());
+                newPopulation = new ArrayList<>(this.populationSize);
+                this.population.sort(this.comparator);
+                for (int i = 0; i < preserve; i++) {
+                    newPopulation.add((BinarySolution) this.population.get(i).copy());
+                }
+                for (int i = preserve; i < this.populationSize; i++) {
+                    BinarySolution solution = (BinarySolution) this.population.get(i).copy();
+                    this.cataclysmicMutation.execute(solution);
+                    this.problem.evaluate(solution);
+                    //problem.evaluateConstraints(solution);
+                    newPopulation.add(solution);
+                    this.evaluations++;
+                }
+            }
+
+            this.population = newPopulation;
+            if (this.evaluations >= this.maxEvaluations) {
+                finishCondition = true;
+            }
         }
-      }
-
-      population = newPopulation ;
-      if (evaluations >= maxEvaluations) {
-        finishCondition = true ;
-      }
-    }
-  }
-
-  @Override
-  public List<BinarySolution> getResult() {
-    NonDominatedSolutionListArchive<BinarySolution> archive = new NonDominatedSolutionListArchive<>() ;
-    for (BinarySolution solution : population) {
-      archive.add(solution) ;
     }
 
-    return archive.getSolutionList();
-  }
+    @Override
+    public List<BinarySolution> getResult() {
+        NonDominatedSolutionListArchive<BinarySolution> archive = new NonDominatedSolutionListArchive<>();
+        for (BinarySolution solution : this.population) {
+            archive.add(solution);
+        }
 
-  /**
-   * Calculate the hamming distance between two solutions
-   *
-   * @param solutionOne A <code>Solution</code>
-   * @param solutionTwo A <code>Solution</code>
-   * @return the hamming distance between solutions
-   */
-
-  private int hammingDistance(BinarySolution solutionOne, BinarySolution solutionTwo) {
-    int distance = 0;
-    for (int i = 0; i < problem.getNumberOfVariables(); i++) {
-      distance += hammingDistance(solutionOne.getVariableValue(i), solutionTwo.getVariableValue(i));
+        return archive.getSolutionList();
     }
 
-    return distance;
-  }
+    /**
+     * Calculate the hamming distance between two solutions
+     *
+     * @param solutionOne A <code>Solution</code>
+     * @param solutionTwo A <code>Solution</code>
+     * @return the hamming distance between solutions
+     */
 
-  private int hammingDistance(BinarySet bitSet1, BinarySet bitSet2) {
-    if (bitSet1.getBinarySetLength() != bitSet2.getBinarySetLength()) {
-      throw new JMetalException("The bitsets have different length: "
-          + bitSet1.getBinarySetLength() +", " + bitSet2.getBinarySetLength()) ;
-    }
-    int distance = 0;
-    int i = 0;
-    while (i < bitSet1.getBinarySetLength()) {
-      if (bitSet1.get(i) != bitSet2.get(i)) {
-        distance++;
-      }
-      i++;
+    private int hammingDistance(BinarySolution solutionOne, BinarySolution solutionTwo) {
+        int distance = 0;
+        for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
+            distance += this.hammingDistance(solutionOne.getVariableValue(i), solutionTwo.getVariableValue(i));
+        }
+
+        return distance;
     }
 
-    return distance;
-  }
+    private int hammingDistance(BinarySet bitSet1, BinarySet bitSet2) {
+        if (bitSet1.getBinarySetLength() != bitSet2.getBinarySetLength()) {
+            throw new JMetalException("The bitsets have different length: "
+                    + bitSet1.getBinarySetLength() + ", " + bitSet2.getBinarySetLength());
+        }
+        int distance = 0;
+        int i = 0;
+        while (i < bitSet1.getBinarySetLength()) {
+            if (bitSet1.get(i) != bitSet2.get(i)) {
+                distance++;
+            }
+            i++;
+        }
+
+        return distance;
+    }
 
 }

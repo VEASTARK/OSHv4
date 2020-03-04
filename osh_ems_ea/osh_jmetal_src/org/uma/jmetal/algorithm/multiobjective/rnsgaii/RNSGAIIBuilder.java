@@ -18,131 +18,131 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class RNSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<RNSGAII<S>> {
-  /**
-   * NSGAIIBuilder class
-   */
-  private final Problem<S> problem;
-  private int maxEvaluations;
-  private int populationSize;
-  protected int matingPoolSize;
-  protected int offspringPopulationSize ;
+    /**
+     * NSGAIIBuilder class
+     */
+    private final Problem<S> problem;
+    private final CrossoverOperator<S> crossoverOperator;
+    private final MutationOperator<S> mutationOperator;
+    private final List<Double> interestPoint;
+    private final double epsilon;
+    protected int matingPoolSize;
+    protected int offspringPopulationSize;
+    private int maxEvaluations;
+    private int populationSize;
+    private SelectionOperator<List<S>, S> selectionOperator;
+    private SolutionListEvaluator<S> evaluator;
 
-  private CrossoverOperator<S> crossoverOperator;
-  private MutationOperator<S> mutationOperator;
-  private SelectionOperator<List<S>, S> selectionOperator;
-  private SolutionListEvaluator<S> evaluator;
-  private List<Double> interestPoint;
-  private double epsilon;
-
-  /**
-   * NSGAIIBuilder constructor
-   */
-  public RNSGAIIBuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                        MutationOperator<S> mutationOperator, List<Double> interestPoint, double epsilon) {
-    this.problem = problem;
-    maxEvaluations = 25000;
-    populationSize = 100;
-    this.matingPoolSize = 100 ;
-    this.offspringPopulationSize = 100 ;
-    this.crossoverOperator = crossoverOperator;
-    this.mutationOperator = mutationOperator;
-    selectionOperator = new BinaryTournamentSelection<S>(new RankingAndCrowdingDistanceComparator<S>());
-    evaluator = new SequentialSolutionListEvaluator<S>();
-    this.epsilon = epsilon;
-    this.interestPoint = interestPoint;
-  }
-
-  public RNSGAIIBuilder<S> setMaxEvaluations(int maxEvaluations) {
-    if (maxEvaluations < 0) {
-      throw new JMetalException("maxEvaluations is negative: " + maxEvaluations);
-    }
-    this.maxEvaluations = maxEvaluations;
-
-    return this;
-  }
-
-  public RNSGAIIBuilder<S> setPopulationSize(int populationSize) {
-    if (populationSize < 0) {
-      throw new JMetalException("Population size is negative: " + populationSize);
+    /**
+     * NSGAIIBuilder constructor
+     */
+    public RNSGAIIBuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
+                          MutationOperator<S> mutationOperator, List<Double> interestPoint, double epsilon) {
+        this.problem = problem;
+        this.maxEvaluations = 25000;
+        this.populationSize = 100;
+        this.matingPoolSize = 100;
+        this.offspringPopulationSize = 100;
+        this.crossoverOperator = crossoverOperator;
+        this.mutationOperator = mutationOperator;
+        this.selectionOperator = new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>());
+        this.evaluator = new SequentialSolutionListEvaluator<>();
+        this.epsilon = epsilon;
+        this.interestPoint = interestPoint;
     }
 
-    this.populationSize = populationSize;
+    public RNSGAIIBuilder<S> setMaxEvaluations(int maxEvaluations) {
+        if (maxEvaluations < 0) {
+            throw new JMetalException("maxEvaluations is negative: " + maxEvaluations);
+        }
+        this.maxEvaluations = maxEvaluations;
 
-    return this;
-  }
-
-  public RNSGAIIBuilder<S> setSelectionOperator(SelectionOperator<List<S>, S> selectionOperator) {
-    if (selectionOperator == null) {
-      throw new JMetalException("selectionOperator is null");
-    }
-    this.selectionOperator = selectionOperator;
-
-    return this;
-  }
-
-  public RNSGAIIBuilder<S> setSolutionListEvaluator(SolutionListEvaluator<S> evaluator) {
-    if (evaluator == null) {
-      throw new JMetalException("evaluator is null");
-    }
-    this.evaluator = evaluator;
-
-    return this;
-  }
-
-  public RNSGAIIBuilder<S> setMatingPoolSize(int matingPoolSize) {
-    if (matingPoolSize < 0) {
-      throw new JMetalException("The mating pool size is negative: " + populationSize);
+        return this;
     }
 
-    this.matingPoolSize = matingPoolSize;
+    public RNSGAIIBuilder<S> setMatingPoolSize(int matingPoolSize) {
+        if (matingPoolSize < 0) {
+            throw new JMetalException("The mating pool size is negative: " + this.populationSize);
+        }
 
-    return this;
-  }
-  public RNSGAIIBuilder<S> setOffspringPopulationSize(int offspringPopulationSize) {
-    if (offspringPopulationSize < 0) {
-      throw new JMetalException("Offspring population size is negative: " + populationSize);
+        this.matingPoolSize = matingPoolSize;
+
+        return this;
     }
 
-    this.offspringPopulationSize = offspringPopulationSize;
+    public RNSGAIIBuilder<S> setOffspringPopulationSize(int offspringPopulationSize) {
+        if (offspringPopulationSize < 0) {
+            throw new JMetalException("Offspring population size is negative: " + this.populationSize);
+        }
 
-    return this;
-  }
+        this.offspringPopulationSize = offspringPopulationSize;
 
-  public RNSGAII<S> build() {
-    RNSGAII<S> algorithm;
+        return this;
+    }
 
-    algorithm = new RNSGAII<>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
-            crossoverOperator, mutationOperator, selectionOperator, evaluator, interestPoint, epsilon);
+    public RNSGAII<S> build() {
+        RNSGAII<S> algorithm;
 
-    return algorithm;
-  }
+        algorithm = new RNSGAII<>(this.problem, this.maxEvaluations, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
+                this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator, this.interestPoint, this.epsilon);
 
-  /* Getters */
-  public Problem<S> getProblem() {
-    return problem;
-  }
+        return algorithm;
+    }
 
-  public int getMaxIterations() {
-    return maxEvaluations;
-  }
+    /* Getters */
+    public Problem<S> getProblem() {
+        return this.problem;
+    }
 
-  public int getPopulationSize() {
-    return populationSize;
-  }
+    public int getMaxIterations() {
+        return this.maxEvaluations;
+    }
 
-  public CrossoverOperator<S> getCrossoverOperator() {
-    return crossoverOperator;
-  }
+    public int getPopulationSize() {
+        return this.populationSize;
+    }
 
-  public MutationOperator<S> getMutationOperator() {
-    return mutationOperator;
-  }
+    public RNSGAIIBuilder<S> setPopulationSize(int populationSize) {
+        if (populationSize < 0) {
+            throw new JMetalException("Population size is negative: " + populationSize);
+        }
 
-  public SelectionOperator<List<S>, S> getSelectionOperator() {
-    return selectionOperator;
-  }
+        this.populationSize = populationSize;
 
-  public SolutionListEvaluator<S> getSolutionListEvaluator() {
-    return evaluator;
-  }
+        return this;
+    }
+
+    public CrossoverOperator<S> getCrossoverOperator() {
+        return this.crossoverOperator;
+    }
+
+    public MutationOperator<S> getMutationOperator() {
+        return this.mutationOperator;
+    }
+
+    public SelectionOperator<List<S>, S> getSelectionOperator() {
+        return this.selectionOperator;
+    }
+
+    public RNSGAIIBuilder<S> setSelectionOperator(SelectionOperator<List<S>, S> selectionOperator) {
+        if (selectionOperator == null) {
+            throw new JMetalException("selectionOperator is null");
+        }
+        this.selectionOperator = selectionOperator;
+
+        return this;
+    }
+
+    public SolutionListEvaluator<S> getSolutionListEvaluator() {
+        return this.evaluator;
+    }
+
+    public RNSGAIIBuilder<S> setSolutionListEvaluator(SolutionListEvaluator<S> evaluator) {
+        if (evaluator == null) {
+            throw new JMetalException("evaluator is null");
+        }
+        this.evaluator = evaluator;
+
+        return this;
+    }
 }

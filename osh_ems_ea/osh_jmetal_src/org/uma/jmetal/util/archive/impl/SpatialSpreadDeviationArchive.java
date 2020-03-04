@@ -25,36 +25,36 @@ import java.util.Comparator;
  * @author Alejandro Santiago <aurelio.santiago@upalt.edu.mx>
  */
 public class SpatialSpreadDeviationArchive<S extends Solution<?>> extends AbstractBoundedArchive<S> {
-  private Comparator<S> crowdingDistanceComparator;
-  private DensityEstimator<S> crowdingDistance ;
+    private final Comparator<S> crowdingDistanceComparator;
+    private final DensityEstimator<S> crowdingDistance;
 
-  public SpatialSpreadDeviationArchive(int maxSize) {
-    super(maxSize);
-    crowdingDistanceComparator = new SpatialSpreadDeviationComparator<S>() ;
-    crowdingDistance = new SpatialSpreadDeviation<S>() ;
-  }
-
-  @Override
-  public void prune() {
-    if (getSolutionList().size() > getMaxSize()) {
-      computeDensityEstimator();
-      S worst = new SolutionListUtils().findWorstSolution(getSolutionList(), crowdingDistanceComparator) ;
-      getSolutionList().remove(worst);
+    public SpatialSpreadDeviationArchive(int maxSize) {
+        super(maxSize);
+        this.crowdingDistanceComparator = new SpatialSpreadDeviationComparator<>();
+        this.crowdingDistance = new SpatialSpreadDeviation<>();
     }
-  }
 
-  @Override
-  public void sortByDensityEstimator() {
-    getSolutionList().sort(getComparator());
-  }
+    @Override
+    public void prune() {
+        if (this.getSolutionList().size() > this.getMaxSize()) {
+            this.computeDensityEstimator();
+            S worst = new SolutionListUtils().findWorstSolution(this.getSolutionList(), this.crowdingDistanceComparator);
+            this.getSolutionList().remove(worst);
+        }
+    }
 
-  @Override
-  public Comparator<S> getComparator() {
-    return crowdingDistanceComparator ;
-  }
+    @Override
+    public void sortByDensityEstimator() {
+        this.getSolutionList().sort(this.crowdingDistanceComparator);
+    }
 
-  @Override
-  public void computeDensityEstimator() {
-    crowdingDistance.computeDensityEstimator(getSolutionList());
-  }
+    @Override
+    public Comparator<S> getComparator() {
+        return this.crowdingDistanceComparator;
+    }
+
+    @Override
+    public void computeDensityEstimator() {
+        this.crowdingDistance.computeDensityEstimator(this.getSolutionList());
+    }
 }

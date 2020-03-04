@@ -8,217 +8,210 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.util.pseudorandom.impl.MersenneTwisterGenerator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * 
  * @author Inacio Medeiros <inaciogmedeiros@gmail.com>
- * 
  */
 public class CoralReefsOptimization<S>
-		extends AbstractCoralReefsOptimization<S, List<S>> {
+        extends AbstractCoralReefsOptimization<S, List<S>> {
 
-	private Problem<S> problem;
-	private int maxEvaluations;
-	private int evaluations;
-	private MersenneTwisterGenerator random;
+    private static final long serialVersionUID = 3013223456538143239L;
+    private final Problem<S> problem;
+    private final int maxEvaluations;
+    private final MersenneTwisterGenerator random;
+    private int evaluations;
 
-	public CoralReefsOptimization(Problem<S> problem,
-			int maxEvaluations, Comparator<S> comparator,
-			SelectionOperator<List<S>, S> selectionOperator,
-			CrossoverOperator<S> crossoverOperator,
-			MutationOperator<S> mutationOperator, int n, int m, double rho,
-			double fbs, double fa, double pd, int attemptsToSettle) {
+    public CoralReefsOptimization(Problem<S> problem,
+                                  int maxEvaluations, Comparator<S> comparator,
+                                  SelectionOperator<List<S>, S> selectionOperator,
+                                  CrossoverOperator<S> crossoverOperator,
+                                  MutationOperator<S> mutationOperator, int n, int m, double rho,
+                                  double fbs, double fa, double pd, int attemptsToSettle) {
 
-		super(comparator, selectionOperator, crossoverOperator,
-				mutationOperator, n, m, rho, fbs, fa, pd, attemptsToSettle);
+        super(comparator, selectionOperator, crossoverOperator,
+                mutationOperator, n, m, rho, fbs, fa, pd, attemptsToSettle);
 
-		this.problem = problem;
-		this.maxEvaluations = maxEvaluations;
-		this.random = new MersenneTwisterGenerator();
+        this.problem = problem;
+        this.maxEvaluations = maxEvaluations;
+        this.random = new MersenneTwisterGenerator();
 
-	}
+    }
 
-	private static final long serialVersionUID = 3013223456538143239L;
+    @Override
+    protected void initProgress() {
+        this.evaluations = 0;
+    }
 
-	@Override
-	protected void initProgress() {
-		evaluations = 0;
-	}
+    @Override
+    protected void updateProgress() {
+        this.evaluations++;
+    }
 
-	@Override
-	protected void updateProgress() {
-		evaluations++;
-	}
+    @Override
+    protected boolean isStoppingConditionReached() {
+        return this.evaluations == this.maxEvaluations;
+    }
 
-	@Override
-	protected boolean isStoppingConditionReached() {
-		return evaluations == maxEvaluations;
-	}
+    @Override
+    protected List<S> createInitialPopulation() {
+        List<S> population = new ArrayList<>(this.getN() * this.getM());
 
-	@Override
-	protected List<S> createInitialPopulation() {
-		List<S> population = new ArrayList<>(getN() * getM());
+        int quantity = (int) (this.getRho() * this.getN() * this.getM());
 
-		int quantity = (int) (getRho() * getN() * getM());
+        for (int i = 0; i < quantity; i++) {
+            S newIndividual = this.problem.createSolution();
+            population.add(newIndividual);
+        }
+        return population;
+    }
 
-		for (int i = 0; i < quantity; i++) {
-			S newIndividual = problem.createSolution();
-			population.add(newIndividual);
-		}
-		return population;
-	}
+    @Override
+    protected List<Coordinate> generateCoordinates() {
+        int popSize = this.getPopulationSize();
+        MersenneTwisterGenerator random = new MersenneTwisterGenerator();
 
-	@Override
-	protected List<Coordinate> generateCoordinates() {
-		int popSize = getPopulationSize();
-		MersenneTwisterGenerator random = new MersenneTwisterGenerator();
+        ArrayList<Coordinate> coordinates = new ArrayList<>(popSize);
 
-		ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>(popSize);
+        for (int i = 0; i < popSize; i++) {
+            coordinates.add(new Coordinate(random.nextInt(0, this.getN() - 1),
+                    random.nextInt(0, this.getM() - 1)));
+        }
 
-		for (int i = 0; i < popSize; i++) {
-			coordinates.add(new Coordinate(random.nextInt(0, getN() - 1),
-					random.nextInt(0, getM() - 1)));
-		}
+        return coordinates;
+    }
 
-		return coordinates;
-	}
+    @Override
+    protected List<S> evaluatePopulation(List<S> population) {
+        for (S s : population) {
+            this.problem.evaluate(s);
+        }
+        return population;
+    }
 
-	@Override
-	protected List<S> evaluatePopulation(List<S> population) {
-		for (int solution = 0; solution < population.size(); solution++) {
-			this.problem.evaluate(population.get(solution));
-		}
-		return population;
-	}
+    @Override
+    protected List<S> selectBroadcastSpawners(List<S> population) {
+        int quantity = (int) (this.getFbs() * population.size());
 
-	@Override
-	protected List<S> selectBroadcastSpawners(List<S> population) {
-		int quantity = (int) (getFbs() * population.size());
+        if ((quantity % 2) == 1) {
+            quantity--;
+        }
 
-		if ((quantity % 2) == 1) {
-			quantity--;
-		}
+        List<S> spawners = new ArrayList<>(quantity);
 
-		List<S> spawners = new ArrayList<S>(quantity);
+        for (int i = 0; i < quantity; i++) {
+            S solution = this.selectionOperator.execute(population);
+            spawners.add(solution);
+        }
 
-		for (int i = 0; i < quantity; i++) {
-			S solution = selectionOperator.execute(population);
-			spawners.add(solution);
-		}
+        return spawners;
+    }
 
-		return spawners;
-	}
+    @Override
+    protected List<S> sexualReproduction(List<S> broadcastSpawners) {
+        List<S> parents = new ArrayList<>(2);
+        List<S> larvae = new ArrayList<>(broadcastSpawners.size() / 2);
 
-	@Override
-	protected List<S> sexualReproduction(List<S> broadcastSpawners) {
-		List<S> parents = new ArrayList<S>(2);
-		List<S> larvae = new ArrayList<S>(broadcastSpawners.size() / 2);
+        while (!broadcastSpawners.isEmpty()) {
+            parents.add(this.selectionOperator.execute(broadcastSpawners));
+            parents.add(this.selectionOperator.execute(broadcastSpawners));
 
-		while (broadcastSpawners.size() > 0) {
-			parents.add(selectionOperator.execute(broadcastSpawners));
-			parents.add(selectionOperator.execute(broadcastSpawners));
+            broadcastSpawners.remove(parents.get(0));
+            broadcastSpawners.remove(parents.get(1));
 
-			broadcastSpawners.remove(parents.get(0));
+            larvae.add(this.crossoverOperator.execute(parents).get(0));
 
-			if (broadcastSpawners.contains(parents.get(1))) {
-				broadcastSpawners.remove(parents.get(1));
-			}
+            parents.clear();
 
-			larvae.add(crossoverOperator.execute(parents).get(0));
-			
-			parents.clear();
+        }
 
-		}
+        return larvae;
+    }
 
-		return larvae;
-	}
+    @Override
+    protected List<S> asexualReproduction(List<S> brooders) {
+        int sz = brooders.size();
 
-	@Override
-	protected List<S> asexualReproduction(List<S> brooders) {
-		int sz = brooders.size();
+        List<S> larvae = new ArrayList<>(sz);
 
-		List<S> larvae = new ArrayList<S>(sz);
+        for (S brooder : brooders) {
+            larvae.add(this.mutationOperator.execute(brooder));
+        }
 
-		for (int i = 0; i < sz; i++) {
-			larvae.add(mutationOperator.execute(brooders.get(i)));
-		}
+        return larvae;
+    }
 
-		return larvae;
-	}
+    @Override
+    protected List<S> larvaeSettlementPhase(List<S> larvae, List<S> population,
+                                            List<Coordinate> coordinates) {
 
-	@Override
-	protected List<S> larvaeSettlementPhase(List<S> larvae, List<S> population,
-			List<Coordinate> coordinates) {
+        int attempts = this.getAttemptsToSettle();
+        int index;
 
-		int attempts = getAttemptsToSettle();
-		int index;
+        for (S larva : larvae) {
 
-		for (S larva : larvae) {
+            for (int attempt = 0; attempt < attempts; attempt++) {
+                Coordinate C = new Coordinate(this.random.nextInt(0, this.getN() - 1),
+                        this.random.nextInt(0, this.getM() - 1));
 
-			for (int attempt = 0; attempt < attempts; attempt++) {
-				Coordinate C = new Coordinate(random.nextInt(0, getN() - 1),
-						random.nextInt(0, getM() - 1));
+                if (!coordinates.contains(C)) {
+                    population.add(larva);
+                    coordinates.add(C);
+                    break;
+                }
 
-				if (!coordinates.contains(C)) {
-					population.add(larva);
-					coordinates.add(C);
-					break;
-				}
+                index = coordinates.indexOf(C);
 
-				index = coordinates.indexOf(C);
+                if (this.comparator.compare(larva, population.get(index)) < 0) {
+                    population.add(index, larva);
+                    population.remove(index + 1);
+                    break;
+                }
 
-				if (comparator.compare(larva, population.get(index)) < 0) {
-					population.add(index, larva);
-					population.remove(index + 1);
-					break;
-				}
+            }
 
-			}
+        }
 
-		}
+        return population;
+    }
 
-		return population;
-	}
+    @Override
+    protected List<S> depredation(List<S> population,
+                                  List<Coordinate> coordinates) {
+        int popSize = population.size();
+        int quantity = (int) (this.getFd() * popSize);
 
-	@Override
-	protected List<S> depredation(List<S> population,
-			List<Coordinate> coordinates) {
-		int popSize = population.size();
-		int quantity = (int) (getFd() * popSize);
+        quantity = popSize - quantity;
 
-		quantity = popSize - quantity;
+        double coin;
+        for (int i = popSize - 1; i > quantity; i--) {
+            coin = this.random.nextDouble();
 
-		double coin;
-		for (int i = popSize-1; i > quantity; i--) {
-			coin = random.nextDouble();
-			
-			if(coin < getPd()){
-				population.remove(population.size()-1);
-				coordinates.remove(population.size()-1);	
-			}
-			
-		}
-				
-		return population;
-	}
+            if (coin < this.getPd()) {
+                population.remove(population.size() - 1);
+                coordinates.remove(population.size() - 1);
+            }
 
-	@Override
-	public List<S> getResult() {
-		Collections.sort(getPopulation(), comparator) ;
-		return getPopulation();
-	}
+        }
 
-	@Override
-	public String getName() {
-		return "CRO";
-	}
+        return population;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Coral Reefs Optimizatoin";
-	}
+    @Override
+    public List<S> getResult() {
+        this.getPopulation().sort(this.comparator);
+        return this.getPopulation();
+    }
+
+    @Override
+    public String getName() {
+        return "CRO";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Coral Reefs Optimizatoin";
+    }
 
 }

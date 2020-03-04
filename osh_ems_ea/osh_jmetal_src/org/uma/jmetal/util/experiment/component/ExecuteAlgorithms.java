@@ -20,62 +20,56 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class ExecuteAlgorithms<S extends Solution<?>, Result extends List<S>> implements ExperimentComponent {
-  private Experiment<S, Result> experiment;
+    private final Experiment<S, Result> experiment;
 
-  /**
-   * Constructor
-   */
-  public ExecuteAlgorithms(Experiment<S, Result> configuration) {
-    this.experiment = configuration;
-  }
-
-  @Override
-  public void run() {
-    JMetalLogger.logger.info("ExecuteAlgorithms: Preparing output directory");
-    prepareOutputDirectory();
-
-    System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
-            "" + this.experiment.getNumberOfCores());
-
-    experiment.getAlgorithmList()
-            .parallelStream()
-            .forEach(algorithm -> algorithm.runAlgorithm(experiment));
-  }
-
-
-  private void prepareOutputDirectory() {
-    if (experimentDirectoryDoesNotExist()) {
-      createExperimentDirectory();
-    }
-  }
-
-  private boolean experimentDirectoryDoesNotExist() {
-    boolean result;
-    File experimentDirectory;
-
-    experimentDirectory = new File(experiment.getExperimentBaseDirectory());
-    if (experimentDirectory.exists() && experimentDirectory.isDirectory()) {
-      result = false;
-    } else {
-      result = true;
+    /**
+     * Constructor
+     */
+    public ExecuteAlgorithms(Experiment<S, Result> configuration) {
+        this.experiment = configuration;
     }
 
-    return result;
-  }
+    @Override
+    public void run() {
+        JMetalLogger.logger.info("ExecuteAlgorithms: Preparing output directory");
+        this.prepareOutputDirectory();
 
-  private void createExperimentDirectory() {
-    File experimentDirectory;
-    experimentDirectory = new File(experiment.getExperimentBaseDirectory());
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+                "" + this.experiment.getNumberOfCores());
 
-    if (experimentDirectory.exists()) {
-      experimentDirectory.delete();
+        this.experiment.getAlgorithmList()
+                .parallelStream()
+                .forEach(algorithm -> algorithm.runAlgorithm(this.experiment));
     }
 
-    boolean result;
-    result = new File(experiment.getExperimentBaseDirectory()).mkdirs();
-    if (!result) {
-      throw new JMetalException("Error creating experiment directory: " +
-              experiment.getExperimentBaseDirectory());
+
+    private void prepareOutputDirectory() {
+        if (this.experimentDirectoryDoesNotExist()) {
+            this.createExperimentDirectory();
+        }
     }
-  }
+
+    private boolean experimentDirectoryDoesNotExist() {
+        boolean result;
+        File experimentDirectory;
+
+        experimentDirectory = new File(this.experiment.getExperimentBaseDirectory());
+        return !experimentDirectory.exists() || !experimentDirectory.isDirectory();
+    }
+
+    private void createExperimentDirectory() {
+        File experimentDirectory;
+        experimentDirectory = new File(this.experiment.getExperimentBaseDirectory());
+
+        if (experimentDirectory.exists()) {
+            experimentDirectory.delete();
+        }
+
+        boolean result;
+        result = new File(this.experiment.getExperimentBaseDirectory()).mkdirs();
+        if (!result) {
+            throw new JMetalException("Error creating experiment directory: " +
+                    this.experiment.getExperimentBaseDirectory());
+        }
+    }
 }

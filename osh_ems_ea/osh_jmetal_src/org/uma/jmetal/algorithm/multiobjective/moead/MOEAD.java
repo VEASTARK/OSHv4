@@ -21,74 +21,77 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class MOEAD extends AbstractMOEAD<DoubleSolution> {
-  protected DifferentialEvolutionCrossover differentialEvolutionCrossover ;
+    protected final DifferentialEvolutionCrossover differentialEvolutionCrossover;
 
-  public MOEAD(Problem<DoubleSolution> problem,
-      int populationSize,
-      int resultPopulationSize,
-      int maxEvaluations,
-      MutationOperator<DoubleSolution> mutation,
-      CrossoverOperator<DoubleSolution> crossover,
-      FunctionType functionType,
-      String dataDirectory,
-      double neighborhoodSelectionProbability,
-      int maximumNumberOfReplacedSolutions,
-      int neighborSize) {
-    super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation, functionType,
-        dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
-        neighborSize);
+    public MOEAD(Problem<DoubleSolution> problem,
+                 int populationSize,
+                 int resultPopulationSize,
+                 int maxEvaluations,
+                 MutationOperator<DoubleSolution> mutation,
+                 CrossoverOperator<DoubleSolution> crossover,
+                 FunctionType functionType,
+                 String dataDirectory,
+                 double neighborhoodSelectionProbability,
+                 int maximumNumberOfReplacedSolutions,
+                 int neighborSize) {
+        super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation, functionType,
+                dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
+                neighborSize);
 
-    differentialEvolutionCrossover = (DifferentialEvolutionCrossover)crossoverOperator ;
-  }
-
-  @Override public void run() {
-    initializePopulation() ;
-    initializeUniformWeight();
-    initializeNeighborhood();
-    idealPoint.update(population); ;
-
-    evaluations = populationSize ;
-    do {
-      int[] permutation = new int[populationSize];
-      MOEADUtils.randomPermutation(permutation, populationSize);
-
-      for (int i = 0; i < populationSize; i++) {
-        int subProblemId = permutation[i];
-
-        NeighborType neighborType = chooseNeighborType() ;
-        List<DoubleSolution> parents = parentSelection(subProblemId, neighborType) ;
-
-        differentialEvolutionCrossover.setCurrentSolution(population.get(subProblemId));
-        List<DoubleSolution> children = differentialEvolutionCrossover.execute(parents);
-
-        DoubleSolution child = children.get(0) ;
-        mutationOperator.execute(child);
-        problem.evaluate(child);
-
-        evaluations++;
-
-        idealPoint.update(child.getObjectives());
-        updateNeighborhood(child, subProblemId, neighborType);
-      }
-    } while (evaluations < maxEvaluations);
-
-  }
-
-  protected void initializePopulation() {
-    population = new ArrayList<>(populationSize);
-    for (int i = 0; i < populationSize; i++) {
-      DoubleSolution newSolution = (DoubleSolution)problem.createSolution();
-
-      problem.evaluate(newSolution);
-      population.add(newSolution);
+        this.differentialEvolutionCrossover = (DifferentialEvolutionCrossover) this.crossoverOperator;
     }
-  }
 
-  @Override public String getName() {
-    return "MOEAD" ;
-  }
+    @Override
+    public void run() {
+        this.initializePopulation();
+        this.initializeUniformWeight();
+        this.initializeNeighborhood();
+        this.idealPoint.update(this.population);
 
-  @Override public String getDescription() {
-    return "Multi-Objective Evolutionary Algorithm based on Decomposition" ;
-  }
+        this.evaluations = this.populationSize;
+        do {
+            int[] permutation = new int[this.populationSize];
+            MOEADUtils.randomPermutation(permutation, this.populationSize);
+
+            for (int i = 0; i < this.populationSize; i++) {
+                int subProblemId = permutation[i];
+
+                NeighborType neighborType = this.chooseNeighborType();
+                List<DoubleSolution> parents = this.parentSelection(subProblemId, neighborType);
+
+                this.differentialEvolutionCrossover.setCurrentSolution(this.population.get(subProblemId));
+                List<DoubleSolution> children = this.differentialEvolutionCrossover.execute(parents);
+
+                DoubleSolution child = children.get(0);
+                this.mutationOperator.execute(child);
+                this.problem.evaluate(child);
+
+                this.evaluations++;
+
+                this.idealPoint.update(child.getObjectives());
+                this.updateNeighborhood(child, subProblemId, neighborType);
+            }
+        } while (this.evaluations < this.maxEvaluations);
+
+    }
+
+    protected void initializePopulation() {
+        this.population = new ArrayList<>(this.populationSize);
+        for (int i = 0; i < this.populationSize; i++) {
+            DoubleSolution newSolution = this.problem.createSolution();
+
+            this.problem.evaluate(newSolution);
+            this.population.add(newSolution);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return "MOEAD";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Multi-Objective Evolutionary Algorithm based on Decomposition";
+    }
 }

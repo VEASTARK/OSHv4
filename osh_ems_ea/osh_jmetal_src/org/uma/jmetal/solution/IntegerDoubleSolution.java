@@ -6,8 +6,11 @@ package org.uma.jmetal.solution;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public interface IntegerDoubleSolution extends Solution<Number> {
-  public Number getLowerBound(int index) ;
-  public Number getUpperBound(int index) ;
-  public int getNumberOfIntegerVariables() ;
-  public int getNumberOfDoubleVariables() ;
+    Number getLowerBound(int index);
+
+    Number getUpperBound(int index);
+
+    int getNumberOfIntegerVariables();
+
+    int getNumberOfDoubleVariables();
 }

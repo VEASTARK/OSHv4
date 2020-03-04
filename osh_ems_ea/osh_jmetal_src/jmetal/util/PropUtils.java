@@ -43,7 +43,7 @@ public abstract class PropUtils {
 
         en = pro.propertyNames();
 
-        for (; en.hasMoreElements(); ) {
+        while (en.hasMoreElements()) {
             String nom = (String) en.nextElement();
 
             if (nom.startsWith(prefix)) {
@@ -62,7 +62,7 @@ public abstract class PropUtils {
 
         en = pro.propertyNames();
 
-        for (; en.hasMoreElements(); ) {
+        while (en.hasMoreElements()) {
             String nom = (String) en.nextElement();
 
             res.setProperty(prefix + nom, pro.getProperty(nom));

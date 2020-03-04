@@ -14,62 +14,66 @@ import java.util.Map;
  */
 @SuppressWarnings("serial")
 public class DefaultIntegerSolution
-    extends AbstractGenericSolution<Integer, IntegerProblem>
-    implements IntegerSolution {
+        extends AbstractGenericSolution<Integer, IntegerProblem>
+        implements IntegerSolution {
 
-  /** Constructor */
-  public DefaultIntegerSolution(IntegerProblem problem) {
-    super(problem) ;
+    /**
+     * Constructor
+     */
+    public DefaultIntegerSolution(IntegerProblem problem) {
+        super(problem);
 
-    initializeIntegerVariables(JMetalRandom.getInstance());
-    initializeObjectiveValues();
-  }
-
-  /** Copy constructor */
-  public DefaultIntegerSolution(DefaultIntegerSolution solution) {
-    super(solution.problem) ;
-
-    for (int i = 0; i < problem.getNumberOfVariables(); i++) {
-      setVariableValue(i, solution.getVariableValue(i));
+        this.initializeIntegerVariables(JMetalRandom.getInstance());
+        this.initializeObjectiveValues();
     }
 
-    for (int i = 0; i < problem.getNumberOfObjectives(); i++) {
-      setObjective(i, solution.getObjective(i)) ;
+    /**
+     * Copy constructor
+     */
+    public DefaultIntegerSolution(DefaultIntegerSolution solution) {
+        super(solution.problem);
+
+        for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
+            this.setVariableValue(i, solution.getVariableValue(i));
+        }
+
+        for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
+            this.setObjective(i, solution.getObjective(i));
+        }
+
+        this.attributes = new HashMap<>(solution.attributes);
     }
 
-    attributes = new HashMap<Object, Object>(solution.attributes) ;
-  }
-
-  @Override
-  public Integer getUpperBound(int index) {
-    return problem.getUpperBound(index);
-  }
-
-  @Override
-  public Integer getLowerBound(int index) {
-    return problem.getLowerBound(index) ;
-  }
-
-  @Override
-  public DefaultIntegerSolution copy() {
-    return new DefaultIntegerSolution(this);
-  }
-
-  @Override
-  public String getVariableValueString(int index) {
-    return getVariableValue(index).toString() ;
-  }
-  
-  private void initializeIntegerVariables(JMetalRandom randomGenerator) {
-    for (int i = 0 ; i < problem.getNumberOfVariables(); i++) {
-      Integer value = randomGenerator.nextInt(getLowerBound(i), getUpperBound(i));
-      setVariableValue(i, value) ;
+    @Override
+    public Integer getUpperBound(int index) {
+        return this.problem.getUpperBound(index);
     }
-  }
-  
-  
-	@Override
-	public Map<Object, Object> getAttributes() {
-		return attributes;
-	}
+
+    @Override
+    public Integer getLowerBound(int index) {
+        return this.problem.getLowerBound(index);
+    }
+
+    @Override
+    public DefaultIntegerSolution copy() {
+        return new DefaultIntegerSolution(this);
+    }
+
+    @Override
+    public String getVariableValueString(int index) {
+        return this.getVariableValue(index).toString();
+    }
+
+    private void initializeIntegerVariables(JMetalRandom randomGenerator) {
+        for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
+            Integer value = randomGenerator.nextInt(this.getLowerBound(i), this.getUpperBound(i));
+            this.setVariableValue(i, value);
+        }
+    }
+
+
+    @Override
+    public Map<Object, Object> getAttributes() {
+        return this.attributes;
+    }
 }

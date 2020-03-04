@@ -11,99 +11,97 @@ import java.util.List;
 
 /**
  * Class for describing the configuration of a jMetal experiment.
- *
+ * <p>
  * Created by Antonio J. Nebro on 17/07/14.
  */
 public class Experiment<S extends Solution<?>, Result extends List<S>> {
-	private String experimentName;
-	private List<ExperimentAlgorithm<S, Result>> algorithmList;
-	private List<ExperimentProblem<S>> problemList;
-	private String experimentBaseDirectory;
+    private final String experimentName;
+    private final List<ExperimentProblem<S>> problemList;
+    private final String experimentBaseDirectory;
+    private final String outputParetoFrontFileName;
+    private final String outputParetoSetFileName;
+    private final int independentRuns;
+    private final List<GenericIndicator<S>> indicatorList;
+    private final int numberOfCores;
+    private List<ExperimentAlgorithm<S, Result>> algorithmList;
+    private String referenceFrontDirectory;
 
-	private String outputParetoFrontFileName;
-	private String outputParetoSetFileName;
-	private int independentRuns;
+    /**
+     * Constructor
+     */
+    public Experiment(ExperimentBuilder<S, Result> builder) {
+        this.experimentName = builder.getExperimentName();
+        this.experimentBaseDirectory = builder.getExperimentBaseDirectory();
+        this.algorithmList = builder.getAlgorithmList();
+        this.problemList = builder.getProblemList();
+        this.independentRuns = builder.getIndependentRuns();
+        this.outputParetoFrontFileName = builder.getOutputParetoFrontFileName();
+        this.outputParetoSetFileName = builder.getOutputParetoSetFileName();
+        this.numberOfCores = builder.getNumberOfCores();
+        this.referenceFrontDirectory = builder.getReferenceFrontDirectory();
+        this.indicatorList = builder.getIndicatorList();
+    }
 
-  private String referenceFrontDirectory;
+    /* Getters */
+    public String getExperimentName() {
+        return this.experimentName;
+    }
 
-  private List<GenericIndicator<S>> indicatorList ;
+    public List<ExperimentAlgorithm<S, Result>> getAlgorithmList() {
+        return this.algorithmList;
+    }
 
-  private int numberOfCores ;
+    public void setAlgorithmList(List<ExperimentAlgorithm<S, Result>> algorithmList) {
+        this.algorithmList = algorithmList;
+    }
 
-	/** Constructor */
-	public Experiment(ExperimentBuilder<S, Result> builder) {
-		this.experimentName = builder.getExperimentName() ;
-    this.experimentBaseDirectory = builder.getExperimentBaseDirectory() ;
-    this.algorithmList = builder.getAlgorithmList() ;
-    this.problemList = builder.getProblemList() ;
-    this.independentRuns = builder.getIndependentRuns() ;
-    this.outputParetoFrontFileName = builder.getOutputParetoFrontFileName() ;
-    this.outputParetoSetFileName = builder.getOutputParetoSetFileName() ;
-    this.numberOfCores = builder.getNumberOfCores() ;
-    this.referenceFrontDirectory = builder.getReferenceFrontDirectory() ;
-    this.indicatorList = builder.getIndicatorList() ;
-  }
+    public List<ExperimentProblem<S>> getProblemList() {
+        return this.problemList;
+    }
 
-  /* Getters */
-  public String getExperimentName() {
-    return experimentName;
-  }
+    public String getExperimentBaseDirectory() {
+        return this.experimentBaseDirectory;
+    }
 
-  public List<ExperimentAlgorithm<S, Result>> getAlgorithmList() {
-    return algorithmList;
-  }
+    public String getOutputParetoFrontFileName() {
+        return this.outputParetoFrontFileName;
+    }
 
-  public List<ExperimentProblem<S>> getProblemList() {
-    return problemList;
-  }
+    public String getOutputParetoSetFileName() {
+        return this.outputParetoSetFileName;
+    }
 
-  public String getExperimentBaseDirectory() {
-    return experimentBaseDirectory;
-  }
+    public int getIndependentRuns() {
+        return this.independentRuns;
+    }
 
-  public String getOutputParetoFrontFileName() {
-    return outputParetoFrontFileName;
-  }
+    public int getNumberOfCores() {
+        return this.numberOfCores;
+    }
 
-  public String getOutputParetoSetFileName() {
-    return outputParetoSetFileName;
-  }
+    public String getReferenceFrontDirectory() {
+        return this.referenceFrontDirectory;
+    }
 
-  public int getIndependentRuns() {
-    return independentRuns;
-  }
+    /* Setters */
+    public void setReferenceFrontDirectory(String referenceFrontDirectory) {
+        this.referenceFrontDirectory = referenceFrontDirectory;
+    }
 
-  public int getNumberOfCores() {
-    return numberOfCores ;
-  }
+    public List<GenericIndicator<S>> getIndicatorList() {
+        return this.indicatorList;
+    }
 
-  public String getReferenceFrontDirectory() {
-    return referenceFrontDirectory;
-  }
-
-  public List<GenericIndicator<S>> getIndicatorList() {
-    return indicatorList;
-  }
-
-  /* Setters */
-  public void setReferenceFrontDirectory(String referenceFrontDirectory) {
-    this.referenceFrontDirectory = referenceFrontDirectory ;
-  }
-
-  public void setAlgorithmList(List<ExperimentAlgorithm<S, Result>> algorithmList) {
-    this.algorithmList = algorithmList ;
-  }
-
-  /**
-   * The list of algorithms contain an algorithm instance per problem. This is not convenient for
-   * calculating statistical data, because a same algorithm will appear many times.
-   * This method remove duplicated algorithms and leave only an instance of each one.
-   */
-  public void removeDuplicatedAlgorithms() {
-    List<ExperimentAlgorithm<S, Result>> algorithmList = new ArrayList<>() ;
-    HashSet<String> algorithmTagList = new HashSet<>() ;
+    /**
+     * The list of algorithms contain an algorithm instance per problem. This is not convenient for
+     * calculating statistical data, because a same algorithm will appear many times.
+     * This method remove duplicated algorithms and leave only an instance of each one.
+     */
+    public void removeDuplicatedAlgorithms() {
+        List<ExperimentAlgorithm<S, Result>> algorithmList = new ArrayList<>();
+        HashSet<String> algorithmTagList = new HashSet<>();
 
 
-    getAlgorithmList().removeIf(alg -> !algorithmTagList.add(alg.getAlgorithmTag())) ;
-  }
+        this.algorithmList.removeIf(alg -> !algorithmTagList.add(alg.getAlgorithmTag()));
+    }
 }

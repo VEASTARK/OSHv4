@@ -14,40 +14,46 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class RandomSearch<S extends Solution<?>> implements Algorithm<List<S>> {
-  private Problem<S> problem ;
-  private int maxEvaluations ;
-  NonDominatedSolutionListArchive<S> nonDominatedArchive ;
+    final NonDominatedSolutionListArchive<S> nonDominatedArchive;
+    private final Problem<S> problem;
+    private final int maxEvaluations;
 
-  /** Constructor */
-  public RandomSearch(Problem<S> problem, int maxEvaluations) {
-    this.problem = problem ;
-    this.maxEvaluations = maxEvaluations ;
-    nonDominatedArchive = new NonDominatedSolutionListArchive<S>();
-  }
-
-  /* Getter */
-  public int getMaxEvaluations() {
-    return maxEvaluations;
-  }
-
-  @Override public void run() {
-    S newSolution;
-    for (int i = 0; i < maxEvaluations; i++) {
-      newSolution = problem.createSolution() ;
-      problem.evaluate(newSolution);
-      nonDominatedArchive.add(newSolution);
+    /**
+     * Constructor
+     */
+    public RandomSearch(Problem<S> problem, int maxEvaluations) {
+        this.problem = problem;
+        this.maxEvaluations = maxEvaluations;
+        this.nonDominatedArchive = new NonDominatedSolutionListArchive<>();
     }
-  }
 
-  @Override public List<S> getResult() {
-    return nonDominatedArchive.getSolutionList();
-  }
+    /* Getter */
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-  @Override public String getName() {
-    return "RS" ;
-  }
+    @Override
+    public void run() {
+        S newSolution;
+        for (int i = 0; i < this.maxEvaluations; i++) {
+            newSolution = this.problem.createSolution();
+            this.problem.evaluate(newSolution);
+            this.nonDominatedArchive.add(newSolution);
+        }
+    }
 
-  @Override public String getDescription() {
-    return "Multi-objective random search algorithm" ;
-  }
+    @Override
+    public List<S> getResult() {
+        return this.nonDominatedArchive.getSolutionList();
+    }
+
+    @Override
+    public String getName() {
+        return "RS";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Multi-objective random search algorithm";
+    }
 } 

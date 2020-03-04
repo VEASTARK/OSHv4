@@ -14,86 +14,90 @@ import java.util.Map;
  */
 @SuppressWarnings("serial")
 public class DefaultIntegerDoubleSolution
-    extends AbstractGenericSolution<Number, IntegerDoubleProblem<?>>
-    implements IntegerDoubleSolution {
+        extends AbstractGenericSolution<Number, IntegerDoubleProblem<?>>
+        implements IntegerDoubleSolution {
 
-  private int numberOfIntegerVariables ;
-  private int numberOfDoubleVariables ;
+    private int numberOfIntegerVariables;
+    private int numberOfDoubleVariables;
 
-  /** Constructor */
-  public DefaultIntegerDoubleSolution(IntegerDoubleProblem<?> problem) {
-    super(problem) ;
+    /**
+     * Constructor
+     */
+    public DefaultIntegerDoubleSolution(IntegerDoubleProblem<?> problem) {
+        super(problem);
 
-    numberOfIntegerVariables = problem.getNumberOfIntegerVariables() ;
-    numberOfDoubleVariables = problem.getNumberOfDoubleVariables() ;
+        this.numberOfIntegerVariables = problem.getNumberOfIntegerVariables();
+        this.numberOfDoubleVariables = problem.getNumberOfDoubleVariables();
 
-    initializeIntegerDoubleVariables(JMetalRandom.getInstance()) ;
-    initializeObjectiveValues() ;
-  }
-
-  /** Copy constructor */
-  public DefaultIntegerDoubleSolution(DefaultIntegerDoubleSolution solution) {
-    super(solution.problem) ;
-
-    for (int i = 0; i < problem.getNumberOfObjectives(); i++) {
-      setObjective(i, solution.getObjective(i)) ;
+        this.initializeIntegerDoubleVariables(JMetalRandom.getInstance());
+        this.initializeObjectiveValues();
     }
 
-    for (int i = 0 ; i < numberOfIntegerVariables; i++) {
-      setVariableValue(i, solution.getVariableValue(i)) ;
+    /**
+     * Copy constructor
+     */
+    public DefaultIntegerDoubleSolution(DefaultIntegerDoubleSolution solution) {
+        super(solution.problem);
+
+        for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
+            this.setObjective(i, solution.getObjective(i));
+        }
+
+        for (int i = 0; i < this.numberOfIntegerVariables; i++) {
+            this.setVariableValue(i, solution.getVariableValue(i));
+        }
+
+        for (int i = this.numberOfIntegerVariables; i < (this.numberOfIntegerVariables + this.numberOfDoubleVariables); i++) {
+            this.setVariableValue(i, solution.getVariableValue(i));
+        }
+
+        this.attributes = new HashMap<>(solution.attributes);
     }
 
-    for (int i = numberOfIntegerVariables ; i < (numberOfIntegerVariables+numberOfDoubleVariables); i++) {
-      setVariableValue(i, solution.getVariableValue(i)) ;
+    @Override
+    public Number getUpperBound(int index) {
+        return this.problem.getUpperBound(index);
     }
 
-    attributes = new HashMap<Object, Object>(solution.attributes) ;
-  }
-
-  @Override
-  public Number getUpperBound(int index) {
-    return problem.getUpperBound(index);
-  }
-
-  @Override
-  public int getNumberOfIntegerVariables() {
-    return numberOfIntegerVariables;
-  }
-
-  @Override
-  public int getNumberOfDoubleVariables() {
-    return numberOfDoubleVariables;
-  }
-
-  @Override
-  public Number getLowerBound(int index) {
-    return problem.getLowerBound(index) ;
-  }
-
-  @Override
-  public DefaultIntegerDoubleSolution copy() {
-    return new DefaultIntegerDoubleSolution(this);
-  }
-
-  @Override
-  public String getVariableValueString(int index) {
-    return getVariableValue(index).toString() ;
-  }
-  
-  private void initializeIntegerDoubleVariables(JMetalRandom randomGenerator) {
-    for (int i = 0 ; i < numberOfIntegerVariables; i++) {
-      Integer value = randomGenerator.nextInt((Integer)getLowerBound(i), (Integer)getUpperBound(i)) ;
-      setVariableValue(i, value) ;
+    @Override
+    public int getNumberOfIntegerVariables() {
+        return this.numberOfIntegerVariables;
     }
 
-    for (int i = numberOfIntegerVariables ; i < getNumberOfVariables(); i++) {
-      Double value = randomGenerator.nextDouble((Double)getLowerBound(i), (Double)getUpperBound(i)) ;
-      setVariableValue(i, value) ;
+    @Override
+    public int getNumberOfDoubleVariables() {
+        return this.numberOfDoubleVariables;
     }
-  }
-  
-	@Override
-	public Map<Object, Object> getAttributes() {
-		return attributes;
-	}
+
+    @Override
+    public Number getLowerBound(int index) {
+        return this.problem.getLowerBound(index);
+    }
+
+    @Override
+    public DefaultIntegerDoubleSolution copy() {
+        return new DefaultIntegerDoubleSolution(this);
+    }
+
+    @Override
+    public String getVariableValueString(int index) {
+        return this.getVariableValue(index).toString();
+    }
+
+    private void initializeIntegerDoubleVariables(JMetalRandom randomGenerator) {
+        for (int i = 0; i < this.numberOfIntegerVariables; i++) {
+            Integer value = randomGenerator.nextInt((Integer) this.getLowerBound(i), (Integer) this.getUpperBound(i));
+            this.setVariableValue(i, value);
+        }
+
+        for (int i = this.numberOfIntegerVariables; i < this.getNumberOfVariables(); i++) {
+            Double value = randomGenerator.nextDouble((Double) this.getLowerBound(i), (Double) this.getUpperBound(i));
+            this.setVariableValue(i, value);
+        }
+    }
+
+    @Override
+    public Map<Object, Object> getAttributes() {
+        return this.attributes;
+    }
 }

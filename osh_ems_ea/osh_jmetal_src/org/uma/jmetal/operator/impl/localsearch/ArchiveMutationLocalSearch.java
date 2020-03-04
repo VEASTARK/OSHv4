@@ -20,97 +20,94 @@ import java.util.Comparator;
 @SuppressWarnings("serial")
 public class ArchiveMutationLocalSearch<S extends Solution<?>> implements LocalSearchOperator<S> {
 
-  private Problem<S> problem;
-  private Archive<S> archive;
-  private int improvementRounds;
-  private Comparator<S> constraintComparator;
-  private Comparator<S> dominanceComparator;
+    private final Problem<S> problem;
+    private final Archive<S> archive;
+    private final int improvementRounds;
+    private final Comparator<S> constraintComparator;
+    private final Comparator<S> dominanceComparator;
 
-  private MutationOperator<S> mutationOperator;
-  private int evaluations;
+    private final MutationOperator<S> mutationOperator;
+    private int evaluations;
 
-  private int numberOfImprovements;
-  private int numberOfNonComparableSolutions;
+    private int numberOfImprovements;
+    private int numberOfNonComparableSolutions;
 
-  /**
-   * Constructor. Creates a new local search object.
-   *
-   * @param improvementRounds number of iterations
-   * @param mutationOperator mutation operator
-   * @param archive archive to store non-dominated solution
-   * @param problem problem to resolve
-   */
-  public ArchiveMutationLocalSearch(int improvementRounds, MutationOperator<S> mutationOperator,
-      Archive<S> archive, Problem<S> problem) {
-    this.problem = problem;
-    this.mutationOperator = mutationOperator;
-    this.improvementRounds = improvementRounds;
-    this.archive = archive;
-    dominanceComparator = new DominanceComparator<S>();
-    constraintComparator = new OverallConstraintViolationComparator<S>();
+    /**
+     * Constructor. Creates a new local search object.
+     *
+     * @param improvementRounds number of iterations
+     * @param mutationOperator  mutation operator
+     * @param archive           archive to store non-dominated solution
+     * @param problem           problem to resolve
+     */
+    public ArchiveMutationLocalSearch(int improvementRounds, MutationOperator<S> mutationOperator,
+                                      Archive<S> archive, Problem<S> problem) {
+        this.problem = problem;
+        this.mutationOperator = mutationOperator;
+        this.improvementRounds = improvementRounds;
+        this.archive = archive;
+        this.dominanceComparator = new DominanceComparator<>();
+        this.constraintComparator = new OverallConstraintViolationComparator<>();
 
-    numberOfImprovements = 0;
-    numberOfNonComparableSolutions = 0;
-  }
-
-  /**
-   * Executes the local search.
-   *
-   * @param solution The solution to improve
-   * @return The improved solution
-   */
-  @SuppressWarnings("unchecked")
-  public S execute(S solution) {
-    int i = 0;
-    int best;
-    evaluations = 0;
-    numberOfNonComparableSolutions = 0;
-
-    int rounds = improvementRounds;
-
-    while (i < rounds) {
-      S mutatedSolution = mutationOperator.execute((S) solution.copy());
-
-      problem.evaluate(mutatedSolution);
-      evaluations++;
-
-      if (problem.getNumberOfConstraints() > 0) {
-        best = constraintComparator.compare(mutatedSolution, solution);
-        if (best == 0) {
-          best = dominanceComparator.compare(mutatedSolution, solution);
-        }
-      } else {
-        best = dominanceComparator.compare(mutatedSolution, solution);
-      }
-
-      if (best == -1) {
-        solution = mutatedSolution;
-        numberOfImprovements++;
-      } else if (best == 1) {
-        ;
-      } else {
-        numberOfNonComparableSolutions++;
-        archive.add(mutatedSolution);
-      }
-      i++;
+        this.numberOfImprovements = 0;
+        this.numberOfNonComparableSolutions = 0;
     }
-    return (S) solution.copy();
-  }
 
-  /**
-   * Returns the number of evaluations
-   */
-  public int getEvaluations() {
-    return evaluations;
-  }
+    /**
+     * Executes the local search.
+     *
+     * @param solution The solution to improve
+     * @return The improved solution
+     */
+    @SuppressWarnings("unchecked")
+    public S execute(S solution) {
+        int i = 0;
+        int best;
+        this.evaluations = 0;
+        this.numberOfNonComparableSolutions = 0;
 
-  @Override
-  public int getNumberOfImprovements() {
-    return numberOfImprovements;
-  }
+        while (i < this.improvementRounds) {
+            S mutatedSolution = this.mutationOperator.execute((S) solution.copy());
 
-  @Override
-  public int getNumberOfNonComparableSolutions() {
-    return numberOfNonComparableSolutions;
-  }
+            this.problem.evaluate(mutatedSolution);
+            this.evaluations++;
+
+            if (this.problem.getNumberOfConstraints() > 0) {
+                best = this.constraintComparator.compare(mutatedSolution, solution);
+                if (best == 0) {
+                    best = this.dominanceComparator.compare(mutatedSolution, solution);
+                }
+            } else {
+                best = this.dominanceComparator.compare(mutatedSolution, solution);
+            }
+
+            if (best == -1) {
+                solution = mutatedSolution;
+                this.numberOfImprovements++;
+            } else if (best == 1) {
+            } else {
+                this.numberOfNonComparableSolutions++;
+                this.archive.add(mutatedSolution);
+            }
+            i++;
+        }
+        return (S) solution.copy();
+    }
+
+    /**
+     * Returns the number of evaluations
+     */
+    public int getEvaluations() {
+        return this.evaluations;
+    }
+
+    @Override
+    public int getNumberOfImprovements() {
+        return this.numberOfImprovements;
+    }
+
+    @Override
+    public int getNumberOfNonComparableSolutions() {
+        return this.numberOfNonComparableSolutions;
+    }
 }

@@ -11,106 +11,105 @@ import java.util.function.Consumer;
 /**
  * An {@link AuditableRandomGenerator} is a {@link PseudoRandomGenerator} which can be audited
  * to know when a random generation method is called.
- * 
- * @author Matthieu Vergne <matthieu.vergne@gmail.com>
  *
+ * @author Matthieu Vergne <matthieu.vergne@gmail.com>
  */
 @SuppressWarnings("serial")
 public class AuditableRandomGenerator implements PseudoRandomGenerator {
 
-	public static enum RandomMethod {
-		BOUNDED_INT, BOUNDED_DOUBLE, DOUBLE
-	}
+    private final PseudoRandomGenerator generator;
+    private final Set<Consumer<Audit>> listeners = new HashSet<>();
 
-	public static class Bounds {
-		final Number lower;
-		final Number upper;
+    public AuditableRandomGenerator(PseudoRandomGenerator generator) {
+        this.generator = Objects.requireNonNull(generator, "No generator provided");
+    }
 
-		public Bounds(Number lower, Number upper) {
-			this.lower = Objects.requireNonNull(lower, "No lower bound provided");
-			this.upper = Objects.requireNonNull(upper, "No upper bound provided");
-		}
-	}
+    public void addListener(Consumer<Audit> listener) {
+        this.listeners.add(listener);
+    }
 
-	private final PseudoRandomGenerator generator;
-	private final Set<Consumer<Audit>> listeners = new HashSet<Consumer<Audit>>();
+    public void removeListener(Consumer<Audit> listener) {
+        this.listeners.remove(listener);
+    }
 
-	public AuditableRandomGenerator(PseudoRandomGenerator generator) {
-		this.generator = Objects.requireNonNull(generator, "No generator provided");
-	}
+    private void notifies(Audit audit) {
+        for (Consumer<Audit> listener : this.listeners) {
+            listener.accept(audit);
+        }
+    }
 
-	public static class Audit {
-		private final RandomMethod method;
-		private final Optional<Bounds> bounds;
-		private final Number result;
+    @Override
+    public int nextInt(int lowerBound, int upperBound) {
+        int result = this.generator.nextInt(lowerBound, upperBound);
+        this.notifies(new Audit(RandomMethod.BOUNDED_INT, new Bounds(lowerBound, upperBound), result));
+        return result;
+    }
 
-		public Audit(RandomMethod method, Bounds bounds, Number result) {
-			this.method = Objects.requireNonNull(method, "No method provided");
-			this.bounds = Optional.ofNullable(bounds);
-			this.result = Objects.requireNonNull(result, "No result provided");
-		}
+    @Override
+    public double nextDouble(double lowerBound, double upperBound) {
+        double result = this.generator.nextDouble(lowerBound, upperBound);
+        this.notifies(new Audit(RandomMethod.BOUNDED_DOUBLE, new Bounds(lowerBound, upperBound), result));
+        return result;
+    }
 
-		public RandomMethod getMethod() {
-			return method;
-		}
+    @Override
+    public double nextDouble() {
+        double result = this.generator.nextDouble();
+        this.notifies(new Audit(RandomMethod.DOUBLE, null, result));
+        return result;
+    }
 
-		public Optional<Bounds> getBounds() {
-			return bounds;
-		}
+    @Override
+    public long getSeed() {
+        return this.generator.getSeed();
+    }
 
-		public Number getResult() {
-			return result;
-		}
-	}
+    @Override
+    public void setSeed(long seed) {
+        this.generator.setSeed(seed);
+    }
 
-	public void addListener(Consumer<Audit> listener) {
-		listeners.add(listener);
-	}
+    @Override
+    public String getName() {
+        return this.generator.getName();
+    }
 
-	public void removeListener(Consumer<Audit> listener) {
-		listeners.remove(listener);
-	}
+    public enum RandomMethod {
+        BOUNDED_INT, BOUNDED_DOUBLE, DOUBLE
+    }
 
-	private void notifies(Audit audit) {
-		for (Consumer<Audit> listener : listeners) {
-			listener.accept(audit);
-		}
-	}
+    public static class Bounds {
+        final Number lower;
+        final Number upper;
 
-	@Override
-	public int nextInt(int lowerBound, int upperBound) {
-		int result = generator.nextInt(lowerBound, upperBound);
-		notifies(new Audit(RandomMethod.BOUNDED_INT, new Bounds(lowerBound, upperBound), result));
-		return result;
-	}
+        public Bounds(Number lower, Number upper) {
+            this.lower = Objects.requireNonNull(lower, "No lower bound provided");
+            this.upper = Objects.requireNonNull(upper, "No upper bound provided");
+        }
+    }
 
-	@Override
-	public double nextDouble(double lowerBound, double upperBound) {
-		double result = generator.nextDouble(lowerBound, upperBound);
-		notifies(new Audit(RandomMethod.BOUNDED_DOUBLE, new Bounds(lowerBound, upperBound), result));
-		return result;
-	}
+    public static class Audit {
+        private final RandomMethod method;
+        private final Optional<Bounds> bounds;
+        private final Number result;
 
-	@Override
-	public double nextDouble() {
-		double result = generator.nextDouble();
-		notifies(new Audit(RandomMethod.DOUBLE, null, result));
-		return result;
-	}
+        public Audit(RandomMethod method, Bounds bounds, Number result) {
+            this.method = Objects.requireNonNull(method, "No method provided");
+            this.bounds = Optional.ofNullable(bounds);
+            this.result = Objects.requireNonNull(result, "No result provided");
+        }
 
-	@Override
-	public void setSeed(long seed) {
-		generator.setSeed(seed);
-	}
+        public RandomMethod getMethod() {
+            return this.method;
+        }
 
-	@Override
-	public long getSeed() {
-		return generator.getSeed();
-	}
+        public Optional<Bounds> getBounds() {
+            return this.bounds;
+        }
 
-	@Override
-	public String getName() {
-		return generator.getName();
-	}
+        public Number getResult() {
+            return this.result;
+        }
+    }
 
 }

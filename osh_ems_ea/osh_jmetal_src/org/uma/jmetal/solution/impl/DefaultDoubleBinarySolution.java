@@ -10,113 +10,113 @@ import java.util.Map;
 
 /**
  * Description:
- *  - this solution contains an array of double value + a binary string
- *  - getNumberOfVariables() returns the number of double values + 1 (the string)
- *  - getNumberOfDoubleVariables() returns the number of double values
- *  - getNumberOfVariables() = getNumberOfDoubleVariables() + 1
- *  - the bitset is the last variable
+ * - this solution contains an array of double value + a binary string
+ * - getNumberOfVariables() returns the number of double values + 1 (the string)
+ * - getNumberOfDoubleVariables() returns the number of double values
+ * - getNumberOfVariables() = getNumberOfDoubleVariables() + 1
+ * - the bitset is the last variable
  *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 @SuppressWarnings("serial")
 public class DefaultDoubleBinarySolution
-    extends AbstractGenericSolution<Object, DoubleBinaryProblem<?>>
-    implements DoubleBinarySolution {
-  private int numberOfDoubleVariables ;
+        extends AbstractGenericSolution<Object, DoubleBinaryProblem<?>>
+        implements DoubleBinarySolution {
+    private int numberOfDoubleVariables;
 
-  /** Constructor */
-  public DefaultDoubleBinarySolution(DoubleBinaryProblem<?> problem) {
-    super(problem) ;
+    /**
+     * Constructor
+     */
+    public DefaultDoubleBinarySolution(DoubleBinaryProblem<?> problem) {
+        super(problem);
 
-    numberOfDoubleVariables = problem.getNumberOfDoubleVariables() ;
+        this.numberOfDoubleVariables = problem.getNumberOfDoubleVariables();
 
-    initializeDoubleVariables(JMetalRandom.getInstance());
-    initializeBitSet(JMetalRandom.getInstance()) ;
-    initializeObjectiveValues();
-  }
-
-  /** Copy constructor */
-  public DefaultDoubleBinarySolution(DefaultDoubleBinarySolution solution) {
-    super(solution.problem) ;
-    for (int i = 0; i < problem.getNumberOfObjectives(); i++) {
-      setObjective(i, solution.getObjective(i)) ;
+        this.initializeDoubleVariables(JMetalRandom.getInstance());
+        this.initializeBitSet(JMetalRandom.getInstance());
+        this.initializeObjectiveValues();
     }
 
-    copyDoubleVariables(solution);
-    copyBitSet(solution);
+    /**
+     * Copy constructor
+     */
+    public DefaultDoubleBinarySolution(DefaultDoubleBinarySolution solution) {
+        super(solution.problem);
+        for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
+            this.setObjective(i, solution.getObjective(i));
+        }
 
-    attributes = new HashMap<Object, Object>(solution.attributes) ;
-  }
+        this.copyDoubleVariables(solution);
+        this.copyBitSet(solution);
 
-  private void initializeDoubleVariables(JMetalRandom randomGenerator) {
-    for (int i = 0 ; i < numberOfDoubleVariables; i++) {
-      Double value = randomGenerator.nextDouble(getLowerBound(i), getUpperBound(i)) ;
-      //variables.add(value) ;
-      setVariableValue(i, value);
+        this.attributes = new HashMap<>(solution.attributes);
     }
-  }
 
-  private void initializeBitSet(JMetalRandom randomGenerator) {
-    BitSet bitset = createNewBitSet(problem.getNumberOfBits(), randomGenerator) ;
-    setVariableValue(numberOfDoubleVariables, bitset);
-  }
-
-  private void copyDoubleVariables(DefaultDoubleBinarySolution solution) {
-    for (int i = 0 ; i < numberOfDoubleVariables; i++) {
-      setVariableValue(i, solution.getVariableValue(i));
+    private void initializeDoubleVariables(JMetalRandom randomGenerator) {
+        for (int i = 0; i < this.numberOfDoubleVariables; i++) {
+            Double value = randomGenerator.nextDouble(this.getLowerBound(i), this.getUpperBound(i));
+            //variables.add(value) ;
+            this.setVariableValue(i, value);
+        }
     }
-  }
 
-  private void copyBitSet(DefaultDoubleBinarySolution solution) {
-    BitSet bitset = (BitSet)solution.getVariableValue(solution.getNumberOfVariables()-1) ;
-    setVariableValue(numberOfDoubleVariables, bitset);
-  }
-
-  @Override
-  public int getNumberOfDoubleVariables() {
-    return numberOfDoubleVariables;
-  }
-
-  @Override
-  public Double getUpperBound(int index) {
-    return (Double)problem.getUpperBound(index);
-  }
-
-  @Override
-  public int getNumberOfBits() {
-    return problem.getNumberOfBits();
-  }
-
-  @Override
-  public Double getLowerBound(int index) {
-    return (Double)problem.getLowerBound(index) ;
-  }
-
-  @Override
-  public DefaultDoubleBinarySolution copy() {
-    return new DefaultDoubleBinarySolution(this);
-  }
-
-  @Override
-  public String getVariableValueString(int index) {
-    return getVariableValue(index).toString() ;
-  }
-
-  private BitSet createNewBitSet(int numberOfBits, JMetalRandom randomGenerator) {
-    BitSet bitSet = new BitSet(numberOfBits) ;
-
-    for (int i = 0; i < numberOfBits; i++) {
-      if (randomGenerator.nextDouble() < 0.5) {
-        bitSet.set(i, true);
-      } else {
-        bitSet.set(i, false);
-      }
+    private void initializeBitSet(JMetalRandom randomGenerator) {
+        BitSet bitset = this.createNewBitSet(this.problem.getNumberOfBits(), randomGenerator);
+        this.setVariableValue(this.numberOfDoubleVariables, bitset);
     }
-    return bitSet ;
-  }
-  
-  	@Override
-	public Map<Object, Object> getAttributes() {
-		return attributes;
-	}
+
+    private void copyDoubleVariables(DefaultDoubleBinarySolution solution) {
+        for (int i = 0; i < this.numberOfDoubleVariables; i++) {
+            this.setVariableValue(i, solution.getVariableValue(i));
+        }
+    }
+
+    private void copyBitSet(DefaultDoubleBinarySolution solution) {
+        BitSet bitset = (BitSet) solution.getVariableValue(solution.getNumberOfVariables() - 1);
+        this.setVariableValue(this.numberOfDoubleVariables, bitset);
+    }
+
+    @Override
+    public int getNumberOfDoubleVariables() {
+        return this.numberOfDoubleVariables;
+    }
+
+    @Override
+    public Double getUpperBound(int index) {
+        return (Double) this.problem.getUpperBound(index);
+    }
+
+    @Override
+    public int getNumberOfBits() {
+        return this.problem.getNumberOfBits();
+    }
+
+    @Override
+    public Double getLowerBound(int index) {
+        return (Double) this.problem.getLowerBound(index);
+    }
+
+    @Override
+    public DefaultDoubleBinarySolution copy() {
+        return new DefaultDoubleBinarySolution(this);
+    }
+
+    @Override
+    public String getVariableValueString(int index) {
+        return this.getVariableValue(index).toString();
+    }
+
+    private BitSet createNewBitSet(int numberOfBits, JMetalRandom randomGenerator) {
+        BitSet bitSet = new BitSet(numberOfBits);
+
+        for (int i = 0; i < numberOfBits; i++) {
+            bitSet.set(i, randomGenerator.nextDouble() < 0.5);
+        }
+        return bitSet;
+    }
+
+    @Override
+    public Map<Object, Object> getAttributes() {
+        return this.attributes;
+    }
 }

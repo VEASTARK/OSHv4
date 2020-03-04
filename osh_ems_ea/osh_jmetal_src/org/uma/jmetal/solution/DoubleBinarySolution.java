@@ -5,9 +5,12 @@ package org.uma.jmetal.solution;
  *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
-public interface DoubleBinarySolution extends Solution<Object>{
-  public int getNumberOfDoubleVariables() ;
-  public Double getLowerBound(int index) ;
-  public Double getUpperBound(int index) ;
-  public int getNumberOfBits() ;
+public interface DoubleBinarySolution extends Solution<Object> {
+    int getNumberOfDoubleVariables();
+
+    Double getLowerBound(int index);
+
+    Double getUpperBound(int index);
+
+    int getNumberOfBits();
 }

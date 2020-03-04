@@ -8,48 +8,53 @@ import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
  */
 @SuppressWarnings("serial")
 public class MersenneTwisterGenerator implements PseudoRandomGenerator {
-  private MersenneTwister rnd ;
-  private long seed ;
-  private static final String NAME = "MersenneTwister" ;
+    private static final String NAME = "MersenneTwister";
+    private final MersenneTwister rnd;
+    private long seed;
 
-  /** Constructor */
-  public MersenneTwisterGenerator() {
-    this(System.currentTimeMillis());
-  }
+    /**
+     * Constructor
+     */
+    public MersenneTwisterGenerator() {
+        this(System.currentTimeMillis());
+    }
 
-  /** Constructor */
-  public MersenneTwisterGenerator(long seed) {
-    this.seed = seed ;
-    rnd = new MersenneTwister(seed) ;
-  }
+    /**
+     * Constructor
+     */
+    public MersenneTwisterGenerator(long seed) {
+        this.seed = seed;
+        this.rnd = new MersenneTwister(seed);
+    }
 
-  @Override
-  public long getSeed() {
-    return seed ;
-  }
+    @Override
+    public long getSeed() {
+        return this.seed;
+    }
 
-  @Override
-  public int nextInt(int lowerBound, int upperBound) {
-    return lowerBound + rnd.nextInt((upperBound - lowerBound) + 1) ;
-  }
+    @Override
+    public void setSeed(long seed) {
+        this.seed = seed;
+        this.rnd.setSeed(seed);
+    }
 
-  @Override
-  public double nextDouble(double lowerBound, double upperBound) {
-    return lowerBound + rnd.nextDouble()*(upperBound - lowerBound) ;
-  }
+    @Override
+    public int nextInt(int lowerBound, int upperBound) {
+        return lowerBound + this.rnd.nextInt((upperBound - lowerBound) + 1);
+    }
 
-  @Override public double nextDouble() {
-    return nextDouble(0.0, 1.0);
-  }
+    @Override
+    public double nextDouble(double lowerBound, double upperBound) {
+        return lowerBound + this.rnd.nextDouble() * (upperBound - lowerBound);
+    }
 
-  @Override
-  public void setSeed(long seed) {
-    this.seed = seed ;
-    rnd.setSeed(seed);
-  }
+    @Override
+    public double nextDouble() {
+        return this.nextDouble(0.0, 1.0);
+    }
 
-  @Override
-  public String getName() {
-    return NAME ;
-  }
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

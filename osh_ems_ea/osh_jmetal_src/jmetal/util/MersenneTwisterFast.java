@@ -933,7 +933,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable, IR
             z ^= (z << 15) & TEMPERING_MASK_C;      // TEMPERING_SHIFT_T(z)
             z ^= (z >>> 18);                        // TEMPERING_SHIFT_L(z)
 
-            bits = (((((long) y) << 32) + (long) z) >>> 1);
+            bits = (((((long) y) << 32) + z) >>> 1);
             val = bits % n;
         } while (bits - val + (n - 1) < 0);
         return val;

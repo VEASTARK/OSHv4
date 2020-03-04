@@ -17,175 +17,175 @@ import java.util.List;
 
 public class ESPEABuilder<S extends Solution<?>> implements AlgorithmBuilder<ESPEA<S>> {
 
-  private final Problem<S> problem;
-  private int maxEvaluations;
-  private int populationSize;
-  private CrossoverOperator<S> crossoverOperator;
-  private CrossoverOperator<S> fullArchiveCrossoverOperator;
-  private MutationOperator<S> mutationOperator;
-  private SelectionOperator<List<S>, S> selectionOperator;
-  private SolutionListEvaluator<S> evaluator;
-  private ScalarizationWrapper scalarization;
-  private boolean normalizeObjectives;
-  private ReplacementStrategy replacementStrategy;
+    private final Problem<S> problem;
+    private int maxEvaluations;
+    private int populationSize;
+    private CrossoverOperator<S> crossoverOperator;
+    private CrossoverOperator<S> fullArchiveCrossoverOperator;
+    private MutationOperator<S> mutationOperator;
+    private SelectionOperator<List<S>, S> selectionOperator;
+    private SolutionListEvaluator<S> evaluator;
+    private ScalarizationWrapper scalarization;
+    private boolean normalizeObjectives;
+    private ReplacementStrategy replacementStrategy;
 
-  public ESPEABuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator) {
-    this.problem = problem;
-    this.maxEvaluations = 25000;
-    this.populationSize = 100;
-    this.crossoverOperator = crossoverOperator;
-    this.fullArchiveCrossoverOperator = crossoverOperator;
-    this.mutationOperator = mutationOperator;
-    this.selectionOperator = new RandomSelection<>();
-    this.evaluator = new SequentialSolutionListEvaluator<>();
-    this.scalarization = new ScalarizationWrapper(ScalarizationType.UNIFORM);
-    this.normalizeObjectives = true;
-    this.replacementStrategy = ReplacementStrategy.LARGEST_DIFFERENCE;
-  }
+    public ESPEABuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator) {
+        this.problem = problem;
+        this.maxEvaluations = 25000;
+        this.populationSize = 100;
+        this.crossoverOperator = crossoverOperator;
+        this.fullArchiveCrossoverOperator = crossoverOperator;
+        this.mutationOperator = mutationOperator;
+        this.selectionOperator = new RandomSelection<>();
+        this.evaluator = new SequentialSolutionListEvaluator<>();
+        this.scalarization = new ScalarizationWrapper(ScalarizationType.UNIFORM);
+        this.normalizeObjectives = true;
+        this.replacementStrategy = ReplacementStrategy.LARGEST_DIFFERENCE;
+    }
 
-  @Override
-  public ESPEA<S> build() {
-    return new ESPEA<>(problem, maxEvaluations, populationSize, crossoverOperator, fullArchiveCrossoverOperator, mutationOperator,
-            selectionOperator, scalarization, evaluator, normalizeObjectives, replacementStrategy);
-  }
+    @Override
+    public ESPEA<S> build() {
+        return new ESPEA<>(this.problem, this.maxEvaluations, this.populationSize, this.crossoverOperator, this.fullArchiveCrossoverOperator, this.mutationOperator,
+                this.selectionOperator, this.scalarization, this.evaluator, this.normalizeObjectives, this.replacementStrategy);
+    }
 
-  /**
-   * @return the maxEvaluations
-   */
-  public int getMaxEvaluations() {
-    return maxEvaluations;
-  }
+    /**
+     * @return the maxEvaluations
+     */
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-  /**
-   * @return the populationSize
-   */
-  public int getPopulationSize() {
-    return populationSize;
-  }
+    /**
+     * @param maxEvaluations the maxEvaluations to set
+     */
+    public void setMaxEvaluations(int maxEvaluations) {
+        this.maxEvaluations = maxEvaluations;
+    }
 
-  /**
-   * @return the crossoverOperator
-   */
-  public CrossoverOperator<S> getCrossoverOperator() {
-    return crossoverOperator;
-  }
+    /**
+     * @return the populationSize
+     */
+    public int getPopulationSize() {
+        return this.populationSize;
+    }
 
-  /**
-   * @return the fullArchiveCrossoverOperator
-   */
-  public CrossoverOperator<S> getFullArchiveCrossoverOperator() {
-    return fullArchiveCrossoverOperator;
-  }
+    /**
+     * @param populationSize the populationSize to set
+     */
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+    }
 
-  /**
-   * @return the mutationOperator
-   */
-  public MutationOperator<S> getMutationOperator() {
-    return mutationOperator;
-  }
+    /**
+     * @return the crossoverOperator
+     */
+    public CrossoverOperator<S> getCrossoverOperator() {
+        return this.crossoverOperator;
+    }
 
-  /**
-   * @return the selectionOperator
-   */
-  public SelectionOperator<List<S>, S> getSelectionOperator() {
-    return selectionOperator;
-  }
+    /**
+     * @param crossoverOperator the crossoverOperator to set
+     */
+    public void setCrossoverOperator(CrossoverOperator<S> crossoverOperator) {
+        this.crossoverOperator = crossoverOperator;
+    }
 
-  /**
-   * @return the evaluator
-   */
-  public SolutionListEvaluator<S> getEvaluator() {
-    return evaluator;
-  }
+    /**
+     * @return the fullArchiveCrossoverOperator
+     */
+    public CrossoverOperator<S> getFullArchiveCrossoverOperator() {
+        return this.fullArchiveCrossoverOperator;
+    }
 
-  /**
-   * @return the scalarization
-   */
-  public ScalarizationWrapper getScalarization() {
-    return scalarization;
-  }
+    /**
+     * @param fullArchiveCrossoverOperator the fullArchiveCrossoverOperator to set
+     */
+    public void setFullArchiveCrossoverOperator(CrossoverOperator<S> fullArchiveCrossoverOperator) {
+        this.fullArchiveCrossoverOperator = fullArchiveCrossoverOperator;
+    }
 
-  /**
-   * @param maxEvaluations the maxEvaluations to set
-   */
-  public void setMaxEvaluations(int maxEvaluations) {
-    this.maxEvaluations = maxEvaluations;
-  }
+    /**
+     * @return the mutationOperator
+     */
+    public MutationOperator<S> getMutationOperator() {
+        return this.mutationOperator;
+    }
 
-  /**
-   * @param populationSize the populationSize to set
-   */
-  public void setPopulationSize(int populationSize) {
-    this.populationSize = populationSize;
-  }
+    /**
+     * @param mutationOperator the mutationOperator to set
+     */
+    public void setMutationOperator(MutationOperator<S> mutationOperator) {
+        this.mutationOperator = mutationOperator;
+    }
 
-  /**
-   * @param crossoverOperator the crossoverOperator to set
-   */
-  public void setCrossoverOperator(CrossoverOperator<S> crossoverOperator) {
-    this.crossoverOperator = crossoverOperator;
-  }
+    /**
+     * @return the selectionOperator
+     */
+    public SelectionOperator<List<S>, S> getSelectionOperator() {
+        return this.selectionOperator;
+    }
 
-  /**
-   * @param fullArchiveCrossoverOperator the fullArchiveCrossoverOperator to set
-   */
-  public void setFullArchiveCrossoverOperator(CrossoverOperator<S> fullArchiveCrossoverOperator) {
-    this.fullArchiveCrossoverOperator = fullArchiveCrossoverOperator;
-  }
+    /**
+     * @param selectionOperator the selectionOperator to set
+     */
+    public void setSelectionOperator(SelectionOperator<List<S>, S> selectionOperator) {
+        this.selectionOperator = selectionOperator;
+    }
 
-  /**
-   * @param mutationOperator the mutationOperator to set
-   */
-  public void setMutationOperator(MutationOperator<S> mutationOperator) {
-    this.mutationOperator = mutationOperator;
-  }
+    /**
+     * @return the evaluator
+     */
+    public SolutionListEvaluator<S> getEvaluator() {
+        return this.evaluator;
+    }
 
-  /**
-   * @param selectionOperator the selectionOperator to set
-   */
-  public void setSelectionOperator(SelectionOperator<List<S>, S> selectionOperator) {
-    this.selectionOperator = selectionOperator;
-  }
+    /**
+     * @param evaluator the evaluator to set
+     */
+    public void setEvaluator(SolutionListEvaluator<S> evaluator) {
+        this.evaluator = evaluator;
+    }
 
-  /**
-   * @param evaluator the evaluator to set
-   */
-  public void setEvaluator(SolutionListEvaluator<S> evaluator) {
-    this.evaluator = evaluator;
-  }
+    /**
+     * @return the scalarization
+     */
+    public ScalarizationWrapper getScalarization() {
+        return this.scalarization;
+    }
 
-  /**
-   * @param scalarization the scalarization to set
-   */
-  public void setScalarization(ScalarizationWrapper scalarization) {
-    this.scalarization = scalarization;
-  }
+    /**
+     * @param scalarization the scalarization to set
+     */
+    public void setScalarization(ScalarizationWrapper scalarization) {
+        this.scalarization = scalarization;
+    }
 
-  /**
-   * @return the normalizeObjectives
-   */
-  public boolean isNormalizeObjectives() {
-    return normalizeObjectives;
-  }
+    /**
+     * @return the normalizeObjectives
+     */
+    public boolean isNormalizeObjectives() {
+        return this.normalizeObjectives;
+    }
 
-  /**
-   * @param normalizeObjectives the normalizeObjectives to set
-   */
-  public void setNormalizeObjectives(boolean normalizeObjectives) {
-    this.normalizeObjectives = normalizeObjectives;
-  }
+    /**
+     * @param normalizeObjectives the normalizeObjectives to set
+     */
+    public void setNormalizeObjectives(boolean normalizeObjectives) {
+        this.normalizeObjectives = normalizeObjectives;
+    }
 
-  /**
-   * @return the replacement strategy
-   */
-  public ReplacementStrategy getOperationType() {
-    return replacementStrategy;
-  }
+    /**
+     * @return the replacement strategy
+     */
+    public ReplacementStrategy getOperationType() {
+        return this.replacementStrategy;
+    }
 
-  /**
-   * @param replacementStrategy the replacement strategy to set
-   */
-  public void setReplacementStrategy(ReplacementStrategy replacementStrategy) {
-    this.replacementStrategy = replacementStrategy;
-  }
+    /**
+     * @param replacementStrategy the replacement strategy to set
+     */
+    public void setReplacementStrategy(ReplacementStrategy replacementStrategy) {
+        this.replacementStrategy = replacementStrategy;
+    }
 }

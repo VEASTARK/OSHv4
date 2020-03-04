@@ -15,86 +15,90 @@ import java.util.List;
  *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
-public class ExperimentAlgorithm<S extends Solution<?>, Result extends List<S>>  {
-  private Algorithm<Result> algorithm;
-  private String algorithmTag;
-  private String problemTag;
-  private String referenceParetoFront;
-  private int runId ;
+public class ExperimentAlgorithm<S extends Solution<?>, Result extends List<S>> {
+    private final Algorithm<Result> algorithm;
+    private final String algorithmTag;
+    private final String problemTag;
+    private final String referenceParetoFront;
+    private final int runId;
 
-  /**
-   * Constructor
-   */
-  public ExperimentAlgorithm(
-          Algorithm<Result> algorithm,
-          String algorithmTag,
-          ExperimentProblem<S> problem,
-          int runId) {
-    this.algorithm = algorithm;
-    this.algorithmTag = algorithmTag;
-    this.problemTag = problem.getTag();
-    this.referenceParetoFront = problem.getReferenceFront();
-    this.runId = runId ;
-  }
-
-  public ExperimentAlgorithm(
-          Algorithm<Result> algorithm,
-          ExperimentProblem<S> problem,
-          int runId) {
-
-    this(algorithm,algorithm.getName(),problem,runId);
-
-  }
-
-  public void runAlgorithm(Experiment<?, ?> experimentData) {
-    String outputDirectoryName = experimentData.getExperimentBaseDirectory()
-            + "/data/"
-            + algorithmTag
-            + "/"
-            + problemTag;
-
-    File outputDirectory = new File(outputDirectoryName);
-    if (!outputDirectory.exists()) {
-      boolean result = new File(outputDirectoryName).mkdirs();
-      if (result) {
-        JMetalLogger.logger.info("Creating " + outputDirectoryName);
-      } else {
-        JMetalLogger.logger.severe("Creating " + outputDirectoryName + " failed");
-      }
+    /**
+     * Constructor
+     */
+    public ExperimentAlgorithm(
+            Algorithm<Result> algorithm,
+            String algorithmTag,
+            ExperimentProblem<S> problem,
+            int runId) {
+        this.algorithm = algorithm;
+        this.algorithmTag = algorithmTag;
+        this.problemTag = problem.getTag();
+        this.referenceParetoFront = problem.getReferenceFront();
+        this.runId = runId;
     }
 
-    String funFile = outputDirectoryName + "/FUN" + runId + ".tsv";
-    String varFile = outputDirectoryName + "/VAR" + runId + ".tsv";
-    JMetalLogger.logger.info(
-            " Running algorithm: " + algorithmTag +
-                    ", problem: " + problemTag +
-                    ", run: " + runId +
-                    ", funFile: " + funFile);
+    public ExperimentAlgorithm(
+            Algorithm<Result> algorithm,
+            ExperimentProblem<S> problem,
+            int runId) {
+
+        this(algorithm, algorithm.getName(), problem, runId);
+
+    }
+
+    public void runAlgorithm(Experiment<?, ?> experimentData) {
+        String outputDirectoryName = experimentData.getExperimentBaseDirectory()
+                + "/data/"
+                + this.algorithmTag
+                + "/"
+                + this.problemTag;
+
+        File outputDirectory = new File(outputDirectoryName);
+        if (!outputDirectory.exists()) {
+            boolean result = new File(outputDirectoryName).mkdirs();
+            if (result) {
+                JMetalLogger.logger.info("Creating " + outputDirectoryName);
+            } else {
+                JMetalLogger.logger.severe("Creating " + outputDirectoryName + " failed");
+            }
+        }
+
+        String funFile = outputDirectoryName + "/FUN" + this.runId + ".tsv";
+        String varFile = outputDirectoryName + "/VAR" + this.runId + ".tsv";
+        JMetalLogger.logger.info(
+                " Running algorithm: " + this.algorithmTag +
+                        ", problem: " + this.problemTag +
+                        ", run: " + this.runId +
+                        ", funFile: " + funFile);
 
 
-    algorithm.run();
-    Result population = algorithm.getResult();
+        this.algorithm.run();
+        Result population = this.algorithm.getResult();
 
-    new SolutionListOutput(population)
-            .setSeparator("\t")
-            .setVarFileOutputContext(new DefaultFileOutputContext(varFile))
-            .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
-            .print();
-  }
+        new SolutionListOutput(population)
+                .setSeparator("\t")
+                .setVarFileOutputContext(new DefaultFileOutputContext(varFile))
+                .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
+                .print();
+    }
 
-  public Algorithm<Result> getAlgorithm() {
-    return algorithm;
-  }
+    public Algorithm<Result> getAlgorithm() {
+        return this.algorithm;
+    }
 
-  public String getAlgorithmTag() {
-    return algorithmTag;
-  }
+    public String getAlgorithmTag() {
+        return this.algorithmTag;
+    }
 
-  public String getProblemTag() {
-    return problemTag;
-  }
+    public String getProblemTag() {
+        return this.problemTag;
+    }
 
-  public String getReferenceParetoFront() { return referenceParetoFront; }
+    public String getReferenceParetoFront() {
+        return this.referenceParetoFront;
+    }
 
-  public int getRunId() { return this.runId;}
+    public int getRunId() {
+        return this.runId;
+    }
 }

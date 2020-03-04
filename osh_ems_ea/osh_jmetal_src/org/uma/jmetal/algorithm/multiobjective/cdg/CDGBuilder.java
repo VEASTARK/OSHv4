@@ -22,177 +22,172 @@ import org.uma.jmetal.util.AlgorithmBuilder;
 /**
  * Builder class for algorithm CDG
  *
- * @author  Feng Zhang
+ * @author Feng Zhang
  * @version 1.0
  */
 public class CDGBuilder implements AlgorithmBuilder<AbstractCDG<DoubleSolution>> {
 
-  protected Problem<DoubleSolution> problem ;
+    protected final Problem<DoubleSolution> problem;
+    protected final double sigma_;
+    /**
+     * Delta in Zhang & Li paper
+     */
+    protected double neighborhoodSelectionProbability;
+    protected CrossoverOperator<DoubleSolution> crossover;
+    protected int populationSize;
+    protected int resultPopulationSize;
+    protected int numberOfThreads;
+    protected int maxEvaluations;
 
-  /** Delta in Zhang & Li paper */
-  protected double neighborhoodSelectionProbability;
+    protected int k_;
 
-  protected CrossoverOperator<DoubleSolution> crossover;
+    protected int t_;
 
-  protected int populationSize;
-  
-  protected int resultPopulationSize ;
+    protected int subproblemNum_;
 
-  protected int numberOfThreads ;
-  
-  protected double sigma_ ;
-  
-  protected int maxEvaluations;
-  
-  protected int k_ ;
-  
-  protected int t_;
-  
-  protected int subproblemNum_;
-  
-  protected int childGrid_;
-  
-  protected int childGridNum_;
+    protected int childGrid_;
 
-  /** Constructor */
-  public CDGBuilder(Problem<DoubleSolution> problem) {
+    protected int childGridNum_;
 
-    this.problem = problem ;
-    populationSize = 300 ;
-    resultPopulationSize = 300 ;
-    maxEvaluations = 300000 ;
-    crossover = new DifferentialEvolutionCrossover() ;
-    neighborhoodSelectionProbability = 0.9 ;
-    numberOfThreads = 1 ;
-    sigma_ = 10e-6 ;
-    
-    if(problem.getNumberOfObjectives() == 2){
-    	k_ = 180;
-    	t_ = 1;
-    	childGrid_ = 60;
+    /**
+     * Constructor
+     */
+    public CDGBuilder(Problem<DoubleSolution> problem) {
+
+        this.problem = problem;
+        this.populationSize = 300;
+        this.resultPopulationSize = 300;
+        this.maxEvaluations = 300000;
+        this.crossover = new DifferentialEvolutionCrossover();
+        this.neighborhoodSelectionProbability = 0.9;
+        this.numberOfThreads = 1;
+        this.sigma_ = 10.0e-6;
+
+        if (problem.getNumberOfObjectives() == 2) {
+            this.k_ = 180;
+            this.t_ = 1;
+            this.childGrid_ = 60;
+        } else if (problem.getNumberOfObjectives() == 3) {
+            this.k_ = 25;
+            this.t_ = 1;
+            this.k_++;
+            this.childGrid_ = 20;
+        } else {
+            this.k_ = 180;
+            this.t_ = 5;
+        }
+        this.childGridNum_ = (int) Math.pow(this.childGrid_, problem.getNumberOfObjectives());
+        this.childGridNum_++;
+        this.subproblemNum_ = (int) Math.pow(this.k_, problem.getNumberOfObjectives() - 1);
+        this.subproblemNum_ *= problem.getNumberOfObjectives();
     }
-    else if(problem.getNumberOfObjectives() == 3){
-    	k_ = 25;
-    	t_ = 1;
-    	k_++;
-    	childGrid_ = 20;
+
+    /* Getters/Setters */
+    public int getPopulationSize() {
+        return this.populationSize;
     }
-    else{
-    	k_ = 180;
-    	t_ = 5;
+
+    public CDGBuilder setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+
+        return this;
     }
-    childGridNum_ = (int) Math.pow(childGrid_, problem.getNumberOfObjectives());
-    childGridNum_++;
-	subproblemNum_ = (int) Math.pow(k_, problem.getNumberOfObjectives() - 1);
-	subproblemNum_ = subproblemNum_ * problem.getNumberOfObjectives();
-  }
 
-  /* Getters/Setters */
-  public int getPopulationSize() {
-    return populationSize;
-  }
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-  public int getMaxEvaluations() {
-	return maxEvaluations;
-  }
-  
-  public int getResultPopulationSize() {
-    return resultPopulationSize;
-  }
+    public CDGBuilder setMaxEvaluations(int maxEvaluations) {
+        this.maxEvaluations = maxEvaluations;
 
-  public CrossoverOperator<DoubleSolution> getCrossover() {
-    return crossover;
-  }
+        return this;
+    }
 
-  public double getNeighborhoodSelectionProbability() {
-    return neighborhoodSelectionProbability;
-  }
+    public int getResultPopulationSize() {
+        return this.resultPopulationSize;
+    }
 
-  public int getNumberOfThreads() {
-    return numberOfThreads ;
-  }
-  
-  public int getK() {
-	return k_ ;
-  }
-  
-  public double getT() {
-	return t_ ;
-  }
-  
-  public int getChildGrid() {
-	return childGrid_ ;
-  }
-  
-  public int getChildGridNum() {
-	return childGridNum_ ;
-  }
-  
-  public CDGBuilder setPopulationSize(int populationSize) {
-    this.populationSize = populationSize;
+    public CDGBuilder setResultPopulationSize(int resultPopulationSize) {
+        this.resultPopulationSize = resultPopulationSize;
 
-    return this;
-  }
+        return this;
+    }
 
-  public CDGBuilder setResultPopulationSize(int resultPopulationSize) {
-    this.resultPopulationSize = resultPopulationSize;
+    public CrossoverOperator<DoubleSolution> getCrossover() {
+        return this.crossover;
+    }
 
-    return this;
-  }
+    public CDGBuilder setCrossover(CrossoverOperator<DoubleSolution> crossover) {
+        this.crossover = crossover;
 
-  public CDGBuilder setMaxEvaluations(int maxEvaluations) {
-	this.maxEvaluations = maxEvaluations;
+        return this;
+    }
 
-	return this;
-  }
-  
-  public CDGBuilder setNeighborhoodSelectionProbability(double neighborhoodSelectionProbability) {
-    this.neighborhoodSelectionProbability = neighborhoodSelectionProbability ;
+    public double getNeighborhoodSelectionProbability() {
+        return this.neighborhoodSelectionProbability;
+    }
 
-    return this ;
-  }
+    public CDGBuilder setNeighborhoodSelectionProbability(double neighborhoodSelectionProbability) {
+        this.neighborhoodSelectionProbability = neighborhoodSelectionProbability;
 
-  public CDGBuilder setCrossover(CrossoverOperator<DoubleSolution> crossover) {
-    this.crossover = crossover ;
+        return this;
+    }
 
-    return this ;
-  }
+    public int getNumberOfThreads() {
+        return this.numberOfThreads;
+    }
 
-  public CDGBuilder setNumberOfThreads(int numberOfThreads) {
-    this.numberOfThreads = numberOfThreads ;
+    public CDGBuilder setNumberOfThreads(int numberOfThreads) {
+        this.numberOfThreads = numberOfThreads;
 
-    return this ;
-  }
-  
-  public CDGBuilder setK(int k) {
-	this.k_ = k ;
+        return this;
+    }
 
-	return this ;
-  }
-  
-  public CDGBuilder setT(int t) {
-	this.t_ = t ;
+    public int getK() {
+        return this.k_;
+    }
 
-	return this ;
-  }
-  
-  public CDGBuilder setChildGrid(int childGrid) {
-	this.childGrid_ = childGrid ;
+    public CDGBuilder setK(int k) {
+        this.k_ = k;
 
-	return this ;
-  }
-  
-  public CDGBuilder setChildGridNum(int childGridNum) {
-	this.childGridNum_ = childGridNum ;
+        return this;
+    }
 
-	return this ;
-  }
-  
-  public AbstractCDG<DoubleSolution> build() {
-	  AbstractCDG<DoubleSolution> algorithm = null ;
-      algorithm = new CDG(problem, populationSize, resultPopulationSize, maxEvaluations, 
-          crossover, neighborhoodSelectionProbability, sigma_, k_, t_, subproblemNum_,
-          childGrid_ ,childGridNum_);
-    return algorithm ;
-  }
+    public double getT() {
+        return this.t_;
+    }
+
+    public CDGBuilder setT(int t) {
+        this.t_ = t;
+
+        return this;
+    }
+
+    public int getChildGrid() {
+        return this.childGrid_;
+    }
+
+    public CDGBuilder setChildGrid(int childGrid) {
+        this.childGrid_ = childGrid;
+
+        return this;
+    }
+
+    public int getChildGridNum() {
+        return this.childGridNum_;
+    }
+
+    public CDGBuilder setChildGridNum(int childGridNum) {
+        this.childGridNum_ = childGridNum;
+
+        return this;
+    }
+
+    public AbstractCDG<DoubleSolution> build() {
+        AbstractCDG<DoubleSolution> algorithm = null;
+        algorithm = new CDG(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations,
+                this.crossover, this.neighborhoodSelectionProbability, this.sigma_, this.k_, this.t_, this.subproblemNum_,
+                this.childGrid_, this.childGridNum_);
+        return algorithm;
+    }
 }

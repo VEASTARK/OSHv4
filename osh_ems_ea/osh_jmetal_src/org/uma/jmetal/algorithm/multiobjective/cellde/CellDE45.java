@@ -22,169 +22,160 @@ import java.util.List;
 
 /**
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
- *
  */
 @SuppressWarnings("serial")
 public class CellDE45 implements Algorithm<List<DoubleSolution>> {
-  private Problem<DoubleSolution> problem ;
-  private List<DoubleSolution> population ;
-  private int populationSize ;
+    protected final int maxEvaluations;
+    private final Problem<DoubleSolution> problem;
+    private final int populationSize;
+    private final Neighborhood<DoubleSolution> neighborhood;
+    private final SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
+    private final DifferentialEvolutionCrossover crossover;
+    private final BoundedArchive<DoubleSolution> archive;
+    private final Comparator<DoubleSolution> dominanceComparator;
+    private final SolutionListEvaluator<DoubleSolution> evaluator;
+    private final double feedback;
+    private final CrowdingDistanceComparator<DoubleSolution> comparator = new CrowdingDistanceComparator<>();
+    private final CrowdingDistance<DoubleSolution> distance = new CrowdingDistance<>();
+    protected int evaluations;
+    private List<DoubleSolution> population;
+    private int currentIndividual;
+    private List<DoubleSolution> currentNeighbors;
+    private LocationAttribute<DoubleSolution> location;
 
-  protected int evaluations;
-  protected int maxEvaluations;
+    public CellDE45(Problem<DoubleSolution> problem,
+                    int maxEvaluations,
+                    int populationSize,
+                    BoundedArchive<DoubleSolution> archive,
+                    Neighborhood<DoubleSolution> neighborhood,
+                    SelectionOperator<List<DoubleSolution>, DoubleSolution> selection,
+                    DifferentialEvolutionCrossover crossover,
+                    double feedback,
+                    SolutionListEvaluator<DoubleSolution> evaluator) {
+        this.problem = problem;
+        this.populationSize = populationSize;
+        this.maxEvaluations = maxEvaluations;
+        this.archive = archive;
+        this.neighborhood = neighborhood;
+        this.selection = selection;
+        this.crossover = crossover;
+        this.dominanceComparator = new DominanceComparator<>();
+        this.feedback = feedback;
 
-  private Neighborhood<DoubleSolution> neighborhood;
-  private int currentIndividual;
-  private List<DoubleSolution> currentNeighbors;
-
-  private SelectionOperator<List<DoubleSolution>, DoubleSolution> selection ;
-  private DifferentialEvolutionCrossover crossover ;
-
-  private BoundedArchive<DoubleSolution> archive;
-
-  private Comparator<DoubleSolution> dominanceComparator;
-  private LocationAttribute<DoubleSolution> location;
-
-  private SolutionListEvaluator<DoubleSolution> evaluator ;
-
-  private double feedback ;
-
-  private CrowdingDistanceComparator<DoubleSolution> comparator = new CrowdingDistanceComparator<>() ;
-  private CrowdingDistance<DoubleSolution> distance = new CrowdingDistance<>() ;
-
-  public CellDE45(Problem<DoubleSolution> problem,
-                  int maxEvaluations,
-                  int populationSize,
-                  BoundedArchive<DoubleSolution> archive,
-                  Neighborhood<DoubleSolution> neighborhood,
-                  SelectionOperator<List<DoubleSolution>, DoubleSolution> selection,
-                  DifferentialEvolutionCrossover crossover,
-                  double feedback,
-                  SolutionListEvaluator<DoubleSolution> evaluator) {
-    this.problem = problem ;
-    this.populationSize = populationSize;
-    this.maxEvaluations = maxEvaluations;
-    this.archive = archive ;
-    this.neighborhood = neighborhood ;
-    this.selection = selection;
-    this.crossover = crossover;
-    this.dominanceComparator = new DominanceComparator<DoubleSolution>() ;
-    this.feedback = feedback ;
-
-    this.evaluator = evaluator ;
-  }
-
-  @Override
-  public void run() {
-    population = createInitialPopulation() ;
-    population = evaluatePopulation(population) ;
-    initProgress();
-
-    while (!isStoppingConditionReached()) {
-      for (int i = 0; i < populationSize; i++) {
-        DoubleSolution solution = (DoubleSolution) population.get(i).copy();
-
-        currentNeighbors = neighborhood.getNeighbors(population, i);
-        currentNeighbors.add(population.get(i));
-
-        List<DoubleSolution> parents = new ArrayList<>() ;
-        parents.add(selection.execute(currentNeighbors)) ;
-        parents.add(selection.execute(currentNeighbors)) ;
-        parents.add(solution);
-
-        crossover.setCurrentSolution(population.get(i));
-        List<DoubleSolution> children = crossover.execute(parents);
-
-        DoubleSolution offspring = children.get(0) ;
-        problem.evaluate(offspring);
-        evaluations ++ ;
-
-        int result = dominanceComparator.compare(population.get(i), offspring) ;
-        if (result == 1) {
-          location.setAttribute(offspring, location.getAttribute(population.get(i)));
-          population.set(i, (DoubleSolution) offspring.copy()) ;
-          archive.add((DoubleSolution) offspring.copy()) ;
-        } else if (result == 0) {
-          Ranking<DoubleSolution> ranking = computeRanking(currentNeighbors);
-
-          distance.computeDensityEstimator(ranking.getSubfront(0));
-          boolean deleteMutant = true ;
-          int compareResult = comparator.compare(solution, offspring) ;
-
-          if (compareResult == 1) {
-            deleteMutant = false ;
-          }
-
-          if (!deleteMutant) {
-            location.setAttribute(offspring, location.getAttribute(solution));
-            population.set(location.getAttribute(offspring), offspring) ;
-            archive.add((DoubleSolution) offspring.copy()) ;
-          } else {
-            archive.add((DoubleSolution) offspring.copy()) ;
-          }
-        }
-      }
-
-      for (int i = 0 ; i < feedback; i++) {
-        if (archive.size() > i) {
-          int random = JMetalRandom.getInstance().nextInt(0, population.size()-1) ;
-          if (random < population.size()) {
-            DoubleSolution solution = archive.get(i) ;
-            location.setAttribute(solution, random);
-            population.set(random, (DoubleSolution) solution.copy()) ;
-          }
-        }
-      }
+        this.evaluator = evaluator;
     }
 
-  }
+    @Override
+    public void run() {
+        this.population = this.createInitialPopulation();
+        this.population = this.evaluatePopulation(this.population);
+        this.initProgress();
 
-  protected List<DoubleSolution> createInitialPopulation() {
-    List<DoubleSolution> population = new ArrayList<>(populationSize);
-    for (int i = 0; i < populationSize; i++) {
-      DoubleSolution newIndividual = problem.createSolution();
-      population.add(newIndividual);
+        while (!this.isStoppingConditionReached()) {
+            for (int i = 0; i < this.populationSize; i++) {
+                DoubleSolution solution = (DoubleSolution) this.population.get(i).copy();
+
+                this.currentNeighbors = this.neighborhood.getNeighbors(this.population, i);
+                this.currentNeighbors.add(this.population.get(i));
+
+                List<DoubleSolution> parents = new ArrayList<>();
+                parents.add(this.selection.execute(this.currentNeighbors));
+                parents.add(this.selection.execute(this.currentNeighbors));
+                parents.add(solution);
+
+                this.crossover.setCurrentSolution(this.population.get(i));
+                List<DoubleSolution> children = this.crossover.execute(parents);
+
+                DoubleSolution offspring = children.get(0);
+                this.problem.evaluate(offspring);
+                this.evaluations++;
+
+                int result = this.dominanceComparator.compare(this.population.get(i), offspring);
+                if (result > 0) {
+                    this.location.setAttribute(offspring, this.location.getAttribute(this.population.get(i)));
+                    this.population.set(i, (DoubleSolution) offspring.copy());
+                    this.archive.add((DoubleSolution) offspring.copy());
+                } else if (result == 0) {
+                    Ranking<DoubleSolution> ranking = this.computeRanking(this.currentNeighbors);
+
+                    this.distance.computeDensityEstimator(ranking.getSubfront(0));
+                    boolean deleteMutant = true;
+                    int compareResult = this.comparator.compare(solution, offspring);
+
+                    if (compareResult > 0) {
+                        deleteMutant = false;
+                    }
+
+                    if (!deleteMutant) {
+                        this.location.setAttribute(offspring, this.location.getAttribute(solution));
+                        this.population.set(this.location.getAttribute(offspring), offspring);
+                    }
+                    this.archive.add((DoubleSolution) offspring.copy());
+                }
+            }
+
+            for (int i = 0; i < this.feedback; i++) {
+                if (this.archive.size() > i) {
+                    int random = JMetalRandom.getInstance().nextInt(0, this.population.size() - 1);
+                    if (random < this.population.size()) {
+                        DoubleSolution solution = this.archive.get(i);
+                        this.location.setAttribute(solution, random);
+                        this.population.set(random, (DoubleSolution) solution.copy());
+                    }
+                }
+            }
+        }
+
     }
-    location = new LocationAttribute<>(population);
-    return population;
-  }
 
-  protected List<DoubleSolution> evaluatePopulation(List<DoubleSolution> population) {
-    return evaluator.evaluate(population, problem);
-  }
+    protected List<DoubleSolution> createInitialPopulation() {
+        List<DoubleSolution> population = new ArrayList<>(this.populationSize);
+        for (int i = 0; i < this.populationSize; i++) {
+            DoubleSolution newIndividual = this.problem.createSolution();
+            population.add(newIndividual);
+        }
+        this.location = new LocationAttribute<>(population);
+        return population;
+    }
 
-  protected void initProgress() {
-    evaluations = populationSize;
-    currentIndividual=0;
-  }
+    protected List<DoubleSolution> evaluatePopulation(List<DoubleSolution> population) {
+        return this.evaluator.evaluate(population, this.problem);
+    }
 
-  protected void updateProgress() {
-    evaluations++;
-    currentIndividual=(currentIndividual+1)%populationSize;
-  }
+    protected void initProgress() {
+        this.evaluations = this.populationSize;
+        this.currentIndividual = 0;
+    }
 
-  protected boolean isStoppingConditionReached() {
-    return (evaluations==maxEvaluations);
-  }
+    protected void updateProgress() {
+        this.evaluations++;
+        this.currentIndividual = (this.currentIndividual + 1) % this.populationSize;
+    }
+
+    protected boolean isStoppingConditionReached() {
+        return (this.evaluations == this.maxEvaluations);
+    }
 
 
-  @Override public String getName() {
-    return "CellDE" ;
-  }
+    @Override
+    public String getName() {
+        return "CellDE";
+    }
 
-  @Override public String getDescription() {
-    return "Multi-Objective Differential Evolution Cellular evolutionary algorithm" ;
-  }
+    @Override
+    public String getDescription() {
+        return "Multi-Objective Differential Evolution Cellular evolutionary algorithm";
+    }
 
-  @Override
-  public List<DoubleSolution> getResult() {
-    return archive.getSolutionList();
-  }
-  
-  protected Ranking<DoubleSolution> computeRanking(List<DoubleSolution> solutionList) {
-    Ranking<DoubleSolution> ranking = new DominanceRanking<DoubleSolution>();
-    ranking.computeRanking(solutionList);
-    
-    return ranking;
-  }
+    @Override
+    public List<DoubleSolution> getResult() {
+        return this.archive.getSolutionList();
+    }
+
+    protected Ranking<DoubleSolution> computeRanking(List<DoubleSolution> solutionList) {
+        Ranking<DoubleSolution> ranking = new DominanceRanking<>();
+        ranking.computeRanking(solutionList);
+
+        return ranking;
+    }
 }

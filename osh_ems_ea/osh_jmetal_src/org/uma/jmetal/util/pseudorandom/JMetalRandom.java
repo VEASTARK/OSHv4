@@ -8,50 +8,50 @@ import java.io.Serializable;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 @SuppressWarnings("serial")
-public class JMetalRandom implements Serializable {
-  private static JMetalRandom instance ;
-  private PseudoRandomGenerator randomGenerator ;
+public final class JMetalRandom implements Serializable {
+    private static JMetalRandom instance;
+    private PseudoRandomGenerator randomGenerator;
 
-  private JMetalRandom() {
-    randomGenerator = new JavaRandomGenerator() ;
-  }
-
-  public static JMetalRandom getInstance() {
-    if (instance == null) {
-      instance = new JMetalRandom() ;
+    private JMetalRandom() {
+        this.randomGenerator = new JavaRandomGenerator();
     }
-    return instance ;
-  }
 
-  public void setRandomGenerator(PseudoRandomGenerator randomGenerator) {
-    this.randomGenerator = randomGenerator;
-  }
+    public static JMetalRandom getInstance() {
+        if (instance == null) {
+            instance = new JMetalRandom();
+        }
+        return instance;
+    }
 
-  public PseudoRandomGenerator getRandomGenerator() {
-    return randomGenerator ;
-  }
+    public PseudoRandomGenerator getRandomGenerator() {
+        return this.randomGenerator;
+    }
 
-  public int nextInt(int lowerBound, int upperBound) {
-    return randomGenerator.nextInt(lowerBound, upperBound) ;
-  }
+    public void setRandomGenerator(PseudoRandomGenerator randomGenerator) {
+        this.randomGenerator = randomGenerator;
+    }
 
-  public double nextDouble() {
-    return randomGenerator.nextDouble() ;
-  }
+    public int nextInt(int lowerBound, int upperBound) {
+        return this.randomGenerator.nextInt(lowerBound, upperBound);
+    }
 
-  public double nextDouble(double lowerBound, double upperBound) {
-    return randomGenerator.nextDouble(lowerBound, upperBound) ;
-  }
+    public double nextDouble() {
+        return this.randomGenerator.nextDouble();
+    }
 
-  public void setSeed(long seed) {
-    randomGenerator.setSeed(seed);
-  }
+    public double nextDouble(double lowerBound, double upperBound) {
+        return this.randomGenerator.nextDouble(lowerBound, upperBound);
+    }
 
-  public long getSeed() {
-    return randomGenerator.getSeed() ;
-  }
+    public long getSeed() {
+        return this.randomGenerator.getSeed();
+    }
 
-  public String getGeneratorName() {
-    return randomGenerator.getName() ;
-  }
+    public void setSeed(long seed) {
+        this.randomGenerator.setSeed(seed);
+    }
+
+    public String getGeneratorName() {
+        return this.randomGenerator.getName();
+    }
 }

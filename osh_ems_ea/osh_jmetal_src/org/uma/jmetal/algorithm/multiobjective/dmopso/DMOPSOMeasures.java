@@ -18,97 +18,97 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class DMOPSOMeasures extends DMOPSO implements Measurable {
 
-  protected CountingMeasure iterations;
-  protected DurationMeasure durationMeasure;
-  protected SimpleMeasureManager measureManager;
-  protected BasicMeasure<List<DoubleSolution>> solutionListMeasure;
-  protected BasicMeasure<Double> hypervolumeValue;
-  protected BasicMeasure<Double> epsilonValue;
-  protected Front referenceFront;
+    protected CountingMeasure iterations;
+    protected DurationMeasure durationMeasure;
+    protected SimpleMeasureManager measureManager;
+    protected BasicMeasure<List<DoubleSolution>> solutionListMeasure;
+    protected BasicMeasure<Double> hypervolumeValue;
+    protected BasicMeasure<Double> epsilonValue;
+    protected Front referenceFront;
 
-  public DMOPSOMeasures(DoubleProblem problem, int swarmSize, int maxIterations,
-                        double r1Min, double r1Max, double r2Min, double r2Max,
-                        double c1Min, double c1Max, double c2Min, double c2Max,
-                        double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                        FunctionType functionType, String dataDirectory, int maxAge) {
-    this(problem, swarmSize, maxIterations,
-            r1Min, r1Max, r2Min, r2Max,
-            c1Min, c1Max, c2Min, c2Max,
-            weightMin, weightMax, changeVelocity1, changeVelocity2,
-            functionType, dataDirectory, maxAge, "dMOPSO");
-  }
+    public DMOPSOMeasures(DoubleProblem problem, int swarmSize, int maxIterations,
+                          double r1Min, double r1Max, double r2Min, double r2Max,
+                          double c1Min, double c1Max, double c2Min, double c2Max,
+                          double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
+                          FunctionType functionType, String dataDirectory, int maxAge) {
+        this(problem, swarmSize, maxIterations,
+                r1Min, r1Max, r2Min, r2Max,
+                c1Min, c1Max, c2Min, c2Max,
+                weightMin, weightMax, changeVelocity1, changeVelocity2,
+                functionType, dataDirectory, maxAge, "dMOPSO");
+    }
 
-  public DMOPSOMeasures(DoubleProblem problem, int swarmSize, int maxIterations,
-                        double r1Min, double r1Max, double r2Min, double r2Max,
-                        double c1Min, double c1Max, double c2Min, double c2Max,
-                        double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                        FunctionType functionType, String dataDirectory, int maxAge, String name) {
-    super(problem, swarmSize, maxIterations,
-            r1Min, r1Max, r2Min, r2Max,
-            c1Min, c1Max, c2Min, c2Max,
-            weightMin, weightMax, changeVelocity1, changeVelocity2,
-            functionType, dataDirectory, maxAge, name);
-    this.referenceFront = new ArrayFront();
-    initMeasures();
-  }
+    public DMOPSOMeasures(DoubleProblem problem, int swarmSize, int maxIterations,
+                          double r1Min, double r1Max, double r2Min, double r2Max,
+                          double c1Min, double c1Max, double c2Min, double c2Max,
+                          double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
+                          FunctionType functionType, String dataDirectory, int maxAge, String name) {
+        super(problem, swarmSize, maxIterations,
+                r1Min, r1Max, r2Min, r2Max,
+                c1Min, c1Max, c2Min, c2Max,
+                weightMin, weightMax, changeVelocity1, changeVelocity2,
+                functionType, dataDirectory, maxAge, name);
+        this.referenceFront = new ArrayFront();
+        this.initMeasures();
+    }
 
-  @Override
-  protected void initProgress() {
-    this.iterations.reset();
-  }
+    @Override
+    protected void initProgress() {
+        this.iterations.reset();
+    }
 
-  @Override
-  protected void updateProgress() {
-    this.iterations.increment();
-    hypervolumeValue.push(new PISAHypervolume<DoubleSolution>(referenceFront).evaluate(getResult()));
-    epsilonValue.push(new Epsilon<DoubleSolution>(referenceFront).evaluate(getResult()));
-    solutionListMeasure.push(getResult());
-  }
+    @Override
+    protected void updateProgress() {
+        this.iterations.increment();
+        this.hypervolumeValue.push(new PISAHypervolume<DoubleSolution>(this.referenceFront).evaluate(this.getResult()));
+        this.epsilonValue.push(new Epsilon<DoubleSolution>(this.referenceFront).evaluate(this.getResult()));
+        this.solutionListMeasure.push(this.getResult());
+    }
 
-  @Override
-  protected boolean isStoppingConditionReached() {
-    return this.iterations.get() >= maxIterations;
-  }
+    @Override
+    protected boolean isStoppingConditionReached() {
+        return this.iterations.get() >= this.maxIterations;
+    }
 
-  @Override
-  public void run() {
-    durationMeasure.reset();
-    durationMeasure.start();
-    super.run();
-    durationMeasure.stop();
-  }
+    @Override
+    public void run() {
+        this.durationMeasure.reset();
+        this.durationMeasure.start();
+        super.run();
+        this.durationMeasure.stop();
+    }
 
-  /* Measures code */
-  private void initMeasures() {
-    durationMeasure = new DurationMeasure();
-    iterations = new CountingMeasure(0);
-    solutionListMeasure = new BasicMeasure<>();
-    hypervolumeValue = new BasicMeasure<>();
-    epsilonValue = new BasicMeasure<>();
+    /* Measures code */
+    private void initMeasures() {
+        this.durationMeasure = new DurationMeasure();
+        this.iterations = new CountingMeasure(0);
+        this.solutionListMeasure = new BasicMeasure<>();
+        this.hypervolumeValue = new BasicMeasure<>();
+        this.epsilonValue = new BasicMeasure<>();
 
-    measureManager = new SimpleMeasureManager();
-    measureManager.setPullMeasure("currentExecutionTime", durationMeasure);
-    measureManager.setPullMeasure("currentEvaluation", iterations);
-    measureManager.setPullMeasure("hypervolume", hypervolumeValue);
-    measureManager.setPullMeasure("epsilon", epsilonValue);
+        this.measureManager = new SimpleMeasureManager();
+        this.measureManager.setPullMeasure("currentExecutionTime", this.durationMeasure);
+        this.measureManager.setPullMeasure("currentEvaluation", this.iterations);
+        this.measureManager.setPullMeasure("hypervolume", this.hypervolumeValue);
+        this.measureManager.setPullMeasure("epsilon", this.epsilonValue);
 
-    measureManager.setPushMeasure("currentPopulation", solutionListMeasure);
-    measureManager.setPushMeasure("currentEvaluation", iterations);
-    measureManager.setPushMeasure("hypervolume", hypervolumeValue);
-    measureManager.setPushMeasure("epsilon", epsilonValue);
-  }
+        this.measureManager.setPushMeasure("currentPopulation", this.solutionListMeasure);
+        this.measureManager.setPushMeasure("currentEvaluation", this.iterations);
+        this.measureManager.setPushMeasure("hypervolume", this.hypervolumeValue);
+        this.measureManager.setPushMeasure("epsilon", this.epsilonValue);
+    }
 
-  @Override
-  public String getDescription() {
-    return "MOPSO with decomposition. Version using measures";
-  }
+    @Override
+    public String getDescription() {
+        return "MOPSO with decomposition. Version using measures";
+    }
 
-  @Override
-  public MeasureManager getMeasureManager() {
-    return this.measureManager;
-  }
+    @Override
+    public MeasureManager getMeasureManager() {
+        return this.measureManager;
+    }
 
-  public void setReferenceFront(Front referenceFront) {
-    this.referenceFront = referenceFront;
-  }
+    public void setReferenceFront(Front referenceFront) {
+        this.referenceFront = referenceFront;
+    }
 }

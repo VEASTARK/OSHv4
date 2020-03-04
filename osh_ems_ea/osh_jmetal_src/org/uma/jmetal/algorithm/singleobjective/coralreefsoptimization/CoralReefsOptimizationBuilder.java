@@ -12,217 +12,215 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 
  * @author Inacio Medeiros <inaciogmedeiros@gmail.com>
- *
  */
 public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
-		AlgorithmBuilder<CoralReefsOptimization<S>> {
+        AlgorithmBuilder<CoralReefsOptimization<S>> {
 
-	/**
-	 * CoralReefsOptimizationBuilder class
-	 */
-	private Problem<S> problem;
+    /**
+     * CoralReefsOptimizationBuilder class
+     */
+    private final Problem<S> problem;
 
-	private SelectionOperator<List<S>, S> selectionOperator;
-	private CrossoverOperator<S> crossoverOperator;
-	private MutationOperator<S> mutationOperator;
-	private Comparator<S> comparator;
+    private final SelectionOperator<List<S>, S> selectionOperator;
+    private final CrossoverOperator<S> crossoverOperator;
+    private final MutationOperator<S> mutationOperator;
+    private Comparator<S> comparator;
 
-	private int maxEvaluations;
-	private int N, M; // Grid sizes
-	private double rho; // Percentage of occupied reef
-	private double Fbs, Fbr; // Percentage of broadcast spawners and brooders
-	private double Fa, Fd; // Percentage of budders and depredated corals
-	private double Pd; // Probability of depredation
-	private int attemptsToSettle;
+    private int maxEvaluations;
+    private int N, M; // Grid sizes
+    private double rho; // Percentage of occupied reef
+    private double Fbs, Fbr; // Percentage of broadcast spawners and brooders
+    private double Fa, Fd; // Percentage of budders and depredated corals
+    private double Pd; // Probability of depredation
+    private int attemptsToSettle;
 
-	/**
-	 * CoralReefsOptimizationBuilder constructor
-	 */
-	public CoralReefsOptimizationBuilder(Problem<S> problem,
-			SelectionOperator<List<S>, S> selectionOperator,
-			CrossoverOperator<S> crossoverOperator,
-			MutationOperator<S> mutationOperator) {
-		this.problem = problem;
-		this.selectionOperator = selectionOperator;
-		this.crossoverOperator = crossoverOperator;
-		this.mutationOperator = mutationOperator;
-	}
+    /**
+     * CoralReefsOptimizationBuilder constructor
+     */
+    public CoralReefsOptimizationBuilder(Problem<S> problem,
+                                         SelectionOperator<List<S>, S> selectionOperator,
+                                         CrossoverOperator<S> crossoverOperator,
+                                         MutationOperator<S> mutationOperator) {
+        this.problem = problem;
+        this.selectionOperator = selectionOperator;
+        this.crossoverOperator = crossoverOperator;
+        this.mutationOperator = mutationOperator;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setComparator(
-			Comparator<S> comparator) {
-		if (comparator == null) {
-			throw new JMetalException("Comparator is null!");
-		}
+    @Override
+    public CoralReefsOptimization<S> build() {
+        CoralReefsOptimization<S> algorithm = null;
 
-		this.comparator = comparator;
+        algorithm = new CoralReefsOptimization<>(this.problem, this.maxEvaluations,
+                this.comparator, this.selectionOperator, this.crossoverOperator,
+                this.mutationOperator, this.N, this.M, this.rho, this.Fbs, this.Fa, this.Pd, this.attemptsToSettle);
 
-		return this;
-	}
+        return algorithm;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setMaxEvaluations(int maxEvaluations) {
-		if (maxEvaluations < 0) {
-			throw new JMetalException("maxEvaluations is negative: "
-					+ maxEvaluations);
-		}
-		this.maxEvaluations = maxEvaluations;
+    public Problem<S> getProblem() {
+        return this.problem;
+    }
 
-		return this;
-	}
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setN(int n) {
-		if (n < 0) {
-			throw new JMetalException("N is negative: " + n);
-		}
+    public CoralReefsOptimizationBuilder<S> setMaxEvaluations(int maxEvaluations) {
+        if (maxEvaluations < 0) {
+            throw new JMetalException("maxEvaluations is negative: "
+                    + maxEvaluations);
+        }
+        this.maxEvaluations = maxEvaluations;
 
-		N = n;
-		return this;
-	}
+        return this;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setM(int m) {
-		if (m < 0) {
-			throw new JMetalException("M is negative: " + m);
-		}
+    public SelectionOperator<List<S>, S> getSelectionOperator() {
+        return this.selectionOperator;
+    }
 
-		M = m;
-		return this;
-	}
+    public CrossoverOperator<S> getCrossoverOperator() {
+        return this.crossoverOperator;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setRho(double rho) {
-		if (rho < 0) {
-			throw new JMetalException("Rho is negative: " + rho);
-		}
+    public MutationOperator<S> getMutationOperator() {
+        return this.mutationOperator;
+    }
 
-		this.rho = rho;
-		return this;
-	}
+    public Comparator<S> getComparator() {
+        return this.comparator;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setFbs(double fbs) {
-		if (fbs < 0) {
-			throw new JMetalException("Fbs is negative: " + fbs);
-		}
+    public CoralReefsOptimizationBuilder<S> setComparator(
+            Comparator<S> comparator) {
+        if (comparator == null) {
+            throw new JMetalException("Comparator is null!");
+        }
 
-		Fbs = fbs;
-		return this;
-	}
+        this.comparator = comparator;
 
-	public CoralReefsOptimizationBuilder<S> setFbr(double fbr) {
-		if (fbr < 0) {
-			throw new JMetalException("Fbr is negative: " + fbr);
-		}
+        return this;
+    }
 
-		Fbr = fbr;
-		return this;
-	}
+    public int getN() {
+        return this.N;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setFa(double fa) {
-		if (fa < 0) {
-			throw new JMetalException("Fa is negative: " + fa);
-		}
+    public CoralReefsOptimizationBuilder<S> setN(int n) {
+        if (n < 0) {
+            throw new JMetalException("N is negative: " + n);
+        }
 
-		Fa = fa;
-		return this;
-	}
+        this.N = n;
+        return this;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setFd(double fd) {
-		if (fd < 0) {
-			throw new JMetalException("Fd is negative: " + fd);
-		}
+    public int getM() {
+        return this.M;
+    }
 
-		Fd = fd;
-		return this;
-	}
+    public CoralReefsOptimizationBuilder<S> setM(int m) {
+        if (m < 0) {
+            throw new JMetalException("M is negative: " + m);
+        }
 
-	public CoralReefsOptimizationBuilder<S> setPd(double pd) {
-		if (pd < 0) {
-			throw new JMetalException("Pd is negative: " + pd);
-		}
+        this.M = m;
+        return this;
+    }
 
-		Pd = pd;
-		return this;
-	}
+    public double getRho() {
+        return this.rho;
+    }
 
-	public CoralReefsOptimizationBuilder<S> setAttemptsToSettle(
-			int attemptsToSettle) {
-		if (attemptsToSettle < 0) {
-			throw new JMetalException("attemptsToSettle is negative: "
-					+ attemptsToSettle);
-		}
+    public CoralReefsOptimizationBuilder<S> setRho(double rho) {
+        if (rho < 0) {
+            throw new JMetalException("Rho is negative: " + rho);
+        }
 
-		this.attemptsToSettle = attemptsToSettle;
-		return this;
-	}
+        this.rho = rho;
+        return this;
+    }
 
-	@Override
-	public CoralReefsOptimization<S> build() {
-		CoralReefsOptimization<S> algorithm = null;
+    public double getFbs() {
+        return this.Fbs;
+    }
 
-		algorithm = new CoralReefsOptimization<S>(problem, maxEvaluations,
-				comparator, selectionOperator, crossoverOperator,
-				mutationOperator, N, M, rho, Fbs, Fa, Pd, attemptsToSettle);
+    public CoralReefsOptimizationBuilder<S> setFbs(double fbs) {
+        if (fbs < 0) {
+            throw new JMetalException("Fbs is negative: " + fbs);
+        }
 
-		return algorithm;
-	}
+        this.Fbs = fbs;
+        return this;
+    }
 
-	public Problem<S> getProblem() {
-		return problem;
-	}
+    public double getFbr() {
+        return this.Fbr;
+    }
 
-	public int getMaxEvaluations() {
-		return maxEvaluations;
-	}
+    public CoralReefsOptimizationBuilder<S> setFbr(double fbr) {
+        if (fbr < 0) {
+            throw new JMetalException("Fbr is negative: " + fbr);
+        }
 
-	public SelectionOperator<List<S>, S> getSelectionOperator() {
-		return selectionOperator;
-	}
+        this.Fbr = fbr;
+        return this;
+    }
 
-	public CrossoverOperator<S> getCrossoverOperator() {
-		return crossoverOperator;
-	}
+    public double getFa() {
+        return this.Fa;
+    }
 
-	public MutationOperator<S> getMutationOperator() {
-		return mutationOperator;
-	}
+    public CoralReefsOptimizationBuilder<S> setFa(double fa) {
+        if (fa < 0) {
+            throw new JMetalException("Fa is negative: " + fa);
+        }
 
-	public Comparator<S> getComparator() {
-		return comparator;
-	}
+        this.Fa = fa;
+        return this;
+    }
 
-	public int getN() {
-		return N;
-	}
+    public double getFd() {
+        return this.Fd;
+    }
 
-	public int getM() {
-		return M;
-	}
+    public CoralReefsOptimizationBuilder<S> setFd(double fd) {
+        if (fd < 0) {
+            throw new JMetalException("Fd is negative: " + fd);
+        }
 
-	public double getRho() {
-		return rho;
-	}
+        this.Fd = fd;
+        return this;
+    }
 
-	public double getFbs() {
-		return Fbs;
-	}
+    public double getPd() {
+        return this.Pd;
+    }
 
-	public double getFbr() {
-		return Fbr;
-	}
+    public CoralReefsOptimizationBuilder<S> setPd(double pd) {
+        if (pd < 0) {
+            throw new JMetalException("Pd is negative: " + pd);
+        }
 
-	public double getFa() {
-		return Fa;
-	}
+        this.Pd = pd;
+        return this;
+    }
 
-	public double getFd() {
-		return Fd;
-	}
+    public int getAttemptsToSettle() {
+        return this.attemptsToSettle;
+    }
 
-	public double getPd() {
-		return Pd;
-	}
+    public CoralReefsOptimizationBuilder<S> setAttemptsToSettle(
+            int attemptsToSettle) {
+        if (attemptsToSettle < 0) {
+            throw new JMetalException("attemptsToSettle is negative: "
+                    + attemptsToSettle);
+        }
 
-	public int getAttemptsToSettle() {
-		return attemptsToSettle;
-	}
+        this.attemptsToSettle = attemptsToSettle;
+        return this;
+    }
 
 }

@@ -10,8 +10,11 @@ import java.io.Serializable;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public interface FileOutputContext extends Serializable {
-  public BufferedWriter getFileWriter() ;
-  public String getSeparator() ;
-  public void setSeparator(String separator) ;
-  public String getFileName() ;
+    BufferedWriter getFileWriter();
+
+    String getSeparator();
+
+    void setSeparator(String separator);
+
+    String getFileName();
 }

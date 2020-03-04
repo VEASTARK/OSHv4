@@ -16,76 +16,78 @@ import java.util.List;
  * This class implements the GDE3 algorithm
  */
 public class GDE3Builder implements AlgorithmBuilder<GDE3> {
-  private DoubleProblem problem;
-  protected int populationSize;
-  protected int maxEvaluations;
+    private final DoubleProblem problem;
+    protected int populationSize;
+    protected int maxEvaluations;
 
-  protected DifferentialEvolutionCrossover crossoverOperator;
-  protected DifferentialEvolutionSelection selectionOperator;
+    protected DifferentialEvolutionCrossover crossoverOperator;
+    protected DifferentialEvolutionSelection selectionOperator;
 
-  protected SolutionListEvaluator<DoubleSolution> evaluator;
+    protected SolutionListEvaluator<DoubleSolution> evaluator;
 
-  /** Constructor */
-  public GDE3Builder(DoubleProblem problem) {
-    this.problem = problem;
-    maxEvaluations = 25000 ;
-    populationSize = 100 ;
-    selectionOperator = new DifferentialEvolutionSelection();
-    crossoverOperator = new DifferentialEvolutionCrossover() ;
-    evaluator = new SequentialSolutionListEvaluator<DoubleSolution>() ;
-  }
+    /**
+     * Constructor
+     */
+    public GDE3Builder(DoubleProblem problem) {
+        this.problem = problem;
+        this.maxEvaluations = 25000;
+        this.populationSize = 100;
+        this.selectionOperator = new DifferentialEvolutionSelection();
+        this.crossoverOperator = new DifferentialEvolutionCrossover();
+        this.evaluator = new SequentialSolutionListEvaluator<>();
+    }
 
-  /* Setters */
-  public GDE3Builder setPopulationSize(int populationSize) {
-    this.populationSize = populationSize;
+    public GDE3Builder setCrossover(DifferentialEvolutionCrossover crossover) {
+        this.crossoverOperator = crossover;
 
-    return this;
-  }
+        return this;
+    }
 
-  public GDE3Builder setMaxEvaluations(int maxEvaluations) {
-    this.maxEvaluations = maxEvaluations;
+    public GDE3Builder setSelection(DifferentialEvolutionSelection selection) {
+        this.selectionOperator = selection;
 
-    return this;
-  }
+        return this;
+    }
 
-  public GDE3Builder setCrossover(DifferentialEvolutionCrossover crossover) {
-    crossoverOperator = crossover;
+    public GDE3Builder setSolutionSetEvaluator(SolutionListEvaluator<DoubleSolution> evaluator) {
+        this.evaluator = evaluator;
 
-    return this;
-  }
+        return this;
+    }
 
-  public GDE3Builder setSelection(DifferentialEvolutionSelection selection) {
-    selectionOperator = selection;
+    public GDE3 build() {
+        return new GDE3(this.problem, this.populationSize, this.maxEvaluations, this.selectionOperator, this.crossoverOperator, this.evaluator);
+    }
 
-    return this;
-  }
+    /* Getters */
+    public CrossoverOperator<DoubleSolution> getCrossoverOperator() {
+        return this.crossoverOperator;
+    }
 
-  public GDE3Builder setSolutionSetEvaluator(SolutionListEvaluator<DoubleSolution> evaluator) {
-    this.evaluator = evaluator ;
+    public SelectionOperator<List<DoubleSolution>, List<DoubleSolution>> getSelectionOperator() {
+        return this.selectionOperator;
+    }
 
-    return this ;
-  }
+    public int getPopulationSize() {
+        return this.populationSize;
+    }
 
-  public GDE3 build() {
-    return new GDE3(problem, populationSize, maxEvaluations, selectionOperator, crossoverOperator, evaluator) ;
-  }
+    /* Setters */
+    public GDE3Builder setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
 
-  /* Getters */
-  public CrossoverOperator<DoubleSolution> getCrossoverOperator() {
-    return crossoverOperator;
-  }
+        return this;
+    }
 
-  public SelectionOperator<List<DoubleSolution>, List<DoubleSolution>> getSelectionOperator() {
-    return selectionOperator;
-  }
+    public int getMaxEvaluations() {
+        return this.maxEvaluations;
+    }
 
-  public int getPopulationSize() {
-    return populationSize;
-  }
+    public GDE3Builder setMaxEvaluations(int maxEvaluations) {
+        this.maxEvaluations = maxEvaluations;
 
-  public int getMaxEvaluations() {
-    return maxEvaluations;
-  }
+        return this;
+    }
 
 }
 

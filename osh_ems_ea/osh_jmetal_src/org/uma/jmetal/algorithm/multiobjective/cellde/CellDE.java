@@ -2,7 +2,6 @@ package org.uma.jmetal.algorithm.multiobjective.cellde;
 
 /**
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
- *
  */
 public class CellDE {
 
@@ -24,14 +23,14 @@ public class CellDE {
   private Comparator<DoubleSolution> dominanceComparator;
   private LocationAttribute<DoubleSolution> location;
 */
-  /**
-   * Constructor
-   * @param problem
-   * @param maxEvaluations
-   * @param populationSize
-   * @param neighborhood
-   * @param evaluator
-   */
+    /**
+     * Constructor
+     * @param problem
+     * @param maxEvaluations
+     * @param populationSize
+     * @param neighborhood
+     * @param evaluator
+     */
   /*
   public CellDE(Problem<DoubleSolution> problem,
                 int maxEvaluations,

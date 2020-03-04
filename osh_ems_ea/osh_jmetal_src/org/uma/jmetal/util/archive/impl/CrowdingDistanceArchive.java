@@ -6,7 +6,6 @@ import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
 import org.uma.jmetal.util.solutionattribute.DensityEstimator;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
 
-import java.util.Collections;
 import java.util.Comparator;
 
 /**
@@ -15,35 +14,36 @@ import java.util.Comparator;
  */
 @SuppressWarnings("serial")
 public class CrowdingDistanceArchive<S extends Solution<?>> extends AbstractBoundedArchive<S> {
-  private Comparator<S> crowdingDistanceComparator;
-  private DensityEstimator<S> crowdingDistance ;
+    private final Comparator<S> crowdingDistanceComparator;
+    private final DensityEstimator<S> crowdingDistance;
 
-  public CrowdingDistanceArchive(int maxSize) {
-    super(maxSize);
-    crowdingDistanceComparator = new CrowdingDistanceComparator<S>() ;
-    crowdingDistance = new CrowdingDistance<S>() ;
-  }
-
-  @Override
-  public void prune() {
-    if (getSolutionList().size() > getMaxSize()) {
-      computeDensityEstimator();
-      S worst = new SolutionListUtils().findWorstSolution(getSolutionList(), crowdingDistanceComparator) ;
-      getSolutionList().remove(worst);
+    public CrowdingDistanceArchive(int maxSize) {
+        super(maxSize);
+        this.crowdingDistanceComparator = new CrowdingDistanceComparator<>();
+        this.crowdingDistance = new CrowdingDistance<>();
     }
-  }
 
-  @Override
-  public Comparator<S> getComparator() {
-    return crowdingDistanceComparator ;
-  }
-  @Override
-  public void computeDensityEstimator() {
-    crowdingDistance.computeDensityEstimator(getSolutionList());
-  }
+    @Override
+    public void prune() {
+        if (this.getSolutionList().size() > this.getMaxSize()) {
+            this.computeDensityEstimator();
+            S worst = new SolutionListUtils().findWorstSolution(this.getSolutionList(), this.crowdingDistanceComparator);
+            this.getSolutionList().remove(worst);
+        }
+    }
 
-  @Override
-  public void sortByDensityEstimator() {
-    Collections.sort(getSolutionList(), new CrowdingDistanceComparator<S>());
-  }
+    @Override
+    public Comparator<S> getComparator() {
+        return this.crowdingDistanceComparator;
+    }
+
+    @Override
+    public void computeDensityEstimator() {
+        this.crowdingDistance.computeDensityEstimator(this.getSolutionList());
+    }
+
+    @Override
+    public void sortByDensityEstimator() {
+        this.getSolutionList().sort(new CrowdingDistanceComparator<>());
+    }
 }

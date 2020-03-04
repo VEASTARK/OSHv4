@@ -19,136 +19,134 @@ import java.util.List;
  * Builder class
  */
 public class MOCHCBuilder implements AlgorithmBuilder<MOCHC> {
-  BinaryProblem problem;
-  SolutionListEvaluator<BinarySolution> evaluator;
-  int populationSize;
-  int maxEvaluations;
-  int convergenceValue;
-  double preservedPopulation;
-  double initialConvergenceCount;
-  CrossoverOperator<BinarySolution> crossoverOperator;
-  MutationOperator<BinarySolution> cataclysmicMutation;
-  SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection;
-  SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection;
+    final BinaryProblem problem;
+    SolutionListEvaluator<BinarySolution> evaluator;
+    int populationSize;
+    int maxEvaluations;
+    int convergenceValue;
+    double preservedPopulation;
+    double initialConvergenceCount;
+    CrossoverOperator<BinarySolution> crossoverOperator;
+    MutationOperator<BinarySolution> cataclysmicMutation;
+    SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection;
+    SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection;
 
-  public MOCHCBuilder(BinaryProblem problem) {
-    this.problem = problem;
-    evaluator = new SequentialSolutionListEvaluator<BinarySolution>() ;
-    populationSize = 100 ;
-    maxEvaluations = 25000 ;
-    convergenceValue = 3 ;
-    preservedPopulation = 0.05 ;
-    initialConvergenceCount = 0.25 ;
-  }
+    public MOCHCBuilder(BinaryProblem problem) {
+        this.problem = problem;
+        this.evaluator = new SequentialSolutionListEvaluator<>();
+        this.populationSize = 100;
+        this.maxEvaluations = 25000;
+        this.convergenceValue = 3;
+        this.preservedPopulation = 0.05;
+        this.initialConvergenceCount = 0.25;
+    }
 
-  /* Getters */
-  public BinaryProblem getProblem() {
-    return problem;
-  }
+    /* Getters */
+    public BinaryProblem getProblem() {
+        return this.problem;
+    }
 
-  public int getPopulationSize() {
-    return populationSize;
-  }
+    public int getPopulationSize() {
+        return this.populationSize;
+    }
 
-  public int getMaxEvaluation() {
-    return maxEvaluations;
-  }
+    /* Setters */
+    public MOCHCBuilder setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
 
-  public double getInitialConvergenceCount() {
-    return initialConvergenceCount;
-  }
+        return this;
+    }
 
-  public int getConvergenceValue() {
-    return convergenceValue;
-  }
+    public int getMaxEvaluation() {
+        return this.maxEvaluations;
+    }
 
-  public CrossoverOperator<BinarySolution> getCrossover() {
-    return crossoverOperator;
-  }
+    public double getInitialConvergenceCount() {
+        return this.initialConvergenceCount;
+    }
 
-  public MutationOperator<BinarySolution> getCataclysmicMutation() {
-    return cataclysmicMutation;
-  }
+    public MOCHCBuilder setInitialConvergenceCount(double initialConvergenceCount) {
+        this.initialConvergenceCount = initialConvergenceCount;
 
-  public SelectionOperator<List<BinarySolution>,BinarySolution> getParentSelection() {
-    return parentSelection;
-  }
+        return this;
+    }
 
-  public SelectionOperator<List<BinarySolution>, List<BinarySolution>> getNewGenerationSelection() {
-    return newGenerationSelection;
-  }
+    public int getConvergenceValue() {
+        return this.convergenceValue;
+    }
 
-  public double getPreservedPopulation() {
-    return preservedPopulation;
-  }
+    public MOCHCBuilder setConvergenceValue(int convergenceValue) {
+        this.convergenceValue = convergenceValue;
 
-  /* Setters */
-  public MOCHCBuilder setPopulationSize(int populationSize) {
-    this.populationSize = populationSize;
+        return this;
+    }
 
-    return this;
-  }
+    public CrossoverOperator<BinarySolution> getCrossover() {
+        return this.crossoverOperator;
+    }
 
-  public MOCHCBuilder setMaxEvaluations(int maxEvaluations) {
-    this.maxEvaluations = maxEvaluations;
+    public MOCHCBuilder setCrossover(CrossoverOperator<BinarySolution> crossover) {
+        this.crossoverOperator = crossover;
 
-    return this;
-  }
+        return this;
+    }
 
-  public MOCHCBuilder setConvergenceValue(int convergenceValue) {
-    this.convergenceValue = convergenceValue;
+    public MutationOperator<BinarySolution> getCataclysmicMutation() {
+        return this.cataclysmicMutation;
+    }
 
-    return this;
-  }
+    public MOCHCBuilder setCataclysmicMutation(MutationOperator<BinarySolution> cataclysmicMutation) {
+        this.cataclysmicMutation = cataclysmicMutation;
 
-  public MOCHCBuilder setInitialConvergenceCount(double initialConvergenceCount) {
-    this.initialConvergenceCount = initialConvergenceCount;
+        return this;
+    }
 
-    return this;
-  }
+    public SelectionOperator<List<BinarySolution>, BinarySolution> getParentSelection() {
+        return this.parentSelection;
+    }
 
-  public MOCHCBuilder setPreservedPopulation(double preservedPopulation) {
-    this.preservedPopulation = preservedPopulation;
+    public MOCHCBuilder setParentSelection(SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection) {
+        this.parentSelection = parentSelection;
 
-    return this;
-  }
+        return this;
+    }
 
-  public MOCHCBuilder setCrossover(CrossoverOperator<BinarySolution> crossover) {
-    this.crossoverOperator = crossover;
+    public SelectionOperator<List<BinarySolution>, List<BinarySolution>> getNewGenerationSelection() {
+        return this.newGenerationSelection;
+    }
 
-    return this;
-  }
+    public MOCHCBuilder setNewGenerationSelection(SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection) {
+        this.newGenerationSelection = newGenerationSelection;
 
-  public MOCHCBuilder setCataclysmicMutation(MutationOperator<BinarySolution> cataclysmicMutation) {
-    this.cataclysmicMutation = cataclysmicMutation;
+        return this;
+    }
 
-    return this;
-  }
+    public double getPreservedPopulation() {
+        return this.preservedPopulation;
+    }
 
-  public MOCHCBuilder setParentSelection(SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection) {
-    this.parentSelection = parentSelection;
+    public MOCHCBuilder setPreservedPopulation(double preservedPopulation) {
+        this.preservedPopulation = preservedPopulation;
 
-    return this;
-  }
+        return this;
+    }
 
-  public MOCHCBuilder setNewGenerationSelection(SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection) {
-    this.newGenerationSelection = newGenerationSelection;
+    public MOCHCBuilder setMaxEvaluations(int maxEvaluations) {
+        this.maxEvaluations = maxEvaluations;
 
-    return this;
-  }
+        return this;
+    }
 
-  public MOCHCBuilder setEvaluator(SolutionListEvaluator<BinarySolution> evaluator) {
-    this.evaluator = evaluator;
+    public MOCHCBuilder setEvaluator(SolutionListEvaluator<BinarySolution> evaluator) {
+        this.evaluator = evaluator;
 
-    return this;
-  }
+        return this;
+    }
 
-  public MOCHC build() {
-    MOCHC algorithm =
-        new MOCHC(problem, populationSize, maxEvaluations, convergenceValue, preservedPopulation,
-            initialConvergenceCount, crossoverOperator, cataclysmicMutation, newGenerationSelection,
-            parentSelection, evaluator);
+    public MOCHC build() {
 
-    return algorithm;
-  }
+        return new MOCHC(this.problem, this.populationSize, this.maxEvaluations, this.convergenceValue, this.preservedPopulation,
+                this.initialConvergenceCount, this.crossoverOperator, this.cataclysmicMutation, this.newGenerationSelection,
+                this.parentSelection, this.evaluator);
+    }
 }

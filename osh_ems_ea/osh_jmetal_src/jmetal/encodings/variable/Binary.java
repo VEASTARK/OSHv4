@@ -69,11 +69,7 @@ public class Binary extends Variable {
 
         this.bits_ = new BitSet(this.numberOfBits_);
         for (int i = 0; i < this.numberOfBits_; i++) {
-            if (pseudoRandom.randDouble() < 0.5) {
-                this.bits_.set(i, true);
-            } else {
-                this.bits_.set(i, false);
-            }
+            this.bits_.set(i, pseudoRandom.randDouble() < 0.5);
         }
     } //Binary
 

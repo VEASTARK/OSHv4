@@ -19,117 +19,123 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-  protected final int maxEvaluations;
-  protected final double offset ;
+    protected final int maxEvaluations;
+    protected final double offset;
+    protected final Comparator<S> dominanceComparator;
+    private final Hypervolume<S> hypervolume;
+    protected int evaluations;
 
-  protected int evaluations;
+    /**
+     * Constructor
+     */
+    public SMSEMOA(Problem<S> problem, int maxEvaluations, int populationSize, double offset,
+                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
+                   SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, Hypervolume<S> hypervolumeImplementation) {
+        super(problem);
+        this.maxEvaluations = maxEvaluations;
+        this.setMaxPopulationSize(populationSize);
 
-  private Hypervolume<S> hypervolume;
-  protected Comparator<S> dominanceComparator ;
+        this.offset = offset;
 
-  /**
-   * Constructor
-   */
-  public SMSEMOA(Problem<S> problem, int maxEvaluations, int populationSize, double offset,
-      CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-      SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, Hypervolume<S> hypervolumeImplementation) {
-    super(problem) ;
-    this.maxEvaluations = maxEvaluations;
-    setMaxPopulationSize(populationSize);
-
-    this.offset = offset ;
-
-    this.crossoverOperator = crossoverOperator;
-    this.mutationOperator = mutationOperator;
-    this.selectionOperator = selectionOperator;
-    this.dominanceComparator = dominanceComparator ;
-    this.hypervolume = hypervolumeImplementation ;
-  }
-
-  @Override protected void initProgress() {
-    evaluations = getMaxPopulationSize() ;
-  }
-
-  @Override protected void updateProgress() {
-    evaluations++ ;
-  }
-
-  @Override protected boolean isStoppingConditionReached() {
-    return evaluations >= maxEvaluations ;
-  }
-
-  @Override protected List<S> evaluatePopulation(List<S> population) {
-    for (S solution : population) {
-      getProblem().evaluate(solution);
-    }
-    return population ;
-  }
-
-  @Override protected List<S> selection(List<S> population) {
-    List<S> matingPopulation = new ArrayList<>(2);
-    for (int i = 0; i < 2; i++) {
-      S solution = selectionOperator.execute(population);
-      matingPopulation.add(solution);
+        this.crossoverOperator = crossoverOperator;
+        this.mutationOperator = mutationOperator;
+        this.selectionOperator = selectionOperator;
+        this.dominanceComparator = dominanceComparator;
+        this.hypervolume = hypervolumeImplementation;
     }
 
-    return matingPopulation;
-  }
-
-  @Override protected List<S> reproduction(List<S> population) {
-    List<S> offspringPopulation = new ArrayList<>(1);
-
-    List<S> parents = new ArrayList<>(2);
-    parents.add(population.get(0));
-    parents.add(population.get(1));
-
-    List<S> offspring = crossoverOperator.execute(parents);
-
-    mutationOperator.execute(offspring.get(0));
-
-    offspringPopulation.add(offspring.get(0));
-    return offspringPopulation;
-  }
-
-  @Override protected List<S> replacement(List<S> population, List<S> offspringPopulation) {
-    List<S> jointPopulation = new ArrayList<>();
-    jointPopulation.addAll(population);
-    jointPopulation.addAll(offspringPopulation);
-
-    Ranking<S> ranking = computeRanking(jointPopulation);
-    List<S> lastSubfront = ranking.getSubfront(ranking.getNumberOfSubfronts()-1) ;
-
-    lastSubfront = hypervolume.computeHypervolumeContribution(lastSubfront, jointPopulation) ;
-
-    List<S> resultPopulation = new ArrayList<>() ;
-    for (int i = 0; i < ranking.getNumberOfSubfronts()-1; i++) {
-      for (S solution : ranking.getSubfront(i)) {
-        resultPopulation.add(solution);
-      }
+    @Override
+    protected void initProgress() {
+        this.evaluations = this.getMaxPopulationSize();
     }
 
-    for (int i = 0; i < lastSubfront.size()-1; i++) {
-      resultPopulation.add(lastSubfront.get(i)) ;
+    @Override
+    protected void updateProgress() {
+        this.evaluations++;
     }
 
-    return resultPopulation ;
-  }
+    @Override
+    protected boolean isStoppingConditionReached() {
+        return this.evaluations >= this.maxEvaluations;
+    }
 
-  @Override public List<S> getResult() {
-    return getPopulation();
-  }
+    @Override
+    protected List<S> evaluatePopulation(List<S> population) {
+        for (S solution : population) {
+            this.getProblem().evaluate(solution);
+        }
+        return population;
+    }
 
-  protected Ranking<S> computeRanking(List<S> solutionList) {
-    Ranking<S> ranking = new DominanceRanking<S>(dominanceComparator);
-    ranking.computeRanking(solutionList);
+    @Override
+    protected List<S> selection(List<S> population) {
+        List<S> matingPopulation = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
+            S solution = this.selectionOperator.execute(population);
+            matingPopulation.add(solution);
+        }
 
-    return ranking;
-  }
+        return matingPopulation;
+    }
 
-  @Override public String getName() {
-    return "SMSEMOA" ;
-  }
+    @Override
+    protected List<S> reproduction(List<S> population) {
+        List<S> offspringPopulation = new ArrayList<>(1);
 
-  @Override public String getDescription() {
-    return "S metric selection EMOA" ;
-  }
+        List<S> parents = new ArrayList<>(2);
+        parents.add(population.get(0));
+        parents.add(population.get(1));
+
+        List<S> offspring = this.crossoverOperator.execute(parents);
+
+        this.mutationOperator.execute(offspring.get(0));
+
+        offspringPopulation.add(offspring.get(0));
+        return offspringPopulation;
+    }
+
+    @Override
+    protected List<S> replacement(List<S> population, List<S> offspringPopulation) {
+        List<S> jointPopulation = new ArrayList<>();
+        jointPopulation.addAll(population);
+        jointPopulation.addAll(offspringPopulation);
+
+        Ranking<S> ranking = this.computeRanking(jointPopulation);
+        List<S> lastSubfront = ranking.getSubfront(ranking.getNumberOfSubfronts() - 1);
+
+        lastSubfront = this.hypervolume.computeHypervolumeContribution(lastSubfront, jointPopulation);
+
+        List<S> resultPopulation = new ArrayList<>();
+        for (int i = 0; i < ranking.getNumberOfSubfronts() - 1; i++) {
+            resultPopulation.addAll(ranking.getSubfront(i));
+        }
+
+        for (int i = 0; i < lastSubfront.size() - 1; i++) {
+            resultPopulation.add(lastSubfront.get(i));
+        }
+
+        return resultPopulation;
+    }
+
+    @Override
+    public List<S> getResult() {
+        return this.getPopulation();
+    }
+
+    protected Ranking<S> computeRanking(List<S> solutionList) {
+        Ranking<S> ranking = new DominanceRanking<>(this.dominanceComparator);
+        ranking.computeRanking(solutionList);
+
+        return ranking;
+    }
+
+    @Override
+    public String getName() {
+        return "SMSEMOA";
+    }
+
+    @Override
+    public String getDescription() {
+        return "S metric selection EMOA";
+    }
 }

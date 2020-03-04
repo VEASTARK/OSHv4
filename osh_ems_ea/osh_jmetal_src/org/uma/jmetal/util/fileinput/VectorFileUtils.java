@@ -18,41 +18,41 @@ import java.util.List;
  * @author sunhaoran
  */
 public class VectorFileUtils {
-  /**
-   * @param filePath the file need to read
-   * @return referenceVectors. referenceVectors[i][j] means the i-th vector's j-th value
-   * @throws JMetalException if error while read file
-   */
-  public static double[][] readVectors(String filePath) {
-    double[][] referenceVectors;
-    String path = filePath ;
+    /**
+     * @param filePath the file need to read
+     * @return referenceVectors. referenceVectors[i][j] means the i-th vector's j-th value
+     * @throws JMetalException if error while read file
+     */
+    public static double[][] readVectors(String filePath) {
+        double[][] referenceVectors;
+        String path = filePath;
 
-    URL url = VectorFileUtils.class.getClassLoader().getResource(filePath);
-    System.out.println(url) ;
-    if (url != null) {
-      try {
-        path = Paths.get(url.toURI()).toString();
-      } catch (URISyntaxException e) {
-        e.printStackTrace();
-      }
-    }
+        URL url = VectorFileUtils.class.getClassLoader().getResource(filePath);
+        System.out.println(url);
+        if (url != null) {
+            try {
+                path = Paths.get(url.toURI()).toString();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
 
-    List<String> vectorStrList = null;
-    try {
-      vectorStrList = Files.readAllLines(Paths.get(path));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    referenceVectors = new double[vectorStrList.size()][];
-    for (int i = 0; i < vectorStrList.size(); i++) {
-      String vectorStr = vectorStrList.get(i);
-      String[] objectArray = vectorStr.split("\\s+");
-      referenceVectors[i] = new double[objectArray.length];
-      for (int j = 0; j < objectArray.length; j++) {
-        referenceVectors[i][j] = Double.parseDouble(objectArray[j]);
-      }
-    }
+        List<String> vectorStrList = null;
+        try {
+            vectorStrList = Files.readAllLines(Paths.get(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        referenceVectors = new double[vectorStrList.size()][];
+        for (int i = 0; i < vectorStrList.size(); i++) {
+            String vectorStr = vectorStrList.get(i);
+            String[] objectArray = vectorStr.split("\\s+");
+            referenceVectors[i] = new double[objectArray.length];
+            for (int j = 0; j < objectArray.length; j++) {
+                referenceVectors[i][j] = Double.parseDouble(objectArray[j]);
+            }
+        }
 
-    return referenceVectors;
-  }
+        return referenceVectors;
+    }
 }
