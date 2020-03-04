@@ -133,7 +133,7 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
 
         int flag = this.dominanceComparator.compare(population.get(this.currentIndividual), offspringPopulation.get(0));
 
-        if (flag == 1) { //The new individual dominates
+        if (flag > 0) { //The new individual dominates
             population = this.insertNewIndividualWhenDominates(population, offspringPopulation);
         } else if (flag == 0) { //The new individual is non-dominated
             population = this.insertNewIndividualWhenNonDominated(population, offspringPopulation);

@@ -73,7 +73,7 @@ public class PreferenceDistance<S extends Solution<?>> extends GenericSolutionAt
 
 
         for (int i = 0; i < front.size() - 1; i++) {
-            double normalizeDiff = 0.0D;
+            double normalizeDiff;
             distance = 0.0D;
             for (int j = 0; j < numberOfObjectives; j++) {
                 // Sort the population by Obj n

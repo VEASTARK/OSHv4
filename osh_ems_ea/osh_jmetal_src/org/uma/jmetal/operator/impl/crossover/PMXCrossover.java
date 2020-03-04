@@ -21,7 +21,7 @@ public class PMXCrossover implements
         CrossoverOperator<PermutationSolution<Integer>> {
     private final BoundedRandomGenerator<Integer> cuttingPointRandomGenerator;
     private final RandomGenerator<Double> crossoverRandomGenerator;
-    private double crossoverProbability = 1.0;
+    private double crossoverProbability;
 
     /**
      * Constructor

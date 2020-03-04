@@ -50,7 +50,7 @@ public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
 
     @Override
     public CoralReefsOptimization<S> build() {
-        CoralReefsOptimization<S> algorithm = null;
+        CoralReefsOptimization<S> algorithm;
 
         algorithm = new CoralReefsOptimization<>(this.problem, this.maxEvaluations,
                 this.comparator, this.selectionOperator, this.crossoverOperator,

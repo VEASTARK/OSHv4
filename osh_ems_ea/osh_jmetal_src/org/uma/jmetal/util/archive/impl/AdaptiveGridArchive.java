@@ -54,7 +54,7 @@ public class AdaptiveGridArchive<S extends Solution<?>> extends AbstractBoundedA
         while (iterator.hasNext()) {
             S element = iterator.next();
             int flag = this.dominanceComparator.compare(solution, element);
-            if (flag == -1) { // The Individual to insert dominates other
+            if (flag < 0) { // The Individual to insert dominates other
                 // individuals in  the setArchive
                 iterator.remove(); //Delete it from the setArchive
                 int location = this.grid.location(element);
@@ -63,7 +63,7 @@ public class AdaptiveGridArchive<S extends Solution<?>> extends AbstractBoundedA
                 } else {
                     this.grid.updateGrid(this.getSolutionList());
                 }
-            } else if (flag == 1) { // An Individual into the file dominates the
+            } else if (flag > 0) { // An Individual into the file dominates the
                 // solution to insert
                 return false; // The solution will not be inserted
             }

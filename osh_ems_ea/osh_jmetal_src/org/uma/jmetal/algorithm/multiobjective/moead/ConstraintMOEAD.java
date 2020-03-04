@@ -121,7 +121,7 @@ public class ConstraintMOEAD extends AbstractMOEAD<DoubleSolution> {
 
             if (this.violationThresholdComparator.needToCompare(this.population.get(k), individual)) {
                 int flag = this.violationThresholdComparator.compare(this.population.get(k), individual);
-                if (flag == 1) {
+                if (flag > 0) {
                     this.population.set(k, (DoubleSolution) individual.copy());
                 } else if (flag == 0) {
                     if (f2 < f1) {

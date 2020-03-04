@@ -184,7 +184,7 @@ public class CDGBuilder implements AlgorithmBuilder<AbstractCDG<DoubleSolution>>
     }
 
     public AbstractCDG<DoubleSolution> build() {
-        AbstractCDG<DoubleSolution> algorithm = null;
+        AbstractCDG<DoubleSolution> algorithm;
         algorithm = new CDG(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations,
                 this.crossover, this.neighborhoodSelectionProbability, this.sigma_, this.k_, this.t_, this.subproblemNum_,
                 this.childGrid_, this.childGridNum_);

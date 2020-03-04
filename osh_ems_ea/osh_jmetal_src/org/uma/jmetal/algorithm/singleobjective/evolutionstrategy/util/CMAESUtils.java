@@ -343,14 +343,14 @@ public final class CMAESUtils {
      * Returns the bigger value of the two params
      */
     private static int biggerValue(int i, int j) {
-        return i > j ? i : j;
+        return Math.max(i, j);
     }
 
     /**
      * Returns the smaller value of the two params
      */
     private static int smallerValue(int i, int j) {
-        return i > j ? j : i;
+        return Math.min(i, j);
     }
 
 }

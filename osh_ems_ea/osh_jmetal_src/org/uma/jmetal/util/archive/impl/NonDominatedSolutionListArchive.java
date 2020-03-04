@@ -69,7 +69,7 @@ public class NonDominatedSolutionListArchive<S extends Solution<?>> implements A
         boolean solutionInserted = false;
         if (this.solutionList.isEmpty()) {
             this.solutionList.add(solution);
-            solutionInserted = true;
+            return true;
         } else {
             Iterator<S> iterator = this.solutionList.iterator();
             boolean isDominated = false;
@@ -96,8 +96,6 @@ public class NonDominatedSolutionListArchive<S extends Solution<?>> implements A
 
             return solutionInserted;
         }
-
-        return solutionInserted;
     }
 
     public Archive<S> join(Archive<S> archive) {

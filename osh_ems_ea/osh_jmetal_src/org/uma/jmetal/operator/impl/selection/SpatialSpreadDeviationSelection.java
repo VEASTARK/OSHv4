@@ -30,6 +30,7 @@ import java.util.List;
  */
 public class SpatialSpreadDeviationSelection<S extends Solution<?>>
         implements SelectionOperator<List<S>, S> {
+    private static final long serialVersionUID = -1832800772390977700L;
     private final Comparator<S> comparator;
 
     private final int numberOfTournaments;

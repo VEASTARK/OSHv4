@@ -31,6 +31,8 @@ public class SpatialSpreadDeviation<S extends Solution<?>>
         extends GenericSolutionAttribute<S, Double>
         implements DensityEstimator<S> {
 
+    private static final long serialVersionUID = 6591609343115158702L;
+
     /**
      * Assigns crowding distances to all solutions in a <code>SolutionSet</code>.
      *

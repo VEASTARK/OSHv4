@@ -225,7 +225,7 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
     protected void updateParticlesMemory(List<DoubleSolution> swarm) {
         for (DoubleSolution doubleSolution : swarm) {
             int flag = this.dominanceComparator.compare(doubleSolution, this.localBest.getAttribute(doubleSolution));
-            if (flag != 1) {
+            if (flag <= 0) {
                 DoubleSolution particle = (DoubleSolution) doubleSolution.copy();
                 this.localBest.setAttribute(doubleSolution, particle);
             }
@@ -261,11 +261,7 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
         double dmax = deltaMax[variableIndex];
         double dmin = deltaMin[variableIndex];
 
-        result = v;
-
-        if (v > dmax) {
-            result = dmax;
-        }
+        result = Math.min(v, dmax);
 
         if (v < dmin) {
             result = dmin;

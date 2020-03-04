@@ -118,7 +118,7 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
                 BufferedReader br = new BufferedReader(isr);
 
                 int i = 0;
-                int j = 0;
+                int j;
                 String aux = br.readLine();
                 while (aux != null) {
                     StringTokenizer st = new StringTokenizer(aux);

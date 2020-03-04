@@ -22,7 +22,7 @@ import java.util.Map;
 public class DefaultDoubleBinarySolution
         extends AbstractGenericSolution<Object, DoubleBinaryProblem<?>>
         implements DoubleBinarySolution {
-    private int numberOfDoubleVariables;
+    private final int numberOfDoubleVariables;
 
     /**
      * Constructor
@@ -42,6 +42,8 @@ public class DefaultDoubleBinarySolution
      */
     public DefaultDoubleBinarySolution(DefaultDoubleBinarySolution solution) {
         super(solution.problem);
+        this.numberOfDoubleVariables = solution.problem.getNumberOfDoubleVariables();
+
         for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
             this.setObjective(i, solution.getObjective(i));
         }

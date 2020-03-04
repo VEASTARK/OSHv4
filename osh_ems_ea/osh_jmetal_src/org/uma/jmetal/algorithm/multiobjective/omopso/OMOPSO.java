@@ -196,7 +196,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     protected void updateParticlesMemory(List<DoubleSolution> swarm) {
         for (int i = 0; i < swarm.size(); i++) {
             int flag = this.dominanceComparator.compare(swarm.get(i), this.localBest[i]);
-            if (flag != 1) {
+            if (flag <= 0) {
                 DoubleSolution particle = (DoubleSolution) swarm.get(i).copy();
                 this.localBest[i] = particle;
             }

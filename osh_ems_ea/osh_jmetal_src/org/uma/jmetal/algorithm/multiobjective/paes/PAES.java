@@ -111,7 +111,7 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
         S mutatedSolution = offspringPopulation.get(0);
 
         int flag = this.comparator.compare(current, mutatedSolution);
-        if (flag == 1) {
+        if (flag > 0) {
             current = (S) mutatedSolution.copy();
             this.archive.add(mutatedSolution);
         } else if (flag == 0) {

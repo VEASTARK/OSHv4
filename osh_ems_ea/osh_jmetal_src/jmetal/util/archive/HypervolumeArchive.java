@@ -208,15 +208,14 @@ public class HypervolumeArchive extends Archive {
      * For that, the equals_ comparator is used
      */
     public int getLocation(Solution solution) {
-        int location = -1;
         int index = 0;
-        while ((index < this.size()) && (location != -1)) {
+        while (index < this.size()) {
             if (this.equals_.compare(solution, this.get(index)) == 0) {
-                location = index;
+                return index;
             }
             index++;
         }
-        return location;
+        return -1;
     }
 
 } // HypervolumeArchive

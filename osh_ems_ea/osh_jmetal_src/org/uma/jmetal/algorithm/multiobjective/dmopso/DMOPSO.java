@@ -225,7 +225,7 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
                 BufferedReader br = new BufferedReader(isr);
 
                 int i = 0;
-                int j = 0;
+                int j;
                 String aux = br.readLine();
                 while (aux != null) {
                     StringTokenizer st = new StringTokenizer(aux);
@@ -421,11 +421,7 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
         double dmax = deltaMax[variableIndex];
         double dmin = deltaMin[variableIndex];
 
-        result = v;
-
-        if (v > dmax) {
-            result = dmax;
-        }
+        result = Math.min(v, dmax);
 
         if (v < dmin) {
             result = dmin;

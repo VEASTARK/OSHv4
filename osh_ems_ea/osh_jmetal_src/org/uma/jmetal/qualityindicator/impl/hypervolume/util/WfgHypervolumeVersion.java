@@ -79,7 +79,7 @@ public class WfgHypervolumeVersion {
     }
 
     public double get2DHV(WfgHypervolumeFront front) {
-        double hv = 0.0;
+        double hv;
 
         hv = Math.abs((front.getPoint(0).getValue(0) - this.referencePoint.getValue(0)) *
                 (front.getPoint(0).getValue(1) - this.referencePoint.getValue(1)));
@@ -240,17 +240,9 @@ public class WfgHypervolumeVersion {
     private double worse(double x, double y, boolean maximizing) {
         double result;
         if (maximizing) {
-            if (x > y) {
-                result = y;
-            } else {
-                result = x;
-            }
+            result = Math.min(x, y);
         } else {
-            if (x > y) {
-                result = x;
-            } else {
-                result = y;
-            }
+            result = Math.max(x, y);
         }
         return result;
     }

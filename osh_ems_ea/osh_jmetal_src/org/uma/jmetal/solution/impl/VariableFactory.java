@@ -156,10 +156,7 @@ public class VariableFactory {
             Map<Class<?>, String> types = new HashMap<>();
             for (Method method : solutionClass.getMethods()) {
                 Class<?> returnType = method.getReturnType();
-                if (method.getParameterTypes().length == 0
-                        && returnType != null
-                        && !method.getName().equals("getClass")
-                        && method.getName().matches("get[^a-z].*")) {
+                if (method.getParameterTypes().length == 0 && !method.getName().equals("getClass") && method.getName().matches("get[^a-z].*")) {
                     String name = method.getName().substring(3);
                     getters.put(name, method);
                     if (types.containsKey(returnType)) {

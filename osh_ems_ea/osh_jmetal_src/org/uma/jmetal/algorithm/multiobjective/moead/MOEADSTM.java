@@ -139,7 +139,7 @@ public class MOEADSTM extends AbstractMOEAD<DoubleSolution> {
                 this.utility[n] = 1.0;
             } else {
                 uti = (0.95 + (0.05 * delta / 0.001)) * this.utility[n];
-                this.utility[n] = uti < 1.0 ? uti : 1.0;
+                this.utility[n] = Math.min(uti, 1.0);
             }
             this.savedValues[n] = (DoubleSolution) this.population.get(n).copy();
         }
@@ -184,7 +184,7 @@ public class MOEADSTM extends AbstractMOEAD<DoubleSolution> {
      */
     public void stmSelection() {
 
-        int[] idx = new int[this.populationSize];
+        int[] idx;
         double[] nicheCount = new double[this.populationSize];
 
         int[][] solPref = new int[this.jointPopulation.size()][];

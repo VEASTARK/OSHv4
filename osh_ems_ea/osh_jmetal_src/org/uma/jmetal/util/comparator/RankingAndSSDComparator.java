@@ -26,6 +26,7 @@ import java.util.Comparator;
  * then the crowding distance is used.
  */
 public class RankingAndSSDComparator<S extends Solution<?>> implements Comparator<S>, Serializable {
+    private static final long serialVersionUID = 695856856707643206L;
     private final Comparator<S> rankComparator = new RankingComparator<>();
     private final Comparator<S> NewcrowdingDistanceComparator = new SpatialSpreadDeviationComparator<>();
 

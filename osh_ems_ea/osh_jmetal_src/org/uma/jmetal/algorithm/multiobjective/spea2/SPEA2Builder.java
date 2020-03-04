@@ -51,7 +51,7 @@ public class SPEA2Builder<S extends Solution<?>> implements AlgorithmBuilder<SPE
     }
 
     public SPEA2<S> build() {
-        SPEA2<S> algorithm = null;
+        SPEA2<S> algorithm;
         algorithm = new SPEA2<>(this.problem, this.maxIterations, this.populationSize, this.crossoverOperator,
                 this.mutationOperator, this.selectionOperator, this.evaluator, this.k);
 

@@ -140,7 +140,7 @@ public class PISAHypervolume<S extends Solution<?>> extends Hypervolume<S> {
         double minValue, value;
 
         if (noPoints < 1) {
-            new JMetalException("run-time error");
+            throw new JMetalException("run-time error");
         }
 
         minValue = front[0][objective];
@@ -187,7 +187,7 @@ public class PISAHypervolume<S extends Solution<?>> extends Hypervolume<S> {
             nonDominatedPoints = this.filterNondominatedSet(front, n, noObjectives - 1);
             if (noObjectives < 3) {
                 if (nonDominatedPoints < 1) {
-                    new JMetalException("run-time error");
+                    throw new JMetalException("run-time error");
                 }
 
                 tempVolume = front[0][0];

@@ -186,7 +186,7 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
     @Override
     protected List<S> reproduction(List<S> population) {
         List<S> offspringPopulation = new ArrayList<>(1);
-        List<S> parents = null;
+        List<S> parents;
 
         double probabilityPolynomial, DristributionIndex;
         probabilityPolynomial = 0.30;

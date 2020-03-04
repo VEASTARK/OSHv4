@@ -25,6 +25,7 @@ import java.util.Comparator;
  * @author Alejandro Santiago <aurelio.santiago@upalt.edu.mx>
  */
 public class SpatialSpreadDeviationArchive<S extends Solution<?>> extends AbstractBoundedArchive<S> {
+    private static final long serialVersionUID = -1589179581147401214L;
     private final Comparator<S> crowdingDistanceComparator;
     private final DensityEstimator<S> crowdingDistance;
 

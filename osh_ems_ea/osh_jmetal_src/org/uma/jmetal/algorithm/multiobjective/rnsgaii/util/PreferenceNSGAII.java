@@ -30,7 +30,7 @@ public class PreferenceNSGAII<S extends Solution<?>> {
             objectiveValues.add(solution.getObjective(i));
         }
 
-        double normalizeDiff = 0.0D;
+        double normalizeDiff;
         double distance = 0.0D;
         for (int i = 0; i < solution.getNumberOfObjectives(); i++) {
             if (this.upperBounds != null && this.lowerBounds != null) {

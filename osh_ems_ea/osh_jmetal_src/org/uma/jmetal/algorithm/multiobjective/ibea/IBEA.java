@@ -181,7 +181,7 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
                 int flag = (new DominanceComparator<S>()).compare(A.get(0), B.get(0));
 
                 double value;
-                if (flag == -1) {
+                if (flag < 0) {
                     value =
                             -this.calculateHypervolumeIndicator(A.get(0), B.get(0), this.problem.getNumberOfObjectives(),
                                     maximumValues, minimumValues);

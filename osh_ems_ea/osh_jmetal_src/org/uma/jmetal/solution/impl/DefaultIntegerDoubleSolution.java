@@ -17,8 +17,8 @@ public class DefaultIntegerDoubleSolution
         extends AbstractGenericSolution<Number, IntegerDoubleProblem<?>>
         implements IntegerDoubleSolution {
 
-    private int numberOfIntegerVariables;
-    private int numberOfDoubleVariables;
+    private final int numberOfIntegerVariables;
+    private final int numberOfDoubleVariables;
 
     /**
      * Constructor
@@ -38,6 +38,9 @@ public class DefaultIntegerDoubleSolution
      */
     public DefaultIntegerDoubleSolution(DefaultIntegerDoubleSolution solution) {
         super(solution.problem);
+
+        this.numberOfIntegerVariables = solution.problem.getNumberOfIntegerVariables();
+        this.numberOfDoubleVariables = solution.problem.getNumberOfDoubleVariables();
 
         for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
             this.setObjective(i, solution.getObjective(i));
