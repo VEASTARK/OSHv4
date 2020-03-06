@@ -16,6 +16,7 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.csv.CSVImporter;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
@@ -224,13 +225,13 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
             for (int d0 = 0; d0 < this.avgWeekDayLoad.length; d0++) {
                 for (int d1 = 0; d1 < this.avgWeekDayLoad[d0].length; d1++) {
-                    double factor = (this.avgWeekDayLoadCounter[d0][d1] / 60.0) * 3600000.0;
+                    double factor = (this.avgWeekDayLoadCounter[d0][d1] / 60.0) * PhysicalConstants.factor_wsToKWh;
                     this.avgWeekDayLoad[d0][d1] /= factor;
                 }
             }
 
             for (int d0 = 0; d0 < this.avgDayLoad.length; d0++) {
-                double factor = (this.avgDayLoadCounter[d0] / 86400.0) * 3600000.0;
+                double factor = (this.avgDayLoadCounter[d0] / 86400.0) * PhysicalConstants.factor_wsToKWh;
                 this.avgDayLoad[d0] /= factor;
             }
 

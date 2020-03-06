@@ -11,6 +11,7 @@ import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.utils.string.ParameterConstants;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,10 +32,17 @@ public class ColdWaterStorage {
  */
     private static final Commodity[] usedCommodities = {Commodity.COLDWATERPOWER};
     public static UUID coldWaterStorageUuid = UUIDStorage.coldWaterTankUUID;
-    public static double tankSize = 1500.0;
+    public static double tankSize = 3000.0;
+    public static double standingHeatLossFactor = 1.0;
     public static double tankDiameter = 0.5;
     public static double initialTemperature = 15.0;
     public static double ambientTemperature = 18.0;
+
+    public static Duration newIPPAfter = GeneralConfig.newIppAfter;
+    public static double triggerIfDeltaTemp = 0.1;
+    public static double rescheduleIfViolatedTemperature = 2.5;
+    public static Duration rescheduleIfViolatedDuration = Duration.ofMinutes(10);
+
     public static String driverName = osh.driver.simulation.ColdWaterTankSimulationDriver.class.getName();
     public static String nonControllableObserverName = osh.mgmt.localobserver.ColdWaterTankLocalObserver.class.getName();
 
@@ -52,6 +60,12 @@ public class ColdWaterStorage {
         params.put(ParameterConstants.WaterTank.tankDiameter, String.valueOf(tankDiameter));
         params.put(ParameterConstants.WaterTank.initialTemperature, String.valueOf(initialTemperature));
         params.put(ParameterConstants.WaterTank.ambientTemperature, String.valueOf(ambientTemperature));
+        params.put(ParameterConstants.WaterTank.standingHeatLossFactor, String.valueOf(standingHeatLossFactor));
+
+        params.put(ParameterConstants.IPP.newIPPAfter, String.valueOf(newIPPAfter.toSeconds()));
+        params.put(ParameterConstants.IPP.triggerIppIfDeltaTemp, String.valueOf(triggerIfDeltaTemp));
+        params.put(ParameterConstants.IPP.rescheduleIfViolatedTemperature, String.valueOf(rescheduleIfViolatedTemperature));
+        params.put(ParameterConstants.IPP.rescheduleIfViolatedDuration, String.valueOf(rescheduleIfViolatedDuration));
 
         if (!params.containsKey(ParameterConstants.Compression.compressionType))
             params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
@@ -59,7 +73,7 @@ public class ColdWaterStorage {
             params.put(ParameterConstants.Compression.compressionValue, String.valueOf(GeneralConfig.compressionValue));
 
         AssignedDevice dev = CreateDevice.createDevice(
-                DeviceTypes.HOTWATERSTORAGE,
+                DeviceTypes.COLDWATERSTORAGE,
                 DeviceClassification.HVAC,
                 coldWaterStorageUuid,
                 driverName,

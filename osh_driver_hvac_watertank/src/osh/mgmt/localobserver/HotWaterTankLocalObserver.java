@@ -18,6 +18,7 @@ import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.mgmt.ipp.HotWaterTankNonControllableIPP;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.physics.PhysicalConstants;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -31,19 +32,25 @@ public class HotWaterTankLocalObserver
         extends WaterTankLocalObserver
         implements IDataRegistryListener {
 
-    private final double defaultPunishmentFactorPerWsPowerLost = 6.0 / 3600000.0;
-    TreeMap<Long, Double> temperaturePrediction = new TreeMap<>();
-    private Duration NEW_IPP_AFTER;
-    private double TRIGGER_IPP_IF_DELTA_TEMP_BIGGER;
+    private final double defaultPunishmentFactorPerWsPowerLost = 6.0 / PhysicalConstants.factor_wsToKWh;
+
+    private double triggerIppIfDeltaTempBigger;
+    private Duration newIppAfter;
+    private double rescheduleIfViolatedTemperature;
+    private Duration rescheduleIfViolatedDuration;
     private ZonedDateTime lastTimeIPPSent;
+    private ZonedDateTime predictionViolatedSince;
+
     private Double lastKnownGasPrice;
     private double tankCapacity = 100;
     private double tankDiameter = 1.0;
+    private double standingHeatLossFactor = 1.0;
     private double ambientTemperature = 20.0;
-    private boolean lastMinuteViolated;
+
     private LoadProfileCompressionTypes compressionType;
     private int compressionValue;
 
+    TreeMap<Long, Double> temperaturePrediction = new TreeMap<>();
 
     /**
      * CONSTRUCTOR
@@ -62,7 +69,7 @@ public class HotWaterTankLocalObserver
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        if (this.NEW_IPP_AFTER != null && this.NEW_IPP_AFTER.toSeconds() % 60 == 0) {
+        if (this.newIppAfter != null && this.newIppAfter.toSeconds() % 60 == 0) {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.MINUTE);
         } else {
             this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
@@ -82,7 +89,7 @@ public class HotWaterTankLocalObserver
 
         //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
         // backwards-compatibility breaking update is released
-        if (now.isAfter(this.lastTimeIPPSent.plus(this.NEW_IPP_AFTER))) {
+        if (now.isAfter(this.lastTimeIPPSent.plus(this.newIppAfter))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     now,
@@ -90,8 +97,10 @@ public class HotWaterTankLocalObserver
                     this.currentTemperature,
                     this.tankCapacity,
                     this.tankDiameter,
+                    this.standingHeatLossFactor,
                     this.ambientTemperature,
-                    (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
+                    (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost :
+                            (this.lastKnownGasPrice) / PhysicalConstants.factor_wsToKWh),
                     this.compressionType,
                     this.compressionValue);
             this.getOCRegistry().publish(
@@ -103,11 +112,12 @@ public class HotWaterTankLocalObserver
         } else if (exchange.getTimeEvents().contains(TimeSubscribeEnum.MINUTE) && this.temperaturePrediction != null) {
             Entry<Long, Double> predEntry = this.temperaturePrediction.floorEntry(nowSeconds);
             if (predEntry != null
-                    && Math.abs(predEntry.getValue() - this.currentTemperature) > 2.5
+                    && Math.abs(predEntry.getValue() - this.currentTemperature) > this.rescheduleIfViolatedTemperature
                     //if pred is too old don't pay attention to it
                     && (this.temperaturePrediction.ceilingEntry(nowSeconds) != null || (nowSeconds - predEntry.getKey()) < 3600)) {
-                if (this.lastMinuteViolated) {
-                    this.getGlobalLogger().logDebug("Temperature prediction was wrong by >2.5 degree for two consecutive minutes, reschedule");
+                if (this.predictionViolatedSince != null && Duration.between(this.predictionViolatedSince, now).compareTo(this.rescheduleIfViolatedDuration) >= 0) {
+                    this.getGlobalLogger().logDebug("Temperature prediction was wrong by >" + this.rescheduleIfViolatedTemperature
+                            + " degree for " + this.rescheduleIfViolatedDuration.toSeconds() + " seconds, reschedule");
                     HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                             this.getUUID(),
                             now,
@@ -115,8 +125,9 @@ public class HotWaterTankLocalObserver
                             this.currentTemperature,
                             this.tankCapacity,
                             this.tankDiameter,
+                            this.standingHeatLossFactor,
                             this.ambientTemperature,
-                            (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
+                            (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / PhysicalConstants.factor_wsToKWh),
                             this.compressionType,
                             this.compressionValue);
                     this.getOCRegistry().publish(
@@ -125,11 +136,14 @@ public class HotWaterTankLocalObserver
                             ex);
                     this.lastTimeIPPSent = now;
                     this.temperatureInLastIPP = this.currentTemperature;
-                } else {
-                    this.lastMinuteViolated = true;
+                    this.predictionViolatedSince = null;
+                } else if (this.predictionViolatedSince == null){
+                    //this may seem counter-intuitive but we count the violation as beginning directly after the last
+                    // time it was within the temperature borders, so it has been on-going for a minute now
+                    this.predictionViolatedSince = now.minusMinutes(1);
                 }
             } else {
-                this.lastMinuteViolated = false;
+                this.predictionViolatedSince = null;
             }
         }
 
@@ -149,21 +163,30 @@ public class HotWaterTankLocalObserver
 
             this.currentTemperature = ox.getTopTemperature();
 
-            if (Math.abs(this.temperatureInLastIPP - this.currentTemperature) >= this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER) {
-                this.tankCapacity = ox.getTankCapacity();
-                this.tankDiameter = ox.getTankDiameter();
-                this.ambientTemperature = ox.getAmbientTemperature();
+            this.tankCapacity = ox.getTankCapacity();
+            this.tankDiameter = ox.getTankDiameter();
+            this.ambientTemperature = ox.getAmbientTemperature();
+            this.standingHeatLossFactor = ox.getStandingHeatLossFactor();
+            this.rescheduleIfViolatedTemperature = ox.getRescheduleIfViolatedTemperature();
+
+            if (!ox.getRescheduleIfViolatedDuration().equals(this.rescheduleIfViolatedDuration)) {
+                this.predictionViolatedSince = null;
+                this.rescheduleIfViolatedDuration = ox.getRescheduleIfViolatedDuration();
+            }
+
+            if (ox.isSendNewIpp() || Math.abs(this.temperatureInLastIPP - this.currentTemperature) >= this.triggerIppIfDeltaTempBigger) {
 
                 HotWaterTankNonControllableIPP ex;
                 ex = new HotWaterTankNonControllableIPP(
                         this.getUUID(),
                         this.getTimeDriver().getCurrentTime(),
-                        false,
+                        ox.isForceRescheduling(),
                         this.currentTemperature,
                         this.tankCapacity,
                         this.tankDiameter,
+                        this.standingHeatLossFactor,
                         this.ambientTemperature,
-                        (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / this.kWhToWsDivisor),
+                        (this.lastKnownGasPrice == null ? this.defaultPunishmentFactorPerWsPowerLost : (this.lastKnownGasPrice) / PhysicalConstants.factor_wsToKWh),
                         this.compressionType,
                         this.compressionValue);
                 this.getOCRegistry().publish(
@@ -194,8 +217,8 @@ public class HotWaterTankLocalObserver
             this.compressionValue = _stat.getCompressionValue();
         } else if (_ihal instanceof IPPSchedulingExchange) {
             IPPSchedulingExchange _ise = (IPPSchedulingExchange) _ihal;
-            this.NEW_IPP_AFTER = _ise.getNewIppAfter();
-            this.TRIGGER_IPP_IF_DELTA_TEMP_BIGGER = _ise.getTriggerIfDeltaX();
+            this.newIppAfter = _ise.getNewIppAfter();
+            this.triggerIppIfDeltaTempBigger = _ise.getTriggerIfDeltaX();
         }
     }
 

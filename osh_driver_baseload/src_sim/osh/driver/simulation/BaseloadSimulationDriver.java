@@ -12,6 +12,7 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.slp.IH0Profile;
 import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
@@ -202,7 +203,8 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueueBaseload(this.sumActivePower / 3600000.0, this.sumReactivePower / 3600000.0);
+                DatabaseLoggerThread.enqueueBaseload(this.sumActivePower / PhysicalConstants.factor_wsToKWh,
+                        this.sumReactivePower / PhysicalConstants.factor_wsToKWh);
             }
         }
     }

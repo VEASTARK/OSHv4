@@ -5,6 +5,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.power.PowerInterval;
+import osh.utils.physics.PhysicalConstants;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -16,7 +17,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public final class CostChecker extends Thread {
 
     private static final double EPSILON = 0.000001;
-    private static final double WsTOkWHDivisor = 3600000.0;
     private static boolean running = true;
     private static PrintWriter pw;
     private static int counter;
@@ -178,11 +178,11 @@ public final class CostChecker extends Thread {
             finalGasCosts += gasCosts;
             finalAutoConsumptionCosts += autoConsumptionCosts;
         }
-        finalEpsCosts /= WsTOkWHDivisor;
-        finalPlsCosts /= WsTOkWHDivisor;
-        finalFeedInCosts /= WsTOkWHDivisor;
-        finalGasCosts /= WsTOkWHDivisor;
-        finalAutoConsumptionCosts /= WsTOkWHDivisor;
+        finalEpsCosts /= PhysicalConstants.factor_wsToKWh;
+        finalPlsCosts /= PhysicalConstants.factor_wsToKWh;
+        finalFeedInCosts /= PhysicalConstants.factor_wsToKWh;
+        finalGasCosts /= PhysicalConstants.factor_wsToKWh;
+        finalAutoConsumptionCosts /= PhysicalConstants.factor_wsToKWh;
 
 
         if (Math.abs((finalEpsCosts + finalPlsCosts + finalGasCosts) - cq.shouldCosts) > EPSILON) {

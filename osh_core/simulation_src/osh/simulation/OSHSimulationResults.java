@@ -1,5 +1,7 @@
 package osh.simulation;
 
+import osh.utils.physics.PhysicalConstants;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -8,8 +10,6 @@ import java.io.PrintWriter;
  * @author Ingo Mauser
  */
 public class OSHSimulationResults extends SimulationResults {
-
-    private static final double kWHConversionFactor = 3600000.0;
 
     protected double activePowerConsumption;
 
@@ -70,59 +70,59 @@ public class OSHSimulationResults extends SimulationResults {
 
     //only converting from Ws to kWh when getting values, will minimise errors due to fp-arithemtic
     public double getActivePowerConsumption() {
-        return this.activePowerConsumption / kWHConversionFactor;
+        return this.activePowerConsumption / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerPV() {
-        return this.activePowerPV / kWHConversionFactor;
+        return this.activePowerPV / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerCHP() {
-        return this.activePowerCHP / kWHConversionFactor;
+        return this.activePowerCHP / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerPVAutoConsumption() {
-        return this.activePowerPVAutoConsumption / kWHConversionFactor;
+        return this.activePowerPVAutoConsumption / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerPVFeedIn() {
-        return this.activePowerPVFeedIn / kWHConversionFactor;
+        return this.activePowerPVFeedIn / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerCHPAutoConsumption() {
-        return this.activePowerCHPAutoConsumption / kWHConversionFactor;
+        return this.activePowerCHPAutoConsumption / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerCHPFeedIn() {
-        return this.activePowerCHPFeedIn / kWHConversionFactor;
+        return this.activePowerCHPFeedIn / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerExternal() {
-        return this.activePowerExternal / kWHConversionFactor;
+        return this.activePowerExternal / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getReactivePowerExternal() {
-        return this.reactivePowerExternal / kWHConversionFactor;
+        return this.reactivePowerExternal / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getGasPowerExternal() {
-        return this.gasPowerExternal / kWHConversionFactor;
+        return this.gasPowerExternal / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerBatteryCharging() {
-        return this.activePowerBatteryCharging / kWHConversionFactor;
+        return this.activePowerBatteryCharging / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerBatteryDischarging() {
-        return this.activePowerBatteryDischarging / kWHConversionFactor;
+        return this.activePowerBatteryDischarging / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerBatteryAutoConsumption() {
-        return this.activePowerBatteryAutoConsumption / kWHConversionFactor;
+        return this.activePowerBatteryAutoConsumption / PhysicalConstants.factor_wsToKWh;
     }
 
     public double getActivePowerBatteryFeedIn() {
-        return this.activePowerBatteryFeedIn / kWHConversionFactor;
+        return this.activePowerBatteryFeedIn / PhysicalConstants.factor_wsToKWh;
     }
 
     public void addActivePowerConsumption(double additional) {

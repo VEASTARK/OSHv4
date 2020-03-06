@@ -16,6 +16,7 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
@@ -290,7 +291,7 @@ public class DachsChpSimulationDriver
     @Override
     public void onSystemShutdown() {
         if (this.log) {
-            this.supply /= 3600000.0;
+            this.supply /= PhysicalConstants.factor_wsToKWh;
             DatabaseLoggerThread.enqueueChp(this.supply, this.starts);
         }
     }

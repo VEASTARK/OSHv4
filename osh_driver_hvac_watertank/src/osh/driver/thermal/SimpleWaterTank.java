@@ -1,5 +1,7 @@
 package osh.driver.thermal;
 
+import osh.utils.physics.PhysicalConstants;
+
 /**
  * @author Ingo Mauser
  */
@@ -8,22 +10,17 @@ public class SimpleWaterTank extends WaterTank {
     private static final long serialVersionUID = -754345613886808973L;
 
     /**
-     * specific heat capacity [J / (kg * K)]
-     */
-    private static final double avgThermalCapacityOfWater = 4190.0;
-
-    /**
      * tank capacity [liters]
      */
     private final double tankCapacity;
 
     /**
-     * average temperature [�C]
+     * average temperature [°C]
      */
     private double waterTemperature;
 
     /**
-     * ambient air temperature [�C]
+     * ambient air temperature [°C]
      */
     private final double ambientTemperature;
 
@@ -39,7 +36,6 @@ public class SimpleWaterTank extends WaterTank {
     // currently unused
     private final double tankHeight;
     private double tankDiameter;
-    @SuppressWarnings("unused")
     private final double tankSurface;
 
 
@@ -75,7 +71,7 @@ public class SimpleWaterTank extends WaterTank {
         this.tankHeight = tankCapacity / 1000.0 / (Math.PI * (this.tankDiameter / 2.0) * (this.tankDiameter / 2.0));
         this.tankSurface = this.tankDiameter * Math.PI * this.tankHeight + 2 * 0.5 * this.tankDiameter * Math.PI;
 
-        this.thermalCapacityOfTank = avgThermalCapacityOfWater * this.tankCapacity;
+        this.thermalCapacityOfTank = PhysicalConstants.schoolBookIsobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
     }
 
     public SimpleWaterTank(SimpleWaterTank other) {
@@ -94,7 +90,7 @@ public class SimpleWaterTank extends WaterTank {
     }
 
     /**
-     * standing loss (DE: Verlustleistung) respective standing gain (DE: Erw�rmung)
+     * standing loss (DE: Verlustleistung) respective standing gain (DE: Erwärmung)
      *
      * @param seconds
      * @return [Ws]
@@ -126,25 +122,25 @@ public class SimpleWaterTank extends WaterTank {
     }
 
     /**
-     * @param oldTemperature [�C]
-     * @param newTemperature [�C]
+     * @param oldTemperature [°C]
+     * @param newTemperature [°C]
      * @param timeDifference [s]
      * @return [W]
      */
     public double calculatePowerDrawOff(double oldTemperature, double newTemperature, long timeDifference) {
         double deltaTheta = newTemperature - oldTemperature;
-        double energy = deltaTheta * avgThermalCapacityOfWater * this.tankCapacity;
+        double energy = deltaTheta * this.thermalCapacityOfTank;
         return energy / timeDifference;
     }
 
     /**
-     * @param oldTemperature [�C]
-     * @param newTemperature [�C]
+     * @param oldTemperature [°C]
+     * @param newTemperature [°C]
      * @return [J]
      */
     public double calculateEnergyDrawOff(double oldTemperature, double newTemperature) {
         double deltaTheta = newTemperature - oldTemperature;
-        return deltaTheta * avgThermalCapacityOfWater * this.tankCapacity;
+        return deltaTheta * this.thermalCapacityOfTank;
     }
 
     public double setCurrentWaterTemperature(double temperature) {
@@ -166,5 +162,4 @@ public class SimpleWaterTank extends WaterTank {
     public double getTankDiameter() {
         return this.tankDiameter;
     }
-
 }

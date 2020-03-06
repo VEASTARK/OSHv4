@@ -19,6 +19,7 @@ import osh.hal.exchange.FutureApplianceObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
 import osh.util.ApplianceConfigurationProviderSingleton;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
@@ -425,7 +426,8 @@ public class GenericFutureApplianceSimulationDriver
             // output the number of runs of this device
 
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueueDevices(this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns, this.activePowerConsumption / 3600000.0, this.profileNumberOfRuns,
+                DatabaseLoggerThread.enqueueDevices(this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns,
+                        this.activePowerConsumption / PhysicalConstants.factor_wsToKWh, this.profileNumberOfRuns,
                         this.dofs, this.startTimes, this.profilesSelected, this.getDeviceType());
             }
 

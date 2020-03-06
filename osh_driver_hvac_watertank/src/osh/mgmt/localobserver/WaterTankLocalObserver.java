@@ -10,8 +10,6 @@ import osh.datatypes.mox.IModelOfObservationType;
  */
 public abstract class WaterTankLocalObserver extends LocalObserver {
 
-    protected final double kWhToWsDivisor = 3600000.0;
-
     protected double temperatureInLastIPP;
 
     protected double currentTemperature = 70.0;

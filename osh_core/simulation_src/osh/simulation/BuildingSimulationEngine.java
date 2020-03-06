@@ -15,6 +15,7 @@ import osh.simulation.exception.SimulationEngineException;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.Screenplay;
 import osh.utils.CostCalculator;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.string.ParameterConstants;
 import osh.utils.string.StringConversions;
 import osh.utils.time.TimeConversion;
@@ -659,14 +660,14 @@ public class BuildingSimulationEngine extends SimulationEngine {
 
                 for (int i = 0; i < avgWeekDays.length; i++) {
                     for (int j = 0; j < avgWeekDays[i].length; j++) {
-                        double factor = this.h0ResultsCounter[i][j] * 3600000.0;
+                        double factor = this.h0ResultsCounter[i][j] * PhysicalConstants.factor_wsToKWh;
                         for (int k = 0; k < avgWeekDays[i][j].length; k++) {
                             avgWeekDays[i][j][k] = this.aggrH0ResultsWeekdays[i][j][k] / factor;
                         }
                     }
                 }
                 for (int i = 0; i < avgDays.length; i++) {
-                    double factor = (this.h0ResultsCounterDays[i] / 1440.0) * 3600000.0;
+                    double factor = (this.h0ResultsCounterDays[i] / 1440.0) * PhysicalConstants.factor_wsToKWh;
                     for (int j = 0; j < avgDays[i].length; j++) {
                         avgDays[i][j] = this.aggrH0ResultsDays[i][j] / factor;
                     }

@@ -20,8 +20,6 @@ public abstract class WaterTankDriver
         extends HALDeviceDriver
         implements IDataRegistryListener {
 
-//	private WaterTank waterTank;
-
     protected LoadProfileCompressionTypes compressionType;
     protected int compressionValue;
 

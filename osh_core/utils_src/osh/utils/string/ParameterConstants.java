@@ -68,6 +68,8 @@ public final class ParameterConstants {
         public static final String rescheduleAfter = "rescheduleAfter";
         public static final String relativeHorizon = "relativeHorizonIPP";
         public static final String triggerIppIfDeltaTemp = "triggerIppIfDeltaTempBigger";
+        public static final String rescheduleIfViolatedTemperature = "rescheduleIfViolatedTemperature";
+        public static final String rescheduleIfViolatedDuration = "rescheduleIfViolatedDuration";
         public static final String triggerIppIfDeltaSoc = "triggerIppIfDeltaSoCBigger";
 
         public static final String bitsPerSlot = "bitsPerSlot";
@@ -123,6 +125,7 @@ public final class ParameterConstants {
         public static final String tankDiameter = "tankDiameter";
         public static final String initialTemperature = "initialTemperature";
         public static final String ambientTemperature = "ambientTemperature";
+        public static final String standingHeatLossFactor = "standingHeatLossFactor";
     }
 
     public static final class TemperatureRestrictions {

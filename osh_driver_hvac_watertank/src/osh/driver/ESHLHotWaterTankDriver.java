@@ -5,7 +5,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.details.common.TemperatureDetails;
-import osh.driver.thermal.SimpleHotWaterTank;
+import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.eal.hal.exchange.compression.StaticCompressionExchange;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
@@ -21,12 +21,12 @@ import java.util.UUID;
  */
 public class ESHLHotWaterTankDriver extends WaterTankDriver {
 
-    private final SimpleHotWaterTank waterTank;
+    private final FactorisedBasicWaterTank waterTank;
 
     private Duration newIppAfter;
     private double triggerIppIfDeltaTempBigger;
-
-//	private TemperatureDetails currentTemperatureDetails = null;
+    private double rescheduleIfViolatedTemperature;
+    private Duration rescheduleIfViolatedDuration;
 
 
     /**
@@ -73,12 +73,36 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
             this.getGlobalLogger().logWarning("Can't get ambientTemperature, using the default value: " + ambientTemperature);
         }
 
+        double standingHeatLossFactor;
+        try {
+            standingHeatLossFactor = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.standingHeatLossFactor));
+        } catch (Exception e) {
+            standingHeatLossFactor = 1.0;
+            this.getGlobalLogger().logWarning("Can't get standingHeatLossFactor, using the default value: " + standingHeatLossFactor);
+        }
+
         try {
             this.newIppAfter =
                     Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIppAfter = Duration.ofHours(1); // 1 hour
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
+        }
+
+        try {
+            this.rescheduleIfViolatedTemperature =
+                    Double.parseDouble(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedTemperature));
+        } catch (Exception e) {
+            this.rescheduleIfViolatedTemperature = 2.5;
+            this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedTemperature, using the default value: " + this.rescheduleIfViolatedDuration);
+        }
+
+        try {
+            this.rescheduleIfViolatedDuration =
+                    Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedDuration)));
+        } catch (Exception e) {
+            this.rescheduleIfViolatedDuration = Duration.ofMinutes(10);
+            this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedDuration, using the default value: " + this.rescheduleIfViolatedDuration);
         }
 
         try {
@@ -89,11 +113,12 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
             this.getGlobalLogger().logWarning("Can't get triggerIppIfDeltaTempBigger, using the default value: " + this.triggerIppIfDeltaTempBigger);
         }
 
-        this.waterTank = new SimpleHotWaterTank(
+        this.waterTank = new FactorisedBasicWaterTank(
                 tankCapacity,
                 tankDiameter,
                 initialTemperature,
-                ambientTemperature);
+                ambientTemperature,
+                standingHeatLossFactor);
     }
 
     @Override
@@ -119,6 +144,9 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
                         this.waterTank.getTankCapacity(),
                         this.waterTank.getTankDiameter(),
                         this.waterTank.getAmbientTemperature(),
+                        this.waterTank.getStandingHeatLossFactor(),
+                        this.rescheduleIfViolatedTemperature,
+                        this.rescheduleIfViolatedDuration,
                         0,
                         0);
         this.notifyObserver(observerExchange);
@@ -140,6 +168,9 @@ public class ESHLHotWaterTankDriver extends WaterTankDriver {
                             this.waterTank.getTankCapacity(),
                             this.waterTank.getTankDiameter(),
                             this.waterTank.getAmbientTemperature(),
+                            this.waterTank.getStandingHeatLossFactor(),
+                            this.rescheduleIfViolatedTemperature,
+                            this.rescheduleIfViolatedDuration,
                             0,
                             0);
             this.notifyObserver(observerExchange);

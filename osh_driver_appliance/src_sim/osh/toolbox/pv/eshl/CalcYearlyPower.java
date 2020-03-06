@@ -1,5 +1,7 @@
 package osh.toolbox.pv.eshl;
 
+import osh.utils.physics.PhysicalConstants;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -57,7 +59,7 @@ public class CalcYearlyPower {
 
         csvReader.close();
 
-        doublePowerInKWH = longPowerInWs / (3600.0 * 1000);
+        doublePowerInKWH = longPowerInWs / PhysicalConstants.factor_wsToKWh;
 
         System.out.println("Ws:  " + longPowerInWs);
         System.out.println("kWh: " + doublePowerInKWH);

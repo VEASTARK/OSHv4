@@ -3,18 +3,17 @@ package osh.driver.simulation;
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
-import osh.driver.thermal.SimpleHotWaterTank;
+import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
-import osh.esc.LimitedCommodityStateMap;
 import osh.hal.exchange.HotWaterTankObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
-import java.util.EnumSet;
 import java.util.UUID;
 
 /**
@@ -22,10 +21,10 @@ import java.util.UUID;
  */
 public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
-//	private SimpleHotWaterTank waterTank;
-
     private Duration newIppAfter;
     private double triggerIppIfDeltaTempBigger;
+    private double rescheduleIfViolatedTemperature;
+    private Duration rescheduleIfViolatedDuration;
 
     private boolean log;
     private double temperatureLogging;
@@ -79,12 +78,38 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
             this.getGlobalLogger().logWarning("Can't get ambientTemperature, using the default value: " + ambientTemperature);
         }
 
+        double standingHeatLossFactor;
+        try {
+            standingHeatLossFactor = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.standingHeatLossFactor));
+        } catch (Exception e) {
+            standingHeatLossFactor = 1.0;
+            this.getGlobalLogger().logWarning("Can't get standingHeatLossFactor, using the default value: " + standingHeatLossFactor);
+        }
+
         try {
             this.newIppAfter =
                     Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIppAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
+        }
+
+        try {
+            this.rescheduleIfViolatedTemperature =
+                    Double.parseDouble(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedTemperature));
+        } catch (Exception e) {
+            this.rescheduleIfViolatedTemperature = 2.5;
+            this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedTemperature, using the default value: " + this.rescheduleIfViolatedDuration);
+        }
+
+        try {
+            this.rescheduleIfViolatedDuration =
+                    Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedDuration)));
+        } catch (Exception e) {
+            //TODO: 2 minutes as deault is too low but will be kept for backwards-compatibility, change to 10 as soon
+            // as the next update that breaks backwards-compatibility
+            this.rescheduleIfViolatedDuration = Duration.ofMinutes(2);
+            this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedDuration, using the default value: " + this.rescheduleIfViolatedDuration);
         }
 
         try {
@@ -95,11 +120,12 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
             this.getGlobalLogger().logWarning("Can't get triggerIppIfDeltaTempBigger, using the default value: " + this.triggerIppIfDeltaTempBigger);
         }
 
-        this.waterTank = new SimpleHotWaterTank(
+        this.waterTank = new FactorisedBasicWaterTank(
                 tankCapacity,
                 tankDiameter,
                 initialTemperature,
-                ambientTemperature);
+                ambientTemperature,
+                standingHeatLossFactor);
     }
 
     @Override
@@ -118,8 +144,8 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
     public void onSystemShutdown() {
         if (this.log) {
             this.temperatureLogging /= this.temperatureLoggingCounter;
-            this.demandLogging /= 3600000.0;
-            this.supplyLogging /= 3600000.0;
+            this.demandLogging /= PhysicalConstants.factor_wsToKWh;
+            this.supplyLogging /= PhysicalConstants.factor_wsToKWh;
 
             DatabaseLoggerThread.enqueueWaterTank(this.temperatureLogging, this.demandLogging, this.supplyLogging);
         }
@@ -180,19 +206,16 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
                         this.waterTank.getTankCapacity(),
                         this.waterTank.getTankDiameter(),
                         this.waterTank.getAmbientTemperature(),
+                        this.waterTank.getStandingHeatLossFactor(),
+                        this.rescheduleIfViolatedTemperature,
+                        this.rescheduleIfViolatedDuration,
                         waterDemand,
                         waterSupply);
         this.notifyObserver(observerExchange);
     }
 
 
-    @Override
-    public LimitedCommodityStateMap getCommodityOutputStates() {
-        LimitedCommodityStateMap map =
-                new LimitedCommodityStateMap(EnumSet.of(Commodity.HEATINGHOTWATERPOWER));
-        map.setTemperature(Commodity.HEATINGHOTWATERPOWER, this.waterTank.getCurrentWaterTemperature());
-        return map;
-    }
+
 
     @Override
     public void performNextAction(SubjectAction nextAction) {

@@ -36,9 +36,14 @@ public class HotWaterStorage {
             Commodity.DOMESTICHOTWATERPOWER
     };
     public static UUID hotWaterStorageUuid = UUIDStorage.hotWaterTankUUID;
-    public static double tankSize = 350.0;
+
     public static Duration newIPPAfter = GeneralConfig.newIppAfter;
     public static double triggerIfDeltaTemp = 0.25;
+    public static double rescheduleIfViolatedTemperature = 2.5;
+    public static Duration rescheduleIfViolatedDuration = Duration.ofMinutes(10);
+
+    public static double tankSize = 350.0;
+    public static double standingHeatLossFactor = 1.0;
     public static double tankDiameter = 0.5;
     public static double initialTemperature = 70.0;
     public static double ambientTemperature = 20.0;
@@ -54,12 +59,17 @@ public class HotWaterStorage {
         HashMap<String, String> params = new HashMap<>();
 
         params.put(ParameterConstants.General_Devices.usedCommodities, Arrays.toString(usedCommodities));
+
         params.put(ParameterConstants.WaterTank.tankCapacity, String.valueOf(tankSize));
         params.put(ParameterConstants.WaterTank.tankDiameter, String.valueOf(tankDiameter));
         params.put(ParameterConstants.WaterTank.initialTemperature, String.valueOf(initialTemperature));
         params.put(ParameterConstants.WaterTank.ambientTemperature, String.valueOf(ambientTemperature));
+        params.put(ParameterConstants.WaterTank.standingHeatLossFactor, String.valueOf(standingHeatLossFactor));
+
         params.put(ParameterConstants.IPP.newIPPAfter, String.valueOf(newIPPAfter.toSeconds()));
         params.put(ParameterConstants.IPP.triggerIppIfDeltaTemp, String.valueOf(triggerIfDeltaTemp));
+        params.put(ParameterConstants.IPP.rescheduleIfViolatedTemperature, String.valueOf(rescheduleIfViolatedTemperature));
+        params.put(ParameterConstants.IPP.rescheduleIfViolatedDuration, String.valueOf(rescheduleIfViolatedDuration));
 
         if (!params.containsKey(ParameterConstants.Compression.compressionType))
             params.put(ParameterConstants.Compression.compressionType, GeneralConfig.compressionType.toString());
