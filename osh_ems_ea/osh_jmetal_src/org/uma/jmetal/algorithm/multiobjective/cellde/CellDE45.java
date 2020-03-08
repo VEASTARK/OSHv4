@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.cellde;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
@@ -42,6 +43,8 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     private int currentIndividual;
     private List<DoubleSolution> currentNeighbors;
     private LocationAttribute<DoubleSolution> location;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public CellDE45(Problem<DoubleSolution> problem,
                     int maxEvaluations,
@@ -170,6 +173,11 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     @Override
     public List<DoubleSolution> getResult() {
         return this.archive.getSolutionList();
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     protected Ranking<DoubleSolution> computeRanking(List<DoubleSolution> solutionList) {

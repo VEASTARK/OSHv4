@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.nsgaii;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -34,6 +35,8 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
     protected final MutationOperator<S> mutationOperator;
     protected List<S> population;
     protected int evaluations;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     /**
      * Constructor
@@ -96,6 +99,11 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
     @Override
     public List<S> getResult() {
         return this.getNonDominatedSolutions(this.population);
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     protected List<S> createInitialPopulation() {

@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.impl;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -39,6 +40,8 @@ public abstract class AbstractCoralReefsOptimization<S, R>
     private final int attemptsToSettle;
     protected List<S> population;
     protected List<Coordinate> coordinates;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     /**
      * Constructor
@@ -133,7 +136,7 @@ public abstract class AbstractCoralReefsOptimization<S, R>
 
     protected abstract void initProgress();
 
-    protected abstract void updateProgress();
+    protected abstract void updateProgress(int evaluations);
 
     protected abstract boolean isStoppingConditionReached();
 
@@ -161,6 +164,7 @@ public abstract class AbstractCoralReefsOptimization<S, R>
         List<S> brooders;
         List<S> larvae;
         List<S> budders;
+        int reproductions = 0;
 
         this.population = this.createInitialPopulation();
         this.population = this.evaluatePopulation(this.population);
@@ -181,11 +185,13 @@ public abstract class AbstractCoralReefsOptimization<S, R>
 
             larvae = this.sexualReproduction(broadcastSpawners);
             larvae = this.evaluatePopulation(larvae);
+            reproductions += larvae.size();
 
             this.population = this.larvaeSettlementPhase(larvae, this.population, this.coordinates);
 
             larvae = this.asexualReproduction(brooders);
             larvae = this.evaluatePopulation(larvae);
+            reproductions += larvae.size();
 
             this.population = this.larvaeSettlementPhase(larvae, this.population, this.coordinates);
 
@@ -199,13 +205,19 @@ public abstract class AbstractCoralReefsOptimization<S, R>
 
             this.population = this.depredation(this.population, this.coordinates);
 
-            this.updateProgress();
+            this.updateProgress(reproductions);
+            reproductions = 0;
         }
 
     }
 
     @Override
     public abstract R getResult();
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
+    }
 
     /**
      * Represents a Coordinate in Coral Reef Grid

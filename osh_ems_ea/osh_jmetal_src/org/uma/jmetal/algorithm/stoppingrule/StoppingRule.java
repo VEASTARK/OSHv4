@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.stoppingrule;
 
+
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 
@@ -35,10 +36,10 @@ public abstract class StoppingRule {
      *
      * @return true if the stopping condition has been reached
      */
-    public abstract boolean checkIfStop(Problem<? extends Solution<?>> problem,
-                                        int generation,
-                                        int evaluations,
-                                        List<? extends Solution<?>> currentSortedSolutions);
+    public abstract <S extends Solution<?>> boolean checkIfStop(Problem<S> problem,
+                                                                int generation,
+                                                                int evaluations,
+                                                                List<S> currentSortedSolutions);
 
     /**
      * Returns a message containing information about why the stopping condition was triggered, or an empty string if

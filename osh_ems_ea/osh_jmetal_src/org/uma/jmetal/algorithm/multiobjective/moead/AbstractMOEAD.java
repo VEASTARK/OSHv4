@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.moead;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
@@ -63,6 +64,8 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
     protected List<S> offspringPopulation;
     protected List<S> jointPopulation;
     protected int evaluations;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public AbstractMOEAD(Problem<S> problem, int populationSize, int resultPopulationSize,
                          int maxEvaluations, CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutation,
@@ -326,6 +329,11 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
         } else {
             return this.population;
         }
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     protected enum NeighborType {NEIGHBOR, POPULATION}

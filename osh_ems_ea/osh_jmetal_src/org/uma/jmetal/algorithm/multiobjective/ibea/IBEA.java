@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.ibea;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -30,6 +31,8 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
     protected List<List<Double>> indicatorValues;
     protected double maxIndicatorValue;
     protected List<S> archive;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     /**
      * Constructor
@@ -113,6 +116,11 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
     @Override
     public List<S> getResult() {
         return SolutionListUtils.getNondominatedSolutions(this.archive);
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     /**

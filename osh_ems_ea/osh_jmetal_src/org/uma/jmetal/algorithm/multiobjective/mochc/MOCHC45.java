@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.mochc;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -45,6 +46,8 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
     private int minimumDistance;
     private int size;
     private Comparator<BinarySolution> comparator;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     /**
      * Constructor
@@ -161,6 +164,11 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
         }
 
         return archive.getSolutionList();
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     /**

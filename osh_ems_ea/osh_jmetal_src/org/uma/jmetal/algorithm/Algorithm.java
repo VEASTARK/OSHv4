@@ -1,8 +1,10 @@
 package org.uma.jmetal.algorithm;
 
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.util.naming.DescribedEntity;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Interface representing an algorithm
@@ -15,4 +17,10 @@ public interface Algorithm<Result> extends Runnable, Serializable, DescribedEnti
     void run();
 
     Result getResult();
+
+    List<StoppingRule> getStoppingRules();
+
+    default void addStoppingRule(StoppingRule stoppingRule) {
+        getStoppingRules().add(stoppingRule);
+    }
 }

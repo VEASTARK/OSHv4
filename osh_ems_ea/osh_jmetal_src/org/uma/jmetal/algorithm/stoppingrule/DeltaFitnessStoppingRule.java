@@ -86,8 +86,8 @@ public class DeltaFitnessStoppingRule extends StoppingRule {
      * @return true if the required minimum improvement of fitness is not reached
      */
     @Override
-    public boolean checkIfStop(Problem<? extends Solution<?>> problem, int generation, int evaluations, List<?
-            extends Solution<?>> currentSortedSolutions) {
+    public <S extends Solution<?>> boolean checkIfStop(Problem<S> problem, int generation, int evaluations,
+                                                       List<S> currentSortedSolutions) {
 
         if (currentSortedSolutions.isEmpty()) return false;
 

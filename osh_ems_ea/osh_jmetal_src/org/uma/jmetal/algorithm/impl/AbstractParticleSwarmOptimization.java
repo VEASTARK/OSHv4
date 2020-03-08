@@ -1,7 +1,9 @@
 package org.uma.jmetal.algorithm.impl;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,6 +14,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public abstract class AbstractParticleSwarmOptimization<S, Result> implements Algorithm<Result> {
     private List<S> swarm;
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public List<S> getSwarm() {
         return this.swarm;
@@ -49,6 +52,11 @@ public abstract class AbstractParticleSwarmOptimization<S, Result> implements Al
 
     @Override
     public abstract Result getResult();
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
+    }
 
     @Override
     public void run() {

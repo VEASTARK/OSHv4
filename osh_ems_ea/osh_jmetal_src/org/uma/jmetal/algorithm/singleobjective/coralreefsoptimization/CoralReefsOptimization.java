@@ -1,11 +1,13 @@
 package org.uma.jmetal.algorithm.singleobjective.coralreefsoptimization;
 
 import org.uma.jmetal.algorithm.impl.AbstractCoralReefsOptimization;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
-import org.uma.jmetal.util.pseudorandom.impl.MersenneTwisterGenerator;
+import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,17 +16,15 @@ import java.util.List;
 /**
  * @author Inacio Medeiros <inaciogmedeiros@gmail.com>
  */
-public class CoralReefsOptimization<S>
+public class CoralReefsOptimization<S extends Solution<?>>
         extends AbstractCoralReefsOptimization<S, List<S>> {
 
     private static final long serialVersionUID = 3013223456538143239L;
     private final Problem<S> problem;
-    private final int maxEvaluations;
-    private final MersenneTwisterGenerator random;
+    private final JMetalRandom random;
     private int evaluations;
 
-    public CoralReefsOptimization(Problem<S> problem,
-                                  int maxEvaluations, Comparator<S> comparator,
+    public CoralReefsOptimization(Problem<S> problem, Comparator<S> comparator,
                                   SelectionOperator<List<S>, S> selectionOperator,
                                   CrossoverOperator<S> crossoverOperator,
                                   MutationOperator<S> mutationOperator, int n, int m, double rho,
@@ -34,24 +34,28 @@ public class CoralReefsOptimization<S>
                 mutationOperator, n, m, rho, fbs, fa, pd, attemptsToSettle);
 
         this.problem = problem;
-        this.maxEvaluations = maxEvaluations;
-        this.random = new MersenneTwisterGenerator();
+        this.random = JMetalRandom.getInstance();
 
     }
 
     @Override
     protected void initProgress() {
-        this.evaluations = 0;
+        this.evaluations = this.population.size();
     }
 
     @Override
-    protected void updateProgress() {
-        this.evaluations++;
+    protected void updateProgress(int reproductions) {
+        this.evaluations += reproductions;
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations == this.maxEvaluations;
+        for (StoppingRule sr : getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -70,13 +74,11 @@ public class CoralReefsOptimization<S>
     @Override
     protected List<Coordinate> generateCoordinates() {
         int popSize = this.getPopulationSize();
-        MersenneTwisterGenerator random = new MersenneTwisterGenerator();
-
         ArrayList<Coordinate> coordinates = new ArrayList<>(popSize);
 
         for (int i = 0; i < popSize; i++) {
-            coordinates.add(new Coordinate(random.nextInt(0, this.getN() - 1),
-                    random.nextInt(0, this.getM() - 1)));
+            coordinates.add(new Coordinate(this.random.nextInt(0, this.getN() - 1),
+                    this.random.nextInt(0, this.getM() - 1)));
         }
 
         return coordinates;
@@ -211,7 +213,7 @@ public class CoralReefsOptimization<S>
 
     @Override
     public String getDescription() {
-        return "Coral Reefs Optimizatoin";
+        return "Coral Reefs Optimization";
     }
 
 }

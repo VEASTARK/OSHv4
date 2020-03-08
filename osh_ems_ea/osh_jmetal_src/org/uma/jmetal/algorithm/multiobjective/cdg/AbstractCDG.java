@@ -14,6 +14,7 @@
 package org.uma.jmetal.algorithm.multiobjective.cdg;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
@@ -74,6 +75,8 @@ public abstract class AbstractCDG<S extends Solution<?>> implements Algorithm<Li
     protected final CrossoverOperator<S> crossoverOperator;
     protected int badSolutionNum;
     protected int evaluations;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public AbstractCDG(Problem<S> problem, int populationSize, int resultPopulationSize, int maxEvaluations,
                        CrossoverOperator<S> crossoverOperator, double neighborhoodSelectionProbability,
@@ -949,6 +952,11 @@ public abstract class AbstractCDG<S extends Solution<?>> implements Algorithm<Li
     @Override
     public List<S> getResult() {
         return this.population;
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     protected enum NeighborType {

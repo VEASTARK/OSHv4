@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.dmopso;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
@@ -52,6 +53,8 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
     private final SolutionListEvaluator<DoubleSolution> evaluator;
     protected int iterations;
     private List<DoubleSolution> swarm;
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
+
     public DMOPSO(DoubleProblem problem, int swarmSize,
                   int maxIterations, double r1Min, double r1Max,
                   double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
@@ -483,6 +486,11 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
     @Override
     public List<DoubleSolution> getResult() {
         return Arrays.asList(this.globalBest);
+    }
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
     }
 
     @Override

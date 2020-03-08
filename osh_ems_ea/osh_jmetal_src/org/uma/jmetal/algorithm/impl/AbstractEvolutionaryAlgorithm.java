@@ -1,8 +1,10 @@
 package org.uma.jmetal.algorithm.impl;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.problem.Problem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +18,8 @@ import java.util.List;
 public abstract class AbstractEvolutionaryAlgorithm<S, R> implements Algorithm<R> {
     protected List<S> population;
     protected Problem<S> problem;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public List<S> getPopulation() {
         return this.population;
@@ -51,6 +55,11 @@ public abstract class AbstractEvolutionaryAlgorithm<S, R> implements Algorithm<R
 
     @Override
     public abstract R getResult();
+
+    @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
+    }
 
     @Override
     public void run() {

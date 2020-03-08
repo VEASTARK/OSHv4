@@ -56,8 +56,8 @@ public class EvaluationsStoppingRule extends StoppingRule {
      * @return true if the number of evaluation of candidate solutions done is greater or equal to the set cutoff-point
      */
     @Override
-    public boolean checkIfStop(Problem<? extends Solution<?>> problem, int generation, int evaluations, List<?
-            extends Solution<?>> currentSortedSolutions) {
+    public <S extends Solution<?>> boolean checkIfStop(Problem<S> problem, int generation, int evaluations,
+                                                       List<S> currentSortedSolutions) {
         if (evaluations > -1) {
             if (evaluations >= this.maxEvaluations) {
                 this._msg = "Optimisation stopped after reaching max evaluations: " + evaluations;

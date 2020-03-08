@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.impl;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.List;
 public abstract class AbstractScatterSearch<S, R> implements Algorithm<R> {
     private List<S> population;
     private int populationSize;
+
+    private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public List<S> getPopulation() {
         return this.population;
@@ -55,6 +58,11 @@ public abstract class AbstractScatterSearch<S, R> implements Algorithm<R> {
     public abstract R getResult();
 
     @Override
+    public List<StoppingRule> getStoppingRules() {
+        return this.stoppingRules;
+    }
+
+    @Override
     public void run() {
         this.initializationPhase();
         this.referenceSetUpdate();
@@ -77,7 +85,6 @@ public abstract class AbstractScatterSearch<S, R> implements Algorithm<R> {
      * Initialization phase of the scatter search: the population is filled with diverse solutions that
      * have been improved.
      *
-     * @return The population
      */
     public void initializationPhase() {
         this.population = new ArrayList<>(this.populationSize);

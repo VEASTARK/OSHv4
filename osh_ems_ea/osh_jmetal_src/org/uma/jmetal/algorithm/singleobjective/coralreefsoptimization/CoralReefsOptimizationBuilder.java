@@ -52,7 +52,7 @@ public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
     public CoralReefsOptimization<S> build() {
         CoralReefsOptimization<S> algorithm;
 
-        algorithm = new CoralReefsOptimization<>(this.problem, this.maxEvaluations,
+        algorithm = new CoralReefsOptimization<>(this.problem,
                 this.comparator, this.selectionOperator, this.crossoverOperator,
                 this.mutationOperator, this.N, this.M, this.rho, this.Fbs, this.Fa, this.Pd, this.attemptsToSettle);
 
