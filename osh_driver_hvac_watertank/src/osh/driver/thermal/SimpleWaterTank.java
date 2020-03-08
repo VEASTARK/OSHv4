@@ -129,7 +129,10 @@ public class SimpleWaterTank extends WaterTank {
      */
     public double calculatePowerDrawOff(double oldTemperature, double newTemperature, long timeDifference) {
         double deltaTheta = newTemperature - oldTemperature;
-        double energy = deltaTheta * this.thermalCapacityOfTank;
+        //TODO: Due to floating point arithmetic voodoo we need to keep the more complicated calculation to ensure
+        // backwards-compatibility. Remove and uncomment as sonn as an update is released which breaks this.
+        double energy = deltaTheta * PhysicalConstants.schoolBookIsobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
+//        double energy = deltaTheta * this.thermalCapacityOfTank;
         return energy / timeDifference;
     }
 
@@ -140,7 +143,10 @@ public class SimpleWaterTank extends WaterTank {
      */
     public double calculateEnergyDrawOff(double oldTemperature, double newTemperature) {
         double deltaTheta = newTemperature - oldTemperature;
-        return deltaTheta * this.thermalCapacityOfTank;
+        //TODO: Due to floating point arithmetic voodoo we need to keep the more complicated calculation to ensure
+        // backwards-compatibility. Remove and uncomment as sonn as an update is released which breaks this.
+        return deltaTheta * PhysicalConstants.schoolBookIsobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
+//        return deltaTheta * this.thermalCapacityOfTank;
     }
 
     public double setCurrentWaterTemperature(double temperature) {
