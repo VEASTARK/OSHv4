@@ -34,7 +34,7 @@ public abstract class MieleApplianceSimulationDriver
      */
     protected int activePowerSumPerRun = -1;
     protected int device2ndDof;
-    private int programDuration;
+    private final int programDuration;
     private boolean systemState;
 
 

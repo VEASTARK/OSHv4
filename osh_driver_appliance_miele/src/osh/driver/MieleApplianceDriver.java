@@ -48,7 +48,7 @@ public class MieleApplianceDriver
         implements IDataRegistryListener {
 
     // uuid of this appliance as posted by the bus driver
-    private UUID applianceBusDriverUUID;
+    private final UUID applianceBusDriverUUID;
 
     // driverData
     private DeviceProfile deviceProfile;

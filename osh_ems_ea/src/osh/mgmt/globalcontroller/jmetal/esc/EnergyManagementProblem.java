@@ -8,7 +8,7 @@ import jmetal.encodings.solutionType.BinarySolutionType;
 import jmetal.encodings.variable.Binary;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
 import jmetal.util.PseudoRandom;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
@@ -77,7 +77,7 @@ public class EnergyManagementProblem extends Problem {
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
             long ignoreLoadProfileAfter,
-            OSHRandomGenerator randomGenerator,
+            OSHRandom randomGenerator,
             IFitness fitnessFunction,
             int stepSize) {
         super(new PseudoRandom(randomGenerator));

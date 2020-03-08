@@ -71,14 +71,14 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     public static final long INVALID_KEY = Long.MIN_VALUE;
     private static final long serialVersionUID = -7046029254386353129L;
     {
-        allocatePaths();
+        this.allocatePaths();
     }
     /**
      * Creates a new empty tree map.
      */
     public Long2IntTreeMap() {
-        tree = null;
-        count = 0;
+        this.tree = null;
+        this.count = 0;
     }
     /**
      * Generates the comparator that will be actually used.
@@ -90,7 +90,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      * Otherwise, we adapt it using a helper static method.
      */
     private void setActualComparator() {
-        actualComparator = LongComparators.asLongComparator(storedComparator);
+        this.actualComparator = LongComparators.asLongComparator(this.storedComparator);
     }
     /**
      * Creates a new empty tree map with the given comparator.
@@ -100,8 +100,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     public Long2IntTreeMap(final Comparator<? super Long> c) {
         this();
-        storedComparator = c;
-        setActualComparator();
+        this.storedComparator = c;
+        this.setActualComparator();
     }
     /**
      * Creates a new tree map copying a given map.
@@ -111,7 +111,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     public Long2IntTreeMap(final Map<? extends Long, ? extends Integer> m) {
         this();
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map copying a given sorted map (and its
@@ -122,7 +122,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     public Long2IntTreeMap(final SortedMap<Long, Integer> m) {
         this(m.comparator());
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map copying a given map.
@@ -132,7 +132,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     public Long2IntTreeMap(final Long2IntMap m) {
         this();
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map copying a given sorted map (and its
@@ -143,7 +143,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     public Long2IntTreeMap(final Long2IntSortedMap m) {
         this(m.comparator());
-        putAll(m);
+        this.putAll(m);
     }
     /**
      * Creates a new tree map using the elements of two parallel arrays and the
@@ -205,7 +205,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
 
     final int compare(final long k1, final long k2) {
-        return actualComparator == null ? (Long.compare((k1), (k2))) : actualComparator.compare(k1, k2);
+        return this.actualComparator == null ? (Long.compare((k1), (k2))) : this.actualComparator.compare(k1, k2);
     }
     /**
      * Returns the entry corresponding to the given key, if it is in the tree;
@@ -217,9 +217,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      *         key exists.
      */
     final Entry findKey(final long k) {
-        Entry e = tree;
+        Entry e = this.tree;
         int cmp;
-        while (e != null && (cmp = compare(k, e.key)) != 0)
+        while (e != null && (cmp = this.compare(k, e.key)) != 0)
             e = cmp < 0 ? e.left() : e.right();
         return e;
     }
@@ -233,9 +233,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      *         key or the greatest smaller key.
      */
     final Entry locateKey(final long k) {
-        Entry e = tree, last = tree;
+        Entry e = this.tree, last = this.tree;
         int cmp = 0;
-        while (e != null && (cmp = compare(k, e.key)) != 0) {
+        while (e != null && (cmp = this.compare(k, e.key)) != 0) {
             last = e;
             e = cmp < 0 ? e.left() : e.right();
         }
@@ -250,8 +250,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     private transient Entry[] nodePath;
 
     private void allocatePaths() {
-        dirPath = new boolean[64];
-        nodePath = new Entry[64];
+        this.dirPath = new boolean[64];
+        this.nodePath = new Entry[64];
     }
     /**
      * Adds an increment to value currently associated with a key.
@@ -270,14 +270,14 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      *         return value} if no value was present for the given key.
      */
     public int addTo(final long k, final int incr) {
-        Entry e = add(k);
+        Entry e = this.add(k);
         final int oldValue = e.value;
         e.value += incr;
         return oldValue;
     }
     @Override
     public int put(final long k, final int v) {
-        Entry e = add(k);
+        Entry e = this.add(k);
         final int oldValue = e.value;
         e.value = v;
         return oldValue;
@@ -297,29 +297,29 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * After execution of this method, modified is true iff a new entry has been
          * inserted.
          */
-        modified = false;
+        this.modified = false;
         int maxDepth = 0;
         Entry e;
-        if (tree == null) { // The case of the empty tree is treated separately.
-            count++;
-            e = tree = lastEntry = firstEntry = new Entry(k, defRetValue);
+        if (this.tree == null) { // The case of the empty tree is treated separately.
+            this.count++;
+            e = this.tree = this.lastEntry = this.firstEntry = new Entry(k, this.defRetValue);
         } else {
-            Entry p = tree;
+            Entry p = this.tree;
             int cmp, i = 0;
             while (true) {
-                if ((cmp = compare(k, p.key)) == 0) {
+                if ((cmp = this.compare(k, p.key)) == 0) {
                     // We clean up the node path, or we could have stale references later.
                     while (i-- != 0)
-                        nodePath[i] = null;
+                        this.nodePath[i] = null;
                     return p;
                 }
-                nodePath[i] = p;
-                if (dirPath[i++] = cmp > 0) {
+                this.nodePath[i] = p;
+                if (this.dirPath[i++] = cmp > 0) {
                     if (p.succ()) {
-                        count++;
-                        e = new Entry(k, defRetValue);
+                        this.count++;
+                        e = new Entry(k, this.defRetValue);
                         if (p.right == null)
-                            lastEntry = e;
+                            this.lastEntry = e;
                         e.left = p;
                         e.right = p.right;
                         p.right(e);
@@ -328,10 +328,10 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                     p = p.right;
                 } else {
                     if (p.pred()) {
-                        count++;
-                        e = new Entry(k, defRetValue);
+                        this.count++;
+                        e = new Entry(k, this.defRetValue);
                         if (p.left == null)
-                            firstEntry = e;
+                            this.firstEntry = e;
                         e.right = p;
                         e.left = p.left;
                         p.left(e);
@@ -340,43 +340,43 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                     p = p.left;
                 }
             }
-            modified = true;
+            this.modified = true;
             maxDepth = i--;
-            while (i > 0 && !nodePath[i].black()) {
-                if (!dirPath[i - 1]) {
-                    Entry y = nodePath[i - 1].right;
-                    if (!nodePath[i - 1].succ() && !y.black()) {
-                        nodePath[i].black(true);
+            while (i > 0 && !this.nodePath[i].black()) {
+                if (!this.dirPath[i - 1]) {
+                    Entry y = this.nodePath[i - 1].right;
+                    if (!this.nodePath[i - 1].succ() && !y.black()) {
+                        this.nodePath[i].black(true);
                         y.black(true);
-                        nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].black(false);
                         i -= 2;
                     } else {
                         Entry x;
-                        if (!dirPath[i])
-                            y = nodePath[i];
+                        if (!this.dirPath[i])
+                            y = this.nodePath[i];
                         else {
-                            x = nodePath[i];
+                            x = this.nodePath[i];
                             y = x.right;
                             x.right = y.left;
                             y.left = x;
-                            nodePath[i - 1].left = y;
+                            this.nodePath[i - 1].left = y;
                             if (y.pred()) {
                                 y.pred(false);
                                 x.succ(y);
                             }
                         }
-                        x = nodePath[i - 1];
+                        x = this.nodePath[i - 1];
                         x.black(false);
                         y.black(true);
                         x.left = y.right;
                         y.right = x;
                         if (i < 2)
-                            tree = y;
+                            this.tree = y;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = y;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = y;
                             else
-                                nodePath[i - 2].left = y;
+                                this.nodePath[i - 2].left = y;
                         }
                         if (y.succ()) {
                             y.succ(false);
@@ -385,39 +385,39 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                         break;
                     }
                 } else {
-                    Entry y = nodePath[i - 1].left;
-                    if (!nodePath[i - 1].pred() && !y.black()) {
-                        nodePath[i].black(true);
+                    Entry y = this.nodePath[i - 1].left;
+                    if (!this.nodePath[i - 1].pred() && !y.black()) {
+                        this.nodePath[i].black(true);
                         y.black(true);
-                        nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].black(false);
                         i -= 2;
                     } else {
                         Entry x;
-                        if (dirPath[i])
-                            y = nodePath[i];
+                        if (this.dirPath[i])
+                            y = this.nodePath[i];
                         else {
-                            x = nodePath[i];
+                            x = this.nodePath[i];
                             y = x.left;
                             x.left = y.right;
                             y.right = x;
-                            nodePath[i - 1].right = y;
+                            this.nodePath[i - 1].right = y;
                             if (y.succ()) {
                                 y.succ(false);
                                 x.pred(y);
                             }
                         }
-                        x = nodePath[i - 1];
+                        x = this.nodePath[i - 1];
                         x.black(false);
                         y.black(true);
                         x.right = y.left;
                         y.left = x;
                         if (i < 2)
-                            tree = y;
+                            this.tree = y;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = y;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = y;
                             else
-                                nodePath[i - 2].left = y;
+                                this.nodePath[i - 2].left = y;
                         }
                         if (y.pred()) {
                             y.pred(false);
@@ -428,10 +428,10 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                 }
             }
         }
-        tree.black(true);
+        this.tree.black(true);
         // We clean up the node path, or we could have stale references later.
         while (maxDepth-- != 0)
-            nodePath[maxDepth] = null;
+            this.nodePath[maxDepth] = null;
         return e;
     }
     /*
@@ -441,57 +441,57 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
 
     @Override
     public int remove(final long k) {
-        modified = false;
-        if (tree == null)
-            return defRetValue;
-        Entry p = tree;
+        this.modified = false;
+        if (this.tree == null)
+            return this.defRetValue;
+        Entry p = this.tree;
         int cmp;
         int i = 0;
         final long kk = k;
         while (true) {
-            if ((cmp = compare(kk, p.key)) == 0)
+            if ((cmp = this.compare(kk, p.key)) == 0)
                 break;
-            dirPath[i] = cmp > 0;
-            nodePath[i] = p;
-            if (dirPath[i++]) {
+            this.dirPath[i] = cmp > 0;
+            this.nodePath[i] = p;
+            if (this.dirPath[i++]) {
                 if ((p = p.right()) == null) {
                     // We clean up the node path, or we could have stale references later.
                     while (i-- != 0)
-                        nodePath[i] = null;
-                    return defRetValue;
+                        this.nodePath[i] = null;
+                    return this.defRetValue;
                 }
             } else {
                 if ((p = p.left()) == null) {
                     // We clean up the node path, or we could have stale references later.
                     while (i-- != 0)
-                        nodePath[i] = null;
-                    return defRetValue;
+                        this.nodePath[i] = null;
+                    return this.defRetValue;
                 }
             }
         }
         if (p.left == null)
-            firstEntry = p.next();
+            this.firstEntry = p.next();
         if (p.right == null)
-            lastEntry = p.prev();
+            this.lastEntry = p.prev();
         if (p.succ()) {
             if (p.pred()) {
                 if (i == 0)
-                    tree = p.left;
+                    this.tree = p.left;
                 else {
-                    if (dirPath[i - 1])
-                        nodePath[i - 1].succ(p.right);
+                    if (this.dirPath[i - 1])
+                        this.nodePath[i - 1].succ(p.right);
                     else
-                        nodePath[i - 1].pred(p.left);
+                        this.nodePath[i - 1].pred(p.left);
                 }
             } else {
                 p.prev().right = p.right;
                 if (i == 0)
-                    tree = p.left;
+                    this.tree = p.left;
                 else {
-                    if (dirPath[i - 1])
-                        nodePath[i - 1].right = p.left;
+                    if (this.dirPath[i - 1])
+                        this.nodePath[i - 1].right = p.left;
                     else
-                        nodePath[i - 1].left = p.left;
+                        this.nodePath[i - 1].left = p.left;
                 }
             }
         } else {
@@ -503,31 +503,31 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                 if (!r.pred())
                     r.prev().right = r;
                 if (i == 0)
-                    tree = r;
+                    this.tree = r;
                 else {
-                    if (dirPath[i - 1])
-                        nodePath[i - 1].right = r;
+                    if (this.dirPath[i - 1])
+                        this.nodePath[i - 1].right = r;
                     else
-                        nodePath[i - 1].left = r;
+                        this.nodePath[i - 1].left = r;
                 }
                 color = r.black();
                 r.black(p.black());
                 p.black(color);
-                dirPath[i] = true;
-                nodePath[i++] = r;
+                this.dirPath[i] = true;
+                this.nodePath[i++] = r;
             } else {
                 Entry s;
                 int j = i++;
                 while (true) {
-                    dirPath[i] = false;
-                    nodePath[i++] = r;
+                    this.dirPath[i] = false;
+                    this.nodePath[i++] = r;
                     s = r.left;
                     if (s.pred())
                         break;
                     r = s;
                 }
-                dirPath[j] = true;
-                nodePath[j] = s;
+                this.dirPath[j] = true;
+                this.nodePath[j] = s;
                 if (s.succ())
                     r.pred(s);
                 else
@@ -542,46 +542,46 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                 s.black(p.black());
                 p.black(color);
                 if (j == 0)
-                    tree = s;
+                    this.tree = s;
                 else {
-                    if (dirPath[j - 1])
-                        nodePath[j - 1].right = s;
+                    if (this.dirPath[j - 1])
+                        this.nodePath[j - 1].right = s;
                     else
-                        nodePath[j - 1].left = s;
+                        this.nodePath[j - 1].left = s;
                 }
             }
         }
         int maxDepth = i;
         if (p.black()) {
             for (; i > 0; i--) {
-                if (dirPath[i - 1] && !nodePath[i - 1].succ() || !dirPath[i - 1] && !nodePath[i - 1].pred()) {
-                    Entry x = dirPath[i - 1] ? nodePath[i - 1].right : nodePath[i - 1].left;
+                if (this.dirPath[i - 1] && !this.nodePath[i - 1].succ() || !this.dirPath[i - 1] && !this.nodePath[i - 1].pred()) {
+                    Entry x = this.dirPath[i - 1] ? this.nodePath[i - 1].right : this.nodePath[i - 1].left;
                     if (!x.black()) {
                         x.black(true);
                         break;
                     }
                 }
-                if (!dirPath[i - 1]) {
-                    Entry w = nodePath[i - 1].right;
+                if (!this.dirPath[i - 1]) {
+                    Entry w = this.nodePath[i - 1].right;
                     if (!w.black()) {
                         w.black(true);
-                        nodePath[i - 1].black(false);
-                        nodePath[i - 1].right = w.left;
-                        w.left = nodePath[i - 1];
+                        this.nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].right = w.left;
+                        w.left = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
-                        nodePath[i] = nodePath[i - 1];
-                        dirPath[i] = false;
-                        nodePath[i - 1] = w;
+                        this.nodePath[i] = this.nodePath[i - 1];
+                        this.dirPath[i] = false;
+                        this.nodePath[i - 1] = w;
                         if (maxDepth == i++)
                             maxDepth++;
-                        w = nodePath[i - 1].right;
+                        w = this.nodePath[i - 1].right;
                     }
                     if ((w.pred() || w.left.black()) && (w.succ() || w.right.black())) {
                         w.black(false);
@@ -592,52 +592,52 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                             w.black(false);
                             w.left = y.right;
                             y.right = w;
-                            w = nodePath[i - 1].right = y;
+                            w = this.nodePath[i - 1].right = y;
                             if (w.succ()) {
                                 w.succ(false);
                                 w.right.pred(w);
                             }
                         }
-                        w.black(nodePath[i - 1].black());
-                        nodePath[i - 1].black(true);
+                        w.black(this.nodePath[i - 1].black());
+                        this.nodePath[i - 1].black(true);
                         w.right.black(true);
-                        nodePath[i - 1].right = w.left;
-                        w.left = nodePath[i - 1];
+                        this.nodePath[i - 1].right = w.left;
+                        w.left = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
                         if (w.pred()) {
                             w.pred(false);
-                            nodePath[i - 1].succ(w);
+                            this.nodePath[i - 1].succ(w);
                         }
                         break;
                     }
                 } else {
-                    Entry w = nodePath[i - 1].left;
+                    Entry w = this.nodePath[i - 1].left;
                     if (!w.black()) {
                         w.black(true);
-                        nodePath[i - 1].black(false);
-                        nodePath[i - 1].left = w.right;
-                        w.right = nodePath[i - 1];
+                        this.nodePath[i - 1].black(false);
+                        this.nodePath[i - 1].left = w.right;
+                        w.right = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
-                        nodePath[i] = nodePath[i - 1];
-                        dirPath[i] = true;
-                        nodePath[i - 1] = w;
+                        this.nodePath[i] = this.nodePath[i - 1];
+                        this.dirPath[i] = true;
+                        this.nodePath[i - 1] = w;
                         if (maxDepth == i++)
                             maxDepth++;
-                        w = nodePath[i - 1].left;
+                        w = this.nodePath[i - 1].left;
                     }
                     if ((w.pred() || w.left.black()) && (w.succ() || w.right.black())) {
                         w.black(false);
@@ -648,48 +648,48 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                             w.black(false);
                             w.right = y.left;
                             y.left = w;
-                            w = nodePath[i - 1].left = y;
+                            w = this.nodePath[i - 1].left = y;
                             if (w.pred()) {
                                 w.pred(false);
                                 w.left.succ(w);
                             }
                         }
-                        w.black(nodePath[i - 1].black());
-                        nodePath[i - 1].black(true);
+                        w.black(this.nodePath[i - 1].black());
+                        this.nodePath[i - 1].black(true);
                         w.left.black(true);
-                        nodePath[i - 1].left = w.right;
-                        w.right = nodePath[i - 1];
+                        this.nodePath[i - 1].left = w.right;
+                        w.right = this.nodePath[i - 1];
                         if (i < 2)
-                            tree = w;
+                            this.tree = w;
                         else {
-                            if (dirPath[i - 2])
-                                nodePath[i - 2].right = w;
+                            if (this.dirPath[i - 2])
+                                this.nodePath[i - 2].right = w;
                             else
-                                nodePath[i - 2].left = w;
+                                this.nodePath[i - 2].left = w;
                         }
                         if (w.succ()) {
                             w.succ(false);
-                            nodePath[i - 1].pred(w);
+                            this.nodePath[i - 1].pred(w);
                         }
                         break;
                     }
                 }
             }
-            if (tree != null)
-                tree.black(true);
+            if (this.tree != null)
+                this.tree.black(true);
         }
-        modified = true;
-        count--;
+        this.modified = true;
+        this.count--;
         // We clean up the node path, or we could have stale references later.
         while (maxDepth-- != 0)
-            nodePath[maxDepth] = null;
+            this.nodePath[maxDepth] = null;
         return p.value;
     }
     @Override
     public boolean containsValue(final int v) {
         final ValueIterator i = new ValueIterator();
         int ev;
-        int j = count;
+        int j = this.count;
         while (j-- != 0) {
             ev = i.nextInt();
             if (((ev) == (v)))
@@ -699,12 +699,12 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
     @Override
     public void clear() {
-        count = 0;
-        tree = null;
-        entries = null;
-        values = null;
-        keys = null;
-        firstEntry = lastEntry = null;
+        this.count = 0;
+        this.tree = null;
+        this.entries = null;
+        this.values = null;
+        this.keys = null;
+        this.firstEntry = this.lastEntry = null;
     }
 
     /**
@@ -731,11 +731,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         }
         @Override
         public long getLongKey() {
-            return key;
+            return this.key;
         }
         @Override
         public int getIntValue() {
-            return value;
+            return this.value;
         }
         @Override
         public int setValue(final int value) {
@@ -748,7 +748,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                 return false;
             if (o instanceof Long2IntMap.Entry) {
                 final Long2IntMap.Entry e = (Long2IntMap.Entry) o;
-                return ((key) == (e.getLongKey())) && ((value) == (e.getIntValue()));
+                return ((this.key) == (e.getLongKey())) && ((this.value) == (e.getIntValue()));
             }
             final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
             final Object key = e.getKey();
@@ -761,11 +761,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         }
         @Override
         public int hashCode() {
-            return it.unimi.dsi.fastutil.HashCommon.long2int(key) ^ (value);
+            return it.unimi.dsi.fastutil.HashCommon.long2int(this.key) ^ (this.value);
         }
         @Override
         public String toString() {
-            return key + "->" + value;
+            return this.key + "->" + this.value;
         }
     }
 
@@ -807,7 +807,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         Entry(final long k, final int v) {
             super(k, v);
-            info = SUCC_MASK | PRED_MASK;
+            this.info = SUCC_MASK | PRED_MASK;
         }
         /**
          * Returns the left subtree.
@@ -815,7 +815,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * @return the left subtree ({@code null} if the left subtree is empty).
          */
         Entry left() {
-            return (info & PRED_MASK) != 0 ? null : left;
+            return (this.info & PRED_MASK) != 0 ? null : this.left;
         }
         /**
          * Returns the right subtree.
@@ -823,7 +823,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * @return the right subtree ({@code null} if the right subtree is empty).
          */
         Entry right() {
-            return (info & SUCC_MASK) != 0 ? null : right;
+            return (this.info & SUCC_MASK) != 0 ? null : this.right;
         }
         /**
          * Checks whether the left pointer is really a predecessor.
@@ -831,7 +831,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * @return true if the left pointer is a predecessor.
          */
         boolean pred() {
-            return (info & PRED_MASK) != 0;
+            return (this.info & PRED_MASK) != 0;
         }
         /**
          * Checks whether the right pointer is really a successor.
@@ -839,7 +839,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * @return true if the right pointer is a successor.
          */
         boolean succ() {
-            return (info & SUCC_MASK) != 0;
+            return (this.info & SUCC_MASK) != 0;
         }
         /**
          * Sets whether the left pointer is really a predecessor.
@@ -849,9 +849,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         void pred(final boolean pred) {
             if (pred)
-                info |= PRED_MASK;
+                this.info |= PRED_MASK;
             else
-                info &= ~PRED_MASK;
+                this.info &= ~PRED_MASK;
         }
         /**
          * Sets whether the right pointer is really a successor.
@@ -861,9 +861,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         void succ(final boolean succ) {
             if (succ)
-                info |= SUCC_MASK;
+                this.info |= SUCC_MASK;
             else
-                info &= ~SUCC_MASK;
+                this.info &= ~SUCC_MASK;
         }
         /**
          * Sets the left pointer to a predecessor.
@@ -872,8 +872,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          *            the predecessr.
          */
         void pred(final Entry pred) {
-            info |= PRED_MASK;
-            left = pred;
+            this.info |= PRED_MASK;
+            this.left = pred;
         }
         /**
          * Sets the right pointer to a successor.
@@ -882,8 +882,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          *            the successor.
          */
         void succ(final Entry succ) {
-            info |= SUCC_MASK;
-            right = succ;
+            this.info |= SUCC_MASK;
+            this.right = succ;
         }
         /**
          * Sets the left pointer to the given subtree.
@@ -892,7 +892,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          *            the new left subtree.
          */
         void left(final Entry left) {
-            info &= ~PRED_MASK;
+            this.info &= ~PRED_MASK;
             this.left = left;
         }
         /**
@@ -902,7 +902,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          *            the new right subtree.
          */
         void right(final Entry right) {
-            info &= ~SUCC_MASK;
+            this.info &= ~SUCC_MASK;
             this.right = right;
         }
         /**
@@ -911,7 +911,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * @return true iff this node is black.
          */
         boolean black() {
-            return (info & BLACK_MASK) != 0;
+            return (this.info & BLACK_MASK) != 0;
         }
         /**
          * Sets whether this node is black.
@@ -921,9 +921,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         void black(final boolean black) {
             if (black)
-                info |= BLACK_MASK;
+                this.info |= BLACK_MASK;
             else
-                info &= ~BLACK_MASK;
+                this.info &= ~BLACK_MASK;
         }
         /**
          * Computes the next entry in the set order.
@@ -932,7 +932,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         Entry next() {
             Entry next = this.right;
-            if ((info & SUCC_MASK) == 0)
+            if ((this.info & SUCC_MASK) == 0)
                 while ((next.info & PRED_MASK) == 0)
                     next = next.left;
             return next;
@@ -944,7 +944,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         Entry prev() {
             Entry prev = this.left;
-            if ((info & PRED_MASK) == 0)
+            if ((this.info & PRED_MASK) == 0)
                 while ((prev.info & SUCC_MASK) == 0)
                     prev = prev.right;
             return prev;
@@ -964,9 +964,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
             } catch (CloneNotSupportedException cantHappen) {
                 throw new InternalError();
             }
-            c.key = key;
-            c.value = value;
-            c.info = info;
+            c.key = this.key;
+            c.value = this.value;
+            c.info = this.info;
             return c;
         }
         @Override
@@ -975,15 +975,15 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<Long, Integer> e = (Map.Entry<Long, Integer>) o;
-            return ((key) == ((e.getKey()).longValue())) && ((value) == ((e.getValue()).intValue()));
+            return ((this.key) == ((e.getKey()).longValue())) && ((this.value) == ((e.getValue()).intValue()));
         }
         @Override
         public int hashCode() {
-            return it.unimi.dsi.fastutil.HashCommon.long2int(key) ^ (value);
+            return it.unimi.dsi.fastutil.HashCommon.long2int(this.key) ^ (this.value);
         }
         @Override
         public String toString() {
-            return key + "=>" + value;
+            return this.key + "=>" + this.value;
         }
         /*
          * public void prettyPrint() { prettyPrint(0); }
@@ -1004,37 +1004,37 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
 
     @Override
     public boolean containsKey(final long k) {
-        return findKey(k) != null;
+        return this.findKey(k) != null;
     }
     @Override
     public int size() {
-        return count;
+        return this.count;
     }
     @Override
     public boolean isEmpty() {
-        return count == 0;
+        return this.count == 0;
     }
 
     @Override
     public int get(final long k) {
-        final Entry e = findKey(k);
-        return e == null ? defRetValue : e.value;
+        final Entry e = this.findKey(k);
+        return e == null ? this.defRetValue : e.value;
     }
     @Override
     public long firstLongKey() {
-        if (tree == null)
+        if (this.tree == null)
             throw new NoSuchElementException();
-        return firstEntry.key;
+        return this.firstEntry.key;
     }
     @Override
     public long lastLongKey() {
-        if (tree == null)
+        if (this.tree == null)
             throw new NoSuchElementException();
-        return lastEntry.key;
+        return this.lastEntry.key;
     }
 
     public final long floorKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key > key) {
             Entry prev = en.prev();
             return prev == null ? INVALID_KEY : prev.key;
@@ -1044,7 +1044,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final long ceilingKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key < key) {
             Entry next = en.next();
             return next == null ? INVALID_KEY : next.key;
@@ -1054,7 +1054,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final long lowerKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key >= key) {
             Entry prev = en.prev();
             return prev == null ? INVALID_KEY : prev.key;
@@ -1064,7 +1064,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final long higherKey(long key) {
-        Entry en = locateKey(key);
+        Entry en = this.locateKey(key);
         if (en.key <= key) {
             Entry next = en.next();
             return next == null ? INVALID_KEY : next.key;
@@ -1074,8 +1074,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final BasicEntry floorEntry(long key) {
-        if (count == 0) return null;
-        Entry en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry en = this.locateKey(key);
         if (en.key > key) {
             return en.prev();
         } else {
@@ -1085,8 +1085,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final BasicEntry ceilingEntry(long key) {
-        if (count == 0) return null;
-        Entry en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry en = this.locateKey(key);
         if (en.key < key) {
             return en.next();
         } else {
@@ -1095,8 +1095,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final BasicEntry lowerEntry(long key) {
-        if (count == 0) return null;
-        Entry en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry en = this.locateKey(key);
         if (en.key >= key) {
             return en.prev();
         } else {
@@ -1106,8 +1106,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     }
 
     public final BasicEntry higherEntry(long key) {
-        if (count == 0) return null;
-        Entry en = locateKey(key);
+        if (this.count == 0) return null;
+        Entry en = this.locateKey(key);
         if (en.key <= key) {
             return en.next();
         } else {
@@ -1146,76 +1146,76 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         int index = 0;
         TreeIterator() {
-            next = firstEntry;
+            this.next = Long2IntTreeMap.this.firstEntry;
         }
         TreeIterator(final long k) {
-            if ((next = locateKey(k)) != null) {
-                if (compare(next.key, k) <= 0) {
-                    prev = next;
-                    next = next.next();
+            if ((this.next = Long2IntTreeMap.this.locateKey(k)) != null) {
+                if (Long2IntTreeMap.this.compare(this.next.key, k) <= 0) {
+                    this.prev = this.next;
+                    this.next = this.next.next();
                 } else
-                    prev = next.prev();
+                    this.prev = this.next.prev();
             }
         }
         public boolean hasNext() {
-            return next != null;
+            return this.next != null;
         }
         public boolean hasPrevious() {
-            return prev != null;
+            return this.prev != null;
         }
         void updateNext() {
-            next = next.next();
+            this.next = this.next.next();
         }
         Entry nextEntry() {
-            if (!hasNext())
+            if (!this.hasNext())
                 throw new NoSuchElementException();
-            curr = prev = next;
-            index++;
-            updateNext();
-            return curr;
+            this.curr = this.prev = this.next;
+            this.index++;
+            this.updateNext();
+            return this.curr;
         }
         void updatePrevious() {
-            prev = prev.prev();
+            this.prev = this.prev.prev();
         }
         Entry previousEntry() {
-            if (!hasPrevious())
+            if (!this.hasPrevious())
                 throw new NoSuchElementException();
-            curr = next = prev;
-            index--;
-            updatePrevious();
-            return curr;
+            this.curr = this.next = this.prev;
+            this.index--;
+            this.updatePrevious();
+            return this.curr;
         }
         public int nextIndex() {
-            return index;
+            return this.index;
         }
         public int previousIndex() {
-            return index - 1;
+            return this.index - 1;
         }
         public void remove() {
-            if (curr == null)
+            if (this.curr == null)
                 throw new IllegalStateException();
             /*
              * If the last operation was a next(), we are removing an entry that preceeds
              * the current index, and thus we must decrement it.
              */
-            if (curr == prev)
-                index--;
-            next = prev = curr;
-            updatePrevious();
-            updateNext();
-            Long2IntTreeMap.this.remove(curr.key);
-            curr = null;
+            if (this.curr == this.prev)
+                this.index--;
+            this.next = this.prev = this.curr;
+            this.updatePrevious();
+            this.updateNext();
+            Long2IntTreeMap.this.remove(this.curr.key);
+            this.curr = null;
         }
         public int skip(final int n) {
             int i = n;
-            while (i-- != 0 && hasNext())
-                nextEntry();
+            while (i-- != 0 && this.hasNext())
+                this.nextEntry();
             return n - i - 1;
         }
         public int back(final int n) {
             int i = n;
-            while (i-- != 0 && hasPrevious())
-                previousEntry();
+            while (i-- != 0 && this.hasPrevious())
+                this.previousEntry();
             return n - i - 1;
         }
     }
@@ -1233,22 +1233,22 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         }
         @Override
         public Long2IntMap.Entry next() {
-            return nextEntry();
+            return this.nextEntry();
         }
         @Override
         public Long2IntMap.Entry previous() {
-            return previousEntry();
+            return this.previousEntry();
         }
     }
     @Override
     public ObjectSortedSet<Long2IntMap.Entry> long2IntEntrySet() {
-        if (entries == null)
-            entries = new AbstractObjectSortedSet<Long2IntMap.Entry>() {
+        if (this.entries == null)
+            this.entries = new AbstractObjectSortedSet<Long2IntMap.Entry>() {
                 final Comparator<? super Long2IntMap.Entry> comparator = (Comparator<Long2IntMap.Entry>) (x,
                                                                                                           y) -> Long2IntTreeMap.this.actualComparator.compare(x.getLongKey(), y.getLongKey());
                 @Override
                 public Comparator<? super Long2IntMap.Entry> comparator() {
-                    return comparator;
+                    return this.comparator;
                 }
                 @Override
                 public ObjectBidirectionalIterator<Long2IntMap.Entry> iterator() {
@@ -1268,7 +1268,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                         return false;
                     if (e.getValue() == null || !(e.getValue() instanceof Integer))
                         return false;
-                    final Entry f = findKey(((Long) (e.getKey())).longValue());
+                    final Entry f = Long2IntTreeMap.this.findKey(((Long) (e.getKey())).longValue());
                     return e.equals(f);
                 }
                 @Override
@@ -1281,7 +1281,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                         return false;
                     if (e.getValue() == null || !(e.getValue() instanceof Integer))
                         return false;
-                    final Entry f = findKey(((Long) (e.getKey())).longValue());
+                    final Entry f = Long2IntTreeMap.this.findKey(((Long) (e.getKey())).longValue());
                     if (f == null || !((f.getIntValue()) == (((Integer) (e.getValue())).intValue())))
                         return false;
                     Long2IntTreeMap.this.remove(f.key);
@@ -1289,7 +1289,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                 }
                 @Override
                 public int size() {
-                    return count;
+                    return Long2IntTreeMap.this.count;
                 }
                 @Override
                 public void clear() {
@@ -1297,26 +1297,26 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                 }
                 @Override
                 public Long2IntMap.Entry first() {
-                    return firstEntry;
+                    return Long2IntTreeMap.this.firstEntry;
                 }
                 @Override
                 public Long2IntMap.Entry last() {
-                    return lastEntry;
+                    return Long2IntTreeMap.this.lastEntry;
                 }
                 @Override
                 public ObjectSortedSet<Long2IntMap.Entry> subSet(Long2IntMap.Entry from, Long2IntMap.Entry to) {
-                    return subMap(from.getLongKey(), to.getLongKey()).long2IntEntrySet();
+                    return Long2IntTreeMap.this.subMap(from.getLongKey(), to.getLongKey()).long2IntEntrySet();
                 }
                 @Override
                 public ObjectSortedSet<Long2IntMap.Entry> headSet(Long2IntMap.Entry to) {
-                    return headMap(to.getLongKey()).long2IntEntrySet();
+                    return Long2IntTreeMap.this.headMap(to.getLongKey()).long2IntEntrySet();
                 }
                 @Override
                 public ObjectSortedSet<Long2IntMap.Entry> tailSet(Long2IntMap.Entry from) {
-                    return tailMap(from.getLongKey()).long2IntEntrySet();
+                    return Long2IntTreeMap.this.tailMap(from.getLongKey()).long2IntEntrySet();
                 }
             };
-        return entries;
+        return this.entries;
     }
     /**
      * An iterator on the whole range of keys.
@@ -1336,11 +1336,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         }
         @Override
         public long nextLong() {
-            return nextEntry().key;
+            return this.nextEntry().key;
         }
         @Override
         public long previousLong() {
-            return previousEntry().key;
+            return this.previousEntry().key;
         }
     }
 
@@ -1367,9 +1367,9 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     @Override
     public LongSortedSet keySet() {
-        if (keys == null)
-            keys = new KeySet();
-        return keys;
+        if (this.keys == null)
+            this.keys = new KeySet();
+        return this.keys;
     }
     /**
      * An iterator on the whole range of values.
@@ -1384,11 +1384,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
     private final class ValueIterator extends TreeIterator implements IntListIterator {
         @Override
         public int nextInt() {
-            return nextEntry().value;
+            return this.nextEntry().value;
         }
         @Override
         public int previousInt() {
-            return previousEntry().value;
+            return this.previousEntry().value;
         }
     }
 
@@ -1404,30 +1404,30 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
     @Override
     public IntCollection values() {
-        if (values == null)
-            values = new AbstractIntCollection() {
+        if (this.values == null)
+            this.values = new AbstractIntCollection() {
                 @Override
                 public IntIterator iterator() {
                     return new ValueIterator();
                 }
                 @Override
                 public boolean contains(final int k) {
-                    return containsValue(k);
+                    return Long2IntTreeMap.this.containsValue(k);
                 }
                 @Override
                 public int size() {
-                    return count;
+                    return Long2IntTreeMap.this.count;
                 }
                 @Override
                 public void clear() {
                     Long2IntTreeMap.this.clear();
                 }
             };
-        return values;
+        return this.values;
     }
     @Override
     public LongComparator comparator() {
-        return actualComparator;
+        return this.actualComparator;
     }
     @Override
     public Long2IntSortedMap headMap(long to) {
@@ -1507,13 +1507,13 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * @return true if is the key is in the submap range.
          */
         final boolean in(final long k) {
-            return (bottom || Long2IntTreeMap.this.compare(k, from) >= 0)
-                    && (top || Long2IntTreeMap.this.compare(k, to) < 0);
+            return (this.bottom || Long2IntTreeMap.this.compare(k, this.from) >= 0)
+                    && (this.top || Long2IntTreeMap.this.compare(k, this.to) < 0);
         }
         @Override
         public ObjectSortedSet<Entry> long2IntEntrySet() {
-            if (entries == null)
-                entries = new AbstractObjectSortedSet<Entry>() {
+            if (this.entries == null)
+                this.entries = new AbstractObjectSortedSet<Entry>() {
                     @Override
                     public ObjectBidirectionalIterator<Entry> iterator() {
                         return new SubmapEntryIterator();
@@ -1536,8 +1536,8 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                             return false;
                         if (e.getValue() == null || !(e.getValue() instanceof Integer))
                             return false;
-                        final Long2IntTreeMap.Entry f = findKey(((Long) (e.getKey())).longValue());
-                        return f != null && in(f.key) && e.equals(f);
+                        final Long2IntTreeMap.Entry f = Long2IntTreeMap.this.findKey(((Long) (e.getKey())).longValue());
+                        return f != null && Submap.this.in(f.key) && e.equals(f);
                     }
                     @Override
 
@@ -1549,15 +1549,15 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                             return false;
                         if (e.getValue() == null || !(e.getValue() instanceof Integer))
                             return false;
-                        final Long2IntTreeMap.Entry f = findKey(((Long) (e.getKey())).longValue());
-                        if (f != null && in(f.key))
+                        final Long2IntTreeMap.Entry f = Long2IntTreeMap.this.findKey(((Long) (e.getKey())).longValue());
+                        if (f != null && Submap.this.in(f.key))
                             Submap.this.remove(f.key);
                         return f != null;
                     }
                     @Override
                     public int size() {
                         int c = 0;
-                        for (Iterator<?> i = iterator(); i.hasNext(); i.next())
+                        for (Iterator<?> i = this.iterator(); i.hasNext(); i.next())
                             c++;
                         return c;
                     }
@@ -1571,26 +1571,26 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                     }
                     @Override
                     public Entry first() {
-                        return firstEntry();
+                        return Submap.this.firstEntry();
                     }
                     @Override
                     public Entry last() {
-                        return lastEntry();
+                        return Submap.this.lastEntry();
                     }
                     @Override
                     public ObjectSortedSet<Entry> subSet(Entry from, Entry to) {
-                        return subMap(from.getLongKey(), to.getLongKey()).long2IntEntrySet();
+                        return Submap.this.subMap(from.getLongKey(), to.getLongKey()).long2IntEntrySet();
                     }
                     @Override
                     public ObjectSortedSet<Entry> headSet(Entry to) {
-                        return headMap(to.getLongKey()).long2IntEntrySet();
+                        return Submap.this.headMap(to.getLongKey()).long2IntEntrySet();
                     }
                     @Override
                     public ObjectSortedSet<Entry> tailSet(Entry from) {
-                        return tailMap(from.getLongKey()).long2IntEntrySet();
+                        return Submap.this.tailMap(from.getLongKey()).long2IntEntrySet();
                     }
                 };
-            return entries;
+            return this.entries;
         }
         private class KeySet extends AbstractLong2IntSortedMap.KeySet {
             @Override
@@ -1604,21 +1604,21 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         }
         @Override
         public LongSortedSet keySet() {
-            if (keys == null)
-                keys = new KeySet();
-            return keys;
+            if (this.keys == null)
+                this.keys = new KeySet();
+            return this.keys;
         }
         @Override
         public IntCollection values() {
-            if (values == null)
-                values = new AbstractIntCollection() {
+            if (this.values == null)
+                this.values = new AbstractIntCollection() {
                     @Override
                     public IntIterator iterator() {
                         return new SubmapValueIterator();
                     }
                     @Override
                     public boolean contains(final int k) {
-                        return containsValue(k);
+                        return Submap.this.containsValue(k);
                     }
                     @Override
                     public int size() {
@@ -1629,12 +1629,12 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
                         Submap.this.clear();
                     }
                 };
-            return values;
+            return this.values;
         }
         @Override
 
         public boolean containsKey(final long k) {
-            return in(k) && Long2IntTreeMap.this.containsKey(k);
+            return this.in(k) && Long2IntTreeMap.this.containsKey(k);
         }
         @Override
         public boolean containsValue(final int v) {
@@ -1652,25 +1652,25 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         public int get(final long k) {
             final Long2IntTreeMap.Entry e;
             final long kk = k;
-            return in(kk) && (e = findKey(kk)) != null ? e.value : this.defRetValue;
+            return this.in(kk) && (e = Long2IntTreeMap.this.findKey(kk)) != null ? e.value : this.defRetValue;
         }
         @Override
         public int put(final long k, final int v) {
-            modified = false;
-            if (!in(k))
+            Long2IntTreeMap.this.modified = false;
+            if (!this.in(k))
                 throw new IllegalArgumentException("Key (" + k + ") out of range ["
-                        + (bottom ? "-" : String.valueOf(from)) + ", " + (top ? "-" : String.valueOf(to)) + ")");
+                        + (this.bottom ? "-" : String.valueOf(this.from)) + ", " + (this.top ? "-" : String.valueOf(this.to)) + ")");
             final int oldValue = Long2IntTreeMap.this.put(k, v);
-            return modified ? this.defRetValue : oldValue;
+            return Long2IntTreeMap.this.modified ? this.defRetValue : oldValue;
         }
         @Override
 
         public int remove(final long k) {
-            modified = false;
-            if (!in(k))
+            Long2IntTreeMap.this.modified = false;
+            if (!this.in(k))
                 return this.defRetValue;
             final int oldValue = Long2IntTreeMap.this.remove(k);
-            return modified ? oldValue : this.defRetValue;
+            return Long2IntTreeMap.this.modified ? oldValue : this.defRetValue;
         }
         @Override
         public int size() {
@@ -1688,29 +1688,29 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         }
         @Override
         public LongComparator comparator() {
-            return actualComparator;
+            return Long2IntTreeMap.this.actualComparator;
         }
         @Override
         public Long2IntSortedMap headMap(final long to) {
-            if (top)
-                return new Submap(from, bottom, to, false);
-            return compare(to, this.to) < 0 ? new Submap(from, bottom, to, false) : this;
+            if (this.top)
+                return new Submap(this.from, this.bottom, to, false);
+            return Long2IntTreeMap.this.compare(to, this.to) < 0 ? new Submap(this.from, this.bottom, to, false) : this;
         }
         @Override
         public Long2IntSortedMap tailMap(final long from) {
-            if (bottom)
-                return new Submap(from, false, to, top);
-            return compare(from, this.from) > 0 ? new Submap(from, false, to, top) : this;
+            if (this.bottom)
+                return new Submap(from, false, this.to, this.top);
+            return Long2IntTreeMap.this.compare(from, this.from) > 0 ? new Submap(from, false, this.to, this.top) : this;
         }
         @Override
         public Long2IntSortedMap subMap(long from, long to) {
-            if (top && bottom)
+            if (this.top && this.bottom)
                 return new Submap(from, false, to, false);
-            if (!top)
-                to = compare(to, this.to) < 0 ? to : this.to;
-            if (!bottom)
-                from = compare(from, this.from) > 0 ? from : this.from;
-            if (!top && !bottom && from == this.from && to == this.to)
+            if (!this.top)
+                to = Long2IntTreeMap.this.compare(to, this.to) < 0 ? to : this.to;
+            if (!this.bottom)
+                from = Long2IntTreeMap.this.compare(from, this.from) > 0 ? from : this.from;
+            if (!this.top && !this.bottom && from == this.from && to == this.to)
                 return this;
             return new Submap(from, false, to, false);
         }
@@ -1721,22 +1721,22 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          *         empty.
          */
         public Long2IntTreeMap.Entry firstEntry() {
-            if (tree == null)
+            if (Long2IntTreeMap.this.tree == null)
                 return null;
             // If this submap goes to -infinity, we return the main map first entry;
             // otherwise, we locate the start of the map.
             Long2IntTreeMap.Entry e;
-            if (bottom)
-                e = firstEntry;
+            if (this.bottom)
+                e = Long2IntTreeMap.this.firstEntry;
             else {
-                e = locateKey(from);
+                e = Long2IntTreeMap.this.locateKey(this.from);
                 // If we find either the start or something greater we're OK.
-                if (compare(e.key, from) < 0)
+                if (Long2IntTreeMap.this.compare(e.key, this.from) < 0)
                     e = e.next();
             }
             // Finally, if this submap doesn't go to infinity, we check that the resulting
             // key isn't greater than the end.
-            if (e == null || !top && compare(e.key, to) >= 0)
+            if (e == null || !this.top && Long2IntTreeMap.this.compare(e.key, this.to) >= 0)
                 return null;
             return e;
         }
@@ -1747,35 +1747,35 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          *         empty.
          */
         public Long2IntTreeMap.Entry lastEntry() {
-            if (tree == null)
+            if (Long2IntTreeMap.this.tree == null)
                 return null;
             // If this submap goes to infinity, we return the main map last entry;
             // otherwise, we locate the end of the map.
             Long2IntTreeMap.Entry e;
-            if (top)
-                e = lastEntry;
+            if (this.top)
+                e = Long2IntTreeMap.this.lastEntry;
             else {
-                e = locateKey(to);
+                e = Long2IntTreeMap.this.locateKey(this.to);
                 // If we find something smaller than the end we're OK.
-                if (compare(e.key, to) >= 0)
+                if (Long2IntTreeMap.this.compare(e.key, this.to) >= 0)
                     e = e.prev();
             }
             // Finally, if this submap doesn't go to -infinity, we check that the resulting
             // key isn't smaller than the start.
-            if (e == null || !bottom && compare(e.key, from) < 0)
+            if (e == null || !this.bottom && Long2IntTreeMap.this.compare(e.key, this.from) < 0)
                 return null;
             return e;
         }
         @Override
         public long firstLongKey() {
-            Long2IntTreeMap.Entry e = firstEntry();
+            Long2IntTreeMap.Entry e = this.firstEntry();
             if (e == null)
                 throw new NoSuchElementException();
             return e.key;
         }
         @Override
         public long lastLongKey() {
-            Long2IntTreeMap.Entry e = lastEntry();
+            Long2IntTreeMap.Entry e = this.lastEntry();
             if (e == null)
                 throw new NoSuchElementException();
             return e.key;
@@ -1791,36 +1791,36 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          */
         private class SubmapIterator extends TreeIterator {
             SubmapIterator() {
-                next = firstEntry();
+                this.next = Submap.this.firstEntry();
             }
             SubmapIterator(final long k) {
                 this();
-                if (next != null) {
-                    if (!bottom && compare(k, next.key) < 0)
-                        prev = null;
-                    else if (!top && compare(k, (prev = lastEntry()).key) >= 0)
-                        next = null;
+                if (this.next != null) {
+                    if (!Submap.this.bottom && Long2IntTreeMap.this.compare(k, this.next.key) < 0)
+                        this.prev = null;
+                    else if (!Submap.this.top && Long2IntTreeMap.this.compare(k, (this.prev = Submap.this.lastEntry()).key) >= 0)
+                        this.next = null;
                     else {
-                        next = locateKey(k);
-                        if (compare(next.key, k) <= 0) {
-                            prev = next;
-                            next = next.next();
+                        this.next = Long2IntTreeMap.this.locateKey(k);
+                        if (Long2IntTreeMap.this.compare(this.next.key, k) <= 0) {
+                            this.prev = this.next;
+                            this.next = this.next.next();
                         } else
-                            prev = next.prev();
+                            this.prev = this.next.prev();
                     }
                 }
             }
             @Override
             void updatePrevious() {
-                prev = prev.prev();
-                if (!bottom && prev != null && Long2IntTreeMap.this.compare(prev.key, from) < 0)
-                    prev = null;
+                this.prev = this.prev.prev();
+                if (!Submap.this.bottom && this.prev != null && Long2IntTreeMap.this.compare(this.prev.key, Submap.this.from) < 0)
+                    this.prev = null;
             }
             @Override
             void updateNext() {
-                next = next.next();
-                if (!top && next != null && Long2IntTreeMap.this.compare(next.key, to) >= 0)
-                    next = null;
+                this.next = this.next.next();
+                if (!Submap.this.top && this.next != null && Long2IntTreeMap.this.compare(this.next.key, Submap.this.to) >= 0)
+                    this.next = null;
             }
         }
         private class SubmapEntryIterator extends SubmapIterator implements ObjectListIterator<Entry> {
@@ -1831,11 +1831,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
             }
             @Override
             public Entry next() {
-                return nextEntry();
+                return this.nextEntry();
             }
             @Override
             public Entry previous() {
-                return previousEntry();
+                return this.previousEntry();
             }
         }
         /**
@@ -1857,11 +1857,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
             }
             @Override
             public long nextLong() {
-                return nextEntry().key;
+                return this.nextEntry().key;
             }
             @Override
             public long previousLong() {
-                return previousEntry().key;
+                return this.previousEntry().key;
             }
         }
 
@@ -1878,11 +1878,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         private final class SubmapValueIterator extends SubmapIterator implements IntListIterator {
             @Override
             public int nextInt() {
-                return nextEntry().value;
+                return this.nextEntry().value;
             }
             @Override
             public int previousInt() {
-                return previousEntry().value;
+                return this.previousEntry().value;
             }
         }
     }
@@ -1909,11 +1909,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         c.values = null;
         c.entries = null;
         c.allocatePaths();
-        if (count != 0) {
+        if (this.count != 0) {
             // Also this apparently unfathomable code is derived from GNU libavl.
             Entry e, p, q, rp = new Entry(), rq = new Entry();
             p = rp;
-            rp.left(tree);
+            rp.left(this.tree);
             q = rq;
             rq.pred(null);
             while (true) {
@@ -1954,7 +1954,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         return c;
     }
     private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {
-        int n = count;
+        int n = this.count;
         EntryIterator i = new EntryIterator();
         Entry e;
         s.defaultWriteObject();
@@ -1981,7 +1981,7 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
      */
 
     private Entry readTree(final java.io.ObjectInputStream s, final int n, final Entry pred, final Entry succ)
-            throws java.io.IOException, ClassNotFoundException {
+            throws java.io.IOException {
         if (n == 1) {
             final Entry top = new Entry(s.readLong(), s.readInt());
             top.pred(pred);
@@ -2005,11 +2005,11 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
         // The right subtree is the largest one.
         final int rightN = n / 2, leftN = n - rightN - 1;
         final Entry top = new Entry();
-        top.left(readTree(s, leftN, pred, top));
+        top.left(this.readTree(s, leftN, pred, top));
         top.key = s.readLong();
         top.value = s.readInt();
         top.black(true);
-        top.right(readTree(s, rightN, top, succ));
+        top.right(this.readTree(s, rightN, top, succ));
         if (n + 2 == ((n + 2) & -(n + 2)))
             top.right.black(false); // Quick test for determining whether n + 2 is a power of 2.
         return top;
@@ -2020,19 +2020,19 @@ public class Long2IntTreeMap extends AbstractLong2IntSortedMap implements java.i
          * The storedComparator is now correctly set, but we must restore on-the-fly the
          * actualComparator.
          */
-        setActualComparator();
-        allocatePaths();
-        if (count != 0) {
-            tree = readTree(s, count, null, null);
+        this.setActualComparator();
+        this.allocatePaths();
+        if (this.count != 0) {
+            this.tree = this.readTree(s, this.count, null, null);
             Entry e;
-            e = tree;
+            e = this.tree;
             while (e.left() != null)
                 e = e.left();
-            firstEntry = e;
-            e = tree;
+            this.firstEntry = e;
+            e = this.tree;
             while (e.right() != null)
                 e = e.right();
-            lastEntry = e;
+            this.lastEntry = e;
         }
     }
 }

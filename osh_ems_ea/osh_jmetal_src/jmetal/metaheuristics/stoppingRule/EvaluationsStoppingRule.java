@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class EvaluationsStoppingRule extends StoppingRule {
 
-    private int populationSize;
-    private int maxEvaluations;
+    private final int populationSize;
+    private final int maxEvaluations;
 
     public EvaluationsStoppingRule(Map<String, Object> parameters) throws JMException {
         super(parameters);

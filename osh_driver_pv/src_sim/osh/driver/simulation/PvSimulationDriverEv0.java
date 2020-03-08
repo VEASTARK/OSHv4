@@ -33,19 +33,19 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
     /**
      * nominal power of PV (e.g. 4.6kWpeak)
      */
-    private int nominalPower;
+    private final int nominalPower;
     /**
      * according to inverter (technical, due to VAmax)
      */
-    private int complexPowerMax;
+    private final int complexPowerMax;
     @SuppressWarnings("unused")
-    private int reactivePowerMax;
+    private final int reactivePowerMax;
     /**
      * according to inverter (technical, due to cosPhi: e.g. 0.8ind...0.8cap)
      */
-    private double cosPhiMax;
+    private final double cosPhiMax;
 
-    private PvProfile profile;
+    private final PvProfile profile;
 
     /**
      * CONSTRUCTOR

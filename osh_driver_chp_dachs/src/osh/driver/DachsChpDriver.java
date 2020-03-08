@@ -26,7 +26,7 @@ import java.util.UUID;
 public abstract class DachsChpDriver extends ChpDriver
 {
 
-    private String dachsURL;
+    private final String dachsURL;
 
     //static values
     private double cosPhi;

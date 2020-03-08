@@ -21,7 +21,7 @@
 
 package jmetal.util;
 
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 
 import java.util.stream.DoubleStream;
 
@@ -31,9 +31,9 @@ import java.util.stream.DoubleStream;
  */
 public class PseudoRandom {
 
-    private final OSHRandomGenerator randomGenerator;
+    private final OSHRandom randomGenerator;
 
-    public PseudoRandom(OSHRandomGenerator randomGenerator) {
+    public PseudoRandom(OSHRandom randomGenerator) {
         this.randomGenerator = randomGenerator;
 
     }

@@ -35,7 +35,7 @@ public class SimpleWaterTank extends WaterTank {
 
     // currently unused
     private final double tankHeight;
-    private double tankDiameter;
+    private final double tankDiameter;
     private final double tankSurface;
 
 

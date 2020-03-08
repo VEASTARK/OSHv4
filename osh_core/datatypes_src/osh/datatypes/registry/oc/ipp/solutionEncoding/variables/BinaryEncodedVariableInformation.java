@@ -5,19 +5,10 @@ package osh.datatypes.registry.oc.ipp.solutionEncoding.variables;
  *
  * @author Sebastian Kramer
  */
-public class BinaryEncodedVariableInformation  extends AbstractEncodedVariableInformation {
+public class BinaryEncodedVariableInformation extends AbstractEncodedVariableInformation {
 
-
-    private static final long serialVersionUID = -3308540972492499143L;
 
     private final int bitCount;
-
-    /**
-     * No-arg constructor for serialization.
-     */
-    protected BinaryEncodedVariableInformation() {
-        this.bitCount = 0;
-    }
 
     /**
      * Creates this variable information with the given bit-count needed.

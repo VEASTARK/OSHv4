@@ -39,7 +39,7 @@ public class DachsChpSimulationDriver
     private int typicalGasPower;
 
     @SuppressWarnings("unused")
-    private double typicalTemperatureIn = 45.0;
+    private final double typicalTemperatureIn = 45.0;
     private final double typicalTemperatureOut = 85.0;
     private final double typicalMassFlow = 1;
     private UUID hotWaterTankUuid;
@@ -78,7 +78,7 @@ public class DachsChpSimulationDriver
     // received from other devices...
     private double waterInTemperature = 60.0;
 
-    private GenericChpModel chpModel;
+    private final GenericChpModel chpModel;
 
     private double supply;
     private int starts;

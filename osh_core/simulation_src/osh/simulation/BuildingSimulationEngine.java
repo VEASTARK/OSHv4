@@ -37,11 +37,11 @@ public class BuildingSimulationEngine extends SimulationEngine {
     public double currentReactivePower;
     //logging intervals
     final List<Long[]> loggingIntervals = new ArrayList<>();
-    private UUID entityUUID;
+    private final UUID entityUUID;
     // Simulation Subjects
     private final ArrayList<ISimulationSubject> simSubjectsList;
     private final HashMap<UUID, ISimulationSubject> simSubjectsMap;
-    private OSHParameterCollection engineParameters;
+    private final OSHParameterCollection engineParameters;
     private Long[] timeStampForInterval;
     private long[] relativeIntervalStart;
     private boolean databaseLogging;
@@ -72,7 +72,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
     // ESC Subjects
     private final ArrayList<IDeviceEnergySubject> energySimSubjectsList;
     private final HashMap<UUID, IDeviceEnergySubject> energySimSubjectsMap;
-    private PrintWriter powerWriter;
+    private final PrintWriter powerWriter;
 
 
     /**
@@ -269,10 +269,9 @@ public class BuildingSimulationEngine extends SimulationEngine {
      * simulate the next timeTick, increment the real-time driver
      *
      * @param currentTick
-     * @throws SimulationEngineException
      */
     @Override
-    public void simulateNextTimeTick(long currentTick) throws SimulationEngineException {
+    public void simulateNextTimeTick(long currentTick) {
 
         //		Map<AncillaryCommodity,AncillaryCommodityState> ancillaryMeterState;
         AncillaryMeterState ancillaryMeterState;

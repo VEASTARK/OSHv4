@@ -4,7 +4,7 @@ import jmetal.core.Solution;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.oc.GAConfiguration;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.GlobalController;
@@ -65,10 +65,10 @@ public class OSHGlobalControllerJMetal
     private double upperOverlimitFactor;
     private double lowerOverlimitFactor;
     private ZonedDateTime lastTimeSchedulingStarted;
-    private OSHRandomGenerator optimizationMainRandomGenerator;
+    private final OSHRandom optimizationMainRandomGenerator;
     private long optimizationMainRandomSeed;
-    private GAParameters gaparameters;
-    private String logDir;
+    private final GAParameters gaparameters;
+    private final String logDir;
     private int stepSize;
     private Boolean logGa;
 
@@ -140,7 +140,7 @@ public class OSHGlobalControllerJMetal
             this.optimizationMainRandomSeed = 0xd1ce5bL;
             this.getGlobalLogger().logError("Can't get parameter optimizationMainRandomSeed, using the default value: " + this.optimizationMainRandomSeed);
         }
-        this.optimizationMainRandomGenerator = new OSHRandomGenerator(new Random(this.optimizationMainRandomSeed));
+        this.optimizationMainRandomGenerator = new OSHRandom(this.optimizationMainRandomSeed);
 
         try {
             this.stepSize =
@@ -316,7 +316,7 @@ public class OSHGlobalControllerJMetal
         boolean showSolverDebugMessages = true;
         final long now = this.getTimeDriver().getCurrentEpochSecond();
 
-        OSHRandomGenerator optimisationRunRandomGenerator = new OSHRandomGenerator(new Random(this.optimizationMainRandomGenerator.getNextLong()));
+        OSHRandom optimisationRunRandomGenerator = new OSHRandom(this.optimizationMainRandomGenerator.getNextLong());
 
         // it is a good idea to use a specific random Generator for the EA,
         // to make it comparable with other optimizers...

@@ -10,7 +10,7 @@ import jmetal.metaheuristics.stoppingRule.StoppingRuleFactory;
 import jmetal.operators.crossover.CrossoverFactory;
 import jmetal.operators.mutation.MutationFactory;
 import jmetal.operators.selection.SelectionFactory;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
@@ -51,7 +51,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
      */
     public JMetalEnergySolverGA(
             IGlobalLogger globalLogger,
-            OSHRandomGenerator randomGenerator,
+            OSHRandom randomGenerator,
             boolean showDebugMessages,
             GAParameters parameters,
             long timestamp,

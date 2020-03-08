@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class DeltaFitnessStoppingRule extends StoppingRule {
 
-    private double minDeltaFitnessPercent;
-    private int maxGenerationsDeltaFitnessViolated;
+    private final double minDeltaFitnessPercent;
+    private final int maxGenerationsDeltaFitnessViolated;
 
     private Double lastGenerationBestFitness;
     private int generationsDeltaFitnessViolated;

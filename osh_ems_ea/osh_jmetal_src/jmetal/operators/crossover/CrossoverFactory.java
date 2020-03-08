@@ -24,7 +24,7 @@ package jmetal.operators.crossover;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
 import jmetal.util.PseudoRandom;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 
 import java.util.HashMap;
 
@@ -35,7 +35,7 @@ import java.util.HashMap;
 @SuppressWarnings("rawtypes")
 public class CrossoverFactory {
 
-    public static Crossover getCrossoverOperator(String name, HashMap parameters, OSHRandomGenerator halRandomGenerator) throws JMException {
+    public static Crossover getCrossoverOperator(String name, HashMap parameters, OSHRandom halRandomGenerator) throws JMException {
         PseudoRandom pseudoRandom = new PseudoRandom(halRandomGenerator);
         return getCrossoverOperator(name, parameters, pseudoRandom);
     }

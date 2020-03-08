@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class GUIDeviceListStateExchange extends StateExchange {
 
-    private Set<DeviceTableEntry> deviceList;
+    private final Set<DeviceTableEntry> deviceList;
 
     public GUIDeviceListStateExchange(UUID sender, ZonedDateTime timestamp, Set<DeviceTableEntry> deviceList) {
         super(sender, timestamp);
