@@ -3,7 +3,7 @@ package osh.comdriver.simulation;
 import osh.cal.CALComDriver;
 import osh.cal.ICALExchange;
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
@@ -15,7 +15,6 @@ import osh.hal.exchange.EpsComExchange;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.EnumMap;
-import java.util.Random;
 import java.util.UUID;
 
 
@@ -84,7 +83,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
 
-        OSHRandomGenerator rand = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
         this.generatePriceSignal(rand);
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
         this.lastSignalSent = now;
@@ -105,8 +104,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
         super.onTimeExchange(exchange);
 
         ZonedDateTime now = exchange.getTime();
-        OSHRandomGenerator rand = new OSHRandomGenerator(
-                new Random(this.getOSH().getRandomGenerator().getNextLong()));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         if (!now.isAfter(this.lastSignalSent.plus(this.newSignalAfterThisPeriod))) {
             this.generatePriceSignal(rand);
@@ -130,7 +128,7 @@ public class RandomEpsProviderComDriver extends CALComDriver {
     }
 
 
-    private void generatePriceSignal(OSHRandomGenerator randomGen) {
+    private void generatePriceSignal(OSHRandom randomGen) {
 
         long now = this.getTimeDriver().getCurrentEpochSecond();
 

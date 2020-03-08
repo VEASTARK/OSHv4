@@ -43,7 +43,7 @@ public class ScheduleDrawer extends JPanel {
         ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
     }
 
-    private ChartPanel panel;
+    private final ChartPanel panel;
     private int counter;
 
     /**

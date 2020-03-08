@@ -17,10 +17,6 @@ import java.util.UUID;
  */
 public class FutureAppliancesStaticIPP extends StaticIPP<ISolution, IPrediction> {
 
-    private static final long serialVersionUID = 4075698811201735555L;
-
-
-
     /**
      * Constructs this static future appliance ipp with the given information.
      *

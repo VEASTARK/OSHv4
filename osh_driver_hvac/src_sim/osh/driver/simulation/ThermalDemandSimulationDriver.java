@@ -1,7 +1,7 @@
 package osh.driver.simulation;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
@@ -15,10 +15,15 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.physics.PhysicalConstants;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Sebastian Kramer, Ingo Mauser
@@ -26,14 +31,14 @@ import java.util.*;
 public abstract class ThermalDemandSimulationDriver
         extends DeviceSimulationDriver {
 
-    private String inputSourceFile;
-    private ThermalDemandData demandData;
+    private final String inputSourceFile;
+    private final ThermalDemandData demandData;
 
     private int pastDaysPrediction;
     private float weightForOtherWeekday;
     private float weightForSameWeekday;
 
-    private Commodity hotWaterType;
+    private final Commodity hotWaterType;
 
     private boolean log;
 
@@ -53,7 +58,7 @@ public abstract class ThermalDemandSimulationDriver
             throws SimulationSubjectException, HALException {
         super(osh, deviceID, driverConfig);
 
-        this.inputSourceFile = driverConfig.getParameter("sourcefile");
+        this.inputSourceFile = driverConfig.getParameter(ParameterConstants.WaterDemand.sourceFile);
         if (this.inputSourceFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal ESHL Simulation missing!");
         }
@@ -61,21 +66,21 @@ public abstract class ThermalDemandSimulationDriver
         this.demandData = new ThermalDemandData(this.inputSourceFile, hotWaterType);
 
         try {
-            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter("pastDaysPrediction"));
+            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Prediction.pastDaysPrediction));
         } catch (Exception e) {
             this.pastDaysPrediction = 14;
             this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
         }
 
         try {
-            this.weightForOtherWeekday = Float.parseFloat(driverConfig.getParameter("weightForOtherWeekday"));
+            this.weightForOtherWeekday = Float.parseFloat(driverConfig.getParameter(ParameterConstants.Prediction.weightForOtherWeekday));
         } catch (Exception e) {
             this.weightForOtherWeekday = 1.0f;
             this.getGlobalLogger().logWarning("Can't get weightForOtherWeekday, using the default value: " + this.weightForOtherWeekday);
         }
 
         try {
-            this.weightForSameWeekday = Float.parseFloat(driverConfig.getParameter("weightForSameWeekday"));
+            this.weightForSameWeekday = Float.parseFloat(driverConfig.getParameter(ParameterConstants.Prediction.weightForSameWeekday));
         } catch (Exception e) {
             this.weightForSameWeekday = 5.0f;
             this.getGlobalLogger().logWarning("Can't get weightForSameWeekday, using the default value: " + this.weightForSameWeekday);
@@ -129,7 +134,7 @@ public abstract class ThermalDemandSimulationDriver
 
     @Override
     public void onNextTimeTick() {
-        OSHRandomGenerator ownGen = new OSHRandomGenerator(new Random(this.getRandomGenerator().getNextLong()));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         int randomHourShift = 2; // % 2 == 0
 
@@ -137,8 +142,8 @@ public abstract class ThermalDemandSimulationDriver
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
         if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
 //			double demand = 0;
-            int randomNumber = ownGen.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
-            double demand = (0.5 + ownGen.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
+            int randomNumber = rand.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
+            double demand = (0.5 + rand.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
                     , randomHourShift);
 //			demand += 0.25 * demandData.getTotalThermalDemand(now - 3600, 0, 0);
 //			demand += 0.5 * demandData.getTotalThermalDemand(now, 0, 0);
@@ -183,13 +188,13 @@ public abstract class ThermalDemandSimulationDriver
 
             for (int d0 = 0; d0 < this.avgWeekDayLoad.length; d0++) {
                 for (int d1 = 0; d1 < this.avgWeekDayLoad[d0].length; d1++) {
-                    double factor = (this.avgWeekDayLoadCounter[d0][d1] / 60.0) * 3600000.0;
+                    double factor = (this.avgWeekDayLoadCounter[d0][d1] / 60.0) * PhysicalConstants.factor_wsToKWh;
                     this.avgWeekDayLoad[d0][d1] /= factor;
                 }
             }
 
             for (int d0 = 0; d0 < this.avgDayLoad.length; d0++) {
-                double factor = (this.avgDayLoadCounter[d0] / 86400.0) * 3600000.0;
+                double factor = (this.avgDayLoadCounter[d0] / 86400.0) * PhysicalConstants.factor_wsToKWh;
                 this.avgDayLoad[d0] /= factor;
             }
 

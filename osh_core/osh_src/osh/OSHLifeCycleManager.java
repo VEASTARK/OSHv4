@@ -11,7 +11,7 @@ import osh.configuration.system.RunningType;
 import osh.core.DataBroker;
 import osh.core.LifeCycleStates;
 import osh.core.OCManager;
-import osh.core.OSHRandomGenerator;
+import osh.core.RandomDistributor;
 import osh.core.exceptions.LifeCycleManagerException;
 import osh.core.exceptions.OSHException;
 import osh.core.logging.IGlobalLogger;
@@ -28,11 +28,9 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
 import osh.simulation.exception.SimulationEngineException;
-import osh.simulation.screenplay.ScreenplayType;
 import osh.utils.xml.XMLSerialization;
 
 import java.time.ZonedDateTime;
-import java.util.Random;
 import java.util.UUID;
 
 public class OSHLifeCycleManager {
@@ -47,7 +45,6 @@ public class OSHLifeCycleManager {
 
     private SimulationEngine simEngine;
     private boolean hasSimEngine;
-    private ScreenplayType screenPlayType;
 
     private LifeCycleStates currentState;
 
@@ -149,11 +146,9 @@ public class OSHLifeCycleManager {
             Long optimizationMainRandomSeed,
             String runID,
             String configurationID,
-            String logDir,
-            ScreenplayType screenPlayType) throws LifeCycleManagerException {
+            String logDir) throws LifeCycleManagerException {
 
         this.hasSimEngine = true;
-        this.screenPlayType = screenPlayType;
 
         this.initOSHReadInFiles(
                 oshConfigFile,
@@ -244,8 +239,7 @@ public class OSHLifeCycleManager {
 
         oshConfig.setRandomSeed(usedRandomSeed.toString());
 
-        this.theOrganicSmartHome.setRandomGenerator(
-                new OSHRandomGenerator(new Random(usedRandomSeed)));
+        this.theOrganicSmartHome.setRandomDistributor(new RandomDistributor(this.theOrganicSmartHome, usedRandomSeed));
         this.globalLogger.logInfo("Using random seed 0x" + Long.toHexString(usedRandomSeed));
 
         //assigning Registries
@@ -368,7 +362,7 @@ public class OSHLifeCycleManager {
                     this.ealManager.loadConfiguration(ealConfig, forcedStartTime, this.simEngine);
                 } else {
                     this.ealManager.loadConfiguration(ealConfig, forcedStartTime, Long.valueOf(oshConfig.getRandomSeed()), oshConfig.getEngineParameters(),
-                            this.screenPlayType, oshConfig.getGridConfigurations(), oshConfig.getMeterUUID());
+                            oshConfig.getGridConfigurations(), oshConfig.getMeterUUID());
                     this.simEngine = this.ealManager.getSimEngine();
                 }
             } else {
@@ -448,6 +442,7 @@ public class OSHLifeCycleManager {
             }
             case ON_SYSTEM_IS_UP: {
                 this.dataBroker.onSystemIsUp();
+                this.theOrganicSmartHome.getRandomDistributor().startClock();
                 this.ocManager.onSystemIsUp();
                 this.ealManager.onSystemIsUp();
                 this.calManager.onSystemIsUp();

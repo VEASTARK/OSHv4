@@ -14,6 +14,7 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -29,7 +30,7 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     private Duration newIppAfter;
     private int triggerIppIfDeltaTempBigger;
 
-    private SmartHeaterModel model;
+    private final SmartHeaterModel model;
     private double currentWaterTemperature;
 
     /**
@@ -46,21 +47,23 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
         super(osh, deviceID, driverConfig);
 
         try {
-            this.temperatureSetting = Integer.parseInt(this.getDriverConfig().getParameter("temperatureSetting"));
+            this.temperatureSetting = Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.IHE.temperatureSetting));
         } catch (Exception e) {
             this.temperatureSetting = 80;
             this.getGlobalLogger().logWarning("Can't get temperatureSetting, using the default value: " + this.temperatureSetting);
         }
 
         try {
-            this.newIppAfter = Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter("newIppAfter")));
+            this.newIppAfter =
+                    Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIppAfter = Duration.ofHours(1);
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
         }
 
         try {
-            this.triggerIppIfDeltaTempBigger = Integer.parseInt(this.getDriverConfig().getParameter("triggerIppIfDeltaTempBigger"));
+            this.triggerIppIfDeltaTempBigger =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.IPP.triggerIppIfDeltaTemp));
         } catch (Exception e) {
             this.triggerIppIfDeltaTempBigger = 1;
             this.getGlobalLogger().logWarning("Can't get triggerIppIfDeltaTempBigger, using the default value: " + this.triggerIppIfDeltaTempBigger);

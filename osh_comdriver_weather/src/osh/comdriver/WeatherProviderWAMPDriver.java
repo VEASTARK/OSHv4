@@ -25,7 +25,7 @@ public class WeatherProviderWAMPDriver extends CALComDriver implements Runnable 
 
     private CurrentWeatherProviderWAMPDispatcher currentWeatherProviderWAMPDispatcher;
     private Thread reqCurrentThread;
-    private UUID loggerUUID;
+    private final UUID loggerUUID;
 
 
     /**

@@ -53,6 +53,8 @@ public class NonControllableDachsChpLocalObserver
     private Duration rescheduleAfter;
     private Duration newIPPAfter;
     private int relativeHorizonIPP;
+    private long timePerSlot;
+    private int bitsPerSlot;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
     private double forcedOnHysteresis;
@@ -136,6 +138,8 @@ public class NonControllableDachsChpLocalObserver
             this.hotWaterTankUuid = diox.getHotWaterTankUuid();
             this.rescheduleAfter = diox.getRescheduleAfter();
             this.newIPPAfter = diox.getNewIPPAfter();
+            this.timePerSlot = diox.getTimePerSlot();
+            this.bitsPerSlot = diox.getBitsPerSlot();
             this.currentHotWaterStorageMinTemp = diox.getCurrentHotWaterStorageMinTemp();
             this.currentHotWaterStorageMaxTemp = diox.getCurrentHotWaterStorageMaxTemp();
             this.forcedOnHysteresis = diox.getForcedOnHysteresis();
@@ -165,6 +169,8 @@ public class NonControllableDachsChpLocalObserver
                 this.hotWaterPower,
                 this.gasPower,
                 this.operationMode,
+                this.timePerSlot,
+                this.bitsPerSlot,
                 this.typicalActivePower,
                 this.typicalReactivePower,
                 this.typicalGasPower,

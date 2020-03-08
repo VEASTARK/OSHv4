@@ -15,6 +15,7 @@ import osh.core.oc.*;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.OCEnergySimulationCore;
+import osh.utils.string.ParameterConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +61,9 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
         /*
          * if a optimisation-random seed is given from external it will override the optimisation-random seed in the configuration package
          */
+        Long usedOptimizationRandomSeed = optimizationMainRandomSeed;
         if (optimizationMainRandomSeed == null && ocConfig.getOptimizationMainRandomSeed() != null) {
-            optimizationMainRandomSeed = Long.valueOf(ocConfig.getOptimizationMainRandomSeed());
+            usedOptimizationRandomSeed = Long.parseLong(ocConfig.getOptimizationMainRandomSeed());
         }
         if (optimizationMainRandomSeed == null) {
             this.getLogger()
@@ -70,10 +72,10 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
             this.getLogger()
                     .printDebugMessage(
                             "No optimizationMainRandomSeed available: Using default seed \"0xd1ce5bL\"");
-            optimizationMainRandomSeed = 0xd1ce5bL;
+            usedOptimizationRandomSeed = 0xd1ce5bL;
         }
 
-        ocConfig.setOptimizationMainRandomSeed(optimizationMainRandomSeed.toString());
+        ocConfig.setOptimizationMainRandomSeed(String.valueOf(usedOptimizationRandomSeed));
 
 
         this.getLogger().logInfo("...initializing OC Manager of Organic Smart Home");
@@ -105,7 +107,8 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
         this.globalControllerParameterCollection.loadCollection(ocConfig
                 .getGlobalControllerParameters());
 
-        this.globalControllerParameterCollection.setParameter("optimizationMainRandomSeed", ocConfig.getOptimizationMainRandomSeed());
+        this.globalControllerParameterCollection.setParameter(ParameterConstants.Optimization.optimizationRandomSeed,
+                ocConfig.getOptimizationMainRandomSeed());
 
         try {
             globalObserverClass = Class.forName(ocConfig.getGlobalObserverClass());

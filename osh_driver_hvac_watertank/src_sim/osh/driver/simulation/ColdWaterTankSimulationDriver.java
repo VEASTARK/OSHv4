@@ -3,21 +3,27 @@ package osh.driver.simulation;
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
-import osh.driver.thermal.SimpleColdWaterTank;
+import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exceptions.HALException;
+import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.hal.exchange.ColdWaterTankObserverExchange;
+import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
  * @author Ingo Mauser
  */
-public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
+public class
+ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
-//	private SimpleColdWaterTank waterTank;
-
-//	private RealThermalCommodityState thermalInputState = null;	
+    private Duration newIppAfter;
+    private double triggerIppIfDeltaTempBigger;
+    private double rescheduleIfViolatedTemperature;
+    private Duration rescheduleIfViolatedDuration;
 
     /**
      * CONSTRUCTOR
@@ -35,7 +41,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
         // tank capacity in liters
         double tankCapacity;
         try {
-            tankCapacity = Double.parseDouble(driverConfig.getParameter("tankCapacity"));
+            tankCapacity = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.tankCapacity));
         } catch (Exception e) {
             tankCapacity = 3000.0;
             this.getGlobalLogger().logWarning("Can't get tankCapacity, using the default value: " + tankCapacity);
@@ -43,7 +49,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double tankDiameter;
         try {
-            tankDiameter = Double.parseDouble(driverConfig.getParameter("tankDiameter"));
+            tankDiameter = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.tankDiameter));
         } catch (Exception e) {
             tankDiameter = 1.0;
             this.getGlobalLogger().logWarning("Can't get tankDiameter, using the default value: " + tankDiameter);
@@ -51,7 +57,7 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double initialTemperature;
         try {
-            initialTemperature = Double.parseDouble(driverConfig.getParameter("initialTemperature"));
+            initialTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.initialTemperature));
         } catch (Exception e) {
             initialTemperature = 14.0;
             this.getGlobalLogger().logWarning("Can't get initialTemperature, using the default value: " + initialTemperature);
@@ -59,17 +65,70 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
 
         double ambientTemperature;
         try {
-            ambientTemperature = Double.parseDouble(driverConfig.getParameter("ambientTemperature"));
+            ambientTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.ambientTemperature));
         } catch (Exception e) {
             ambientTemperature = 20.0;
             this.getGlobalLogger().logWarning("Can't get ambientTemperature, using the default value: " + ambientTemperature);
         }
 
-        this.waterTank = new SimpleColdWaterTank(
+        double standingHeatLossFactor;
+        try {
+            standingHeatLossFactor = Double.parseDouble(driverConfig.getParameter(ParameterConstants.WaterTank.standingHeatLossFactor));
+        } catch (Exception e) {
+            standingHeatLossFactor = 1.0;
+            this.getGlobalLogger().logWarning("Can't get standingHeatLossFactor, using the default value: " + standingHeatLossFactor);
+        }
+
+        try {
+            this.newIppAfter =
+                    Duration.ofSeconds(Long.parseLong(this.getDriverConfig().getParameter(ParameterConstants.IPP.newIPPAfter)));
+        } catch (Exception e) {
+            this.newIppAfter = Duration.ofHours(1);
+            this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
+        }
+
+        try {
+            this.rescheduleIfViolatedTemperature =
+                    Double.parseDouble(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedTemperature));
+        } catch (Exception e) {
+            this.rescheduleIfViolatedTemperature = 2.5;
+            this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedTemperature, using the default value: " + this.rescheduleIfViolatedDuration);
+        }
+
+        try {
+            this.rescheduleIfViolatedDuration =
+                    Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedDuration)));
+        } catch (Exception e) {
+            //TODO: 2 minutes as deault is too low but will be kept for backwards-compatibility, change to 10 as soon
+            // as the next update that breaks backwards-compatibility
+            this.rescheduleIfViolatedDuration = Duration.ofMinutes(2);
+            this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedDuration, using the default value: " + this.rescheduleIfViolatedDuration);
+        }
+
+        try {
+            this.triggerIppIfDeltaTempBigger =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.IPP.triggerIppIfDeltaTemp));
+        } catch (Exception e) {
+            this.triggerIppIfDeltaTempBigger = 0.1;
+            this.getGlobalLogger().logWarning("Can't get triggerIppIfDeltaTempBigger, using the default value: " + this.triggerIppIfDeltaTempBigger);
+        }
+
+        this.waterTank = new FactorisedBasicWaterTank(
                 tankCapacity,
                 tankDiameter,
                 initialTemperature,
-                ambientTemperature);
+                ambientTemperature,
+                standingHeatLossFactor);
+    }
+
+    @Override
+    public void onSimulationIsUp() throws SimulationSubjectException {
+        super.onSimulationIsUp();
+
+        IPPSchedulingExchange _ise = new IPPSchedulingExchange(this.getUUID(), this.getTimeDriver().getCurrentTime());
+        _ise.setNewIppAfter(this.newIppAfter);
+        _ise.setTriggerIfDeltaX(this.triggerIppIfDeltaTempBigger);
+        this.notifyObserver(_ise);
     }
 
     @Override
@@ -108,6 +167,11 @@ public class ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
                         this.getTimeDriver().getCurrentTime(),
                         this.waterTank.getCurrentWaterTemperature(),
                         this.waterTank.getTankCapacity(),
+                        this.waterTank.getTankDiameter(),
+                        this.waterTank.getAmbientTemperature(),
+                        this.waterTank.getStandingHeatLossFactor(),
+                        this.rescheduleIfViolatedTemperature,
+                        this.rescheduleIfViolatedDuration,
                         demand,
                         supply);
         this.notifyObserver(observerExchange);

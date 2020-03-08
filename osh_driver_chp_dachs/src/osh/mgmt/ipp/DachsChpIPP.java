@@ -34,8 +34,8 @@ public class DachsChpIPP
     /**
      * slot length in [s]
      */
-    private final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
-    private final static int BITS_PER_ACTIVATION = 4;
+    private final long timePerSlot;
+    private final int bitsPerSlot;
     private final boolean initialState;
     /**
      * minimum running time of CHP in seconds
@@ -43,10 +43,10 @@ public class DachsChpIPP
     private final int minRunTime;
     // fixed costs per start, i.e., costs to turn on the CHP
     // (not the variable costs for letting the CHP run)
-    private double fixedCostPerStart;
-    private double forcedOnOffStepMultiplier;
-    private int forcedOffAdditionalCost;
-    private double chpOnCervisiaStepSizeMultiplier;
+    private final double fixedCostPerStart;
+    private final double forcedOnOffStepMultiplier;
+    private final int forcedOffAdditionalCost;
+    private final double chpOnCervisiaStepSizeMultiplier;
     //TODO add maxRunTime
     // temperature control
     private final double hotWaterStorageMinTemp;
@@ -89,6 +89,8 @@ public class DachsChpIPP
             UUID deviceId,
             ZonedDateTime timestamp,
             boolean toBeScheduled,
+            long timePerSlot,
+            int bitsPerSlot,
             boolean initialState,
             int minRunTime,
             GenericChpModel chpModel,
@@ -118,9 +120,11 @@ public class DachsChpIPP
                 EnumSet.of(Commodity.HEATINGHOTWATERPOWER),
                 compressionType,
                 compressionValue,
-                new BinaryBiStateVariableTranslator(BITS_PER_ACTIVATION),
-                new RealSimulatedBiStateTranslator(BITS_PER_ACTIVATION));
+                new BinaryBiStateVariableTranslator(bitsPerSlot),
+                new RealSimulatedBiStateTranslator(bitsPerSlot));
 
+        this.timePerSlot = timePerSlot;
+        this.bitsPerSlot = bitsPerSlot;
         this.initialState = initialState;
         this.minRunTime = minRunTime;
 
@@ -148,6 +152,8 @@ public class DachsChpIPP
      */
     public DachsChpIPP(DachsChpIPP other) {
         super(other);
+        this.timePerSlot = other.timePerSlot;
+        this.bitsPerSlot = other.bitsPerSlot;
         this.initialState = other.initialState;
         this.minRunTime = other.minRunTime;
 
@@ -190,7 +196,7 @@ public class DachsChpIPP
 
     private void updateSolutionInformation(long referenceTime, long maxHorizon) {
         //TODO: change to Math.ceil as soon as backwards compatibility is broken by another update
-        int slots = (int) Math.round(((double) (maxHorizon - referenceTime)) / ((float) TIME_PER_SLOT));
+        int slots = (int) Math.round(((double) (maxHorizon - referenceTime)) / ((float) timePerSlot));
         double[][] boundarys = new double[slots][];
 
         for (int i = 0; i < slots; i++) {
@@ -218,7 +224,7 @@ public class DachsChpIPP
         boolean plannedState = false;
         boolean hysteresisOn = false;
 
-        int i = (int) ((this.getInterdependentTime() - this.interdependentTimeOfFirstBit) / TIME_PER_SLOT);
+        int i = (int) ((this.getInterdependentTime() - this.interdependentTimeOfFirstBit) / timePerSlot);
 
         if (i < this.ab.length) {
             chpOn = this.ab[i];
@@ -358,10 +364,10 @@ public class DachsChpIPP
                 if (currentActivation == null) {
                     currentActivation = new Activation();
                     currentActivation.startTime =
-                            TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * TIME_PER_SLOT);
-                    duration = TIME_PER_SLOT;
+                            TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * timePerSlot);
+                    duration = timePerSlot;
                 } else {
-                    duration += TIME_PER_SLOT;
+                    duration += timePerSlot;
                 }
             } else {
                 // turn off
@@ -431,7 +437,7 @@ public class DachsChpIPP
             currentState = ret[i];
 
             if (ret[i]) {
-                runningFor += TIME_PER_SLOT;
+                runningFor += timePerSlot;
             } else {
                 runningFor = 0;
             }
@@ -441,7 +447,7 @@ public class DachsChpIPP
     }
 
     private int getNecessaryNumberOfBits() {
-        return Math.round((float) (this.getOptimizationHorizon() - this.getReferenceTime()) / TIME_PER_SLOT) * BITS_PER_ACTIVATION;
+        return Math.round((float) (this.getOptimizationHorizon() - this.getReferenceTime()) / timePerSlot) * bitsPerSlot;
     }
 
     @Override

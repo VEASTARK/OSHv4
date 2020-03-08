@@ -13,6 +13,7 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
+import osh.utils.string.ParameterConstants;
 
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -32,19 +33,19 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
     /**
      * nominal power of PV (e.g. 4.6kWpeak)
      */
-    private int nominalPower;
+    private final int nominalPower;
     /**
      * according to inverter (technical, due to VAmax)
      */
-    private int complexPowerMax;
+    private final int complexPowerMax;
     @SuppressWarnings("unused")
-    private int reactivePowerMax;
+    private final int reactivePowerMax;
     /**
      * according to inverter (technical, due to cosPhi: e.g. 0.8ind...0.8cap)
      */
-    private double cosPhiMax;
+    private final double cosPhiMax;
 
-    private PvProfile profile;
+    private final PvProfile profile;
 
     /**
      * CONSTRUCTOR
@@ -61,13 +62,13 @@ public class PvSimulationDriverEv0 extends DeviceSimulationDriver {
         this.pvSwitchedOn = true;
         this.reactivePowerTarget = 0;
 
-        String profileSourceName = driverConfig.getParameter("profilesource");
-        this.nominalPower = Integer.parseInt(driverConfig.getParameter("nominalpower"));
-        this.complexPowerMax = Integer.parseInt(driverConfig.getParameter("complexpowermax"));
-        this.cosPhiMax = Double.parseDouble(driverConfig.getParameter("cosphimax"));
+        String profileSourceName = driverConfig.getParameter(ParameterConstants.General_Devices.profileSource);
+        this.nominalPower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.PV.nominalPower));
+        this.complexPowerMax = Integer.parseInt(driverConfig.getParameter(ParameterConstants.PV.complexPowerMax));
+        this.cosPhiMax = Double.parseDouble(driverConfig.getParameter(ParameterConstants.PV.cosPhiMax));
 
         try {
-            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter("pastDaysPrediction"));
+            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Prediction.pastDaysPrediction));
         } catch (Exception e) {
             this.pastDaysPrediction = 14;
             this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);

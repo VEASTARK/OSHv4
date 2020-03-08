@@ -12,6 +12,7 @@ import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
 import osh.utils.slp.IH0Profile;
+import osh.utils.string.ParameterConstants;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -70,7 +71,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         super(osh, deviceID, driverConfig);
 
         try {
-            this.h0ProfileFileName = this.getComConfig().getParameter("h0Filename");
+            this.h0ProfileFileName = this.getComConfig().getParameter(ParameterConstants.General_Devices.h0Filename);
             if (this.h0ProfileFileName == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -79,7 +80,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
         }
 
         try {
-            this.h0ClassName = this.getComConfig().getParameter("h0Classname");
+            this.h0ClassName = this.getComConfig().getParameter(ParameterConstants.General_Devices.h0Classname);
             if (this.h0ClassName == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -89,77 +90,83 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
 
         try {
             this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
-                    "newSignalAfterThisPeriod")));
+                    ParameterConstants.Signal.newSignal)));
         } catch (Exception e) {
             this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
         try {
-            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter("signalPeriod"));
+            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.Signal.signalPeriod));
         } catch (Exception e) {
             this.signalPeriod = 129600; //36 hours
             this.getGlobalLogger().logWarning("Can't get signalPeriod, using the default value: " + this.signalPeriod);
         }
 
         try {
-            this.signalConstantPeriod = Integer.parseInt(this.getComConfig().getParameter("signalConstantPeriod"));
+            this.signalConstantPeriod = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.Signal.signalConstantPeriod));
         } catch (Exception e) {
             this.signalConstantPeriod = 900; //15 minutes
             this.getGlobalLogger().logWarning("Can't get signalConstantPeriod, using the default value: " + this.signalConstantPeriod);
         }
 
         try {
-            this.activePowerExternalSupplyMin = Double.parseDouble(this.getComConfig().getParameter("activePowerExternalSupplyMin"));
+            this.activePowerExternalSupplyMin =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.activePriceSupplyMin));
         } catch (Exception e) {
             this.activePowerExternalSupplyMin = 5.0;
             this.getGlobalLogger().logWarning("Can't get activePowerExternalSupplyMin, using the default value: " + this.activePowerExternalSupplyMin);
         }
 
         try {
-            this.activePowerExternalSupplyAvg = Double.parseDouble(this.getComConfig().getParameter("activePowerExternalSupplyAvg"));
+            this.activePowerExternalSupplyAvg =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.activePriceSupplyAvg));
         } catch (Exception e) {
             this.activePowerExternalSupplyAvg = 25.0;
             this.getGlobalLogger().logWarning("Can't get activePowerExternalSupplyAvg, using the default value: " + this.activePowerExternalSupplyAvg);
         }
 
         try {
-            this.activePowerExternalSupplyMax = Double.parseDouble(this.getComConfig().getParameter("activePowerExternalSupplyMax"));
+            this.activePowerExternalSupplyMax =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.activePriceSupplyMax));
         } catch (Exception e) {
             this.activePowerExternalSupplyMax = 45.0;
             this.getGlobalLogger().logWarning("Can't get activePowerExternalSupplyMax, using the default value: " + this.activePowerExternalSupplyMax);
         }
 
         try {
-            this.activePowerAutoConsumptionPV = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionPV"));
+            this.activePowerAutoConsumptionPV =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.pvAutoConsumptionPrice));
         } catch (Exception e) {
             this.activePowerAutoConsumptionPV = 0.0;
             this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionPV, using the default value: " + this.activePowerAutoConsumptionPV);
         }
 
         try {
-            this.activePowerAutoConsumptionCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionCHP"));
+            this.activePowerAutoConsumptionCHP =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.chpAutoConsumptionPrice));
         } catch (Exception e) {
             this.activePowerAutoConsumptionCHP = 0.0;
             this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionCHP, using the default value: " + this.activePowerAutoConsumptionCHP);
         }
 
         try {
-            this.naturalGasPowerPrice = Double.parseDouble(this.getComConfig().getParameter("naturalGasPowerPrice"));
+            this.naturalGasPowerPrice = Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.gasPrice));
         } catch (Exception e) {
             this.naturalGasPowerPrice = 7.5;
             this.getGlobalLogger().logWarning("Can't get naturalGasPowerPrice, using the default value: " + this.naturalGasPowerPrice);
         }
 
         try {
-            this.activePowerFeedInPV = Double.parseDouble(this.getComConfig().getParameter("activePowerFeedInPV"));
+            this.activePowerFeedInPV = Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.pvFeedInPrice));
         } catch (Exception e) {
             this.activePowerFeedInPV = 10.0;
             this.getGlobalLogger().logWarning("Can't get activePowerFeedInPV, using the default value: " + this.activePowerFeedInPV);
         }
 
         try {
-            this.activePowerFeedInCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerFeedInCHP"));
+            this.activePowerFeedInCHP =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.chpFeedInPrice));
         } catch (Exception e) {
             this.activePowerFeedInCHP = 5.0;
             this.getGlobalLogger().logWarning("Can't get activePowerFeedInCHP, using the default value: " + this.activePowerFeedInCHP);
@@ -269,7 +276,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
                 this.activePowerExternalSupplyAvg,
                 this.activePowerExternalSupplyMax,
                 this.h0Profile,
-                this.getOSH().getRandomGenerator(),
+                this.getOSH().getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass(), true),
                 false,
                 0,
                 0);

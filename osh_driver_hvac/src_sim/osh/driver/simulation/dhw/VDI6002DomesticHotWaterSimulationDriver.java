@@ -1,7 +1,7 @@
 package osh.driver.simulation.dhw;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
@@ -16,11 +16,12 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.csv.CSVImporter;
+import osh.utils.physics.PhysicalConstants;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -28,14 +29,14 @@ import java.util.UUID;
  */
 public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDriver {
 
-    private String weekDayHourProbabilitiesFile;
+    private final String weekDayHourProbabilitiesFile;
     //d0 = hour, d1 = weekday
-    private double[][] weekDayHourProbabilities;
+    private final double[][] weekDayHourProbabilities;
     private double[][] cumulativeWeekDayHourProbabilities;
 
-    private String drawOffTypesFile;
+    private final String drawOffTypesFile;
     //d0 = hour, d1 = weekday
-    private double[][] drawOffTypes;
+    private final double[][] drawOffTypes;
     private double[] cumulativeProfileProbabilities;
 
     private double avgYearlyRuns;
@@ -58,18 +59,19 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
                                                    OSHParameterCollection driverConfig) throws HALException, SimulationSubjectException {
         super(osh, deviceID, driverConfig);
 
-        this.drawOffTypesFile = driverConfig.getParameter("drawOffTypesFile");
+        this.drawOffTypesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.drawOffFile);
         if (this.drawOffTypesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
-        this.weekDayHourProbabilitiesFile = driverConfig.getParameter("weekDayHourProbabilitiesFile");
+        this.weekDayHourProbabilitiesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.probabilitiesFile);
         if (this.drawOffTypesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
         try {
-            this.avgYearlyDemand = Double.parseDouble(this.getDriverConfig().getParameter("avgYearlyDemamd"));
+            this.avgYearlyDemand =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.WaterDemand.averageYearlyDemand));
         } catch (Exception e) {
             this.avgYearlyDemand = 700;
             this.getGlobalLogger().logWarning("Can't get avgYearlyDemand, using the default value: " + this.avgYearlyDemand);
@@ -173,15 +175,14 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
     @Override
     public void onNextTimeTick() {
 
-        long initialNumber = this.getRandomGenerator().getNextLong();
-        OSHRandomGenerator newRandomGen = new OSHRandomGenerator(new Random(initialNumber));
+        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         if (this.dayProfile == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             if (this.dayProfile == null)
                 this.dayProfile = new SparseLoadProfile();
-            this.generateDailyDemandProfile(now, newRandomGen);
+            this.generateDailyDemandProfile(now, rand);
         }
 
         int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.getTimeDriver().getCurrentEpochSecond());
@@ -222,13 +223,13 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
             for (int d0 = 0; d0 < this.avgWeekDayLoad.length; d0++) {
                 for (int d1 = 0; d1 < this.avgWeekDayLoad[d0].length; d1++) {
-                    double factor = (this.avgWeekDayLoadCounter[d0][d1] / 60.0) * 3600000.0;
+                    double factor = (this.avgWeekDayLoadCounter[d0][d1] / 60.0) * PhysicalConstants.factor_wsToKWh;
                     this.avgWeekDayLoad[d0][d1] /= factor;
                 }
             }
 
             for (int d0 = 0; d0 < this.avgDayLoad.length; d0++) {
-                double factor = (this.avgDayLoadCounter[d0] / 86400.0) * 3600000.0;
+                double factor = (this.avgDayLoadCounter[d0] / 86400.0) * PhysicalConstants.factor_wsToKWh;
                 this.avgDayLoad[d0] /= factor;
             }
 
@@ -241,7 +242,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         // NOTHING
     }
 
-    private void generateDailyDemandProfile(ZonedDateTime now, OSHRandomGenerator randomGen) {
+    private void generateDailyDemandProfile(ZonedDateTime now, OSHRandom randomGen) {
 
         int month = TimeConversion.getCorrectedMonth(now);
         int weekDay = TimeConversion.getCorrectedDayOfWeek(now);
@@ -314,7 +315,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
 
     }
 
-    private int getRandomHourBasedOnProbabilities(OSHRandomGenerator randomGen, int weekDay) {
+    private int getRandomHourBasedOnProbabilities(OSHRandom randomGen, int weekDay) {
 
         double randomNumber = randomGen.getNextDouble();
         int hour = 0;

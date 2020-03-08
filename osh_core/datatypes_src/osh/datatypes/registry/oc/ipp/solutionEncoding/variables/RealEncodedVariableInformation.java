@@ -9,8 +9,6 @@ import java.util.Objects;
  */
 public class RealEncodedVariableInformation extends AbstractEncodedVariableInformation {
 
-    private static final long serialVersionUID = -4410726766559094781L;
-
     /**
      * The number of variables needed for the optimization loop.
      */
@@ -20,14 +18,6 @@ public class RealEncodedVariableInformation extends AbstractEncodedVariableInfor
      * The min/max boundaries of every variable needed for the optimization loop.
      */
     private final double[][] variableBoundaries;
-
-    /**
-     * No-arg constructor for serialization.
-     */
-    protected RealEncodedVariableInformation() {
-        this.variableCount = 0;
-        this.variableBoundaries = new double[0][0];
-    }
 
     /**
      * Creates this variable information with the given variable count and the given min/max boundaries for the

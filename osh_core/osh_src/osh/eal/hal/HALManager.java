@@ -8,7 +8,6 @@ import osh.configuration.eal.AssignedDevice;
 import osh.configuration.eal.EALConfiguration;
 import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.GridConfig;
-import osh.core.OSHRandomGenerator;
 import osh.core.bus.BusManager;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.ILifeCycleListener;
@@ -22,7 +21,6 @@ import osh.eal.hal.exceptions.HALManagerException;
 import osh.simulation.*;
 import osh.simulation.energy.SimEnergySimulationCore;
 import osh.simulation.exception.SimulationEngineException;
-import osh.simulation.screenplay.ScreenplayType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -96,7 +94,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
             ZonedDateTime forcedStartTime,
             Long randomSeed,
             List<ConfigurationParameter> engineParameters,
-            ScreenplayType currentScreenplayType,
             List<GridConfig> gridConfigurations,
             String meterUUID) throws HALManagerException {
 
@@ -107,7 +104,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
                 this.getOSH().getOSHStatus().getLogDir(),
                 randomSeed,
                 engineParameters,
-                currentScreenplayType,
                 gridConfigurations,
                 meterUUID);
         this.initSimulationEngine();
@@ -139,7 +135,7 @@ public class HALManager extends EALManager implements ILifeCycleListener {
         this.getGlobalLogger().logInfo("...creating EAL-BUS-devices... [DONE]");
 
         this.getGlobalLogger().logInfo("...creating EAL-device-drivers");
-        this.processDeviceDriverConfiguration(this.getOSH().getRandomGenerator());
+        this.processDeviceDriverConfiguration();
         this.getGlobalLogger().logInfo("...creating EAL-device-drivers... [DONE]");
     }
 
@@ -149,7 +145,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
             String logDir,
             Long randomSeed,
             List<ConfigurationParameter> engineParameters,
-            ScreenplayType currentScreenplayType,
             List<GridConfig> gridConfigurations,
             String meterUUID) throws HALManagerException {
 
@@ -213,7 +208,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
                     allDrivers,
                     engineParameters,
                     esc,
-                    currentScreenplayType,
                     simlogger,
                     powerWriter,
                     this.getOSH().getOSHStatus().getHhUUID());
@@ -240,7 +234,7 @@ public class HALManager extends EALManager implements ILifeCycleListener {
 
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void processDeviceDriverConfiguration(OSHRandomGenerator halRandomGenerator) throws HALManagerException {
+    private void processDeviceDriverConfiguration() throws HALManagerException {
 
         for (int i = 0; i < this.ealConfig.getAssignedDevices().size(); i++) {
 

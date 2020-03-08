@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class GUIAncillaryMeterStateExchange extends StateExchange {
 
-    private AncillaryCommodityLoadProfile ancillaryMeter;
+    private final AncillaryCommodityLoadProfile ancillaryMeter;
 
     public GUIAncillaryMeterStateExchange(UUID sender, ZonedDateTime timestamp,
                                           AncillaryCommodityLoadProfile ancillaryMeter) {

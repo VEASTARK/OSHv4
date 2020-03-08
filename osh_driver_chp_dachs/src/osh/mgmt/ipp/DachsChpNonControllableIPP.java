@@ -25,7 +25,6 @@ public class DachsChpNonControllableIPP
     /**
      * slot length in [s]
      */
-    public final static long TIME_PER_SLOT = 5 * 60; // 5 minutes
     private final GenericChpModel masterModel;
     private GenericChpModel actualModel;
     private final double fixedCostPerStart;

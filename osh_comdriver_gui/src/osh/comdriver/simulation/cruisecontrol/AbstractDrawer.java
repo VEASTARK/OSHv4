@@ -32,9 +32,9 @@ abstract class AbstractDrawer extends JPanel {
         ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
     }
 
-    private ChartPanel panel;
-    private String name;
-    private boolean showPast;
+    private final ChartPanel panel;
+    private final String name;
+    private final boolean showPast;
     private int showDays = 2;
 
 

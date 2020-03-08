@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class OSHGlobalLogger implements IGlobalLogger {
 
-    private IOSH osh;
+    private final IOSH osh;
 
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
 

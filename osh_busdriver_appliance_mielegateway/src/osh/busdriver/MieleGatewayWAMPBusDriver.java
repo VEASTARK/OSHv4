@@ -44,9 +44,9 @@ public class MieleGatewayWAMPBusDriver extends HALBusDriver implements Runnable,
     private final String mieleGatewayHost;
     private MieleGatewayWAMPDispatcher mieleGatewayDispatcher;
 
-    private InetAddress mieleGatewayAddr;
+    private final InetAddress mieleGatewayAddr;
 
-    private Map<UUID, Integer> deviceIds;
+    private final Map<UUID, Integer> deviceIds;
 
 
     /**

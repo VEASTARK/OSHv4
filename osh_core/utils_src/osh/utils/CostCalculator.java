@@ -9,6 +9,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.power.PowerInterval;
+import osh.utils.physics.PhysicalConstants;
 
 import java.util.EnumMap;
 
@@ -16,9 +17,6 @@ import java.util.EnumMap;
  * @author Ingo Mauser, Sebastian Kramer
  */
 public class CostCalculator {
-
-    private static final double WsTOkWHDivisor = 3600000.0;
-
 
     /* ##########################
      *  epsOptimizationObjective
@@ -148,7 +146,7 @@ public class CostCalculator {
                 upperOverLimitFactor,
                 lowerOverLimitFactor,
                 startCalc,
-                endCalc) / WsTOkWHDivisor);
+                endCalc) / PhysicalConstants.factor_wsToKWh);
 
 //		SortedSet<Long> gasPowerChanges = calcSingularLoadChanges(AncillaryCommodity.NATURALGASPOWEREXTERNAL,
 //				ancillaryMeter, startCalc, endCalc);
@@ -168,7 +166,7 @@ public class CostCalculator {
                 upperOverLimitFactor,
                 lowerOverLimitFactor,
                 startCalc,
-                endCalc) / WsTOkWHDivisor);
+                endCalc) / PhysicalConstants.factor_wsToKWh);
 
         //eps > 0 --> We have to calculate FeedIn/AutoConsumption costs
         if (epsOptimizationObjective > 0) {
@@ -183,7 +181,7 @@ public class CostCalculator {
                     epsOptimizationObjective,
                     lowerOverLimitFactor,
                     startCalc,
-                    endCalc) / WsTOkWHDivisor);
+                    endCalc) / PhysicalConstants.factor_wsToKWh);
 
             //eps == 2 || eps == 4 calculate AutoConsumption costs
             if (epsOptimizationObjective == 2 || epsOptimizationObjective == 4) {
@@ -206,7 +204,7 @@ public class CostCalculator {
                         priceSignals,
                         epsOptimizationObjective,
                         startCalc,
-                        endCalc) / WsTOkWHDivisor);
+                        endCalc) / PhysicalConstants.factor_wsToKWh);
             }
         }
 
@@ -229,7 +227,7 @@ public class CostCalculator {
 
             costs += (calcVarPower(varPowerChanges, varPriceChanges, varLimitChanges, upperOverLimitFactor, lowerOverLimitFactor,
                     startCalc, endCalc, ancillaryMeter, priceSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL),
-                    powerLimitSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL)) / WsTOkWHDivisor);
+                    powerLimitSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL)) / PhysicalConstants.factor_wsToKWh);
         }
 
         return costs;
@@ -378,7 +376,9 @@ public class CostCalculator {
          * [4] = feedInCompensationCHP
          * [5] = autoConsumptionCosts
          */
-        return new double[]{epsCosts / WsTOkWHDivisor, plsCosts / WsTOkWHDivisor, gasCosts / WsTOkWHDivisor, feedInCostsPV / WsTOkWHDivisor, feedInCostsCHP / WsTOkWHDivisor, autoConsumptionCosts / WsTOkWHDivisor};
+        return new double[]{epsCosts / PhysicalConstants.factor_wsToKWh, plsCosts / PhysicalConstants.factor_wsToKWh,
+                gasCosts / PhysicalConstants.factor_wsToKWh, feedInCostsPV / PhysicalConstants.factor_wsToKWh,
+                feedInCostsCHP / PhysicalConstants.factor_wsToKWh, autoConsumptionCosts / PhysicalConstants.factor_wsToKWh};
     }
 
     private static LongSortedSet calcSingularLoadChanges(AncillaryCommodity ancillaryCommodity, AncillaryCommodityLoadProfile ancillaryMeter,

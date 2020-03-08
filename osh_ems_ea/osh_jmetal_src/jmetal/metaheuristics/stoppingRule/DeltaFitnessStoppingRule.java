@@ -4,6 +4,7 @@ import jmetal.core.Problem;
 import jmetal.core.SolutionSet;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Map;
 
@@ -18,15 +19,15 @@ public class DeltaFitnessStoppingRule extends StoppingRule {
     public DeltaFitnessStoppingRule(Map<String, Object> parameters) throws JMException {
         super(parameters);
 
-        if (this._parameters.get("minDeltaFitnessPerc") != null)
-            this.minDeltaFitnessPercent = (double) parameters.get("minDeltaFitnessPerc");
+        if (this._parameters.get(ParameterConstants.EA.minDeltaFitnessPercent) != null)
+            this.minDeltaFitnessPercent = (double) parameters.get(ParameterConstants.EA.minDeltaFitnessPercent);
         else {
             Configuration.logger_.severe("EvaluationsStoppingRule no minDeltaFitnessPerc in parameters.");
             throw new JMException("no minDeltaFitnessPerc in parameters");
         }
 
-        if (this._parameters.get("maxGenerationsDeltaFitnessViolated") != null)
-            this.maxGenerationsDeltaFitnessViolated = (int) parameters.get("maxGenerationsDeltaFitnessViolated");
+        if (this._parameters.get(ParameterConstants.EA.maxGenerationsDeltaFitnessViolated) != null)
+            this.maxGenerationsDeltaFitnessViolated = (int) parameters.get(ParameterConstants.EA.maxGenerationsDeltaFitnessViolated);
         else {
             Configuration.logger_.severe("EvaluationsStoppingRule no maxGenerationsDeltaFitnessViolated in parameters.");
             throw new JMException("no minGenerations in parameters");

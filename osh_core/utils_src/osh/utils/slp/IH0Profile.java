@@ -16,11 +16,11 @@ public interface IH0Profile {
      * @return
      */
     static double getBdewDynamizationValue(int dayOfYear) {
-        dayOfYear++;
-        return -0.000000000392 * Math.pow(dayOfYear, 4)
-                + 0.00000032 * Math.pow(dayOfYear, 3)
-                + -0.0000702 * Math.pow(dayOfYear, 2)
-                + 0.0021 * Math.pow(dayOfYear, 1) + 1.24;
+        int correctedDayOfYear = dayOfYear + 1;
+        return -0.000000000392 * Math.pow(correctedDayOfYear, 4)
+                + 0.00000032 * Math.pow(correctedDayOfYear, 3)
+                + -0.0000702 * Math.pow(correctedDayOfYear, 2)
+                + 0.0021 * Math.pow(correctedDayOfYear, 1) + 1.24;
     }
 
     /**

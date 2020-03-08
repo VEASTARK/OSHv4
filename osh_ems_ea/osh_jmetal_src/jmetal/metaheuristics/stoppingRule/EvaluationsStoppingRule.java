@@ -4,6 +4,7 @@ import jmetal.core.Problem;
 import jmetal.core.SolutionSet;
 import jmetal.util.Configuration;
 import jmetal.util.JMException;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Map;
 
@@ -15,15 +16,15 @@ public class EvaluationsStoppingRule extends StoppingRule {
     public EvaluationsStoppingRule(Map<String, Object> parameters) throws JMException {
         super(parameters);
 
-        if (this._parameters.get("populationSize") != null)
-            this.populationSize = (int) parameters.get("populationSize");
+        if (this._parameters.get(ParameterConstants.EA.populationSize) != null)
+            this.populationSize = (int) parameters.get(ParameterConstants.EA.populationSize);
         else {
             Configuration.logger_.severe("EvaluationsStoppingRule no populationSize in parameters.");
             throw new JMException("no populationSize in parameters");
         }
 
-        if (this._parameters.get("maxEvaluations") != null)
-            this.maxEvaluations = (int) parameters.get("maxEvaluations");
+        if (this._parameters.get(ParameterConstants.EA.maxEvaluations) != null)
+            this.maxEvaluations = (int) parameters.get(ParameterConstants.EA.maxEvaluations);
         else {
             Configuration.logger_.severe("EvaluationsStoppingRule no maxEvaluations in parameters.");
             throw new JMException("no maxEvaluations in parameters");

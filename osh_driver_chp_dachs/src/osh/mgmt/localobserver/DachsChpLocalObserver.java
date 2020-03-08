@@ -41,6 +41,8 @@ public class DachsChpLocalObserver
 
     // quasi static values
     private final ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
+    private long timePerSlot;
+    private int bitsPerSlot;
     private int typicalActivePower;
     private int typicalReactivePower;
     private int typicalGasPower;
@@ -124,6 +126,8 @@ public class DachsChpLocalObserver
             this.newIPPAfter = diox.getNewIPPAfter();
             this.currentHotWaterStorageMinTemp = diox.getCurrentHotWaterStorageMinTemp();
             this.currentHotWaterStorageMaxTemp = diox.getCurrentHotWaterStorageMaxTemp();
+            this.timePerSlot = diox.getTimePerSlot();
+            this.bitsPerSlot = diox.getBitsPerSlot();
             this.forcedOnHysteresis = diox.getForcedOnHysteresis();
             this.relativeHorizonIPP = diox.getRelativeHorizonIPP();
 
@@ -159,6 +163,8 @@ public class DachsChpLocalObserver
                 this.hotWaterPower,
                 this.gasPower,
                 this.operationMode,
+                this.timePerSlot,
+                this.bitsPerSlot,
                 this.typicalActivePower,
                 this.typicalReactivePower,
                 this.typicalGasPower,

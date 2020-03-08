@@ -24,6 +24,8 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
     private Duration rescheduleAfter;
     private Duration newIPPAfter;
     private int relativeHorizonIPP;
+    private long timePerSlot;
+    private int bitsPerSlot;
     private double currentHotWaterStorageMinTemp;
     private double currentHotWaterStorageMaxTemp;
     private double forcedOnHysteresis;
@@ -112,6 +114,22 @@ public class ChpStaticDetailsObserverExchange extends HALDeviceObserverExchange
 
     public void setRelativeHorizonIPP(int relativeHorizonIPP) {
         this.relativeHorizonIPP = relativeHorizonIPP;
+    }
+
+    public long getTimePerSlot() {
+        return this.timePerSlot;
+    }
+
+    public void setTimePerSlot(long timePerSlot) {
+        this.timePerSlot = timePerSlot;
+    }
+
+    public int getBitsPerSlot() {
+        return this.bitsPerSlot;
+    }
+
+    public void setBitsPerSlot(int bitsPerSlot) {
+        this.bitsPerSlot = bitsPerSlot;
     }
 
     public double getCurrentHotWaterStorageMinTemp() {

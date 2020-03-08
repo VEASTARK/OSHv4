@@ -11,6 +11,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.PlsComExchange;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -59,42 +60,42 @@ public class FlatPlsProviderComDriver extends CALComDriver {
 
         try {
             this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
-                    "newSignalAfterThisPeriod")));
+                    ParameterConstants.Signal.newSignal)));
         } catch (Exception e) {
             this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
         try {
-            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter("signalPeriod"));
+            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.Signal.signalPeriod));
         } catch (Exception e) {
             this.signalPeriod = 129600; //36h
             this.getGlobalLogger().logWarning("Can't get signalPeriod, using the default value: " + this.signalPeriod);
         }
 
         try {
-            this.activeLowerLimit = Integer.parseInt(this.getComConfig().getParameter("activeLowerLimit"));
+            this.activeLowerLimit = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.PLS.activeLowerLimit));
         } catch (Exception e) {
             this.activeLowerLimit = -3000; //kW
             this.getGlobalLogger().logWarning("Can't get activeLowerLimit, using the default value: " + this.activeLowerLimit);
         }
 
         try {
-            this.activeUpperLimit = Integer.parseInt(this.getComConfig().getParameter("activeUpperLimit"));
+            this.activeUpperLimit = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.PLS.activeUpperLimit));
         } catch (Exception e) {
             this.activeUpperLimit = 10000; //kW
             this.getGlobalLogger().logWarning("Can't get activeUpperLimit, using the default value: " + this.activeUpperLimit);
         }
 
         try {
-            this.reactiveLowerLimit = Integer.parseInt(this.getComConfig().getParameter("reactiveLowerLimit"));
+            this.reactiveLowerLimit = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.PLS.reactiveLowerLimit));
         } catch (Exception e) {
             this.reactiveLowerLimit = -3000; //kW
             this.getGlobalLogger().logWarning("Can't get reactiveLowerLimit, using the default value: " + this.reactiveLowerLimit);
         }
 
         try {
-            this.reactiveUpperLimit = Integer.parseInt(this.getComConfig().getParameter("reactiveUpperLimit"));
+            this.reactiveUpperLimit = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.PLS.reactiveUpperLimit));
         } catch (Exception e) {
             this.reactiveUpperLimit = 10000; //kW
             this.getGlobalLogger().logWarning("Can't get reactiveUpperLimit, using the default value: " + this.reactiveUpperLimit);

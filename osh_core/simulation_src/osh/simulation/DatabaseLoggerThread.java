@@ -1,5 +1,7 @@
 package osh.simulation;
 
+import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.Commodity;
@@ -614,10 +616,10 @@ public final class DatabaseLoggerThread extends Thread {
                                 + "VALUES ('" + runName + "'" + ", '%s'" + ", %d" + ", %f);";
 
                         for (Entry<AncillaryCommodity, PriceSignal> en : logObj.eps.entrySet()) {
-                            for (Entry<Long, Double> price : en.getValue().getPrices().entrySet()) {
+                            for (Long2DoubleMap.Entry price : en.getValue().getPrices().long2DoubleEntrySet()) {
                                 //forces decimal point
                                 String sql = String.format(Locale.ENGLISH, sqlBase, en.getKey().getCommodity(),
-                                        price.getKey(), price.getValue());
+                                        price.getLongKey(), price.getDoubleValue());
                                 stmt.executeUpdate(sql);
                             }
                         }
@@ -659,9 +661,9 @@ public final class DatabaseLoggerThread extends Thread {
                                 + "VALUES ('" + runName + "'" + ", '%s'" + ", %d" + ", %f" + ", %f);";
 
                         for (Entry<AncillaryCommodity, PowerLimitSignal> en : logObj.pls.entrySet()) {
-                            for (Entry<Long, PowerInterval> power : en.getValue().getLimits().entrySet()) {
+                            for (Long2ObjectMap.Entry<PowerInterval> power : en.getValue().getLimits().long2ObjectEntrySet()) {
                                 String sql = String.format(Locale.ENGLISH, sqlBase, en.getKey().getCommodity(),
-                                        power.getKey(), power.getValue().getPowerLowerLimit(),
+                                        power.getLongKey(), power.getValue().getPowerLowerLimit(),
                                         power.getValue().getPowerUpperLimit());
                                 stmt.executeUpdate(sql);
                             }

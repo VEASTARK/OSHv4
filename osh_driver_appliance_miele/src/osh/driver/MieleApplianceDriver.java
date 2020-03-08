@@ -30,6 +30,7 @@ import osh.hal.exchange.GenericApplianceStartTimesControllerExchange;
 import osh.hal.exchange.MieleApplianceControllerExchange;
 import osh.hal.exchange.MieleApplianceObserverExchange;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.string.ParameterConstants;
 import osh.utils.xml.XMLSerialization;
 
 import javax.xml.bind.JAXBException;
@@ -47,7 +48,7 @@ public class MieleApplianceDriver
         implements IDataRegistryListener {
 
     // uuid of this appliance as posted by the bus driver
-    private UUID applianceBusDriverUUID;
+    private final UUID applianceBusDriverUUID;
 
     // driverData
     private DeviceProfile deviceProfile;
@@ -89,14 +90,15 @@ public class MieleApplianceDriver
         this.applianceBusDriverUUID = UUID.fromString(cfgApplianceUUID);
 
         try {
-            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter("compressionType"));
+            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionType));
         } catch (Exception e) {
             this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
             this.getGlobalLogger().logWarning("Can't get compressionType, using the default value: " + this.compressionType);
         }
 
         try {
-            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter("compressionValue"));
+            this.compressionValue =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionValue));
         } catch (Exception e) {
             this.compressionValue = 100;
             this.getGlobalLogger().logWarning("Can't get compressionValue, using the default value: " + this.compressionValue);
@@ -202,7 +204,7 @@ public class MieleApplianceDriver
     }
 
     private void loadDeviceProfiles() throws OSHException {
-        String profileSourceName = this.getDriverConfig().getParameter("profilesource");
+        String profileSourceName = this.getDriverConfig().getParameter(ParameterConstants.General_Devices.profileSource);
         //load profiles
         try {
             this.deviceProfile = (DeviceProfile) XMLSerialization.file2Unmarshal(profileSourceName, DeviceProfile.class);

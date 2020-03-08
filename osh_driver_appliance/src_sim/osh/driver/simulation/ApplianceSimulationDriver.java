@@ -1,14 +1,14 @@
 package osh.driver.simulation;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandomGenerator;
+import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.eal.hal.exceptions.HALException;
 import osh.simulation.DeviceSimulationDriver;
-import osh.simulation.screenplay.ScreenplayType;
 import osh.utils.csv.CSVImporter;
 import osh.utils.slp.IH0Profile;
+import osh.utils.string.ParameterConstants;
 import osh.utils.string.StringConversions;
 import osh.utils.time.TimeConversion;
 
@@ -89,105 +89,94 @@ public abstract class ApplianceSimulationDriver
 
         // if DeviceClassification.APPLIANCE (but info at this point not yet available!)
         // all conditions after first && should NOT be necessary (but remain for safety reasons)
-        if (driverConfig.getParameter("screenplaytype") != null) {
-
-            ScreenplayType screenplayType = ScreenplayType.fromValue(driverConfig.getParameter("screenplaytype"));
-
-            if (screenplayType == ScreenplayType.STATIC) {
-                // screenplay is loaded from file...
-            } else if (screenplayType == ScreenplayType.DYNAMIC) {
-                // TEMPORAL DEGREE OF FREEDOM
-                {
-                    // max 1st tDoF
-                    String deviceMax1stDofString = driverConfig.getParameter("devicemax1stdof");
-                    if (deviceMax1stDofString != null) {
-                        this.deviceMax1stTDof = Integer.parseInt(deviceMax1stDofString);
-                    } else {
-                        throw new RuntimeException("variable \"screenplaytype\" = DYNAMIC : missing parameter (devicemax1stdof)!");
-                    }
-                }
-                {
-                    // average yearly runs for dynamic daily screenplay
-                    String avgYearlyRunsString = driverConfig.getParameter("averageyearlyruns");
-                    if (avgYearlyRunsString != null) {
-                        this.avgYearlyRuns = Double.parseDouble(avgYearlyRunsString);
-                    } else {
-                        throw new RuntimeException("Parameter missing: averageyearlyruns");
-                    }
-                }
-
-                IH0Profile h0Profile;
-
-                // H0-PROFILE
-                {
-                    String h0ProfileFileName = driverConfig.getParameter("h0filename");
-                    String h0ProfileClass = driverConfig.getParameter("h0classname");
-                    if (h0ProfileFileName != null) {
-                        try {
-                            Class h0Class = Class.forName(h0ProfileClass);
-
-                            h0Profile = (IH0Profile) h0Class.getConstructor(int.class, String.class, double.class)
-                                    .newInstance(this.getTimeDriver().getCurrentTime().getYear(),
-                                            h0ProfileFileName,
-                                            1000);
-
-                        } catch (Exception ex) {
-                            throw new RuntimeException(ex);
-                        }
-
-                        this.correctionFactorDay = h0Profile.getCorrectionFactorForDay();
-                    } else {
-                        throw new RuntimeException("variable \"screenplaytype\" = DYNAMIC : missing parameter (h0filename)!");
-                    }
-                }
-                // Probability per hour of weekday
-                {
-                    String probabiltyFileName = driverConfig.getParameter("probabilityfilename");
-                    if (probabiltyFileName != null) {
-                        double[][] probabilityPerHourOfWeekdayTemp = CSVImporter.readDouble2DimArrayFromFile(probabiltyFileName, ";");
-                        this.probabilityPerHourOfWeekday = new double[7][24];
-                        // transpose (d0 <-> d1)
-                        for (int d0 = 0; d0 < probabilityPerHourOfWeekdayTemp.length; d0++) {
-                            for (int d1 = 0; d1 < probabilityPerHourOfWeekdayTemp[d0].length; d1++) {
-                                this.probabilityPerHourOfWeekday[d1][d0] = probabilityPerHourOfWeekdayTemp[d0][d1];
-                            }
-                        }
-                        //calculate cumulative distribution
-                        this.probabilityPerHourOfWeekdayCumulativeDistribution = new double[this.probabilityPerHourOfWeekday.length][];
-                        for (int d0 = 0; d0 < this.probabilityPerHourOfWeekday.length; d0++) {
-                            this.probabilityPerHourOfWeekdayCumulativeDistribution[d0] = new double[this.probabilityPerHourOfWeekday[d0].length];
-
-                            double temp = 0;
-                            for (int d1 = 0; d1 < this.probabilityPerHourOfWeekday[d0].length; d1++) {
-                                if (d1 == this.probabilityPerHourOfWeekday[d0].length - 1) {
-                                    temp = 1;
-                                } else {
-                                    temp += this.probabilityPerHourOfWeekday[d0][d1];
-                                }
-                                this.probabilityPerHourOfWeekdayCumulativeDistribution[d0][d1] = temp;
-                            }
-                        }
-                    } else {
-                        throw new RuntimeException("variable \"screenplaytype\" = DYNAMIC : missing parameter (probabiltyFileName)!");
-                    }
-                }
-
-                {
-                    // shares of different program configurations
-                    String configurationsharesString = driverConfig.getParameter("configurationshares");
-                    if (configurationsharesString != null) {
-                        this.configurationShares = StringConversions.fromStringToDoubleArray(configurationsharesString);
-                    } else {
-                        throw new RuntimeException("Parameter missing: configurationshares");
-                    }
-                }
-
-                // calculate average daily runs
-                this.avgDailyRuns = (this.avgYearlyRuns / 365.0);
+        // TEMPORAL DEGREE OF FREEDOM
+        {
+            // max 1st tDoF
+            String deviceMax1stDofString = driverConfig.getParameter(ParameterConstants.Appliances.firstTDoF);
+            if (deviceMax1stDofString != null) {
+                this.deviceMax1stTDof = Integer.parseInt(deviceMax1stDofString);
             } else {
-                throw new RuntimeException("variable \"screenplaytype\" " + screenplayType + " : not implemented!");
+                throw new RuntimeException("variable \"screenplaytype\" = DYNAMIC : missing parameter (devicemax1stdof)!");
             }
         }
+        {
+            // average yearly runs for dynamic daily screenplay
+            String avgYearlyRunsString = driverConfig.getParameter(ParameterConstants.Appliances.averageYearlyRuns);
+            if (avgYearlyRunsString != null) {
+                this.avgYearlyRuns = Double.parseDouble(avgYearlyRunsString);
+            } else {
+                throw new RuntimeException("Parameter missing: averageyearlyruns");
+            }
+        }
+
+        IH0Profile h0Profile;
+
+        // H0-PROFILE
+        {
+            String h0ProfileFileName = driverConfig.getParameter(ParameterConstants.General_Devices.h0Filename);
+            String h0ProfileClass = driverConfig.getParameter(ParameterConstants.General_Devices.h0Classname);
+            if (h0ProfileFileName != null) {
+                try {
+                    Class h0Class = Class.forName(h0ProfileClass);
+
+                    h0Profile = (IH0Profile) h0Class.getConstructor(int.class, String.class, double.class)
+                            .newInstance(this.getTimeDriver().getCurrentTime().getYear(),
+                                    h0ProfileFileName,
+                                    1000);
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                this.correctionFactorDay = h0Profile.getCorrectionFactorForDay();
+            } else {
+                throw new RuntimeException("variable \"screenplaytype\" = DYNAMIC : missing parameter (h0filename)!");
+            }
+        }
+        // Probability per hour of weekday
+        {
+            String probabiltyFileName = driverConfig.getParameter(ParameterConstants.Appliances.probabilityFile);
+            if (probabiltyFileName != null) {
+                double[][] probabilityPerHourOfWeekdayTemp = CSVImporter.readDouble2DimArrayFromFile(probabiltyFileName, ";");
+                this.probabilityPerHourOfWeekday = new double[7][24];
+                // transpose (d0 <-> d1)
+                for (int d0 = 0; d0 < probabilityPerHourOfWeekdayTemp.length; d0++) {
+                    for (int d1 = 0; d1 < probabilityPerHourOfWeekdayTemp[d0].length; d1++) {
+                        this.probabilityPerHourOfWeekday[d1][d0] = probabilityPerHourOfWeekdayTemp[d0][d1];
+                    }
+                }
+                //calculate cumulative distribution
+                this.probabilityPerHourOfWeekdayCumulativeDistribution = new double[this.probabilityPerHourOfWeekday.length][];
+                for (int d0 = 0; d0 < this.probabilityPerHourOfWeekday.length; d0++) {
+                    this.probabilityPerHourOfWeekdayCumulativeDistribution[d0] = new double[this.probabilityPerHourOfWeekday[d0].length];
+
+                    double temp = 0;
+                    for (int d1 = 0; d1 < this.probabilityPerHourOfWeekday[d0].length; d1++) {
+                        if (d1 == this.probabilityPerHourOfWeekday[d0].length - 1) {
+                            temp = 1;
+                        } else {
+                            temp += this.probabilityPerHourOfWeekday[d0][d1];
+                        }
+                        this.probabilityPerHourOfWeekdayCumulativeDistribution[d0][d1] = temp;
+                    }
+                }
+            } else {
+                throw new RuntimeException("variable \"screenplaytype\" = DYNAMIC : missing parameter (probabiltyFileName)!");
+            }
+        }
+
+        {
+            // shares of different program configurations
+            String configurationsharesString = driverConfig.getParameter(ParameterConstants.Appliances.configurationShares);
+            if (configurationsharesString != null) {
+                this.configurationShares = StringConversions.fromStringToDoubleArray(configurationsharesString);
+            } else {
+                throw new RuntimeException("Parameter missing: configurationshares");
+            }
+        }
+
+        // calculate average daily runs
+        this.avgDailyRuns = (this.avgYearlyRuns / 365.0);
     }
 
     /**
@@ -196,7 +185,7 @@ public abstract class ApplianceSimulationDriver
      */
     private int getRandomHourToRunBasedOnProbabilityMap(
             long timestamp,
-            OSHRandomGenerator randomGen) {
+            OSHRandom randomGen) {
         double randomDouble = randomGen.getNextDouble();
         int weekday = TimeConversion.convertUnixTime2CorrectedDayOfWeek(timestamp);
         int hour = 0;
@@ -218,7 +207,7 @@ public abstract class ApplianceSimulationDriver
             long timestamp,
             int middleOfPowerConsumption,
             double randomValue,
-            OSHRandomGenerator randomGen) {
+            OSHRandom randomGen) {
         int randomHour = this.getRandomHourToRunBasedOnProbabilityMap(timestamp, randomGen);
 
         double deviation = randomValue;
@@ -244,24 +233,21 @@ public abstract class ApplianceSimulationDriver
     /**
      * in case of use please override
      */
-    protected abstract int generateNewDof(boolean useRandomDof, int noActions, long applianceActionTimeTick, OSHRandomGenerator randomGen, int maxDof, int maxPossibleDof);
+    protected abstract int generateNewDof(boolean useRandomDof, int noActions, long applianceActionTimeTick, OSHRandom randomGen, int maxDof, int maxPossibleDof);
 
 
     @Override
     public final void triggerSubject() {
         super.triggerSubject();
 
-        //if dynamic screenplay then generate daily screenplay
-        if (this.getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
-            if (this.lastTimeScreenplayGenerated == null ||
-                    this.getTimeDriver().getCurrentTime().getDayOfYear() != this.lastTimeScreenplayGenerated.getDayOfYear()) {
-                try {
-                    this.generateDynamicDailyScreenplay();
-                } catch (OSHException e) {
-                    e.printStackTrace();
-                }
-                this.lastTimeScreenplayGenerated = this.getTimeDriver().getCurrentTime();
+        if (this.lastTimeScreenplayGenerated == null ||
+                this.getTimeDriver().getCurrentTime().getDayOfYear() != this.lastTimeScreenplayGenerated.getDayOfYear()) {
+            try {
+                this.generateDynamicDailyScreenplay();
+            } catch (OSHException e) {
+                e.printStackTrace();
             }
+            this.lastTimeScreenplayGenerated = this.getTimeDriver().getCurrentTime();
         }
     }
 

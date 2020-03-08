@@ -136,7 +136,7 @@ public class BacNetDispatcher implements ITimeRegistryListener {
         }
     }
 
-    public void init() throws IOException, OSHException {
+    public void init() throws IOException {
         this.bacNetDevice = new LocalDevice(1984, "255.255.255.255");
         this.bacNetDevice.getEventHandler().addListener(new MyDeviceEventListener());
         this.bacNetDevice.initialize();

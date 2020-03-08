@@ -41,7 +41,7 @@ public class ComplexPowerUtil {
      * EN: Phase difference angle phi in [rad]<br>
      * DE: Phasenverschiebungswinkel
      */
-    private double phiInRadian;
+    private final double phiInRadian;
 
 
     /**

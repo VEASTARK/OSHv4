@@ -2,8 +2,10 @@ package osh.driver.simulation;
 
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
-import osh.driver.thermal.SimpleWaterTank;
+import osh.datatypes.commodity.Commodity;
+import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exceptions.HALException;
+import osh.esc.LimitedCommodityStateMap;
 import osh.simulation.DeviceSimulationDriver;
 
 import java.util.UUID;
@@ -14,7 +16,7 @@ import java.util.UUID;
 public abstract class WaterTankSimulationDriver
         extends DeviceSimulationDriver {
 
-    protected SimpleWaterTank waterTank;
+    protected FactorisedBasicWaterTank waterTank;
 
     /**
      * CONSTRUCTOR
@@ -25,5 +27,15 @@ public abstract class WaterTankSimulationDriver
             OSHParameterCollection driverConfig)
             throws HALException {
         super(osh, deviceID, driverConfig);
+    }
+
+    @Override
+    public LimitedCommodityStateMap getCommodityOutputStates() {
+        LimitedCommodityStateMap map =
+                new LimitedCommodityStateMap(this.usedCommodities);
+        for (Commodity c : this.usedCommodities) {
+            map.setTemperature(c, this.waterTank != null ? this.waterTank.getCurrentWaterTemperature() : 0.0);
+        }
+        return map;
     }
 }

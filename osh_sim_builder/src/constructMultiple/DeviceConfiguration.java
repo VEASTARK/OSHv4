@@ -1,5 +1,7 @@
 package constructMultiple;
 
+import constructsimulation.configuration.EAL.electric.consumers.ApplianceType;
+
 public enum DeviceConfiguration {
 
     NORMAL,
@@ -10,153 +12,63 @@ public enum DeviceConfiguration {
     HYBRID_INTERRUPTIBLE,
     HYBRID_SINGLE;
 
-    private static final boolean[] normalConf = {
-            true, true, true, true, true,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false
-    };
-    private static final boolean[] delayableConf = {
-            true, false, true, false, false,
-            false, true, false, true, true,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-    };
-    private static final boolean[] interrConf = {
-            true, false, true, false, false,
-            false, false, false, false, false,
-            false, true, false, true, true,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-    };
-
     //col:
-    //  IH,    DW     OV     TD     WM
-
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    private static final boolean[] hybrid = {
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            true, true, true, true, true,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
+    //  DE,    IH     OV     TD     WM
+    private static final ApplianceType[] normalConf = {
+            ApplianceType.STANDARD,
+            ApplianceType.STANDARD,
+            ApplianceType.STANDARD,
+            ApplianceType.STANDARD,
+            ApplianceType.STANDARD,
+    };
+    private static final ApplianceType[] delayableConf = {
+            ApplianceType.DELAYABLE,
+            ApplianceType.STANDARD,
+            ApplianceType.STANDARD,
+            ApplianceType.DELAYABLE,
+            ApplianceType.DELAYABLE,
+    };
+    private static final ApplianceType[] interrConf = {
+            ApplianceType.INTERRUPTIBLE,
+            ApplianceType.STANDARD,
+            ApplianceType.STANDARD,
+            ApplianceType.INTERRUPTIBLE,
+            ApplianceType.INTERRUPTIBLE,
     };
 
-    //col:
-    //  IH,    DW     OV     TD     WM
-
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    private static final boolean[] hybridDelayable = {
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            true, false, true, false, false,
-            false, true, false, true, true,
-            false, false, false, false, false,
-            false, false, false, false, false,
+    private static final ApplianceType[] hybrid = {
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID,
     };
 
-    //col:
-    //  IH,    DW     OV     TD     WM
-
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    private static final boolean[] hybridInterr = {
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            true, false, true, false, false,
-            false, false, false, false, false,
-            false, true, false, true, true,
-            false, false, false, false, false,
+    private static final ApplianceType[] hybridDelayable = {
+            ApplianceType.HYBRID_DELAYABLE,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID_DELAYABLE,
+            ApplianceType.HYBRID_DELAYABLE,
     };
 
-    //col:
-    //  IH,    DW     OV     TD     WM
-
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    //row:
-    /*										normal
-     * 										delayable
-     * 										interruptible
-     * 										hybrid
-     * 										hybrid delayable
-     * 										hybrid interruptible
-     * 										hybrid single
-     */
-    private static final boolean[] hybridSingle = {
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            false, false, false, false, false,
-            true, true, true, true, true,
+    private static final ApplianceType[] hybridInterr = {
+            ApplianceType.HYBRID_INTERRUPTIBLE,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID,
+            ApplianceType.HYBRID_INTERRUPTIBLE,
+            ApplianceType.HYBRID_INTERRUPTIBLE,
     };
 
-    //col:
-    //  IH,    DW     OV     TD     WM
+    private static final ApplianceType[] hybridSingle = {
+            ApplianceType.HYBRID_SINGLE,
+            ApplianceType.HYBRID_SINGLE,
+            ApplianceType.HYBRID_SINGLE,
+            ApplianceType.HYBRID_SINGLE,
+            ApplianceType.HYBRID_SINGLE,
+    };
 
-    public static boolean[] getAppliancesValues(DeviceConfiguration config) {
+    public static ApplianceType[] getAppliancesValues(DeviceConfiguration config) {
         switch (config) {
             case NORMAL:
                 return normalConf;
@@ -204,7 +116,7 @@ public enum DeviceConfiguration {
     //col:
     //  IH,    DW     OV     TD     WM
 
-    public boolean[] getApplianceValues() {
+    public ApplianceType[] getApplianceValues() {
         switch (this) {
             case NORMAL:
                 return normalConf;

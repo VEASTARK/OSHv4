@@ -45,12 +45,12 @@ public class MieleGatewayRESTBusDriver extends HALBusDriver implements Runnable,
 
     private final String mieleGatewayHost;
     private MieleGatewayRESTDispatcher mieleGatewayDispatcher;
-    private InetAddress mieleGatewayAddr;
+    private final InetAddress mieleGatewayAddr;
 
-    private String mieleGatewayUsername;
-    private String mieleGatewayPassword;
+    private final String mieleGatewayUsername;
+    private final String mieleGatewayPassword;
 
-    private Map<UUID, Map<String, String>> deviceProperties;
+    private final Map<UUID, Map<String, String>> deviceProperties;
 
 
     /**

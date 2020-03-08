@@ -24,7 +24,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore {
     UUIDCommodityMap a2pInputStateMap;
     UUIDCommodityMap p2aInputStateMap;
     private IEnergyGrid[] allGrids;
-    private IEnergyGrid[] thermalGrids;
+    private final IEnergyGrid[] thermalGrids;
 
     /**
      * CONSTRUCTOR
