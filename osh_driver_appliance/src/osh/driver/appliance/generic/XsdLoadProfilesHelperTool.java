@@ -31,7 +31,7 @@ public class XsdLoadProfilesHelperTool {
     /**
      * SparseLoadProfile for Phase
      */
-    private static SparseLoadProfile getSparseLoadProfileForPhase(
+    public static SparseLoadProfile getSparseLoadProfileForPhase(
             XsdPhase phase) {
         SparseLoadProfile returnProfile = new SparseLoadProfile();
         List<XsdTick> phaseTicksList = phase.getTick();

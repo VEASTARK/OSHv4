@@ -14,8 +14,9 @@ import osh.simulation.energy.SimEnergySimulationCore;
 import osh.simulation.exception.SimulationEngineException;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.Screenplay;
-import osh.simulation.screenplay.ScreenplayType;
 import osh.utils.CostCalculator;
+import osh.utils.physics.PhysicalConstants;
+import osh.utils.string.ParameterConstants;
 import osh.utils.string.StringConversions;
 import osh.utils.time.TimeConversion;
 import osh.utils.xml.XMLSerialization;
@@ -36,7 +37,6 @@ public class BuildingSimulationEngine extends SimulationEngine {
     public double currentReactivePower;
     //logging intervals
     final List<Long[]> loggingIntervals = new ArrayList<>();
-    private final ScreenplayType screenplayType;
     private final UUID entityUUID;
     // Simulation Subjects
     private final ArrayList<ISimulationSubject> simSubjectsList;
@@ -86,7 +86,6 @@ public class BuildingSimulationEngine extends SimulationEngine {
             ArrayList<? extends OSHComponent> deviceList,
             List<ConfigurationParameter> engineParameters,
             SimEnergySimulationCore esc,
-            ScreenplayType screenplayType,
             ISimulationActionLogger simLogger,
             PrintWriter powerWriter,
             UUID entityUUID) throws SimulationEngineException {
@@ -95,8 +94,6 @@ public class BuildingSimulationEngine extends SimulationEngine {
         this.oshSimulationResults = new OSHSimulationResults();
 
         this.energySimulationCore = esc;
-
-        this.screenplayType = screenplayType;
 
         this.simSubjectsList = new ArrayList<>();
         this.simSubjectsMap = new HashMap<>();
@@ -151,55 +148,55 @@ public class BuildingSimulationEngine extends SimulationEngine {
         this.entityUUID = entityUUID;
 
         try {
-            this.logH0 = Boolean.parseBoolean(this.engineParameters.getParameter("logH0"));
+            this.logH0 = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logH0));
         } catch (Exception e) {
             this.logH0 = false;
         }
 
         try {
-            this.logIntervals = Boolean.parseBoolean(this.engineParameters.getParameter("logIntervalls"));
+            this.logIntervals = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logIntervals));
         } catch (Exception e) {
             this.logIntervals = false;
         }
 
         try {
-            this.logDevices = Boolean.parseBoolean(this.engineParameters.getParameter("logDevices"));
+            this.logDevices = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logDevices));
         } catch (Exception e) {
             this.logDevices = false;
         }
 
         try {
-            this.logHotWater = Boolean.parseBoolean(this.engineParameters.getParameter("logHotWater"));
+            this.logHotWater = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logHotWater));
         } catch (Exception e) {
             this.logHotWater = false;
         }
 
         try {
-            this.logEpsPls = Boolean.parseBoolean(this.engineParameters.getParameter("logEpsPls"));
+            this.logEpsPls = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logEpsPls));
         } catch (Exception e) {
             this.logEpsPls = false;
         }
 
         try {
-            this.logDetailedPower = Boolean.parseBoolean(this.engineParameters.getParameter("logDetailedPower"));
+            this.logDetailedPower = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logDetailedPower));
         } catch (Exception e) {
             this.logDetailedPower = false;
         }
 
         try {
-            this.logWaterTank = Boolean.parseBoolean(this.engineParameters.getParameter("logWaterTank"));
+            this.logWaterTank = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logWaterTank));
         } catch (Exception e) {
             this.logWaterTank = false;
         }
 
         try {
-            this.logGA = Boolean.parseBoolean(this.engineParameters.getParameter("logGA"));
+            this.logGA = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logGA));
         } catch (Exception e) {
             this.logGA = false;
         }
 
         try {
-            this.logSmartHeater = Boolean.parseBoolean(this.engineParameters.getParameter("logSmartHeater"));
+            this.logSmartHeater = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logSmartHeater));
         } catch (Exception e) {
             this.logSmartHeater = false;
         }
@@ -208,7 +205,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
         String loggingIntervalsAsArray = null;
 
         try {
-            loggingIntervalsAsArray = this.engineParameters.getParameter("loggingIntervalls");
+            loggingIntervalsAsArray = this.engineParameters.getParameter(ParameterConstants.Logging.loggingIntervals);
         } catch (Exception ignored) {
         }
 
@@ -329,10 +326,6 @@ public class BuildingSimulationEngine extends SimulationEngine {
         ISimulationSubject _simSubj;
         _simSubj = this.simSubjectsMap.get(subjectID);
         return _simSubj;
-    }
-
-    public ScreenplayType getScreenplayType() {
-        return this.screenplayType;
     }
 
     public void setDatabaseLogging() {
@@ -666,14 +659,14 @@ public class BuildingSimulationEngine extends SimulationEngine {
 
                 for (int i = 0; i < avgWeekDays.length; i++) {
                     for (int j = 0; j < avgWeekDays[i].length; j++) {
-                        double factor = this.h0ResultsCounter[i][j] * 3600000.0;
+                        double factor = this.h0ResultsCounter[i][j] * PhysicalConstants.factor_wsToKWh;
                         for (int k = 0; k < avgWeekDays[i][j].length; k++) {
                             avgWeekDays[i][j][k] = this.aggrH0ResultsWeekdays[i][j][k] / factor;
                         }
                     }
                 }
                 for (int i = 0; i < avgDays.length; i++) {
-                    double factor = (this.h0ResultsCounterDays[i] / 1440.0) * 3600000.0;
+                    double factor = (this.h0ResultsCounterDays[i] / 1440.0) * PhysicalConstants.factor_wsToKWh;
                     for (int j = 0; j < avgDays[i].length; j++) {
                         avgDays[i][j] = this.aggrH0ResultsDays[i][j] / factor;
                     }

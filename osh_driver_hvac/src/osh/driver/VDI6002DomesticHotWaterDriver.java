@@ -17,6 +17,7 @@ import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.utils.csv.CSVImporter;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
@@ -60,32 +61,34 @@ public class VDI6002DomesticHotWaterDriver extends HALDeviceDriver {
             OSHParameterCollection driverConfig) throws SimulationSubjectException {
         super(osh, deviceID, driverConfig);
 
-        this.drawOffTypesFile = driverConfig.getParameter("drawOffTypesFile");
+        this.drawOffTypesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.drawOffFile);
         if (this.drawOffTypesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
-        this.weekDayHourProbabilitiesFile = driverConfig.getParameter("weekDayHourProbabilitiesFile");
+        this.weekDayHourProbabilitiesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.probabilitiesFile);
         if (this.weekDayHourProbabilitiesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
         try {
-            this.avgYearlyDemand = Double.parseDouble(this.getDriverConfig().getParameter("avgYearlyDemamd"));
+            this.avgYearlyDemand =
+                    Double.parseDouble(this.getDriverConfig().getParameter(ParameterConstants.WaterDemand.averageYearlyDemand));
         } catch (Exception e) {
             this.avgYearlyDemand = 700;
             this.getGlobalLogger().logWarning("Can't get avgYearlyDemand, using the default value: " + this.avgYearlyDemand);
         }
 
         try {
-            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter("compressionType"));
+            this.compressionType = LoadProfileCompressionTypes.valueOf(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionType));
         } catch (Exception e) {
             this.compressionType = LoadProfileCompressionTypes.DISCONTINUITIES;
             this.getGlobalLogger().logWarning("Can't get compressionType, using the default value: " + this.compressionType);
         }
 
         try {
-            this.compressionValue = Integer.parseInt(this.getDriverConfig().getParameter("compressionValue"));
+            this.compressionValue =
+                    Integer.parseInt(this.getDriverConfig().getParameter(ParameterConstants.Compression.compressionValue));
         } catch (Exception e) {
             this.compressionValue = 100;
             this.getGlobalLogger().logWarning("Can't get compressionValue, using the default value: " + this.compressionValue);

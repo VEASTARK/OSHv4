@@ -34,6 +34,8 @@ public class DachsChpLocalController
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     // quasi static values
     private final ChpOperationMode operationMode = ChpOperationMode.UNKNOWN;
+    private long timePerSlot;
+    private int bitsPerSlot;
     private int typicalActivePower = Integer.MIN_VALUE;
     private int typicalReactivePower = Integer.MIN_VALUE;
     private int typicalGasPower = Integer.MIN_VALUE;
@@ -127,6 +129,9 @@ public class DachsChpLocalController
         this.currentThermalPower = mox.getThermalPower();
         this.currentGasPower = mox.getGasPower();
         this.currentRemainingRunningTime = mox.getRemainingRunningTime();
+
+        this.timePerSlot = mox.getTimePerSlot();
+        this.bitsPerSlot = mox.getBitsPerSlot();
 
         this.typicalActivePower = mox.getTypicalActivePower();
         this.typicalReactivePower = mox.getTypicalReactivePower();
@@ -465,11 +470,11 @@ public class DachsChpLocalController
                 this.getUUID(),
                 now,
                 toBeScheduled,
+                this.timePerSlot,
+                this.bitsPerSlot,
                 currentState,
                 this.minRuntime,
                 chpModel,
-//				- Math.abs(typicalActivePower),
-//				Math.abs(typicalGasPower),
                 this.relativeHorizonIPP,
                 this.currentHotWaterStorageMinTemp,
                 this.currentHotWaterStorageMaxTemp,
@@ -484,11 +489,5 @@ public class DachsChpLocalController
         this.lastTimeIppSent = now;
         this.getOCRegistry().publish(
                 InterdependentProblemPart.class, this.getUUID(), ex);
-
-
-        // IMPORTANT: update of variable is done via onQueueEventTypeReceived()
-//		if ( toBeScheduled ) {
-//			this.lastTimeReschedulingTriggered = now;
-//		}
     }
 }

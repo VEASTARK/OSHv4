@@ -26,7 +26,6 @@ dependencies {
     implementation project(":osh_driver_appliance_miele")
     implementation project(":osh_driver_hvac")
     implementation project(":osh_driver_hvac_watertank")
-    implementation project(":osh_driver_smartmeter")
     implementation project(":osh_driver_smartplug")
     implementation project(":osh_driver_chp_dachs")
     implementation project(":osh_driver_hvac_heater_gas")
@@ -41,7 +40,7 @@ task constructSingleHHConfig(type: JavaExec) {
     group = "Construction"
     description = "constructs the configuration files for a single HH simlation"
     classpath = sourceSets.main.runtimeClasspath
-    main = "constructsimulation.constructSimulationPackage"
+    main = "constructsimulation.configuration.general.Generate"
 }
 
 task constructMultipleSingleHHConfig(type: JavaExec) {

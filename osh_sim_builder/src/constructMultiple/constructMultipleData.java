@@ -62,9 +62,9 @@ public abstract class constructMultipleData {
             //				complexPowerMax, cosPhiMax, nominalPower, useESHLPV, useHOLLPV
 //		new PVConfiguration("10000", "-0.8", 2000, true, false),
 //		new PVConfiguration("10000", "-0.8", 2000, false, true),
-            new PVConfiguration("0", "0", 0, false, false),
+            new PVConfiguration(0, 0, 0, false, false),
 //		new PVConfiguration("10000", "-0.8", 2000, false, true),
-            new PVConfiguration("10000", "-0.8", 4000, false, true),
+            new PVConfiguration(10000, -0.8, 4000, false, true),
 //		new PVConfiguration("10000", "-0.8", 6000, false, true),
     };
 

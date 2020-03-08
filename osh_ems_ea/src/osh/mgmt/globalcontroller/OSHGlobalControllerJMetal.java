@@ -42,6 +42,7 @@ import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
+import osh.utils.string.ParameterConstants;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -93,42 +94,48 @@ public class OSHGlobalControllerJMetal
         }
 
         try {
-            this.upperOverlimitFactor = Double.parseDouble(this.configurationParameters.getParameter("upperOverlimitFactor"));
+            this.upperOverlimitFactor =
+                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.upperOverlimitFactor));
         } catch (Exception e) {
             this.upperOverlimitFactor = 1.0;
             this.getGlobalLogger().logWarning("Can't get upperOverlimitFactor, using the default value: " + this.upperOverlimitFactor);
         }
 
         try {
-            this.lowerOverlimitFactor = Double.parseDouble(this.configurationParameters.getParameter("lowerOverlimitFactor"));
+            this.lowerOverlimitFactor =
+                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.lowerOverlimitFactor));
         } catch (Exception e) {
             this.lowerOverlimitFactor = 1.0;
             this.getGlobalLogger().logWarning("Can't get lowerOverlimitFactor, using the default value: " + this.lowerOverlimitFactor);
         }
 
         try {
-            this.epsOptimizationObjective = Integer.parseInt(this.configurationParameters.getParameter("epsoptimizationobjective"));
+            this.epsOptimizationObjective =
+                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.epsObjective));
         } catch (Exception e) {
             this.epsOptimizationObjective = 0;
             this.getGlobalLogger().logWarning("Can't get epsOptimizationObjective, using the default value: " + this.epsOptimizationObjective);
         }
 
         try {
-            this.plsOptimizationObjective = Integer.parseInt(this.configurationParameters.getParameter("plsoptimizationobjective"));
+            this.plsOptimizationObjective =
+                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.plsObjective));
         } catch (Exception e) {
             this.plsOptimizationObjective = 0;
             this.getGlobalLogger().logWarning("Can't get plsOptimizationObjective, using the default value: " + this.plsOptimizationObjective);
         }
 
         try {
-            this.varOptimizationObjective = Integer.parseInt(this.configurationParameters.getParameter("varoptimizationobjective"));
+            this.varOptimizationObjective =
+                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.varObjective));
         } catch (Exception e) {
             this.varOptimizationObjective = 0;
             this.getGlobalLogger().logWarning("Can't get varOptimizationObjective, using the default value: " + this.varOptimizationObjective);
         }
 
         try {
-            this.optimizationMainRandomSeed = Long.parseLong(this.configurationParameters.getParameter("optimizationMainRandomSeed"));
+            this.optimizationMainRandomSeed =
+                    Long.parseLong(this.configurationParameters.getParameter(ParameterConstants.Optimization.optimizationRandomSeed));
         } catch (Exception e) {
             this.optimizationMainRandomSeed = 0xd1ce5bL;
             this.getGlobalLogger().logError("Can't get parameter optimizationMainRandomSeed, using the default value: " + this.optimizationMainRandomSeed);
@@ -136,14 +143,16 @@ public class OSHGlobalControllerJMetal
         this.optimizationMainRandomGenerator = new OSHRandom(this.optimizationMainRandomSeed);
 
         try {
-            this.stepSize = Integer.parseInt(this.configurationParameters.getParameter("stepSize"));
+            this.stepSize =
+                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.stepSize));
         } catch (Exception e) {
             this.stepSize = 60;
             this.getGlobalLogger().logError("Can't get parameter stepSize, using the default value: " + this.stepSize);
         }
 
         try {
-            this.hotWaterTankID = UUID.fromString(this.configurationParameters.getParameter("hotWaterTankUUID"));
+            this.hotWaterTankID =
+                    UUID.fromString(this.configurationParameters.getParameter(ParameterConstants.Optimization.hotWaterTankUUID));
         } catch (Exception e) {
             this.hotWaterTankID = UUID.fromString("00000000-0000-4857-4853-000000000000");
             this.getGlobalLogger().logError("Can't get parameter hotWaterTankUUID, using the default value: " + this.hotWaterTankID);

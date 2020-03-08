@@ -8,7 +8,6 @@ import osh.core.logging.OSHLoggerCore;
 import osh.datatypes.logger.SystemLoggerConfiguration;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
-import osh.simulation.screenplay.ScreenplayType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -82,6 +81,7 @@ public class runSimulationPackage {
     public static void main(String[] args) {
 
         // reset starting time
+        // 1.1.1970
         ZonedDateTime forcedStartTime = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, ZoneId.of("UTC"));
 
         // iterate all configs
@@ -122,9 +122,6 @@ public class runSimulationPackage {
                 }
 
                 System.out.println("[INFO] Simulation running from time " + forcedStartTime + " for " + simulationDuration + " ticks");
-
-                ScreenplayType currentScreenplayType = ScreenplayType.DYNAMIC;
-
 
                 String configRootPath = configFilesDir == null ? configFilesPath + "/osh/" + configID + "/" : configFilesDir + "/";
 
@@ -174,8 +171,7 @@ public class runSimulationPackage {
                             optimizationMainRandomSeed,
                             runID,
                             configID,
-                            logDirName,
-                            currentScreenplayType);
+                            logDirName);
                 } catch (LifeCycleManagerException e) {
                     e.printStackTrace();
                     System.exit(1);

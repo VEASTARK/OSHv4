@@ -2,15 +2,14 @@ package osh.driver.simulation;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.appliance.XsdApplianceProgramConfigurations;
 import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
+import osh.datatypes.appliance.future.ApplianceProgramConfigurations;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
-import osh.driver.appliance.generic.XsdLoadProfilesHelperTool;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.HALControllerExchange;
 import osh.en50523.EN50523DeviceState;
@@ -19,11 +18,12 @@ import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
 import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
+import osh.util.ApplianceConfigurationProviderSingleton;
+import osh.utils.physics.PhysicalConstants;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -48,12 +48,6 @@ public class GenericFutureApplianceSimulationDriver
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     public static final int[] DEFAULT_CORRECTION_IDS = new int[0];
 
-    // ### Variables for ESC ###
-
-//	/** Currently unused, but may be used to react, e.g., on in-flow water temperature... */
-//	@SuppressWarnings("unused")
-//	private EnumMap<Commodity, RealCommodityState> commodityInputStates;
-
     // ### Variables for DeviceState ###
 
     /**
@@ -72,8 +66,7 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * All Configurations (= program + extras + loadProfiles)
      */
-    protected XsdApplianceProgramConfigurations applianceConfigurations;
-
+    protected ApplianceProgramConfigurations applianceConfigurations;
 
     // ### Variables for current Configuration ###
 
@@ -142,6 +135,8 @@ public class GenericFutureApplianceSimulationDriver
     private final int[] dofs = new int[1440];
     private final int[] profilesSelected;
 
+    private double hybridFactor;
+
 
     /**
      * CONSTRUCTOR
@@ -159,39 +154,17 @@ public class GenericFutureApplianceSimulationDriver
             throws JAXBException, HALException {
         super(osh, deviceID, driverConfig);
 
-        // load some variables (e.g. initialize variables)
-
-        // IMPORTANT:
-        // if (getDeviceType() == DeviceTypes.WASHINGMACHINE) <-- does NOT work!
-
-        // get WashingParametersConfigurations profile file
-        {
-            String configurationsFile = driverConfig.getParameter("profilesource");
-            if (configurationsFile != null) {
-                JAXBContext jaxbWMParameters = JAXBContext.newInstance("osh.configuration.appliance");
-                Unmarshaller unmarshallerConfigurations = jaxbWMParameters.createUnmarshaller();
-                Object unmarshalledConfigurations = unmarshallerConfigurations.unmarshal(new File(configurationsFile));
-                if (unmarshalledConfigurations instanceof XsdApplianceProgramConfigurations) {
-                    this.applianceConfigurations = (XsdApplianceProgramConfigurations) unmarshalledConfigurations;
-                } else {
-                    throw new HALException("No valid configurations file found!");
-                }
-            } else {
-                throw new HALException("Appliance configurations are missing!");
-            }
+        try {
+            this.hybridFactor = Double.parseDouble(driverConfig.getParameter(ParameterConstants.Appliances.hybridFactor));
+        } catch (Exception e) {
+            this.hybridFactor = 1.0;
+            this.getGlobalLogger().logWarning("Can't get hybridProfileFactor, using the default value: " + this.hybridFactor);
         }
 
-//		SEKR: Already done by superclass(DeviceSimulationDriver)
-//		// get Commodities used by this device
-//		{
-//			String commoditiesArray = driverConfig.getParameter("usedcommodities");
-//			if (commoditiesArray != null) {
-//				usedCommodities = Commodity.parseCommodityArray(commoditiesArray);
-//			}
-//			else {
-//				throw new HALException("Used Commodities are missing!");
-//			}
-//		}
+        String configurationsFile = driverConfig.getParameter(ParameterConstants.General_Devices.profileSource);
+        this.applianceConfigurations = ApplianceConfigurationProviderSingleton.readInConfiguration(configurationsFile
+                , this.hybridFactor);
+
 
         // default: OFF
         this.turnOff();
@@ -199,27 +172,13 @@ public class GenericFutureApplianceSimulationDriver
         // default: remote enabled (well...it's a simulation...)
         this.currentEn50523RemoteControlState = EN50523DeviceStateRemoteControl.ENABLED_REMOTE_CONTROL;
 
-        this.profilesSelected = new int[this.applianceConfigurations.getApplianceProgramConfiguration().size()];
+        this.profilesSelected = new int[this.applianceConfigurations.getNumberOfConfigurations()];
         this.profileNumberOfRuns = new int[this.getConfigurationShares().length];
         Arrays.fill(this.profilesSelected, 0);
         Arrays.fill(this.profileNumberOfRuns, 0);
         Arrays.fill(this.startTimes, 0);
         Arrays.fill(this.dofs, 0);
     }
-
-
-//	Nothing to do for now
-//	@Override
-//	public void onSystemIsUp() {
-//		super.onSystemIsUp();
-//
-//		// do after loading...do e.g.
-//		// register for call of onNextTimePeriod() for every 10 ticks...
-//		// getTimer().registerComponent(this, 10);
-//
-//		// register for StateExchanges from DriverRegistry
-//		// this.getDriverRegistry().register(StateExchange.class, this);
-//	}
 
 
     @Override
@@ -390,8 +349,7 @@ public class GenericFutureApplianceSimulationDriver
             // set new power values...
             for (Commodity c : this.usedCommodities) {
                 try {
-                    this.setPower(c,
-                            newDlp[this.selectedProfileID][0].getLoadAt(c,
+                    this.setPower(c, newDlp[this.selectedProfileID][0].getLoadAt(c,
                                     Duration.between(this.phaseStartedAt, now).getSeconds())); //
                     // (now - configurationStartedAt) = 0!
                 } catch (Exception e) {
@@ -471,7 +429,8 @@ public class GenericFutureApplianceSimulationDriver
             // output the number of runs of this device
 
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueueDevices(this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns, this.activePowerConsumption / 3600000.0, this.profileNumberOfRuns,
+                DatabaseLoggerThread.enqueueDevices(this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns,
+                        this.activePowerConsumption / PhysicalConstants.factor_wsToKWh, this.profileNumberOfRuns,
                         this.dofs, this.startTimes, this.profilesSelected, this.getDeviceType());
             }
 
@@ -625,17 +584,17 @@ public class GenericFutureApplianceSimulationDriver
             }
 
             // ### build ApplianceConfigurationProfile ###
-            SparseLoadProfile[][] dynamicLoadProfiles = XsdLoadProfilesHelperTool.getSparseLoadProfilesArray(
-                    this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID).getLoadProfiles());
+            SparseLoadProfile[][] dynamicLoadProfiles =
+                    this.applianceConfigurations.getLoadProfilesOfConfiguration(this.selectedConfigurationID);
             // get min and max times
             int[][][] minMaxTimes = new int[dynamicLoadProfiles.length][][];
             for (int i = 0; i < dynamicLoadProfiles.length; i++) {
                 minMaxTimes[i] = new int[dynamicLoadProfiles[i].length][2];
                 for (int j = 0; j < dynamicLoadProfiles[i].length; j++) {
-                    minMaxTimes[i][j][0] = this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)
-                            .getLoadProfiles().getLoadProfile().get(0).getPhases().getPhase().get(j).getMinLength();
-                    minMaxTimes[i][j][1] = this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)
-                            .getLoadProfiles().getLoadProfile().get(0).getPhases().getPhase().get(j).getMaxLength();
+                    minMaxTimes[i][j][0] = this.applianceConfigurations.getMinLengthOfPhase(this.selectedConfigurationID,
+                            0 , j);
+                    minMaxTimes[i][j][1] = this.applianceConfigurations.getMaxLengthOfPhase(this.selectedConfigurationID,
+                            0 , j);
                 }
             }
 
@@ -700,7 +659,7 @@ public class GenericFutureApplianceSimulationDriver
         OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 
         // get number of configurations
-        int noOfPrograms = this.applianceConfigurations.getApplianceProgramConfiguration().size();
+        int noOfPrograms = this.applianceConfigurations.getNumberOfConfigurations();
         if (noOfPrograms != this.getConfigurationShares().length) {
             throw new OSHException("ERROR: noOfPrograms != configurationShares.length");
         }
@@ -746,7 +705,7 @@ public class GenericFutureApplianceSimulationDriver
             }
 
             // calculate max tDoF based on number of runs today and their maximum possible duration
-            int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(this.applianceConfigurations);
+            int maxProgramDuration = this.applianceConfigurations.getMaxLengthOfAllConfigurations();
             //check if parts of this day are blocked by actions of the previous day
             long blockedTime = this.checkForBlockedSeconds();
             long blockedSeconds = blockedTime == 0 ? 0 : blockedTime - now;
@@ -760,8 +719,8 @@ public class GenericFutureApplianceSimulationDriver
             //restoring configured runs from earlier days that could notr be scheduled
             for (int i = 0; i < this.runCorrection; i++) {
                 generatedConfigurationIDs[i] = this.correctionSelectedIDs[i];
-                selectedProfileLengths[i] = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.correctionSelectedIDs[i]));
+                selectedProfileLengths[i] = this.applianceConfigurations.getMaxLengthOfConfiguration
+                        (this.correctionSelectedIDs[i]);
             }
 
             //generate configurationIDs
@@ -775,8 +734,7 @@ public class GenericFutureApplianceSimulationDriver
                     }
                 }
                 generatedConfigurationIDs[this.runCorrection + i] = configurationForThisRun;
-                selectedProfileLengths[this.runCorrection + i] = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-                        this.applianceConfigurations.getApplianceProgramConfiguration().get(configurationForThisRun));
+                selectedProfileLengths[this.runCorrection + i] = this.applianceConfigurations.getMaxLengthOfConfiguration(configurationForThisRun);
 
                 this.profileNumberOfRuns[configurationForThisRun]++;
             }
@@ -961,32 +919,28 @@ public class GenericFutureApplianceSimulationDriver
             int maxPossibleDof) {
         // generate DOFs with binary distribution
         int newDof = maxDof;
-        if (this.getSimulationEngine().getScreenplayType() == ScreenplayType.DYNAMIC) {
-            int maxProgramDuration = XsdLoadProfilesHelperTool.getMaximumDurationOfAllConfigurations(this.applianceConfigurations);
-            if (86400 / ((maxProgramDuration + 1) * actionCountPerDay) < 1 && actionCountPerDay > 1) {
-                return 0;
-                //we now have a run correction for this
+        int maxProgramDuration = this.applianceConfigurations.getMaxLengthOfAllConfigurations();
+        if (86400 / ((maxProgramDuration + 1) * actionCountPerDay) < 1 && actionCountPerDay > 1) {
+            return 0;
+            //we now have a run correction for this
 //				throw new RuntimeException("Program duration to long for multiple runs per day");
-            }
-
-            // in 15 minutes steps only
-            int stepSize = 900;
-            newDof /= stepSize;
-            //deviate
-            //E(X)=0.5*max=28800s=8h or E(X)=0.5*max=14400s=4h or similar
-            BinomialDistribution binDistribution = new BinomialDistribution(newDof, 0.5);
-            double rand = randomGen.getNextDouble();
-            int newValue = 0;
-            for (int i = 0; i < newDof; i++) {
-                if (binDistribution.cumulativeProbability(i) > rand) {
-                    newValue = i;
-                    break;
-                }
-            }
-            return Math.min(newValue * stepSize, maxPossibleDof);
         }
 
-        return 0;
+        // in 15 minutes steps only
+        int stepSize = 900;
+        newDof /= stepSize;
+        //deviate
+        //E(X)=0.5*max=28800s=8h or E(X)=0.5*max=14400s=4h or similar
+        BinomialDistribution binDistribution = new BinomialDistribution(newDof, 0.5);
+        double rand = randomGen.getNextDouble();
+        int newValue = 0;
+        for (int i = 0; i < newDof; i++) {
+            if (binDistribution.cumulativeProbability(i) > rand) {
+                newValue = i;
+                break;
+            }
+        }
+        return Math.min(newValue * stepSize, maxPossibleDof);
     }
 
     private long checkForBlockedSeconds() {
@@ -1015,8 +969,7 @@ public class GenericFutureApplianceSimulationDriver
                         "appliance",
                         "configuration"));
 
-                int maxDur = XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-                        this.applianceConfigurations.getApplianceProgramConfiguration().get(selectedConfigurationID));
+                int maxDur = this.applianceConfigurations.getMaxLengthOfConfiguration(selectedConfigurationID);
 
                 maxBlock = Math.max(maxBlock, a.getTick() + maxDur + tDof + 100);
             }
@@ -1033,8 +986,7 @@ public class GenericFutureApplianceSimulationDriver
             //running action could be rescheduled, so look for maximum length this could run
             if (this.isControllable()) {
                 long lastPossibleEnd = this.configurationStartedAt.plus(this.lastSet1sttDof).plusSeconds(
-                        + XsdLoadProfilesHelperTool.getMaximumLengthOfOneConfiguration(
-                        this.applianceConfigurations.getApplianceProgramConfiguration().get(this.selectedConfigurationID)) + 100).toEpochSecond();
+                        this.applianceConfigurations.getMaxLengthOfConfiguration(this.selectedConfigurationID) + 100).toEpochSecond();
                 otherLast = Math.max(lastPossibleEnd, otherLast);
             }
 

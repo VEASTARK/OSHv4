@@ -29,6 +29,7 @@ import jmetal.util.comparators.ObjectiveComparator;
 import osh.configuration.system.DeviceTypes;
 import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
 import osh.simulation.DatabaseLoggerThread;
+import osh.utils.string.ParameterConstants;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -142,8 +143,8 @@ public class OSH_gGASingleThread extends Algorithm {
         comparator = new ObjectiveComparator(0); // Single objective comparator
 
         // Read the params
-        populationSize = (Integer) this.getInputParameter("populationSize");
-        maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
+        populationSize = (Integer) this.getInputParameter(ParameterConstants.EA.populationSize);
+        maxEvaluations = (Integer) this.getInputParameter(ParameterConstants.EA.maxEvaluations);
 
         // Initialize the variables
         population = new SolutionSet(populationSize);
@@ -152,9 +153,9 @@ public class OSH_gGASingleThread extends Algorithm {
         evaluations = 0;
 
         // Read the operators
-        mutationOperator = this.operators_.get("mutation");
-        crossoverOperator = this.operators_.get("crossover");
-        selectionOperator = this.operators_.get("selection");
+        mutationOperator = this.operators_.get(ParameterConstants.EA.mutation);
+        crossoverOperator = this.operators_.get(ParameterConstants.EA.crossover);
+        selectionOperator = this.operators_.get(ParameterConstants.EA.selection);
 
         // Create the initial population
         Solution newIndividual;

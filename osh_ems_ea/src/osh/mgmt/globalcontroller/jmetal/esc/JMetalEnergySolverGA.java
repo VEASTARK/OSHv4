@@ -23,6 +23,7 @@ import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.JMetalSolver;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
+import osh.utils.string.ParameterConstants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -133,8 +134,8 @@ public class JMetalEnergySolverGA extends JMetalSolver {
 //        }
 
         /* Algorithm parameters */
-        algorithm.setInputParameter("maxEvaluations", this.gaparameters.getNumEvaluations());
-        algorithm.setInputParameter("populationSize", this.gaparameters.getPopSize());
+        algorithm.setInputParameter(ParameterConstants.EA.maxEvaluations, this.gaparameters.getNumEvaluations());
+        algorithm.setInputParameter(ParameterConstants.EA.populationSize, this.gaparameters.getPopSize());
 
         /* Mutation and Crossover for Real codification */
         mutation = MutationFactory.getMutationOperator(
@@ -158,9 +159,9 @@ public class JMetalEnergySolverGA extends JMetalSolver {
 
 
         //add the operators
-        algorithm.addOperator("crossover", crossover);
-        algorithm.addOperator("mutation", mutation);
-        algorithm.addOperator("selection", selection);
+        algorithm.addOperator(ParameterConstants.EA.crossover, crossover);
+        algorithm.addOperator(ParameterConstants.EA.mutation, mutation);
+        algorithm.addOperator(ParameterConstants.EA.selection, selection);
 
         //add stopping rules
         for (String ruleName : this.gaparameters.getStoppingRules().keySet()) {

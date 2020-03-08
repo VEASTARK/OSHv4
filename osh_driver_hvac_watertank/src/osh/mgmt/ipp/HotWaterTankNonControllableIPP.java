@@ -8,7 +8,7 @@ import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.oc.ipp.NonControllableIPP;
-import osh.driver.thermal.SimpleHotWaterTank;
+import osh.driver.thermal.FactorisedBasicWaterTank;
 
 import java.time.ZonedDateTime;
 import java.util.EnumSet;
@@ -24,8 +24,8 @@ import java.util.UUID;
 public class HotWaterTankNonControllableIPP
         extends NonControllableIPP<ISolution, TemperaturePrediction> {
 
-    private final SimpleHotWaterTank masterWaterTank;
-    private SimpleHotWaterTank actualWaterTank;
+    private final FactorisedBasicWaterTank masterWaterTank;
+    private FactorisedBasicWaterTank actualWaterTank;
     private Double firstTemperature;
     //6ct per kWh ThermalPower (= gas price per kWh)
     private final double punishmentFactorPerWsPowerLost;
@@ -41,6 +41,8 @@ public class HotWaterTankNonControllableIPP
      * @param initialTemperature the intial temperature of the watertank
      * @param tankCapacity the capacity of the watertank
      * @param tankDiameter the diameter of the watertank
+     * @param standingHeatLossFactor the heat-loss factor as a multiple of the standard assumed heat-loss of the
+     *                               simple water tank
      * @param ambientTemperature the ambient temperature around the watertank
      * @param punishmentFactorPerWsLost the punishment factor per ws lost over the optimization loop
      * @param compressionType type of compression to be used for load profiles
@@ -53,6 +55,7 @@ public class HotWaterTankNonControllableIPP
             double initialTemperature,
             double tankCapacity,
             double tankDiameter,
+            double standingHeatLossFactor,
             double ambientTemperature,
             double punishmentFactorPerWsLost,
             LoadProfileCompressionTypes compressionType,
@@ -71,8 +74,8 @@ public class HotWaterTankNonControllableIPP
                 compressionType,
                 compressionValue);
 
-        this.masterWaterTank = new SimpleHotWaterTank(tankCapacity, tankDiameter, initialTemperature,
-                ambientTemperature);
+        this.masterWaterTank = new FactorisedBasicWaterTank(tankCapacity, tankDiameter, initialTemperature,
+                ambientTemperature, standingHeatLossFactor);
         this.punishmentFactorPerWsPowerLost = punishmentFactorPerWsLost;
 
         this.setAllInputCommodities(EnumSet.of(Commodity.HEATINGHOTWATERPOWER, Commodity.DOMESTICHOTWATERPOWER));
@@ -87,7 +90,7 @@ public class HotWaterTankNonControllableIPP
      */
     public HotWaterTankNonControllableIPP(HotWaterTankNonControllableIPP other) {
         super(other);
-        this.masterWaterTank = new SimpleHotWaterTank(other.masterWaterTank);
+        this.masterWaterTank = new FactorisedBasicWaterTank(other.masterWaterTank);
         this.actualWaterTank = null;
         this.temperatureStates = null;
 
@@ -116,7 +119,7 @@ public class HotWaterTankNonControllableIPP
         else
             this.temperatureStates = null;
 
-        this.actualWaterTank = new SimpleHotWaterTank(this.masterWaterTank);
+        this.actualWaterTank = new FactorisedBasicWaterTank(this.masterWaterTank);
 
         this.actualWaterTank.reduceByStandingHeatLoss(this.getInterdependentTime() - this.getTimestamp().toEpochSecond());
         this.firstTemperature = this.actualWaterTank.getCurrentWaterTemperature();

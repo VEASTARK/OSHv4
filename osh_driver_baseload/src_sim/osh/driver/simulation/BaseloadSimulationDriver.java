@@ -12,7 +12,9 @@ import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
+import osh.utils.physics.PhysicalConstants;
 import osh.utils.slp.IH0Profile;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
@@ -51,14 +53,15 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         int yearlyElectricityConsumptionOfHousehold;
         String h0ProfileFileName, h0ClassName;
         try {
-            yearlyElectricityConsumptionOfHousehold = Integer.parseInt(driverConfig.getParameter("baseloadyearlyconsumption"));
+            yearlyElectricityConsumptionOfHousehold =
+                    Integer.parseInt(driverConfig.getParameter(ParameterConstants.Baseload.yearlyConsumption));
         } catch (Exception e) {
             yearlyElectricityConsumptionOfHousehold = 1000;
             this.getGlobalLogger().logWarning("Can't get yearlyElectricityConsumptionOfHousehold, using the default value: " + yearlyElectricityConsumptionOfHousehold);
         }
 
         try {
-            h0ProfileFileName = this.getDriverConfig().getParameter("h0filename");
+            h0ProfileFileName = this.getDriverConfig().getParameter(ParameterConstants.General_Devices.h0Filename);
             if (h0ProfileFileName == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -67,7 +70,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         }
 
         try {
-            h0ClassName = this.getDriverConfig().getParameter("h0classname");
+            h0ClassName = this.getDriverConfig().getParameter(ParameterConstants.General_Devices.h0Classname);
             if (h0ClassName == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -75,25 +78,25 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
             this.getGlobalLogger().logWarning("Can't get h0ClassName, using the default value: " + h0ClassName);
         }
 
-        this.cosPhi = Double.parseDouble(driverConfig.getParameter("baseloadcosphi"));
-        this.isInductive = Boolean.parseBoolean(driverConfig.getParameter("baseloadisinductive"));
+        this.cosPhi = Double.parseDouble(driverConfig.getParameter(ParameterConstants.Baseload.cosPhi));
+        this.isInductive = Boolean.parseBoolean(driverConfig.getParameter(ParameterConstants.Baseload.isInductive));
 
         try {
-            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter("pastDaysPrediction"));
+            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Prediction.pastDaysPrediction));
         } catch (Exception e) {
             this.pastDaysPrediction = 14;
             this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
         }
 
         try {
-            this.weightForOtherWeekday = Float.parseFloat(driverConfig.getParameter("weightForOtherWeekday"));
+            this.weightForOtherWeekday = Float.parseFloat(driverConfig.getParameter(ParameterConstants.Prediction.weightForOtherWeekday));
         } catch (Exception e) {
             this.weightForOtherWeekday = 1.0f;
             this.getGlobalLogger().logWarning("Can't get weightForOtherWeekday, using the default value: " + this.weightForOtherWeekday);
         }
 
         try {
-            this.weightForSameWeekday = Float.parseFloat(driverConfig.getParameter("weightForSameWeekday"));
+            this.weightForSameWeekday = Float.parseFloat(driverConfig.getParameter(ParameterConstants.Prediction.weightForSameWeekday));
         } catch (Exception e) {
             this.weightForSameWeekday = 5.0f;
             this.getGlobalLogger().logWarning("Can't get weightForSameWeekday, using the default value: " + this.weightForSameWeekday);
@@ -200,7 +203,8 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueueBaseload(this.sumActivePower / 3600000.0, this.sumReactivePower / 3600000.0);
+                DatabaseLoggerThread.enqueueBaseload(this.sumActivePower / PhysicalConstants.factor_wsToKWh,
+                        this.sumReactivePower / PhysicalConstants.factor_wsToKWh);
             }
         }
     }

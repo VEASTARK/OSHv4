@@ -8,6 +8,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Comparator;
 import java.util.EnumMap;

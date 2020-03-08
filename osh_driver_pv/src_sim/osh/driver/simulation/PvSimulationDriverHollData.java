@@ -14,6 +14,7 @@ import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
@@ -63,20 +64,19 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
 
         this.pvSwitchedOn = true;
 
-//		String profileSourceName = driverConfig.getParameter("profilesource");
-        this.nominalPower = Integer.parseInt(driverConfig.getParameter("nominalpower"));
-        this.complexPowerMax = Integer.parseInt(driverConfig.getParameter("complexpowermax"));
-        this.cosPhiMax = Double.parseDouble(driverConfig.getParameter("cosphimax"));
+        this.nominalPower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.PV.nominalPower));
+        this.complexPowerMax = Integer.parseInt(driverConfig.getParameter(ParameterConstants.PV.complexPowerMax));
+        this.cosPhiMax = Double.parseDouble(driverConfig.getParameter(ParameterConstants.PV.cosPhiMax));
 
         try {
-            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter("pastDaysPrediction"));
+            this.pastDaysPrediction = Integer.parseInt(driverConfig.getParameter(ParameterConstants.Prediction.pastDaysPrediction));
         } catch (Exception e) {
             this.pastDaysPrediction = 14;
             this.getGlobalLogger().logWarning("Can't get pastDaysPrediction, using the default value: " + this.pastDaysPrediction);
         }
 
         try {
-            this.pathToFiles = driverConfig.getParameter("pathToFiles");
+            this.pathToFiles = driverConfig.getParameter(ParameterConstants.General_Devices.filePath);
             if (this.pathToFiles == null) throw new IllegalArgumentException();
         } catch (Exception e) {
             this.pathToFiles = "configfiles/pv/holl2013cleaned";
@@ -84,7 +84,7 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
         }
 
         try {
-            this.fileExtension = driverConfig.getParameter("fileExtension");
+            this.fileExtension = driverConfig.getParameter(ParameterConstants.General_Devices.fileExtension);
             if (this.fileExtension == null) throw new IllegalArgumentException();
         } catch (Exception e) {
             this.fileExtension = ".csv";
@@ -92,7 +92,7 @@ public class PvSimulationDriverHollData extends DeviceSimulationDriver {
         }
 
         try {
-            this.profileNominalPower = Double.parseDouble(driverConfig.getParameter("profileNominalPower"));
+            this.profileNominalPower = Double.parseDouble(driverConfig.getParameter(ParameterConstants.PV.profileNominalPower));
         } catch (Exception e) {
             this.profileNominalPower = 5307.48;
             this.getGlobalLogger().logWarning("Can't get profileNominalPower, using the default value: " + this.profileNominalPower);

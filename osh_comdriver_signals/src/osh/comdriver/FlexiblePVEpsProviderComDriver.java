@@ -11,6 +11,7 @@ import osh.datatypes.limit.PriceSignal;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.EpsComExchange;
+import osh.utils.string.ParameterConstants;
 import osh.utils.time.TimeConversion;
 
 import java.io.BufferedReader;
@@ -77,63 +78,67 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
 
         try {
             this.newSignalAfterThisPeriod = Duration.ofSeconds(Integer.parseInt(this.getComConfig().getParameter(
-                    "newSignalAfterThisPeriod")));
+                    ParameterConstants.Signal.newSignal)));
         } catch (Exception e) {
             this.newSignalAfterThisPeriod = Duration.ofHours(12);
             this.getGlobalLogger().logWarning("Can't get newSignalAfterThisPeriod, using the default value: " + this.newSignalAfterThisPeriod);
         }
 
         try {
-            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter("signalPeriod"));
+            this.signalPeriod = Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.Signal.signalPeriod));
         } catch (Exception e) {
             this.signalPeriod = 129600; //36 hours
             this.getGlobalLogger().logWarning("Can't get signalPeriod, using the default value: " + this.signalPeriod);
         }
 
         try {
-            this.resolutionOfPriceSignal = Integer.parseInt(this.getComConfig().getParameter("resolutionOfPriceSignal"));
+            this.resolutionOfPriceSignal =
+                    Integer.parseInt(this.getComConfig().getParameter(ParameterConstants.EPS.resolution));
         } catch (Exception e) {
             this.resolutionOfPriceSignal = 3600; //15 minutes
             this.getGlobalLogger().logWarning("Can't get signalConstantPeriod, using the default value: " + this.resolutionOfPriceSignal);
         }
 
         try {
-            this.activePowerPrice = Double.parseDouble(this.getComConfig().getParameter("activePowerPrice"));
+            this.activePowerPrice = Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.activePrice));
         } catch (Exception e) {
             this.activePowerPrice = 28.0;
             this.getGlobalLogger().logWarning("Can't get activePowerPrice, using the default value: " + this.activePowerPrice);
         }
 
         try {
-            this.reactivePowerPrice = Double.parseDouble(this.getComConfig().getParameter("reactivePowerPrice"));
+            this.reactivePowerPrice = Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.reactivePrice));
         } catch (Exception e) {
             this.reactivePowerPrice = 0.0;
             this.getGlobalLogger().logWarning("Can't get reactivePowerPrice, using the default value: " + this.reactivePowerPrice);
         }
 
         try {
-            this.naturalGasPowerPrice = Double.parseDouble(this.getComConfig().getParameter("naturalGasPowerPrice"));
+            this.naturalGasPowerPrice = Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.gasPrice));
         } catch (Exception e) {
             this.naturalGasPowerPrice = 7.0;
             this.getGlobalLogger().logWarning("Can't get naturalGasPowerPrice, using the default value: " + this.naturalGasPowerPrice);
         }
 
         try {
-            this.activePowerFeedInCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerFeedInCHP"));
+            this.activePowerFeedInCHP =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.chpFeedInPrice));
         } catch (Exception e) {
             this.activePowerFeedInCHP = 5.0;
             this.getGlobalLogger().logWarning("Can't get activePowerFeedInCHP, using the default value: " + this.activePowerFeedInCHP);
         }
 
         try {
-            this.activePowerAutoConsumptionPV = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionPV"));
+            this.activePowerAutoConsumptionPV =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.pvAutoConsumptionPrice));
         } catch (Exception e) {
             this.activePowerAutoConsumptionPV = 0.0;
             this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionPV, using the default value: " + this.activePowerAutoConsumptionPV);
         }
 
         try {
-            this.activePowerAutoConsumptionCHP = Double.parseDouble(this.getComConfig().getParameter("activePowerAutoConsumptionCHP"));
+            this.activePowerAutoConsumptionCHP =
+                    Double.parseDouble(this.getComConfig().getParameter(ParameterConstants.EPS.chpAutoConsumptionPrice));
         } catch (Exception e) {
             this.activePowerAutoConsumptionCHP = 0.0;
             this.getGlobalLogger().logWarning("Can't get activePowerAutoConsumptionCHP, using the default value: " + this.activePowerAutoConsumptionCHP);
@@ -142,7 +147,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
         String ancillaryCommoditiesAsArray;
 
         try {
-            ancillaryCommoditiesAsArray = driverConfig.getParameter("ancillaryCommodities");
+            ancillaryCommoditiesAsArray = driverConfig.getParameter(ParameterConstants.EPS.ancillaryCommodities);
             if (ancillaryCommoditiesAsArray == null)
                 throw new IllegalArgumentException();
         } catch (Exception e) {
@@ -156,7 +161,7 @@ public class FlexiblePVEpsProviderComDriver extends CALComDriver {
                 .collect(Collectors.toList());
 
         try {
-            this.filePathActivePowerFeedInPVPriceSignal = this.getComConfig().getParameter("filePathActivePowerFeedInPVPriceSignal");
+            this.filePathActivePowerFeedInPVPriceSignal = this.getComConfig().getParameter(ParameterConstants.EPS.filePathPVPriceSignal);
         } catch (Exception e) {
             this.filePathActivePowerFeedInPVPriceSignal = "configfiles/externalSignal/priceDynamic.csv";
             this.getGlobalLogger().logWarning("Can't get filePathPriceSignal, using the default value: " + this.filePathActivePowerFeedInPVPriceSignal);

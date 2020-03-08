@@ -192,7 +192,7 @@ public class Fitness implements IFitness {
 //				}
 //				
 //				// get time factor (constant time in [s] and price is [cents/kWh], whereas load/power is in [W])
-//				double timeFactor = (minNextChange - currenttime) / (3600000.0);
+//				double timeFactor = (minNextChange - currenttime) / (PhysicalConstants.factor_wsToKWh);
 //				
 //				// EPS
 //				double fitnessNew = EPSCostCalculator.calcEpsFitnessValue(

@@ -8,6 +8,7 @@ import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.GasBoilerObserverExchange;
 import osh.simulation.DeviceSimulationDriver;
 import osh.simulation.screenplay.SubjectAction;
+import osh.utils.string.ParameterConstants;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -46,63 +47,64 @@ public class GasBoilerSimulationDriver extends DeviceSimulationDriver {
         super(osh, deviceID, driverConfig);
 
         try {
-            this.minTemperature = Double.parseDouble(driverConfig.getParameter("minTemperature"));
+            this.minTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.GasBoiler.hotWaterStorageMinTemp));
         } catch (Exception e) {
             this.minTemperature = 60;
             this.getGlobalLogger().logWarning("Can't get minTemperature, using the default value: " + this.minTemperature);
         }
 
         try {
-            this.maxTemperature = Double.parseDouble(driverConfig.getParameter("maxTemperature"));
+            this.maxTemperature = Double.parseDouble(driverConfig.getParameter(ParameterConstants.GasBoiler.hotWaterStorageMaxTemp));
         } catch (Exception e) {
             this.maxTemperature = 80;
             this.getGlobalLogger().logWarning("Can't get maxTemperature, using the default value: " + this.maxTemperature);
         }
 
         try {
-            this.maxHotWaterPower = Integer.parseInt(driverConfig.getParameter("maxHotWaterPower"));
+            this.maxHotWaterPower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.GasBoiler.maxHotWaterPower));
         } catch (Exception e) {
             this.maxHotWaterPower = 15000;
             this.getGlobalLogger().logWarning("Can't get maxHotWaterPower, using the default value: " + this.maxHotWaterPower);
         }
 
         try {
-            this.maxGasPower = Integer.parseInt(driverConfig.getParameter("maxGasPower"));
+            this.maxGasPower = Integer.parseInt(driverConfig.getParameter(ParameterConstants.GasBoiler.maxGasPower));
         } catch (Exception e) {
             this.maxGasPower = 15000;
             this.getGlobalLogger().logWarning("Can't get maxGasPower, using the default value: " + this.maxGasPower);
         }
 
         try {
-            this.typicalActivePowerOn = Integer.parseInt(driverConfig.getParameter("typicalActivePowerOn"));
+            this.typicalActivePowerOn = Integer.parseInt(driverConfig.getParameter(ParameterConstants.GasBoiler.activePowerOn));
         } catch (Exception e) {
             this.typicalActivePowerOn = 100;
             this.getGlobalLogger().logWarning("Can't get typicalActivePowerOn, using the default value: " + this.typicalActivePowerOn);
         }
 
         try {
-            this.typicalActivePowerOff = Integer.parseInt(driverConfig.getParameter("typicalActivePowerOff"));
+            this.typicalActivePowerOff = Integer.parseInt(driverConfig.getParameter(ParameterConstants.GasBoiler.activePowerOff));
         } catch (Exception e) {
             this.typicalActivePowerOff = 0;
             this.getGlobalLogger().logWarning("Can't get typicalActivePowerOff, using the default value: " + this.typicalActivePowerOff);
         }
 
         try {
-            this.typicalReactivePowerOn = Integer.parseInt(driverConfig.getParameter("typicalReactivePowerOn"));
+            this.typicalReactivePowerOn = Integer.parseInt(driverConfig.getParameter(ParameterConstants.GasBoiler.reactivePowerOn));
         } catch (Exception e) {
             this.typicalReactivePowerOn = 0;
             this.getGlobalLogger().logWarning("Can't get typicalReactivePowerOn, using the default value: " + this.typicalReactivePowerOn);
         }
 
         try {
-            this.typicalReactivePowerOff = Integer.parseInt(driverConfig.getParameter("typicalReactivePowerOff"));
+            this.typicalReactivePowerOff = Integer.parseInt(driverConfig.getParameter(ParameterConstants.GasBoiler.reactivePowerOff));
         } catch (Exception e) {
             this.typicalReactivePowerOff = 0;
             this.getGlobalLogger().logWarning("Can't get typicalReactivePowerOff, using the default value: " + this.typicalReactivePowerOff);
         }
 
         try {
-            this.newIppAfter = Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter("newIppAfter")));
+            this.newIppAfter =
+                    Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter(ParameterConstants.IPP.newIPPAfter)));
         } catch (Exception e) {
             this.newIppAfter = Duration.ofHours(1); //1 hour
             this.getGlobalLogger().logWarning("Can't get newIppAfter, using the default value: " + this.newIppAfter);
