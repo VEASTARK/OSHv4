@@ -26,7 +26,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
-    protected final int maxEvaluations;
     protected final int populationSize;
     protected final Problem<S> problem;
     protected final SolutionListEvaluator<S> evaluator;
@@ -41,12 +40,11 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
     /**
      * Constructor
      */
-    public NSGAII45(Problem<S> problem, int maxEvaluations, int populationSize,
-                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                    SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
+    public NSGAII45(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
+                    MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
+                    SolutionListEvaluator<S> evaluator) {
         super();
         this.problem = problem;
-        this.maxEvaluations = maxEvaluations;
         this.populationSize = populationSize;
 
         this.crossoverOperator = crossoverOperator;
@@ -66,7 +64,7 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
 
         this.evaluations = this.populationSize;
 
-        while (this.evaluations < this.maxEvaluations) {
+        while (!this.isStoppingConditionReached()) {
             List<S> offspringPopulation = new ArrayList<>(this.populationSize);
             for (int i = 0; i < this.populationSize; i += 2) {
                 List<S> parents = new ArrayList<>(2);
@@ -96,6 +94,15 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
         }
     }
 
+    protected boolean isStoppingConditionReached() {
+        for (StoppingRule sr : this.stoppingRules) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public List<S> getResult() {
         return this.getNonDominatedSolutions(this.population);
@@ -116,9 +123,7 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
     }
 
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.problem);
-
-        return population;
+        return this.evaluator.evaluate(population, this.problem);
     }
 
     protected Ranking<S> computeRanking(List<S> solutionList) {

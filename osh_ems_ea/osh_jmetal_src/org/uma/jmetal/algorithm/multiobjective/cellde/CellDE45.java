@@ -26,7 +26,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class CellDE45 implements Algorithm<List<DoubleSolution>> {
-    protected final int maxEvaluations;
     private final Problem<DoubleSolution> problem;
     private final int populationSize;
     private final Neighborhood<DoubleSolution> neighborhood;
@@ -47,7 +46,6 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public CellDE45(Problem<DoubleSolution> problem,
-                    int maxEvaluations,
                     int populationSize,
                     BoundedArchive<DoubleSolution> archive,
                     Neighborhood<DoubleSolution> neighborhood,
@@ -57,7 +55,6 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
                     SolutionListEvaluator<DoubleSolution> evaluator) {
         this.problem = problem;
         this.populationSize = populationSize;
-        this.maxEvaluations = maxEvaluations;
         this.archive = archive;
         this.neighborhood = neighborhood;
         this.selection = selection;
@@ -91,7 +88,7 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
 
                 DoubleSolution offspring = children.get(0);
                 this.problem.evaluate(offspring);
-                this.evaluations++;
+                this.updateProgress();
 
                 int result = this.dominanceComparator.compare(this.population.get(i), offspring);
                 if (result > 0) {
@@ -156,7 +153,12 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     }
 
     protected boolean isStoppingConditionReached() {
-        return (this.evaluations == this.maxEvaluations);
+        for (StoppingRule sr : this.stoppingRules) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

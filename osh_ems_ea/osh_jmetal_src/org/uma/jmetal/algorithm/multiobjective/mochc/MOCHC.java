@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.mochc;
 
 import org.uma.jmetal.algorithm.impl.AbstractEvolutionaryAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -28,7 +29,6 @@ import java.util.List;
 public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<BinarySolution>> {
     private final BinaryProblem problem;
 
-    private final int maxEvaluations;
     private final int convergenceValue;
     private final double preservedPopulation;
     private final double initialConvergenceCount;
@@ -47,7 +47,7 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
     /**
      * Constructor
      */
-    public MOCHC(BinaryProblem problem, int populationSize, int maxEvaluations, int convergenceValue,
+    public MOCHC(BinaryProblem problem, int populationSize, int convergenceValue,
                  double preservedPopulation, double initialConvergenceCount,
                  CrossoverOperator<BinarySolution> crossoverOperator,
                  MutationOperator<BinarySolution> cataclysmicMutation,
@@ -56,7 +56,6 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
         super();
         this.problem = problem;
         this.maxPopulationSize = populationSize;
-        this.maxEvaluations = maxEvaluations;
         this.convergenceValue = convergenceValue;
         this.preservedPopulation = preservedPopulation;
         this.initialConvergenceCount = initialConvergenceCount;
@@ -94,7 +93,12 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -109,9 +113,7 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
 
     @Override
     protected List<BinarySolution> evaluatePopulation(List<BinarySolution> population) {
-        population = this.evaluator.evaluate(population, this.problem);
-
-        return population;
+        return this.evaluator.evaluate(population, this.problem);
     }
 
     @Override

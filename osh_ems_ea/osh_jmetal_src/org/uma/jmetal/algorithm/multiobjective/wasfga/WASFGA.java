@@ -39,7 +39,6 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
     private final AbstractUtilityFunctionsSet<S> achievementScalarizingFunction;
     private final List<Double> interestPoint;
     private final String weightVectorsFileName;
-    protected int maxEvaluations;
     protected int evaluations;
     protected double[][] weights;
 
@@ -50,7 +49,6 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
      */
     public WASFGA(Problem<S> problem,
                   int populationSize,
-                  int maxIterations,
                   CrossoverOperator<S> crossoverOperator,
                   MutationOperator<S> mutationOperator,
                   SelectionOperator<List<S>, S> selectionOperator,
@@ -59,7 +57,7 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
                   List<Double> referencePoint,
                   String weightVectorsFileName) {
 
-        super(problem, maxIterations, crossoverOperator, mutationOperator, selectionOperator, evaluator);
+        super(problem, crossoverOperator, mutationOperator, selectionOperator, evaluator);
         this.weightVectorsFileName = weightVectorsFileName;
         this.setMaxPopulationSize(populationSize);
         this.interestPoint = referencePoint;
@@ -74,7 +72,6 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
      */
     public WASFGA(Problem<S> problem,
                   int populationSize,
-                  int maxIterations,
                   CrossoverOperator<S> crossoverOperator,
                   MutationOperator<S> mutationOperator,
                   SelectionOperator<List<S>, S> selectionOperator,
@@ -84,7 +81,6 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
 
         this(problem,
                 populationSize,
-                maxIterations,
                 crossoverOperator,
                 mutationOperator,
                 selectionOperator,

@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.omopso;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
@@ -79,7 +80,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     }
 
     public OMOPSO build() {
-        return new OMOPSO(this.problem, this.evaluator, this.swarmSize, this.maxIterations, this.archiveSize, this.uniformMutation,
-                this.nonUniformMutation);
+        OMOPSO algorithm = new OMOPSO(this.problem, this.evaluator, this.swarmSize,
+                this.archiveSize, this.uniformMutation, this.nonUniformMutation);
+
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.swarmSize, this.maxIterations * this.swarmSize));
+        return algorithm;
     }
 }

@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.pesa2;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.pesa2.util.PESA2Selection;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -21,17 +22,15 @@ import java.util.List;
 public class PESA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
     protected final SelectionOperator<AdaptiveGridArchive<S>, S> selectionOperator;
     protected final SolutionListEvaluator<S> evaluator;
-    private final int maxEvaluations;
     private final int archiveSize;
     private final int biSections;
     private final AdaptiveGridArchive<S> archive;
     private int evaluations;
 
-    public PESA2(Problem<S> problem, int maxEvaluations, int populationSize, int archiveSize,
+    public PESA2(Problem<S> problem, int populationSize, int archiveSize,
                  int biSections, CrossoverOperator<S> crossoverOperator,
                  MutationOperator<S> mutationOperator, SolutionListEvaluator<S> evaluator) {
         super(problem);
-        this.maxEvaluations = maxEvaluations;
         this.setMaxPopulationSize(populationSize);
         this.archiveSize = archiveSize;
         this.biSections = biSections;
@@ -57,7 +56,12 @@ public class PESA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -59,12 +59,10 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
             Problem<S> problem,
             int populationSize,
             int archiveSize,
-            int maxEvaluations,
             SelectionOperator<List<S>, S> selectionOperator,
             SolutionListEvaluator<S> evaluator) {
         super(
                 problem,
-                maxEvaluations,
                 populationSize,
                 null,
                 null,

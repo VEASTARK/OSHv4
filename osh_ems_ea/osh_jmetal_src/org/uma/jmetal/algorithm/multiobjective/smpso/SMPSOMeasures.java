@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.smpso;
 
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
@@ -65,7 +66,12 @@ public class SMPSOMeasures extends SMPSO implements Measurable {
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.iterations.get() >= this.getMaxIterations();
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations.get().intValue(), -1, this.getResult())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

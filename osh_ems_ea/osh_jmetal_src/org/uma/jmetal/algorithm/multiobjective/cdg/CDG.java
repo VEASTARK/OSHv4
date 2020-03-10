@@ -14,6 +14,7 @@
 package org.uma.jmetal.algorithm.multiobjective.cdg;
 
 import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
@@ -65,7 +66,6 @@ public class CDG extends AbstractCDG<DoubleSolution> {
 
         this.evaluations = this.populationSize;
 
-        int maxGen = this.maxEvaluations / this.populationSize;
         int gen = 0;
 
         double mutationProbability = 1.0 / this.problem.getNumberOfVariables();
@@ -127,7 +127,7 @@ public class CDG extends AbstractCDG<DoubleSolution> {
             else
                 this.rankBasedSelection();
 
-        } while (gen < maxGen);
+        } while (!this.isStoppingConditionReached());
     }
 
     protected void initializePopulation() {
@@ -139,6 +139,15 @@ public class CDG extends AbstractCDG<DoubleSolution> {
             this.population.add(newSolution);
 
         }
+    }
+
+    public boolean isStoppingConditionReached() {
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

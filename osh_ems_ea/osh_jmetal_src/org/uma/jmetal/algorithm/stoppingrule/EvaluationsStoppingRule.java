@@ -3,6 +3,7 @@ package org.uma.jmetal.algorithm.stoppingrule;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
+import osh.utils.string.ParameterConstants;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,14 +27,14 @@ public class EvaluationsStoppingRule extends StoppingRule {
     public EvaluationsStoppingRule(Map<String, Object> parameters) {
         super(parameters);
 
-        if (this._parameters.get("populationSize") != null)
-            this.populationSize = (int) parameters.get("populationSize");
+        if (this._parameters.get(ParameterConstants.EA.populationSize) != null)
+            this.populationSize = (int) parameters.get(ParameterConstants.EA.populationSize);
         else {
             throw new JMetalException("no populationSize in parameters");
         }
 
-        if (this._parameters.get("maxEvaluations") != null)
-            this.maxEvaluations = (int) parameters.get("maxEvaluations");
+        if (this._parameters.get(ParameterConstants.EA.maxEvaluations) != null)
+            this.maxEvaluations = (int) parameters.get(ParameterConstants.EA.maxEvaluations);
         else {
             throw new JMetalException("no maxEvaluations in parameters");
         }
@@ -64,20 +65,20 @@ public class EvaluationsStoppingRule extends StoppingRule {
      * @param problem the underlying problem of the algorithm
      * @param generation the number of generations that have passed since the start of the execution
      * @param evaluations the number of evaltuations that have been done since the start of the execution
-     * @param currentSortedSolutions the current (sorted) set of solutions
+     * @param currentSolutions the current set of solutions
      *
      * @return true if the number of evaluation of candidate solutions done is greater or equal to the set cutoff-point
      */
     @Override
     public <S extends Solution<?>> boolean checkIfStop(Problem<S> problem, int generation, int evaluations,
-                                                       List<S> currentSortedSolutions) {
+                                                       List<S> currentSolutions) {
         if (evaluations > -1) {
             if (evaluations >= this.maxEvaluations) {
                 this._msg = "Optimisation stopped after reaching max evaluations: " + evaluations;
                 return true;
             }
         } else {
-            int realSize = Math.max(currentSortedSolutions.size(), this.populationSize);
+            int realSize = Math.max(currentSolutions.size(), this.populationSize);
             if (generation * realSize >= this.maxEvaluations) {
                 this._msg = "Optimisation stopped after reaching max evaluations: " + (generation * realSize);
                 return true;

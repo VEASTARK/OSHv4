@@ -176,23 +176,23 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
     public AbstractMOEAD<DoubleSolution> build() {
         AbstractMOEAD<DoubleSolution> algorithm = null;
         if (this.moeadVariant == Variant.MOEAD) {
-            algorithm = new MOEAD(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations, this.mutation,
+            algorithm = new MOEAD(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
                     this.maximumNumberOfReplacedSolutions, this.neighborSize);
         } else if (this.moeadVariant == Variant.ConstraintMOEAD) {
-            algorithm = new ConstraintMOEAD(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations, this.mutation,
+            algorithm = new ConstraintMOEAD(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
                     this.maximumNumberOfReplacedSolutions, this.neighborSize);
         } else if (this.moeadVariant == Variant.MOEADDRA) {
-            algorithm = new MOEADDRA(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations, this.mutation,
+            algorithm = new MOEADDRA(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
                     this.maximumNumberOfReplacedSolutions, this.neighborSize);
         } else if (this.moeadVariant == Variant.MOEADSTM) {
-            algorithm = new MOEADSTM(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations, this.mutation,
+            algorithm = new MOEADSTM(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
                     this.maximumNumberOfReplacedSolutions, this.neighborSize);
         } else if (this.moeadVariant == Variant.MOEADD) {
-            algorithm = new MOEADD<>(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations, this.crossover, this.mutation,
+            algorithm = new MOEADD<>(this.problem, this.populationSize, this.resultPopulationSize, this.crossover, this.mutation,
                     this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
                     this.maximumNumberOfReplacedSolutions, this.neighborSize);
         }

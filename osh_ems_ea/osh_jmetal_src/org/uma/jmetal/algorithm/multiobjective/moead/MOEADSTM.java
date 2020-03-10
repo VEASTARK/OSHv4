@@ -33,11 +33,10 @@ public class MOEADSTM extends AbstractMOEAD<DoubleSolution> {
     final JMetalRandom randomGenerator;
 
     public MOEADSTM(Problem<DoubleSolution> problem, int populationSize, int resultPopulationSize,
-                    int maxEvaluations,
                     MutationOperator<DoubleSolution> mutation, CrossoverOperator<DoubleSolution> crossover,
                     FunctionType functionType, String dataDirectory, double neighborhoodSelectionProbability,
                     int maximumNumberOfReplacedSolutions, int neighborSize) {
-        super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation,
+        super(problem, populationSize, resultPopulationSize, crossover, mutation,
                 functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
                 neighborSize);
@@ -64,7 +63,7 @@ public class MOEADSTM extends AbstractMOEAD<DoubleSolution> {
         this.nadirPoint.update(this.population);
 
         int generation = 0;
-        this.evaluations = this.populationSize;
+        this.initProgress();
         do {
             int[] permutation = new int[this.populationSize];
             MOEADUtils.randomPermutation(permutation, this.populationSize);
@@ -83,8 +82,6 @@ public class MOEADSTM extends AbstractMOEAD<DoubleSolution> {
                 DoubleSolution child = children.get(0);
                 this.mutationOperator.execute(child);
                 this.problem.evaluate(child);
-
-                this.evaluations++;
 
                 this.idealPoint.update(this.population);
                 this.nadirPoint.update(this.population);
@@ -105,8 +102,9 @@ public class MOEADSTM extends AbstractMOEAD<DoubleSolution> {
             if (generation % 30 == 0) {
                 this.utilityFunction();
             }
+            this.updateProgress();
 
-        } while (this.evaluations < this.maxEvaluations);
+        } while (!this.isStoppingConditionReached());
 
     }
 

@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.smsemoa;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -19,7 +20,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-    protected final int maxEvaluations;
     protected final double offset;
     protected final Comparator<S> dominanceComparator;
     private final Hypervolume<S> hypervolume;
@@ -28,11 +28,10 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     /**
      * Constructor
      */
-    public SMSEMOA(Problem<S> problem, int maxEvaluations, int populationSize, double offset,
+    public SMSEMOA(Problem<S> problem, int populationSize, double offset,
                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                    SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, Hypervolume<S> hypervolumeImplementation) {
         super(problem);
-        this.maxEvaluations = maxEvaluations;
         this.setMaxPopulationSize(populationSize);
 
         this.offset = offset;
@@ -56,7 +55,12 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

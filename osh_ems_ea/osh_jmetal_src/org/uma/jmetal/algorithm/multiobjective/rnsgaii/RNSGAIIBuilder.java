@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.rnsgaii;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -83,9 +84,9 @@ public class RNSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<R
     public RNSGAII<S> build() {
         RNSGAII<S> algorithm;
 
-        algorithm = new RNSGAII<>(this.problem, this.maxEvaluations, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
+        algorithm = new RNSGAII<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
                 this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator, this.interestPoint, this.epsilon);
-
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }
 

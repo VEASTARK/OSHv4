@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.smpso;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -234,15 +235,20 @@ public class SMPSOBuilder implements AlgorithmBuilder<SMPSO> {
     }
 
     public SMPSO build() {
+        SMPSO algorithm;
         if (this.variant == SMPSOVariant.SMPSO) {
-            return new SMPSO(this.problem, this.swarmSize, this.leaders, this.mutationOperator, this.maxIterations, this.r1Min, this.r1Max,
+            algorithm = new SMPSO(this.problem, this.swarmSize, this.leaders, this.mutationOperator,
+                this.maxIterations, this.r1Min, this.r1Max,
                     this.r2Min, this.r2Max, this.c1Min, this.c1Max, this.c2Min, this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1,
                     this.changeVelocity2, this.evaluator);
         } else {
-            return new SMPSOMeasures(this.problem, this.swarmSize, this.leaders, this.mutationOperator, this.maxIterations, this.r1Min, this.r1Max,
+            algorithm = new SMPSOMeasures(this.problem, this.swarmSize, this.leaders, this.mutationOperator,
+                this.maxIterations, this.r1Min, this.r1Max,
                     this.r2Min, this.r2Max, this.c1Min, this.c1Max, this.c2Min, this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1,
                     this.changeVelocity2, this.evaluator);
         }
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.swarmSize, this.swarmSize * this.maxIterations));
+        return algorithm;
     }
 
     /*

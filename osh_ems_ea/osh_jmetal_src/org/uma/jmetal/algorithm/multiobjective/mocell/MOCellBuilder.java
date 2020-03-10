@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.mocell;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -58,8 +59,10 @@ public class MOCellBuilder<S extends Solution<?>> implements AlgorithmBuilder<MO
 
     public MOCell<S> build() {
 
-        return new MOCell<>(this.problem, this.maxEvaluations, this.populationSize, this.archive,
+        MOCell<S> algorithm = new MOCell<>(this.problem, this.populationSize, this.archive,
                 this.neighborhood, this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 
     /* Getters */

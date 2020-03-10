@@ -45,7 +45,6 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
     protected final String dataDirectory;
     protected final int populationSize;
     protected final int resultPopulationSize;
-    protected final int maxEvaluations;
     protected final JMetalRandom randomGenerator;
     protected final CrossoverOperator<S> crossoverOperator;
     protected final MutationOperator<S> mutationOperator;
@@ -68,13 +67,12 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
 
     public AbstractMOEAD(Problem<S> problem, int populationSize, int resultPopulationSize,
-                         int maxEvaluations, CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutation,
+                         CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutation,
                          FunctionType functionType, String dataDirectory, double neighborhoodSelectionProbability,
                          int maximumNumberOfReplacedSolutions, int neighborSize) {
         this.problem = problem;
         this.populationSize = populationSize;
         this.resultPopulationSize = resultPopulationSize;
-        this.maxEvaluations = maxEvaluations;
         this.mutationOperator = mutation;
         this.crossoverOperator = crossoverOperator;
         this.functionType = functionType;
@@ -320,6 +318,23 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
             throw new JMetalException(" MOEAD.fitnessFunction: unknown type " + this.functionType);
         }
         return fitness;
+    }
+
+    protected void initProgress() {
+        this.evaluations = this.populationSize;
+    }
+
+    protected void updateProgress() {
+        this.evaluations += this.populationSize;
+    }
+
+    protected boolean isStoppingConditionReached() {
+        for (StoppingRule sr : this.stoppingRules) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

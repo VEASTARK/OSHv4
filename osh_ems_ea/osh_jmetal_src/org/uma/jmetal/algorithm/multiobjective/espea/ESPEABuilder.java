@@ -3,6 +3,7 @@ package org.uma.jmetal.algorithm.multiobjective.espea;
 import org.uma.jmetal.algorithm.multiobjective.espea.util.EnergyArchive.ReplacementStrategy;
 import org.uma.jmetal.algorithm.multiobjective.espea.util.ScalarizationWrapper;
 import org.uma.jmetal.algorithm.multiobjective.espea.util.ScalarizationWrapper.ScalarizationType;
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -45,8 +46,11 @@ public class ESPEABuilder<S extends Solution<?>> implements AlgorithmBuilder<ESP
 
     @Override
     public ESPEA<S> build() {
-        return new ESPEA<>(this.problem, this.maxEvaluations, this.populationSize, this.crossoverOperator, this.fullArchiveCrossoverOperator, this.mutationOperator,
+        ESPEA<S> algorithm = new ESPEA<>(this.problem, this.populationSize, this.crossoverOperator,
+                this.fullArchiveCrossoverOperator, this.mutationOperator,
                 this.selectionOperator, this.scalarization, this.evaluator, this.normalizeObjectives, this.replacementStrategy);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 
     /**

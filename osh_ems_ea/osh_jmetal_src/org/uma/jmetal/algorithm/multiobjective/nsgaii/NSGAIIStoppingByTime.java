@@ -28,7 +28,7 @@ public class NSGAIIStoppingByTime<S extends Solution<?>> extends NSGAII<S> {
                                 CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                                 SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
                                 SolutionListEvaluator<S> evaluator) {
-        super(problem, 0, populationSize, matingPoolSize, offspringPopulationSize,
+        super(problem, populationSize, matingPoolSize, offspringPopulationSize,
                 crossoverOperator, mutationOperator,
                 selectionOperator, dominanceComparator, evaluator);
 

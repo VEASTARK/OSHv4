@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.paes;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
@@ -22,7 +23,9 @@ public class PAESBuilder<S extends Solution<?>> implements AlgorithmBuilder<PAES
     }
 
     public PAES<S> build() {
-        return new PAES<>(this.problem, this.archiveSize, this.maxEvaluations, this.biSections, this.mutationOperator);
+        PAES<S> algorithm = new PAES<>(this.problem, this.archiveSize, this.biSections, this.mutationOperator);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.archiveSize, this.maxEvaluations));
+        return algorithm;
     }
 
     /*

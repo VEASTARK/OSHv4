@@ -35,16 +35,15 @@ public class MOMBI2<S extends Solution<?>> extends MOMBI<S> {
      * Creates a new instance of the MOMBI algorithm
      *
      * @param problem
-     * @param maxIterations
      * @param crossover
      * @param mutation
      * @param selection
      * @param evaluator
      * @param pathWeights
      */
-    public MOMBI2(Problem<S> problem, int maxIterations, CrossoverOperator<S> crossover, MutationOperator<S> mutation,
+    public MOMBI2(Problem<S> problem, CrossoverOperator<S> crossover, MutationOperator<S> mutation,
                   SelectionOperator<List<S>, S> selection, SolutionListEvaluator<S> evaluator, String pathWeights) {
-        super(problem, maxIterations, crossover, mutation, selection, evaluator, pathWeights);
+        super(problem, crossover, mutation, selection, evaluator, pathWeights);
 
         this.history = new MOMBI2History<>(problem.getNumberOfObjectives());
     }

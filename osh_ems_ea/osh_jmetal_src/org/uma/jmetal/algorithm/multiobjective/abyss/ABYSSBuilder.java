@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.abyss;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.LocalSearchOperator;
 import org.uma.jmetal.operator.MutationOperator;
@@ -129,7 +130,10 @@ public class ABYSSBuilder implements AlgorithmBuilder<ABYSS> {
 
     @Override
     public ABYSS build() {
-        return new ABYSS(this.problem, this.maxEvaluations, this.populationSize, this.refSet1Size, this.refSet2Size, this.archiveSize,
-                this.archive, this.improvementOperator, this.crossoverOperator, this.numberOfSubranges);
+        ABYSS algorithm =  new ABYSS(this.problem, this.populationSize, this.refSet1Size,
+                this.refSet2Size, this.archiveSize, this.archive, this.improvementOperator, this.crossoverOperator,
+                this.numberOfSubranges);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 }

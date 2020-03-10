@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.spea2;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -18,7 +19,6 @@ import java.util.List;
  **/
 @SuppressWarnings("serial")
 public class SPEA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-    protected final int maxIterations;
     protected final SolutionListEvaluator<S> evaluator;
     protected final StrengthRawFitness<S> strenghtRawFitness = new StrengthRawFitness<>();
     protected final EnvironmentalSelection<S> environmentalSelection;
@@ -26,12 +26,11 @@ public class SPEA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     protected int iterations;
     protected List<S> archive;
 
-    public SPEA2(Problem<S> problem, int maxIterations, int populationSize,
+    public SPEA2(Problem<S> problem, int populationSize,
                  CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                  SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
                  int k) {
         super(problem);
-        this.maxIterations = maxIterations;
         this.setMaxPopulationSize(populationSize);
 
         this.k = k;
@@ -57,13 +56,17 @@ public class SPEA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, this.archive)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     @Override

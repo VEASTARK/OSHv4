@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.smpso;
 
 import org.uma.jmetal.algorithm.impl.AbstractParticleSwarmOptimization;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> {
-    private final DoubleProblem problem;
+    protected final DoubleProblem problem;
 
     private final double c1Max;
     private final double c1Min;
@@ -111,7 +112,12 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, this.leaders.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.smsemoa;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -67,9 +68,11 @@ public class SMSEMOABuilder<S extends Solution<?>> implements AlgorithmBuilder<S
 
     @Override
     public SMSEMOA<S> build() {
-        return new SMSEMOA<>(this.problem, this.maxEvaluations, this.populationSize, this.offset,
+        SMSEMOA<S> algorithm = new SMSEMOA<>(this.problem, this.populationSize, this.offset,
                 this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator,
                 this.hypervolumeImplementation);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 
     public Problem<S> getProblem() {

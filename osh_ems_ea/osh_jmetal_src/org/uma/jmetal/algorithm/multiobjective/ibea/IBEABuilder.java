@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.ibea;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -110,7 +111,9 @@ public class IBEABuilder implements AlgorithmBuilder<IBEA<DoubleSolution>> {
     }
 
     public IBEA<DoubleSolution> build() {
-        return new IBEA<>(this.problem, this.populationSize, this.archiveSize, this.maxEvaluations, this.selection, this.crossover,
-                this.mutation);
+        IBEA<DoubleSolution> algorithm = new IBEA<>(this.problem, this.populationSize, this.archiveSize, this.selection,
+            this.crossover, this.mutation);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 }

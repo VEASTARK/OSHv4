@@ -32,14 +32,14 @@ public abstract class StoppingRule {
      * @param problem the underlying problem of the algorithm
      * @param generation the number of generations that have passed since the start of the execution
      * @param evaluations the number of evaltuations that have been done since the start of the execution
-     * @param currentSortedSolutions the current (sorted) set of solutions
+     * @param currentSolutions the current set of solutions
      *
      * @return true if the stopping condition has been reached
      */
     public abstract <S extends Solution<?>> boolean checkIfStop(Problem<S> problem,
                                                                 int generation,
                                                                 int evaluations,
-                                                                List<S> currentSortedSolutions);
+                                                                List<S> currentSolutions);
 
     /**
      * Returns a message containing information about why the stopping condition was triggered, or an empty string if

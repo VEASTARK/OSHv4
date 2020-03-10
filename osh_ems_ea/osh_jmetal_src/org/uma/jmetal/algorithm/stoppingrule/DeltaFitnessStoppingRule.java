@@ -88,28 +88,28 @@ public class DeltaFitnessStoppingRule extends StoppingRule {
      * @param problem the underlying problem of the algorithm
      * @param generation the number of generations that have passed since the start of the execution
      * @param evaluations the number of evaltuations that have been done since the start of the execution
-     * @param currentSortedSolutions the current (sorted) set of solutions
+     * @param currentSolutions the current set of solutions
      *
      * @return true if the required minimum improvement of fitness is not reached
      */
     @Override
     public <S extends Solution<?>> boolean checkIfStop(Problem<S> problem, int generation, int evaluations,
-                                                       List<S> currentSortedSolutions) {
+                                                       List<S> currentSolutions) {
 
         if (this.lastGenerationBestFitness == null) {
             this.noObjectives = problem.getNumberOfObjectives();
             this.init();
         }
 
-        if (currentSortedSolutions.isEmpty()) return false;
+        if (currentSolutions.isEmpty()) return false;
 
         boolean firstTime = false;
         double[] deltaFitness = new double[this.noObjectives];
         double[] thisGenerationBestFitness = new double[this.noObjectives];
 
         for (int i = 0; i < this.noObjectives; i++) {
-            currentSortedSolutions.sort(this.comparators[i]);
-            Solution<?> best = currentSortedSolutions.get(0);
+            currentSolutions.sort(this.comparators[i]);
+            Solution<?> best = currentSolutions.get(0);
 
             if (this.lastGenerationBestFitness[i] == null) {
                 this.lastGenerationBestFitness[i] = best.getObjective(0);

@@ -130,7 +130,12 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
     }
 
     protected boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.stoppingRules) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.localBest))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected List<DoubleSolution> createInitialSwarm() {
@@ -146,9 +151,7 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
     }
 
     protected List<DoubleSolution> evaluateSwarm(List<DoubleSolution> swarm) {
-        swarm = this.evaluator.evaluate(swarm, this.problem);
-
-        return swarm;
+        return this.evaluator.evaluate(swarm, this.problem);
     }
 
     protected void initializeLeaders(List<DoubleSolution> swarm) {

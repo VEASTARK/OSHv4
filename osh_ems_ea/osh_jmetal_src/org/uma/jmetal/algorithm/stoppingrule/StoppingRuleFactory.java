@@ -18,9 +18,11 @@ public class StoppingRuleFactory {
      * @return the constructed stopping rule
      */
     public static StoppingRule getStoppingRule(String name, Map<String, Object> parameters) {
-        if (name.equalsIgnoreCase("EvaluationsStoppingRule"))
+        StoppingRuleType ruleType = StoppingRuleType.fromName(name);
+
+        if (ruleType == StoppingRuleType.MAX_EVALUATIONS)
             return new EvaluationsStoppingRule(parameters);
-        else if (name.equalsIgnoreCase("DeltaFitnessStoppingRule"))
+        else if (ruleType == StoppingRuleType.DELTA_FITNESS)
             return new DeltaFitnessStoppingRule(parameters);
         else {
             throw new JMetalException("Exception in " + name + ".getStoppingRule()");

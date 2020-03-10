@@ -100,9 +100,7 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
             this.evaluations++;
         }
 
-        boolean finishCondition = false;
-
-        while (!finishCondition) {
+        while (!this.isStoppingConditionReached()) {
             List<BinarySolution> offspringPopulation = new ArrayList<>(this.populationSize);
             for (int i = 0; i < this.population.size() / 2; i++) {
                 List<BinarySolution> parents = new ArrayList<>(2);
@@ -150,10 +148,16 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
             }
 
             this.population = newPopulation;
-            if (this.evaluations >= this.maxEvaluations) {
-                finishCondition = true;
+        }
+    }
+
+    protected boolean isStoppingConditionReached() {
+        for (StoppingRule sr : this.stoppingRules) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
             }
         }
+        return false;
     }
 
     @Override

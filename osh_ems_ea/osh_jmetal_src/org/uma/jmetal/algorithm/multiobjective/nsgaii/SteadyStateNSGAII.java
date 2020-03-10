@@ -20,10 +20,10 @@ public class SteadyStateNSGAII<S extends Solution<?>> extends NSGAII<S> {
     /**
      * Constructor
      */
-    public SteadyStateNSGAII(Problem<S> problem, int maxEvaluations, int populationSize,
-                             CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                             SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, SolutionListEvaluator<S> evaluator) {
-        super(problem, maxEvaluations, populationSize, 100, 100, crossoverOperator, mutationOperator,
+    public SteadyStateNSGAII(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
+                             MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
+                             Comparator<S> dominanceComparator, SolutionListEvaluator<S> evaluator) {
+        super(problem, populationSize, 100, 100, crossoverOperator, mutationOperator,
                 selectionOperator, dominanceComparator, evaluator);
     }
 

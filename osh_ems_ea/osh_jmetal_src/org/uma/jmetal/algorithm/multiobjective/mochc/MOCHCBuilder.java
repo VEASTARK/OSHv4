@@ -4,6 +4,7 @@ package org.uma.jmetal.algorithm.multiobjective.mochc;
  * Created by ajnebro on 21/11/14.
  */
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -145,8 +146,10 @@ public class MOCHCBuilder implements AlgorithmBuilder<MOCHC> {
 
     public MOCHC build() {
 
-        return new MOCHC(this.problem, this.populationSize, this.maxEvaluations, this.convergenceValue, this.preservedPopulation,
+        MOCHC algorithm = new MOCHC(this.problem, this.populationSize, this.convergenceValue, this.preservedPopulation,
                 this.initialConvergenceCount, this.crossoverOperator, this.cataclysmicMutation, this.newGenerationSelection,
                 this.parentSelection, this.evaluator);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 }

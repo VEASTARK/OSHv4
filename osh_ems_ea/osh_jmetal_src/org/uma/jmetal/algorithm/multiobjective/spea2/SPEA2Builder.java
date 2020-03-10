@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.spea2;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -52,9 +53,9 @@ public class SPEA2Builder<S extends Solution<?>> implements AlgorithmBuilder<SPE
 
     public SPEA2<S> build() {
         SPEA2<S> algorithm;
-        algorithm = new SPEA2<>(this.problem, this.maxIterations, this.populationSize, this.crossoverOperator,
+        algorithm = new SPEA2<>(this.problem, this.populationSize, this.crossoverOperator,
                 this.mutationOperator, this.selectionOperator, this.evaluator, this.k);
-
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.populationSize * this.maxIterations));
         return algorithm;
     }
 

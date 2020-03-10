@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.nsgaii;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -101,20 +102,20 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
     public NSGAII<S> build() {
         NSGAII<S> algorithm = null;
         if (this.variant == NSGAIIVariant.NSGAII) {
-            algorithm = new NSGAII<>(this.problem, this.maxEvaluations, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
+            algorithm = new NSGAII<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
                     this.crossoverOperator,
                     this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
         } else if (this.variant == NSGAIIVariant.SteadyStateNSGAII) {
-            algorithm = new SteadyStateNSGAII<>(this.problem, this.maxEvaluations, this.populationSize, this.crossoverOperator,
+            algorithm = new SteadyStateNSGAII<>(this.problem, this.populationSize, this.crossoverOperator,
                     this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
         } else if (this.variant == NSGAIIVariant.Measures) {
-            algorithm = new NSGAIIMeasures<>(this.problem, this.maxEvaluations, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
+            algorithm = new NSGAIIMeasures<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
                     this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
         } else if (this.variant == NSGAIIVariant.DNSGAII) {
-            algorithm = new DNSGAII<>(this.problem, this.maxEvaluations, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
+            algorithm = new DNSGAII<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
                     this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
         }
-
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }
 

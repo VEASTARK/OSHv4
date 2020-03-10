@@ -1,6 +1,7 @@
 package constructsimulation.configuration.OC;
 
 import constructsimulation.configuration.general.Util;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRuleType;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
@@ -71,7 +72,7 @@ public class EAConfig {
 
         if (useMaxEvaluations) {
             StoppingRule src = new StoppingRule();
-            src.setStoppingRuleName("EvaluationsStoppingRule");
+            src.setStoppingRuleName(StoppingRuleType.MAX_EVALUATIONS.getName());
             src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.populationSize, popSize));
             src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.maxEvaluations, numEvaluations));
             stoppingRules.add(src);
@@ -79,7 +80,7 @@ public class EAConfig {
 
         if (useMinDeltaFitness) {
             StoppingRule src = new StoppingRule();
-            src.setStoppingRuleName("DeltaFitnessStoppingRule");
+            src.setStoppingRuleName(StoppingRuleType.DELTA_FITNESS.getName());
             src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.minDeltaFitnessPercent,
                     minDeltaFitnessPercent));
             src.getRuleParameters().add(Util.generateClassedParameter(ParameterConstants.EA.maxGenerationsDeltaFitnessViolated,

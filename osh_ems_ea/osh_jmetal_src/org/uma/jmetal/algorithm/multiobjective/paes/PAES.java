@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.paes;
 
 import org.uma.jmetal.algorithm.impl.AbstractEvolutionStrategy;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
@@ -21,7 +22,6 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, List<S>> {
     protected final int archiveSize;
-    protected final int maxEvaluations;
     protected final int biSections;
     protected final AdaptiveGridArchive<S> archive;
     protected final Comparator<S> comparator;
@@ -30,12 +30,11 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
     /**
      * Constructor
      */
-    public PAES(Problem<S> problem, int archiveSize, int maxEvaluations, int biSections,
+    public PAES(Problem<S> problem, int archiveSize, int biSections,
                 MutationOperator<S> mutationOperator) {
         super(problem);
         this.setProblem(problem);
         this.archiveSize = archiveSize;
-        this.maxEvaluations = maxEvaluations;
         this.biSections = biSections;
         this.mutationOperator = mutationOperator;
 
@@ -48,10 +47,6 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
         return this.archiveSize;
     }
 
-    public int getMaxEvaluations() {
-        return this.maxEvaluations;
-    }
-
     public int getBiSections() {
         return this.biSections;
     }
@@ -62,7 +57,7 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
 
     @Override
     protected void initProgress() {
-        this.evaluations = 0;
+        this.evaluations = 1;
     }
 
     @Override
@@ -72,7 +67,12 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

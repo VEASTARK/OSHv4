@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.pesa2;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
@@ -49,9 +50,9 @@ public class PESA2Builder<S extends Solution<?>> implements AlgorithmBuilder<PES
 
     public PESA2<S> build() {
         PESA2<S> algorithm;
-        algorithm = new PESA2<>(this.problem, this.maxEvaluations, this.populationSize, this.archiveSize, this.biSections,
+        algorithm = new PESA2<>(this.problem, this.populationSize, this.archiveSize, this.biSections,
                 this.crossoverOperator, this.mutationOperator, this.evaluator);
-
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }
 

@@ -27,7 +27,6 @@ public class ConstraintMOEAD extends AbstractMOEAD<DoubleSolution> {
     public ConstraintMOEAD(Problem<DoubleSolution> problem,
                            int populationSize,
                            int resultPopulationSize,
-                           int maxEvaluations,
                            MutationOperator<DoubleSolution> mutation,
                            CrossoverOperator<DoubleSolution> crossover,
                            FunctionType functionType,
@@ -35,7 +34,7 @@ public class ConstraintMOEAD extends AbstractMOEAD<DoubleSolution> {
                            double neighborhoodSelectionProbability,
                            int maximumNumberOfReplacedSolutions,
                            int neighborSize) {
-        super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation, functionType,
+        super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
                 neighborSize);
 
@@ -52,7 +51,7 @@ public class ConstraintMOEAD extends AbstractMOEAD<DoubleSolution> {
 
         this.violationThresholdComparator.updateThreshold(this.population);
 
-        this.evaluations = this.populationSize;
+        this.initProgress();
 
         do {
             int[] permutation = new int[this.populationSize];
@@ -71,15 +70,14 @@ public class ConstraintMOEAD extends AbstractMOEAD<DoubleSolution> {
                 this.mutationOperator.execute(child);
                 this.problem.evaluate(child);
 
-                this.evaluations++;
-
                 this.idealPoint.update(child.getObjectives());
                 this.updateNeighborhood(child, subProblemId, neighborType);
             }
 
             this.violationThresholdComparator.updateThreshold(this.population);
+            this.updateProgress();
 
-        } while (this.evaluations < this.maxEvaluations);
+        } while (!this.isStoppingConditionReached());
     }
 
     public void initializePopulation() {

@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.dmopso;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
@@ -274,6 +275,7 @@ public class DMOPSOBuilder implements AlgorithmBuilder<DMOPSO> {
                     this.c2Min, this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1, this.changeVelocity2, this.functionType, this.dataDirectory,
                     this.maxAge, this.name);
         }
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.swarmSize, this.maxIterations * this.swarmSize));
         return algorithm;
     }
 

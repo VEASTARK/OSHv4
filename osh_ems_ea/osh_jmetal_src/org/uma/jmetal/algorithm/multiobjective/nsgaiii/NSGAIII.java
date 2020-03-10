@@ -3,6 +3,12 @@ package org.uma.jmetal.algorithm.multiobjective.nsgaiii;
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaiii.util.EnvironmentalSelection;
 import org.uma.jmetal.algorithm.multiobjective.nsgaiii.util.ReferencePoint;
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
+import org.uma.jmetal.operator.CrossoverOperator;
+import org.uma.jmetal.operator.MutationOperator;
+import org.uma.jmetal.operator.SelectionOperator;
+import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.SolutionListUtils;
@@ -23,7 +29,6 @@ import java.util.Vector;
  */
 @SuppressWarnings("serial")
 public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-    protected final int maxIterations;
     protected final SolutionListEvaluator<S> evaluator;
     protected final Vector<Integer> numberOfDivisions;
     protected final List<ReferencePoint<S>> referencePoints = new Vector<>();
@@ -34,7 +39,8 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
      */
     public NSGAIII(NSGAIIIBuilder<S> builder) { // can be created from the NSGAIIIBuilder within the same package
         super(builder.getProblem());
-        this.maxIterations = builder.getMaxIterations();
+        this.addStoppingRule(new EvaluationsStoppingRule(builder.getPopulationSize(),
+                builder.getMaxIterations() * builder.getPopulationSize()));
 
         this.crossoverOperator = builder.getCrossoverOperator();
         this.mutationOperator = builder.getMutationOperator();
@@ -58,6 +64,68 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
         JMetalLogger.logger.info("rpssize: " + this.referencePoints.size());
     }
 
+    /**
+     * Constructor
+     *
+     * @param problem
+     * @param crossoverOperator
+     * @param mutationOperator
+     * @param selectionOperator
+     * @param evaluator
+     */
+    public NSGAIII(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
+                   MutationOperator<S> mutationOperator,
+                   SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
+        super(problem);
+
+        this.crossoverOperator = crossoverOperator;
+        this.mutationOperator = mutationOperator;
+        this.selectionOperator = selectionOperator;
+        this.evaluator = evaluator;
+
+        /* divisions according to the original NSGAIII study
+         *
+         *   objectives   | outer   | inner
+         *   3            | 12      | 0
+         *   5            |  6      | 0
+         *   8            |  3      | 2
+         *   10           |  3      | 2
+         *   15           |  2      | 1
+         */
+        int noObjectives = this.getProblem().getNumberOfObjectives();
+
+        if (noObjectives <= 3) {
+            this.numberOfDivisions = new Vector<>(1);
+            this.numberOfDivisions.add(12);
+        } else if (noObjectives <= 6) {
+            this.numberOfDivisions = new Vector<>(1);
+            this.numberOfDivisions.add(6);
+        } else if (noObjectives <= 8) {
+            this.numberOfDivisions = new Vector<>(2);
+            this.numberOfDivisions.add(3);
+            this.numberOfDivisions.add(2);
+        } else if (noObjectives <= 10) {
+            this.numberOfDivisions = new Vector<>(2);
+            this.numberOfDivisions.add(3);
+            this.numberOfDivisions.add(2);
+        } else {
+            this.numberOfDivisions = new Vector<>(2);
+            this.numberOfDivisions.add(2);
+            this.numberOfDivisions.add(1);
+        }
+
+        (new ReferencePoint<S>()).generateReferencePoints(this.referencePoints, noObjectives, this.numberOfDivisions);
+
+        int populationSize = this.referencePoints.size();
+        while (populationSize % 4 > 0) {
+            populationSize++;
+        }
+
+        this.setMaxPopulationSize(populationSize);
+
+        JMetalLogger.logger.info("rpssize: " + referencePoints.size()); ;
+    }
+
     @Override
     protected void initProgress() {
         this.iterations = 1;
@@ -70,14 +138,17 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     @Override

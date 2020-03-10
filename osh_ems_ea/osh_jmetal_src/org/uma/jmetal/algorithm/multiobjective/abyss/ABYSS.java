@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.abyss;
 
 import org.uma.jmetal.algorithm.impl.AbstractScatterSearch;
 import org.uma.jmetal.algorithm.multiobjective.abyss.util.MarkAttribute;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.LocalSearchOperator;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -35,7 +36,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolution>> {
-    protected final int maxEvaluations;
     protected final Problem<DoubleSolution> problem;
 
     protected final int referenceSet1Size;
@@ -66,7 +66,7 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
     protected final Comparator<DoubleSolution> crowdingDistanceComparator;
     protected int evaluations;
 
-    public ABYSS(DoubleProblem problem, int maxEvaluations, int populationSize, int referenceSet1Size,
+    public ABYSS(DoubleProblem problem, int populationSize, int referenceSet1Size,
                  int referenceSet2Size, int archiveSize, Archive<DoubleSolution> archive,
                  LocalSearchOperator<DoubleSolution> localSearch,
                  CrossoverOperator<DoubleSolution> crossoverOperator,
@@ -75,7 +75,6 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
         this.setPopulationSize(populationSize);
 
         this.problem = problem;
-        this.maxEvaluations = maxEvaluations;
         this.referenceSet1Size = referenceSet1Size;
         this.referenceSet2Size = referenceSet2Size;
         this.archiveSize = archiveSize;
@@ -109,7 +108,12 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
 
     @Override
     public boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -443,10 +447,10 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
 
     private void addReferenceSet1ToPopulation() {
         for (DoubleSolution solution : this.referenceSet1) {
-            solution = this.improvement(solution);
-            this.marked.setAttribute(solution, false);
+            DoubleSolution improvement = this.improvement(solution);
+            this.marked.setAttribute(improvement, false);
 
-            this.getPopulation().add(solution);
+            this.getPopulation().add(improvement);
         }
         this.referenceSet1.clear();
         this.referenceSet2.clear();

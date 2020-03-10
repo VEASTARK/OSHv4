@@ -4,6 +4,7 @@ import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.espea.util.EnergyArchive;
 import org.uma.jmetal.algorithm.multiobjective.espea.util.EnergyArchive.ReplacementStrategy;
 import org.uma.jmetal.algorithm.multiobjective.espea.util.ScalarizationWrapper;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -37,10 +38,6 @@ import java.util.List;
 public class ESPEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
 
     /**
-     * Maximum number of functions evaluations that are executed.
-     */
-    protected final int maxEvaluations;
-    /**
      * ESPEA uses two different crossover operators depending on the current
      * archive size. If the archive is not full, it uses the crossover operator
      * provided by {@link #getCrossoverOperator()}. If the archive is full,
@@ -64,12 +61,11 @@ public class ESPEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     /**
      * Constructor for setting all parameters of ESPEA.
      */
-    public ESPEA(Problem<S> problem, int maxEvaluations, int populationSize, CrossoverOperator<S> crossoverOperator,
+    public ESPEA(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                  CrossoverOperator<S> fullArchiveCrossoverOperator, MutationOperator<S> mutationOperator,
                  SelectionOperator<List<S>, S> selectionOperator, ScalarizationWrapper scalarizationWrapper, SolutionListEvaluator<S> evaluator,
                  boolean normalizeObjectives, ReplacementStrategy replacementStrategy) {
         super(problem);
-        this.maxEvaluations = maxEvaluations;
         this.setMaxPopulationSize(populationSize);
         this.crossoverOperator = crossoverOperator;
         this.fullArchiveCrossoverOperator = fullArchiveCrossoverOperator;
@@ -104,13 +100,17 @@ public class ESPEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     @Override

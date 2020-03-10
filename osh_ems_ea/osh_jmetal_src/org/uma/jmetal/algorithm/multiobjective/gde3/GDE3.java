@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.gde3;
 
 import org.uma.jmetal.algorithm.impl.AbstractDifferentialEvolution;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.operator.impl.selection.DifferentialEvolutionSelection;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -24,7 +25,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class GDE3 extends AbstractDifferentialEvolution<List<DoubleSolution>> {
-    protected final int maxEvaluations;
     protected final Comparator<DoubleSolution> dominanceComparator;
     protected final Ranking<DoubleSolution> ranking;
     protected final DensityEstimator<DoubleSolution> crowdingDistance;
@@ -35,12 +35,11 @@ public class GDE3 extends AbstractDifferentialEvolution<List<DoubleSolution>> {
     /**
      * Constructor
      */
-    public GDE3(DoubleProblem problem, int populationSize, int maxEvaluations,
+    public GDE3(DoubleProblem problem, int populationSize,
                 DifferentialEvolutionSelection selection, DifferentialEvolutionCrossover crossover,
                 SolutionListEvaluator<DoubleSolution> evaluator) {
         this.setProblem(problem);
         this.maxPopulationSize = populationSize;
-        this.maxEvaluations = maxEvaluations;
         this.crossoverOperator = crossover;
         this.selectionOperator = selection;
 
@@ -71,7 +70,12 @@ public class GDE3 extends AbstractDifferentialEvolution<List<DoubleSolution>> {
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

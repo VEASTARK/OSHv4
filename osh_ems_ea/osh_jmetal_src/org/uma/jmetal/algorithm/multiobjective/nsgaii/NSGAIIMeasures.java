@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.nsgaii;
 
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -40,11 +41,11 @@ public class NSGAIIMeasures<S extends Solution<?>> extends NSGAII<S> implements 
     /**
      * Constructor
      */
-    public NSGAIIMeasures(Problem<S> problem, int maxIterations, int populationSize,
+    public NSGAIIMeasures(Problem<S> problem, int populationSize,
                           int matingPoolSize, int offspringPopulationSize,
                           CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                           SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, SolutionListEvaluator<S> evaluator) {
-        super(problem, maxIterations, populationSize, matingPoolSize, offspringPopulationSize,
+        super(problem, populationSize, matingPoolSize, offspringPopulationSize,
                 crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator);
 
         this.referenceFront = new ArrayFront();
@@ -72,7 +73,12 @@ public class NSGAIIMeasures<S extends Solution<?>> extends NSGAII<S> implements 
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations.get() >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations.get().intValue(), this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

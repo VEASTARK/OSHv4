@@ -17,13 +17,12 @@ public class MOMBI<S extends Solution<?>> extends AbstractMOMBI<S> {
     protected final AbstractUtilityFunctionsSet<S> utilityFunctions;
 
     public MOMBI(Problem<S> problem,
-                 int maxIterations,
                  CrossoverOperator<S> crossover,
                  MutationOperator<S> mutation,
                  SelectionOperator<List<S>, S> selection,
                  SolutionListEvaluator<S> evaluator,
                  String pathWeights) {
-        super(problem, maxIterations, crossover, mutation, selection, evaluator);
+        super(problem, crossover, mutation, selection, evaluator);
         this.utilityFunctions = this.createUtilityFunction(pathWeights);
     }
 

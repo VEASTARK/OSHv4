@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.mocell;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -26,7 +27,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-    protected final int maxEvaluations;
     protected final SolutionListEvaluator<S> evaluator;
     protected final Neighborhood<S> neighborhood;
     protected final BoundedArchive<S> archive;
@@ -40,7 +40,6 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
      * Constructor
      *
      * @param problem
-     * @param maxEvaluations
      * @param populationSize
      * @param neighborhood
      * @param crossoverOperator
@@ -48,12 +47,11 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
      * @param selectionOperator
      * @param evaluator
      */
-    public MOCell(Problem<S> problem, int maxEvaluations, int populationSize, BoundedArchive<S> archive,
+    public MOCell(Problem<S> problem, int populationSize, BoundedArchive<S> archive,
                   Neighborhood<S> neighborhood,
                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                   SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
         super(problem);
-        this.maxEvaluations = maxEvaluations;
         this.setMaxPopulationSize(populationSize);
         this.archive = archive;
         this.neighborhood = neighborhood;
@@ -67,7 +65,7 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
 
     @Override
     protected void initProgress() {
-        this.evaluations = 0;
+        this.evaluations = this.getMaxPopulationSize();
         this.currentIndividual = 0;
     }
 
@@ -79,7 +77,12 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return (this.evaluations == this.maxEvaluations);
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

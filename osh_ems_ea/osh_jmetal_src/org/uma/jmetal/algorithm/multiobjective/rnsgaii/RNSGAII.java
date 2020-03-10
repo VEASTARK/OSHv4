@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.multiobjective.rnsgaii;
 
 import org.uma.jmetal.algorithm.InteractiveAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAII;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -37,12 +38,12 @@ public class RNSGAII<S extends Solution<?>> extends NSGAII<S> implements
     /**
      * Constructor
      */
-    public RNSGAII(Problem<S> problem, int maxEvaluations, int populationSize,
+    public RNSGAII(Problem<S> problem, int populationSize,
                    int matingPoolSize, int offspringPopulationSize,
                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                    SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
                    List<Double> interestPoint, double epsilon) {
-        super(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize, crossoverOperator,
+        super(problem, populationSize, matingPoolSize, offspringPopulationSize, crossoverOperator,
                 mutationOperator, selectionOperator, new DominanceComparator<>(), evaluator);
         this.interestPoint = interestPoint;
         this.epsilon = epsilon;
@@ -72,7 +73,12 @@ public class RNSGAII<S extends Solution<?>> extends NSGAII<S> implements
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations.get() >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations.get().intValue(), this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

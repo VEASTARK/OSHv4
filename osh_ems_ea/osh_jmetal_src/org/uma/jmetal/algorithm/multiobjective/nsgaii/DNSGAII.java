@@ -24,12 +24,11 @@ public class DNSGAII<S extends Solution<?>> extends NSGAII<S> {
 
     private double[][] referenceVectors;
 
-    public DNSGAII(Problem<S> problem, int maxEvaluations,
-                   int populationSize, int matingPoolSize, int offspringPopulationSize,
+    public DNSGAII(Problem<S> problem, int populationSize, int matingPoolSize, int offspringPopulationSize,
                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                    SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
                    SolutionListEvaluator<S> evaluator) {
-        super(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
+        super(problem, populationSize, matingPoolSize, offspringPopulationSize,
                 crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator);
     }
 

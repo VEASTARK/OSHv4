@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.nsgaii;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -20,7 +21,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-    protected final int maxEvaluations;
 
     protected final SolutionListEvaluator<S> evaluator;
     protected final Comparator<S> dominanceComparator;
@@ -31,24 +31,23 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
     /**
      * Constructor
      */
-    public NSGAII(Problem<S> problem, int maxEvaluations, int populationSize,
+    public NSGAII(Problem<S> problem, int populationSize,
                   int matingPoolSize, int offspringPopulationSize,
                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                   SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
-        this(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
+        this(problem, populationSize, matingPoolSize, offspringPopulationSize,
                 crossoverOperator, mutationOperator, selectionOperator, new DominanceComparator<>(), evaluator);
     }
 
     /**
      * Constructor
      */
-    public NSGAII(Problem<S> problem, int maxEvaluations, int populationSize,
+    public NSGAII(Problem<S> problem, int populationSize,
                   int matingPoolSize, int offspringPopulationSize,
                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                   SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
                   SolutionListEvaluator<S> evaluator) {
         super(problem);
-        this.maxEvaluations = maxEvaluations;
         this.setMaxPopulationSize(populationSize);
 
         this.crossoverOperator = crossoverOperator;
@@ -74,14 +73,17 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     /**

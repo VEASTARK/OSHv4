@@ -138,9 +138,7 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
 
     @Override
     public List<DoubleSolution> evaluateSwarm(List<DoubleSolution> swarm) {
-        swarm = this.evaluator.evaluate(swarm, this.problem);
-
-        return swarm;
+        return this.evaluator.evaluate(swarm, this.problem);
     }
 
     @Override

@@ -25,7 +25,6 @@ public class MOEADD<S extends DoubleSolution> extends AbstractMOEAD<S> {
     public MOEADD(Problem<S> problem,
                   int populationSize,
                   int resultPopulationSize,
-                  int maxEvaluations,
                   CrossoverOperator<S> crossoverOperator,
                   MutationOperator<S> mutation,
                   FunctionType functionType,
@@ -33,13 +32,12 @@ public class MOEADD<S extends DoubleSolution> extends AbstractMOEAD<S> {
                   double neighborhoodSelectionProbability,
                   int maximumNumberOfReplacedSolutions,
                   int neighborSize) {
-        super(problem, populationSize, resultPopulationSize, maxEvaluations, crossoverOperator, mutation, functionType, dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize);
+        super(problem, populationSize, resultPopulationSize, crossoverOperator, mutation, functionType, dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize);
     }
 
     @Override
     public void run() {
 
-        this.evaluations = 0;
         this.population = new ArrayList<>(this.populationSize);
 
         this.neighborhood = new int[this.populationSize][this.neighborSize];
@@ -58,6 +56,8 @@ public class MOEADD<S extends DoubleSolution> extends AbstractMOEAD<S> {
         this.initPopulation();
         this.idealPoint.update(this.population);
         this.nadirPoint.update(this.population);
+
+        this.initProgress();
 
         // initialize the distance
         for (int i = 0; i < this.populationSize; i++) {
@@ -99,13 +99,12 @@ public class MOEADD<S extends DoubleSolution> extends AbstractMOEAD<S> {
                 this.mutationOperator.execute(child);
                 this.problem.evaluate(child);
 
-                this.evaluations++;
-
                 this.idealPoint.update(child.getObjectives());
                 this.nadirPoint.update(child.getObjectives());
                 this.updateArchive(child);
             }
-        } while (this.evaluations < this.maxEvaluations);
+            this.updateProgress();
+        } while (!this.isStoppingConditionReached());
     }
 
     /**
@@ -115,7 +114,6 @@ public class MOEADD<S extends DoubleSolution> extends AbstractMOEAD<S> {
         for (int i = 0; i < this.populationSize; i++) {
             S newSolution = this.problem.createSolution();
             this.problem.evaluate(newSolution);
-            this.evaluations++;
             this.population.add(newSolution);
             this.subregionIdx[i][i] = 1;
         }

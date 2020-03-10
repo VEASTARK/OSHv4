@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.wasfga;
 
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -35,7 +36,6 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
      */
     public WASFGAMeasures(Problem<S> problem,
                           int populationSize,
-                          int maxIterations,
                           CrossoverOperator<S> crossoverOperator,
                           MutationOperator<S> mutationOperator,
                           SelectionOperator<List<S>, S> selectionOperator,
@@ -46,7 +46,6 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
 
         super(problem,
                 populationSize,
-                maxIterations,
                 crossoverOperator,
                 mutationOperator,
                 selectionOperator,
@@ -64,7 +63,6 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
      */
     public WASFGAMeasures(Problem<S> problem,
                           int populationSize,
-                          int maxIterations,
                           CrossoverOperator<S> crossoverOperator,
                           MutationOperator<S> mutationOperator,
                           SelectionOperator<List<S>, S> selectionOperator,
@@ -73,7 +71,6 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
                           List<Double> referencePoint) {
         this(problem,
                 populationSize,
-                maxIterations,
                 crossoverOperator,
                 mutationOperator,
                 selectionOperator,
@@ -96,7 +93,12 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.iterations.get() >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations.get().intValue(), -1, this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -32,11 +32,11 @@ public class MOEADDRA extends AbstractMOEAD<DoubleSolution> {
 
     final JMetalRandom randomGenerator;
 
-    public MOEADDRA(Problem<DoubleSolution> problem, int populationSize, int resultPopulationSize, int maxEvaluations,
+    public MOEADDRA(Problem<DoubleSolution> problem, int populationSize, int resultPopulationSize,
                     MutationOperator<DoubleSolution> mutation, CrossoverOperator<DoubleSolution> crossover, FunctionType functionType,
                     String dataDirectory, double neighborhoodSelectionProbability,
                     int maximumNumberOfReplacedSolutions, int neighborSize) {
-        super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation, functionType,
+        super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
                 neighborSize);
 
@@ -61,7 +61,7 @@ public class MOEADDRA extends AbstractMOEAD<DoubleSolution> {
         this.idealPoint.update(this.population);
 
         int generation = 0;
-        this.evaluations = this.populationSize;
+        this.initProgress();
         do {
             int[] permutation = new int[this.populationSize];
             MOEADUtils.randomPermutation(permutation, this.populationSize);
@@ -80,8 +80,6 @@ public class MOEADDRA extends AbstractMOEAD<DoubleSolution> {
                 this.mutationOperator.execute(child);
                 this.problem.evaluate(child);
 
-                this.evaluations++;
-
                 this.idealPoint.update(child.getObjectives());
                 this.updateNeighborhood(child, subProblemId, neighborType);
             }
@@ -90,8 +88,9 @@ public class MOEADDRA extends AbstractMOEAD<DoubleSolution> {
             if (generation % 30 == 0) {
                 this.utilityFunction();
             }
+            this.updateProgress();
 
-        } while (this.evaluations < this.maxEvaluations);
+        } while (!this.isStoppingConditionReached());
 
     }
 

@@ -103,7 +103,7 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
     @Override
     public boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
-            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.getLocalBest()))) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.localBest))) {
                 return true;
             }
         }
@@ -126,9 +126,7 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
 
     @Override
     public List<DoubleSolution> evaluateSwarm(List<DoubleSolution> swarm) {
-        swarm = this.evaluator.evaluate(swarm, this.problem);
-
-        return swarm;
+        return this.evaluator.evaluate(swarm, this.problem);
     }
 
     @Override

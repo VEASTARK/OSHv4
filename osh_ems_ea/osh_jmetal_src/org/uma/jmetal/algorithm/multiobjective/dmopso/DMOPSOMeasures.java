@@ -66,11 +66,6 @@ public class DMOPSOMeasures extends DMOPSO implements Measurable {
     }
 
     @Override
-    protected boolean isStoppingConditionReached() {
-        return this.iterations.get() >= this.maxIterations;
-    }
-
-    @Override
     public void run() {
         this.durationMeasure.reset();
         this.durationMeasure.start();

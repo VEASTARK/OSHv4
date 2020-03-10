@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.multiobjective.gde3;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
@@ -56,7 +57,10 @@ public class GDE3Builder implements AlgorithmBuilder<GDE3> {
     }
 
     public GDE3 build() {
-        return new GDE3(this.problem, this.populationSize, this.maxEvaluations, this.selectionOperator, this.crossoverOperator, this.evaluator);
+        GDE3 algorithm = new GDE3(this.problem, this.populationSize, this.selectionOperator,
+            this.crossoverOperator, this.evaluator);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 
     /* Getters */

@@ -26,7 +26,6 @@ public class MOEAD extends AbstractMOEAD<DoubleSolution> {
     public MOEAD(Problem<DoubleSolution> problem,
                  int populationSize,
                  int resultPopulationSize,
-                 int maxEvaluations,
                  MutationOperator<DoubleSolution> mutation,
                  CrossoverOperator<DoubleSolution> crossover,
                  FunctionType functionType,
@@ -34,7 +33,7 @@ public class MOEAD extends AbstractMOEAD<DoubleSolution> {
                  double neighborhoodSelectionProbability,
                  int maximumNumberOfReplacedSolutions,
                  int neighborSize) {
-        super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation, functionType,
+        super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
                 neighborSize);
 
@@ -48,7 +47,7 @@ public class MOEAD extends AbstractMOEAD<DoubleSolution> {
         this.initializeNeighborhood();
         this.idealPoint.update(this.population);
 
-        this.evaluations = this.populationSize;
+        this.initProgress();
         do {
             int[] permutation = new int[this.populationSize];
             MOEADUtils.randomPermutation(permutation, this.populationSize);
@@ -66,12 +65,9 @@ public class MOEAD extends AbstractMOEAD<DoubleSolution> {
                 this.mutationOperator.execute(child);
                 this.problem.evaluate(child);
 
-                this.evaluations++;
-
-                this.idealPoint.update(child.getObjectives());
-                this.updateNeighborhood(child, subProblemId, neighborType);
             }
-        } while (this.evaluations < this.maxEvaluations);
+            this.updateProgress();
+        }while (!this.isStoppingConditionReached());
 
     }
 

@@ -27,10 +27,10 @@ public class GWASFGA<S extends Solution<?>> extends WASFGA<S> {
     private final AbstractUtilityFunctionsSet<S> achievementScalarizingUtopia;
     private final AbstractUtilityFunctionsSet<S> achievementScalarizingNadir;
 
-    public GWASFGA(Problem<S> problem, int populationSize, int maxIterations, CrossoverOperator<S> crossoverOperator,
+    public GWASFGA(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                    MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
                    SolutionListEvaluator<S> evaluator, double epsilon, String weightVectorsFileName) {
-        super(problem, populationSize, maxIterations, crossoverOperator, mutationOperator, selectionOperator, evaluator, epsilon,
+        super(problem, populationSize, crossoverOperator, mutationOperator, selectionOperator, evaluator, epsilon,
                 null, weightVectorsFileName);
 
         this.setMaxPopulationSize(populationSize);
@@ -53,10 +53,10 @@ public class GWASFGA<S extends Solution<?>> extends WASFGA<S> {
         this.achievementScalarizingUtopia = this.createUtilityFunction(this.getReferencePoint(), oddVectors);
     }
 
-    public GWASFGA(Problem<S> problem, int populationSize, int maxIterations, CrossoverOperator<S> crossoverOperator,
+    public GWASFGA(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                    MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
                    SolutionListEvaluator<S> evaluator, double epsilon) {
-        this(problem, populationSize, maxIterations, crossoverOperator, mutationOperator, selectionOperator, evaluator, epsilon,
+        this(problem, populationSize, crossoverOperator, mutationOperator, selectionOperator, evaluator, epsilon,
                 "");
     }
 

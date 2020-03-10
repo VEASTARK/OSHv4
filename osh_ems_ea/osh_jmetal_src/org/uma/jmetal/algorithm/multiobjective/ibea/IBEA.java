@@ -23,7 +23,6 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
     protected final Problem<S> problem;
     protected final int populationSize;
     protected final int archiveSize;
-    protected final int maxEvaluations;
     protected final CrossoverOperator<S> crossoverOperator;
     protected final MutationOperator<S> mutationOperator;
     protected final SelectionOperator<List<S>, S> selectionOperator;
@@ -37,13 +36,12 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
     /**
      * Constructor
      */
-    public IBEA(Problem<S> problem, int populationSize, int archiveSize, int maxEvaluations,
+    public IBEA(Problem<S> problem, int populationSize, int archiveSize,
                 SelectionOperator<List<S>, S> selectionOperator, CrossoverOperator<S> crossoverOperator,
                 MutationOperator<S> mutationOperator) {
         this.problem = problem;
         this.populationSize = populationSize;
         this.archiveSize = archiveSize;
-        this.maxEvaluations = maxEvaluations;
         this.crossoverOperator = crossoverOperator;
         this.mutationOperator = mutationOperator;
         this.selectionOperator = selectionOperator;
@@ -71,7 +69,7 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
             solutionSet.add(newSolution);
         }
 
-        while (evaluations < this.maxEvaluations) {
+        while (!this.isStoppingConditionReached(evaluations)) {
             List<S> union = new ArrayList<>();
             union.addAll(solutionSet);
             union.addAll(this.archive);
@@ -111,6 +109,15 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
             }
             solutionSet = offSpringSolutionSet;
         }
+    }
+
+    public boolean isStoppingConditionReached(int evaluations) {
+        for (StoppingRule sr : this.stoppingRules) {
+            if (sr.checkIfStop(this.problem, -1, evaluations, this.archive)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

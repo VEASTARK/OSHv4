@@ -13,6 +13,7 @@
 
 package org.uma.jmetal.algorithm.multiobjective.cdg;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
@@ -188,6 +189,7 @@ public class CDGBuilder implements AlgorithmBuilder<AbstractCDG<DoubleSolution>>
         algorithm = new CDG(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations,
                 this.crossover, this.neighborhoodSelectionProbability, this.sigma_, this.k_, this.t_, this.subproblemNum_,
                 this.childGrid_, this.childGridNum_);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }
 }

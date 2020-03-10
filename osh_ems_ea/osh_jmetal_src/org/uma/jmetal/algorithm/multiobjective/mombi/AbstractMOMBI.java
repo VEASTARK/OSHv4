@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.mombi;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -21,7 +22,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
-    protected final int maxIterations;
     protected final SolutionListEvaluator<S> evaluator;
     protected final List<Double> referencePoint;
     protected final List<Double> nadirPoint;
@@ -31,19 +31,15 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
      * Constructor
      *
      * @param problem       Problem to be solved
-     * @param maxIterations Maximum number of iterations the algorithm
-     *                      will perform
      * @param crossover     Crossover operator
      * @param mutation      Mutation operator
      * @param selection     Selection operator
      * @param evaluator     Evaluator object for evaluating solution lists
      */
-    public AbstractMOMBI(Problem<S> problem, int maxIterations,
-                         CrossoverOperator<S> crossover, MutationOperator<S> mutation,
+    public AbstractMOMBI(Problem<S> problem, CrossoverOperator<S> crossover, MutationOperator<S> mutation,
                          SelectionOperator<List<S>, S> selection,
                          SolutionListEvaluator<S> evaluator) {
         super(problem);
-        this.maxIterations = maxIterations;
 
         this.crossoverOperator = crossover;
         this.mutationOperator = mutation;
@@ -69,14 +65,17 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, this.getPopulation())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     @Override

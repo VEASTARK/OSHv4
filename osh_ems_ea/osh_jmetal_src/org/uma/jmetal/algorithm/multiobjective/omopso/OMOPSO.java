@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.omopso;
 
 import org.uma.jmetal.algorithm.impl.AbstractParticleSwarmOptimization;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -27,7 +28,6 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     private final DoubleProblem problem;
     private final int swarmSize;
     private final int archiveSize;
-    private final int maxIterations;
     private final DoubleSolution[] localBest;
     private final CrowdingDistanceArchive<DoubleSolution> leaderArchive;
     private final NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
@@ -45,13 +45,12 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
      * Constructor
      */
     public OMOPSO(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
-                  int swarmSize, int maxIterations, int archiveSize, UniformMutation uniformMutation,
+                  int swarmSize, int archiveSize, UniformMutation uniformMutation,
                   NonUniformMutation nonUniformMutation) {
         this.problem = problem;
         this.evaluator = evaluator;
 
         this.swarmSize = swarmSize;
-        this.maxIterations = maxIterations;
         this.archiveSize = archiveSize;
 
         this.uniformMutation = uniformMutation;
@@ -85,7 +84,12 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.currentIteration >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.currentIteration, -1, this.epsilonArchive.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -103,8 +107,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
     @Override
     protected List<DoubleSolution> evaluateSwarm(List<DoubleSolution> swarm) {
-        swarm = this.evaluator.evaluate(swarm, this.problem);
-        return swarm;
+        return this.evaluator.evaluate(swarm, this.problem);
     }
 
     @Override
