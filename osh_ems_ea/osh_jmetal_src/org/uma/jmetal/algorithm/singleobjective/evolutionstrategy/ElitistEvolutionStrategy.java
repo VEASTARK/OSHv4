@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.singleobjective.evolutionstrategy;
 
 import org.uma.jmetal.algorithm.impl.AbstractEvolutionStrategy;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
@@ -19,7 +20,6 @@ import java.util.List;
 public class ElitistEvolutionStrategy<S extends Solution<?>> extends AbstractEvolutionStrategy<S, S> {
     private final int mu;
     private final int lambda;
-    private final int maxEvaluations;
     private final MutationOperator<S> mutation;
     private final Comparator<S> comparator;
     private int evaluations;
@@ -27,12 +27,10 @@ public class ElitistEvolutionStrategy<S extends Solution<?>> extends AbstractEvo
     /**
      * Constructor
      */
-    public ElitistEvolutionStrategy(Problem<S> problem, int mu, int lambda, int maxEvaluations,
-                                    MutationOperator<S> mutation) {
+    public ElitistEvolutionStrategy(Problem<S> problem, int mu, int lambda, MutationOperator<S> mutation) {
         super(problem);
         this.mu = mu;
         this.lambda = lambda;
-        this.maxEvaluations = maxEvaluations;
         this.mutation = mutation;
 
         this.comparator = new ObjectiveComparator<>(0);
@@ -50,7 +48,12 @@ public class ElitistEvolutionStrategy<S extends Solution<?>> extends AbstractEvo
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

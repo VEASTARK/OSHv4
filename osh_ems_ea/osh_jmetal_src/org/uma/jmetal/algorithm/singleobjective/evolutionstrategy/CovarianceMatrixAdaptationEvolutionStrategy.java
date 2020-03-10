@@ -2,6 +2,8 @@ package org.uma.jmetal.algorithm.singleobjective.evolutionstrategy;
 
 import org.uma.jmetal.algorithm.impl.AbstractEvolutionStrategy;
 import org.uma.jmetal.algorithm.singleobjective.evolutionstrategy.util.CMAESUtils;
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
@@ -20,10 +22,10 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
         extends AbstractEvolutionStrategy<DoubleSolution, DoubleSolution> {
     private final Comparator<DoubleSolution> comparator;
     private final int lambda;
-    private final int maxEvaluations;
     private final double[] typicalX;
     private final Random rand;
     private int evaluations;
+    private boolean eigenValuesStoppingCondition;
     /**
      * CMA-ES state variables
      */
@@ -80,7 +82,6 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
     private CovarianceMatrixAdaptationEvolutionStrategy(Builder builder) {
         super(builder.problem);
         this.lambda = builder.lambda;
-        this.maxEvaluations = builder.maxEvaluations;
         this.typicalX = builder.typicalX;
         this.sigma = builder.sigma;
 
@@ -97,10 +98,6 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
         return this.lambda;
     }
 
-    public int getMaxEvaluations() {
-        return this.maxEvaluations;
-    }
-
     @Override
     protected void initProgress() {
         this.evaluations = 0;
@@ -114,7 +111,16 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        if (this.eigenValuesStoppingCondition) {
+            return true;
+        } else {
+            for (StoppingRule sr : this.getStoppingRules()) {
+                if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -424,7 +430,7 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
         int numberOfVariables = this.getProblem().getNumberOfVariables();
 
         if (CMAESUtils.checkEigenSystem(numberOfVariables, this.c, this.diagD, this.b) > 0) {
-            this.evaluations = this.maxEvaluations;
+            this.eigenValuesStoppingCondition = true;
         }
 
         for (int i = 0; i < numberOfVariables; i++) {
@@ -433,7 +439,7 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
                 JMetalLogger.logger.severe(
                         "CovarianceMatrixAdaptationEvolutionStrategy.updateDistribution:" +
                                 " WARNING - an eigenvalue has become negative.");
-                this.evaluations = this.maxEvaluations;
+                this.eigenValuesStoppingCondition = true;
             }
         }
 
@@ -529,7 +535,9 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
         }
 
         public CovarianceMatrixAdaptationEvolutionStrategy build() {
-            return new CovarianceMatrixAdaptationEvolutionStrategy(this);
+            CovarianceMatrixAdaptationEvolutionStrategy algorithm = new CovarianceMatrixAdaptationEvolutionStrategy(this);
+            algorithm.addStoppingRule(new EvaluationsStoppingRule(this.lambda, this.maxEvaluations));
+            return algorithm;
         }
     }
 

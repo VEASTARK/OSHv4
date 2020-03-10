@@ -4,6 +4,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,18 @@ public class EvaluationsStoppingRule extends StoppingRule {
         else {
             throw new JMetalException("no maxEvaluations in parameters");
         }
+    }
+
+    /**
+     * Constructs this stopping rule with the explicit paramters.
+     *
+     * @param populationSize the size of the population the algorithm uses
+     * @param maxEvaluations the amount of evaluations to trigger this stopping condition
+     */
+    public EvaluationsStoppingRule(int populationSize, int maxEvaluations) {
+        super(Collections.emptyMap());
+        this.populationSize = populationSize;
+        this.maxEvaluations = maxEvaluations;
     }
 
     /**

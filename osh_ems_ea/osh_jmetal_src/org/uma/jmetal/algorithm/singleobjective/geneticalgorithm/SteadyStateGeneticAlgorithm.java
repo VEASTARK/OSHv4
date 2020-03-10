@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.singleobjective.geneticalgorithm;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -18,18 +19,16 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class SteadyStateGeneticAlgorithm<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, S> {
     private final Comparator<S> comparator;
-    private final int maxEvaluations;
     private int evaluations;
 
     /**
      * Constructor
      */
-    public SteadyStateGeneticAlgorithm(Problem<S> problem, int maxEvaluations, int populationSize,
+    public SteadyStateGeneticAlgorithm(Problem<S> problem, int populationSize,
                                        CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                                        SelectionOperator<List<S>, S> selectionOperator) {
         super(problem);
         this.setMaxPopulationSize(populationSize);
-        this.maxEvaluations = maxEvaluations;
 
         this.crossoverOperator = crossoverOperator;
         this.mutationOperator = mutationOperator;
@@ -40,7 +39,12 @@ public class SteadyStateGeneticAlgorithm<S extends Solution<?>> extends Abstract
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return (this.evaluations >= this.maxEvaluations);
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -98,7 +102,7 @@ public class SteadyStateGeneticAlgorithm<S extends Solution<?>> extends Abstract
 
     @Override
     public void initProgress() {
-        this.evaluations = 1;
+        this.evaluations = this.getMaxPopulationSize();
     }
 
     @Override

@@ -4,12 +4,10 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import osh.utils.string.ParameterConstants;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a stopping condition based upon minimum delta fitness improvement that has to be reached for the
@@ -21,39 +19,48 @@ public class DeltaFitnessStoppingRule extends StoppingRule {
 
     int noObjectives;
     Comparator<Solution<?>>[] comparators;
-    private final double minDeltaFitnessPerc;
+    private final double minDeltaFitnessPercent;
     private final int maxGenerationsDeltaFitnessViolated;
-    private final Double[] lastGenerationBestFitness;
-    private final int[] generationsDeltaFitnessViolated;
+    private Double[] lastGenerationBestFitness;
+    private int[] generationsDeltaFitnessViolated;
 
     /**
      * Constructs this stopping rule with the given parameter collection.
      *
      * @param parameters the parameters for the stopping condition
      */
-    @SuppressWarnings("unchecked")
     public DeltaFitnessStoppingRule(Map<String, Object> parameters) {
         super(parameters);
 
-        if (this._parameters.get("minDeltaFitnessPerc") != null)
-            this.minDeltaFitnessPerc = (double) parameters.get("minDeltaFitnessPerc");
+        if (this._parameters.get(ParameterConstants.EA.minDeltaFitnessPercent) != null)
+            this.minDeltaFitnessPercent = (double) parameters.get(ParameterConstants.EA.minDeltaFitnessPercent);
         else {
-            throw new JMetalException("no minDeltaFitnessPerc in parameters");
+            throw new JMetalException("no minDeltaFitnessPercent in parameters");
         }
 
-        if (this._parameters.get("maxGenerationsDeltaFitnessViolated") != null)
-            this.maxGenerationsDeltaFitnessViolated = (int) parameters.get("maxGenerationsDeltaFitnessViolated");
+        if (this._parameters.get(ParameterConstants.EA.maxGenerationsDeltaFitnessViolated) != null)
+            this.maxGenerationsDeltaFitnessViolated = (int) parameters.get(ParameterConstants.EA.maxGenerationsDeltaFitnessViolated);
         else {
-            throw new JMetalException("no minGenerations in parameters");
+            throw new JMetalException("no maxGenerationsDeltaFitnessViolated in parameters");
         }
+    }
 
-        if (this._parameters.get("noObjectives") != null)
-            this.noObjectives = (int) parameters.get("noObjectives");
-        else {
-            this.noObjectives = 1;
-            System.out.println("---- [WARN]: no noObjectives given for deltaFitnessRule ----");
-        }
+    /**
+     * Constructs this stopping rule with the explicit paramters.
+     *
+     * @param minDeltaFitnessPercent the minimum fitness improvement to not be considered violating the rule
+     * @param maxGenerationsDeltaFitnessViolated the amount of generations needed to violate the minimum improvement
+     *                                           to trigger this stopping condition
+     */
+    public DeltaFitnessStoppingRule(double minDeltaFitnessPercent, int maxGenerationsDeltaFitnessViolated) {
+        super(Collections.emptyMap());
 
+        this.minDeltaFitnessPercent = minDeltaFitnessPercent;
+        this.maxGenerationsDeltaFitnessViolated = maxGenerationsDeltaFitnessViolated;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void init() {
         this.lastGenerationBestFitness = new Double[this.noObjectives];
         Arrays.fill(this.lastGenerationBestFitness, null);
 
@@ -89,6 +96,11 @@ public class DeltaFitnessStoppingRule extends StoppingRule {
     public <S extends Solution<?>> boolean checkIfStop(Problem<S> problem, int generation, int evaluations,
                                                        List<S> currentSortedSolutions) {
 
+        if (this.lastGenerationBestFitness == null) {
+            this.noObjectives = problem.getNumberOfObjectives();
+            this.init();
+        }
+
         if (currentSortedSolutions.isEmpty()) return false;
 
         boolean firstTime = false;
@@ -116,7 +128,7 @@ public class DeltaFitnessStoppingRule extends StoppingRule {
         boolean stop = true;
 
         for (int i = 0; i < this.noObjectives; i++) {
-            if (deltaFitness[i] >= this.minDeltaFitnessPerc) {
+            if (deltaFitness[i] >= this.minDeltaFitnessPercent) {
                 this.generationsDeltaFitnessViolated[i] = 0;
                 this.lastGenerationBestFitness[i] = thisGenerationBestFitness[i];
                 stop = false;

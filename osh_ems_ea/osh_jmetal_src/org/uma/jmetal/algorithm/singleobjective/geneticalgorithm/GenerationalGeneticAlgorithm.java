@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.singleobjective.geneticalgorithm;
 
 import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -18,18 +19,16 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class GenerationalGeneticAlgorithm<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, S> {
     private final Comparator<S> comparator;
-    private final int maxEvaluations;
     private final SolutionListEvaluator<S> evaluator;
     private int evaluations;
 
     /**
      * Constructor
      */
-    public GenerationalGeneticAlgorithm(Problem<S> problem, int maxEvaluations, int populationSize,
+    public GenerationalGeneticAlgorithm(Problem<S> problem, int populationSize,
                                         CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                                         SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
         super(problem);
-        this.maxEvaluations = maxEvaluations;
         this.setMaxPopulationSize(populationSize);
 
         this.crossoverOperator = crossoverOperator;
@@ -43,7 +42,12 @@ public class GenerationalGeneticAlgorithm<S extends Solution<?>> extends Abstrac
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return (this.evaluations >= this.maxEvaluations);
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

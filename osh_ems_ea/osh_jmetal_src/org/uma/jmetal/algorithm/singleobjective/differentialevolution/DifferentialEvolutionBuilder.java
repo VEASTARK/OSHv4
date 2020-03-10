@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.singleobjective.differentialevolution;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.operator.impl.selection.DifferentialEvolutionSelection;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -43,8 +44,12 @@ public class DifferentialEvolutionBuilder {
     }
 
     public DifferentialEvolution build() {
-        return new DifferentialEvolution(this.problem, this.maxEvaluations, this.populationSize, this.crossoverOperator,
+        DifferentialEvolution de = new DifferentialEvolution(this.problem, this.populationSize, this.crossoverOperator,
                 this.selectionOperator, this.evaluator);
+
+        de.addStoppingRule(new EvaluationsStoppingRule());
+
+        return de;
     }
 
     /* Getters */

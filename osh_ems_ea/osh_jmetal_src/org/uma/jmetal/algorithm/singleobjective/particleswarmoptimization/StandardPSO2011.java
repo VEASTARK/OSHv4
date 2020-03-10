@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.singleobjective.particleswarmoptimization;
 
 import org.uma.jmetal.algorithm.impl.AbstractParticleSwarmOptimization;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.Operator;
 import org.uma.jmetal.operator.impl.selection.BestSolutionSelection;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -15,6 +16,7 @@ import org.uma.jmetal.util.pseudorandom.impl.JavaRandomGenerator;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -112,7 +114,12 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
 
     @Override
     public boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.getLocalBest()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -266,13 +273,13 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
         DoubleSolution bestSolution = this.findBestSolution.execute(swarm);
 
         if (this.bestFoundParticle == null) {
-            this.bestFoundParticle = bestSolution;
+            this.bestFoundParticle = (DoubleSolution) bestSolution.copy();
         } else {
             if (bestSolution.getObjective(this.objectiveId) == this.bestFoundParticle.getObjective(0)) {
                 this.neighborhood.recompute();
             }
             if (bestSolution.getObjective(this.objectiveId) < this.bestFoundParticle.getObjective(0)) {
-                this.bestFoundParticle = bestSolution;
+                this.bestFoundParticle = (DoubleSolution) bestSolution.copy();
             }
         }
     }

@@ -1,6 +1,8 @@
 package org.uma.jmetal.algorithm.singleobjective.geneticalgorithm;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -55,15 +57,18 @@ public class GeneticAlgorithmBuilder<S extends Solution<?>> {
     }
 
     public Algorithm<S> build() {
+        AbstractGeneticAlgorithm<S, S> algorithm;
         if (this.variant == GeneticAlgorithmVariant.GENERATIONAL) {
-            return new GenerationalGeneticAlgorithm<>(this.problem, this.maxEvaluations, this.populationSize,
+            algorithm = new GenerationalGeneticAlgorithm<>(this.problem, this.populationSize,
                     this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator);
         } else if (this.variant == GeneticAlgorithmVariant.STEADY_STATE) {
-            return new SteadyStateGeneticAlgorithm<>(this.problem, this.maxEvaluations, this.populationSize,
+            algorithm = new SteadyStateGeneticAlgorithm<>(this.problem, this.populationSize,
                     this.crossoverOperator, this.mutationOperator, this.selectionOperator);
         } else {
             throw new JMetalException("Unknown variant: " + this.variant);
         }
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
+        return algorithm;
     }
 
     /*

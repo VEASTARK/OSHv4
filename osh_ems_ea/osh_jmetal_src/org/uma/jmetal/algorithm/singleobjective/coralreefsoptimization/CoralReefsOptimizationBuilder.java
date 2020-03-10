@@ -1,5 +1,6 @@
 package org.uma.jmetal.algorithm.singleobjective.coralreefsoptimization;
 
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -55,6 +56,7 @@ public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
         algorithm = new CoralReefsOptimization<>(this.problem,
                 this.comparator, this.selectionOperator, this.crossoverOperator,
                 this.mutationOperator, this.N, this.M, this.rho, this.Fbs, this.Fa, this.Pd, this.attemptsToSettle);
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.M * this.N, this.maxEvaluations));
 
         return algorithm;
     }

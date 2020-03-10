@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.singleobjective.particleswarmoptimization;
 
 import org.uma.jmetal.algorithm.impl.AbstractParticleSwarmOptimization;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.Operator;
 import org.uma.jmetal.operator.impl.selection.BestSolutionSelection;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -12,6 +13,7 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -28,7 +30,6 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
     private final Operator<List<DoubleSolution>, DoubleSolution> findBestSolution;
     private final Comparator<DoubleSolution> fitnessComparator;
     private final int swarmSize;
-    private final int maxIterations;
     private final int numberOfParticlesToInform;
     private final DoubleSolution[] localBest;
     private final DoubleSolution[] neighborhoodBest;
@@ -49,15 +50,13 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
      * @param objectiveId               This field indicates which objective, in the case of a multi-objective problem,
      *                                  is selected to be optimized.
      * @param swarmSize
-     * @param maxIterations
      * @param numberOfParticlesToInform
      * @param evaluator
      */
-    public StandardPSO2007(DoubleProblem problem, int objectiveId, int swarmSize, int maxIterations,
+    public StandardPSO2007(DoubleProblem problem, int objectiveId, int swarmSize,
                            int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator) {
         this.problem = problem;
         this.swarmSize = swarmSize;
-        this.maxIterations = maxIterations;
         this.numberOfParticlesToInform = numberOfParticlesToInform;
         this.evaluator = evaluator;
         this.objectiveId = objectiveId;
@@ -83,13 +82,12 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
      *
      * @param problem
      * @param swarmSize
-     * @param maxIterations
      * @param numberOfParticlesToInform
      * @param evaluator
      */
-    public StandardPSO2007(DoubleProblem problem, int swarmSize, int maxIterations,
-                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator) {
-        this(problem, 0, swarmSize, maxIterations, numberOfParticlesToInform, evaluator);
+    public StandardPSO2007(DoubleProblem problem, int swarmSize, int numberOfParticlesToInform,
+                           SolutionListEvaluator<DoubleSolution> evaluator) {
+        this(problem, 0, swarmSize, numberOfParticlesToInform, evaluator);
     }
 
     @Override
@@ -104,7 +102,12 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
 
     @Override
     public boolean isStoppingConditionReached() {
-        return this.iterations >= this.maxIterations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.getLocalBest()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -220,13 +223,13 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
         DoubleSolution bestSolution = this.findBestSolution.execute(swarm);
 
         if (this.bestFoundParticle == null) {
-            this.bestFoundParticle = bestSolution;
+            this.bestFoundParticle = (DoubleSolution) bestSolution.copy();
         } else {
             if (bestSolution.getObjective(this.objectiveId) == this.bestFoundParticle.getObjective(0)) {
                 this.neighborhood.recompute();
             }
             if (bestSolution.getObjective(this.objectiveId) < this.bestFoundParticle.getObjective(0)) {
-                this.bestFoundParticle = bestSolution;
+                this.bestFoundParticle = (DoubleSolution) bestSolution.copy();
             }
         }
     }

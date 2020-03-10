@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.singleobjective.differentialevolution;
 
 import org.uma.jmetal.algorithm.impl.AbstractDifferentialEvolution;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.operator.impl.selection.DifferentialEvolutionSelection;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -20,7 +21,6 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleSolution> {
     private final int populationSize;
-    private final int maxEvaluations;
     private final SolutionListEvaluator<DoubleSolution> evaluator;
     private final Comparator<DoubleSolution> comparator;
 
@@ -30,17 +30,15 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
      * Constructor
      *
      * @param problem           Problem to solve
-     * @param maxEvaluations    Maximum number of evaluations to perform
      * @param populationSize
      * @param crossoverOperator
      * @param selectionOperator
      * @param evaluator
      */
-    public DifferentialEvolution(DoubleProblem problem, int maxEvaluations, int populationSize,
+    public DifferentialEvolution(DoubleProblem problem, int populationSize,
                                  DifferentialEvolutionCrossover crossoverOperator,
                                  DifferentialEvolutionSelection selectionOperator, SolutionListEvaluator<DoubleSolution> evaluator) {
         this.setProblem(problem);
-        this.maxEvaluations = maxEvaluations;
         this.populationSize = populationSize;
         this.crossoverOperator = crossoverOperator;
         this.selectionOperator = selectionOperator;
@@ -69,7 +67,12 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
 
     @Override
     protected boolean isStoppingConditionReached() {
-        return this.evaluations >= this.maxEvaluations;
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package org.uma.jmetal.algorithm.singleobjective.evolutionstrategy;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.impl.AbstractEvolutionStrategy;
+import org.uma.jmetal.algorithm.stoppingrule.EvaluationsStoppingRule;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
@@ -31,13 +33,16 @@ public class EvolutionStrategyBuilder<S extends Solution<?>> implements Algorith
 
     @Override
     public Algorithm<S> build() {
+        AbstractEvolutionStrategy<S, S> algorithm;
         if (this.variant == EvolutionStrategyVariant.ELITIST) {
-            return new ElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.maxEvaluations, this.mutation);
+            algorithm = new ElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.mutation);
         } else if (this.variant == EvolutionStrategyVariant.NON_ELITIST) {
-            return new NonElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.maxEvaluations, this.mutation);
+            algorithm = new NonElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.mutation);
         } else {
             throw new JMetalException("Unknown variant: " + this.variant);
         }
+        algorithm.addStoppingRule(new EvaluationsStoppingRule(this.lambda, this.maxEvaluations));
+        return algorithm;
     }
 
     /* Getters */
