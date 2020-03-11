@@ -2,6 +2,7 @@ package constructsimulation.configuration.OC;
 
 import constructsimulation.configuration.general.Util;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRuleType;
+import org.uma.jmetal.operator.impl.crossover.CrossoverType;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public class EAConfig {
 
-    public static String defaultBinaryCrossoverOperator = "SingleBinaryNPointsCrossover";
+    public static CrossoverType defaultBinaryCrossoverOperator = CrossoverType.BINARY_N_POINT;
     public static String defaultBinaryMutationOperator = "BitFlipAutoProbMutation"; //  adjusts the mutation rate to 1/(numberOfBits)
 
     public static String defaultSelectionOperator = "BinaryTournament";
@@ -52,13 +53,13 @@ public class EAConfig {
             //Nothing for now
         } else if (type == OperatorType.RECOMBINATION) {
             list.add(Util.generateClassedParameter(ParameterConstants.EA.probability, crossoverProbability));
-            if (operatorName.equals("SingleBinaryNPointsCrossover")) {
-                list.add(Util.generateClassedParameter(ParameterConstants.EA.points, crossoverPoints));
+            if (operatorName.equals(CrossoverType.BINARY_N_POINT.getName())) {
+                list.add(Util.generateClassedParameter(ParameterConstants.EA_RECOMBINATION.points, crossoverPoints));
             }
         } else {
             list.add(Util.generateClassedParameter(ParameterConstants.EA.probability, mutationProbability));
             if (operatorName.equals("BitFlipAutoProbMutation")) {
-                list.add(Util.generateClassedParameter(ParameterConstants.EA.autoProbMutationFactor, autoProbMutationFactor));
+                list.add(Util.generateClassedParameter(ParameterConstants.EA_MUTATION.autoProbMutationFactor, autoProbMutationFactor));
             }
         }
 
@@ -91,14 +92,14 @@ public class EAConfig {
         eaConfig.setNumEvaluations(numEvaluations);
         eaConfig.setPopSize(popSize);
         eaConfig.setSelectionOperator(defaultSelectionOperator);
-        eaConfig.setCrossoverOperator(defaultBinaryCrossoverOperator);
+        eaConfig.setCrossoverOperator(defaultBinaryCrossoverOperator.getName());
         eaConfig.setMutationOperator(defaultBinaryMutationOperator);
 
 
         eaConfig.getSelectionParameters().addAll(generateOperatorParameters(OperatorType.SELECTION,
                 defaultSelectionOperator));
         eaConfig.getCrossoverParameters().addAll(generateOperatorParameters(OperatorType.RECOMBINATION,
-                defaultBinaryCrossoverOperator));
+                defaultBinaryCrossoverOperator.getName()));
         eaConfig.getMutationParameters().addAll(generateOperatorParameters(OperatorType.MUTATION,
                 defaultBinaryMutationOperator));
 

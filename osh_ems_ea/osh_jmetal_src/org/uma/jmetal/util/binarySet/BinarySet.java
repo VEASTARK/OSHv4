@@ -9,7 +9,7 @@ import java.util.BitSet;
  */
 @SuppressWarnings("serial")
 public class BinarySet extends BitSet {
-    private final int numberOfBits;
+    private int numberOfBits;
 
     /**
      * Constructor
@@ -28,5 +28,12 @@ public class BinarySet extends BitSet {
      */
     public int getBinarySetLength() {
         return this.numberOfBits;
+    }
+
+    @Override
+    public Object clone() {
+        BinarySet result = (BinarySet) super.clone();
+        result.numberOfBits = this.numberOfBits;
+        return result;
     }
 }
