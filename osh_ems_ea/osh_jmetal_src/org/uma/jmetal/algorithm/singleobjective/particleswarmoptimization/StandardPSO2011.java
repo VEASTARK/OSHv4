@@ -161,8 +161,8 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
             DoubleSolution particle = swarm.get(i);
             for (int j = 0; j < this.problem.getNumberOfVariables(); j++) {
                 this.speed[i][j] = (this.randomGenerator.nextDouble(
-                        particle.getLowerBound(j) - particle.getVariableValue(0),
-                        particle.getUpperBound(j) - particle.getVariableValue(0)));
+                        particle.getLowerBound(j) - particle.getUnboxedVariableValue(0),
+                        particle.getUpperBound(j) - particle.getUnboxedVariableValue(0)));
             }
         }
     }
@@ -182,19 +182,19 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
             if (this.localBest[i] != this.neighborhoodBest[i]) {
                 for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                     double G;
-                    G = particle.getVariableValue(var) +
-                            this.c * (this.localBest[i].getVariableValue(var) +
-                                    this.neighborhoodBest[i].getVariableValue(var) - 2 *
-                                    particle.getVariableValue(var)) / 3.0;
+                    G = particle.getUnboxedVariableValue(var) +
+                            this.c * (this.localBest[i].getUnboxedVariableValue(var) +
+                                    this.neighborhoodBest[i].getUnboxedVariableValue(var) - 2 *
+                                    particle.getUnboxedVariableValue(var)) / 3.0;
 
-                    gravityCenter.setVariableValue(var, G);
+                    gravityCenter.setUnboxedVariableValue(var, G);
                 }
             } else {
                 for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-                    double g = particle.getVariableValue(var) +
-                            this.c * (this.localBest[i].getVariableValue(var) - particle.getVariableValue(var)) / 2.0;
+                    double g = particle.getUnboxedVariableValue(var) +
+                            this.c * (this.localBest[i].getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var)) / 2.0;
 
-                    gravityCenter.setVariableValue(var, g);
+                    gravityCenter.setUnboxedVariableValue(var, g);
                 }
             }
 
@@ -206,27 +206,27 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
             double[] random = ((ExtendedPseudoRandomGenerator) this.randomGenerator.getRandomGenerator()).randSphere(this.problem.getNumberOfVariables());
 
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-                randomParticle.setVariableValue(var, gravityCenter.getVariableValue(var) + radius * random[var]);
+                randomParticle.setUnboxedVariableValue(var, gravityCenter.getUnboxedVariableValue(var) + radius * random[var]);
             }
 
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                 this.speed[i][var] =
-                        this.weight * this.speed[i][var] + randomParticle.getVariableValue(var) - particle.getVariableValue(var);
+                        this.weight * this.speed[i][var] + randomParticle.getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var);
             }
 
 
             if (this.localBest[i] != this.neighborhoodBest[i]) {
                 for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                     this.speed[i][var] = this.weight * this.speed[i][var] +
-                            r1 * (this.localBest[i].getVariableValue(var) - particle.getVariableValue(var)) +
-                            r2 * (this.neighborhoodBest[i].getVariableValue(var) - particle.getVariableValue
+                            r1 * (this.localBest[i].getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var)) +
+                            r2 * (this.neighborhoodBest[i].getUnboxedVariableValue(var) - particle.getUnboxedVariableValue
                                     (var));
                 }
             } else {
                 for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                     this.speed[i][var] = this.weight * this.speed[i][var] +
-                            r1 * (this.localBest[i].getVariableValue(var) -
-                                    particle.getVariableValue(var));
+                            r1 * (this.localBest[i].getUnboxedVariableValue(var) -
+                                    particle.getUnboxedVariableValue(var));
                 }
             }
         }
@@ -237,14 +237,14 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
         for (int i = 0; i < this.swarmSize; i++) {
             DoubleSolution particle = swarm.get(i);
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-                particle.setVariableValue(var, particle.getVariableValue(var) + this.speed[i][var]);
+                particle.setUnboxedVariableValue(var, particle.getUnboxedVariableValue(var) + this.speed[i][var]);
 
-                if (particle.getVariableValue(var) < this.problem.getLowerBound(var)) {
-                    particle.setVariableValue(var, this.problem.getLowerBound(var));
+                if (particle.getUnboxedVariableValue(var) < this.problem.getLowerBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getLowerBound(var));
                     this.speed[i][var] = this.changeVelocity * this.speed[i][var];
                 }
-                if (particle.getVariableValue(var) > this.problem.getUpperBound(var)) {
-                    particle.setVariableValue(var, this.problem.getUpperBound(var));
+                if (particle.getUnboxedVariableValue(var) > this.problem.getUpperBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getUpperBound(var));
                     this.speed[i][var] = this.changeVelocity * this.speed[i][var];
                 }
             }

@@ -241,8 +241,8 @@ public class SMPSORP
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                 this.speed[i][var] = this.velocityConstriction(this.constrictionCoefficient(c1, c2) * (
                                 this.inertiaWeight(this.iterations, this.maxIterations, wmax, wmin) * this.speed[i][var] +
-                                        c1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var)) +
-                                        c2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var))),
+                                        c1 * r1 * (bestParticle.getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var)) +
+                                        c2 * r2 * (bestGlobal.getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var))),
                         this.deltaMax, this.deltaMin, var);
             }
         }
@@ -253,14 +253,14 @@ public class SMPSORP
         for (int i = 0; i < this.swarmSize; i++) {
             DoubleSolution particle = swarm.get(i);
             for (int j = 0; j < particle.getNumberOfVariables(); j++) {
-                particle.setVariableValue(j, particle.getVariableValue(j) + this.speed[i][j]);
+                particle.setUnboxedVariableValue(j, particle.getUnboxedVariableValue(j) + this.speed[i][j]);
 
-                if (particle.getVariableValue(j) < this.problem.getLowerBound(j)) {
-                    particle.setVariableValue(j, this.problem.getLowerBound(j));
+                if (particle.getUnboxedVariableValue(j) < this.problem.getLowerBound(j)) {
+                    particle.setUnboxedVariableValue(j, this.problem.getLowerBound(j));
                     this.speed[i][j] *= this.changeVelocity1;
                 }
-                if (particle.getVariableValue(j) > this.problem.getUpperBound(j)) {
-                    particle.setVariableValue(j, this.problem.getUpperBound(j));
+                if (particle.getUnboxedVariableValue(j) > this.problem.getUpperBound(j)) {
+                    particle.setUnboxedVariableValue(j, this.problem.getUpperBound(j));
                     this.speed[i][j] *= this.changeVelocity2;
                 }
             }

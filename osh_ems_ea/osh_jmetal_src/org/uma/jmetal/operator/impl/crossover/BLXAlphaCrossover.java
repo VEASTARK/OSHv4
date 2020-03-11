@@ -116,8 +116,8 @@ public class BLXAlphaCrossover implements CrossoverOperator<DoubleSolution> {
             for (i = 0; i < parent1.getNumberOfVariables(); i++) {
                 upperBound = parent1.getUpperBound(i);
                 lowerBound = parent1.getLowerBound(i);
-                valueX1 = parent1.getVariableValue(i);
-                valueX2 = parent2.getVariableValue(i);
+                valueX1 = parent1.getUnboxedVariableValue(i);
+                valueX2 = parent2.getUnboxedVariableValue(i);
 
                 double max;
                 double min;
@@ -148,8 +148,8 @@ public class BLXAlphaCrossover implements CrossoverOperator<DoubleSolution> {
                 valueY1 = this.solutionRepair.repairSolutionVariableValue(valueY1, lowerBound, upperBound);
                 valueY2 = this.solutionRepair.repairSolutionVariableValue(valueY2, lowerBound, upperBound);
 
-                offspring.get(0).setVariableValue(i, valueY1);
-                offspring.get(1).setVariableValue(i, valueY2);
+                offspring.get(0).setUnboxedVariableValue(i, valueY1);
+                offspring.get(1).setUnboxedVariableValue(i, valueY2);
             }
         }
 

@@ -55,6 +55,16 @@ public class DefaultDoubleSolution
     }
 
     @Override
+    public double getUnboxedVariableValue(int index) {
+        return this.getVariableValue(index);
+    }
+
+    @Override
+    public void setUnboxedVariableValue(int index, double value) {
+        this.setVariableValue(index, value);
+    }
+
+    @Override
     public DefaultDoubleSolution copy() {
         return new DefaultDoubleSolution(this);
     }

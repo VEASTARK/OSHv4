@@ -68,7 +68,7 @@ public class SimpleRandomMutation implements MutationOperator<DoubleSolution> {
                 Double value = solution.getLowerBound(i) +
                         ((solution.getUpperBound(i) - solution.getLowerBound(i)) * this.randomGenerator.getRandomValue());
 
-                solution.setVariableValue(i, value);
+                solution.setUnboxedVariableValue(i, value);
             }
         }
     }

@@ -119,7 +119,7 @@ public class SolutionUtils {
 
         double diff;
         for (int i = 0; i < solutionI.getNumberOfVariables(); i++) {
-            diff = solutionI.getVariableValue(i) - solutionJ.getVariableValue(i);
+            diff = solutionI.getUnboxedVariableValue(i) - solutionJ.getUnboxedVariableValue(i);
             distance += Math.pow(diff, 2.0);
         }
 

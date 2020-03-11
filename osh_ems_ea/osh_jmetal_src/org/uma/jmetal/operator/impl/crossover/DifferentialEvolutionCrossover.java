@@ -156,9 +156,9 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
             for (int j = 0; j < numberOfVariables; j++) {
                 if (this.crRandomGenerator.getRandomValue(0.0, 1.0) < this.cr || j == jrand) {
                     double value;
-                    value = parentSolutions.get(2).getVariableValue(j) + this.f * (parentSolutions.get(0).getVariableValue(
+                    value = parentSolutions.get(2).getUnboxedVariableValue(j) + this.f * (parentSolutions.get(0).getUnboxedVariableValue(
                             j) -
-                            parentSolutions.get(1).getVariableValue(j));
+                            parentSolutions.get(1).getUnboxedVariableValue(j));
 
                     if (value < child.getLowerBound(j)) {
                         value = child.getLowerBound(j);
@@ -166,11 +166,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                     if (value > child.getUpperBound(j)) {
                         value = child.getUpperBound(j);
                     }
-                    child.setVariableValue(j, value);
+                    child.setUnboxedVariableValue(j, value);
                 } else {
                     double value;
-                    value = this.currentSolution.getVariableValue(j);
-                    child.setVariableValue(j, value);
+                    value = this.currentSolution.getUnboxedVariableValue(j);
+                    child.setUnboxedVariableValue(j, value);
                 }
             }
         } else if ("rand/1/exp".equals(this.variant) ||
@@ -178,8 +178,8 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
             for (int j = 0; j < numberOfVariables; j++) {
                 if (this.crRandomGenerator.getRandomValue(0.0, 1.0) < this.cr || j == jrand) {
                     double value;
-                    value = parentSolutions.get(2).getVariableValue(j) + this.f * (parentSolutions.get(0).getVariableValue(j) -
-                            parentSolutions.get(1).getVariableValue(j));
+                    value = parentSolutions.get(2).getUnboxedVariableValue(j) + this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) -
+                            parentSolutions.get(1).getUnboxedVariableValue(j));
 
                     if (value < child.getLowerBound(j)) {
                         value = child.getLowerBound(j);
@@ -188,21 +188,21 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                         value = child.getUpperBound(j);
                     }
 
-                    child.setVariableValue(j, value);
+                    child.setUnboxedVariableValue(j, value);
                 } else {
                     this.cr = 0.0;
                     double value;
-                    value = this.currentSolution.getVariableValue(j);
-                    child.setVariableValue(j, value);
+                    value = this.currentSolution.getUnboxedVariableValue(j);
+                    child.setUnboxedVariableValue(j, value);
                 }
             }
         } else if ("current-to-rand/1".equals(this.variant) ||
                 "current-to-best/1".equals(this.variant)) {
             for (int j = 0; j < numberOfVariables; j++) {
                 double value;
-                value = this.currentSolution.getVariableValue(j) + this.k * (parentSolutions.get(2).getVariableValue(j) -
-                        this.currentSolution.getVariableValue(j)) +
-                        this.f * (parentSolutions.get(0).getVariableValue(j) - parentSolutions.get(1).getVariableValue(j));
+                value = this.currentSolution.getUnboxedVariableValue(j) + this.k * (parentSolutions.get(2).getUnboxedVariableValue(j) -
+                        this.currentSolution.getUnboxedVariableValue(j)) +
+                        this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) - parentSolutions.get(1).getUnboxedVariableValue(j));
 
                 if (value < child.getLowerBound(j)) {
                     value = child.getLowerBound(j);
@@ -211,16 +211,16 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                     value = child.getUpperBound(j);
                 }
 
-                child.setVariableValue(j, value);
+                child.setUnboxedVariableValue(j, value);
             }
         } else if ("current-to-rand/1/bin".equals(this.variant) ||
                 "current-to-best/1/bin".equals(this.variant)) {
             for (int j = 0; j < numberOfVariables; j++) {
                 if (this.crRandomGenerator.getRandomValue(0.0, 1.0) < this.cr || j == jrand) {
                     double value;
-                    value = this.currentSolution.getVariableValue(j) + this.k * (parentSolutions.get(2).getVariableValue(j) -
-                            this.currentSolution.getVariableValue(j)) +
-                            this.f * (parentSolutions.get(0).getVariableValue(j) - parentSolutions.get(1).getVariableValue(j));
+                    value = this.currentSolution.getUnboxedVariableValue(j) + this.k * (parentSolutions.get(2).getUnboxedVariableValue(j) -
+                            this.currentSolution.getUnboxedVariableValue(j)) +
+                            this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) - parentSolutions.get(1).getUnboxedVariableValue(j));
 
                     if (value < child.getLowerBound(j)) {
                         value = child.getLowerBound(j);
@@ -229,11 +229,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                         value = child.getUpperBound(j);
                     }
 
-                    child.setVariableValue(j, value);
+                    child.setUnboxedVariableValue(j, value);
                 } else {
                     double value;
-                    value = this.currentSolution.getVariableValue(j);
-                    child.setVariableValue(j, value);
+                    value = this.currentSolution.getUnboxedVariableValue(j);
+                    child.setUnboxedVariableValue(j, value);
                 }
             }
         } else if ("current-to-rand/1/exp".equals(this.variant) ||
@@ -241,9 +241,9 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
             for (int j = 0; j < numberOfVariables; j++) {
                 if (this.crRandomGenerator.getRandomValue(0.0, 1.0) < this.cr || j == jrand) {
                     double value;
-                    value = this.currentSolution.getVariableValue(j) + this.k * (parentSolutions.get(2).getVariableValue(j) -
-                            this.currentSolution.getVariableValue(j)) +
-                            this.f * (parentSolutions.get(0).getVariableValue(j) - parentSolutions.get(1).getVariableValue(j));
+                    value = this.currentSolution.getUnboxedVariableValue(j) + this.k * (parentSolutions.get(2).getUnboxedVariableValue(j) -
+                            this.currentSolution.getUnboxedVariableValue(j)) +
+                            this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) - parentSolutions.get(1).getUnboxedVariableValue(j));
 
                     if (value < child.getLowerBound(j)) {
                         value = child.getLowerBound(j);
@@ -252,12 +252,12 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                         value = child.getUpperBound(j);
                     }
 
-                    child.setVariableValue(j, value);
+                    child.setUnboxedVariableValue(j, value);
                 } else {
                     this.cr = 0.0;
                     double value;
-                    value = this.currentSolution.getVariableValue(j);
-                    child.setVariableValue(j, value);
+                    value = this.currentSolution.getUnboxedVariableValue(j);
+                    child.setUnboxedVariableValue(j, value);
                 }
             }
         } else {

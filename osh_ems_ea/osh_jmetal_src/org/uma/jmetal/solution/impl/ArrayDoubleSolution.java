@@ -44,7 +44,7 @@ public class ArrayDoubleSolution implements DoubleSolution {
         this(solution.problem);
 
         for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
-            this.variables[i] = solution.getVariableValue(i);
+            this.variables[i] = solution.getUnboxedVariableValue(i);
         }
 
         for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
@@ -79,18 +79,20 @@ public class ArrayDoubleSolution implements DoubleSolution {
     }
 
     @Override
+    @Deprecated
     public Double getVariableValue(int index) {
         return this.variables[index];
     }
 
     @Override
+    @Deprecated
     public void setVariableValue(int index, Double value) {
         this.variables[index] = value;
     }
 
     @Override
     public String getVariableValueString(int index) {
-        return this.getVariableValue(index).toString();
+        return String.valueOf(this.getUnboxedVariableValue(index));
     }
 
     @Override
@@ -106,6 +108,16 @@ public class ArrayDoubleSolution implements DoubleSolution {
     @Override
     public Double getUpperBound(int index) {
         return this.problem.getUpperBound(index);
+    }
+
+    @Override
+    public double getUnboxedVariableValue(int index) {
+        return this.variables[index];
+    }
+
+    @Override
+    public void setUnboxedVariableValue(int index, double value) {
+        this.variables[index] = value;
     }
 
     @Override

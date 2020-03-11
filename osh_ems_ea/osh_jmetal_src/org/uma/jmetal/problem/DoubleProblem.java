@@ -8,4 +8,5 @@ import org.uma.jmetal.solution.DoubleSolution;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public interface DoubleProblem extends BoundedProblem<Double, DoubleSolution> {
+    
 }

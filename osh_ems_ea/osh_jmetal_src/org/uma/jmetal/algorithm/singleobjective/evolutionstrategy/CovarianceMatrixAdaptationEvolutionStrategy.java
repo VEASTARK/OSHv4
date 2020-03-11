@@ -310,7 +310,7 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
         for (int i = 0; i < numberOfVariables; i++) {
             this.distributionMean[i] = 0.0;
             for (int iNk = 0; iNk < this.mu; iNk++) {
-                double variableValue = this.getPopulation().get(iNk).getVariableValue(i);
+                double variableValue = this.getPopulation().get(iNk).getUnboxedVariableValue(i);
                 this.distributionMean[i] += this.weights[iNk] * variableValue;
             }
         }
@@ -370,8 +370,8 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
                      * additional rank mu
                      * update
                      */
-                    double valueI = this.getPopulation().get(k).getVariableValue(i);
-                    double valueJ = this.getPopulation().get(k).getVariableValue(j);
+                    double valueI = this.getPopulation().get(k).getUnboxedVariableValue(i);
+                    double valueJ = this.getPopulation().get(k).getUnboxedVariableValue(j);
                     this.c[i][j] += this.cmu
                             * this.weights[k]
                             * (valueI - oldDistributionMean[i])
@@ -470,7 +470,7 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
                 value = ((DoubleProblem) this.getProblem()).getLowerBound(i);
             }
 
-            solution.setVariableValue(i, value);
+            solution.setUnboxedVariableValue(i, value);
         }
 
         return solution;

@@ -167,9 +167,9 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                 //Computing the velocity of this particle
-                this.speed[i][var] = W * this.speed[i][var] + C1 * r1 * (bestParticle.getVariableValue(var) -
-                        particle.getVariableValue(var)) +
-                        C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
+                this.speed[i][var] = W * this.speed[i][var] + C1 * r1 * (bestParticle.getUnboxedVariableValue(var) -
+                        particle.getUnboxedVariableValue(var)) +
+                        C2 * r2 * (bestGlobal.getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var));
             }
         }
     }
@@ -182,13 +182,13 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
         for (int i = 0; i < this.swarmSize; i++) {
             DoubleSolution particle = swarm.get(i);
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-                particle.setVariableValue(var, particle.getVariableValue(var) + this.speed[i][var]);
-                if (particle.getVariableValue(var) < this.problem.getLowerBound(var)) {
-                    particle.setVariableValue(var, this.problem.getLowerBound(var));
+                particle.setUnboxedVariableValue(var, particle.getUnboxedVariableValue(var) + this.speed[i][var]);
+                if (particle.getUnboxedVariableValue(var) < this.problem.getLowerBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getLowerBound(var));
                     this.speed[i][var] *= -1.0;
                 }
-                if (particle.getVariableValue(var) > this.problem.getUpperBound(var)) {
-                    particle.setVariableValue(var, this.problem.getUpperBound(var));
+                if (particle.getUnboxedVariableValue(var) > this.problem.getUpperBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getUpperBound(var));
                     this.speed[i][var] *= -1.0;
                 }
             }

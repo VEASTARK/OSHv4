@@ -146,7 +146,7 @@ public class NonDominatedSolutionListArchive<S extends Solution<?>> implements A
         public void evaluate(DoubleSolution solution) {
             double[] f = new double[this.getNumberOfObjectives()];
 
-            f[0] = solution.getVariableValue(0) + 0.0;
+            f[0] = solution.getUnboxedVariableValue(0) + 0.0;
             double g = this.evalG(solution);
             double h = this.evalH(f[0], g);
             f[1] = h * g;
@@ -163,7 +163,7 @@ public class NonDominatedSolutionListArchive<S extends Solution<?>> implements A
         private double evalG(DoubleSolution solution) {
             double g = 0.0;
             for (int i = 1; i < solution.getNumberOfVariables(); i++) {
-                g += solution.getVariableValue(i);
+                g += solution.getUnboxedVariableValue(i);
             }
             double constant = 9.0 / (solution.getNumberOfVariables() - 1.0);
             g = constant * g;

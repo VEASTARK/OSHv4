@@ -9,4 +9,8 @@ public interface DoubleSolution extends Solution<Double> {
     Double getLowerBound(int index);
 
     Double getUpperBound(int index);
+
+    double getUnboxedVariableValue(int index);
+
+    void setUnboxedVariableValue(int index, double value);
 }

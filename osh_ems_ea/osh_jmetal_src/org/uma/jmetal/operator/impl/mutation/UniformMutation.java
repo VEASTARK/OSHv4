@@ -64,7 +64,7 @@ public class UniformMutation implements MutationOperator<DoubleSolution> {
                 double rand = this.randomGenenerator.getRandomValue();
                 double tmp = (rand - 0.5) * this.perturbation;
 
-                tmp += solution.getVariableValue(i);
+                tmp += solution.getUnboxedVariableValue(i);
 
                 if (tmp < solution.getLowerBound(i)) {
                     tmp = solution.getLowerBound(i);
@@ -72,7 +72,7 @@ public class UniformMutation implements MutationOperator<DoubleSolution> {
                     tmp = solution.getUpperBound(i);
                 }
 
-                solution.setVariableValue(i, tmp);
+                solution.setUnboxedVariableValue(i, tmp);
             }
         }
     }

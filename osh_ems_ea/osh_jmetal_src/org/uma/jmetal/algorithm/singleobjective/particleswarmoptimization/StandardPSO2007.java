@@ -150,7 +150,7 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
             for (int j = 0; j < this.problem.getNumberOfVariables(); j++) {
                 this.speed[i][j] =
                         (this.randomGenerator.nextDouble(particle.getLowerBound(j), particle.getUpperBound(j))
-                                - particle.getVariableValue(j)) / 2.0;
+                                - particle.getUnboxedVariableValue(j)) / 2.0;
             }
         }
     }
@@ -168,15 +168,15 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
             if (this.localBest[i] != this.neighborhoodBest[i]) {
                 for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                     this.speed[i][var] = this.weight * this.speed[i][var] +
-                            r1 * (this.localBest[i].getVariableValue(var) - particle.getVariableValue(var)) +
-                            r2 * (this.neighborhoodBest[i].getVariableValue(var) - particle.getVariableValue
+                            r1 * (this.localBest[i].getUnboxedVariableValue(var) - particle.getUnboxedVariableValue(var)) +
+                            r2 * (this.neighborhoodBest[i].getUnboxedVariableValue(var) - particle.getUnboxedVariableValue
                                     (var));
                 }
             } else {
                 for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                     this.speed[i][var] = this.weight * this.speed[i][var] +
-                            r1 * (this.localBest[i].getVariableValue(var) -
-                                    particle.getVariableValue(var));
+                            r1 * (this.localBest[i].getUnboxedVariableValue(var) -
+                                    particle.getUnboxedVariableValue(var));
                 }
             }
         }
@@ -187,14 +187,14 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
         for (int i = 0; i < this.swarmSize; i++) {
             DoubleSolution particle = swarm.get(i);
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-                particle.setVariableValue(var, particle.getVariableValue(var) + this.speed[i][var]);
+                particle.setUnboxedVariableValue(var, particle.getUnboxedVariableValue(var) + this.speed[i][var]);
 
-                if (particle.getVariableValue(var) < this.problem.getLowerBound(var)) {
-                    particle.setVariableValue(var, this.problem.getLowerBound(var));
+                if (particle.getUnboxedVariableValue(var) < this.problem.getLowerBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getLowerBound(var));
                     this.speed[i][var] = 0;
                 }
-                if (particle.getVariableValue(var) > this.problem.getUpperBound(var)) {
-                    particle.setVariableValue(var, this.problem.getUpperBound(var));
+                if (particle.getUnboxedVariableValue(var) > this.problem.getUpperBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getUpperBound(var));
                     this.speed[i][var] = 0;
                 }
             }

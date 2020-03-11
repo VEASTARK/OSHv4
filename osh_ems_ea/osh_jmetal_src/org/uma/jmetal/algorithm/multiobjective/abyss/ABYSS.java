@@ -164,7 +164,7 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
                     ((DoubleProblem) this.problem).getLowerBound(i)) / this.numberOfSubRanges;
 
             value = this.randomGenerator.nextDouble(low, high);
-            solution.setVariableValue(i, value);
+            solution.setUnboxedVariableValue(i, value);
         }
 
         this.problem.evaluate(solution);
