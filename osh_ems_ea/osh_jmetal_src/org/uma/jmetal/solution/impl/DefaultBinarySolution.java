@@ -4,6 +4,7 @@ import org.uma.jmetal.problem.BinaryProblem;
 import org.uma.jmetal.solution.BinarySolution;
 import org.uma.jmetal.util.binarySet.BinarySet;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.utils.DeepCopy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class DefaultBinarySolution
     /**
      * Copy constructor
      */
+    @SuppressWarnings("unchecked")
     public DefaultBinarySolution(DefaultBinarySolution solution) {
         super(solution.problem);
 
@@ -42,7 +44,7 @@ public class DefaultBinarySolution
             this.setObjective(i, solution.getObjective(i));
         }
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     private static BinarySet createNewBitSet(int numberOfBits, JMetalRandom randomGenerator) {

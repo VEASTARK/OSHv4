@@ -3,6 +3,7 @@ package org.uma.jmetal.solution.impl;
 import org.uma.jmetal.problem.DoubleBinaryProblem;
 import org.uma.jmetal.solution.DoubleBinarySolution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.utils.DeepCopy;
 
 import java.util.BitSet;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ public class DefaultDoubleBinarySolution
     /**
      * Copy constructor
      */
+    @SuppressWarnings("unchecked")
     public DefaultDoubleBinarySolution(DefaultDoubleBinarySolution solution) {
         super(solution.problem);
         this.numberOfDoubleVariables = solution.problem.getNumberOfDoubleVariables();
@@ -51,7 +53,7 @@ public class DefaultDoubleBinarySolution
         this.copyDoubleVariables(solution);
         this.copyBitSet(solution);
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     private void initializeDoubleVariables(JMetalRandom randomGenerator) {

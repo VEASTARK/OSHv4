@@ -4,6 +4,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.utils.DeepCopy;
 
 import java.util.*;
 
@@ -40,18 +41,18 @@ public class ArrayDoubleSolution implements DoubleSolution {
      *
      * @param solution to copy
      */
+    @SuppressWarnings("unchecked")
     public ArrayDoubleSolution(ArrayDoubleSolution solution) {
-        this(solution.problem);
+        this.problem = solution.problem;
+        this.randomGenerator = JMetalRandom.getInstance();
 
-        for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
-            this.variables[i] = solution.getUnboxedVariableValue(i);
-        }
+        this.objectives = new double[this.problem.getNumberOfObjectives()];
+        this.variables = new double[this.problem.getNumberOfVariables()];
 
-        for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
-            this.objectives[i] = solution.getObjective(i);
-        }
+        System.arraycopy(solution.objectives, 0, this.objectives, 0, this.objectives.length);
+        System.arraycopy(solution.variables, 0, this.variables, 0, this.variables.length);
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.uma.jmetal.solution.impl;
 import org.uma.jmetal.problem.IntegerProblem;
 import org.uma.jmetal.solution.IntegerSolution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.utils.DeepCopy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class DefaultIntegerSolution
     /**
      * Copy constructor
      */
+    @SuppressWarnings("unchecked")
     public DefaultIntegerSolution(DefaultIntegerSolution solution) {
         super(solution.problem);
 
@@ -41,7 +43,7 @@ public class DefaultIntegerSolution
             this.setObjective(i, solution.getObjective(i));
         }
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     @Override

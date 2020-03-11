@@ -2,6 +2,7 @@ package org.uma.jmetal.solution.impl;
 
 import org.uma.jmetal.problem.PermutationProblem;
 import org.uma.jmetal.solution.PermutationSolution;
+import osh.utils.DeepCopy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ public class DefaultIntegerPermutationSolution
     /**
      * Copy Constructor
      */
+    @SuppressWarnings("unchecked")
     public DefaultIntegerPermutationSolution(DefaultIntegerPermutationSolution solution) {
         super(solution.problem);
         for (int i = 0; i < this.problem.getNumberOfObjectives(); i++) {
@@ -50,7 +52,7 @@ public class DefaultIntegerPermutationSolution
             this.setVariableValue(i, solution.getVariableValue(i));
         }
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.uma.jmetal.solution.impl;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.utils.DeepCopy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class DefaultDoubleSolution
     /**
      * Copy constructor
      */
+    @SuppressWarnings("unchecked")
     public DefaultDoubleSolution(DefaultDoubleSolution solution) {
         super(solution.problem);
 
@@ -41,7 +43,7 @@ public class DefaultDoubleSolution
             this.setObjective(i, solution.getObjective(i));
         }
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     @Override

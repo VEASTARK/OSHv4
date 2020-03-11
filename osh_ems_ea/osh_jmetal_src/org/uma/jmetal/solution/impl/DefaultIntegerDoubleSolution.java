@@ -3,6 +3,7 @@ package org.uma.jmetal.solution.impl;
 import org.uma.jmetal.problem.IntegerDoubleProblem;
 import org.uma.jmetal.solution.IntegerDoubleSolution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.utils.DeepCopy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,7 @@ public class DefaultIntegerDoubleSolution
     /**
      * Copy constructor
      */
+    @SuppressWarnings("unchecked")
     public DefaultIntegerDoubleSolution(DefaultIntegerDoubleSolution solution) {
         super(solution.problem);
 
@@ -54,7 +56,7 @@ public class DefaultIntegerDoubleSolution
             this.setVariableValue(i, solution.getVariableValue(i));
         }
 
-        this.attributes = new HashMap<>(solution.attributes);
+        this.attributes = (HashMap<Object, Object>) DeepCopy.copy(solution.attributes);
     }
 
     @Override
