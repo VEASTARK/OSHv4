@@ -131,7 +131,7 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
 
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
-            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.localBest))) {
+            if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.globalBest))) {
                 return true;
             }
         }

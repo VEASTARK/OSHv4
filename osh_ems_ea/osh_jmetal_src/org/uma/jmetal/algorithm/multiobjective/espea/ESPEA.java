@@ -101,7 +101,7 @@ public class ESPEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
-            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.getPopulation())) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
                 return true;
             }
         }

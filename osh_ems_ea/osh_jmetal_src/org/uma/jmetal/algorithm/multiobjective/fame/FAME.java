@@ -7,6 +7,7 @@ import com.fuzzylite.term.Triangle;
 import com.fuzzylite.variable.InputVariable;
 import com.fuzzylite.variable.OutputVariable;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.SteadyStateNSGAII;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.Operator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
@@ -164,6 +165,16 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
             this.window = 0;
             this.Stagnation = 0.0;
         }
+    }
+
+    @Override
+    protected boolean isStoppingConditionReached() {
+        for (StoppingRule sr : this.getStoppingRules()) {
+            if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archiveSSD.getSolutionList())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
