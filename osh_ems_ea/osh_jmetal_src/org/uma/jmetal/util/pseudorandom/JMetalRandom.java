@@ -43,6 +43,10 @@ public final class JMetalRandom implements Serializable {
         return this.randomGenerator.nextDouble(lowerBound, upperBound);
     }
 
+    public double nextGaussian() {
+        return this.randomGenerator.nextGaussian();
+    }
+
     public long getSeed() {
         return this.randomGenerator.getSeed();
     }

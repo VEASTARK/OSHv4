@@ -54,6 +54,11 @@ public class Well44497bGenerator implements PseudoRandomGenerator {
     }
 
     @Override
+    public double nextGaussian() {
+        return this.rnd.nextGaussian();
+    }
+
+    @Override
     public String getName() {
         return NAME;
     }

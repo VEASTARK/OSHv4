@@ -17,4 +17,6 @@ public interface PseudoRandomGenerator extends Serializable {
     void setSeed(long seed);
 
     String getName();
+
+    double nextGaussian();
 }

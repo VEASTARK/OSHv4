@@ -55,6 +55,11 @@ public class JavaRandomGenerator implements PseudoRandomGenerator {
     }
 
     @Override
+    public double nextGaussian() {
+        return this.rnd.nextGaussian();
+    }
+
+    @Override
     public String getName() {
         return NAME;
     }

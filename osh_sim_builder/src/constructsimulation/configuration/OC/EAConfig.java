@@ -3,6 +3,7 @@ package constructsimulation.configuration.OC;
 import constructsimulation.configuration.general.Util;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRuleType;
 import org.uma.jmetal.operator.impl.crossover.CrossoverType;
+import org.uma.jmetal.operator.impl.mutation.MutationType;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
@@ -19,7 +20,8 @@ import java.util.List;
 public class EAConfig {
 
     public static CrossoverType defaultBinaryCrossoverOperator = CrossoverType.BINARY_N_POINT;
-    public static String defaultBinaryMutationOperator = "BitFlipAutoProbMutation"; //  adjusts the mutation rate to 1/(numberOfBits)
+    public static MutationType defaultBinaryMutationOperator = MutationType.BIT_FLIP_AUTO; //  adjusts the mutation rate
+    // to 1/(numberOfBits)
 
     public static String defaultSelectionOperator = "BinaryTournament";
 
@@ -58,7 +60,7 @@ public class EAConfig {
             }
         } else {
             list.add(Util.generateClassedParameter(ParameterConstants.EA.probability, mutationProbability));
-            if (operatorName.equals("BitFlipAutoProbMutation")) {
+            if (operatorName.equals(MutationType.BIT_FLIP_AUTO.getName())) {
                 list.add(Util.generateClassedParameter(ParameterConstants.EA_MUTATION.autoProbMutationFactor, autoProbMutationFactor));
             }
         }
@@ -93,7 +95,7 @@ public class EAConfig {
         eaConfig.setPopSize(popSize);
         eaConfig.setSelectionOperator(defaultSelectionOperator);
         eaConfig.setCrossoverOperator(defaultBinaryCrossoverOperator.getName());
-        eaConfig.setMutationOperator(defaultBinaryMutationOperator);
+        eaConfig.setMutationOperator(defaultBinaryMutationOperator.getName());
 
 
         eaConfig.getSelectionParameters().addAll(generateOperatorParameters(OperatorType.SELECTION,
@@ -101,7 +103,7 @@ public class EAConfig {
         eaConfig.getCrossoverParameters().addAll(generateOperatorParameters(OperatorType.RECOMBINATION,
                 defaultBinaryCrossoverOperator.getName()));
         eaConfig.getMutationParameters().addAll(generateOperatorParameters(OperatorType.MUTATION,
-                defaultBinaryMutationOperator));
+                defaultBinaryMutationOperator.getName()));
 
         eaConfig.getStoppingRules().addAll(stoppingRules);
 

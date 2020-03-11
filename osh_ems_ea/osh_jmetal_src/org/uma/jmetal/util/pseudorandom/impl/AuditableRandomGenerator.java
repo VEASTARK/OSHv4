@@ -60,6 +60,13 @@ public class AuditableRandomGenerator implements PseudoRandomGenerator {
     }
 
     @Override
+    public double nextGaussian() {
+        double result = this.generator.nextGaussian();
+        this.notifies(new Audit(RandomMethod.DOUBLE, null, result));
+        return result;
+    }
+
+    @Override
     public long getSeed() {
         return this.generator.getSeed();
     }

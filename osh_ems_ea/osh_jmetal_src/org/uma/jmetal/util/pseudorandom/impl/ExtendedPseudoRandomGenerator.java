@@ -32,6 +32,11 @@ public class ExtendedPseudoRandomGenerator implements PseudoRandomGenerator {
     }
 
     @Override
+    public double nextGaussian() {
+        return this.randomGenerator.nextGaussian();
+    }
+
+    @Override
     public long getSeed() {
         return this.randomGenerator.getSeed();
     }
