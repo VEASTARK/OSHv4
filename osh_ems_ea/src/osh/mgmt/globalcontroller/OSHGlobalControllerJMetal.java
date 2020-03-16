@@ -35,7 +35,7 @@ import osh.mgmt.globalcontroller.jmetal.Fitness;
 import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
-import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
+import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
@@ -385,7 +385,7 @@ public class OSHGlobalControllerJMetal
             SolutionDistributor distributor = new SolutionDistributor();
             distributor.gatherVariableInformation(problemParts);
 
-            EnergyManagementProblem problem = new EnergyManagementProblem(
+            EMProblemEvaluator problem = new EMProblemEvaluator(
                     problemParts,
                     this.ocESC,
                     distributor,

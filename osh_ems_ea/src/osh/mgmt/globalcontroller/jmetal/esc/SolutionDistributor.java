@@ -1,10 +1,8 @@
 package osh.mgmt.globalcontroller.jmetal.esc;
 
-import jmetal.core.Solution;
-import jmetal.encodings.solutionType.ArrayRealSolutionType;
-import jmetal.encodings.solutionType.BinarySolutionType;
-import jmetal.encodings.variable.ArrayReal;
-import jmetal.encodings.variable.Binary;
+import org.uma.jmetal.solution.BinarySolution;
+import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.solution.Solution;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
@@ -126,13 +124,13 @@ public class SolutionDistributor {
      * @param solution the encoded solution
      * @param problemParts the problem-parts to distribute the solution to
      */
-    public void distributeSolution(Solution solution, InterdependentProblemPart<? extends ISolution, ? extends
+    public void distributeSolution(Solution<?> solution, InterdependentProblemPart<? extends ISolution, ? extends
                 IPrediction>[] problemParts) {
 
-        if (solution.getType().getClass() == BinarySolutionType.class) {
-            this.distributeBinarySolution(((Binary) solution.getDecisionVariables()[0]).bits_, problemParts);
-        } else if (solution.getType().getClass() == ArrayRealSolutionType.class){
-            this.distributeRealSolution(((ArrayReal) solution.getDecisionVariables()[0]).array_, problemParts);
+        if (BinarySolution.class.isAssignableFrom(solution.getClass())) {
+            this.distributeBinarySolution(((BinarySolution) solution).getVariableValue(0), problemParts);
+        } else if (DoubleSolution.class.isAssignableFrom(solution.getClass())){
+            this.distributeRealSolution((DoubleSolution) solution, problemParts);
         }
     }
 
@@ -152,10 +150,10 @@ public class SolutionDistributor {
         }
     }
 
-    private void distributeRealSolution(Double[] solution, InterdependentProblemPart<? extends ISolution, ? extends
+    private void distributeRealSolution(DoubleSolution solution, InterdependentProblemPart<? extends ISolution, ? extends
             IPrediction>[] problemParts) {
 
-        assert (solution.length == this.realVariableInformation.getVariableCount());
+        assert (solution.getNumberOfVariables() == this.realVariableInformation.getVariableCount());
 
         for (InterdependentProblemPart<?, ?> ipp : problemParts) {
 
@@ -169,7 +167,7 @@ public class SolutionDistributor {
             double[] variables = new double[positions[1] - positions[0]];
 
             for (int i = positions[0]; i < positions[1]; i++) {
-                variables[i - positions[0]] = solution[i];
+                variables[i - positions[0]] = solution.getUnboxedVariableValue(i);
             }
 
             ipp.setSolution(variables);

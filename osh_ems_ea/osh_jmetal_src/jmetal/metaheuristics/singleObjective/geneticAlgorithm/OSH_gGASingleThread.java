@@ -27,7 +27,7 @@ import jmetal.metaheuristics.stoppingRule.StoppingRule;
 import jmetal.util.JMException;
 import jmetal.util.comparators.ObjectiveComparator;
 import osh.configuration.system.DeviceTypes;
-import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
+import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
 import osh.simulation.DatabaseLoggerThread;
 import osh.utils.string.ParameterConstants;
 
@@ -294,7 +294,7 @@ public class OSH_gGASingleThread extends Algorithm {
         SolutionSet resultPopulation = new SolutionSet(1);
         resultPopulation.add(population.get(0));
 
-        ((EnergyManagementProblem) this.problem_).evaluateFinalTime(population.get(0), log);
+        ((EMProblemEvaluator) this.problem_).evaluateFinalTime(population.get(0), log);
 
         if (log) {
             generationsUsed += generation;

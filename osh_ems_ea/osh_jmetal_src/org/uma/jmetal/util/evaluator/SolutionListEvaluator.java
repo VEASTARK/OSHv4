@@ -12,5 +12,7 @@ import java.util.List;
 public interface SolutionListEvaluator<S> extends Serializable {
     List<S> evaluate(List<S> solutionList, Problem<S> problem);
 
+    void evaluateFinal(S solution, Problem<S> problem);
+
     void shutdown();
 }

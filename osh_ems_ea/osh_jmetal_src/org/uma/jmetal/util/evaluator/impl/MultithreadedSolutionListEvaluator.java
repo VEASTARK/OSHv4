@@ -40,4 +40,9 @@ public class MultithreadedSolutionListEvaluator<S> implements SolutionListEvalua
     public void shutdown() {
         //This method is an intentionally-blank override.
     }
+
+    @Override
+    public void evaluateFinal(S solution, Problem<S> problem) {
+        problem.evaluateFinal(solution, true);
+    }
 }

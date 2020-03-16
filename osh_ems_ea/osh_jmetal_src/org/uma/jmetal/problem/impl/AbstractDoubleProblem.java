@@ -24,6 +24,16 @@ public abstract class AbstractDoubleProblem extends AbstractGenericProblem<Doubl
         return this.lowerLimit.get(index);
     }
 
+    @Override
+    public double getUnboxedLowerBound(int index) {
+        return this.lowerLimit.get(index);
+    }
+
+    @Override
+    public double getUnboxedUpperBound(int index) {
+        return this.upperLimit.get(index);
+    }
+
     /* Setters */
     protected void setLowerLimit(List<Double> lowerLimit) {
         this.lowerLimit = lowerLimit;
