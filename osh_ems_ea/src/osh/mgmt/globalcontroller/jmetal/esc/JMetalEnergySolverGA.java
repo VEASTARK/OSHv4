@@ -19,6 +19,8 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.MultithreadedStealingSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.point.PointSolution;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import org.uma.jmetal.util.pseudorandom.impl.OSHPseudoRandom;
 import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
@@ -131,6 +133,8 @@ public class JMetalEnergySolverGA extends JMetalSolver {
                 evaluator,
                 distributor);
 
+        JMetalRandom.getInstance().setRandomGenerator(new OSHPseudoRandom(this.randomGenerator));
+
         PrintWriter pw = new PrintWriter(new FileOutputStream(
                 new File(this.gaLogPath),
                 true));
@@ -138,19 +142,19 @@ public class JMetalEnergySolverGA extends JMetalSolver {
 
         /* Mutation and Crossover for Real codification */
         mutation = MutationFactory.getMutationOperator(
-                MutationType.valueOf(this.gaparameters.getMutationOperator()),
+                MutationType.fromName(this.gaparameters.getMutationOperator()),
                 this.gaparameters.getMutationParameters());
 
 
         //crossover
         crossover = CrossoverFactory.getCrossoverOperator(
-                CrossoverType.valueOf(this.gaparameters.getCrossoverOperator()),
+                CrossoverType.fromName(this.gaparameters.getCrossoverOperator()),
                 this.gaparameters.getCrossoverParameters());
 
 
         //selection
         selection = SelectionFactory.getSelectionOperator(
-                SelectionType.valueOf(this.gaparameters.getSelectionOperator()),
+                SelectionType.fromName(this.gaparameters.getSelectionOperator()),
                 this.gaparameters.getSelectionParameters());
 
         SolutionListEvaluator<BinarySolution> algorithmEvaluator;

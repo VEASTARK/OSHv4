@@ -55,7 +55,7 @@
             <ns2:parameterType>java.lang.Integer</ns2:parameterType>
         </crossoverParameters>
         <mutationParameters>
-            <ns2:parameterName>autoProbMuatationFactor</ns2:parameterName>
+            <ns2:parameterName>autoProbMutationFactor</ns2:parameterName>
             <ns2:parameterValue>1.0</ns2:parameterValue>
             <ns2:parameterType>java.lang.Double</ns2:parameterType>
         </mutationParameters>

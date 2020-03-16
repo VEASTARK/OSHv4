@@ -8,6 +8,7 @@ package org.uma.jmetal.operator.impl.crossover;
 public enum CrossoverType {
 
     BINARY_N_POINT("BinaryNPointCrossover"),
+    BINARY_N_POINT_LEGACY("SingleBinaryNPointsCrossover"),
     BLX_ALPHA("BLXAlphaCrossover"),
     DE("DifferentialEvolutionCrossover"),
     HUX("HUXCrossover"),
