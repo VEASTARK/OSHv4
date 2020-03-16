@@ -4,6 +4,7 @@ import constructsimulation.configuration.general.Util;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRuleType;
 import org.uma.jmetal.operator.impl.crossover.CrossoverType;
 import org.uma.jmetal.operator.impl.mutation.MutationType;
+import org.uma.jmetal.operator.impl.selection.SelectionType;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
@@ -23,7 +24,7 @@ public class EAConfig {
     public static MutationType defaultBinaryMutationOperator = MutationType.BIT_FLIP_AUTO; //  adjusts the mutation rate
     // to 1/(numberOfBits)
 
-    public static String defaultSelectionOperator = "BinaryTournament";
+    public static SelectionType defaultSelectionOperator = SelectionType.BINARY_TOURNAMENT;
 
     // OptimizationAlgorithm specific variables
     public static int numEvaluations = 20000;
@@ -93,13 +94,13 @@ public class EAConfig {
 
         eaConfig.setNumEvaluations(numEvaluations);
         eaConfig.setPopSize(popSize);
-        eaConfig.setSelectionOperator(defaultSelectionOperator);
+        eaConfig.setSelectionOperator(defaultSelectionOperator.getName());
         eaConfig.setCrossoverOperator(defaultBinaryCrossoverOperator.getName());
         eaConfig.setMutationOperator(defaultBinaryMutationOperator.getName());
 
 
         eaConfig.getSelectionParameters().addAll(generateOperatorParameters(OperatorType.SELECTION,
-                defaultSelectionOperator));
+                defaultSelectionOperator.getName()));
         eaConfig.getCrossoverParameters().addAll(generateOperatorParameters(OperatorType.RECOMBINATION,
                 defaultBinaryCrossoverOperator.getName()));
         eaConfig.getMutationParameters().addAll(generateOperatorParameters(OperatorType.MUTATION,

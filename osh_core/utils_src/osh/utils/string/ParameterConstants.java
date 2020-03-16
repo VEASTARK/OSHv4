@@ -209,6 +209,12 @@ public final class ParameterConstants {
         public static final String maxIterations = "maxIterations";
     }
 
+    public static final class EA_SELECTION {
+        public static final String comparator = "comparator";
+        public static final String toSelect = "solutionsToSelect";
+        public static final String tournaments = "numberOfTournaments";
+    }
+
     public static final class Logging {
         public static final String logH0 = "logH0";
         public static final String logEpsPls = "logEpsPls";

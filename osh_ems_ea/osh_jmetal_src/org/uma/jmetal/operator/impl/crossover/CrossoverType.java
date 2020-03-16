@@ -23,17 +23,17 @@ public enum CrossoverType {
     private final String name;
 
     /**
-     * Construct the stopping rule with the given name.
+     * Construct the crossover type with the given name.
      *
-     * @param name the name of the stopping rule
+     * @param name the name of the crossover type
      */
     CrossoverType(String name) {
         this.name = name;
     }
 
     /**
-     * Returns the name of the stopping rule.
-     * @return the name of the stopping rule
+     * Returns the name of the crossover type.
+     * @return the name of the crossover type
      */
     public String getName() {
         return this.name;

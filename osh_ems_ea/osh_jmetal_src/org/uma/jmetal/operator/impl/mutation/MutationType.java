@@ -26,17 +26,17 @@ public enum MutationType {
     private final String name;
 
     /**
-     * Construct the stopping rule with the given name.
+     * Construct the mutation type with the given name.
      *
-     * @param name the name of the stopping rule
+     * @param name the name of the mutation type
      */
     MutationType(String name) {
         this.name = name;
     }
 
     /**
-     * Returns the name of the stopping rule.
-     * @return the name of the stopping rule
+     * Returns the name of the mutation type.
+     * @return the name of the mutation type
      */
     public String getName() {
         return this.name;
