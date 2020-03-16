@@ -114,8 +114,8 @@ public class BLXAlphaCrossover implements CrossoverOperator<DoubleSolution> {
 
         if (this.randomGenerator.getRandomValue() <= probability) {
             for (i = 0; i < parent1.getNumberOfVariables(); i++) {
-                upperBound = parent1.getUpperBound(i);
-                lowerBound = parent1.getLowerBound(i);
+                upperBound = parent1.getUnboxedUpperBound(i);
+                lowerBound = parent1.getUnboxedLowerBound(i);
                 valueX1 = parent1.getUnboxedVariableValue(i);
                 valueX2 = parent2.getUnboxedVariableValue(i);
 

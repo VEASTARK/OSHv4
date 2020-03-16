@@ -66,10 +66,10 @@ public class UniformMutation implements MutationOperator<DoubleSolution> {
 
                 tmp += solution.getUnboxedVariableValue(i);
 
-                if (tmp < solution.getLowerBound(i)) {
-                    tmp = solution.getLowerBound(i);
-                } else if (tmp > solution.getUpperBound(i)) {
-                    tmp = solution.getUpperBound(i);
+                if (tmp < solution.getUnboxedLowerBound(i)) {
+                    tmp = solution.getUnboxedLowerBound(i);
+                } else if (tmp > solution.getUnboxedUpperBound(i)) {
+                    tmp = solution.getUnboxedUpperBound(i);
                 }
 
                 solution.setUnboxedVariableValue(i, tmp);

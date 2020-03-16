@@ -129,8 +129,8 @@ public class ApproximatePolynomialMutation implements MutationOperator<DoubleSol
 
         for (Integer i : indices) {
             y = solution.getUnboxedVariableValue(i);
-            yl = solution.getLowerBound(i);
-            yu = solution.getUpperBound(i);
+            yl = solution.getUnboxedLowerBound(i);
+            yu = solution.getUnboxedUpperBound(i);
             if (yl == yu) {
                 y = yl;
             } else {

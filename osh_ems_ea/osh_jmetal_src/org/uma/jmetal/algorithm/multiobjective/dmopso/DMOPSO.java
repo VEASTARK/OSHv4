@@ -111,8 +111,8 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
         this.deltaMax = new double[problem.getNumberOfVariables()];
         this.deltaMin = new double[problem.getNumberOfVariables()];
         for (int i = 0; i < problem.getNumberOfVariables(); i++) {
-            this.deltaMax[i] = (problem.getUpperBound(i) -
-                    problem.getLowerBound(i)) / 2.0;
+            this.deltaMax[i] = (problem.getUnboxedUpperBound(i) -
+                    problem.getUnboxedLowerBound(i)) / 2.0;
             this.deltaMin[i] = -this.deltaMax[i];
         }
     }
@@ -386,12 +386,12 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
         DoubleSolution particle = this.swarm.get(part);
 
         for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-            if (particle.getUnboxedVariableValue(var) < this.problem.getLowerBound(var)) {
-                particle.setUnboxedVariableValue(var, this.problem.getLowerBound(var));
+            if (particle.getUnboxedVariableValue(var) < this.problem.getUnboxedLowerBound(var)) {
+                particle.setUnboxedVariableValue(var, this.problem.getUnboxedLowerBound(var));
                 this.speed[part][var] *= this.changeVelocity1;
             }
-            if (particle.getUnboxedVariableValue(var) > this.problem.getUpperBound(var)) {
-                particle.setUnboxedVariableValue(var, this.problem.getUpperBound(var));
+            if (particle.getUnboxedVariableValue(var) > this.problem.getUnboxedUpperBound(var)) {
+                particle.setUnboxedVariableValue(var, this.problem.getUnboxedUpperBound(var));
                 this.speed[part][var] *= this.changeVelocity2;
             }
         }

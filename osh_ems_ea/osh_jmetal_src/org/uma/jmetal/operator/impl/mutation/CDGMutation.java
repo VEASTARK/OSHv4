@@ -120,8 +120,8 @@ public class CDGMutation implements MutationOperator<DoubleSolution> {
         for (int i = 0; i < solution.getNumberOfVariables(); i++) {
             if (this.randomGenerator.nextDouble() <= probability) {
                 y = solution.getUnboxedVariableValue(i);
-                yl = solution.getLowerBound(i);
-                yu = solution.getUpperBound(i);
+                yl = solution.getUnboxedLowerBound(i);
+                yu = solution.getUnboxedUpperBound(i);
                 rnd = this.randomGenerator.nextDouble();
 
                 tempDelta = Math.pow(rnd, -this.delta);

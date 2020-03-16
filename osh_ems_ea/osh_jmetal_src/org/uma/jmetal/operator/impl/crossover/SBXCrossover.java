@@ -134,8 +134,8 @@ public class SBXCrossover implements CrossoverOperator<DoubleSolution> {
                             y2 = valueX1;
                         }
 
-                        lowerBound = parent1.getLowerBound(i);
-                        upperBound = parent1.getUpperBound(i);
+                        lowerBound = parent1.getUnboxedLowerBound(i);
+                        upperBound = parent1.getUnboxedUpperBound(i);
 
                         rand = this.randomGenerator.getRandomValue();
                         beta = 1.0 + (2.0 * (y1 - lowerBound) / (y2 - y1));

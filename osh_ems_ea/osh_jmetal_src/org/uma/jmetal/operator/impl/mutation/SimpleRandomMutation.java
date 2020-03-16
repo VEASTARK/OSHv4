@@ -65,8 +65,8 @@ public class SimpleRandomMutation implements MutationOperator<DoubleSolution> {
     private void doMutation(double probability, DoubleSolution solution) {
         for (int i = 0; i < solution.getNumberOfVariables(); i++) {
             if (this.randomGenerator.getRandomValue() <= probability) {
-                Double value = solution.getLowerBound(i) +
-                        ((solution.getUpperBound(i) - solution.getLowerBound(i)) * this.randomGenerator.getRandomValue());
+                double value = solution.getUnboxedLowerBound(i) +
+                        ((solution.getUnboxedUpperBound(i) - solution.getUnboxedLowerBound(i)) * this.randomGenerator.getRandomValue());
 
                 solution.setUnboxedVariableValue(i, value);
             }

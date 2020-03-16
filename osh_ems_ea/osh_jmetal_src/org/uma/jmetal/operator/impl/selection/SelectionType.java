@@ -10,6 +10,8 @@ public enum SelectionType {
     BEST("BestSolutionSelection"),
     DE("DifferentialEvolutionSelection"),
     BINARY_TOURNAMENT("BinaryTournamentSelection"),
+    //TODO: remove with next backwards-compatibility breaking update
+    BINARY_TOURNAMENT_LEGACY("BinaryTournament"),
     TOURNAMENT("TournamentSelection"),
     NARY_TOURNAMENT("NaryTournamentSelection"),
     NARY_RANDOM("NaryRandomSelection"),

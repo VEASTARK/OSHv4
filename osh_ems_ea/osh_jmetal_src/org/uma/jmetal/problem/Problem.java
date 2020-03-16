@@ -21,7 +21,9 @@ public interface Problem<S> extends Serializable {
     /* Methods */
     void evaluate(S solution);
 
-    void evaluateFinal(S solution, boolean log);
+    default void evaluateFinal(S solution, boolean log) {
+        this.evaluate(solution);
+    }
 
     S createSolution();
 }

@@ -1,5 +1,8 @@
 package osh.mgmt.globalcontroller.jmetal;
 
+import org.uma.jmetal.operator.impl.crossover.CrossoverType;
+import org.uma.jmetal.operator.impl.mutation.MutationType;
+import org.uma.jmetal.operator.impl.selection.SelectionType;
 import osh.configuration.oc.GAConfiguration;
 import osh.configuration.oc.StoppingRule;
 import osh.configuration.system.ConfigurationParameter;
@@ -32,16 +35,16 @@ public class GAParameters implements Cloneable {
     private HashMap<String, HashMap> stoppingRules;
 
     public GAParameters() {
-        this.crossoverOperator = "SingleBinaryNPointsCrossover";
-        this.mutationOperator = "BitFlipMutation";
-        this.selectionOperator = "BinaryTournament";
+        this.crossoverOperator = CrossoverType.BINARY_N_POINT.getName();
+        this.mutationOperator = MutationType.BIT_FLIP_APPROX.getName();
+        this.selectionOperator = SelectionType.BINARY_TOURNAMENT.getName();
         this.numEvaluations = 1000;
         this.popSize = 50;
 
         //crossOverProbability
         this.crossoverParameters = new HashMap();
         this.crossoverParameters.put(ParameterConstants.EA.probability, String.valueOf(0.7));
-        this.crossoverParameters.put(ParameterConstants.EA.points, String.valueOf(2));
+        this.crossoverParameters.put(ParameterConstants.EA_RECOMBINATION.points, String.valueOf(2));
         //mutationProbability
         this.mutationParameters = new HashMap();
         this.mutationParameters.put(ParameterConstants.EA.probability, String.valueOf(0.1));

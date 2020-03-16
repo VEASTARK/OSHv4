@@ -119,7 +119,7 @@ public class SMPSORP
         this.deltaMax = new double[problem.getNumberOfVariables()];
         this.deltaMin = new double[problem.getNumberOfVariables()];
         for (int i = 0; i < problem.getNumberOfVariables(); i++) {
-            this.deltaMax[i] = (problem.getUpperBound(i) - problem.getLowerBound(i)) / 2.0;
+            this.deltaMax[i] = (problem.getUnboxedUpperBound(i) - problem.getUnboxedLowerBound(i)) / 2.0;
             this.deltaMin[i] = -this.deltaMax[i];
         }
 
@@ -255,12 +255,12 @@ public class SMPSORP
             for (int j = 0; j < particle.getNumberOfVariables(); j++) {
                 particle.setUnboxedVariableValue(j, particle.getUnboxedVariableValue(j) + this.speed[i][j]);
 
-                if (particle.getUnboxedVariableValue(j) < this.problem.getLowerBound(j)) {
-                    particle.setUnboxedVariableValue(j, this.problem.getLowerBound(j));
+                if (particle.getUnboxedVariableValue(j) < this.problem.getUnboxedLowerBound(j)) {
+                    particle.setUnboxedVariableValue(j, this.problem.getUnboxedLowerBound(j));
                     this.speed[i][j] *= this.changeVelocity1;
                 }
-                if (particle.getUnboxedVariableValue(j) > this.problem.getUpperBound(j)) {
-                    particle.setUnboxedVariableValue(j, this.problem.getUpperBound(j));
+                if (particle.getUnboxedVariableValue(j) > this.problem.getUnboxedUpperBound(j)) {
+                    particle.setUnboxedVariableValue(j, this.problem.getUnboxedUpperBound(j));
                     this.speed[i][j] *= this.changeVelocity2;
                 }
             }

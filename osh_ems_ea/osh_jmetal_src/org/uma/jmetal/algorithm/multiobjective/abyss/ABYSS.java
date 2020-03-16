@@ -157,11 +157,11 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
             this.frequency[range][i]++;
             this.sumOfFrequencyValues[i]++;
 
-            double low = ((DoubleProblem) this.problem).getLowerBound(i) + range *
-                    (((DoubleProblem) this.problem).getUpperBound(i) -
-                            ((DoubleProblem) this.problem).getLowerBound(i)) / this.numberOfSubRanges;
-            double high = low + (((DoubleProblem) this.problem).getUpperBound(i) -
-                    ((DoubleProblem) this.problem).getLowerBound(i)) / this.numberOfSubRanges;
+            double low = ((DoubleProblem) this.problem).getUnboxedLowerBound(i) + range *
+                    (((DoubleProblem) this.problem).getUnboxedUpperBound(i) -
+                            ((DoubleProblem) this.problem).getUnboxedLowerBound(i)) / this.numberOfSubRanges;
+            double high = low + (((DoubleProblem) this.problem).getUnboxedUpperBound(i) -
+                    ((DoubleProblem) this.problem).getUnboxedLowerBound(i)) / this.numberOfSubRanges;
 
             value = this.randomGenerator.nextDouble(low, high);
             solution.setUnboxedVariableValue(i, value);

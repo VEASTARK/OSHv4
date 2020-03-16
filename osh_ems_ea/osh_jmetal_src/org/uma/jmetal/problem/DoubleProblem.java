@@ -13,12 +13,16 @@ public interface DoubleProblem extends BoundedProblem<Double, DoubleSolution> {
      * @param index index of the variable
      * @return unboxed lower bound of the variable
      */
-    double getUnboxedLowerBound(int index);
+    default double getUnboxedLowerBound(int index) {
+        return this.getLowerBound(index);
+    }
 
     /**
      * @param index index of the variable
      * @return unboxed upper bound of the variable
      */
-    double getUnboxedUpperBound(int index);
+    default double getUnboxedUpperBound(int index) {
+        return this.getUpperBound(index);
+    }
     
 }

@@ -62,8 +62,8 @@ public class SingleBinaryNPointsCrossover extends Crossover {
 
         if (parameters.get(ParameterConstants.EA.probability) != null)
             this.crossoverProbability_ = (Double) parameters.get(ParameterConstants.EA.probability);
-        if (parameters.get(ParameterConstants.EA.points) != null)
-            this.points_ = (Integer) parameters.get(ParameterConstants.EA.points);
+        if (parameters.get(ParameterConstants.EA_RECOMBINATION.points) != null)
+            this.points_ = (Integer) parameters.get(ParameterConstants.EA_RECOMBINATION.points);
     } // SingleBinaryNPointsCrossover
 
 

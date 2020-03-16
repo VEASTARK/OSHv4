@@ -1,7 +1,7 @@
 package osh.mgmt.globalcontroller;
 
-import jmetal.core.Solution;
 import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
+import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.oc.GAConfiguration;
 import osh.core.OSHRandom;
@@ -24,6 +24,7 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
@@ -333,7 +334,7 @@ public class OSHGlobalControllerJMetal
         InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[problemPartsList.size()];
         problemParts = problemPartsList.toArray(problemParts);
 
-        Solution solution;
+        Solution<?> solution;
         SolutionWithFitness resultWithAll;
 
         if (!this.oshGlobalObserver.getAndResetProblempartChangedFlag()) {
@@ -393,11 +394,11 @@ public class OSHGlobalControllerJMetal
                     this.powerLimitSignals,
                     now,
                     ignoreLoadProfileAfter,
-                    optimisationRunRandomGenerator,
                     fitnessFunction,
                     this.stepSize);
 
-            boolean extensiveLogging = (hasGUI || isReal) && solution.getDecisionVariables().length > 0;
+            boolean extensiveLogging =
+                    (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
             AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
 
             problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ancillaryMeter);

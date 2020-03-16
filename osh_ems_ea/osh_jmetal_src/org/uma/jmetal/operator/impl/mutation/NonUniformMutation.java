@@ -103,18 +103,18 @@ public class NonUniformMutation implements MutationOperator<DoubleSolution> {
                 double tmp;
 
                 if (rand <= 0.5) {
-                    tmp = this.delta(solution.getUpperBound(i) - solution.getUnboxedVariableValue(i),
+                    tmp = this.delta(solution.getUnboxedUpperBound(i) - solution.getUnboxedVariableValue(i),
                             this.perturbation);
                 } else {
-                    tmp = this.delta(solution.getLowerBound(i) - solution.getUnboxedVariableValue(i),
+                    tmp = this.delta(solution.getUnboxedLowerBound(i) - solution.getUnboxedVariableValue(i),
                             this.perturbation);
                 }
                 tmp += solution.getUnboxedVariableValue(i);
 
-                if (tmp < solution.getLowerBound(i)) {
-                    tmp = solution.getLowerBound(i);
-                } else if (tmp > solution.getUpperBound(i)) {
-                    tmp = solution.getUpperBound(i);
+                if (tmp < solution.getUnboxedLowerBound(i)) {
+                    tmp = solution.getUnboxedLowerBound(i);
+                } else if (tmp > solution.getUnboxedUpperBound(i)) {
+                    tmp = solution.getUnboxedUpperBound(i);
                 }
                 solution.setUnboxedVariableValue(i, tmp);
             }

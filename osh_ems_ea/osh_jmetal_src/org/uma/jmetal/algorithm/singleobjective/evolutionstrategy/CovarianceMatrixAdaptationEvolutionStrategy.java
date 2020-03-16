@@ -464,10 +464,10 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
             }
 
             double value = this.distributionMean[i] + this.sigma * sum;
-            if (value > ((DoubleProblem) this.getProblem()).getUpperBound(i)) {
-                value = ((DoubleProblem) this.getProblem()).getUpperBound(i);
-            } else if (value < ((DoubleProblem) this.getProblem()).getLowerBound(i)) {
-                value = ((DoubleProblem) this.getProblem()).getLowerBound(i);
+            if (value > ((DoubleProblem) this.getProblem()).getUnboxedUpperBound(i)) {
+                value = ((DoubleProblem) this.getProblem()).getUnboxedUpperBound(i);
+            } else if (value < ((DoubleProblem) this.getProblem()).getUnboxedLowerBound(i)) {
+                value = ((DoubleProblem) this.getProblem()).getUnboxedLowerBound(i);
             }
 
             solution.setUnboxedVariableValue(i, value);

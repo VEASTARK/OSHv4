@@ -47,7 +47,7 @@ public class DifferentialEvolutionBuilder {
         DifferentialEvolution de = new DifferentialEvolution(this.problem, this.populationSize, this.crossoverOperator,
                 this.selectionOperator, this.evaluator);
 
-        de.addStoppingRule(new EvaluationsStoppingRule());
+        de.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
 
         return de;
     }

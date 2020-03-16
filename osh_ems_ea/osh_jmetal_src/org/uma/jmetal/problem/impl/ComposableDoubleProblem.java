@@ -141,4 +141,6 @@ public class ComposableDoubleProblem implements DoubleProblem {
             this.numberOfViolatedConstraints.setAttribute(solution, violatedConstraints);
         }
     }
+
+
 }

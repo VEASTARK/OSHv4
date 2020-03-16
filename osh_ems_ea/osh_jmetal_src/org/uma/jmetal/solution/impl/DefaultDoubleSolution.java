@@ -57,6 +57,16 @@ public class DefaultDoubleSolution
     }
 
     @Override
+    public double getUnboxedLowerBound(int index) {
+        return this.problem.getUnboxedLowerBound(index);
+    }
+
+    @Override
+    public double getUnboxedUpperBound(int index) {
+        return this.problem.getUnboxedUpperBound(index);
+    }
+
+    @Override
     public double getUnboxedVariableValue(int index) {
         return this.getVariableValue(index);
     }
@@ -78,8 +88,8 @@ public class DefaultDoubleSolution
 
     private void initializeDoubleVariables(JMetalRandom randomGenerator) {
         for (int i = 0; i < this.problem.getNumberOfVariables(); i++) {
-            Double value = randomGenerator.nextDouble(this.getLowerBound(i), this.getUpperBound(i));
-            this.setVariableValue(i, value);
+            double value = randomGenerator.nextDouble(this.getUnboxedLowerBound(i), this.getUnboxedUpperBound(i));
+            this.setUnboxedVariableValue(i, value);
         }
     }
 

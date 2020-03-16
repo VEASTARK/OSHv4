@@ -32,7 +32,7 @@ public class ArrayDoubleSolution implements DoubleSolution {
         this.objectives = new double[problem.getNumberOfObjectives()];
         this.variables = new double[problem.getNumberOfVariables()];
         for (int i = 0; i < problem.getNumberOfVariables(); i++) {
-            this.variables[i] = this.randomGenerator.nextDouble(this.getLowerBound(i), this.getUpperBound(i));
+            this.variables[i] = this.randomGenerator.nextDouble(this.getUnboxedLowerBound(i), this.getUnboxedUpperBound(i));
         }
     }
 
@@ -124,6 +124,16 @@ public class ArrayDoubleSolution implements DoubleSolution {
     @Override
     public Double getLowerBound(int index) {
         return this.problem.getLowerBound(index);
+    }
+
+    @Override
+    public double getUnboxedLowerBound(int index) {
+        return this.problem.getUnboxedLowerBound(index);
+    }
+
+    @Override
+    public double getUnboxedUpperBound(int index) {
+        return this.problem.getUnboxedUpperBound(index);
     }
 
     @Override

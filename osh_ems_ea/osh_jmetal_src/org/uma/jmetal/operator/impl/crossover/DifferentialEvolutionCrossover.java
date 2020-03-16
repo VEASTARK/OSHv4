@@ -160,11 +160,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                             j) -
                             parentSolutions.get(1).getUnboxedVariableValue(j));
 
-                    if (value < child.getLowerBound(j)) {
-                        value = child.getLowerBound(j);
+                    if (value < child.getUnboxedLowerBound(j)) {
+                        value = child.getUnboxedLowerBound(j);
                     }
-                    if (value > child.getUpperBound(j)) {
-                        value = child.getUpperBound(j);
+                    if (value > child.getUnboxedUpperBound(j)) {
+                        value = child.getUnboxedUpperBound(j);
                     }
                     child.setUnboxedVariableValue(j, value);
                 } else {
@@ -181,11 +181,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                     value = parentSolutions.get(2).getUnboxedVariableValue(j) + this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) -
                             parentSolutions.get(1).getUnboxedVariableValue(j));
 
-                    if (value < child.getLowerBound(j)) {
-                        value = child.getLowerBound(j);
+                    if (value < child.getUnboxedLowerBound(j)) {
+                        value = child.getUnboxedLowerBound(j);
                     }
-                    if (value > child.getUpperBound(j)) {
-                        value = child.getUpperBound(j);
+                    if (value > child.getUnboxedUpperBound(j)) {
+                        value = child.getUnboxedUpperBound(j);
                     }
 
                     child.setUnboxedVariableValue(j, value);
@@ -204,11 +204,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                         this.currentSolution.getUnboxedVariableValue(j)) +
                         this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) - parentSolutions.get(1).getUnboxedVariableValue(j));
 
-                if (value < child.getLowerBound(j)) {
-                    value = child.getLowerBound(j);
+                if (value < child.getUnboxedLowerBound(j)) {
+                    value = child.getUnboxedLowerBound(j);
                 }
-                if (value > child.getUpperBound(j)) {
-                    value = child.getUpperBound(j);
+                if (value > child.getUnboxedUpperBound(j)) {
+                    value = child.getUnboxedUpperBound(j);
                 }
 
                 child.setUnboxedVariableValue(j, value);
@@ -222,11 +222,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                             this.currentSolution.getUnboxedVariableValue(j)) +
                             this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) - parentSolutions.get(1).getUnboxedVariableValue(j));
 
-                    if (value < child.getLowerBound(j)) {
-                        value = child.getLowerBound(j);
+                    if (value < child.getUnboxedLowerBound(j)) {
+                        value = child.getUnboxedLowerBound(j);
                     }
-                    if (value > child.getUpperBound(j)) {
-                        value = child.getUpperBound(j);
+                    if (value > child.getUnboxedUpperBound(j)) {
+                        value = child.getUnboxedUpperBound(j);
                     }
 
                     child.setUnboxedVariableValue(j, value);
@@ -245,11 +245,11 @@ public class DifferentialEvolutionCrossover implements CrossoverOperator<DoubleS
                             this.currentSolution.getUnboxedVariableValue(j)) +
                             this.f * (parentSolutions.get(0).getUnboxedVariableValue(j) - parentSolutions.get(1).getUnboxedVariableValue(j));
 
-                    if (value < child.getLowerBound(j)) {
-                        value = child.getLowerBound(j);
+                    if (value < child.getUnboxedLowerBound(j)) {
+                        value = child.getUnboxedLowerBound(j);
                     }
-                    if (value > child.getUpperBound(j)) {
-                        value = child.getUpperBound(j);
+                    if (value > child.getUnboxedUpperBound(j)) {
+                        value = child.getUnboxedUpperBound(j);
                     }
 
                     child.setUnboxedVariableValue(j, value);

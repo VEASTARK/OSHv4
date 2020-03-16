@@ -10,6 +10,10 @@ public interface DoubleSolution extends Solution<Double> {
 
     Double getUpperBound(int index);
 
+    double getUnboxedLowerBound(int index);
+
+    double getUnboxedUpperBound(int index);
+
     double getUnboxedVariableValue(int index);
 
     void setUnboxedVariableValue(int index, double value);

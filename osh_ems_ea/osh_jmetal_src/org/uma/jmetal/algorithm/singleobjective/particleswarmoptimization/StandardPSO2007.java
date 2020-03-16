@@ -149,7 +149,7 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
             DoubleSolution particle = swarm.get(i);
             for (int j = 0; j < this.problem.getNumberOfVariables(); j++) {
                 this.speed[i][j] =
-                        (this.randomGenerator.nextDouble(particle.getLowerBound(j), particle.getUpperBound(j))
+                        (this.randomGenerator.nextDouble(particle.getUnboxedLowerBound(j), particle.getUnboxedUpperBound(j))
                                 - particle.getUnboxedVariableValue(j)) / 2.0;
             }
         }
@@ -189,12 +189,12 @@ public class StandardPSO2007 extends AbstractParticleSwarmOptimization<DoubleSol
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                 particle.setUnboxedVariableValue(var, particle.getUnboxedVariableValue(var) + this.speed[i][var]);
 
-                if (particle.getUnboxedVariableValue(var) < this.problem.getLowerBound(var)) {
-                    particle.setUnboxedVariableValue(var, this.problem.getLowerBound(var));
+                if (particle.getUnboxedVariableValue(var) < this.problem.getUnboxedLowerBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getUnboxedLowerBound(var));
                     this.speed[i][var] = 0;
                 }
-                if (particle.getUnboxedVariableValue(var) > this.problem.getUpperBound(var)) {
-                    particle.setUnboxedVariableValue(var, this.problem.getUpperBound(var));
+                if (particle.getUnboxedVariableValue(var) > this.problem.getUnboxedUpperBound(var)) {
+                    particle.setUnboxedVariableValue(var, this.problem.getUnboxedUpperBound(var));
                     this.speed[i][var] = 0;
                 }
             }
