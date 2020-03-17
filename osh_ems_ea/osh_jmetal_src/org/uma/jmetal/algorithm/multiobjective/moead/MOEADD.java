@@ -9,6 +9,7 @@ import org.uma.jmetal.util.point.impl.IdealPoint;
 import org.uma.jmetal.util.point.impl.NadirPoint;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,10 @@ public class MOEADD<S extends DoubleSolution> extends AbstractMOEAD<S> {
                   String dataDirectory,
                   double neighborhoodSelectionProbability,
                   int maximumNumberOfReplacedSolutions,
-                  int neighborSize) {
-        super(problem, populationSize, resultPopulationSize, crossoverOperator, mutation, functionType, dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize);
+                  int neighborSize,
+                  IEALogger eaLogger) {
+        super(problem, populationSize, resultPopulationSize, crossoverOperator, mutation, functionType, dataDirectory,
+                neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize, eaLogger);
     }
 
     @Override

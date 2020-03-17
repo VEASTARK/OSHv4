@@ -8,6 +8,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +36,10 @@ public class MOEADDRA extends AbstractMOEAD<DoubleSolution> {
     public MOEADDRA(Problem<DoubleSolution> problem, int populationSize, int resultPopulationSize,
                     MutationOperator<DoubleSolution> mutation, CrossoverOperator<DoubleSolution> crossover, FunctionType functionType,
                     String dataDirectory, double neighborhoodSelectionProbability,
-                    int maximumNumberOfReplacedSolutions, int neighborSize) {
+                    int maximumNumberOfReplacedSolutions, int neighborSize, IEALogger eaLogger) {
         super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
-                neighborSize);
+                neighborSize, eaLogger);
 
         this.differentialEvolutionCrossover = (DifferentialEvolutionCrossover) this.crossoverOperator;
 

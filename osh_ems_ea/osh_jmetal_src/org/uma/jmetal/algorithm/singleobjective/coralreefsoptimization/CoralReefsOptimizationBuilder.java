@@ -8,6 +8,8 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.JMetalException;
+import osh.datatypes.registry.oc.state.IAction;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.Comparator;
 import java.util.List;
@@ -22,6 +24,7 @@ public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
      * CoralReefsOptimizationBuilder class
      */
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
 
     private final SelectionOperator<List<S>, S> selectionOperator;
     private final CrossoverOperator<S> crossoverOperator;
@@ -42,8 +45,10 @@ public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
     public CoralReefsOptimizationBuilder(Problem<S> problem,
                                          SelectionOperator<List<S>, S> selectionOperator,
                                          CrossoverOperator<S> crossoverOperator,
-                                         MutationOperator<S> mutationOperator) {
+                                         MutationOperator<S> mutationOperator,
+                                         IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.selectionOperator = selectionOperator;
         this.crossoverOperator = crossoverOperator;
         this.mutationOperator = mutationOperator;
@@ -55,7 +60,8 @@ public class CoralReefsOptimizationBuilder<S extends Solution<?>> implements
 
         algorithm = new CoralReefsOptimization<>(this.problem,
                 this.comparator, this.selectionOperator, this.crossoverOperator,
-                this.mutationOperator, this.N, this.M, this.rho, this.Fbs, this.Fa, this.Pd, this.attemptsToSettle);
+                this.mutationOperator, this.N, this.M, this.rho, this.Fbs, this.Fa, this.Pd, this.attemptsToSettle,
+                this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.M * this.N, this.maxEvaluations));
 
         return algorithm;

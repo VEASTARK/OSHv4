@@ -11,6 +11,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,9 +35,10 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
     public NSGAII(Problem<S> problem, int populationSize,
                   int matingPoolSize, int offspringPopulationSize,
                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                  SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
+                  SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
+                  IEALogger eaLogger) {
         this(problem, populationSize, matingPoolSize, offspringPopulationSize,
-                crossoverOperator, mutationOperator, selectionOperator, new DominanceComparator<>(), evaluator);
+                crossoverOperator, mutationOperator, selectionOperator, new DominanceComparator<>(), evaluator, eaLogger);
     }
 
     /**
@@ -46,8 +48,8 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
                   int matingPoolSize, int offspringPopulationSize,
                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                   SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
-                  SolutionListEvaluator<S> evaluator) {
-        super(problem);
+                  SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
 
         this.crossoverOperator = crossoverOperator;
@@ -64,17 +66,20 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
     @Override
     protected void initProgress() {
         this.evaluations = this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.offspringPopulationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

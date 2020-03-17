@@ -10,6 +10,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +30,8 @@ public class SPEA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     public SPEA2(Problem<S> problem, int populationSize,
                  CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                  SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
-                 int k) {
-        super(problem);
+                 int k, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
 
         this.k = k;
@@ -47,17 +48,20 @@ public class SPEA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     @Override
     protected void initProgress() {
         this.iterations = 1;
+        this.getEALogger().logPopulation(this.archive, this.iterations);
     }
 
     @Override
     protected void updateProgress() {
         this.iterations++;
+        this.getEALogger().logPopulation(this.archive, this.iterations);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, this.archive)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

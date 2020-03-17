@@ -8,6 +8,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.JMetalException;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * Class implementing a (mu , lambda) Evolution Strategy (lambda must be divisible by mu)
@@ -16,14 +17,16 @@ import org.uma.jmetal.util.JMetalException;
  */
 public class EvolutionStrategyBuilder<S extends Solution<?>> implements AlgorithmBuilder<Algorithm<S>> {
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private final MutationOperator<S> mutation;
     private final EvolutionStrategyVariant variant;
     private int mu;
     private int lambda;
     private int maxEvaluations;
     public EvolutionStrategyBuilder(Problem<S> problem, MutationOperator<S> mutationOperator,
-                                    EvolutionStrategyVariant variant) {
+                                    EvolutionStrategyVariant variant, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.mu = 1;
         this.lambda = 10;
         this.maxEvaluations = 250000;
@@ -35,9 +38,9 @@ public class EvolutionStrategyBuilder<S extends Solution<?>> implements Algorith
     public Algorithm<S> build() {
         AbstractEvolutionStrategy<S, S> algorithm;
         if (this.variant == EvolutionStrategyVariant.ELITIST) {
-            algorithm = new ElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.mutation);
+            algorithm = new ElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.mutation, this.eaLogger);
         } else if (this.variant == EvolutionStrategyVariant.NON_ELITIST) {
-            algorithm = new NonElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.mutation);
+            algorithm = new NonElitistEvolutionStrategy<>(this.problem, this.mu, this.lambda, this.mutation, this.eaLogger);
         } else {
             throw new JMetalException("Unknown variant: " + this.variant);
         }

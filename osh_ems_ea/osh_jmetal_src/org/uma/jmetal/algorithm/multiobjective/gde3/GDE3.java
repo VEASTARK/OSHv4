@@ -14,6 +14,7 @@ import org.uma.jmetal.util.solutionattribute.DensityEstimator;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ public class GDE3 extends AbstractDifferentialEvolution<List<DoubleSolution>> {
      */
     public GDE3(DoubleProblem problem, int populationSize,
                 DifferentialEvolutionSelection selection, DifferentialEvolutionCrossover crossover,
-                SolutionListEvaluator<DoubleSolution> evaluator) {
+                SolutionListEvaluator<DoubleSolution> evaluator, IEALogger eaLogger) {
         this.setProblem(problem);
         this.maxPopulationSize = populationSize;
         this.crossoverOperator = crossover;
@@ -48,6 +49,9 @@ public class GDE3 extends AbstractDifferentialEvolution<List<DoubleSolution>> {
         this.crowdingDistance = new CrowdingDistance<>();
 
         this.evaluator = evaluator;
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     public int getMaxPopulationSize() {
@@ -61,17 +65,20 @@ public class GDE3 extends AbstractDifferentialEvolution<List<DoubleSolution>> {
     @Override
     protected void initProgress() {
         this.evaluations = this.maxPopulationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.maxPopulationSize);
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.maxPopulationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.maxPopulationSize);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

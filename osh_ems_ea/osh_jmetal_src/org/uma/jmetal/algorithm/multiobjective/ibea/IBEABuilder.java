@@ -10,6 +10,7 @@ import org.uma.jmetal.operator.impl.selection.BinaryTournamentSelection;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  */
 public class IBEABuilder implements AlgorithmBuilder<IBEA<DoubleSolution>> {
     private final Problem<DoubleSolution> problem;
+    private final IEALogger eaLogger;
     private int populationSize;
     private int archiveSize;
     private int maxEvaluations;
@@ -31,8 +33,9 @@ public class IBEABuilder implements AlgorithmBuilder<IBEA<DoubleSolution>> {
      *
      * @param problem
      */
-    public IBEABuilder(Problem<DoubleSolution> problem) {
+    public IBEABuilder(Problem<DoubleSolution> problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.populationSize = 100;
         this.archiveSize = 100;
         this.maxEvaluations = 25000;
@@ -112,7 +115,7 @@ public class IBEABuilder implements AlgorithmBuilder<IBEA<DoubleSolution>> {
 
     public IBEA<DoubleSolution> build() {
         IBEA<DoubleSolution> algorithm = new IBEA<>(this.problem, this.populationSize, this.archiveSize, this.selection,
-            this.crossover, this.mutation);
+            this.crossover, this.mutation, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

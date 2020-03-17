@@ -12,6 +12,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.comparator.DominanceComparator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +24,7 @@ public class SMSEMOABuilder<S extends Solution<?>> implements AlgorithmBuilder<S
     private static final double DEFAULT_OFFSET = 100.0;
 
     protected final Problem<S> problem;
+    protected final IEALogger eaLogger;
 
     protected int populationSize;
     protected int maxEvaluations;
@@ -37,8 +39,9 @@ public class SMSEMOABuilder<S extends Solution<?>> implements AlgorithmBuilder<S
     protected Comparator<S> dominanceComparator;
 
     public SMSEMOABuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                          MutationOperator<S> mutationOperator) {
+                          MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.offset = DEFAULT_OFFSET;
         this.populationSize = 100;
         this.maxEvaluations = 25000;
@@ -70,7 +73,7 @@ public class SMSEMOABuilder<S extends Solution<?>> implements AlgorithmBuilder<S
     public SMSEMOA<S> build() {
         SMSEMOA<S> algorithm = new SMSEMOA<>(this.problem, this.populationSize, this.offset,
                 this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator,
-                this.hypervolumeImplementation);
+                this.hypervolumeImplementation, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

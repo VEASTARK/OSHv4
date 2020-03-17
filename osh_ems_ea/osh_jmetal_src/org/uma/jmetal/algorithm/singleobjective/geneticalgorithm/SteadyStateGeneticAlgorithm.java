@@ -8,6 +8,7 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,8 +27,8 @@ public class SteadyStateGeneticAlgorithm<S extends Solution<?>> extends Abstract
      */
     public SteadyStateGeneticAlgorithm(Problem<S> problem, int populationSize,
                                        CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                                       SelectionOperator<List<S>, S> selectionOperator) {
-        super(problem);
+                                       SelectionOperator<List<S>, S> selectionOperator, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
 
         this.crossoverOperator = crossoverOperator;
@@ -41,6 +42,7 @@ public class SteadyStateGeneticAlgorithm<S extends Solution<?>> extends Abstract
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -103,11 +105,16 @@ public class SteadyStateGeneticAlgorithm<S extends Solution<?>> extends Abstract
     @Override
     public void initProgress() {
         this.evaluations = this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     public void updateProgress() {
         this.evaluations++;
+
+        if (this.evaluations % this.getMaxPopulationSize() == 0) {
+            this.getEALogger().logPopulation(this.population, this.evaluations / this.getMaxPopulationSize());
+        }
     }
 
     @Override

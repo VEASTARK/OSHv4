@@ -5,12 +5,14 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class PAESBuilder<S extends Solution<?>> implements AlgorithmBuilder<PAES<S>> {
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
 
     private int archiveSize;
     private int maxEvaluations;
@@ -18,12 +20,13 @@ public class PAESBuilder<S extends Solution<?>> implements AlgorithmBuilder<PAES
 
     private MutationOperator<S> mutationOperator;
 
-    public PAESBuilder(Problem<S> problem) {
+    public PAESBuilder(Problem<S> problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
     }
 
     public PAES<S> build() {
-        PAES<S> algorithm = new PAES<>(this.problem, this.archiveSize, this.biSections, this.mutationOperator);
+        PAES<S> algorithm = new PAES<>(this.problem, this.archiveSize, this.biSections, this.mutationOperator, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.archiveSize, this.maxEvaluations));
         return algorithm;
     }

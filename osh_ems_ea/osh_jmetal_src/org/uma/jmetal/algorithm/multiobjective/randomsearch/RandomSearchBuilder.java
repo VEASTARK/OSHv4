@@ -3,6 +3,7 @@ package org.uma.jmetal.algorithm.multiobjective.randomsearch;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * This class implements a simple random search algorithm.
@@ -11,10 +12,12 @@ import org.uma.jmetal.util.AlgorithmBuilder;
  */
 public class RandomSearchBuilder<S extends Solution<?>> implements AlgorithmBuilder<RandomSearch<S>> {
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private int maxEvaluations;
 
-    public RandomSearchBuilder(Problem<S> problem) {
+    public RandomSearchBuilder(Problem<S> problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
     }
 
@@ -30,6 +33,6 @@ public class RandomSearchBuilder<S extends Solution<?>> implements AlgorithmBuil
     }
 
     public RandomSearch<S> build() {
-        return new RandomSearch<>(this.problem, this.maxEvaluations);
+        return new RandomSearch<>(this.problem, this.maxEvaluations, this.eaLogger);
     }
 } 

@@ -13,6 +13,7 @@ import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +26,7 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
      * NSGAIIBuilder class
      */
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private final int populationSize;
     private final CrossoverOperator<S> crossoverOperator;
     private final MutationOperator<S> mutationOperator;
@@ -40,8 +42,9 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
      * NSGAIIBuilder constructor
      */
     public NSGAIIBuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                         MutationOperator<S> mutationOperator, int populationSize) {
+                         MutationOperator<S> mutationOperator, int populationSize, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = populationSize;
         this.matingPoolSize = populationSize;
@@ -104,16 +107,18 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
         if (this.variant == NSGAIIVariant.NSGAII) {
             algorithm = new NSGAII<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
                     this.crossoverOperator,
-                    this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
+                    this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator, this.eaLogger);
         } else if (this.variant == NSGAIIVariant.SteadyStateNSGAII) {
             algorithm = new SteadyStateNSGAII<>(this.problem, this.populationSize, this.crossoverOperator,
-                    this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
+                    this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator, this.eaLogger);
         } else if (this.variant == NSGAIIVariant.Measures) {
             algorithm = new NSGAIIMeasures<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
-                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
+                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator,
+                    this.evaluator, this.eaLogger);
         } else if (this.variant == NSGAIIVariant.DNSGAII) {
             algorithm = new DNSGAII<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
-                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator, this.evaluator);
+                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.dominanceComparator,
+                    this.evaluator, this.eaLogger);
         }
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;

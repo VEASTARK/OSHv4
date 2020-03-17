@@ -25,6 +25,7 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
 import org.uma.jmetal.util.solutionattribute.impl.SpatialSpreadDeviation;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,8 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
             int populationSize,
             int archiveSize,
             SelectionOperator<List<S>, S> selectionOperator,
-            SolutionListEvaluator<S> evaluator) {
+            SolutionListEvaluator<S> evaluator,
+            IEALogger eaLogger) {
         super(
                 problem,
                 populationSize,
@@ -69,7 +71,8 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
                 null,
                 selectionOperator,
                 new DominanceComparator<>(),
-                evaluator);
+                evaluator,
+                eaLogger);
         this.archiveSSD = new SpatialSpreadDeviationArchive(archiveSize);
         this.OpProb = new double[this.operators];
         this.Utilization = new double[this.operators];
@@ -151,6 +154,12 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
     }
 
     @Override
+    protected void initProgress() {
+        this.evaluations = this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.archiveSSD.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
+    }
+
+    @Override
     protected void updateProgress() {
         this.evaluations++;
         if (this.window == this.windowSize) {
@@ -165,12 +174,17 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
             this.window = 0;
             this.Stagnation = 0.0;
         }
+
+        if (this.evaluations % this.getMaxPopulationSize() == 0) {
+            this.getEALogger().logPopulation(this.archiveSSD.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
+        }
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archiveSSD.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

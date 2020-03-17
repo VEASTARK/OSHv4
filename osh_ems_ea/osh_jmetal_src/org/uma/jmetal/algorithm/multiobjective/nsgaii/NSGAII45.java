@@ -14,6 +14,7 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +37,14 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
     protected int evaluations;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     /**
      * Constructor
      */
     public NSGAII45(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                     MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
-                    SolutionListEvaluator<S> evaluator) {
+                    SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
         super();
         this.problem = problem;
         this.populationSize = populationSize;
@@ -52,6 +54,9 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
         this.selectionOperator = selectionOperator;
 
         this.evaluator = evaluator;
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     /**
@@ -63,6 +68,7 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
         this.evaluatePopulation(this.population);
 
         this.evaluations = this.populationSize;
+        this.eaLogger.logPopulation(this.population, this.evaluations / this.populationSize);
 
         while (!this.isStoppingConditionReached()) {
             List<S> offspringPopulation = new ArrayList<>(this.populationSize);
@@ -91,12 +97,14 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
             this.population = this.crowdingDistanceSelection(ranking);
 
             this.evaluations += this.populationSize;
+            this.eaLogger.logPopulation(this.population, this.evaluations / this.populationSize);
         }
     }
 
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.eaLogger.logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -180,6 +188,16 @@ public class NSGAII45<S extends Solution<?>> implements Algorithm<List<S>> {
 
     protected List<S> getNonDominatedSolutions(List<S> solutionList) {
         return SolutionListUtils.getNondominatedSolutions(solutionList);
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override

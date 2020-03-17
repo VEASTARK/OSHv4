@@ -10,6 +10,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.solutionattribute.impl.Fitness;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,19 +33,23 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
     protected List<S> archive;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     /**
      * Constructor
      */
     public IBEA(Problem<S> problem, int populationSize, int archiveSize,
                 SelectionOperator<List<S>, S> selectionOperator, CrossoverOperator<S> crossoverOperator,
-                MutationOperator<S> mutationOperator) {
+                MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         this.problem = problem;
         this.populationSize = populationSize;
         this.archiveSize = archiveSize;
         this.crossoverOperator = crossoverOperator;
         this.mutationOperator = mutationOperator;
         this.selectionOperator = selectionOperator;
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     /**
@@ -68,6 +73,7 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
             evaluations++;
             solutionSet.add(newSolution);
         }
+        this.eaLogger.logPopulation(solutionSet, evaluations / this.populationSize);
 
         while (!this.isStoppingConditionReached(evaluations)) {
             List<S> union = new ArrayList<>();
@@ -108,12 +114,15 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
                 evaluations++;
             }
             solutionSet = offSpringSolutionSet;
+
+            this.eaLogger.logPopulation(solutionSet, evaluations / this.populationSize);
         }
     }
 
     public boolean isStoppingConditionReached(int evaluations) {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, -1, evaluations, this.archive)) {
+                this.eaLogger.logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -294,6 +303,16 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
         }
 
         solutionSet.remove(worstIndex);
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.uma.jmetal.solution.BinarySolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
  */
 public class MOCHCBuilder implements AlgorithmBuilder<MOCHC> {
     final BinaryProblem problem;
+    final IEALogger eaLogger;
     SolutionListEvaluator<BinarySolution> evaluator;
     int populationSize;
     int maxEvaluations;
@@ -32,8 +34,9 @@ public class MOCHCBuilder implements AlgorithmBuilder<MOCHC> {
     SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection;
     SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection;
 
-    public MOCHCBuilder(BinaryProblem problem) {
+    public MOCHCBuilder(BinaryProblem problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.evaluator = new SequentialSolutionListEvaluator<>();
         this.populationSize = 100;
         this.maxEvaluations = 25000;
@@ -148,7 +151,7 @@ public class MOCHCBuilder implements AlgorithmBuilder<MOCHC> {
 
         MOCHC algorithm = new MOCHC(this.problem, this.populationSize, this.convergenceValue, this.preservedPopulation,
                 this.initialConvergenceCount, this.crossoverOperator, this.cataclysmicMutation, this.newGenerationSelection,
-                this.parentSelection, this.evaluator);
+                this.parentSelection, this.evaluator, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

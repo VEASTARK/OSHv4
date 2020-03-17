@@ -21,6 +21,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.*;
 
@@ -77,10 +78,12 @@ public abstract class AbstractCDG<S extends Solution<?>> implements Algorithm<Li
     protected int evaluations;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     public AbstractCDG(Problem<S> problem, int populationSize, int resultPopulationSize, int maxEvaluations,
                        CrossoverOperator<S> crossoverOperator, double neighborhoodSelectionProbability,
-                       double sigma_, int k_, int t_, int subproblemNum_, int childGrid_, int childGridNum_) {
+                       double sigma_, int k_, int t_, int subproblemNum_, int childGrid_, int childGridNum_,
+                       IEALogger eaLogger) {
         this.problem = problem;
         this.populationSize = populationSize;
         this.resultPopulationSize = resultPopulationSize;
@@ -144,6 +147,8 @@ public abstract class AbstractCDG<S extends Solution<?>> implements Algorithm<Li
             this.border.add(list);
         }
 
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     protected void initialCDGAttributes(S individual) {
@@ -957,6 +962,16 @@ public abstract class AbstractCDG<S extends Solution<?>> implements Algorithm<Li
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     protected enum NeighborType {

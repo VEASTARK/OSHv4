@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,8 +43,9 @@ public class MOMBI2<S extends Solution<?>> extends MOMBI<S> {
      * @param pathWeights
      */
     public MOMBI2(Problem<S> problem, CrossoverOperator<S> crossover, MutationOperator<S> mutation,
-                  SelectionOperator<List<S>, S> selection, SolutionListEvaluator<S> evaluator, String pathWeights) {
-        super(problem, crossover, mutation, selection, evaluator, pathWeights);
+                  SelectionOperator<List<S>, S> selection, SolutionListEvaluator<S> evaluator, String pathWeights,
+                  IEALogger eaLogger) {
+        super(problem, crossover, mutation, selection, evaluator, pathWeights, eaLogger);
 
         this.history = new MOMBI2History<>(problem.getNumberOfObjectives());
     }

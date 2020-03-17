@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,9 @@ public class MOMBI<S extends Solution<?>> extends AbstractMOMBI<S> {
                  MutationOperator<S> mutation,
                  SelectionOperator<List<S>, S> selection,
                  SolutionListEvaluator<S> evaluator,
-                 String pathWeights) {
-        super(problem, crossover, mutation, selection, evaluator);
+                 String pathWeights,
+                 IEALogger eaLogger) {
+        super(problem, crossover, mutation, selection, evaluator, eaLogger);
         this.utilityFunctions = this.createUtilityFunction(pathWeights);
     }
 

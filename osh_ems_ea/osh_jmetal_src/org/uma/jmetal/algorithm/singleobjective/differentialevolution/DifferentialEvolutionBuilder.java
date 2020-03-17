@@ -8,6 +8,7 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * DifferentialEvolutionBuilder class
@@ -16,14 +17,16 @@ import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
  */
 public class DifferentialEvolutionBuilder {
     private final DoubleProblem problem;
+    private final IEALogger eaLogger;
     private int populationSize;
     private int maxEvaluations;
     private DifferentialEvolutionCrossover crossoverOperator;
     private DifferentialEvolutionSelection selectionOperator;
     private SolutionListEvaluator<DoubleSolution> evaluator;
 
-    public DifferentialEvolutionBuilder(DoubleProblem problem) {
+    public DifferentialEvolutionBuilder(DoubleProblem problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.populationSize = 100;
         this.maxEvaluations = 25000;
         this.crossoverOperator = new DifferentialEvolutionCrossover(0.5, 0.5, "rand/1/bin");
@@ -45,7 +48,7 @@ public class DifferentialEvolutionBuilder {
 
     public DifferentialEvolution build() {
         DifferentialEvolution de = new DifferentialEvolution(this.problem, this.populationSize, this.crossoverOperator,
-                this.selectionOperator, this.evaluator);
+                this.selectionOperator, this.evaluator, this.eaLogger);
 
         de.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
 

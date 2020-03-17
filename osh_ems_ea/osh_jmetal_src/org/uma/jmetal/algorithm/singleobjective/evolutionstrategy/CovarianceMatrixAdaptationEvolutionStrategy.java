@@ -8,6 +8,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -80,7 +81,7 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
      * Constructor
      */
     private CovarianceMatrixAdaptationEvolutionStrategy(Builder builder) {
-        super(builder.problem);
+        super(builder.problem, builder.eaLogger);
         this.lambda = builder.lambda;
         this.typicalX = builder.typicalX;
         this.sigma = builder.sigma;
@@ -100,22 +101,26 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
 
     @Override
     protected void initProgress() {
-        this.evaluations = 0;
+        this.evaluations = this.lambda;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.lambda);
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.lambda;
         this.updateInternalParameters();
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.lambda);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         if (this.eigenValuesStoppingCondition) {
+            this.getEALogger().logAdditional("Eigenvalues stopping condition reached");
             return true;
         } else {
             for (StoppingRule sr : this.getStoppingRules()) {
                 if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                    this.getEALogger().logAdditional(sr.getMsg());
                     return true;
                 }
             }
@@ -502,13 +507,15 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
         private static final double DEFAULT_SIGMA = 0.3;
 
         private final DoubleProblem problem;
+        private final IEALogger eaLogger;
         private int lambda;
         private int maxEvaluations;
         private double[] typicalX;
         private double sigma;
 
-        public Builder(DoubleProblem problem) {
+        public Builder(DoubleProblem problem, IEALogger eaLogger) {
             this.problem = problem;
+            this.eaLogger = eaLogger;
             this.lambda = DEFAULT_LAMBDA;
             this.maxEvaluations = DEFAULT_MAX_EVALUATIONS;
             this.sigma = DEFAULT_SIGMA;

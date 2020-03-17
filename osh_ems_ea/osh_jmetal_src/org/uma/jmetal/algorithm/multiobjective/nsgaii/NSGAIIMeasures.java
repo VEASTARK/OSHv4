@@ -19,6 +19,7 @@ import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.Comparator;
 import java.util.List;
@@ -44,9 +45,10 @@ public class NSGAIIMeasures<S extends Solution<?>> extends NSGAII<S> implements 
     public NSGAIIMeasures(Problem<S> problem, int populationSize,
                           int matingPoolSize, int offspringPopulationSize,
                           CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                          SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, SolutionListEvaluator<S> evaluator) {
+                          SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
+                          SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
         super(problem, populationSize, matingPoolSize, offspringPopulationSize,
-                crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator);
+                crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator, eaLogger);
 
         this.referenceFront = new ArrayFront();
 
@@ -56,6 +58,7 @@ public class NSGAIIMeasures<S extends Solution<?>> extends NSGAII<S> implements 
     @Override
     protected void initProgress() {
         this.evaluations.reset(this.getMaxPopulationSize());
+        this.getEALogger().logPopulation(this.getPopulation(), this.evaluations.get().intValue() / this.getMaxPopulationSize());
     }
 
     @Override
@@ -69,12 +72,14 @@ public class NSGAIIMeasures<S extends Solution<?>> extends NSGAII<S> implements 
                     new PISAHypervolume<S>(this.referenceFront).evaluate(
                             SolutionListUtils.getNondominatedSolutions(this.getPopulation())));
         }
+        this.getEALogger().logPopulation(this.getPopulation(), this.evaluations.get().intValue() / this.getMaxPopulationSize());
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations.get().intValue(), this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

@@ -16,6 +16,7 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.neighborhood.Neighborhood;
 import org.uma.jmetal.util.neighborhood.impl.C9;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class MOCellBuilder<S extends Solution<?>> implements AlgorithmBuilder<MO
      * MOCellBuilder class
      */
     protected final Problem<S> problem;
+    private final IEALogger eaLogger;
     protected final CrossoverOperator<S> crossoverOperator;
     protected final MutationOperator<S> mutationOperator;
     protected int maxEvaluations;
@@ -39,8 +41,9 @@ public class MOCellBuilder<S extends Solution<?>> implements AlgorithmBuilder<MO
      * MOCellBuilder constructor
      */
     public MOCellBuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                         MutationOperator<S> mutationOperator) {
+                         MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = 100;
         this.crossoverOperator = crossoverOperator;
@@ -60,7 +63,8 @@ public class MOCellBuilder<S extends Solution<?>> implements AlgorithmBuilder<MO
     public MOCell<S> build() {
 
         MOCell<S> algorithm = new MOCell<>(this.problem, this.populationSize, this.archive,
-                this.neighborhood, this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator);
+                this.neighborhood, this.crossoverOperator, this.mutationOperator, this.selectionOperator,
+                this.evaluator, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

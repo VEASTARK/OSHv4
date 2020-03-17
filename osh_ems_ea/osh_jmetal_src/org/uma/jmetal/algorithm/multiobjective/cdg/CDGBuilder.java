@@ -19,6 +19,7 @@ import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * Builder class for algorithm CDG
@@ -29,6 +30,7 @@ import org.uma.jmetal.util.AlgorithmBuilder;
 public class CDGBuilder implements AlgorithmBuilder<AbstractCDG<DoubleSolution>> {
 
     protected final Problem<DoubleSolution> problem;
+    private final IEALogger eaLogger;
     protected final double sigma_;
     /**
      * Delta in Zhang & Li paper
@@ -53,9 +55,10 @@ public class CDGBuilder implements AlgorithmBuilder<AbstractCDG<DoubleSolution>>
     /**
      * Constructor
      */
-    public CDGBuilder(Problem<DoubleSolution> problem) {
+    public CDGBuilder(Problem<DoubleSolution> problem, IEALogger eaLogger) {
 
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.populationSize = 300;
         this.resultPopulationSize = 300;
         this.maxEvaluations = 300000;
@@ -188,7 +191,7 @@ public class CDGBuilder implements AlgorithmBuilder<AbstractCDG<DoubleSolution>>
         AbstractCDG<DoubleSolution> algorithm;
         algorithm = new CDG(this.problem, this.populationSize, this.resultPopulationSize, this.maxEvaluations,
                 this.crossover, this.neighborhoodSelectionProbability, this.sigma_, this.k_, this.t_, this.subproblemNum_,
-                this.childGrid_, this.childGridNum_);
+                this.childGrid_, this.childGridNum_, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

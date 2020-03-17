@@ -12,6 +12,7 @@ import org.uma.jmetal.util.measure.impl.BasicMeasure;
 import org.uma.jmetal.util.measure.impl.CountingMeasure;
 import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -50,8 +51,13 @@ public class SMPSOMeasures extends SMPSO implements Measurable {
      * @param changeVelocity2
      * @param evaluator
      */
-    public SMPSOMeasures(DoubleProblem problem, int swarmSize, BoundedArchive<DoubleSolution> leaders, MutationOperator<DoubleSolution> mutationOperator, int maxIterations, double r1Min, double r1Max, double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max, double weightMin, double weightMax, double changeVelocity1, double changeVelocity2, SolutionListEvaluator<DoubleSolution> evaluator) {
-        super(problem, swarmSize, leaders, mutationOperator, maxIterations, r1Min, r1Max, r2Min, r2Max, c1Min, c1Max, c2Min, c2Max, weightMin, weightMax, changeVelocity1, changeVelocity2, evaluator);
+    public SMPSOMeasures(DoubleProblem problem, int swarmSize, BoundedArchive<DoubleSolution> leaders,
+                         MutationOperator<DoubleSolution> mutationOperator, int maxIterations, double r1Min, double r1Max,
+                         double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max, double weightMin,
+                         double weightMax, double changeVelocity1, double changeVelocity2,
+                         SolutionListEvaluator<DoubleSolution> evaluator, IEALogger eaLogger) {
+        super(problem, swarmSize, leaders, mutationOperator, maxIterations, r1Min, r1Max, r2Min, r2Max, c1Min, c1Max,
+                c2Min, c2Max, weightMin, weightMax, changeVelocity1, changeVelocity2, evaluator, eaLogger);
 
         this.initMeasures();
     }
@@ -68,6 +74,7 @@ public class SMPSOMeasures extends SMPSO implements Measurable {
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations.get().intValue(), -1, this.getResult())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -78,6 +85,7 @@ public class SMPSOMeasures extends SMPSO implements Measurable {
     protected void initProgress() {
         this.iterations.reset(1);
         this.updateLeadersDensityEstimator();
+        this.logPopulation(this.iterations.get().intValue());
     }
 
     @Override
@@ -86,6 +94,7 @@ public class SMPSOMeasures extends SMPSO implements Measurable {
         this.updateLeadersDensityEstimator();
 
         this.solutionListMeasure.push(super.getResult());
+        this.logPopulation(this.iterations.get().intValue());
     }
 
     @Override

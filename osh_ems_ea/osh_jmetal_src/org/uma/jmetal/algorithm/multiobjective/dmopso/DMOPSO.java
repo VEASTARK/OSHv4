@@ -8,6 +8,7 @@ import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -54,24 +55,25 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
     protected int iterations;
     private List<DoubleSolution> swarm;
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     public DMOPSO(DoubleProblem problem, int swarmSize,
                   int maxIterations, double r1Min, double r1Max,
                   double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
                   double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                  FunctionType functionType, String dataDirectory, int maxAge) {
+                  FunctionType functionType, String dataDirectory, int maxAge, IEALogger eaLogger) {
         this(problem, swarmSize,
                 maxIterations, r1Min, r1Max,
                 r2Min, r2Max, c1Min, c1Max, c2Min, c2Max,
                 weightMin, weightMax, changeVelocity1, changeVelocity2,
-                functionType, dataDirectory, maxAge, "dMOPSO");
+                functionType, dataDirectory, maxAge, "dMOPSO", eaLogger);
     }
 
     public DMOPSO(DoubleProblem problem, int swarmSize,
                   int maxIterations, double r1Min, double r1Max,
                   double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
                   double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                  FunctionType functionType, String dataDirectory, int maxAge, String name) {
+                  FunctionType functionType, String dataDirectory, int maxAge, String name, IEALogger eaLogger) {
         this.name = name;
         this.problem = problem;
         this.swarmSize = swarmSize;
@@ -115,6 +117,9 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
                     problem.getUnboxedLowerBound(i)) / 2.0;
             this.deltaMin[i] = -this.deltaMax[i];
         }
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     public List<DoubleSolution> getSwarm() {
@@ -123,15 +128,22 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
 
     protected void initProgress() {
         this.iterations = 1;
+        this.logPopulation(this.iterations);
     }
 
     protected void updateProgress() {
         this.iterations++;
+        this.logPopulation(this.iterations);
+    }
+
+    void logPopulation(int iterations) {
+        this.eaLogger.logPopulation(Arrays.asList(this.globalBest), iterations);
     }
 
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.globalBest))) {
+                this.eaLogger.logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -494,6 +506,16 @@ public class DMOPSO implements Algorithm<List<DoubleSolution>> {
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override

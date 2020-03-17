@@ -3,6 +3,7 @@ package org.uma.jmetal.algorithm.impl;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.problem.Problem;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public abstract class AbstractEvolutionaryAlgorithm<S, R> implements Algorithm<R
     protected Problem<S> problem;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     public List<S> getPopulation() {
         return this.population;
@@ -59,6 +61,16 @@ public abstract class AbstractEvolutionaryAlgorithm<S, R> implements Algorithm<R
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override

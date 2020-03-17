@@ -8,12 +8,14 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * @author Jorge Rodriguez
  */
 public class DMOPSOBuilder implements AlgorithmBuilder<DMOPSO> {
     private final DoubleProblem problem;
+    private final IEALogger eaLogger;
     private String name;
     private double c1Max;
     private double c1Min;
@@ -35,9 +37,10 @@ public class DMOPSOBuilder implements AlgorithmBuilder<DMOPSO> {
     private SolutionListEvaluator<DoubleSolution> evaluator;
     private DMOPSOVariant variant;
 
-    public DMOPSOBuilder(DoubleProblem problem) {
+    public DMOPSOBuilder(DoubleProblem problem, IEALogger eaLogger) {
         this.name = "dMOPSO";
         this.problem = problem;
+        this.eaLogger = eaLogger;
 
         this.swarmSize = 100;
         this.maxIterations = 250;
@@ -269,11 +272,11 @@ public class DMOPSOBuilder implements AlgorithmBuilder<DMOPSO> {
         if (this.variant == DMOPSOVariant.DMOPSO) {
             algorithm = new DMOPSO(this.problem, this.swarmSize, this.maxIterations, this.r1Min, this.r1Max, this.r2Min, this.r2Max, this.c1Min, this.c1Max, this.c2Min,
                     this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1, this.changeVelocity2, this.functionType, this.dataDirectory, this.maxAge,
-                    this.name);
+                    this.name, this.eaLogger);
         } else if (this.variant == DMOPSOVariant.Measures) {
             algorithm = new DMOPSOMeasures(this.problem, this.swarmSize, this.maxIterations, this.r1Min, this.r1Max, this.r2Min, this.r2Max, this.c1Min, this.c1Max,
                     this.c2Min, this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1, this.changeVelocity2, this.functionType, this.dataDirectory,
-                    this.maxAge, this.name);
+                    this.maxAge, this.name, this.eaLogger);
         }
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.swarmSize, this.maxIterations * this.swarmSize));
         return algorithm;

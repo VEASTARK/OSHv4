@@ -12,6 +12,7 @@ import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class RNSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<R
      * NSGAIIBuilder class
      */
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private final CrossoverOperator<S> crossoverOperator;
     private final MutationOperator<S> mutationOperator;
     private final List<Double> interestPoint;
@@ -38,8 +40,10 @@ public class RNSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<R
      * NSGAIIBuilder constructor
      */
     public RNSGAIIBuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                          MutationOperator<S> mutationOperator, List<Double> interestPoint, double epsilon) {
+                          MutationOperator<S> mutationOperator, List<Double> interestPoint, double epsilon,
+                          IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = 100;
         this.matingPoolSize = 100;
@@ -85,7 +89,8 @@ public class RNSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<R
         RNSGAII<S> algorithm;
 
         algorithm = new RNSGAII<>(this.problem, this.populationSize, this.matingPoolSize, this.offspringPopulationSize,
-                this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator, this.interestPoint, this.epsilon);
+                this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator, this.interestPoint,
+                this.epsilon, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

@@ -6,6 +6,7 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +33,11 @@ public class MOEAD extends AbstractMOEAD<DoubleSolution> {
                  String dataDirectory,
                  double neighborhoodSelectionProbability,
                  int maximumNumberOfReplacedSolutions,
-                 int neighborSize) {
+                 int neighborSize,
+                 IEALogger eaLogger) {
         super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
-                neighborSize);
+                neighborSize, eaLogger);
 
         this.differentialEvolutionCrossover = (DifferentialEvolutionCrossover) this.crossoverOperator;
     }

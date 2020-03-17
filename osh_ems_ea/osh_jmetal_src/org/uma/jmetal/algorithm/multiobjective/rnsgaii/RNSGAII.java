@@ -17,6 +17,7 @@ import org.uma.jmetal.util.measure.impl.BasicMeasure;
 import org.uma.jmetal.util.measure.impl.CountingMeasure;
 import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,9 +43,9 @@ public class RNSGAII<S extends Solution<?>> extends NSGAII<S> implements
                    int matingPoolSize, int offspringPopulationSize,
                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                    SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
-                   List<Double> interestPoint, double epsilon) {
+                   List<Double> interestPoint, double epsilon, IEALogger eaLogger) {
         super(problem, populationSize, matingPoolSize, offspringPopulationSize, crossoverOperator,
-                mutationOperator, selectionOperator, new DominanceComparator<>(), evaluator);
+                mutationOperator, selectionOperator, new DominanceComparator<>(), evaluator, eaLogger);
         this.interestPoint = interestPoint;
         this.epsilon = epsilon;
 
@@ -63,18 +64,22 @@ public class RNSGAII<S extends Solution<?>> extends NSGAII<S> implements
     @Override
     protected void initProgress() {
         this.evaluations.reset(this.getMaxPopulationSize());
+        this.getEALogger().logPopulation(this.getPopulation(), this.evaluations.get().intValue() / this.getMaxPopulationSize());
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations.increment(this.getMaxPopulationSize());
         this.solutionListMeasure.push(this.getPopulation());
+        this.getEALogger().logPopulation(this.getPopulation(), this.evaluations.get().intValue() / this.getMaxPopulationSize());
+
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations.get().intValue(), this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

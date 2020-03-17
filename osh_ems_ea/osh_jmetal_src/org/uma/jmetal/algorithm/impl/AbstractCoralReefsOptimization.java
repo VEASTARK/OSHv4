@@ -5,6 +5,7 @@ import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,6 +43,8 @@ public abstract class AbstractCoralReefsOptimization<S, R>
     protected List<Coordinate> coordinates;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
+
 
     /**
      * Constructor
@@ -62,7 +65,7 @@ public abstract class AbstractCoralReefsOptimization<S, R>
                                           SelectionOperator<List<S>, S> selectionOperator,
                                           CrossoverOperator<S> crossoverOperator,
                                           MutationOperator<S> mutationOperator, int n, int m, double rho,
-                                          double fbs, double fa, double pd, int attemptsToSettle) {
+                                          double fbs, double fa, double pd, int attemptsToSettle, IEALogger eaLogger) {
         this.comparator = comparator;
         this.selectionOperator = selectionOperator;
         this.crossoverOperator = crossoverOperator;
@@ -76,6 +79,9 @@ public abstract class AbstractCoralReefsOptimization<S, R>
         this.Fd = fa;
         this.Pd = pd;
         this.attemptsToSettle = attemptsToSettle;
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     public List<S> getPopulation() {
@@ -217,6 +223,16 @@ public abstract class AbstractCoralReefsOptimization<S, R>
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     /**

@@ -12,7 +12,9 @@ import org.uma.jmetal.util.measure.impl.BasicMeasure;
 import org.uma.jmetal.util.measure.impl.CountingMeasure;
 import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
+import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -30,24 +32,24 @@ public class DMOPSOMeasures extends DMOPSO implements Measurable {
                           double r1Min, double r1Max, double r2Min, double r2Max,
                           double c1Min, double c1Max, double c2Min, double c2Max,
                           double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                          FunctionType functionType, String dataDirectory, int maxAge) {
+                          FunctionType functionType, String dataDirectory, int maxAge, IEALogger eaLogger) {
         this(problem, swarmSize, maxIterations,
                 r1Min, r1Max, r2Min, r2Max,
                 c1Min, c1Max, c2Min, c2Max,
                 weightMin, weightMax, changeVelocity1, changeVelocity2,
-                functionType, dataDirectory, maxAge, "dMOPSO");
+                functionType, dataDirectory, maxAge, "dMOPSO", eaLogger);
     }
 
     public DMOPSOMeasures(DoubleProblem problem, int swarmSize, int maxIterations,
                           double r1Min, double r1Max, double r2Min, double r2Max,
                           double c1Min, double c1Max, double c2Min, double c2Max,
                           double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                          FunctionType functionType, String dataDirectory, int maxAge, String name) {
+                          FunctionType functionType, String dataDirectory, int maxAge, String name, IEALogger eaLogger) {
         super(problem, swarmSize, maxIterations,
                 r1Min, r1Max, r2Min, r2Max,
                 c1Min, c1Max, c2Min, c2Max,
                 weightMin, weightMax, changeVelocity1, changeVelocity2,
-                functionType, dataDirectory, maxAge, name);
+                functionType, dataDirectory, maxAge, name, eaLogger);
         this.referenceFront = new ArrayFront();
         this.initMeasures();
     }
@@ -55,6 +57,7 @@ public class DMOPSOMeasures extends DMOPSO implements Measurable {
     @Override
     protected void initProgress() {
         this.iterations.reset();
+        this.logPopulation(this.iterations.get().intValue());
     }
 
     @Override
@@ -63,6 +66,7 @@ public class DMOPSOMeasures extends DMOPSO implements Measurable {
         this.hypervolumeValue.push(new PISAHypervolume<DoubleSolution>(this.referenceFront).evaluate(this.getResult()));
         this.epsilonValue.push(new Epsilon<DoubleSolution>(this.referenceFront).evaluate(this.getResult()));
         this.solutionListMeasure.push(this.getResult());
+        this.logPopulation(this.iterations.get().intValue());
     }
 
     @Override

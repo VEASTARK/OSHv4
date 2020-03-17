@@ -13,6 +13,7 @@ import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.binarySet.BinarySet;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -52,7 +53,7 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
                  CrossoverOperator<BinarySolution> crossoverOperator,
                  MutationOperator<BinarySolution> cataclysmicMutation,
                  SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection, SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection,
-                 SolutionListEvaluator<BinarySolution> evaluator) {
+                 SolutionListEvaluator<BinarySolution> evaluator, IEALogger eaLogger) {
         super();
         this.problem = problem;
         this.maxPopulationSize = populationSize;
@@ -71,6 +72,9 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
         this.minimumDistance = (int) Math.floor(this.initialConvergenceCount * this.size);
 
         this.comparator = new CrowdingDistanceComparator<>();
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     public int getMaxPopulationSize() {
@@ -84,17 +88,20 @@ public class MOCHC extends AbstractEvolutionaryAlgorithm<BinarySolution, List<Bi
     @Override
     protected void initProgress() {
         this.evaluations = this.maxPopulationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.maxPopulationSize);
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.lastOffspringPopulationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.maxPopulationSize);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

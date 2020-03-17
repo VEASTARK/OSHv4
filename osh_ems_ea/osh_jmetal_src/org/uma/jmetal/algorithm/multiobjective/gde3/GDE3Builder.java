@@ -10,6 +10,7 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  */
 public class GDE3Builder implements AlgorithmBuilder<GDE3> {
     private final DoubleProblem problem;
+    private final IEALogger eaLogger;
     protected int populationSize;
     protected int maxEvaluations;
 
@@ -29,8 +31,9 @@ public class GDE3Builder implements AlgorithmBuilder<GDE3> {
     /**
      * Constructor
      */
-    public GDE3Builder(DoubleProblem problem) {
+    public GDE3Builder(DoubleProblem problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = 100;
         this.selectionOperator = new DifferentialEvolutionSelection();
@@ -58,7 +61,7 @@ public class GDE3Builder implements AlgorithmBuilder<GDE3> {
 
     public GDE3 build() {
         GDE3 algorithm = new GDE3(this.problem, this.populationSize, this.selectionOperator,
-            this.crossoverOperator, this.evaluator);
+            this.crossoverOperator, this.evaluator, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

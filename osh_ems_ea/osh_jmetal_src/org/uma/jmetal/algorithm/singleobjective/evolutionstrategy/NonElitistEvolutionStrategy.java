@@ -6,6 +6,7 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,8 +28,9 @@ public class NonElitistEvolutionStrategy<S extends Solution<?>> extends Abstract
     /**
      * Constructor
      */
-    public NonElitistEvolutionStrategy(Problem<S> problem, int mu, int lambda, MutationOperator<S> mutation) {
-        super(problem);
+    public NonElitistEvolutionStrategy(Problem<S> problem, int mu, int lambda, MutationOperator<S> mutation,
+                                       IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.mu = mu;
         this.lambda = lambda;
         this.mutation = mutation;
@@ -39,17 +41,20 @@ public class NonElitistEvolutionStrategy<S extends Solution<?>> extends Abstract
     @Override
     protected void initProgress() {
         this.evaluations = this.mu;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.mu);
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.lambda;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.lambda);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

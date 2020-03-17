@@ -11,6 +11,7 @@ import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class SPEA2Builder<S extends Solution<?>> implements AlgorithmBuilder<SPE
      * SPEA2Builder class
      */
     protected final Problem<S> problem;
+    protected final IEALogger eaLogger;
     protected final CrossoverOperator<S> crossoverOperator;
     protected final MutationOperator<S> mutationOperator;
     protected int maxIterations;
@@ -34,8 +36,9 @@ public class SPEA2Builder<S extends Solution<?>> implements AlgorithmBuilder<SPE
      * SPEA2Builder constructor
      */
     public SPEA2Builder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                        MutationOperator<S> mutationOperator) {
+                        MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxIterations = 250;
         this.populationSize = 100;
         this.crossoverOperator = crossoverOperator;
@@ -54,7 +57,7 @@ public class SPEA2Builder<S extends Solution<?>> implements AlgorithmBuilder<SPE
     public SPEA2<S> build() {
         SPEA2<S> algorithm;
         algorithm = new SPEA2<>(this.problem, this.populationSize, this.crossoverOperator,
-                this.mutationOperator, this.selectionOperator, this.evaluator, this.k);
+                this.mutationOperator, this.selectionOperator, this.evaluator, this.k, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.populationSize * this.maxIterations));
         return algorithm;
     }

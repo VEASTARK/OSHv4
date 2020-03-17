@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm.impl;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public abstract class AbstractParticleSwarmOptimization<S, Result> implements Algorithm<Result> {
     private List<S> swarm;
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     public List<S> getSwarm() {
         return this.swarm;
@@ -56,6 +58,16 @@ public abstract class AbstractParticleSwarmOptimization<S, Result> implements Al
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override

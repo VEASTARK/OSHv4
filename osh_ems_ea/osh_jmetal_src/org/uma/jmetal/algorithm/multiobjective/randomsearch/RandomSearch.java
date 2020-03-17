@@ -5,6 +5,7 @@ import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +22,18 @@ public class RandomSearch<S extends Solution<?>> implements Algorithm<List<S>> {
     private final int maxEvaluations;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     /**
      * Constructor
      */
-    public RandomSearch(Problem<S> problem, int maxEvaluations) {
+    public RandomSearch(Problem<S> problem, int maxEvaluations, IEALogger eaLogger) {
         this.problem = problem;
         this.maxEvaluations = maxEvaluations;
         this.nonDominatedArchive = new NonDominatedSolutionListArchive<>();
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     /* Getter */
@@ -44,6 +49,7 @@ public class RandomSearch<S extends Solution<?>> implements Algorithm<List<S>> {
             this.problem.evaluate(newSolution);
             this.nonDominatedArchive.add(newSolution);
         }
+        this.eaLogger.logPopulation(this.nonDominatedArchive.getSolutionList(), 1);
     }
 
     @Override
@@ -54,6 +60,16 @@ public class RandomSearch<S extends Solution<?>> implements Algorithm<List<S>> {
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override

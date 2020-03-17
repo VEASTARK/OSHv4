@@ -8,6 +8,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.utils.string.ParameterConstants;
 
 import java.util.Comparator;
@@ -53,7 +54,7 @@ public class JMetalSolver extends Optimizer {
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction) throws Exception {
+            IFitness fitnessFunction, IEALogger eaLogger) throws Exception {
 
         return this.getSolutionAndFitness(
                 problemParts,
@@ -61,7 +62,8 @@ public class JMetalSolver extends Optimizer {
                 priceSignals,
                 powerLimitSignals,
                 ignoreLoadProfileBefore,
-                fitnessFunction);
+                fitnessFunction,
+                eaLogger);
     }
 
     public SolutionWithFitness getSolutionAndFitness (
@@ -70,7 +72,7 @@ public class JMetalSolver extends Optimizer {
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction) throws Exception {
+            IFitness fitnessFunction, IEALogger eaLogger) throws Exception {
         throw new UnsupportedOperationException("not implemented here");
     }
 

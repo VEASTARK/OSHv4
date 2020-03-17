@@ -16,6 +16,7 @@ import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.fileinput.VectorFileUtils;
 import org.uma.jmetal.util.solutionattribute.Ranking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +56,10 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
                   SolutionListEvaluator<S> evaluator,
                   double epsilon,
                   List<Double> referencePoint,
-                  String weightVectorsFileName) {
+                  String weightVectorsFileName,
+                  IEALogger eaLogger) {
 
-        super(problem, crossoverOperator, mutationOperator, selectionOperator, evaluator);
+        super(problem, crossoverOperator, mutationOperator, selectionOperator, evaluator, eaLogger);
         this.weightVectorsFileName = weightVectorsFileName;
         this.setMaxPopulationSize(populationSize);
         this.interestPoint = referencePoint;
@@ -77,7 +79,8 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
                   SelectionOperator<List<S>, S> selectionOperator,
                   SolutionListEvaluator<S> evaluator,
                   double epsilon,
-                  List<Double> referencePoint) {
+                  List<Double> referencePoint,
+                  IEALogger eaLogger) {
 
         this(problem,
                 populationSize,
@@ -87,7 +90,8 @@ public class WASFGA<S extends Solution<?>> extends AbstractMOMBI<S> implements
                 evaluator,
                 epsilon,
                 referencePoint,
-                "");
+                "",
+                eaLogger);
     }
 
     public AbstractUtilityFunctionsSet<S> createUtilityFunction() {

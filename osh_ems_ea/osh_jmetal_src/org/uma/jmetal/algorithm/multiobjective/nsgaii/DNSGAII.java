@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.impl.selection.RankingAndDirScoreSelection;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,9 +28,9 @@ public class DNSGAII<S extends Solution<?>> extends NSGAII<S> {
     public DNSGAII(Problem<S> problem, int populationSize, int matingPoolSize, int offspringPopulationSize,
                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
                    SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
-                   SolutionListEvaluator<S> evaluator) {
+                   SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
         super(problem, populationSize, matingPoolSize, offspringPopulationSize,
-                crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator);
+                crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator, eaLogger);
     }
 
     public void setReferenceVectors(double[][] referenceVectors) {

@@ -11,6 +11,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.solutionattribute.Ranking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -29,9 +30,10 @@ public class GWASFGA<S extends Solution<?>> extends WASFGA<S> {
 
     public GWASFGA(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                    MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
-                   SolutionListEvaluator<S> evaluator, double epsilon, String weightVectorsFileName) {
+                   SolutionListEvaluator<S> evaluator, double epsilon, String weightVectorsFileName,
+                   IEALogger eaLogger) {
         super(problem, populationSize, crossoverOperator, mutationOperator, selectionOperator, evaluator, epsilon,
-                null, weightVectorsFileName);
+                null, weightVectorsFileName, eaLogger);
 
         this.setMaxPopulationSize(populationSize);
 
@@ -55,9 +57,9 @@ public class GWASFGA<S extends Solution<?>> extends WASFGA<S> {
 
     public GWASFGA(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                    MutationOperator<S> mutationOperator, SelectionOperator<List<S>, S> selectionOperator,
-                   SolutionListEvaluator<S> evaluator, double epsilon) {
+                   SolutionListEvaluator<S> evaluator, double epsilon, IEALogger eaLogger) {
         this(problem, populationSize, crossoverOperator, mutationOperator, selectionOperator, evaluator, epsilon,
-                "");
+                "", eaLogger);
     }
 
     private AbstractUtilityFunctionsSet<S> createUtilityFunction(List<Double> referencePoint, double[][] weights) {

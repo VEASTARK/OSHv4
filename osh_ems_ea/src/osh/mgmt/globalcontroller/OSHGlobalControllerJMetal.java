@@ -39,6 +39,8 @@ import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
 import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
+import osh.mgmt.globalcontroller.jmetal.logging.EALogger;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
@@ -72,6 +74,7 @@ public class OSHGlobalControllerJMetal
     private final String logDir;
     private int stepSize;
     private Boolean logGa;
+    private final IEALogger eaLogger;
 
 
     /**
@@ -162,6 +165,7 @@ public class OSHGlobalControllerJMetal
         this.logDir = this.getOSH().getOSHStatus().getLogDir();
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
+        this.eaLogger = new EALogger(this.getGlobalLogger(),true,true,10,20,true);
     }
 
 
@@ -193,9 +197,7 @@ public class OSHGlobalControllerJMetal
     public void onSystemShutdown() throws OSHException {
         super.onSystemShutdown();
 
-        // shutting down threadpool
-        OSH_gGAMultiThread.shutdown();
-//		CostChecker.shutDown();
+        this.eaLogger.shutdown();
     }
 
     @Override
@@ -281,9 +283,6 @@ public class OSHGlobalControllerJMetal
         //retrieve information of ga should log to database
         if (this.logGa == null) {
             this.logGa = DatabaseLoggerThread.isLogGA();
-            if (this.logGa) {
-                OSH_gGAMultiThread.initLogging();
-            }
         }
 
         EnumMap<AncillaryCommodity, PriceSignal> tempPriceSignals = new EnumMap<>(AncillaryCommodity.class);
@@ -380,7 +379,8 @@ public class OSHGlobalControllerJMetal
                     tempPriceSignals,
                     tempPowerLimitSignals,
                     now,
-                    fitnessFunction);
+                    fitnessFunction,
+                    this.eaLogger);
             solution = resultWithAll.getSolution();
 
             SolutionDistributor distributor = new SolutionDistributor();

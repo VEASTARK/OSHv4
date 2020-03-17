@@ -9,6 +9,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,8 +28,9 @@ public class GenerationalGeneticAlgorithm<S extends Solution<?>> extends Abstrac
      */
     public GenerationalGeneticAlgorithm(Problem<S> problem, int populationSize,
                                         CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                                        SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
-        super(problem);
+                                        SelectionOperator<List<S>, S> selectionOperator,
+                                        SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
 
         this.crossoverOperator = crossoverOperator;
@@ -44,6 +46,7 @@ public class GenerationalGeneticAlgorithm<S extends Solution<?>> extends Abstrac
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -64,9 +67,7 @@ public class GenerationalGeneticAlgorithm<S extends Solution<?>> extends Abstrac
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     @Override
@@ -78,11 +79,13 @@ public class GenerationalGeneticAlgorithm<S extends Solution<?>> extends Abstrac
     @Override
     public void initProgress() {
         this.evaluations = this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.maxPopulationSize);
     }
 
     @Override
     public void updateProgress() {
         this.evaluations += this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.maxPopulationSize);
     }
 
     @Override

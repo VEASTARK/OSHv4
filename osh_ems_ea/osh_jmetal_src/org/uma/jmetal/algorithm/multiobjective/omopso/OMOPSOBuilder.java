@@ -8,12 +8,14 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * Class implementing the OMOPSO algorithm
  */
 public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     protected final DoubleProblem problem;
+    protected final IEALogger eaLogger;
     protected final SolutionListEvaluator<DoubleSolution> evaluator;
 
     private int swarmSize = 100;
@@ -23,9 +25,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     private UniformMutation uniformMutation;
     private NonUniformMutation nonUniformMutation;
 
-    public OMOPSOBuilder(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator) {
+    public OMOPSOBuilder(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator, IEALogger eaLogger) {
         this.evaluator = evaluator;
         this.problem = problem;
+        this.eaLogger = eaLogger;
     }
 
     /* Getters */
@@ -81,7 +84,7 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
 
     public OMOPSO build() {
         OMOPSO algorithm = new OMOPSO(this.problem, this.evaluator, this.swarmSize,
-                this.archiveSize, this.uniformMutation, this.nonUniformMutation);
+                this.archiveSize, this.uniformMutation, this.nonUniformMutation, this.eaLogger);
 
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.swarmSize, this.maxIterations * this.swarmSize));
         return algorithm;

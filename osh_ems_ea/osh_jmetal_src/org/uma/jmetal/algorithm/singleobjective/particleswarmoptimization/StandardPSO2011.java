@@ -14,6 +14,7 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.impl.ExtendedPseudoRandomGenerator;
 import org.uma.jmetal.util.pseudorandom.impl.JavaRandomGenerator;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +61,8 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
      * @param evaluator
      */
     public StandardPSO2011(DoubleProblem problem, int objectiveId, int swarmSize, int maxIterations,
-                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator) {
+                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator,
+                           IEALogger eaLogger) {
         this.problem = problem;
         this.swarmSize = swarmSize;
         this.maxIterations = maxIterations;
@@ -86,6 +88,9 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
 
         this.bestFoundParticle = null;
         this.neighborhood = new AdaptiveRandomNeighborhood<>(swarmSize, this.numberOfParticlesToInform);
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     /**
@@ -98,24 +103,28 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
      * @param evaluator
      */
     public StandardPSO2011(DoubleProblem problem, int swarmSize, int maxIterations,
-                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator) {
-        this(problem, 0, swarmSize, maxIterations, numberOfParticlesToInform, evaluator);
+                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator,
+                           IEALogger eaLogger) {
+        this(problem, 0, swarmSize, maxIterations, numberOfParticlesToInform, evaluator, eaLogger);
     }
 
     @Override
     public void initProgress() {
         this.iterations = 1;
+        this.getEALogger().logPopulation(Arrays.asList(this.getLocalBest()), this.iterations);
     }
 
     @Override
     public void updateProgress() {
         this.iterations += 1;
+        this.getEALogger().logPopulation(Arrays.asList(this.getLocalBest()), this.iterations);
     }
 
     @Override
     public boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, Arrays.asList(this.getLocalBest()))) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

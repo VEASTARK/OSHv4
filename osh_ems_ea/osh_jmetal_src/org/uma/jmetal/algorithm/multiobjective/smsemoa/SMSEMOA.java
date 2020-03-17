@@ -10,6 +10,7 @@ import org.uma.jmetal.qualityindicator.impl.Hypervolume;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,8 +31,9 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
      */
     public SMSEMOA(Problem<S> problem, int populationSize, double offset,
                    CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                   SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator, Hypervolume<S> hypervolumeImplementation) {
-        super(problem);
+                   SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
+                   Hypervolume<S> hypervolumeImplementation, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
 
         this.offset = offset;
@@ -46,17 +48,22 @@ public class SMSEMOA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     @Override
     protected void initProgress() {
         this.evaluations = this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations++;
+        if (this.evaluations % this.getMaxPopulationSize() == 0) {
+            this.getEALogger().logPopulation(this.population, this.evaluations / this.getMaxPopulationSize());
+        }
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

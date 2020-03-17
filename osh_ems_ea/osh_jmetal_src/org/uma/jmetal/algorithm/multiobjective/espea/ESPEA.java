@@ -11,6 +11,7 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +65,8 @@ public class ESPEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     public ESPEA(Problem<S> problem, int populationSize, CrossoverOperator<S> crossoverOperator,
                  CrossoverOperator<S> fullArchiveCrossoverOperator, MutationOperator<S> mutationOperator,
                  SelectionOperator<List<S>, S> selectionOperator, ScalarizationWrapper scalarizationWrapper, SolutionListEvaluator<S> evaluator,
-                 boolean normalizeObjectives, ReplacementStrategy replacementStrategy) {
-        super(problem);
+                 boolean normalizeObjectives, ReplacementStrategy replacementStrategy, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
         this.crossoverOperator = crossoverOperator;
         this.fullArchiveCrossoverOperator = fullArchiveCrossoverOperator;
@@ -90,18 +91,23 @@ public class ESPEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
         this.evaluations = this.getMaxPopulationSize();
         // Initialize archive
         this.population.forEach(this.archive::add);
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected void updateProgress() {
         // ESPEA is steady-state
         this.evaluations++;
+        if (this.evaluations % this.getMaxPopulationSize() == 0) {
+            this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
+        }
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

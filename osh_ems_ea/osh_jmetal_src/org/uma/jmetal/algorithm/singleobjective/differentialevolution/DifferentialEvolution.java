@@ -8,6 +8,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +38,9 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
      */
     public DifferentialEvolution(DoubleProblem problem, int populationSize,
                                  DifferentialEvolutionCrossover crossoverOperator,
-                                 DifferentialEvolutionSelection selectionOperator, SolutionListEvaluator<DoubleSolution> evaluator) {
+                                 DifferentialEvolutionSelection selectionOperator,
+                                 SolutionListEvaluator<DoubleSolution> evaluator,
+                                 IEALogger eaLogger) {
         this.setProblem(problem);
         this.populationSize = populationSize;
         this.crossoverOperator = crossoverOperator;
@@ -45,6 +48,9 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
         this.evaluator = evaluator;
 
         this.comparator = new ObjectiveComparator<>(0);
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     public int getEvaluations() {
@@ -58,17 +64,20 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
     @Override
     protected void initProgress() {
         this.evaluations = this.populationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.populationSize);
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.populationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.populationSize);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

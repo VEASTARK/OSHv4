@@ -16,6 +16,7 @@ import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
 import org.uma.jmetal.util.solutionattribute.impl.LocationAttribute;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,6 +45,7 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     private LocationAttribute<DoubleSolution> location;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     public CellDE45(Problem<DoubleSolution> problem,
                     int populationSize,
@@ -52,7 +54,8 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
                     SelectionOperator<List<DoubleSolution>, DoubleSolution> selection,
                     DifferentialEvolutionCrossover crossover,
                     double feedback,
-                    SolutionListEvaluator<DoubleSolution> evaluator) {
+                    SolutionListEvaluator<DoubleSolution> evaluator,
+                    IEALogger eaLogger) {
         this.problem = problem;
         this.populationSize = populationSize;
         this.archive = archive;
@@ -63,6 +66,9 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
         this.feedback = feedback;
 
         this.evaluator = evaluator;
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     @Override
@@ -145,16 +151,19 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     protected void initProgress() {
         this.evaluations = this.populationSize;
         this.currentIndividual = 0;
+        this.eaLogger.logPopulation(this.archive.getSolutionList(), this.evaluations / this.populationSize);
     }
 
     protected void updateProgress() {
         this.evaluations++;
         this.currentIndividual = (this.currentIndividual + 1) % this.populationSize;
+        this.eaLogger.logPopulation(this.archive.getSolutionList(), this.evaluations / this.populationSize);
     }
 
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -180,6 +189,16 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     protected Ranking<DoubleSolution> computeRanking(List<DoubleSolution> solutionList) {

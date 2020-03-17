@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.impl.ViolationThresholdComparator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -33,10 +34,11 @@ public class ConstraintMOEAD extends AbstractMOEAD<DoubleSolution> {
                            String dataDirectory,
                            double neighborhoodSelectionProbability,
                            int maximumNumberOfReplacedSolutions,
-                           int neighborSize) {
+                           int neighborSize,
+                           IEALogger eaLogger) {
         super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
-                neighborSize);
+                neighborSize, eaLogger);
 
         this.differentialEvolutionCrossover = (DifferentialEvolutionCrossover) this.crossoverOperator;
         this.violationThresholdComparator = new ViolationThresholdComparator<>();

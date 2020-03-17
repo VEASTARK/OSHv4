@@ -34,6 +34,8 @@ import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.JMetalSolver;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
+import osh.mgmt.globalcontroller.jmetal.logging.EALogger;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -88,7 +90,8 @@ public class JMetalEnergySolverGA extends JMetalSolver {
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction) throws Exception {
+            IFitness fitnessFunction,
+            IEALogger eaLogger) throws Exception {
 
 
         // DECLARATION
@@ -166,8 +169,10 @@ public class JMetalEnergySolverGA extends JMetalSolver {
             algorithmEvaluator = new SequentialSolutionListEvaluator<>();
         }
 
+        eaLogger.attachWriter(pw);
+
         algorithm = new GenerationalGeneticAlgorithm<>(binaryProblem, this.gaparameters.getPopSize(), crossover,
-                mutation, selection, algorithmEvaluator);
+                mutation, selection, algorithmEvaluator, eaLogger);
 
         //add stopping rules
         for (String ruleName : this.gaparameters.getStoppingRules().keySet()) {
@@ -179,17 +184,22 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         algorithm.run();
         BinarySolution solution = algorithm.getResult();
 
-        pw.flush();
-        pw.close();
+        eaLogger.logEnd(solution);
 
         if (true) { // debug
             this.logger.logDebug("Final Fitness: " + solution.getObjective(0)); //
         }
 
+        eaLogger.detachWriter();
+
         //better be sure
         evaluator.finalizeGrids();
 
         return new SolutionWithFitness(solution, solution.getObjective(0));
+    }
+
+    public void shutdown() {
+
     }
 }
 

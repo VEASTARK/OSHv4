@@ -8,6 +8,7 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,24 +29,25 @@ public class CoralReefsOptimization<S extends Solution<?>>
                                   SelectionOperator<List<S>, S> selectionOperator,
                                   CrossoverOperator<S> crossoverOperator,
                                   MutationOperator<S> mutationOperator, int n, int m, double rho,
-                                  double fbs, double fa, double pd, int attemptsToSettle) {
+                                  double fbs, double fa, double pd, int attemptsToSettle, IEALogger eaLogger) {
 
         super(comparator, selectionOperator, crossoverOperator,
-                mutationOperator, n, m, rho, fbs, fa, pd, attemptsToSettle);
+                mutationOperator, n, m, rho, fbs, fa, pd, attemptsToSettle, eaLogger);
 
         this.problem = problem;
         this.random = JMetalRandom.getInstance();
-
     }
 
     @Override
     protected void initProgress() {
         this.evaluations = this.population.size();
+        this.getEALogger().logPopulation(this.population, 1);
     }
 
     @Override
     protected void updateProgress(int reproductions) {
         this.evaluations += reproductions;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.getPopulationSize());
     }
 
     @Override

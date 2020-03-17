@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * Builder class for algorithm MOEA/D and variants
@@ -16,6 +17,7 @@ import org.uma.jmetal.util.AlgorithmBuilder;
  */
 public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSolution>> {
     protected final Problem<DoubleSolution> problem;
+    protected final IEALogger eaLogger;
     protected final Variant moeadVariant;
     /**
      * T in Zhang & Li paper
@@ -46,8 +48,9 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
     /**
      * Constructor
      */
-    public MOEADBuilder(Problem<DoubleSolution> problem, Variant variant) {
+    public MOEADBuilder(Problem<DoubleSolution> problem, Variant variant, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.populationSize = 300;
         this.resultPopulationSize = 300;
         this.maxEvaluations = 150000;
@@ -178,23 +181,23 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
         if (this.moeadVariant == Variant.MOEAD) {
             algorithm = new MOEAD(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
-                    this.maximumNumberOfReplacedSolutions, this.neighborSize);
+                    this.maximumNumberOfReplacedSolutions, this.neighborSize, this.eaLogger);
         } else if (this.moeadVariant == Variant.ConstraintMOEAD) {
             algorithm = new ConstraintMOEAD(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
-                    this.maximumNumberOfReplacedSolutions, this.neighborSize);
+                    this.maximumNumberOfReplacedSolutions, this.neighborSize, this.eaLogger);
         } else if (this.moeadVariant == Variant.MOEADDRA) {
             algorithm = new MOEADDRA(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
-                    this.maximumNumberOfReplacedSolutions, this.neighborSize);
+                    this.maximumNumberOfReplacedSolutions, this.neighborSize, this.eaLogger);
         } else if (this.moeadVariant == Variant.MOEADSTM) {
             algorithm = new MOEADSTM(this.problem, this.populationSize, this.resultPopulationSize, this.mutation,
                     this.crossover, this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
-                    this.maximumNumberOfReplacedSolutions, this.neighborSize);
+                    this.maximumNumberOfReplacedSolutions, this.neighborSize, this.eaLogger);
         } else if (this.moeadVariant == Variant.MOEADD) {
             algorithm = new MOEADD<>(this.problem, this.populationSize, this.resultPopulationSize, this.crossover, this.mutation,
                     this.functionType, this.dataDirectory, this.neighborhoodSelectionProbability,
-                    this.maximumNumberOfReplacedSolutions, this.neighborSize);
+                    this.maximumNumberOfReplacedSolutions, this.neighborSize, this.eaLogger);
         }
         return algorithm;
     }

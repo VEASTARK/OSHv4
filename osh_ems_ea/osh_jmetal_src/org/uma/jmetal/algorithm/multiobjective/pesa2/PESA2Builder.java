@@ -9,12 +9,14 @@ import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * Created by Antonio J. Nebro
  */
 public class PESA2Builder<S extends Solution<?>> implements AlgorithmBuilder<PESA2<S>> {
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private final CrossoverOperator<S> crossoverOperator;
     private final MutationOperator<S> mutationOperator;
     private int maxEvaluations;
@@ -27,8 +29,9 @@ public class PESA2Builder<S extends Solution<?>> implements AlgorithmBuilder<PES
      * Constructor
      */
     public PESA2Builder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
-                        MutationOperator<S> mutationOperator) {
+                        MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = 100;
         this.archiveSize = 100;
@@ -51,7 +54,7 @@ public class PESA2Builder<S extends Solution<?>> implements AlgorithmBuilder<PES
     public PESA2<S> build() {
         PESA2<S> algorithm;
         algorithm = new PESA2<>(this.problem, this.populationSize, this.archiveSize, this.biSections,
-                this.crossoverOperator, this.mutationOperator, this.evaluator);
+                this.crossoverOperator, this.mutationOperator, this.evaluator, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

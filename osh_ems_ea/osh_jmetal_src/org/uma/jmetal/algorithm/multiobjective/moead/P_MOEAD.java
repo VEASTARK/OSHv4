@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,10 +36,11 @@ public class P_MOEAD extends AbstractMOEAD<DoubleSolution> {
                    double neighborhoodSelectionProbability,
                    int maximumNumberOfReplacedSolutions,
                    int neighborSize,
-                   SolutionListEvaluator<DoubleSolution> evaluator) {
+                   SolutionListEvaluator<DoubleSolution> evaluator,
+                   IEALogger eaLogger) {
         super(problem, populationSize, resultPopulationSize, crossover, mutation, functionType,
                 dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
-                neighborSize);
+                neighborSize, eaLogger);
 
         this.differentialEvolutionCrossover = (DifferentialEvolutionCrossover) this.crossoverOperator;
         this.evaluator = evaluator;

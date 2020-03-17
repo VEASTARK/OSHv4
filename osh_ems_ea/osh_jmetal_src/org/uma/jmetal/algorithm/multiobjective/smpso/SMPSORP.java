@@ -29,8 +29,10 @@ import org.uma.jmetal.util.measure.impl.CountingMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -88,7 +90,7 @@ public class SMPSORP
                    MutationOperator<DoubleSolution> mutationOperator, int maxIterations, double r1Min, double r1Max,
                    double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
                    double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                   SolutionListEvaluator<DoubleSolution> evaluator) {
+                   SolutionListEvaluator<DoubleSolution> evaluator, IEALogger eaLogger) {
         this.problem = problem;
         this.swarmSize = swarmSize;
         this.leaders = leaders;
@@ -140,6 +142,9 @@ public class SMPSORP
 
             this.referencePointSolutions.add(refPoint);
         }
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     protected void updateLeadersDensityEstimator() {
@@ -153,6 +158,7 @@ public class SMPSORP
         this.iterations = 1;
         this.currentIteration.reset(1);
         this.updateLeadersDensityEstimator();
+        this.getEALogger().logPopulation(this.getResult(), this.iterations);
     }
 
     @Override
@@ -162,12 +168,14 @@ public class SMPSORP
         this.updateLeadersDensityEstimator();
 
         this.solutionListMeasure.push(this.getResult());
+        this.getEALogger().logPopulation(this.getResult(), this.iterations);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, this.getResult())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

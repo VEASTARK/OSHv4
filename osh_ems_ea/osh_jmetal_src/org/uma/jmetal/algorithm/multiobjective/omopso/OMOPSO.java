@@ -13,6 +13,7 @@ import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,7 +47,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
      */
     public OMOPSO(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
                   int swarmSize, int archiveSize, UniformMutation uniformMutation,
-                  NonUniformMutation nonUniformMutation) {
+                  NonUniformMutation nonUniformMutation, IEALogger eaLogger) {
         this.problem = problem;
         this.evaluator = evaluator;
 
@@ -67,6 +68,9 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
         this.randomGenerator = JMetalRandom.getInstance();
         this.crowdingDistance = new CrowdingDistance<>();
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
 
@@ -74,18 +78,21 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     protected void initProgress() {
         this.currentIteration = 1;
         this.crowdingDistance.computeDensityEstimator(this.leaderArchive.getSolutionList());
+        this.getEALogger().logPopulation(this.epsilonArchive.getSolutionList(), this.currentIteration);
     }
 
     @Override
     protected void updateProgress() {
         this.currentIteration += 1;
         this.crowdingDistance.computeDensityEstimator(this.leaderArchive.getSolutionList());
+        this.getEALogger().logPopulation(this.epsilonArchive.getSolutionList(), this.currentIteration);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.currentIteration, -1, this.epsilonArchive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

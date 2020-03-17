@@ -11,6 +11,7 @@ import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.point.impl.IdealPoint;
 import org.uma.jmetal.util.point.impl.NadirPoint;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -65,11 +66,12 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
     protected int evaluations;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     public AbstractMOEAD(Problem<S> problem, int populationSize, int resultPopulationSize,
                          CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutation,
                          FunctionType functionType, String dataDirectory, double neighborhoodSelectionProbability,
-                         int maximumNumberOfReplacedSolutions, int neighborSize) {
+                         int maximumNumberOfReplacedSolutions, int neighborSize, IEALogger eaLogger) {
         this.problem = problem;
         this.populationSize = populationSize;
         this.resultPopulationSize = resultPopulationSize;
@@ -89,6 +91,9 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
         this.idealPoint = new IdealPoint(problem.getNumberOfObjectives());
         this.nadirPoint = new NadirPoint(problem.getNumberOfObjectives());
         this.lambda = new double[populationSize][problem.getNumberOfObjectives()];
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     /**
@@ -322,15 +327,18 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
 
     protected void initProgress() {
         this.evaluations = this.populationSize;
+        this.eaLogger.logPopulation(this.population, this.evaluations / this.populationSize);
     }
 
     protected void updateProgress() {
         this.evaluations += this.populationSize;
+        this.eaLogger.logPopulation(this.population, this.evaluations / this.populationSize);
     }
 
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -349,6 +357,16 @@ public abstract class AbstractMOEAD<S extends Solution<?>> implements Algorithm<
     @Override
     public List<StoppingRule> getStoppingRules() {
         return this.stoppingRules;
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     protected enum NeighborType {NEIGHBOR, POPULATION}

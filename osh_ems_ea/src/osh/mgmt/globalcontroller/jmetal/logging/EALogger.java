@@ -10,6 +10,7 @@ import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
 import osh.simulation.DatabaseLoggerThread;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +37,8 @@ public class EALogger implements IEALogger {
     private final double[][] cervisiaInformation = new double[5][2];
     private final Comparator<Solution<?>> comparator= new ObjectiveComparator<>(0);
 
+    private PrintWriter additionalWriter;
+
     public EALogger(
             IGlobalLogger globalLogger,
             boolean log,
@@ -44,7 +47,7 @@ public class EALogger implements IEALogger {
             int logExtendedGenerations,
             boolean logOverallEA) {
 
-        init(globalLogger, log, logExtended, logXthGeneration, logExtendedGenerations,
+        this.init(globalLogger, log, logExtended, logXthGeneration, logExtendedGenerations,
                 logOverallEA);
     }
 
@@ -63,59 +66,60 @@ public class EALogger implements IEALogger {
         this.logger = globalLogger;
         this.logOverallEA = logOverallEA;
 
-        fitnessChange = new double[logExtendedGenerations];
-        fitnessSpread = new double[logExtendedGenerations];
-        homogeneity = new double[logExtendedGenerations];
+        this.fitnessChange = new double[logExtendedGenerations];
+        this.fitnessSpread = new double[logExtendedGenerations];
+        this.homogeneity = new double[logExtendedGenerations];
+    }
+
+    @Override
+    public void attachWriter(PrintWriter writer) {
+        this.additionalWriter = writer;
+    }
+
+    @Override
+    public void detachWriter() {
+        this.additionalWriter.flush();
+        this.additionalWriter.close();
+        this.additionalWriter = null;
     }
 
     @Override
     public void logStart(Algorithm<?> usedAlgorithm) {
-        if (log) {
+        if (this.log) {
             String logMessage = "===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===";
-            logger.logDebug(logMessage);
+            this.logger.logDebug(logMessage);
+            if (this.additionalWriter != null) {
+                this.additionalWriter.println(logMessage);
+            }
             this.bestFirstFitness = Double.NaN;
         }
     }
 
     @Override
     public void logEnd(Solution<?> bestSolution) {
-        if (log) {
+        if (this.log) {
             StringBuilder logMessage = new StringBuilder("===    Finished Optimization, final Fitness: ");
             logMessage.append(" ").append(bestSolution.getObjective(0)).append(" ");
             logMessage.append("    ===");
-            logger.logDebug(logMessage.toString());
-        }
-        if (logOverallEA) {
-            optimizationCounter++;
-        }
-    }
-
-    @Override
-    public void logEnd(List<? extends Solution<?>> bestSolutions) {
-        if (log) {
-            StringBuilder logMessage = new StringBuilder("***    final Fitness of Candidates: ");
-            for (Solution<?> s : bestSolutions) {
-                logMessage.append("\n Candidate: ");
-                logMessage.append(" ").append(s.getObjective(0)).append(" ");
+            this.logger.logDebug(logMessage.toString());
+            if (this.additionalWriter != null) {
+                this.additionalWriter.println(logMessage.toString());
             }
-
-            logMessage.append("\n    ***");
-            logger.logDebug(logMessage.toString());
         }
-        if (logOverallEA) {
-            optimizationCounter++;
+        if (this.logOverallEA) {
+            this.optimizationCounter++;
         }
     }
 
     @Override
     public void logPopulation(List<? extends Solution<?>> population, int generation) {
-        if (log) {
+        if (this.log) {
 
             String logMessage = "";
 
-            if (generation % logXthGeneration == 0) {
+            if (generation % this.logXthGeneration == 0) {
 
-                population.sort(comparator);
+                population.sort(this.comparator);
 
                 double bestFitness = population.get(0).getObjective(0);
 
@@ -128,64 +132,70 @@ public class EALogger implements IEALogger {
             } else {
 
                 if (Double.isNaN(this.bestFirstFitness)) {
-                    population.sort(comparator);
+                    population.sort(this.comparator);
                     this.bestFirstFitness = population.get(0).getObjective(0);
                 }
             }
 
-            if ((logExtended && generation % logXthGeneration == 0)
-                    || (logOverallEA && generation < logExtendedGenerations)) {
-                double[] popValues = getExtendedPopulationValues(population);
+            if ((this.logExtended && generation % this.logXthGeneration == 0)
+                    || (this.logOverallEA && generation < this.logExtendedGenerations)) {
+                double[] popValues = this.getExtendedPopulationValues(population);
 
-                if ((logOverallEA && generation < logExtendedGenerations)) {
+                if ((this.logOverallEA && generation < this.logExtendedGenerations)) {
 
-                    homogeneity[generation] += popValues[0];
-                    population.sort(comparator);
-                    fitnessChange[generation] += population.get(0).getObjective(0) / bestFirstFitness;
-                    fitnessSpread[generation] += popValues[1];
+                    this.homogeneity[generation] += popValues[0];
+                    population.sort(this.comparator);
+                    this.fitnessChange[generation] += population.get(0).getObjective(0) / this.bestFirstFitness;
+                    this.fitnessSpread[generation] += popValues[1];
                 }
 
-                if ((logExtended && generation % logXthGeneration == 0)) {
+                if ((this.logExtended && generation % this.logXthGeneration == 0)) {
                     logMessage += " -- Homogeneity mean: " + popValues[0] + " -- max: " + popValues[1]
                             + " -- deltaFitnessSpread: " + popValues[2];
                 }
             }
 
             if (!logMessage.isEmpty()) {
-                logger.logDebug(logMessage);
+                this.logger.logDebug(logMessage);
+                if (this.additionalWriter != null) {
+                    this.additionalWriter.println(logMessage);
+                }
             }
 
         }
-        if (logOverallEA) {
-            generationsUsed++;
+        if (this.logOverallEA) {
+            this.generationsUsed++;
         }
     }
 
     @Override
     public void logAdditional(String message) {
-        if (log) {
-            logger.logDebug(message);
+        if (this.log) {
+            this.logger.logDebug(message);
+            if (this.additionalWriter != null) {
+                this.additionalWriter.println(message);
+            }
         }
     }
 
     @Override
     public void shutdown() {
-        if (log) {
-            generationsUsed /= optimizationCounter;
+        if (this.log) {
+            this.generationsUsed /= this.optimizationCounter;
 
-            fitnessChange = Arrays.stream(fitnessChange).map(d -> d /= optimizationCounter).toArray();
-            fitnessSpread = Arrays.stream(fitnessSpread).map(d -> d /= optimizationCounter).toArray();
+            this.fitnessChange = Arrays.stream(this.fitnessChange).map(d -> d / this.optimizationCounter).toArray();
+            this.fitnessSpread = Arrays.stream(this.fitnessSpread).map(d -> d / this.optimizationCounter).toArray();
 
-            homogeneity = Arrays.stream(homogeneity).map(d -> d /= optimizationCounter).toArray();
+            this.homogeneity = Arrays.stream(this.homogeneity).map(d -> d / this.optimizationCounter).toArray();
 
             double[] cervisiaResults = new double[5];
             for (int i = 0; i < cervisiaResults.length; i++) {
-                if (cervisiaInformation[i][1] != 0) {
-                    cervisiaResults[i] = cervisiaInformation[i][0] / cervisiaInformation[i][1];
+                if (this.cervisiaInformation[i][1] != 0) {
+                    cervisiaResults[i] = this.cervisiaInformation[i][0] / this.cervisiaInformation[i][1];
                 }
             }
 
-            DatabaseLoggerThread.enqueueGA(generationsUsed, fitnessChange, fitnessSpread, homogeneity, optimizationCounter, cervisiaResults);
+            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange, this.fitnessSpread, this.homogeneity, this.optimizationCounter, cervisiaResults);
         }
     }
 

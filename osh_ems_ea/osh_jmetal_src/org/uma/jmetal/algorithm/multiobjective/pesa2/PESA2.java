@@ -10,6 +10,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.archive.impl.AdaptiveGridArchive;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +30,8 @@ public class PESA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
 
     public PESA2(Problem<S> problem, int populationSize, int archiveSize,
                  int biSections, CrossoverOperator<S> crossoverOperator,
-                 MutationOperator<S> mutationOperator, SolutionListEvaluator<S> evaluator) {
-        super(problem);
+                 MutationOperator<S> mutationOperator, SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
         this.archiveSize = archiveSize;
         this.biSections = biSections;
@@ -47,17 +48,20 @@ public class PESA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
     @Override
     protected void initProgress() {
         this.evaluations = this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations += this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -66,9 +70,7 @@ public class PESA2<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, Li
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        population = this.evaluator.evaluate(population, this.getProblem());
-
-        return population;
+        return this.evaluator.evaluate(population, this.getProblem());
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.operator.impl.mutation.CDGMutation;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -49,9 +50,10 @@ public class CDG extends AbstractCDG<DoubleSolution> {
                int t_,
                int subproblemNum_,
                int childGrid_,
-               int childGridNum_) {
+               int childGridNum_,
+               IEALogger eaLogger) {
         super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover,
-                neighborhoodSelectionProbability, sigma_, k_, t_, subproblemNum_, childGrid_, childGridNum_);
+                neighborhoodSelectionProbability, sigma_, k_, t_, subproblemNum_, childGrid_, childGridNum_, eaLogger);
 
         this.differentialEvolutionCrossover = (DifferentialEvolutionCrossover) this.crossoverOperator;
     }
@@ -65,6 +67,7 @@ public class CDG extends AbstractCDG<DoubleSolution> {
         this.initializeNadirPoint();
 
         this.evaluations = this.populationSize;
+        this.getEALogger().logPopulation(this.population, this.evaluations / this.populationSize);
 
         int gen = 0;
 
@@ -127,6 +130,8 @@ public class CDG extends AbstractCDG<DoubleSolution> {
             else
                 this.rankBasedSelection();
 
+            this.getEALogger().logPopulation(this.population, this.evaluations / this.populationSize);
+
         } while (!this.isStoppingConditionReached());
     }
 
@@ -144,6 +149,7 @@ public class CDG extends AbstractCDG<DoubleSolution> {
     public boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

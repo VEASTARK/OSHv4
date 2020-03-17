@@ -13,12 +13,14 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
 public class ESPEABuilder<S extends Solution<?>> implements AlgorithmBuilder<ESPEA<S>> {
 
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private int maxEvaluations;
     private int populationSize;
     private CrossoverOperator<S> crossoverOperator;
@@ -30,8 +32,10 @@ public class ESPEABuilder<S extends Solution<?>> implements AlgorithmBuilder<ESP
     private boolean normalizeObjectives;
     private ReplacementStrategy replacementStrategy;
 
-    public ESPEABuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator) {
+    public ESPEABuilder(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
+                        MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = 100;
         this.crossoverOperator = crossoverOperator;
@@ -48,7 +52,8 @@ public class ESPEABuilder<S extends Solution<?>> implements AlgorithmBuilder<ESP
     public ESPEA<S> build() {
         ESPEA<S> algorithm = new ESPEA<>(this.problem, this.populationSize, this.crossoverOperator,
                 this.fullArchiveCrossoverOperator, this.mutationOperator,
-                this.selectionOperator, this.scalarization, this.evaluator, this.normalizeObjectives, this.replacementStrategy);
+                this.selectionOperator, this.scalarization, this.evaluator, this.normalizeObjectives,
+                this.replacementStrategy, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

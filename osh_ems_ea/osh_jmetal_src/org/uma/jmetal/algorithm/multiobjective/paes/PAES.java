@@ -7,6 +7,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.archive.impl.AdaptiveGridArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,8 +32,8 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
      * Constructor
      */
     public PAES(Problem<S> problem, int archiveSize, int biSections,
-                MutationOperator<S> mutationOperator) {
-        super(problem);
+                MutationOperator<S> mutationOperato, IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setProblem(problem);
         this.archiveSize = archiveSize;
         this.biSections = biSections;
@@ -58,17 +59,24 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
     @Override
     protected void initProgress() {
         this.evaluations = 1;
+        if (this.evaluations % this.archiveSize == 0) {
+            this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.archiveSize);
+        }
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations++;
+        if (this.evaluations % this.archiveSize == 0) {
+            this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.archiveSize);
+        }
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

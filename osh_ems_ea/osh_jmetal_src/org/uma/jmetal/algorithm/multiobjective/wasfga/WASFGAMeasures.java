@@ -13,6 +13,7 @@ import org.uma.jmetal.util.measure.impl.BasicMeasure;
 import org.uma.jmetal.util.measure.impl.CountingMeasure;
 import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -42,7 +43,8 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
                           SolutionListEvaluator<S> evaluator,
                           double epsilon,
                           List<Double> referencePoint,
-                          String weightVectorsFileName) {
+                          String weightVectorsFileName,
+                          IEALogger eaLogger) {
 
         super(problem,
                 populationSize,
@@ -52,7 +54,8 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
                 evaluator,
                 epsilon,
                 referencePoint,
-                weightVectorsFileName);
+                weightVectorsFileName,
+                eaLogger);
         this.initMeasures();
     }
 
@@ -68,7 +71,8 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
                           SelectionOperator<List<S>, S> selectionOperator,
                           SolutionListEvaluator<S> evaluator,
                           double epsilon,
-                          List<Double> referencePoint) {
+                          List<Double> referencePoint,
+                          IEALogger eaLogger) {
         this(problem,
                 populationSize,
                 crossoverOperator,
@@ -77,24 +81,27 @@ public class WASFGAMeasures<S extends Solution<?>> extends WASFGA<S> implements 
                 evaluator,
                 epsilon,
                 referencePoint,
-                "");
+                "",
+                eaLogger);
     }
 
     @Override
     protected void initProgress() {
         this.iterations.reset();
+        this.getEALogger().logPopulation(this.population, this.iterations.get().intValue());
     }
 
     @Override
     protected void updateProgress() {
         this.iterations.increment();
-        this.solutionListMeasure.push(this.getResult());
+        this.getEALogger().logPopulation(this.population, this.iterations.get().intValue());
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations.get().intValue(), -1, this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

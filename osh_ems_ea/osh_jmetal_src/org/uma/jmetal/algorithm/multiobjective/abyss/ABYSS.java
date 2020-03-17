@@ -18,6 +18,7 @@ import org.uma.jmetal.util.comparator.StrengthFitnessComparator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.DistanceToSolutionListAttribute;
 import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import javax.management.JMException;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
                  int referenceSet2Size, int archiveSize, Archive<DoubleSolution> archive,
                  LocalSearchOperator<DoubleSolution> localSearch,
                  CrossoverOperator<DoubleSolution> crossoverOperator,
-                 int numberOfSubRanges) {
+                 int numberOfSubRanges, IEALogger eaLogger) {
 
         this.setPopulationSize(populationSize);
 
@@ -104,12 +105,16 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
         this.equalComparator = new EqualSolutionsComparator<>();
 
         this.evaluations = 0;
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     @Override
     public boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -179,6 +184,7 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
     public void referenceSetUpdate() {
         this.buildNewReferenceSet1();
         this.buildNewReferenceSet2();
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getPopulationSize());
     }
 
     /**
@@ -198,6 +204,7 @@ public class ABYSS extends AbstractScatterSearch<DoubleSolution, List<DoubleSolu
         } else {
             this.refSet2Test(solution);
         }
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getPopulationSize());
     }
 
     /**

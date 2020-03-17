@@ -14,6 +14,7 @@ import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.binarySet.BinarySet;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,7 +34,6 @@ import java.util.List;
 public class MOCHC45 implements Algorithm<List<BinarySolution>> {
     private final BinaryProblem problem;
     private final int populationSize;
-    private final int maxEvaluations;
     private final int convergenceValue;
     private final double preservedPopulation;
     private final double initialConvergenceCount;
@@ -48,21 +48,21 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
     private Comparator<BinarySolution> comparator;
 
     private final List<StoppingRule> stoppingRules = new ArrayList<>();
+    private IEALogger eaLogger;
 
     /**
      * Constructor
      */
-    public MOCHC45(BinaryProblem problem, int populationSize, int maxEvaluations, int convergenceValue,
+    public MOCHC45(BinaryProblem problem, int populationSize, int convergenceValue,
                    double preservedPopulation, double initialConvergenceCount,
                    CrossoverOperator<BinarySolution> crossoverOperator,
                    MutationOperator<BinarySolution> cataclysmicMutation,
                    SelectionOperator<List<BinarySolution>, List<BinarySolution>> newGenerationSelection,
                    SelectionOperator<List<BinarySolution>, BinarySolution> parentSelection,
-                   SolutionListEvaluator<BinarySolution> evaluator) {
+                   SolutionListEvaluator<BinarySolution> evaluator, IEALogger eaLogger) {
         super();
         this.problem = problem;
         this.populationSize = populationSize;
-        this.maxEvaluations = maxEvaluations;
         this.convergenceValue = convergenceValue;
         this.preservedPopulation = preservedPopulation;
         this.initialConvergenceCount = initialConvergenceCount;
@@ -70,6 +70,9 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
         this.cataclysmicMutation = cataclysmicMutation;
         this.newGenerationSelection = newGenerationSelection;
         this.parentSelection = parentSelection;
+
+        this.eaLogger = eaLogger;
+        this.eaLogger.logStart(this);
     }
 
     @Override
@@ -80,6 +83,16 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
     @Override
     public String getDescription() {
         return "Multiobjective CHC algorithm";
+    }
+
+    @Override
+    public void setEALogger(IEALogger eaLogger) {
+        this.eaLogger = eaLogger;
+    }
+
+    @Override
+    public IEALogger getEALogger() {
+        return this.eaLogger;
     }
 
     @Override
@@ -99,6 +112,7 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
             this.population.add(newIndividual);
             this.evaluations++;
         }
+        this.eaLogger.logPopulation(this.population, this.evaluations / this.populationSize);
 
         while (!this.isStoppingConditionReached()) {
             List<BinarySolution> offspringPopulation = new ArrayList<>(this.populationSize);
@@ -148,12 +162,14 @@ public class MOCHC45 implements Algorithm<List<BinarySolution>> {
             }
 
             this.population = newPopulation;
+            this.eaLogger.logPopulation(this.population, this.evaluations / this.populationSize);
         }
     }
 
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.eaLogger.logAdditional(sr.getMsg());
                 return true;
             }
         }

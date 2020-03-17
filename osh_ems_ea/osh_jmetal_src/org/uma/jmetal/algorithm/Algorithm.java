@@ -2,6 +2,7 @@ package org.uma.jmetal.algorithm;
 
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.util.naming.DescribedEntity;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,4 +24,8 @@ public interface Algorithm<Result> extends Runnable, Serializable, DescribedEnti
     default void addStoppingRule(StoppingRule stoppingRule) {
         getStoppingRules().add(stoppingRule);
     }
+
+    void setEALogger(IEALogger eaLogger);
+
+    IEALogger getEALogger();
 }

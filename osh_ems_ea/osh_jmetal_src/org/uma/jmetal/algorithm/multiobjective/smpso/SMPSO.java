@@ -10,6 +10,7 @@ import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,7 +60,7 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
                  MutationOperator<DoubleSolution> mutationOperator, int maxIterations, double r1Min, double r1Max,
                  double r2Min, double r2Max, double c1Min, double c1Max, double c2Min, double c2Max,
                  double weightMin, double weightMax, double changeVelocity1, double changeVelocity2,
-                 SolutionListEvaluator<DoubleSolution> evaluator) {
+                 SolutionListEvaluator<DoubleSolution> evaluator, IEALogger eaLogger) {
         this.problem = problem;
         this.swarmSize = swarmSize;
         this.leaders = leaders;
@@ -92,6 +93,9 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
             this.deltaMax[i] = (problem.getUnboxedUpperBound(i) - problem.getUnboxedLowerBound(i)) / 2.0;
             this.deltaMin[i] = -this.deltaMax[i];
         }
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     protected void updateLeadersDensityEstimator() {
@@ -102,18 +106,25 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
     protected void initProgress() {
         this.iterations = 1;
         this.updateLeadersDensityEstimator();
+        this.logPopulation(this.iterations);
     }
 
     @Override
     protected void updateProgress() {
         this.iterations += 1;
         this.updateLeadersDensityEstimator();
+        this.logPopulation(this.iterations);
+    }
+
+    void logPopulation(int iterations) {
+        this.getEALogger().logPopulation(this.leaders.getSolutionList(), iterations);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, this.leaders.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
@@ -135,9 +146,7 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
 
     @Override
     protected List<DoubleSolution> evaluateSwarm(List<DoubleSolution> swarm) {
-        swarm = this.evaluator.evaluate(swarm, this.problem);
-
-        return swarm;
+        return this.evaluator.evaluate(swarm, this.problem);
     }
 
     @Override

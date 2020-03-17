@@ -16,6 +16,7 @@ import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
 import org.uma.jmetal.util.solutionattribute.impl.LocationAttribute;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -50,8 +51,9 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
     public MOCell(Problem<S> problem, int populationSize, BoundedArchive<S> archive,
                   Neighborhood<S> neighborhood,
                   CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                  SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
-        super(problem);
+                  SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
+                  IEALogger eaLogger) {
+        super(problem, eaLogger);
         this.setMaxPopulationSize(populationSize);
         this.archive = archive;
         this.neighborhood = neighborhood;
@@ -67,18 +69,21 @@ public class MOCell<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
     protected void initProgress() {
         this.evaluations = this.getMaxPopulationSize();
         this.currentIndividual = 0;
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected void updateProgress() {
         this.evaluations++;
         this.currentIndividual = (this.currentIndividual + 1) % this.getMaxPopulationSize();
+        this.getEALogger().logPopulation(this.archive.getSolutionList(), this.evaluations / this.getMaxPopulationSize());
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

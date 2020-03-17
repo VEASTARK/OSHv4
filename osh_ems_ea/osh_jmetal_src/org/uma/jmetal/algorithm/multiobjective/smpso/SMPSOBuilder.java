@@ -11,6 +11,7 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
@@ -18,6 +19,7 @@ import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
 public class SMPSOBuilder implements AlgorithmBuilder<SMPSO> {
     protected final BoundedArchive<DoubleSolution> leaders;
     private final DoubleProblem problem;
+    private final IEALogger eaLogger;
     protected int archiveSize;
     protected MutationOperator<DoubleSolution> mutationOperator;
     protected SolutionListEvaluator<DoubleSolution> evaluator;
@@ -37,8 +39,9 @@ public class SMPSOBuilder implements AlgorithmBuilder<SMPSO> {
     private int swarmSize;
     private int maxIterations;
 
-    public SMPSOBuilder(DoubleProblem problem, BoundedArchive<DoubleSolution> leaders) {
+    public SMPSOBuilder(DoubleProblem problem, BoundedArchive<DoubleSolution> leaders, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.leaders = leaders;
 
         this.swarmSize = 100;
@@ -240,12 +243,12 @@ public class SMPSOBuilder implements AlgorithmBuilder<SMPSO> {
             algorithm = new SMPSO(this.problem, this.swarmSize, this.leaders, this.mutationOperator,
                 this.maxIterations, this.r1Min, this.r1Max,
                     this.r2Min, this.r2Max, this.c1Min, this.c1Max, this.c2Min, this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1,
-                    this.changeVelocity2, this.evaluator);
+                    this.changeVelocity2, this.evaluator, this.eaLogger);
         } else {
             algorithm = new SMPSOMeasures(this.problem, this.swarmSize, this.leaders, this.mutationOperator,
                 this.maxIterations, this.r1Min, this.r1Max,
                     this.r2Min, this.r2Max, this.c1Min, this.c1Max, this.c2Min, this.c2Max, this.weightMin, this.weightMax, this.changeVelocity1,
-                    this.changeVelocity2, this.evaluator);
+                    this.changeVelocity2, this.evaluator, this.eaLogger);
         }
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.swarmSize, this.swarmSize * this.maxIterations));
         return algorithm;

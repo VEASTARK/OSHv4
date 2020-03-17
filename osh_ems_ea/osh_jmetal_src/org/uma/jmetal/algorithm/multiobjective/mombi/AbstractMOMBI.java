@@ -9,6 +9,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,8 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
      */
     public AbstractMOMBI(Problem<S> problem, CrossoverOperator<S> crossover, MutationOperator<S> mutation,
                          SelectionOperator<List<S>, S> selection,
-                         SolutionListEvaluator<S> evaluator) {
-        super(problem);
+                         SolutionListEvaluator<S> evaluator, IEALogger eaLogger) {
+        super(problem, eaLogger);
 
         this.crossoverOperator = crossover;
         this.mutationOperator = mutation;
@@ -56,17 +57,20 @@ public abstract class AbstractMOMBI<S extends Solution<?>> extends AbstractGenet
     @Override
     protected void initProgress() {
         this.iterations = 1;
+        this.getEALogger().logPopulation(this.population, this.iterations);
     }
 
     @Override
     protected void updateProgress() {
         this.iterations += 1;
+        this.getEALogger().logPopulation(this.population, this.iterations);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

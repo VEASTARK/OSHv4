@@ -15,6 +15,7 @@ import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
      * Constructor
      */
     public NSGAIII(NSGAIIIBuilder<S> builder) { // can be created from the NSGAIIIBuilder within the same package
-        super(builder.getProblem());
+        super(builder.getProblem(), builder.getEaLogger());
         this.addStoppingRule(new EvaluationsStoppingRule(builder.getPopulationSize(),
                 builder.getMaxIterations() * builder.getPopulationSize()));
 
@@ -75,8 +76,9 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
      */
     public NSGAIII(Problem<S> problem, CrossoverOperator<S> crossoverOperator,
                    MutationOperator<S> mutationOperator,
-                   SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
-        super(problem);
+                   SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator,
+                   IEALogger eaLogger) {
+        super(problem, eaLogger);
 
         this.crossoverOperator = crossoverOperator;
         this.mutationOperator = mutationOperator;
@@ -129,17 +131,20 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     @Override
     protected void initProgress() {
         this.iterations = 1;
+        this.getEALogger().logPopulation(this.population, this.iterations);
     }
 
     @Override
     protected void updateProgress() {
         this.iterations++;
+        this.getEALogger().logPopulation(this.population, this.iterations);
     }
 
     @Override
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, this.iterations, -1, this.getPopulation())) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }

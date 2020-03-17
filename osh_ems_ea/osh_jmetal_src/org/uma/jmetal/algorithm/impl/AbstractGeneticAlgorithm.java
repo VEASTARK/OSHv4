@@ -5,6 +5,7 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.util.JMetalException;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,11 @@ public abstract class AbstractGeneticAlgorithm<S, Result> extends AbstractEvolut
      *
      * @param problem The problem to solve
      */
-    public AbstractGeneticAlgorithm(Problem<S> problem) {
+    public AbstractGeneticAlgorithm(Problem<S> problem, IEALogger eaLogger) {
         this.setProblem(problem);
+
+        this.setEALogger(eaLogger);
+        this.getEALogger().logStart(this);
     }
 
     public int getMaxPopulationSize() {

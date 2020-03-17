@@ -8,6 +8,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
 public class NSGAIIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NSGAIII<S>> {
     // no access modifier means access from classes within the same package
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private int maxIterations;
     private int populationSize;
     private CrossoverOperator<S> crossoverOperator;
@@ -29,8 +31,9 @@ public class NSGAIIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<N
     /**
      * Builder constructor
      */
-    public NSGAIIIBuilder(Problem<S> problem) {
+    public NSGAIIIBuilder(Problem<S> problem, IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxIterations = 250;
         this.populationSize = 100;
         this.evaluator = new SequentialSolutionListEvaluator<>();
@@ -48,6 +51,10 @@ public class NSGAIIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<N
 
     public Problem<S> getProblem() {
         return this.problem;
+    }
+
+    public IEALogger getEaLogger() {
+        return this.eaLogger;
     }
 
     public int getMaxIterations() {

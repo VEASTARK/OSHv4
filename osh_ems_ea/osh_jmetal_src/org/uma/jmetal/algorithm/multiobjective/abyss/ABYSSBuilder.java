@@ -12,12 +12,14 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
  * @author Cristobal Barba
  */
 public class ABYSSBuilder implements AlgorithmBuilder<ABYSS> {
     private final DoubleProblem problem;
+    private final IEALogger eaLogger;
     private final CrowdingDistanceArchive<DoubleSolution> archive;
     protected LocalSearchOperator<DoubleSolution> improvementOperator;
     private CrossoverOperator<DoubleSolution> crossoverOperator;
@@ -29,7 +31,7 @@ public class ABYSSBuilder implements AlgorithmBuilder<ABYSS> {
     private int archiveSize;
     private int maxEvaluations;
 
-    public ABYSSBuilder(DoubleProblem problem, Archive<DoubleSolution> archive) {
+    public ABYSSBuilder(DoubleProblem problem, Archive<DoubleSolution> archive, IEALogger eaLogger) {
         this.populationSize = 20;
         this.maxEvaluations = 25000;
         this.archiveSize = 100;
@@ -37,6 +39,7 @@ public class ABYSSBuilder implements AlgorithmBuilder<ABYSS> {
         this.refSet2Size = 10;
         this.numberOfSubranges = 4;
         this.problem = problem;
+        this.eaLogger = eaLogger;
         double crossoverProbability = 0.9;
         double distributionIndex = 20.0;
         this.crossoverOperator = new SBXCrossover(crossoverProbability, distributionIndex);
@@ -132,7 +135,7 @@ public class ABYSSBuilder implements AlgorithmBuilder<ABYSS> {
     public ABYSS build() {
         ABYSS algorithm =  new ABYSS(this.problem, this.populationSize, this.refSet1Size,
                 this.refSet2Size, this.archiveSize, this.archive, this.improvementOperator, this.crossoverOperator,
-                this.numberOfSubranges);
+                this.numberOfSubranges, this.eaLogger);
         algorithm.addStoppingRule(new EvaluationsStoppingRule(this.populationSize, this.maxEvaluations));
         return algorithm;
     }

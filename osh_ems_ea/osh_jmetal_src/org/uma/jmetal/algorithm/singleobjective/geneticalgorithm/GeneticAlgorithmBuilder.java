@@ -12,6 +12,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class GeneticAlgorithmBuilder<S extends Solution<?>> {
      * Builder class
      */
     private final Problem<S> problem;
+    private final IEALogger eaLogger;
     private final CrossoverOperator<S> crossoverOperator;
     private final MutationOperator<S> mutationOperator;
     private final SelectionOperator<List<S>, S> defaultSelectionOperator = new BinaryTournamentSelection<>();
@@ -37,8 +39,10 @@ public class GeneticAlgorithmBuilder<S extends Solution<?>> {
      */
     public GeneticAlgorithmBuilder(Problem<S> problem,
                                    CrossoverOperator<S> crossoverOperator,
-                                   MutationOperator<S> mutationOperator) {
+                                   MutationOperator<S> mutationOperator,
+                                   IEALogger eaLogger) {
         this.problem = problem;
+        this.eaLogger = eaLogger;
         this.maxEvaluations = 25000;
         this.populationSize = 100;
         this.mutationOperator = mutationOperator;
@@ -60,10 +64,10 @@ public class GeneticAlgorithmBuilder<S extends Solution<?>> {
         AbstractGeneticAlgorithm<S, S> algorithm;
         if (this.variant == GeneticAlgorithmVariant.GENERATIONAL) {
             algorithm = new GenerationalGeneticAlgorithm<>(this.problem, this.populationSize,
-                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator);
+                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.evaluator, this.eaLogger);
         } else if (this.variant == GeneticAlgorithmVariant.STEADY_STATE) {
             algorithm = new SteadyStateGeneticAlgorithm<>(this.problem, this.populationSize,
-                    this.crossoverOperator, this.mutationOperator, this.selectionOperator);
+                    this.crossoverOperator, this.mutationOperator, this.selectionOperator, this.eaLogger);
         } else {
             throw new JMetalException("Unknown variant: " + this.variant);
         }
