@@ -143,8 +143,9 @@ public class OSHLegacyGenerationalGeneticAlgorithm<S extends Solution<?>> extend
             for (int i = 0; i < ((this.maxPopulationSize / 2) - 1); i++) {
                 matingPopulation = this.selection(this.population);
                 offspringPopulation = this.reproduction(matingPopulation);
-                offspringPool.addAll(this.evaluatePopulation(offspringPopulation));
+                offspringPool.addAll(offspringPopulation);
             }
+            this.evaluatePopulation(offspringPool);
             this.population = this.replacement(this.population, offspringPool);
             this.updateProgress();
         }
