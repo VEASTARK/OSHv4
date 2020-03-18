@@ -54,6 +54,13 @@ public class TournamentSelection<S extends Solution<?>> implements SelectionOper
             int count = 1; // at least 2 solutions are compared
             do {
                 S candidate = SolutionListUtils.selectNRandomDifferentSolutions(1, solutionList).get(0);
+
+                //TODO: in legacy jmetal the same solution could not be selected when running tournament selection,
+                // review this as sonon as next backwards-compatibility breaking update is released
+                while (result == candidate) {
+                    candidate = SolutionListUtils.selectNRandomDifferentSolutions(1, solutionList).get(0);
+                }
+
                 result = SolutionUtils.getBestSolution(result, candidate, this.comparator);
             } while (++count < this.n_arity);
         }

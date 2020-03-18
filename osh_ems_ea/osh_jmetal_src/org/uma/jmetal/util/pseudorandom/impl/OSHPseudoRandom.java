@@ -3,8 +3,6 @@ package org.uma.jmetal.util.pseudorandom.impl;
 import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
 import osh.core.OSHRandom;
 
-import java.util.stream.DoubleStream;
-
 
 /**
  * Represents a wrapper around a {@link OSHRandom} random generator for use in JMetal related algorithms, problem,
@@ -28,23 +26,23 @@ public class OSHPseudoRandom implements PseudoRandomGenerator {
 
     @Override
     public int nextInt(int lowerBound, int upperBound) {
-        return lowerBound + randomGenerator.getNextInt(upperBound - lowerBound + 1);
+        return lowerBound + this.randomGenerator.getNextInt(upperBound - lowerBound + 1);
     }
 
     @Override
     public double nextDouble(double lowerBound, double upperBound) {
         double max = upperBound - lowerBound;
-        return lowerBound + randomGenerator.getNextDouble(max);
+        return lowerBound + this.randomGenerator.getNextDouble(max);
     }
 
     @Override
     public double nextDouble() {
-        return randomGenerator.getNextDouble();
+        return this.randomGenerator.getNextDouble();
     }
 
     @Override
     public double nextGaussian() {
-        return randomGenerator.getNextGaussian();
+        return this.randomGenerator.getNextGaussian();
     }
 
     @Override

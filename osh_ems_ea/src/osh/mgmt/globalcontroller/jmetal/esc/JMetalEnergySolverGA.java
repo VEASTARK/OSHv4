@@ -1,7 +1,7 @@
 package osh.mgmt.globalcontroller.jmetal.esc;
 
 import org.uma.jmetal.algorithm.Algorithm;
-import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.GenerationalGeneticAlgorithm;
+import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.OSHLegacyGenerationalGeneticAlgorithm;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRuleFactory;
 import org.uma.jmetal.operator.CrossoverOperator;
@@ -34,7 +34,6 @@ import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.JMetalSolver;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
-import osh.mgmt.globalcontroller.jmetal.logging.EALogger;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.io.File;
@@ -170,8 +169,9 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         }
 
         eaLogger.attachWriter(pw);
+        eaLogger.setTimestamp(ignoreLoadProfileBefore);
 
-        algorithm = new GenerationalGeneticAlgorithm<>(binaryProblem, this.gaparameters.getPopSize(), crossover,
+        algorithm = new OSHLegacyGenerationalGeneticAlgorithm<>(binaryProblem, this.gaparameters.getPopSize(), crossover,
                 mutation, selection, algorithmEvaluator, eaLogger);
 
         //add stopping rules

@@ -38,6 +38,7 @@ public class EALogger implements IEALogger {
     private final Comparator<Solution<?>> comparator= new ObjectiveComparator<>(0);
 
     private PrintWriter additionalWriter;
+    private long timestamp;
 
     public EALogger(
             IGlobalLogger globalLogger,
@@ -84,12 +85,17 @@ public class EALogger implements IEALogger {
     }
 
     @Override
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
     public void logStart(Algorithm<?> usedAlgorithm) {
         if (this.log) {
             String logMessage = "===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===";
             this.logger.logDebug(logMessage);
             if (this.additionalWriter != null) {
-                this.additionalWriter.println(logMessage);
+                this.additionalWriter.println("[" + this.timestamp + "] " + logMessage);
             }
             this.bestFirstFitness = Double.NaN;
         }
@@ -180,7 +186,7 @@ public class EALogger implements IEALogger {
 
     @Override
     public void shutdown() {
-        if (this.log) {
+        if (this.log && DatabaseLoggerThread.isIsLogToDatabase()) {
             this.generationsUsed /= this.optimizationCounter;
 
             this.fitnessChange = Arrays.stream(this.fitnessChange).map(d -> d / this.optimizationCounter).toArray();
@@ -262,19 +268,19 @@ public class EALogger implements IEALogger {
     @Override
     public void logCervisia(DeviceTypes type, double cervisia) {
         synchronized (this.cervisiaInformation) {
-            if (type.equals(DeviceTypes.CHPPLANT)) {
+            if (type == DeviceTypes.CHPPLANT) {
                 this.cervisiaInformation[0][0] += cervisia;
                 this.cervisiaInformation[0][1]++;
-            } else if (type.equals(DeviceTypes.HOTWATERSTORAGE)) {
+            } else if (type == DeviceTypes.HOTWATERSTORAGE) {
                 this.cervisiaInformation[1][0] += cervisia;
                 this.cervisiaInformation[1][1]++;
-            } else if (type.equals(DeviceTypes.DISHWASHER)) {
+            } else if (type == DeviceTypes.DISHWASHER) {
                 this.cervisiaInformation[2][0] += cervisia;
                 this.cervisiaInformation[2][1]++;
-            } else if (type.equals(DeviceTypes.DRYER)) {
+            } else if (type == DeviceTypes.DRYER) {
                 this.cervisiaInformation[3][0] += cervisia;
                 this.cervisiaInformation[3][1]++;
-            } else if (type.equals(DeviceTypes.WASHINGMACHINE)) {
+            } else if (type == DeviceTypes.WASHINGMACHINE) {
                 this.cervisiaInformation[4][0] += cervisia;
                 this.cervisiaInformation[4][1]++;
             }
