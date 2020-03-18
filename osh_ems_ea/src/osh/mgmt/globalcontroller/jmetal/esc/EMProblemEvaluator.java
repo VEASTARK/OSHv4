@@ -2,7 +2,6 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
 import org.uma.jmetal.solution.Solution;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
@@ -15,6 +14,7 @@ import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -36,6 +36,7 @@ public class EMProblemEvaluator {
 
     private final int stepSize;
     private final IFitness fitnessFunction;
+    private final IEALogger eaLogger;
     private final SolutionDistributor distributor;
 
     private final EnergyProblemDataContainer baseDataContainer;
@@ -68,6 +69,7 @@ public class EMProblemEvaluator {
             long ignoreLoadProfileBefore,
             long ignoreLoadProfileAfter,
             IFitness fitnessFunction,
+            IEALogger eaLogger,
             int stepSize) {
 
         this.distributor = distributor;
@@ -77,6 +79,7 @@ public class EMProblemEvaluator {
         this.ignoreLoadProfileAfter = ignoreLoadProfileAfter;
         this.stepSize = stepSize;
         this.fitnessFunction = fitnessFunction;
+        this.eaLogger = eaLogger;
 
         //mapping of uuid to problem-part id, needed for the construction of UUIDCommodityMaps
         Object2IntOpenHashMap<UUID> uuidIntMap = new Object2IntOpenHashMap<>();
@@ -342,7 +345,7 @@ public class EMProblemEvaluator {
             fitness += add;
 
             if (log && add != 0) {
-                OSH_gGAMultiThread.logCervisia(problempart.getDeviceType(), add);
+                this.eaLogger.logCervisia(problempart.getDeviceType(), add);
             }
         }
 

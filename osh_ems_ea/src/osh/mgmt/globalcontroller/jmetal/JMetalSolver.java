@@ -1,6 +1,6 @@
 package osh.mgmt.globalcontroller.jmetal;
 
-import jmetal.core.Solution;
+import org.uma.jmetal.solution.Solution;
 import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
@@ -9,7 +9,6 @@ import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
-import osh.utils.string.ParameterConstants;
 
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -23,7 +22,7 @@ public class JMetalSolver extends Optimizer {
     protected final OSHRandom randomGenerator;
     protected final IGlobalLogger logger;
     protected final boolean showDebugMessages;
-    protected final Comparator<Solution> fitnessComparator = (o1, o2) -> {
+    protected final Comparator<Solution<?>> fitnessComparator = (o1, o2) -> {
         double v1 = o1.getObjective(0), v2 = o2.getObjective(0);
         return Double.compare(v1, v2);
     };

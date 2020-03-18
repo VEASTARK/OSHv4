@@ -129,6 +129,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
                 ignoreLoadProfileBefore,
                 ignoreLoadProfileAfter,
                 fitnessFunction,
+                eaLogger,
                 this.STEP_SIZE);
 
         Problem<BinarySolution> binaryProblem = new BinaryEnergyManagementProblem(

@@ -1,6 +1,5 @@
 package osh.mgmt.globalcontroller;
 
-import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
 import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.oc.GAConfiguration;
@@ -395,6 +394,7 @@ public class OSHGlobalControllerJMetal
                     now,
                     ignoreLoadProfileAfter,
                     fitnessFunction,
+                    this.eaLogger,
                     this.stepSize);
 
             boolean extensiveLogging =
