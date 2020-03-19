@@ -4,12 +4,21 @@ sourceSets {
             srcDir 'src'
             srcDir 'osh_jmetal_src'
         }
+
+        resources {
+            srcDir 'resources'
+        }
     }
 }
 
 dependencies {
     implementation project(":osh_core")
 
+    implementation group: 'com.fuzzylite', name: 'jfuzzylite'
+    implementation group: 'commons-io', name: 'commons-io'
     implementation group: 'it.unimi.dsi', name: 'fastutil'
     implementation group: 'javax.xml.bind', name: 'jaxb-api'
+    implementation group: 'org.apache.commons', name: 'commons-collections4'
+    implementation group: 'org.apache.commons', name: 'commons-lang3'
+    implementation group: 'org.apache.commons', name: 'commons-math3'
 }

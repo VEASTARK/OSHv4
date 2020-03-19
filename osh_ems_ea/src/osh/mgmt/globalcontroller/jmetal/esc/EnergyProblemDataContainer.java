@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Data-container for all necessary parts to evaluate a proposed solution for the {@link EnergyManagementProblem}.
+ * Data-container for all necessary parts to evaluate a proposed solution for the {@link EMProblemEvaluator}.
  *
  * @author Sebastian Kramer
  */

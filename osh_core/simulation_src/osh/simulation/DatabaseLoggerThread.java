@@ -46,6 +46,7 @@ public final class DatabaseLoggerThread extends Thread {
     private static int[] preferredConnection;
     private static Connection[] conn;
     private static boolean running = true;
+    private static boolean isLogToDatabase;
 
     private static boolean logDevices;
     private static boolean logHotWater;
@@ -78,6 +79,7 @@ public final class DatabaseLoggerThread extends Thread {
         conn = new Connection[preferredConnection.length];
 
         DatabaseLoggerThread.logQueue = new LinkedBlockingQueue<>();
+        DatabaseLoggerThread.isLogToDatabase = true;
 
 //		trySetupConnection();
 
@@ -1133,6 +1135,10 @@ public final class DatabaseLoggerThread extends Thread {
 
     public static void setLogSmartHeater(boolean logSmartHeater) {
         DatabaseLoggerThread.logSmartHeater = logSmartHeater;
+    }
+
+    public static boolean isIsLogToDatabase() {
+        return isLogToDatabase;
     }
 
     @Override

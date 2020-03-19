@@ -1,7 +1,6 @@
 package osh.mgmt.globalcontroller;
 
-import jmetal.core.Solution;
-import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
+import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.oc.GAConfiguration;
 import osh.core.OSHRandom;
@@ -24,6 +23,7 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
+import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
@@ -35,9 +35,11 @@ import osh.mgmt.globalcontroller.jmetal.Fitness;
 import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
-import osh.mgmt.globalcontroller.jmetal.esc.EnergyManagementProblem;
+import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
+import osh.mgmt.globalcontroller.jmetal.logging.EALogger;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
@@ -71,6 +73,7 @@ public class OSHGlobalControllerJMetal
     private final String logDir;
     private int stepSize;
     private Boolean logGa;
+    private final IEALogger eaLogger;
 
 
     /**
@@ -161,6 +164,7 @@ public class OSHGlobalControllerJMetal
         this.logDir = this.getOSH().getOSHStatus().getLogDir();
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
+        this.eaLogger = new EALogger(this.getGlobalLogger(),true,true,10,20,true);
     }
 
 
@@ -192,9 +196,7 @@ public class OSHGlobalControllerJMetal
     public void onSystemShutdown() throws OSHException {
         super.onSystemShutdown();
 
-        // shutting down threadpool
-        OSH_gGAMultiThread.shutdown();
-//		CostChecker.shutDown();
+        this.eaLogger.shutdown();
     }
 
     @Override
@@ -280,9 +282,6 @@ public class OSHGlobalControllerJMetal
         //retrieve information of ga should log to database
         if (this.logGa == null) {
             this.logGa = DatabaseLoggerThread.isLogGA();
-            if (this.logGa) {
-                OSH_gGAMultiThread.initLogging();
-            }
         }
 
         EnumMap<AncillaryCommodity, PriceSignal> tempPriceSignals = new EnumMap<>(AncillaryCommodity.class);
@@ -333,7 +332,7 @@ public class OSHGlobalControllerJMetal
         InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[problemPartsList.size()];
         problemParts = problemPartsList.toArray(problemParts);
 
-        Solution solution;
+        Solution<?> solution;
         SolutionWithFitness resultWithAll;
 
         if (!this.oshGlobalObserver.getAndResetProblempartChangedFlag()) {
@@ -379,13 +378,14 @@ public class OSHGlobalControllerJMetal
                     tempPriceSignals,
                     tempPowerLimitSignals,
                     now,
-                    fitnessFunction);
+                    fitnessFunction,
+                    this.eaLogger);
             solution = resultWithAll.getSolution();
 
             SolutionDistributor distributor = new SolutionDistributor();
             distributor.gatherVariableInformation(problemParts);
 
-            EnergyManagementProblem problem = new EnergyManagementProblem(
+            EMProblemEvaluator problem = new EMProblemEvaluator(
                     problemParts,
                     this.ocESC,
                     distributor,
@@ -393,11 +393,12 @@ public class OSHGlobalControllerJMetal
                     this.powerLimitSignals,
                     now,
                     ignoreLoadProfileAfter,
-                    optimisationRunRandomGenerator,
                     fitnessFunction,
+                    this.eaLogger,
                     this.stepSize);
 
-            boolean extensiveLogging = (hasGUI || isReal) && solution.getDecisionVariables().length > 0;
+            boolean extensiveLogging =
+                    (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
             AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
 
             problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ancillaryMeter);

@@ -185,12 +185,34 @@ public final class ParameterConstants {
         public static final String maxGenerationsDeltaFitnessViolated = "maxGenerationsDeltaFitnessViolated";
 
         public static final String probability = "probability";
-        public static final String points = "points";
-        public static final String autoProbMutationFactor = "autoProbMutationFactor";
+        public static final String solutionRepair = "solutionRepair";
+        public static final String distributionIndex = "distributionIndex";
 
         public static final String mutation = "mutation";
         public static final String crossover = "crossover";
         public static final String selection = "selection";
+    }
+
+    public static final class EA_RECOMBINATION {
+        public static final String points = "points";
+        public static final String alpha = "alpha";
+
+        public static final String cr = "cr";
+        public static final String f = "f";
+        public static final String k = "k";
+        public static final String variant = "variant";
+    }
+
+    public static final class EA_MUTATION {
+        public static final String autoProbMutationFactor = "autoProbMutationFactor";
+        public static final String perturbation = "perturbation";
+        public static final String maxIterations = "maxIterations";
+    }
+
+    public static final class EA_SELECTION {
+        public static final String comparator = "comparator";
+        public static final String toSelect = "solutionsToSelect";
+        public static final String tournaments = "numberOfTournaments";
     }
 
     public static final class Logging {

@@ -30,19 +30,16 @@ public class BitSetConverter {
 
     //tested
     public static long gray2long(BitSet gray) {
-        BitSet binary = new BitSet();
-        int bitSize = gray.length();
-
-        if (bitSize > 0) {
-            binary.set(bitSize - 1, gray.get(bitSize - 1));
+        if (gray.isEmpty()) return 0;
+        long[] longs = gray.toLongArray();
+        if (longs.length > 1) {
+            throw new IllegalArgumentException();
         }
-
-        for (int i = bitSize - 2; i >= 0; i--) {
-            if (binary.get(i + 1) != gray.get(i)) //xor
-                binary.set(i);
-        }
-
-        return bitSet2long(binary);
+        long n = longs[0];
+        long p = n;
+        while ((n >>>= 1) != 0)
+            p ^= n;
+        return p;
     }
 
     public static BitSet long2bitSet(long n) {

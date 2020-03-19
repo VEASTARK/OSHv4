@@ -1,15 +1,26 @@
 package osh.mgmt.globalcontroller.jmetal.esc;
 
-import jmetal.core.Operator;
-import jmetal.core.Solution;
-import jmetal.core.SolutionSet;
-import jmetal.encodings.variable.Binary;
-import jmetal.metaheuristics.singleObjective.geneticAlgorithm.OSH_gGAMultiThread;
-import jmetal.metaheuristics.stoppingRule.StoppingRule;
-import jmetal.metaheuristics.stoppingRule.StoppingRuleFactory;
-import jmetal.operators.crossover.CrossoverFactory;
-import jmetal.operators.mutation.MutationFactory;
-import jmetal.operators.selection.SelectionFactory;
+import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.OSHLegacyGenerationalGeneticAlgorithm;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
+import org.uma.jmetal.algorithm.stoppingrule.StoppingRuleFactory;
+import org.uma.jmetal.operator.CrossoverOperator;
+import org.uma.jmetal.operator.MutationOperator;
+import org.uma.jmetal.operator.SelectionOperator;
+import org.uma.jmetal.operator.impl.crossover.CrossoverFactory;
+import org.uma.jmetal.operator.impl.crossover.CrossoverType;
+import org.uma.jmetal.operator.impl.mutation.MutationFactory;
+import org.uma.jmetal.operator.impl.mutation.MutationType;
+import org.uma.jmetal.operator.impl.selection.SelectionFactory;
+import org.uma.jmetal.operator.impl.selection.SelectionType;
+import org.uma.jmetal.problem.Problem;
+import org.uma.jmetal.solution.BinarySolution;
+import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.MultithreadedStealingSolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import org.uma.jmetal.util.point.PointSolution;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
+import org.uma.jmetal.util.pseudorandom.impl.OSHPseudoRandom;
 import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.AncillaryCommodity;
@@ -23,12 +34,13 @@ import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.JMetalSolver;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
-import osh.utils.string.ParameterConstants;
+import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.EnumMap;
+import java.util.List;
 
 /**
  * New JMetalEnergySolverGA
@@ -69,6 +81,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public SolutionWithFitness getSolutionAndFitness(
             InterdependentProblemPart<?, ?>[] problemParts,
@@ -76,25 +89,25 @@ public class JMetalEnergySolverGA extends JMetalSolver {
             EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
             EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction) throws Exception {
+            IFitness fitnessFunction,
+            IEALogger eaLogger) throws Exception {
 
 
         // DECLARATION
-        EnergyManagementProblem problem;            // The problem to solve
         SolutionDistributor distributor = new SolutionDistributor();
-        OSH_gGAMultiThread algorithm;        // The algorithm to use
-        Operator mutation;            // Mutation operator
-        Operator crossover;
-        Operator selection;
+        boolean useMultithreading = true;
+        Algorithm<BinarySolution> algorithm;
+        MutationOperator<BinarySolution> mutation;            // Mutation operator
+        CrossoverOperator<BinarySolution> crossover;
+        SelectionOperator<List<BinarySolution>, BinarySolution> selection;
 //		HashMap parameters;			// Operator parameters
 
         distributor.gatherVariableInformation(problemParts);
 
         //abort if there is nothing to optimize
         if (distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables()) {
-            Solution emptySolution = new Solution();
-            emptySolution.setDecisionVariables(new Binary[0]);
-            emptySolution.setFitness(0.0);
+            PointSolution emptySolution = new PointSolution(1);
+            emptySolution.setObjective(0, 0.0);
             return new SolutionWithFitness(emptySolution, 0.0);
         }
 
@@ -107,7 +120,7 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         }
 
         // INITIALIZATION
-        problem = new EnergyManagementProblem(
+        EMProblemEvaluator evaluator = new EMProblemEvaluator(
                 problemParts,
                 ocESC,
                 distributor,
@@ -115,53 +128,52 @@ public class JMetalEnergySolverGA extends JMetalSolver {
                 powerLimitSignals,
                 ignoreLoadProfileBefore,
                 ignoreLoadProfileAfter,
-                this.randomGenerator,
                 fitnessFunction,
+                eaLogger,
                 this.STEP_SIZE);
+
+        Problem<BinarySolution> binaryProblem = new BinaryEnergyManagementProblem(
+                evaluator,
+                distributor);
+
+        JMetalRandom.getInstance().setRandomGenerator(new OSHPseudoRandom(this.randomGenerator));
 
         PrintWriter pw = new PrintWriter(new FileOutputStream(
                 new File(this.gaLogPath),
                 true));
-        /* initialize algorithm */
-        //IMA:
-        {
-            algorithm = new OSH_gGAMultiThread(problem, true, this.timestamp, pw);
-            problem.initializeMultithreading();
-        }
 
-//        {
-//            algorithm = new OSH_gGASingleThread(problem, true, this.timestamp, pw);
-//        }
-
-        /* Algorithm parameters */
-        algorithm.setInputParameter(ParameterConstants.EA.maxEvaluations, this.gaparameters.getNumEvaluations());
-        algorithm.setInputParameter(ParameterConstants.EA.populationSize, this.gaparameters.getPopSize());
 
         /* Mutation and Crossover for Real codification */
         mutation = MutationFactory.getMutationOperator(
-                this.gaparameters.getMutationOperator(),
-                this.gaparameters.getMutationParameters(),
-                this.randomGenerator);
+                MutationType.fromName(this.gaparameters.getMutationOperator()),
+                this.gaparameters.getMutationParameters());
 
 
         //crossover
         crossover = CrossoverFactory.getCrossoverOperator(
-                this.gaparameters.getCrossoverOperator(),
-                this.gaparameters.getCrossoverParameters(),
-                this.randomGenerator);
+                CrossoverType.fromName(this.gaparameters.getCrossoverOperator()),
+                this.gaparameters.getCrossoverParameters());
 
 
         //selection
         selection = SelectionFactory.getSelectionOperator(
-                this.gaparameters.getSelectionOperator(),
-                this.gaparameters.getSelectionParameters(),
-                this.randomGenerator);
+                SelectionType.fromName(this.gaparameters.getSelectionOperator()),
+                this.gaparameters.getSelectionParameters());
 
+        SolutionListEvaluator<BinarySolution> algorithmEvaluator;
 
-        //add the operators
-        algorithm.addOperator(ParameterConstants.EA.crossover, crossover);
-        algorithm.addOperator(ParameterConstants.EA.mutation, mutation);
-        algorithm.addOperator(ParameterConstants.EA.selection, selection);
+        if (useMultithreading) {
+            algorithmEvaluator = new MultithreadedStealingSolutionListEvaluator<>();
+            evaluator.initializeMultithreading();
+        } else {
+            algorithmEvaluator = new SequentialSolutionListEvaluator<>();
+        }
+
+        eaLogger.attachWriter(pw);
+        eaLogger.setTimestamp(ignoreLoadProfileBefore);
+
+        algorithm = new OSHLegacyGenerationalGeneticAlgorithm<>(binaryProblem, this.gaparameters.getPopSize(), crossover,
+                mutation, selection, algorithmEvaluator, eaLogger);
 
         //add stopping rules
         for (String ruleName : this.gaparameters.getStoppingRules().keySet()) {
@@ -170,27 +182,25 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         }
 
         /* Execute the Algorithm */
-        SolutionSet population = algorithm.execute();
+        algorithm.run();
+        BinarySolution solution = algorithm.getResult();
 
-        Solution s = population.best(this.fitnessComparator);
-
-        pw.flush();
-        pw.close();
+        eaLogger.logEnd(solution);
 
         if (true) { // debug
-            for (int i = 0; i < population.size(); i++) {
-                Solution solution = population.get(i);
-                this.logger.logDebug("Final Fitness: " + solution.getObjective(0)); //
-//				if (solution.getObjective(0) == 0) {
-//					System.out.println();
-//				}
-            }
+            this.logger.logDebug("Final Fitness: " + solution.getObjective(0)); //
         }
 
-        //better be sure
-        problem.finalizeGrids();
+        eaLogger.detachWriter();
 
-        return new SolutionWithFitness(s, s.getObjective(0));
+        //better be sure
+        evaluator.finalizeGrids();
+
+        return new SolutionWithFitness(solution, solution.getObjective(0));
+    }
+
+    public void shutdown() {
+
     }
 }
 
