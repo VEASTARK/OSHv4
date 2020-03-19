@@ -22,7 +22,7 @@ public interface Algorithm<Result> extends Runnable, Serializable, DescribedEnti
     List<StoppingRule> getStoppingRules();
 
     default void addStoppingRule(StoppingRule stoppingRule) {
-        getStoppingRules().add(stoppingRule);
+        this.getStoppingRules().add(stoppingRule);
     }
 
     void setEALogger(IEALogger eaLogger);

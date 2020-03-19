@@ -32,7 +32,7 @@ public class PAES<S extends Solution<?>> extends AbstractEvolutionStrategy<S, Li
      * Constructor
      */
     public PAES(Problem<S> problem, int archiveSize, int biSections,
-                MutationOperator<S> mutationOperato, IEALogger eaLogger) {
+                MutationOperator<S> mutationOperator, IEALogger eaLogger) {
         super(problem, eaLogger);
         this.setProblem(problem);
         this.archiveSize = archiveSize;

@@ -15,7 +15,7 @@ import java.util.Map;
 public abstract class StoppingRule {
 
     String _msg;
-    Map<String, Object> _parameters;
+    final Map<String, Object> _parameters;
 
     /**
      * Creates this stopping condition with the given parameters.

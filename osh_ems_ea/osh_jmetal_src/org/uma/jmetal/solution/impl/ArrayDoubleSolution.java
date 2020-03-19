@@ -19,7 +19,7 @@ public class ArrayDoubleSolution implements DoubleSolution {
     protected final JMetalRandom randomGenerator;
     private final double[] objectives;
     private final double[] variables;
-    protected Map<Object, Object> attributes;
+    protected final Map<Object, Object> attributes;
 
     /**
      * Constructor

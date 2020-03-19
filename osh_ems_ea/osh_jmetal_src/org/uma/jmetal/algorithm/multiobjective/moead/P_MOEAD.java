@@ -22,9 +22,9 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class P_MOEAD extends AbstractMOEAD<DoubleSolution> {
-    protected DifferentialEvolutionCrossover differentialEvolutionCrossover;
+    protected final DifferentialEvolutionCrossover differentialEvolutionCrossover;
 
-    private SolutionListEvaluator<DoubleSolution> evaluator;
+    private final SolutionListEvaluator<DoubleSolution> evaluator;
 
     public P_MOEAD(Problem<DoubleSolution> problem,
                    int populationSize,

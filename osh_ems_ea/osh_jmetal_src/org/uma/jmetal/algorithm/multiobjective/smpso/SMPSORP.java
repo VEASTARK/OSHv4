@@ -32,7 +32,6 @@ import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 

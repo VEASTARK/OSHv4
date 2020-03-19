@@ -199,8 +199,5 @@ public class JMetalEnergySolverGA extends JMetalSolver {
         return new SolutionWithFitness(solution, solution.getObjective(0));
     }
 
-    public void shutdown() {
-
-    }
 }
 

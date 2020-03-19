@@ -163,7 +163,7 @@ public class CellDE45 implements Algorithm<List<DoubleSolution>> {
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.stoppingRules) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.archive.getSolutionList())) {
-                this.getEALogger().logAdditional(sr.getMsg());
+                this.eaLogger.logAdditional(sr.getMsg());
                 return true;
             }
         }

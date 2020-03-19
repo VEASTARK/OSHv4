@@ -14,7 +14,6 @@ import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
-import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("serial")
