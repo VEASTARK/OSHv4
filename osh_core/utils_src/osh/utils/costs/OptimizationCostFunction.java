@@ -3,7 +3,7 @@ package osh.utils.costs;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
-import osh.datatypes.power.AncillaryCommodityLoadProfile;
+import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.power.PowerInterval;
 import osh.utils.CostConfigurationContainer;
 import osh.utils.CostConfigurationTypes.AUTO_CONSUMPTION_COSTS;
@@ -36,6 +36,16 @@ public class OptimizationCostFunction {
     private List<SingularCostFunctionConfiguration<?>> activeConfiguration, reactiveConfiguration, feedInConfiguration,
             autoConsumptionConfiguration, gasConfiguration;
 
+    /**
+     * Constructs this cost function with the given cost configuration and all relevant signals.
+     *
+     * @param upperOverlimitFactor the overlimit factor for upper pls violations
+     * @param lowerOverlimitFactor the overlimit factor for lower pls violations
+     * @param costConfiguration the cost configuration
+     * @param priceSignals the price signals
+     * @param powerLimitSignals the power limit signals
+     * @param now the current time in epoch seconds
+     */
     public OptimizationCostFunction(double upperOverlimitFactor, double lowerOverlimitFactor,
                                     CostConfigurationContainer costConfiguration, Map<AncillaryCommodity, PriceSignal> priceSignals,
                                     Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals, long now) {
@@ -47,6 +57,10 @@ public class OptimizationCostFunction {
         this.processSignals(priceSignals, powerLimitSignals, now);
     }
 
+    /**
+     * Initializes the internal functions based on the cost configuration.
+     *
+     */
     private void initializeConfigurations() {
         //reset all lists
         this.activeConfiguration = new ArrayList<>();
@@ -191,23 +205,32 @@ public class OptimizationCostFunction {
                 CalculationFunctions::pricePowerFunction));
     }
 
-    public Enum2DoubleMap<CostReturnType> calcRangeCosts(
+    /**
+     * Calculates the costs resulting from the supplied load profile and the current cost configuration.
+     *
+     * @param start the starting point for the calculation
+     * @param end the ending point for the calculation
+     * @param ancillaryLoadProfile the load profile
+     *
+     * @return the costs resulting from the supplied load profile and the current cost configuration as a map
+     */
+    public Enum2DoubleMap<CostReturnType> calculateCosts(
             long start,
             long end,
-            AncillaryCommodityLoadProfile ancillaryMeter) {
+            ErsatzACLoadProfile ancillaryLoadProfile) {
 
         if (this.arraysCalculatedFor != start) {
             throw new UnsupportedOperationException("Cost function in use in the optimization loop must be created " +
                     "new for every optimization run.");
         }
 
-        return this.calcInternalCosts(start, end, ancillaryMeter);
+        return this.calcInternalCosts(start, end, ancillaryLoadProfile);
     }
 
     private Enum2DoubleMap<CostReturnType> calcInternalCosts(
             long start,
             long end,
-            AncillaryCommodityLoadProfile ancillaryMeter) {
+            ErsatzACLoadProfile ancillaryMeter) {
 
         double electricity = 0.0, gas = 0.0;
 
@@ -244,10 +267,11 @@ public class OptimizationCostFunction {
 
         for (AncillaryCommodity ac : AncillaryCommodity.values()) {
             if (priceSignals != null && priceSignals.containsKey(ac)) {
-                this.priceSignals.put(ac, this.convertPriceMap(priceSignals.get(ac).getPrices()));
+                this.priceSignals.put(ac, this.convertPriceMap(priceSignals.get(ac).cloneAfter(now).getPrices()));
             }
             if (powerLimitSignals != null && powerLimitSignals.containsKey(ac)) {
-                KeysValuesTuple[] powerLimits = this.convertPowerLimitMap(powerLimitSignals.get(ac).getLimits());
+                KeysValuesTuple[] powerLimits =
+                        this.convertPowerLimitMap(powerLimitSignals.get(ac).cloneAfter(now).getLimits());
                 this.upperPowerLimitSignals.put(ac, powerLimits[0]);
                 this.lowerPowerLimitSignals.put(ac, powerLimits[1]);
             }
@@ -307,7 +331,7 @@ public class OptimizationCostFunction {
         return new KeysValuesTuple[] {new KeysValuesTuple(keys, upperValues), new KeysValuesTuple(keys, lowerValues)};
     }
 
-    private double execute(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                            List<SingularCostFunctionConfiguration<?>> costFunctions) {
         double costs = 0.0;
 
@@ -318,12 +342,12 @@ public class OptimizationCostFunction {
         return costs;
     }
 
-    private double execute_uni(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute_uni(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                                List<SingularArgumentTuple> argumentList,
                                PrimitiveOperators.DoubleLongOperator function) {
         long[][] keys = new long[1][];
 
-        return ArrayCalcIterators.iterator(
+        return ArrayCalcIterators.uniIterator(
                 keys,
                 this.getValues(keys, 0, argumentList.get(0), ancillaryMeter),
                 start,
@@ -331,7 +355,7 @@ public class OptimizationCostFunction {
                 function);
     }
 
-    private double execute_bi(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute_bi(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                               List<SingularArgumentTuple> argumentList,
                               PrimitiveOperators.BiDoubleLongOperator function) {
         long[][] keys = new long[2][];
@@ -345,7 +369,7 @@ public class OptimizationCostFunction {
                 function);
     }
 
-    private double execute_tri(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute_tri(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                                List<SingularArgumentTuple> argumentList,
                                PrimitiveOperators.TriDoubleLongOperator function) {
         long[][] keys = new long[3][];
@@ -360,7 +384,7 @@ public class OptimizationCostFunction {
                 function);
     }
 
-    private double execute_quad(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute_quad(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                                 List<SingularArgumentTuple> argumentList,
                                 PrimitiveOperators.QuadDoubleLongOperator function) {
         long[][] keys = new long[4][];
@@ -376,7 +400,7 @@ public class OptimizationCostFunction {
                 function);
     }
 
-    private double execute_quint(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute_quint(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                                  List<SingularArgumentTuple> argumentList,
                                  PrimitiveOperators.QuintDoubleLongOperator function) {
         long[][] keys = new long[5][];
@@ -393,7 +417,7 @@ public class OptimizationCostFunction {
                 function);
     }
 
-    private double execute_hex(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end,
+    private double execute_hex(ErsatzACLoadProfile ancillaryMeter, long start, long end,
                                List<SingularArgumentTuple> argumentList,
                                PrimitiveOperators.HexDoubleLongOperator function) {
         long[][] keys = new long[6][];
@@ -411,14 +435,8 @@ public class OptimizationCostFunction {
                 function);
     }
 
-    private double[] getMeterValues(long[][] keys, int index, SingularArgumentTuple argumentTuple,
-                                    AncillaryCommodityLoadProfile ancillaryMeter) {
-        //TODO:
-        return null;
-    }
-
     private double[] getValues(long[][] keys, int index, SingularArgumentTuple argumentTuple,
-                               AncillaryCommodityLoadProfile ancillaryMeter) {
+                               ErsatzACLoadProfile ancillaryMeter) {
         switch (argumentTuple.argumentType) {
             case PRICE:
                 keys[index] = this.priceSignals.get(argumentTuple.commodity).keys;
@@ -430,7 +448,8 @@ public class OptimizationCostFunction {
                 keys[index] = this.lowerPowerLimitSignals.get(argumentTuple.commodity).keys;
                 return this.lowerPowerLimitSignals.get(argumentTuple.commodity).values;
             case POWER:
-                return this.getMeterValues(keys, index, argumentTuple, ancillaryMeter);
+                keys[index] = ancillaryMeter.getKeyFor(argumentTuple.commodity);
+                return ancillaryMeter.getValueFor(argumentTuple.commodity);
             default:
                 return null;
         }
@@ -446,7 +465,7 @@ public class OptimizationCostFunction {
     }
 
     /**
-     * Rerpesents an internal container for a simple key-value mapping expressed in array form.
+     * Represents an internal container for a simple key-value mapping expressed in array form.
      *
      * @author Sebastian Kramer
      */
@@ -467,12 +486,25 @@ public class OptimizationCostFunction {
         }
     }
 
+    /**
+     * Represents the configuration for a single function execution.
+     *
+     * @param <T> the type of the calculation function
+     */
     private static class SingularCostFunctionConfiguration<T> {
 
         private final List<SingularArgumentTuple> argumentList;
         private final IteratorFunction<T> iteratorFunction;
         private final T calculationFunction;
 
+        /**
+         * Constructs this function configuration with the given argument lists, the iterator function and
+         * calculation function.
+         *
+         * @param argumentList the list of all argument configurations
+         * @param iteratorFunction the function that iterates over the all arguments
+         * @param calculationFunction the function to apply inside the iteration
+         */
         public SingularCostFunctionConfiguration(List<SingularArgumentTuple> argumentList,
                                                  IteratorFunction<T> iteratorFunction, T calculationFunction) {
             this.argumentList = argumentList;
@@ -480,21 +512,39 @@ public class OptimizationCostFunction {
             this.calculationFunction = calculationFunction;
         }
 
-        public double calculate(AncillaryCommodityLoadProfile ancillaryMeter, long start, long end) {
-            return this.iteratorFunction.apply(ancillaryMeter, start, end, this.argumentList, this.calculationFunction);
+        /**
+         * Executes this function configuration and returns the result.
+         *
+         * @param ancillaryLoadProfile the load profile for the execution
+         * @param start the starting point for the calculation
+         * @param end the end point for the calculation
+         *
+         * @return the result of the function execution
+         */
+        public double calculate(ErsatzACLoadProfile ancillaryLoadProfile, long start, long end) {
+            return this.iteratorFunction.apply(ancillaryLoadProfile, start, end, this.argumentList, this.calculationFunction);
         }
     }
 
     @FunctionalInterface
     private interface IteratorFunction<T> {
-        double apply(AncillaryCommodityLoadProfile s, long t, long u, List<SingularArgumentTuple> v, T w);
+        double apply(ErsatzACLoadProfile s, long t, long u, List<SingularArgumentTuple> v, T w);
     }
 
+    /**
+     * Represents a simple tuple of an argument type with a corresponding commodity value.
+     */
     private static class SingularArgumentTuple {
 
         private final ArgumentType argumentType;
         private final AncillaryCommodity commodity;
 
+        /**
+         * Constructs this tuple with the given argument type and commodity value
+         *
+         * @param argumentType the argument type
+         * @param commodity the commodity value
+         */
         public SingularArgumentTuple(ArgumentType argumentType, AncillaryCommodity commodity) {
             this.argumentType = argumentType;
             this.commodity = commodity;
@@ -502,7 +552,6 @@ public class OptimizationCostFunction {
     }
 
     private enum ArgumentType {
-
         PRICE,
         UPPER_LIMIT,
         LOWER_LIMIT,

@@ -1,17 +1,25 @@
 package osh.utils.dataStructures;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.function.Function;
 
-public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneable {
-
-    private static final long serialVersionUID = -2804162059596633009L;
+/**
+ * Represents a mapping from enum keys to double values using primitive datatypes in contrast to
+ * {@link java.util.EnumMap}.
+ *
+ * @param <K> the type of the enum for the key values
+ */
+public class Enum2DoubleMap<K extends Enum<K>> implements Cloneable {
 
     private final Class<K> keyType;
     private final K[] keyUniverse;
     private final double[] values;
 
+    /**
+     * Constructs this map with the given key type.
+     *
+     * @param keyType the key type
+     */
     public Enum2DoubleMap(Class<K> keyType) {
         this.keyType = keyType;
         this.keyUniverse = getKeyUniverse(keyType);
@@ -19,6 +27,11 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         Arrays.fill(this.values, 0.0);
     }
 
+    /**
+     * Clones the given map.
+     *
+     * @param m the map to clone
+     */
     public Enum2DoubleMap(Enum2DoubleMap<K> m) {
         this.keyType = m.keyType;
         this.keyUniverse = m.keyUniverse;
@@ -26,6 +39,13 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         System.arraycopy(m.values, 0, this.values, 0, this.keyUniverse.length);
     }
 
+    /**
+     * Checks if the given value is contained in this map.
+     *
+     * @param value the value to check
+     *
+     * @return true if the given value is contained in this map
+     */
     public boolean containsValue(double value) {
         for (double val : this.values)
             if (value == val)
@@ -34,10 +54,24 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         return false;
     }
 
+    /**
+     * Returns the value mapped to the given key.
+     *
+     * @param key the key
+     *
+     * @return the value mapped to the given key or 0.0 if there is no such mapping
+     */
     public double get(Object key) {
         return (this.isValidKey(key) ? this.values[((Enum<?>)key).ordinal()] : 0.0);
     }
 
+    /**
+     * Puts the given value at the given key in this map.
+     *
+     * @param key the key
+     * @param value the value
+     * @return the old value at the key
+     */
     public double put(K key, double value) {
         this.typeCheck(key);
         if (Double.isNaN(value)) return Double.NaN;
@@ -48,6 +82,12 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         return oldValue;
     }
 
+    /**
+     * Adds the given value to the existing value at the given key.
+     *
+     * @param key the key
+     * @param value the value
+     */
     public void add(K key, double value) {
         this.typeCheck(key);
         if (Double.isNaN(value)) return;
@@ -56,6 +96,12 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         this.values[index] += value;
     }
 
+    /**
+     * Adds the given value to the existing value at the given key if this given value is positive.
+     *
+     * @param key the key
+     * @param value the value
+     */
     public void addIfPositive(K key, double value) {
         this.typeCheck(key);
         if (Double.isNaN(value) || value < 0) return;
@@ -64,6 +110,12 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         this.values[index] += value;
     }
 
+    /**
+     * Adds the given value to the existing value at the given key if this given value is negative.
+     *
+     * @param key the key
+     * @param value the value
+     */
     public void addIfNegative(K key, double value) {
         this.typeCheck(key);
         if (Double.isNaN(value) || value > 0) return;
@@ -72,12 +124,23 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         this.values[index] += value;
     }
 
+    /**
+     * Adds all mappings of the given map to this map.
+     *
+     * @param other the map whose values are to be added
+     */
     public void addAll(Enum2DoubleMap<K> other) {
         for (K key : this.keyUniverse) {
             this.add(key, other.values[key.ordinal()]);
         }
     }
 
+    /**
+     * Applies the given function to the value at the given key.
+     *
+     * @param key the key
+     * @param calculation the function to apply
+     */
     public void compute(K key, Function<Double, Double> calculation) {
         this.typeCheck(key);
         int index = key.ordinal();
@@ -87,6 +150,12 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         this.values[index] = result;
     }
 
+    /**
+     * Removes and returns the mapping for the given key.
+     *
+     * @param key the key
+     * @return the old value or 0.0 if there was no mapping
+     */
     public double remove(Object key) {
         if (!this.isValidKey(key))
             return 0.0;
@@ -109,7 +178,7 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         Arrays.fill(this.values, 0.0);
     }
 
-
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -132,6 +201,7 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
         return true;
     }
 
+    @Override
     public int hashCode() {
         int h = 0;
 
@@ -159,10 +229,9 @@ public class Enum2DoubleMap<K extends Enum<K>> implements Serializable, Cloneabl
     }
 
     /**
-     * Returns a shallow copy of this enum map.  (The values themselves
-     * are not cloned.
+     * Returns a copy of this enum map.
      *
-     * @return a shallow copy of this enum map
+     * @return a copy of this enum map
      */
     public Enum2DoubleMap<K> clone() {
         return new Enum2DoubleMap<>(this);

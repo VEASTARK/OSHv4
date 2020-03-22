@@ -1,6 +1,8 @@
 package osh.utils.costs;
 
 /**
+ * Represents a collection of simple calculation function in use in the {@link OptimizationCostFunction}.
+ *
  * @author Sebastian Kramer
  */
 public class CalculationFunctions {
@@ -8,6 +10,12 @@ public class CalculationFunctions {
     private static double upperOverlimitFactor;
     private static double lowerOverlimitFactor;
 
+    /**
+     * Sets the overlimit factors for pls violations.
+     *
+     * @param upperOverlimitFactor the overlimit factor for upper pls violations
+     * @param lowerOverlimitFactor the overlimit factor for lower pls violations
+     */
     public static void setOverlimitFactors(double upperOverlimitFactor, double lowerOverlimitFactor) {
         CalculationFunctions.upperOverlimitFactor = upperOverlimitFactor;
         CalculationFunctions.lowerOverlimitFactor = lowerOverlimitFactor;

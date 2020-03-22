@@ -32,6 +32,16 @@ public class RegularCostFunction {
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
 
+    /**
+     * Constructs this cost function with the given cost configuration and all relevant signals.
+     *
+     * @param upperOverlimitFactor the overlimit factor for upper pls violations
+     * @param lowerOverlimitFactor the overlimit factor for lower pls violations
+     * @param costConfiguration the cost configuration
+     * @param priceSignals the price signals
+     * @param powerLimitSignals the power limit signals
+     * @param now the current time in epoch seconds
+     */
     public RegularCostFunction(double upperOverlimitFactor, double lowerOverlimitFactor,
                                CostConfigurationContainer costConfiguration, EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
                                EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals, long now) {
@@ -43,12 +53,27 @@ public class RegularCostFunction {
         this.powerLimitSignals = powerLimitSignals;
     }
 
+    /**
+     * Update the signals to new value.
+     *
+     * @param priceSignals the price signals
+     * @param powerLimitSignals the power limit signals
+     */
     public void updateSignals(EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
                               EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals) {
         this.priceSignals = priceSignals;
         this.powerLimitSignals = powerLimitSignals;
     }
 
+    /**
+     * Calculates the costs resulting from the supplied meter state and the current cost configuration.
+     *
+     * @param ancillaryMeter the meter state
+     * @param now the current time in epoch seconds
+     * @param timeFactor the time factor to multiply the results with
+     *
+     * @return the costs resulting from the supplied meter state and the current cost configuration as a map
+     */
     public Enum2DoubleMap<SingleStepCostReturnType> calculateSingleStepCosts(AncillaryMeterState ancillaryMeter,
                                                                              Long now, Long timeFactor) {
 

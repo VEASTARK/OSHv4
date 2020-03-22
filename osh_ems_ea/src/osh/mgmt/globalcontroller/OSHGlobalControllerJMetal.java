@@ -15,6 +15,7 @@ import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
+import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
@@ -31,9 +32,7 @@ import osh.datatypes.registry.oc.state.globalobserver.GUIScheduleStateExchange;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.Fitness;
 import osh.mgmt.globalcontroller.jmetal.GAParameters;
-import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
 import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
@@ -44,6 +43,8 @@ import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
+import osh.utils.CostConfigurationContainer;
+import osh.utils.costs.OptimizationCostFunction;
 import osh.utils.string.ParameterConstants;
 
 import java.time.ZonedDateTime;
@@ -61,9 +62,7 @@ public class OSHGlobalControllerJMetal
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private boolean newEpsPlsReceived;
-    private int epsOptimizationObjective;
-    private int plsOptimizationObjective;
-    private int varOptimizationObjective;
+    private final CostConfigurationContainer costConfiguration;
     private double upperOverlimitFactor;
     private double lowerOverlimitFactor;
     private ZonedDateTime lastTimeSchedulingStarted;
@@ -112,29 +111,34 @@ public class OSHGlobalControllerJMetal
             this.getGlobalLogger().logWarning("Can't get lowerOverlimitFactor, using the default value: " + this.lowerOverlimitFactor);
         }
 
+        int epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective;
+
         try {
-            this.epsOptimizationObjective =
+            epsOptimizationObjective =
                     Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.epsObjective));
         } catch (Exception e) {
-            this.epsOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get epsOptimizationObjective, using the default value: " + this.epsOptimizationObjective);
+            epsOptimizationObjective = 0;
+            this.getGlobalLogger().logWarning("Can't get epsOptimizationObjective, using the default value: " + epsOptimizationObjective);
         }
 
         try {
-            this.plsOptimizationObjective =
+            plsOptimizationObjective =
                     Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.plsObjective));
         } catch (Exception e) {
-            this.plsOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get plsOptimizationObjective, using the default value: " + this.plsOptimizationObjective);
+            plsOptimizationObjective = 0;
+            this.getGlobalLogger().logWarning("Can't get plsOptimizationObjective, using the default value: " + plsOptimizationObjective);
         }
 
         try {
-            this.varOptimizationObjective =
+            varOptimizationObjective =
                     Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.varObjective));
         } catch (Exception e) {
-            this.varOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get varOptimizationObjective, using the default value: " + this.varOptimizationObjective);
+            varOptimizationObjective = 0;
+            this.getGlobalLogger().logWarning("Can't get varOptimizationObjective, using the default value: " + varOptimizationObjective);
         }
+
+        this.costConfiguration = new CostConfigurationContainer(epsOptimizationObjective, plsOptimizationObjective,
+                varOptimizationObjective);
 
         try {
             this.optimizationMainRandomSeed =
@@ -228,9 +232,7 @@ public class OSHGlobalControllerJMetal
                     now,
                     this.priceSignals,
                     this.powerLimitSignals,
-                    this.epsOptimizationObjective,
-                    this.plsOptimizationObjective,
-                    this.varOptimizationObjective,
+                    this.costConfiguration,
                     this.upperOverlimitFactor,
                     this.lowerOverlimitFactor,
                     this.newEpsPlsReceived);
@@ -364,21 +366,18 @@ public class OSHGlobalControllerJMetal
 
 
         try {
-            IFitness fitnessFunction = new Fitness(
-                    this.getGlobalLogger(),
-                    this.epsOptimizationObjective,
-                    this.plsOptimizationObjective,
-                    this.varOptimizationObjective,
-                    this.upperOverlimitFactor,
-                    this.lowerOverlimitFactor);
+            OptimizationCostFunction costFunction = new OptimizationCostFunction(this.upperOverlimitFactor,
+                    this.lowerOverlimitFactor,
+                    this.costConfiguration,
+                    tempPriceSignals,
+                    tempPowerLimitSignals,
+                    now);
 
             resultWithAll = solver.getSolution(
                     problemParts,
                     this.ocESC,
-                    tempPriceSignals,
-                    tempPowerLimitSignals,
                     now,
-                    fitnessFunction,
+                    costFunction,
                     this.eaLogger);
             solution = resultWithAll.getSolution();
 
@@ -389,19 +388,19 @@ public class OSHGlobalControllerJMetal
                     problemParts,
                     this.ocESC,
                     distributor,
-                    this.priceSignals,
-                    this.powerLimitSignals,
                     now,
                     ignoreLoadProfileAfter,
-                    fitnessFunction,
+                    costFunction,
                     this.eaLogger,
                     this.stepSize);
 
             boolean extensiveLogging =
                     (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
-            AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
 
-            problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ancillaryMeter);
+            int maxLength = (int) Math.ceil((ignoreLoadProfileAfter - now) / this.stepSize) + 2;
+            ErsatzACLoadProfile ersatzProfile = new ErsatzACLoadProfile(maxLength);
+
+            problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ersatzProfile);
 
             distributor.distributeSolution(solution, problemParts);
 
@@ -463,7 +462,8 @@ public class OSHGlobalControllerJMetal
                 this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
-                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(), ancillaryMeter));
+                        new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
+                                AncillaryCommodityLoadProfile.convertFromErsatzProfile(ersatzProfile)));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)

@@ -1,5 +1,6 @@
 package osh.mgmt.globalcontroller.jmetal.esc;
 
+import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
@@ -21,6 +22,7 @@ public class EnergyProblemDataContainer {
     private final OCEnergySimulationCore ocESC;
     private final UUIDCommodityMap activeToPassiveMap;
     private final UUIDCommodityMap passiveToActiveMap;
+    private final ErsatzACLoadProfile ancillaryLoadProfile;
 
     /**
      * Generates this data-object with all the given consituting parts.
@@ -40,7 +42,8 @@ public class EnergyProblemDataContainer {
                                       InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs,
                                       OCEnergySimulationCore ocESC,
                                       UUIDCommodityMap activeToPassiveMap,
-                                      UUIDCommodityMap passiveToActiveMap) {
+                                      UUIDCommodityMap passiveToActiveMap,
+                                      ErsatzACLoadProfile ancillaryLoadProfile) {
         Objects.requireNonNull(allProblemParts);
         Objects.requireNonNull(allActivePPs);
         Objects.requireNonNull(allPassivePPs);
@@ -48,6 +51,7 @@ public class EnergyProblemDataContainer {
         Objects.requireNonNull(ocESC);
         Objects.requireNonNull(activeToPassiveMap);
         Objects.requireNonNull(passiveToActiveMap);
+        Objects.requireNonNull(ancillaryLoadProfile);
 
         this.allProblemParts = allProblemParts;
         this.allActivePPs = allActivePPs;
@@ -56,6 +60,7 @@ public class EnergyProblemDataContainer {
         this.ocESC = ocESC;
         this.activeToPassiveMap = activeToPassiveMap;
         this.passiveToActiveMap = passiveToActiveMap;
+        this.ancillaryLoadProfile = ancillaryLoadProfile;
     }
 
     /**
@@ -122,6 +127,15 @@ public class EnergyProblemDataContainer {
     }
 
     /**
+     * Returns the load profile used for storing the ancillary meter state.
+     *
+     * @return the load profile used for storing the ancillary meter state
+     */
+    public ErsatzACLoadProfile getAncillaryLoadProfile() {
+        return this.ancillaryLoadProfile;
+    }
+
+    /**
      * Returns a deep-copy of this data-container.
      *
      * @return a deep-copy of this container
@@ -160,6 +174,7 @@ public class EnergyProblemDataContainer {
                 allPassivePPsCopy, allActiveNeedsInputPPsCopy,
                 new OCEnergySimulationCore(this.ocESC),
                 new UUIDCommodityMap(this.activeToPassiveMap),
-                new UUIDCommodityMap(this.passiveToActiveMap));
+                new UUIDCommodityMap(this.passiveToActiveMap),
+                new ErsatzACLoadProfile(this.ancillaryLoadProfile));
     }
 }

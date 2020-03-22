@@ -23,23 +23,20 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.impl.OSHPseudoRandom;
 import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
-import osh.datatypes.commodity.AncillaryCommodity;
-import osh.datatypes.limit.PowerLimitSignal;
-import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.esc.OCEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.GAParameters;
-import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.JMetalSolver;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
+import osh.utils.costs.OptimizationCostFunction;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.util.EnumMap;
 import java.util.List;
 
 /**
@@ -86,11 +83,9 @@ public class JMetalEnergySolverGA extends JMetalSolver {
     public SolutionWithFitness getSolutionAndFitness(
             InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
-            EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
-            EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction,
-            IEALogger eaLogger) throws Exception {
+            OptimizationCostFunction costFunction,
+            IEALogger eaLogger) throws FileNotFoundException {
 
 
         // DECLARATION
@@ -124,11 +119,9 @@ public class JMetalEnergySolverGA extends JMetalSolver {
                 problemParts,
                 ocESC,
                 distributor,
-                priceSignals,
-                powerLimitSignals,
                 ignoreLoadProfileBefore,
                 ignoreLoadProfileAfter,
-                fitnessFunction,
+                costFunction,
                 eaLogger,
                 this.STEP_SIZE);
 

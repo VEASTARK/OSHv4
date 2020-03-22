@@ -3,13 +3,25 @@ package osh.utils.costs;
 import osh.utils.functions.PrimitiveOperators;
 
 /**
- *
+ * Represents a fmaily of iterators, over long and double arrays that look for the next change in values and applies
+ * a supplied function to the values.
  *
  * @author Sebastian Kramer
  */
 public class ArrayCalcIterators {
 
-    public static double iterator(
+    /**
+     * Iterates over a single key-value array and applies a supplied function after each value change found.
+     *
+     * @param keys collection of key arrays
+     * @param firstValues first value array
+     * @param start the starting point of the iteration
+     * @param end the end point of the iteration
+     * @param calcFunction the function to apply
+     *
+     * @return the sum of all function results
+     */
+    public static double uniIterator(
             long[][] keys,
             double[] firstValues,
             long start, long end, PrimitiveOperators.DoubleLongOperator calcFunction) {
@@ -48,6 +60,18 @@ public class ArrayCalcIterators {
         return costs;
     }
 
+    /**
+     * Iterates over two key-value arrays and applies a supplied function after each value change found.
+     *
+     * @param keys collection of key arrays
+     * @param firstValues first value array
+     * @param secondValues second value array
+     * @param start the starting point of the iteration
+     * @param end the end point of the iteration
+     * @param calcFunction the function to apply
+     *
+     * @return the sum of all function results
+     */
     public static double biIterator(
             long[][] keys,
             double[] firstValues,
@@ -89,6 +113,19 @@ public class ArrayCalcIterators {
         return costs;
     }
 
+    /**
+     * Iterates over three key-value arrays and applies a supplied function after each value change found.
+     *
+     * @param keys collection of key arrays
+     * @param firstValues first value array
+     * @param secondValues second value array
+     * @param thirdValues third value array
+     * @param start the starting point of the iteration
+     * @param end the end point of the iteration
+     * @param calcFunction the function to apply
+     *
+     * @return the sum of all function results
+     */
     public static double triIterator(
             long[][] keys,
             double[] firstValues,
@@ -131,6 +168,20 @@ public class ArrayCalcIterators {
         return costs;
     }
 
+    /**
+     * Iterates over four key-value arrays and applies a supplied function after each value change found.
+     *
+     * @param keys collection of key arrays
+     * @param firstValues first value array
+     * @param secondValues second value array
+     * @param thirdValues third value array
+     * @param forthValues forth value array
+     * @param start the starting point of the iteration
+     * @param end the end point of the iteration
+     * @param calcFunction the function to apply
+     *
+     * @return the sum of all function results
+     */
     public static double quadIterator(
             long[][] keys,
             double[] firstValues,
@@ -174,6 +225,21 @@ public class ArrayCalcIterators {
         return costs;
     }
 
+    /**
+     * Iterates over five key-value arrays and applies a supplied function after each value change found.
+     *
+     * @param keys collection of key arrays
+     * @param firstValues first value array
+     * @param secondValues second value array
+     * @param thirdValues third value array
+     * @param forthValues forth value array
+     * @param fifthValues fifth value array
+     * @param start the starting point of the iteration
+     * @param end the end point of the iteration
+     * @param calcFunction the function to apply
+     *
+     * @return the sum of all function results
+     */
     public static double quintIterator(
             long[][] keys,
             double[] firstValues,
@@ -219,6 +285,22 @@ public class ArrayCalcIterators {
         return costs;
     }
 
+    /**
+     * Iterates over six key-value arrays and applies a supplied function after each value change found.
+     *
+     * @param keys collection of key arrays
+     * @param firstValues first value array
+     * @param secondValues second value array
+     * @param thirdValues third value array
+     * @param forthValues forth value array
+     * @param fifthValues fifth value array
+     * @param sixthValues sixth value array
+     * @param start the starting point of the iteration
+     * @param end the end point of the iteration
+     * @param calcFunction the function to apply
+     *
+     * @return the sum of all function results
+     */
     public static double hexIterator(
             long[][] keys,
             double[] firstValues,

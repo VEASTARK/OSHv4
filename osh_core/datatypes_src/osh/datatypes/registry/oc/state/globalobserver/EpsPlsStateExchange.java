@@ -4,6 +4,7 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.StateExchange;
+import osh.utils.CostConfigurationContainer;
 
 import java.time.ZonedDateTime;
 import java.util.EnumMap;
@@ -15,9 +16,7 @@ import java.util.UUID;
  */
 public class EpsPlsStateExchange extends StateExchange {
 
-    private final int epsOptimizationObjective;
-    private final int plsOptimizationObjective;
-    private final int varOptimizationObjective;
+    private final CostConfigurationContainer costConfiguration;
     private final double plsUpperOverLimitFactor;
     private final double plsLowerOverLimitFactor;
     private final boolean epsPlsChanged;
@@ -38,9 +37,7 @@ public class EpsPlsStateExchange extends StateExchange {
             ZonedDateTime timestamp,
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit,
-            int epsOptimizationObjective,
-            int plsOptimizationObjective,
-            int varOptimizationObjective,
+            CostConfigurationContainer costConfiguration,
             double plsUpperOverLimitFactor,
             double plsLowerOverLimitFactor,
             boolean epsPlsChanged) {
@@ -48,9 +45,7 @@ public class EpsPlsStateExchange extends StateExchange {
 
         this.ps = ps;
         this.pwrLimit = pwrLimit;
-        this.epsOptimizationObjective = epsOptimizationObjective;
-        this.plsOptimizationObjective = plsOptimizationObjective;
-        this.varOptimizationObjective = varOptimizationObjective;
+        this.costConfiguration = costConfiguration.clone();
         this.plsUpperOverLimitFactor = plsUpperOverLimitFactor;
         this.plsLowerOverLimitFactor = plsLowerOverLimitFactor;
         this.epsPlsChanged = epsPlsChanged;
@@ -65,20 +60,9 @@ public class EpsPlsStateExchange extends StateExchange {
         return this.pwrLimit;
     }
 
-    public int getEpsOptimizationObjective() {
-        return this.epsOptimizationObjective;
+    public CostConfigurationContainer getCostConfiguration() {
+        return this.costConfiguration;
     }
-
-
-    public int getPlsOptimizationObjective() {
-        return this.plsOptimizationObjective;
-    }
-
-
-    public int getVarOptimizationObjective() {
-        return this.varOptimizationObjective;
-    }
-
 
     public double getPlsUpperOverLimitFactor() {
         return this.plsUpperOverLimitFactor;
@@ -104,9 +88,7 @@ public class EpsPlsStateExchange extends StateExchange {
                 this.getTimestamp(),
                 this.ps,
                 this.pwrLimit,
-                this.epsOptimizationObjective,
-                this.plsOptimizationObjective,
-                this.varOptimizationObjective,
+                this.costConfiguration,
                 this.plsUpperOverLimitFactor,
                 this.plsLowerOverLimitFactor,
                 this.epsPlsChanged);
