@@ -92,7 +92,7 @@ public class CostConfigurationContainer implements Cloneable {
                 this.autoConsumptionConfiguration = AUTO_CONSUMPTION_COSTS.BOTH;
                 break;
             default:
-                throw new IllegalArgumentException("eps-optimization objective for not recognized.");
+                throw new IllegalArgumentException("eps-optimization objective not recognized.");
         }
     }
 

@@ -95,7 +95,7 @@ public class RegularCostFunction {
         }
 
         //feed-in costs
-        if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.NONE) {
+        if (this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE) {
 
             if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.PV
                     || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH) {

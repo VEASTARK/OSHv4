@@ -70,8 +70,11 @@ public class OptimizationCostFunction {
         this.gasConfiguration = new ArrayList<>();
 
         //active power pricing
-        if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL_ACTIVE
-                || this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL) {
+        //TODO: in the old cost model, lower pls violations would only be punsihed by refunding the feed-in costs.
+        // Change this to refunding + punishment according to active power price
+        if ((this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL_ACTIVE
+                || this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL)
+                && this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.NONE) {
             List<SingularArgumentTuple> arguments = new ArrayList<>();
             arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -80,7 +83,9 @@ public class OptimizationCostFunction {
 
             this.activeConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_quad,
                     CalculationFunctions::priceAbsPowerLimitFunction));
-        } else if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.UPPER_ACTIVE) {
+        } else if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.UPPER_ACTIVE
+                || (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.NONE
+                && this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE)) {
             List<SingularArgumentTuple> arguments = new ArrayList<>();
             arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -121,7 +126,7 @@ public class OptimizationCostFunction {
         //feed in pricing
         if (this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE) {
             if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL
-                    || this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL_ACTIVE) {
+                    && this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL_ACTIVE) {
                 if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH
                         || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.PV) {
                     List<SingularArgumentTuple> arguments = new ArrayList<>();
@@ -234,18 +239,24 @@ public class OptimizationCostFunction {
 
         double electricity = 0.0, gas = 0.0;
 
-        electricity += this.execute(ancillaryMeter, start, end, this.activeConfiguration);
-        electricity += this.execute(ancillaryMeter, start, end, this.reactiveConfiguration);
-        electricity += this.execute(ancillaryMeter, start, end, this.feedInConfiguration);
-        electricity += this.execute(ancillaryMeter, start, end, this.autoConsumptionConfiguration);
+        //TODO: it's a bit wasteful to divide after each calculation but we need to keep consistent with the old
+        // version due tu floating-point voodoo. Change as soon as next backwards compatibility breaking update is
+        // released
+        electricity += this.execute(ancillaryMeter, start, end, this.activeConfiguration) / PhysicalConstants.factor_wsToKWh;
+        electricity += this.execute(ancillaryMeter, start, end, this.reactiveConfiguration) / PhysicalConstants.factor_wsToKWh;
+        electricity += this.execute(ancillaryMeter, start, end, this.feedInConfiguration) / PhysicalConstants.factor_wsToKWh;
+        electricity += this.execute(ancillaryMeter, start, end, this.autoConsumptionConfiguration) / PhysicalConstants.factor_wsToKWh;
 
-        gas += this.execute(ancillaryMeter, start, end, this.gasConfiguration);
+        gas += this.execute(ancillaryMeter, start, end, this.gasConfiguration) / PhysicalConstants.factor_wsToKWh;
 
 
         Enum2DoubleMap<CostReturnType> costs = new Enum2DoubleMap<>(CostReturnType.class);
 
-        costs.put(CostReturnType.ELECTRICITY, electricity / PhysicalConstants.factor_wsToKWh);
-        costs.put(CostReturnType.GAS, gas / PhysicalConstants.factor_wsToKWh);
+        costs.put(CostReturnType.ELECTRICITY, electricity);
+        costs.put(CostReturnType.GAS, gas);
+
+//        costs.put(CostReturnType.ELECTRICITY, electricity / PhysicalConstants.factor_wsToKWh);
+//        costs.put(CostReturnType.GAS, gas / PhysicalConstants.factor_wsToKWh);
 
         return costs;
     }

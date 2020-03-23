@@ -464,7 +464,8 @@ public class BuildingSimulationEngine extends SimulationEngine {
                         + costs.get(SingleStepCostReturnType.PLS)
                         + costs.get(SingleStepCostReturnType.GAS)
                         + costs.get(SingleStepCostReturnType.FEED_IN_PV)
-                        + costs.get(SingleStepCostReturnType.FEED_IN_CHP));
+                        + costs.get(SingleStepCostReturnType.FEED_IN_CHP)
+                        + costs.get(SingleStepCostReturnType.AUTO_CONSUMPTION));
                 ((OSHSimulationResults) this.oshSimulationResults).addGasCostsToGasCosts(costs.get(SingleStepCostReturnType.GAS));
                 ((OSHSimulationResults) this.oshSimulationResults).addFeedInCostsToFeedInCostsPV(costs.get(SingleStepCostReturnType.FEED_IN_PV));
                 ((OSHSimulationResults) this.oshSimulationResults).addFeedInCostsToFeedInCostsCHP(costs.get(SingleStepCostReturnType.FEED_IN_CHP));
