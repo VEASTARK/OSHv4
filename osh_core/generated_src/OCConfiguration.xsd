@@ -8,6 +8,7 @@
     <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system"/>
 
     <include schemaLocation="GAConfiguration.xsd"/>
+    <include schemaLocation="EAConfiguration.xsd"/>
 
 
     <element name="OCConfiguration">

@@ -6,41 +6,37 @@
 //
 
 
-package osh.simulation.screenplay;
+package osh.configuration.oc;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ScreenplayType.
+ * <p>Java class for EAObjectives.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ScreenplayType"&gt;
+ * &lt;simpleType name="EAObjectives"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
- *     &lt;enumeration value="STATIC"/&gt;
- *     &lt;enumeration value="DYNAMIC"/&gt;
- *     &lt;enumeration value="GUI"/&gt;
+ *     &lt;enumeration value="MONEY"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
  * 
  */
-@XmlType(name = "ScreenplayType")
+@XmlType(name = "EAObjectives")
 @XmlEnum
-public enum ScreenplayType {
+public enum EAObjectives {
 
-    STATIC,
-    DYNAMIC,
-    GUI;
+    MONEY;
 
     public String value() {
         return name();
     }
 
-    public static ScreenplayType fromValue(String v) {
+    public static EAObjectives fromValue(String v) {
         return valueOf(v);
     }
 

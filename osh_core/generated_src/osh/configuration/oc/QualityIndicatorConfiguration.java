@@ -10,26 +10,23 @@ package osh.configuration.oc;
 
 import osh.configuration.system.ConfigurationParameter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * <p>Java class for StoppingRule complex type.
+ * <p>Java class for QualityIndicatorConfiguration complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="StoppingRule"&gt;
+ * &lt;complexType name="QualityIndicatorConfiguration"&gt;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="stoppingRuleName" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="ruleParameters" type="{http://osh/configuration/system}ConfigurationParameter" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="type" type="{http://osh/configuration/oc}qualityIndicator"/&gt;
+ *         &lt;element name="indicatorParameters" type="{http://osh/configuration/system}ConfigurationParameter" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -39,53 +36,54 @@ import java.util.List;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StoppingRule", propOrder = {
-    "stoppingRuleName",
-    "ruleParameters"
+@XmlType(name = "QualityIndicatorConfiguration", propOrder = {
+    "type",
+    "indicatorParameters"
 })
-public class StoppingRule {
+public class QualityIndicatorConfiguration {
 
     @XmlElement(required = true)
-    protected String stoppingRuleName;
-    protected List<ConfigurationParameter> ruleParameters;
+    @XmlSchemaType(name = "string")
+    protected QualityIndicator type;
+    protected List<ConfigurationParameter> indicatorParameters;
 
     /**
-     * Gets the value of the stoppingRuleName property.
+     * Gets the value of the type property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link QualityIndicator }
      *     
      */
-    public String getStoppingRuleName() {
-        return stoppingRuleName;
+    public QualityIndicator getType() {
+        return type;
     }
 
     /**
-     * Sets the value of the stoppingRuleName property.
+     * Sets the value of the type property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link QualityIndicator }
      *     
      */
-    public void setStoppingRuleName(String value) {
-        this.stoppingRuleName = value;
+    public void setType(QualityIndicator value) {
+        this.type = value;
     }
 
     /**
-     * Gets the value of the ruleParameters property.
+     * Gets the value of the indicatorParameters property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the ruleParameters property.
+     * This is why there is not a <CODE>set</CODE> method for the indicatorParameters property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getRuleParameters().add(newItem);
+     *    getIndicatorParameters().add(newItem);
      * </pre>
      * 
      * 
@@ -95,11 +93,11 @@ public class StoppingRule {
      * 
      * 
      */
-    public List<ConfigurationParameter> getRuleParameters() {
-        if (ruleParameters == null) {
-            ruleParameters = new ArrayList<ConfigurationParameter>();
+    public List<ConfigurationParameter> getIndicatorParameters() {
+        if (indicatorParameters == null) {
+            indicatorParameters = new ArrayList<ConfigurationParameter>();
         }
-        return this.ruleParameters;
+        return this.indicatorParameters;
     }
 
 }

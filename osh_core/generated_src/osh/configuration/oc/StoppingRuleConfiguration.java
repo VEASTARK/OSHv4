@@ -6,7 +6,9 @@
 //
 
 
-package osh.simulation.screenplay;
+package osh.configuration.oc;
+
+import osh.configuration.system.ConfigurationParameter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -17,17 +19,17 @@ import java.util.List;
 
 
 /**
- * <p>Java class for ActionParameters complex type.
+ * <p>Java class for StoppingRuleConfiguration complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ActionParameters"&gt;
+ * &lt;complexType name="StoppingRuleConfiguration"&gt;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="parametersName" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="parameter" type="{http://osh/Simulation/Screenplay}ActionParameter" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="stoppingRuleName" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="ruleParameters" type="{http://osh/configuration/system}ConfigurationParameter" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -37,67 +39,67 @@ import java.util.List;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ActionParameters", propOrder = {
-    "parametersName",
-    "parameter"
+@XmlType(name = "StoppingRuleConfiguration", propOrder = {
+    "stoppingRuleName",
+    "ruleParameters"
 })
-public class ActionParameters {
+public class StoppingRuleConfiguration {
 
     @XmlElement(required = true)
-    protected String parametersName;
-    protected List<ActionParameter> parameter;
+    protected String stoppingRuleName;
+    protected List<ConfigurationParameter> ruleParameters;
 
     /**
-     * Gets the value of the parametersName property.
+     * Gets the value of the stoppingRuleName property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getParametersName() {
-        return parametersName;
+    public String getStoppingRuleName() {
+        return stoppingRuleName;
     }
 
     /**
-     * Sets the value of the parametersName property.
+     * Sets the value of the stoppingRuleName property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setParametersName(String value) {
-        this.parametersName = value;
+    public void setStoppingRuleName(String value) {
+        this.stoppingRuleName = value;
     }
 
     /**
-     * Gets the value of the parameter property.
+     * Gets the value of the ruleParameters property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the parameter property.
+     * This is why there is not a <CODE>set</CODE> method for the ruleParameters property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getParameter().add(newItem);
+     *    getRuleParameters().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ActionParameter }
+     * {@link ConfigurationParameter }
      * 
      * 
      */
-    public List<ActionParameter> getParameter() {
-        if (parameter == null) {
-            parameter = new ArrayList<ActionParameter>();
+    public List<ConfigurationParameter> getRuleParameters() {
+        if (ruleParameters == null) {
+            ruleParameters = new ArrayList<ConfigurationParameter>();
         }
-        return this.parameter;
+        return this.ruleParameters;
     }
 
 }

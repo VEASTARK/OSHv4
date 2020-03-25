@@ -6,41 +6,39 @@
 //
 
 
-package osh.simulation.screenplay;
+package osh.configuration.oc;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ScreenplayType.
+ * <p>Java class for variableEncoding.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ScreenplayType"&gt;
+ * &lt;simpleType name="variableEncoding"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
- *     &lt;enumeration value="STATIC"/&gt;
- *     &lt;enumeration value="DYNAMIC"/&gt;
- *     &lt;enumeration value="GUI"/&gt;
+ *     &lt;enumeration value="BINARY"/&gt;
+ *     &lt;enumeration value="REAL"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
  * 
  */
-@XmlType(name = "ScreenplayType")
+@XmlType(name = "variableEncoding")
 @XmlEnum
-public enum ScreenplayType {
+public enum VariableEncoding {
 
-    STATIC,
-    DYNAMIC,
-    GUI;
+    BINARY,
+    REAL;
 
     public String value() {
         return name();
     }
 
-    public static ScreenplayType fromValue(String v) {
+    public static VariableEncoding fromValue(String v) {
         return valueOf(v);
     }
 

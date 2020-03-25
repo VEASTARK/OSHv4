@@ -6,28 +6,27 @@
 //
 
 
-package osh.simulation.screenplay;
+package osh.configuration.oc;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import osh.configuration.system.ConfigurationParameter;
+
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * <p>Java class for ActionParameters complex type.
+ * <p>Java class for SolutionRanking complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ActionParameters"&gt;
+ * &lt;complexType name="SolutionRanking"&gt;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="parametersName" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="parameter" type="{http://osh/Simulation/Screenplay}ActionParameter" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="type" type="{http://osh/configuration/oc}rankingType"/&gt;
+ *         &lt;element name="rankingParameters" type="{http://osh/configuration/system}ConfigurationParameter" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -37,67 +36,68 @@ import java.util.List;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ActionParameters", propOrder = {
-    "parametersName",
-    "parameter"
+@XmlType(name = "SolutionRanking", propOrder = {
+    "type",
+    "rankingParameters"
 })
-public class ActionParameters {
+public class SolutionRanking {
 
     @XmlElement(required = true)
-    protected String parametersName;
-    protected List<ActionParameter> parameter;
+    @XmlSchemaType(name = "string")
+    protected RankingType type;
+    protected List<ConfigurationParameter> rankingParameters;
 
     /**
-     * Gets the value of the parametersName property.
+     * Gets the value of the type property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link RankingType }
      *     
      */
-    public String getParametersName() {
-        return parametersName;
+    public RankingType getType() {
+        return type;
     }
 
     /**
-     * Sets the value of the parametersName property.
+     * Sets the value of the type property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link RankingType }
      *     
      */
-    public void setParametersName(String value) {
-        this.parametersName = value;
+    public void setType(RankingType value) {
+        this.type = value;
     }
 
     /**
-     * Gets the value of the parameter property.
+     * Gets the value of the rankingParameters property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the parameter property.
+     * This is why there is not a <CODE>set</CODE> method for the rankingParameters property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getParameter().add(newItem);
+     *    getRankingParameters().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link ActionParameter }
+     * {@link ConfigurationParameter }
      * 
      * 
      */
-    public List<ActionParameter> getParameter() {
-        if (parameter == null) {
-            parameter = new ArrayList<ActionParameter>();
+    public List<ConfigurationParameter> getRankingParameters() {
+        if (rankingParameters == null) {
+            rankingParameters = new ArrayList<ConfigurationParameter>();
         }
-        return this.parameter;
+        return this.rankingParameters;
     }
 
 }

@@ -6,41 +6,41 @@
 //
 
 
-package osh.simulation.screenplay;
+package osh.configuration.oc;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ScreenplayType.
+ * <p>Java class for operatorType.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ScreenplayType"&gt;
+ * &lt;simpleType name="operatorType"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
- *     &lt;enumeration value="STATIC"/&gt;
- *     &lt;enumeration value="DYNAMIC"/&gt;
- *     &lt;enumeration value="GUI"/&gt;
+ *     &lt;enumeration value="SELECTION"/&gt;
+ *     &lt;enumeration value="RECOMBINATION"/&gt;
+ *     &lt;enumeration value="MUTATION"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
  * 
  */
-@XmlType(name = "ScreenplayType")
+@XmlType(name = "operatorType")
 @XmlEnum
-public enum ScreenplayType {
+public enum OperatorType {
 
-    STATIC,
-    DYNAMIC,
-    GUI;
+    SELECTION,
+    RECOMBINATION,
+    MUTATION;
 
     public String value() {
         return name();
     }
 
-    public static ScreenplayType fromValue(String v) {
+    public static OperatorType fromValue(String v) {
         return valueOf(v);
     }
 

@@ -6,41 +6,45 @@
 //
 
 
-package osh.simulation.screenplay;
+package osh.configuration.oc;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ScreenplayType.
+ * <p>Java class for rankingType.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ScreenplayType"&gt;
+ * &lt;simpleType name="rankingType"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
- *     &lt;enumeration value="STATIC"/&gt;
- *     &lt;enumeration value="DYNAMIC"/&gt;
- *     &lt;enumeration value="GUI"/&gt;
+ *     &lt;enumeration value="DOMINANCE"/&gt;
+ *     &lt;enumeration value="OBJECTIVE"/&gt;
+ *     &lt;enumeration value="WEIGHTED_OBJECTIVE"/&gt;
+ *     &lt;enumeration value="CHEBYSHEV"/&gt;
+ *     &lt;enumeration value="NASH_BARGAINING"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
  * 
  */
-@XmlType(name = "ScreenplayType")
+@XmlType(name = "rankingType")
 @XmlEnum
-public enum ScreenplayType {
+public enum RankingType {
 
-    STATIC,
-    DYNAMIC,
-    GUI;
+    DOMINANCE,
+    OBJECTIVE,
+    WEIGHTED_OBJECTIVE,
+    CHEBYSHEV,
+    NASH_BARGAINING;
 
     public String value() {
         return name();
     }
 
-    public static ScreenplayType fromValue(String v) {
+    public static RankingType fromValue(String v) {
         return valueOf(v);
     }
 
