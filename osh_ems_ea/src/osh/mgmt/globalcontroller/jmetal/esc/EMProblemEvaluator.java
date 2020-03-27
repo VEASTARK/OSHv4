@@ -3,6 +3,7 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.uma.jmetal.solution.Solution;
+import osh.configuration.oc.EAObjectives;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.ErsatzACLoadProfile;
@@ -36,6 +37,8 @@ public class EMProblemEvaluator {
     private final IEALogger eaLogger;
     private final SolutionDistributor distributor;
 
+    private final List<EAObjectives> eaObjectives;
+
     private final EnergyProblemDataContainer baseDataContainer;
 
     //multithreading
@@ -54,6 +57,7 @@ public class EMProblemEvaluator {
      * @param ignoreLoadProfileAfter the point in time after which all should be ignored for this optimization
      * @param costFunction the function determining which fitness an evaluated solution has
      * @param stepSize the size of the time-steps to be used for the evaluation of solutions
+     * @param eaObjectives the collection of all EA-objectvies
      */
     public EMProblemEvaluator(
             InterdependentProblemPart<?, ?>[] problemParts,
@@ -63,7 +67,8 @@ public class EMProblemEvaluator {
             long ignoreLoadProfileAfter,
             OptimizationCostFunction costFunction,
             IEALogger eaLogger,
-            int stepSize) {
+            int stepSize,
+            List<EAObjectives> eaObjectives) {
 
         this.distributor = distributor;
         this.ignoreLoadProfileBefore = ignoreLoadProfileBefore;
@@ -71,6 +76,7 @@ public class EMProblemEvaluator {
         this.stepSize = stepSize;
         this.costFunction = costFunction;
         this.eaLogger = eaLogger;
+        this.eaObjectives = eaObjectives;
 
         //mapping of uuid to problem-part id, needed for the construction of UUIDCommodityMaps
         Object2IntOpenHashMap<UUID> uuidIntMap = new Object2IntOpenHashMap<>();
@@ -329,20 +335,28 @@ public class EMProblemEvaluator {
                 this.ignoreLoadProfileAfter,
                 ancillaryLoadProfile);
 
-        double fitness = costs.get(CostReturnType.ELECTRICITY) + costs.get(CostReturnType.GAS);
+        Enum2DoubleMap<EAObjectives> cervisia = new Enum2DoubleMap<>(EAObjectives.class);
 
         // add lukewarm cervisia (i.e. additional fixed costs...)
         for (InterdependentProblemPart<?, ?> problempart : allIPPs) {
-            problempart.finalizeInterdependentCervisia();
-            double add = problempart.getInterdependentCervisia();
-            fitness += add;
+            Enum2DoubleMap<EAObjectives> add = problempart.getFinalInterdependentSchedule().getLukewarmCervisia();
+            cervisia.addAll(add);
 
-            if (log && add != 0) {
+            if (log) {
                 this.eaLogger.logCervisia(problempart.getDeviceType(), add);
             }
         }
 
-        solution.setObjective(0, fitness);
+        for (int i = 0; i < this.eaObjectives.size(); i++) {
+            EAObjectives objective = this.eaObjectives.get(i);
+
+            if (objective == EAObjectives.MONEY) {
+                solution.setObjective(i,
+                        costs.get(CostReturnType.ELECTRICITY)
+                                + costs.get(CostReturnType.GAS)
+                                + cervisia.get(EAObjectives.MONEY));
+            }
+        }
 
         //free the used data for another evaluation
         this.freeDataCopy(dataContainer);

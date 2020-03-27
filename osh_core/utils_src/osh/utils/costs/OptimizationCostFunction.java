@@ -239,15 +239,12 @@ public class OptimizationCostFunction {
 
         double electricity = 0.0, gas = 0.0;
 
-        //TODO: it's a bit wasteful to divide after each calculation but we need to keep consistent with the old
-        // version due tu floating-point voodoo. Change as soon as next backwards compatibility breaking update is
-        // released
-        electricity += this.execute(ancillaryMeter, start, end, this.activeConfiguration) / PhysicalConstants.factor_wsToKWh;
-        electricity += this.execute(ancillaryMeter, start, end, this.reactiveConfiguration) / PhysicalConstants.factor_wsToKWh;
-        electricity += this.execute(ancillaryMeter, start, end, this.feedInConfiguration) / PhysicalConstants.factor_wsToKWh;
-        electricity += this.execute(ancillaryMeter, start, end, this.autoConsumptionConfiguration) / PhysicalConstants.factor_wsToKWh;
+        electricity += this.execute(ancillaryMeter, start, end, this.activeConfiguration);
+        electricity += this.execute(ancillaryMeter, start, end, this.reactiveConfiguration);
+        electricity += this.execute(ancillaryMeter, start, end, this.feedInConfiguration);
+        electricity += this.execute(ancillaryMeter, start, end, this.autoConsumptionConfiguration);
 
-        gas += this.execute(ancillaryMeter, start, end, this.gasConfiguration) / PhysicalConstants.factor_wsToKWh;
+        gas += this.execute(ancillaryMeter, start, end, this.gasConfiguration);
 
 
         Enum2DoubleMap<CostReturnType> costs = new Enum2DoubleMap<>(CostReturnType.class);
@@ -255,8 +252,8 @@ public class OptimizationCostFunction {
         costs.put(CostReturnType.ELECTRICITY, electricity);
         costs.put(CostReturnType.GAS, gas);
 
-//        costs.put(CostReturnType.ELECTRICITY, electricity / PhysicalConstants.factor_wsToKWh);
-//        costs.put(CostReturnType.GAS, gas / PhysicalConstants.factor_wsToKWh);
+        costs.put(CostReturnType.ELECTRICITY, electricity / PhysicalConstants.factor_wsToKWh);
+        costs.put(CostReturnType.GAS, gas / PhysicalConstants.factor_wsToKWh);
 
         return costs;
     }

@@ -2,16 +2,17 @@ package osh.mgmt.globalcontroller.jmetal.logging;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.solution.BinarySolution;
-import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.binarySet.BinarySet;
-import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
 import osh.simulation.DatabaseLoggerThread;
+import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -22,43 +23,44 @@ import java.util.List;
  */
 public class EALogger implements IEALogger {
 
-    private boolean log;
-    private boolean logExtended;
-    private int logXthGeneration;
-    private IGlobalLogger logger;
-    private boolean logOverallEA;
+    final boolean log;
+    private final boolean logExtended;
+    private final int logXthGeneration;
+    private final IGlobalLogger logger;
+    private final boolean logOverallEA;
     private int optimizationCounter;
     private double generationsUsed;
-    private int logExtendedGenerations;
-    private double[] fitnessChange;
-    private double[] fitnessSpread;
+    private final int logExtendedGenerations;
+    private final double[][] fitnessChange;
+    private final double[][] fitnessSpread;
     private double[] homogeneity;
-    private double bestFirstFitness = Double.NaN;
+    private final double[] bestFirstFitness;
     private final double[][] cervisiaInformation = new double[5][2];
-    private final Comparator<Solution<?>> comparator= new ObjectiveComparator<>(0);
+    final int objectiveCount;
 
     private PrintWriter additionalWriter;
     private long timestamp;
 
+    /**
+     * Constructs this ea-logger with the given global logger and the configuration parameters.
+     *
+     * @param globalLogger the global logger
+     * @param log flag if anything should be logged
+     * @param logExtended flag if extended population values should be logged
+     * @param logXthGeneration counter after how many generations there should be a log of population values
+     * @param logExtendedGenerations counter after how many generations there should be an exteneded log of population
+     *                               values
+     * @param logOverallEA flag if the number of optimization runs should be logges
+     * @param eaObjectives collection of the objectives of the optimization
+     */
     public EALogger(
             IGlobalLogger globalLogger,
             boolean log,
             boolean logExtended,
             int logXthGeneration,
             int logExtendedGenerations,
-            boolean logOverallEA) {
-
-        this.init(globalLogger, log, logExtended, logXthGeneration, logExtendedGenerations,
-                logOverallEA);
-    }
-
-    private void init(
-            IGlobalLogger globalLogger,
-            boolean log,
-            boolean logExtended,
-            int logXthGeneration,
-            int logExtendedGenerations,
-            boolean logOverallEA) {
+            boolean logOverallEA,
+            Collection<EAObjectives> eaObjectives) {
 
         this.log = log;
         this.logExtended = logExtended;
@@ -66,9 +68,11 @@ public class EALogger implements IEALogger {
         this.logExtendedGenerations = logExtendedGenerations;
         this.logger = globalLogger;
         this.logOverallEA = logOverallEA;
+        this.objectiveCount = eaObjectives.size();
 
-        this.fitnessChange = new double[logExtendedGenerations];
-        this.fitnessSpread = new double[logExtendedGenerations];
+        this.bestFirstFitness = new double[this.objectiveCount];
+        this.fitnessChange = new double[logExtendedGenerations][this.objectiveCount];
+        this.fitnessSpread = new double[logExtendedGenerations][this.objectiveCount];
         this.homogeneity = new double[logExtendedGenerations];
     }
 
@@ -89,15 +93,46 @@ public class EALogger implements IEALogger {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Logs the given message.
+     *
+     * @param message the message to log
+     */
+    void log(String message) {
+        this.log(message, false);
+    }
+
+    /**
+     * Logs the given message with an optional prepended timestamp.
+     *
+     * @param message the message to log
+     * @param prependTime flag if a timestamp should be prepended
+     */
+    void log(String message, boolean prependTime) {
+        this.logger.logDebug(message);
+        if (this.additionalWriter != null) {
+            if (prependTime) {
+                this.additionalWriter.println("[" + this.timestamp + "] " + message);
+            } else {
+                this.additionalWriter.println(message);
+            }
+        }
+    }
+
+    /**
+     * Returns the array containing the best fitness values for each objective.
+     *
+     * @return the array containing the best fitness values for each objective
+     */
+    double[] getBestFirstFitness() {
+        return this.bestFirstFitness;
+    }
+
     @Override
     public void logStart(Algorithm<?> usedAlgorithm) {
         if (this.log) {
-            String logMessage = "===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===";
-            this.logger.logDebug(logMessage);
-            if (this.additionalWriter != null) {
-                this.additionalWriter.println("[" + this.timestamp + "] " + logMessage);
-            }
-            this.bestFirstFitness = Double.NaN;
+            this.log("===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===", true);
+            Arrays.fill(this.getBestFirstFitness(), Double.NaN);
         }
     }
 
@@ -105,12 +140,12 @@ public class EALogger implements IEALogger {
     public void logEnd(Solution<?> bestSolution) {
         if (this.log) {
             StringBuilder logMessage = new StringBuilder("===    Finished Optimization, final Fitness: ");
-            logMessage.append(" ").append(bestSolution.getObjective(0)).append(" ");
-            logMessage.append("    ===");
-            this.logger.logDebug(logMessage.toString());
-            if (this.additionalWriter != null) {
-                this.additionalWriter.println(logMessage.toString());
+            for (int i = 0; i < this.objectiveCount; i++) {
+                logMessage.append(" ").append(bestSolution.getObjective(i)).append(" ");
             }
+            logMessage.append("    ===");
+            this.log(logMessage.toString());
+
         }
         if (this.logOverallEA) {
             this.optimizationCounter++;
@@ -125,47 +160,36 @@ public class EALogger implements IEALogger {
 
             if (generation % this.logXthGeneration == 0) {
 
-                population.sort(this.comparator);
+                double[] bestFitness = new double[this.objectiveCount];
 
-                double bestFitness = population.get(0).getObjective(0);
+                for (int i = 0; i < this.objectiveCount; i++) {
+                    population.sort(this.getComparatorForObjective(i));
 
-                if (Double.isNaN(this.bestFirstFitness)) {
-                    this.bestFirstFitness = bestFitness;
+                    bestFitness[i] = population.get(0).getObjective(i);
+                    if (Double.isNaN(this.getBestFirstFitness()[i])) {
+                        this.getBestFirstFitness()[i] = bestFitness[i];
+                    }
                 }
 
-                logMessage = "[" + generation + "] -- BestFitness: " + bestFitness;
+                logMessage = "[" + generation + "] -- BestFitness: " + Arrays.toString(bestFitness);
 
             } else {
-
-                if (Double.isNaN(this.bestFirstFitness)) {
-                    population.sort(this.comparator);
-                    this.bestFirstFitness = population.get(0).getObjective(0);
+                for (int i = 0; i < this.objectiveCount; i++) {
+                    if (Double.isNaN(this.getBestFirstFitness()[i])) {
+                        population.sort(this.getComparatorForObjective(i));
+                        this.getBestFirstFitness()[i] = population.get(0).getObjective(i);
+                    }
                 }
             }
 
             if ((this.logExtended && generation % this.logXthGeneration == 0)
                     || (this.logOverallEA && generation < this.logExtendedGenerations)) {
-                double[] popValues = this.getExtendedPopulationValues(population);
+                logMessage += this.logExtendedPopulation(population, generation);
 
-                if ((this.logOverallEA && generation < this.logExtendedGenerations)) {
-
-                    this.homogeneity[generation] += popValues[0];
-                    population.sort(this.comparator);
-                    this.fitnessChange[generation] += population.get(0).getObjective(0) / this.bestFirstFitness;
-                    this.fitnessSpread[generation] += popValues[1];
-                }
-
-                if ((this.logExtended && generation % this.logXthGeneration == 0)) {
-                    logMessage += " -- Homogeneity mean: " + popValues[0] + " -- max: " + popValues[1]
-                            + " -- deltaFitnessSpread: " + popValues[2];
-                }
             }
 
             if (!logMessage.isEmpty()) {
-                this.logger.logDebug(logMessage);
-                if (this.additionalWriter != null) {
-                    this.additionalWriter.println(logMessage);
-                }
+                this.log(logMessage);
             }
 
         }
@@ -174,13 +198,41 @@ public class EALogger implements IEALogger {
         }
     }
 
+    /**
+     * Logs the extended population values and returns an optional log-message.
+     *
+     * @param population the population to log
+     * @param generation the generation the ea algorithm is in
+     *
+     * @return the optional log message or an empty string
+     */
+    String logExtendedPopulation(List<? extends Solution<?>> population, int generation) {
+
+        double[][] popValues = this.getExtendedPopulationValues(population);
+
+        if ((this.logOverallEA && generation < this.logExtendedGenerations)) {
+
+            this.homogeneity[generation] += popValues[0][0];
+
+            for (int i = 0; i < this.objectiveCount; i++) {
+                population.sort(this.getComparatorForObjective(i));
+                this.fitnessChange[generation][i] += population.get(0).getObjective(i) / this.getBestFirstFitness()[i];
+                this.fitnessSpread[generation][i] += popValues[1][i];
+            }
+        }
+
+        if ((this.logExtended && generation % this.logXthGeneration == 0)) {
+            return " -- Homogeneity mean: " + popValues[0][0] + " -- max: " + popValues[0][1]
+                    + " -- deltaFitnessSpread: " + Arrays.toString(popValues[1]);
+        }
+
+        return "";
+    }
+
     @Override
     public void logAdditional(String message) {
         if (this.log) {
-            this.logger.logDebug(message);
-            if (this.additionalWriter != null) {
-                this.additionalWriter.println(message);
-            }
+            this.log(message);
         }
     }
 
@@ -189,8 +241,10 @@ public class EALogger implements IEALogger {
         if (this.log && DatabaseLoggerThread.isIsLogToDatabase()) {
             this.generationsUsed /= this.optimizationCounter;
 
-            this.fitnessChange = Arrays.stream(this.fitnessChange).map(d -> d / this.optimizationCounter).toArray();
-            this.fitnessSpread = Arrays.stream(this.fitnessSpread).map(d -> d / this.optimizationCounter).toArray();
+            for (int i = 0; i < this.objectiveCount; i++) {
+                this.fitnessChange[i] = Arrays.stream(this.fitnessChange[i]).map(d -> d / this.optimizationCounter).toArray();
+                this.fitnessSpread[i] = Arrays.stream(this.fitnessSpread[i]).map(d -> d / this.optimizationCounter).toArray();
+            }
 
             this.homogeneity = Arrays.stream(this.homogeneity).map(d -> d / this.optimizationCounter).toArray();
 
@@ -201,17 +255,22 @@ public class EALogger implements IEALogger {
                 }
             }
 
-            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange, this.fitnessSpread, this.homogeneity, this.optimizationCounter, cervisiaResults);
+            //TODO: change logging to include multi-objective as soon as next backwards-compatibility breaking update
+            // is released
+            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange[0], this.fitnessSpread[0],
+                    this.homogeneity, this.optimizationCounter, cervisiaResults);
         }
     }
 
-    /* [0] = homogeneity
-     * [1] = maxDifference
-     * [2] = deltaFitnessChanges
+    /* [0][0] = homogeneity
+     * [0][1] = maxDifference
+     * [1] = deltaFitnessChanges
      */
-    private double[] getExtendedPopulationValues(List<? extends Solution<?>> population) {
+    private double[][] getExtendedPopulationValues(List<? extends Solution<?>> population) {
 
-        double[] values = new double[3];
+        double[][] values = new double[2][];
+        values[0] = new double[2];
+        values[1] = new double[this.objectiveCount];
 
         if (BinarySolution.class.isAssignableFrom(population.get(0).getClass())) {
 
@@ -235,53 +294,46 @@ public class EALogger implements IEALogger {
                 homogeneitySum += homogeneity;
             }
 
-            values[0] = (homogeneitySum / population.size());
-            values[1] = max;
+            values[0][0] = (homogeneitySum / population.size());
+            values[0][1] = max;
+        }
 
-            double bestFitness = population.get(0).getObjective(0);
+        for (int i = 0; i < this.objectiveCount; i++) {
+            double bestFitness = population.get(0).getObjective(i);
             double deltaFitnessSum = 0.0;
 
             for (Solution<?> solution : population) {
 
-                deltaFitnessSum += (solution.getObjective(0) / bestFitness) - 1;
+                deltaFitnessSum += (solution.getObjective(i) / bestFitness) - 1;
 
             }
-            values[2] = deltaFitnessSum / population.size();
-
-
-        } else if (DoubleSolution.class.isAssignableFrom(population.get(0).getClass())) {
-
-            double bestFitness = population.get(0).getObjective(0);
-            double deltaFitnessSum = 0.0;
-
-            for (Solution<?> solution : population) {
-
-                deltaFitnessSum += (solution.getObjective(0) / bestFitness) - 1;
-
-            }
-            values[2] = deltaFitnessSum / population.size();
+            values[1][i] = deltaFitnessSum / population.size();
         }
 
         return values;
     }
 
+    private Comparator<Solution<?>> getComparatorForObjective(int objective) {
+        return Comparator.comparingDouble(s -> s.getObjective(objective));
+    }
+
     @Override
-    public void logCervisia(DeviceTypes type, double cervisia) {
+    public void logCervisia(DeviceTypes type, Enum2DoubleMap<EAObjectives> cervisia) {
         synchronized (this.cervisiaInformation) {
             if (type == DeviceTypes.CHPPLANT) {
-                this.cervisiaInformation[0][0] += cervisia;
+                this.cervisiaInformation[0][0] += cervisia.get(EAObjectives.MONEY);
                 this.cervisiaInformation[0][1]++;
             } else if (type == DeviceTypes.HOTWATERSTORAGE) {
-                this.cervisiaInformation[1][0] += cervisia;
+                this.cervisiaInformation[1][0] += cervisia.get(EAObjectives.MONEY);
                 this.cervisiaInformation[1][1]++;
             } else if (type == DeviceTypes.DISHWASHER) {
-                this.cervisiaInformation[2][0] += cervisia;
+                this.cervisiaInformation[2][0] += cervisia.get(EAObjectives.MONEY);
                 this.cervisiaInformation[2][1]++;
             } else if (type == DeviceTypes.DRYER) {
-                this.cervisiaInformation[3][0] += cervisia;
+                this.cervisiaInformation[3][0] += cervisia.get(EAObjectives.MONEY);
                 this.cervisiaInformation[3][1]++;
             } else if (type == DeviceTypes.WASHINGMACHINE) {
-                this.cervisiaInformation[4][0] += cervisia;
+                this.cervisiaInformation[4][0] += cervisia.get(EAObjectives.MONEY);
                 this.cervisiaInformation[4][1]++;
             }
         }

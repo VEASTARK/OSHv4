@@ -1,5 +1,6 @@
 package osh.datatypes.registry.oc.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
@@ -18,6 +19,7 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionW
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
+import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.time.ZonedDateTime;
 import java.util.BitSet;
@@ -84,7 +86,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      * Additional (non-monetary) costs produced during the optimization loops which would not be computed in the
      * normal cost-calulcation. To be added at the end of the optimization loop.
      */
-    private double interdependentCervisia;
+    private Enum2DoubleMap<EAObjectives> interdependentCervisia = new Enum2DoubleMap<>(EAObjectives.class);
 
     private final UUID deviceID;
 
@@ -160,6 +162,8 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         this.compressionValue = compressionValue;
         this.internalInterdependentOutputStates = new LimitedCommodityStateMap(allOutputCommodities);
         this.solutionHandler = new IPPSolutionHandler(binaryTranslator, realTranslator);
+
+        this.interdependentCervisia.clear();
     }
 
     /**
@@ -197,7 +201,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
         this.compressionValue = other.compressionValue;
 
         this.currentSolution = null;
-        this.interdependentCervisia = 0.0;
+        this.interdependentCervisia.clear();
 
         this.id = other.id;
         this.loadProfile = other.loadProfile == null ? null : new SparseLoadProfile();
@@ -220,7 +224,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
             this.recalculateEncoding(interdependentStartingTime, this.getOptimizationHorizon());
         }
 
-        this.interdependentCervisia = 0.0;
+        this.interdependentCervisia.clear();
 
         this.interdependentTime = interdependentStartingTime;
         this.interdependentOutputStates = null;
@@ -510,7 +514,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      *
      * @return the additional (non-monetary) costs incurred by this problem-part
      */
-    public double getInterdependentCervisia() {
+    public Enum2DoubleMap<EAObjectives> getInterdependentCervisia() {
         return this.interdependentCervisia;
     }
 
@@ -519,8 +523,8 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      *
      * @param add the additional value
      */
-    public void addInterdependentCervisia(double add) {
-        this.interdependentCervisia += add;
+    public void addInterdependentCervisia(EAObjectives objective, double add) {
+        this.interdependentCervisia.add(objective, add);
     }
 
     /**
