@@ -1,6 +1,7 @@
 package osh.datatypes.registry.oc.ipp;
 
 import osh.configuration.oc.EAObjectives;
+import osh.configuration.oc.VariableEncoding;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
@@ -16,7 +17,6 @@ import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.AbstractVariab
 import osh.datatypes.registry.oc.ipp.solutionEncoding.translators.IPPSolutionHandler;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.AbstractEncodedVariableInformation;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.DecodedSolutionWrapper;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.esc.IOCEnergySubject;
 import osh.esc.LimitedCommodityStateMap;
 import osh.utils.dataStructures.Enum2DoubleMap;

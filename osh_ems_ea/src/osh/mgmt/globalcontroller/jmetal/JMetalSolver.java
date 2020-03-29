@@ -5,7 +5,7 @@ import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
+import osh.mgmt.globalcontroller.jmetal.builder.AlgorithmExecutor;
 import osh.utils.costs.OptimizationCostFunction;
 
 import java.io.FileNotFoundException;
@@ -49,21 +49,22 @@ public class JMetalSolver extends Optimizer {
             InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             long ignoreLoadProfileBefore,
-            OptimizationCostFunction costFunction, IEALogger eaLogger) throws FileNotFoundException {
+            OptimizationCostFunction costFunction, AlgorithmExecutor algorithmExecutor) throws FileNotFoundException {
 
         return this.getSolutionAndFitness(
                 problemParts,
                 ocESC,
                 ignoreLoadProfileBefore,
                 costFunction,
-                eaLogger);
+                algorithmExecutor);
     }
 
-    public SolutionWithFitness getSolutionAndFitness (
+    public SolutionWithFitness getSolutionAndFitness(
             InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             long ignoreLoadProfileBefore,
-            OptimizationCostFunction costFunction, IEALogger eaLogger) throws FileNotFoundException {
+            OptimizationCostFunction costFunction,
+            AlgorithmExecutor algorithmExecutor) throws FileNotFoundException {
         throw new UnsupportedOperationException("not implemented here");
     }
 

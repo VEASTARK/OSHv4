@@ -1,5 +1,6 @@
 package osh.datatypes.registry.oc.ipp.solutionEncoding.translators;
 
+import osh.configuration.oc.VariableEncoding;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.*;
 
 import java.util.BitSet;

@@ -3,10 +3,12 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 import org.uma.jmetal.problem.BinaryProblem;
 import org.uma.jmetal.solution.BinarySolution;
 import org.uma.jmetal.solution.impl.DefaultBinarySolution;
+import osh.configuration.oc.EAObjectives;
+import osh.configuration.oc.VariableEncoding;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.BinaryEncodedVariableInformation;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Represents a binary encoded version of the {@link EnergyManagementProblem}.
@@ -19,14 +21,16 @@ public class BinaryEnergyManagementProblem extends EnergyManagementProblem<Binar
     private final int[] bitCount;
 
     /**
-     * Constructs this binary encoded energy management problem with the provided problem evaluator and solution
-     * distributor
+     * Constructs this binary encoded energy management problem with the provided problem evaluator, the collection of
+     * objectives and the solution distributor
      *
      * @param evaluator the evaluator for the problem
+     * @param objectives the collection of objective
      * @param distributor the solution distributor for the problem
      */
-    public BinaryEnergyManagementProblem(EMProblemEvaluator evaluator, SolutionDistributor distributor) {
-        super(evaluator);
+    public BinaryEnergyManagementProblem(EMProblemEvaluator evaluator, List<EAObjectives> objectives,
+                                         SolutionDistributor distributor) {
+        super(evaluator, objectives);
 
         this.setNumberOfVariables(1);
         this.bitCount = new int[1];

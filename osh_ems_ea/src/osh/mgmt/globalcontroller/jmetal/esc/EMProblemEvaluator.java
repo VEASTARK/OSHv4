@@ -339,6 +339,7 @@ public class EMProblemEvaluator {
 
         // add lukewarm cervisia (i.e. additional fixed costs...)
         for (InterdependentProblemPart<?, ?> problempart : allIPPs) {
+            problempart.finalizeInterdependentCervisia();
             Enum2DoubleMap<EAObjectives> add = problempart.getFinalInterdependentSchedule().getLukewarmCervisia();
             cervisia.addAll(add);
 

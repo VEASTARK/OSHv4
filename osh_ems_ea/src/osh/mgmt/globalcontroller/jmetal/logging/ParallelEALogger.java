@@ -4,8 +4,10 @@ import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.solution.Solution;
 import osh.configuration.oc.EAObjectives;
 import osh.core.logging.IGlobalLogger;
+import osh.mgmt.globalcontroller.jmetal.builder.ParallelAlgorithmRunner;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,9 +19,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ParallelEALogger extends EALogger {
 
     private final Map<Integer, double[]> bestFirstFitness = new HashMap<>();
-    private final Map<Integer, List<String>> logMessages = new HashMap<>();
+    private final Map<Integer, List<String>> logMessages = new ConcurrentHashMap<>();
 
-    private final Lock extendedLock = new ReentrantLock();
+    private final Lock writeLock = new ReentrantLock();
 
     /**
      * Constructs this ea-logger with the given global logger and the configuration parameters.
@@ -44,7 +46,7 @@ public class ParallelEALogger extends EALogger {
      * @return a unique identifier of the current thread
      */
     private int getId() {
-        return 0;
+        return ParallelAlgorithmRunner.getAlgorithmId();
     }
 
     @Override
@@ -64,13 +66,18 @@ public class ParallelEALogger extends EALogger {
      * @param usedAlgorithm the started algorithm
      */
     public void logStartParallel(Algorithm<?> usedAlgorithm) {
-        int id = this.getId();
         if (this.log) {
-            this.logMessages.put(id, new ArrayList<>());
-            this.bestFirstFitness.put(id, new double[this.objectiveCount]);
+            this.writeLock.lock();
+            try {
+                int id = this.getId();
+                this.logMessages.put(id, new ArrayList<>());
+                this.bestFirstFitness.put(id, new double[this.objectiveCount]);
 
-            this.log("===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===");
-            Arrays.fill(this.getBestFirstFitness(), Double.NaN);
+                this.log("===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===");
+                Arrays.fill(this.getBestFirstFitness(), Double.NaN);
+            } finally {
+                this.writeLock.unlock();
+            }
         }
     }
 
@@ -92,11 +99,11 @@ public class ParallelEALogger extends EALogger {
 
     @Override
     String logExtendedPopulation(List<? extends Solution<?>> population, int generation) {
-        this.extendedLock.lock();
+        this.writeLock.lock();
         try {
             return super.logExtendedPopulation(population, generation);
         } finally {
-            this.extendedLock.unlock();
+            this.writeLock.unlock();
         }
     }
 }

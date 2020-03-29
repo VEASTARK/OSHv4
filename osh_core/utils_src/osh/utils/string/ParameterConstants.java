@@ -193,6 +193,11 @@ public final class ParameterConstants {
         public static final String selection = "selection";
     }
 
+    public static final class EA_ALGORITHM {
+        public static final String particlesToInform = "particlesToInform";
+        public static final String singleThreaded = "singleThreaded";
+    }
+
     public static final class EA_RECOMBINATION {
         public static final String points = "points";
         public static final String alpha = "alpha";
@@ -213,6 +218,12 @@ public final class ParameterConstants {
         public static final String comparator = "comparator";
         public static final String toSelect = "solutionsToSelect";
         public static final String tournaments = "numberOfTournaments";
+    }
+
+    public static final class EA_MULTI_OBJECTIVE {
+        public static final String ordering = "ordering";
+        public static final String objective = "objective";
+        public static final String objectiveWeights = "objectiveWeights";
     }
 
     public static final class Logging {

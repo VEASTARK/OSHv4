@@ -9,9 +9,9 @@ import org.uma.jmetal.solution.Solution;
 public class SolutionWithFitness {
 
     final Solution<?> solution;
-    final double fitness;
+    final double[] fitness;
 
-    public SolutionWithFitness(Solution<?> solution, double fitness) {
+    public SolutionWithFitness(Solution<?> solution, double[] fitness) {
         this.solution = solution;
         this.fitness = fitness;
     }
@@ -20,7 +20,7 @@ public class SolutionWithFitness {
         return this.solution;
     }
 
-    public double getFitness() {
+    public double[] getFitness() {
         return this.fitness;
     }
 }

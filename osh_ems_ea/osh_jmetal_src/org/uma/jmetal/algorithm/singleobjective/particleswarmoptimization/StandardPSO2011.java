@@ -34,7 +34,6 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
     private final Operator<List<DoubleSolution>, DoubleSolution> findBestSolution;
     private final Comparator<DoubleSolution> fitnessComparator;
     private final int swarmSize;
-    private final int maxIterations;
     private final int numberOfParticlesToInform;
     private final DoubleSolution[] localBest;
     private final DoubleSolution[] neighborhoodBest;
@@ -56,16 +55,14 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
      * @param objectiveId               This field indicates which objective, in the case of a multi-objective problem,
      *                                  is selected to be optimized.
      * @param swarmSize
-     * @param maxIterations
      * @param numberOfParticlesToInform
      * @param evaluator
      */
-    public StandardPSO2011(DoubleProblem problem, int objectiveId, int swarmSize, int maxIterations,
-                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator,
+    public StandardPSO2011(DoubleProblem problem, int objectiveId, int swarmSize, int numberOfParticlesToInform,
+                           SolutionListEvaluator<DoubleSolution> evaluator,
                            IEALogger eaLogger) {
         this.problem = problem;
         this.swarmSize = swarmSize;
-        this.maxIterations = maxIterations;
         this.numberOfParticlesToInform = numberOfParticlesToInform;
         this.evaluator = evaluator;
         this.objectiveId = objectiveId;
@@ -98,14 +95,13 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
      *
      * @param problem
      * @param swarmSize
-     * @param maxIterations
      * @param numberOfParticlesToInform
      * @param evaluator
      */
-    public StandardPSO2011(DoubleProblem problem, int swarmSize, int maxIterations,
-                           int numberOfParticlesToInform, SolutionListEvaluator<DoubleSolution> evaluator,
+    public StandardPSO2011(DoubleProblem problem, int swarmSize, int numberOfParticlesToInform,
+                           SolutionListEvaluator<DoubleSolution> evaluator,
                            IEALogger eaLogger) {
-        this(problem, 0, swarmSize, maxIterations, numberOfParticlesToInform, evaluator, eaLogger);
+        this(problem, 0, swarmSize, numberOfParticlesToInform, evaluator, eaLogger);
     }
 
     @Override

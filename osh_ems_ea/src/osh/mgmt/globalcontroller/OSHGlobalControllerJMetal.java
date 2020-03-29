@@ -2,7 +2,8 @@ package osh.mgmt.globalcontroller;
 
 import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.GAConfiguration;
+import osh.configuration.oc.*;
+import osh.configuration.system.ConfigurationParameter;
 import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
@@ -24,7 +25,6 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
@@ -32,13 +32,11 @@ import osh.datatypes.registry.oc.state.globalobserver.GUIScheduleStateExchange;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.GAParameters;
 import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
+import osh.mgmt.globalcontroller.jmetal.builder.AlgorithmExecutor;
 import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
 import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
-import osh.mgmt.globalcontroller.jmetal.logging.EALogger;
-import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
@@ -68,32 +66,83 @@ public class OSHGlobalControllerJMetal
     private ZonedDateTime lastTimeSchedulingStarted;
     private final OSHRandom optimizationMainRandomGenerator;
     private long optimizationMainRandomSeed;
-    private final GAParameters gaparameters;
+    private final EAConfiguration eaConfiguration;
+    private final AlgorithmExecutor algorithmExecutor;
     private final String logDir;
     private int stepSize;
     private Boolean logGa;
-    private final IEALogger eaLogger;
 
 
     /**
      * CONSTRUCTOR
      *
-     * @throws Exception
      */
     public OSHGlobalControllerJMetal(
             IOSHOC osh,
             OSHParameterCollection configurationParameters,
-            GAConfiguration gaConfiguration, OCEnergySimulationCore ocESC) throws Exception {
+            GAConfiguration gaConfiguration, OCEnergySimulationCore ocESC) {
         super(osh, configurationParameters, gaConfiguration, ocESC);
 
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
         this.powerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
-        try {
-            this.gaparameters = new GAParameters(this.gaConfiguration);
-        } catch (Exception ex) {
-            this.getGlobalLogger().logError("Can't parse GAParameters, will shut down now!");
-            throw ex;
+
+        this.eaConfiguration = new EAConfiguration();
+        this.eaConfiguration.setExecuteAlgorithmsParallel(false);
+        SolutionRanking ranking = new SolutionRanking();
+        ranking.setType(RankingType.OBJECTIVE);
+        ConfigurationParameter obj = new ConfigurationParameter();
+        obj.setParameterName(ParameterConstants.EA_MULTI_OBJECTIVE.objective);
+        obj.setParameterValue("" + 0);
+        obj.setParameterType(Integer.class.getName());
+        ranking.getRankingParameters().add(obj);
+        this.eaConfiguration.setSolutionRanking(ranking);
+        this.eaConfiguration.getEaObjectives().add(EAObjectives.MONEY);
+        AlgorithmConfiguration config = new AlgorithmConfiguration();
+        config.setAlgorithm(AlgorithmType.G_GA);
+
+        ConfigurationParameter popSize = new ConfigurationParameter();
+        popSize.setParameterName(ParameterConstants.EA.populationSize);
+        popSize.setParameterValue("" + gaConfiguration.getPopSize());
+        popSize.setParameterType(Integer.class.getName());
+        config.getAlgorithmParameters().add(popSize);
+
+        OperatorConfiguration sel = new OperatorConfiguration();
+        sel.setName(gaConfiguration.getSelectionOperator());
+        sel.setType(OperatorType.SELECTION);
+        sel.getOperatorParameters().addAll(gaConfiguration.getSelectionParameters());
+        config.getOperators().add(sel);
+
+        OperatorConfiguration mut = new OperatorConfiguration();
+        mut.setName(gaConfiguration.getMutationOperator());
+        mut.setType(OperatorType.MUTATION);
+        mut.getOperatorParameters().addAll(gaConfiguration.getMutationParameters());
+        config.getOperators().add(mut);
+
+        OperatorConfiguration cross = new OperatorConfiguration();
+        cross.setName(gaConfiguration.getCrossoverOperator());
+        cross.setType(OperatorType.RECOMBINATION);
+        cross.getOperatorParameters().addAll(gaConfiguration.getCrossoverParameters());
+        config.getOperators().add(cross);
+
+        for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
+            StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
+            scr.setStoppingRuleName(sr.getStoppingRuleName());
+            scr.getRuleParameters().addAll(sr.getRuleParameters());
+            config.getStoppingRules().add(scr);
         }
+        config.setVariableEncoding(VariableEncoding.BINARY);
+
+        //set to true if single threaded execution is desired
+        if (false) {
+            ConfigurationParameter singleT = new ConfigurationParameter();
+            singleT.setParameterName(ParameterConstants.EA_ALGORITHM.singleThreaded);
+            singleT.setParameterValue("" + true);
+            singleT.setParameterType(Boolean.class.getName());
+            config.getAlgorithmParameters().add(singleT);
+        }
+
+        this.eaConfiguration.getAlgorithms().add(config);
+
 
         try {
             this.upperOverlimitFactor =
@@ -168,7 +217,8 @@ public class OSHGlobalControllerJMetal
         this.logDir = this.getOSH().getOSHStatus().getLogDir();
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
-        this.eaLogger = new EALogger(this.getGlobalLogger(),true,true,10,20,true);
+        this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.getGlobalLogger(),
+                this.optimizationMainRandomGenerator);
     }
 
 
@@ -200,7 +250,7 @@ public class OSHGlobalControllerJMetal
     public void onSystemShutdown() throws OSHException {
         super.onSystemShutdown();
 
-        this.eaLogger.shutdown();
+        this.algorithmExecutor.getEaLogger().shutdown();
     }
 
     @Override
@@ -325,7 +375,7 @@ public class OSHGlobalControllerJMetal
                 this.getGlobalLogger(),
                 optimisationRunRandomGenerator,
                 showSolverDebugMessages,
-                this.gaparameters,
+                this.eaConfiguration,
                 now,
                 this.stepSize,
                 this.logDir);
@@ -378,7 +428,7 @@ public class OSHGlobalControllerJMetal
                     this.ocESC,
                     now,
                     costFunction,
-                    this.eaLogger);
+                    this.algorithmExecutor);
             solution = resultWithAll.getSolution();
 
             SolutionDistributor distributor = new SolutionDistributor();
@@ -391,8 +441,9 @@ public class OSHGlobalControllerJMetal
                     now,
                     ignoreLoadProfileAfter,
                     costFunction,
-                    this.eaLogger,
-                    this.stepSize);
+                    this.algorithmExecutor.getEaLogger(),
+                    this.stepSize,
+                    this.eaConfiguration.getEaObjectives());
 
             boolean extensiveLogging =
                     (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
