@@ -12,7 +12,6 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.neighborhood.impl.AdaptiveRandomNeighborhood;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.impl.ExtendedPseudoRandomGenerator;
-import org.uma.jmetal.util.pseudorandom.impl.JavaRandomGenerator;
 import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
@@ -38,7 +37,7 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
     private final DoubleSolution[] localBest;
     private final DoubleSolution[] neighborhoodBest;
     private final double[][] speed;
-    private final AdaptiveRandomNeighborhood<DoubleSolution> neighborhood;
+    private AdaptiveRandomNeighborhood<DoubleSolution> neighborhood;
     private final GenericSolutionAttribute<DoubleSolution, Integer> positionInSwarm;
     private final double weight;
     private final double c;
@@ -79,12 +78,9 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
         this.speed = new double[swarmSize][problem.getNumberOfVariables()];
 
         this.positionInSwarm = new GenericSolutionAttribute<>();
-
         this.randomGenerator = JMetalRandom.getInstance();
-        this.randomGenerator.setRandomGenerator(new ExtendedPseudoRandomGenerator(new JavaRandomGenerator()));
 
         this.bestFoundParticle = null;
-        this.neighborhood = new AdaptiveRandomNeighborhood<>(swarmSize, this.numberOfParticlesToInform);
 
         this.setEALogger(eaLogger);
         this.getEALogger().logStart(this);
@@ -129,6 +125,7 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
 
     @Override
     public List<DoubleSolution> createInitialSwarm() {
+        this.neighborhood = new AdaptiveRandomNeighborhood<>(this.swarmSize, this.numberOfParticlesToInform);
         List<DoubleSolution> swarm = new ArrayList<>(this.swarmSize);
 
         DoubleSolution newSolution;
@@ -208,7 +205,8 @@ public class StandardPSO2011 extends AbstractParticleSwarmOptimization<DoubleSol
             double radius;
             radius = SolutionUtils.distanceBetweenSolutionsInObjectiveSpace(gravityCenter, particle);
 
-            double[] random = ((ExtendedPseudoRandomGenerator) this.randomGenerator.getRandomGenerator()).randSphere(this.problem.getNumberOfVariables());
+            double[] random =
+                    (new ExtendedPseudoRandomGenerator(this.randomGenerator.getRandomGenerator())).randSphere(this.problem.getNumberOfVariables());
 
             for (int var = 0; var < particle.getNumberOfVariables(); var++) {
                 randomParticle.setUnboxedVariableValue(var, gravityCenter.getUnboxedVariableValue(var) + radius * random[var]);

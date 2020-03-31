@@ -2,6 +2,7 @@ package osh.mgmt.globalcontroller.jmetal.logging;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.solution.Solution;
+import osh.configuration.oc.AlgorithmType;
 import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.utils.dataStructures.Enum2DoubleMap;
@@ -27,7 +28,7 @@ public interface IEALogger {
      *
      * @param bestSolution the result of the algorithm
      */
-    void logEnd(Solution<?> bestSolution);
+    void logEnd(Solution<?> bestSolution, AlgorithmType bestAlgorithm);
 
     /**
      * Logs the state of the algorithm population during the execution.

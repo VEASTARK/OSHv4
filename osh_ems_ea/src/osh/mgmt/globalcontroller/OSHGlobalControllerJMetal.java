@@ -65,7 +65,6 @@ public class OSHGlobalControllerJMetal
     private double lowerOverlimitFactor;
     private ZonedDateTime lastTimeSchedulingStarted;
     private final OSHRandom optimizationMainRandomGenerator;
-    private long optimizationMainRandomSeed;
     private final EAConfiguration eaConfiguration;
     private final AlgorithmExecutor algorithmExecutor;
     private final String logDir;
@@ -86,8 +85,9 @@ public class OSHGlobalControllerJMetal
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
         this.powerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
 
+        //to keep compatible with the old configuration files we need to convert it to the new format
         this.eaConfiguration = new EAConfiguration();
-        this.eaConfiguration.setExecuteAlgorithmsParallel(false);
+        this.eaConfiguration.setExecuteAlgorithmsParallel(true);
         SolutionRanking ranking = new SolutionRanking();
         ranking.setType(RankingType.OBJECTIVE);
         ConfigurationParameter obj = new ConfigurationParameter();
@@ -124,6 +124,35 @@ public class OSHGlobalControllerJMetal
         cross.getOperatorParameters().addAll(gaConfiguration.getCrossoverParameters());
         config.getOperators().add(cross);
 
+        //change to true if you want to run it with an additional PSO algorithm
+        if (false) {
+            AlgorithmConfiguration psoConfig = new AlgorithmConfiguration();
+            psoConfig.setAlgorithm(AlgorithmType.PSO);
+
+            ConfigurationParameter psoPopSize = new ConfigurationParameter();
+            psoPopSize.setParameterName(ParameterConstants.EA.populationSize);
+            psoPopSize.setParameterValue("" + gaConfiguration.getPopSize());
+            psoPopSize.setParameterType(Integer.class.getName());
+            psoConfig.getAlgorithmParameters().add(psoPopSize);
+
+            ConfigurationParameter psoPartToInform = new ConfigurationParameter();
+            psoPartToInform.setParameterName(ParameterConstants.EA_ALGORITHM.particlesToInform);
+            psoPartToInform.setParameterValue("" + gaConfiguration.getPopSize() / 2);
+            psoPartToInform.setParameterType(Integer.class.getName());
+            psoConfig.getAlgorithmParameters().add(psoPartToInform);
+
+            psoConfig.setVariableEncoding(VariableEncoding.REAL);
+
+            for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
+                StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
+                scr.setStoppingRuleName(sr.getStoppingRuleName());
+                scr.getRuleParameters().addAll(sr.getRuleParameters());
+                psoConfig.getStoppingRules().add(scr);
+            }
+
+            this.eaConfiguration.getAlgorithms().add(psoConfig);
+        }
+
         for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
             StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
             scr.setStoppingRuleName(sr.getStoppingRuleName());
@@ -141,8 +170,10 @@ public class OSHGlobalControllerJMetal
             config.getAlgorithmParameters().add(singleT);
         }
 
-        this.eaConfiguration.getAlgorithms().add(config);
-
+        //change to false to remove the gGA algorithm
+        if (true) {
+            this.eaConfiguration.getAlgorithms().add(config);
+        }
 
         try {
             this.upperOverlimitFactor =
@@ -189,14 +220,15 @@ public class OSHGlobalControllerJMetal
         this.costConfiguration = new CostConfigurationContainer(epsOptimizationObjective, plsOptimizationObjective,
                 varOptimizationObjective);
 
+        long optimizationMainRandomSeed;
         try {
-            this.optimizationMainRandomSeed =
+            optimizationMainRandomSeed =
                     Long.parseLong(this.configurationParameters.getParameter(ParameterConstants.Optimization.optimizationRandomSeed));
         } catch (Exception e) {
-            this.optimizationMainRandomSeed = 0xd1ce5bL;
-            this.getGlobalLogger().logError("Can't get parameter optimizationMainRandomSeed, using the default value: " + this.optimizationMainRandomSeed);
+            optimizationMainRandomSeed = 0xd1ce5bL;
+            this.getGlobalLogger().logError("Can't get parameter optimizationMainRandomSeed, using the default value: " + optimizationMainRandomSeed);
         }
-        this.optimizationMainRandomGenerator = new OSHRandom(this.optimizationMainRandomSeed);
+        this.optimizationMainRandomGenerator = new OSHRandom(optimizationMainRandomSeed);
 
         try {
             this.stepSize =
@@ -217,8 +249,7 @@ public class OSHGlobalControllerJMetal
         this.logDir = this.getOSH().getOSHStatus().getLogDir();
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
-        this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.getGlobalLogger(),
-                this.optimizationMainRandomGenerator);
+        this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.getGlobalLogger());
     }
 
 

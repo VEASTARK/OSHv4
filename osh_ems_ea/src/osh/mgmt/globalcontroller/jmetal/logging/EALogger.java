@@ -4,6 +4,7 @@ import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.solution.BinarySolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.binarySet.BinarySet;
+import osh.configuration.oc.AlgorithmType;
 import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
@@ -137,13 +138,13 @@ public class EALogger implements IEALogger {
     }
 
     @Override
-    public void logEnd(Solution<?> bestSolution) {
+    public void logEnd(Solution<?> bestSolution, AlgorithmType bestAlgorithm) {
         if (this.log) {
             StringBuilder logMessage = new StringBuilder("===    Finished Optimization, final Fitness: ");
             for (int i = 0; i < this.objectiveCount; i++) {
                 logMessage.append(" ").append(bestSolution.getObjective(i)).append(" ");
             }
-            logMessage.append("    ===");
+            logMessage.append("  by ").append(bestAlgorithm.name()).append("    ===");
             this.log(logMessage.toString());
 
         }

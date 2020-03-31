@@ -6,8 +6,6 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
-import org.uma.jmetal.util.pseudorandom.JMetalRandom;
-import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
@@ -245,12 +243,6 @@ public class DMOPSOBuilder implements AlgorithmBuilder<DMOPSO> {
 
     public DMOPSOBuilder setName(String name) {
         this.name = name;
-
-        return this;
-    }
-
-    public DMOPSOBuilder setRandomGenerator(PseudoRandomGenerator randomGenerator) {
-        JMetalRandom.getInstance().setRandomGenerator(randomGenerator);
 
         return this;
     }

@@ -22,6 +22,7 @@ public class ParallelEALogger extends EALogger {
     private final Map<Integer, List<String>> logMessages = new ConcurrentHashMap<>();
 
     private final Lock writeLock = new ReentrantLock();
+    private boolean queueMessages;
 
     /**
      * Constructs this ea-logger with the given global logger and the configuration parameters.
@@ -69,6 +70,7 @@ public class ParallelEALogger extends EALogger {
         if (this.log) {
             this.writeLock.lock();
             try {
+                this.queueMessages = true;
                 int id = this.getId();
                 this.logMessages.put(id, new ArrayList<>());
                 this.bestFirstFitness.put(id, new double[this.objectiveCount]);
@@ -85,16 +87,22 @@ public class ParallelEALogger extends EALogger {
      * Flushes the saved log messages.
      */
     public void flush() {
+        this.queueMessages = false;
         for (List<String> strings : this.logMessages.values()) {
-            strings.forEach(super::log);
+            strings.forEach(s -> super.log(s, false));
         }
         this.logMessages.clear();
         this.bestFirstFitness.clear();
+
     }
 
     @Override
     void log(String message, boolean prependTime) {
-        this.logMessages.get(this.getId()).add(message);
+        if (this.queueMessages) {
+            this.logMessages.get(this.getId()).add(message);
+        } else {
+            super.log(message, prependTime);
+        }
     }
 
     @Override
