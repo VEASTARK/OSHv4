@@ -1,9 +1,6 @@
 package osh.utils;
 
-import osh.utils.CostConfigurationTypes.AUTO_CONSUMPTION_COSTS;
-import osh.utils.CostConfigurationTypes.FEED_IN_COSTS;
-import osh.utils.CostConfigurationTypes.PLS_COSTS;
-import osh.utils.CostConfigurationTypes.REACTIVE_COSTS;
+import osh.utils.CostConfigurationTypes.*;
 
 /**
  * Represents a container for the full configuration of the cost-calculation-function.
@@ -16,6 +13,8 @@ public class CostConfigurationContainer implements Cloneable {
     private final PLS_COSTS plsConfiguration;
     private final FEED_IN_COSTS feedInConfiguration;
     private final AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration;
+    private final SELF_SUFFICIENCY_RATIO selfSufficiencyConfiguration;
+    private final SELF_CONSUMPTION_RATIO selfConsumptionConfiguration;
 
     /**
      * Creates this data-container with the given values for all configuration values.
@@ -25,14 +24,20 @@ public class CostConfigurationContainer implements Cloneable {
      * @param feedInConfiguration configuration setting for the calculation of feed-in power
      * @param autoConsumptionConfiguration configuration setting for the calculation of self-consumption of produced
      *                                     power
+     * @param selfSufficiencyConfiguration configuration setting for the calculation of the self-sufficiency-ratio
+     * @param selfConsumptionConfiguration configuration setting for the calculation of the self-consumption-ratio
      */
     public CostConfigurationContainer(REACTIVE_COSTS reactiveConfiguration, PLS_COSTS plsConfiguration,
                                       FEED_IN_COSTS feedInConfiguration,
-                                      AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration) {
+                                      AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration,
+                                      SELF_SUFFICIENCY_RATIO selfSufficiencyConfiguration,
+                                      SELF_CONSUMPTION_RATIO selfConsumptionConfiguration) {
         this.reactiveConfiguration = reactiveConfiguration;
         this.plsConfiguration = plsConfiguration;
         this.feedInConfiguration = feedInConfiguration;
         this.autoConsumptionConfiguration = autoConsumptionConfiguration;
+        this.selfSufficiencyConfiguration = selfSufficiencyConfiguration;
+        this.selfConsumptionConfiguration = selfConsumptionConfiguration;
     }
 
     /**
@@ -94,6 +99,9 @@ public class CostConfigurationContainer implements Cloneable {
             default:
                 throw new IllegalArgumentException("eps-optimization objective not recognized.");
         }
+
+        this.selfSufficiencyConfiguration = SELF_SUFFICIENCY_RATIO.NORMAL;
+        this.selfConsumptionConfiguration = SELF_CONSUMPTION_RATIO.NORMAL;
     }
 
     /**
@@ -106,6 +114,8 @@ public class CostConfigurationContainer implements Cloneable {
         this.plsConfiguration = other.plsConfiguration;
         this.feedInConfiguration = other.feedInConfiguration;
         this.autoConsumptionConfiguration = other.autoConsumptionConfiguration;
+        this.selfSufficiencyConfiguration = other.selfSufficiencyConfiguration;
+        this.selfConsumptionConfiguration = other.selfConsumptionConfiguration;
     }
 
     /**
@@ -142,6 +152,24 @@ public class CostConfigurationContainer implements Cloneable {
      */
     public AUTO_CONSUMPTION_COSTS getAutoConsumptionConfiguration() {
         return this.autoConsumptionConfiguration;
+    }
+
+    /**
+     * Returns the configuration for the calculation of the of the self-sufficiency-ratio.
+     *
+     * @return the configuration for the calculation of the of the self-sufficiency-ratio
+     */
+    public SELF_SUFFICIENCY_RATIO getSelfSufficiencyConfiguration() {
+        return this.selfSufficiencyConfiguration;
+    }
+
+    /**
+     * Returns the configuration for the calculation of the of the self-consumption-ratio.
+     *
+     * @return the configuration for the calculation of the of the self-consumption-ratio
+     */
+    public SELF_CONSUMPTION_RATIO getSelfConsumptionConfiguration() {
+        return this.selfConsumptionConfiguration;
     }
 
     /**

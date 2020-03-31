@@ -351,11 +351,21 @@ public class EMProblemEvaluator {
         for (int i = 0; i < this.eaObjectives.size(); i++) {
             EAObjectives objective = this.eaObjectives.get(i);
 
-            if (objective == EAObjectives.MONEY) {
-                solution.setObjective(i,
-                        costs.get(CostReturnType.ELECTRICITY)
-                                + costs.get(CostReturnType.GAS)
-                                + cervisia.get(EAObjectives.MONEY));
+            switch (objective) {
+                case MONEY:
+                    solution.setObjective(i,
+                            costs.get(CostReturnType.ELECTRICITY)
+                                    + costs.get(CostReturnType.GAS)
+                                    + cervisia.get(EAObjectives.MONEY));
+                    break;
+                case SELF_SUFFICIENCY_RATIO:
+                    solution.setObjective(i, costs.get(CostReturnType.SELF_SUFFICIENCY_RATIO)
+                            + cervisia.get(CostReturnType.SELF_SUFFICIENCY_RATIO));
+                    break;
+                case SELF_CONSUMPTION_RATIO:
+                    solution.setObjective(i, costs.get(CostReturnType.SELF_CONSUMPTION_RATIO)
+                            + cervisia.get(CostReturnType.SELF_CONSUMPTION_RATIO));
+                    break;
             }
         }
 

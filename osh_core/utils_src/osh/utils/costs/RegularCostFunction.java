@@ -6,10 +6,7 @@ import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.PowerInterval;
 import osh.utils.CostConfigurationContainer;
-import osh.utils.CostConfigurationTypes.AUTO_CONSUMPTION_COSTS;
-import osh.utils.CostConfigurationTypes.FEED_IN_COSTS;
-import osh.utils.CostConfigurationTypes.PLS_COSTS;
-import osh.utils.CostConfigurationTypes.REACTIVE_COSTS;
+import osh.utils.CostConfigurationTypes.*;
 import osh.utils.CostReturnType.SingleStepCostReturnType;
 import osh.utils.dataStructures.Enum2DoubleMap;
 import osh.utils.physics.PhysicalConstants;
@@ -187,8 +184,55 @@ public class RegularCostFunction {
             }
         }
 
+        //SELF-SUFF
+        if (this.costConfiguration.getSelfSufficiencyConfiguration() == SELF_SUFFICIENCY_RATIO.NORMAL) {
+
+            double ssr = 1.0;
+
+            if (ancillaryMeter.getPower(AncillaryCommodity.ACTIVEPOWEREXTERNAL) > 0) {
+                //apExt(+), autoconPV(-), autoconCHP(-), autoConBat(-)
+
+                double numerator = ancillaryMeter.getPower(AncillaryCommodity.ACTIVEPOWEREXTERNAL);
+                //total cons --> ap + sum of autoCon
+                double denominator = ancillaryMeter.getPower(AncillaryCommodity.ACTIVEPOWEREXTERNAL)
+                        - ancillaryMeter.getPower(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION)
+                        - ancillaryMeter.getPower(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION)
+                        - ancillaryMeter.getPower(AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION);
+
+                ssr = 1.0 - (numerator / denominator);
+            }
+
+            //minimization problem, but higher ssr is more desirable -> negate
+            costMap.add(SingleStepCostReturnType.SELF_SUFFICIENCY_RATIO, -ssr);
+        }
+
+        //SELF-CONS
+        if (this.costConfiguration.getSelfConsumptionConfiguration() == SELF_CONSUMPTION_RATIO.NORMAL) {
+
+            double scr = 1.0;
+
+            if (ancillaryMeter.getPower(AncillaryCommodity.ACTIVEPOWEREXTERNAL) < 0) {
+                //1 = apSuper(-), autoconPV(-), autoconCHP(-), autoConBat(-)
+
+                double numerator = ancillaryMeter.getPower(AncillaryCommodity.ACTIVEPOWEREXTERNAL);
+                //total production sum --> ap + sum of autoCon
+                // signs reversed as numerator is neg
+                double denominator = ancillaryMeter.getPower(AncillaryCommodity.ACTIVEPOWEREXTERNAL)
+                        + ancillaryMeter.getPower(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION)
+                        + ancillaryMeter.getPower(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION)
+                        + ancillaryMeter.getPower(AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION);
+
+                scr = 1.0 - (numerator / denominator);
+            }
+
+            //minimization problem, but higher scr is more desirable -> negate
+            costMap.add(SingleStepCostReturnType.SELF_CONSUMPTION_RATIO, -scr);
+        }
+
         //apply time
         for (SingleStepCostReturnType value : SingleStepCostReturnType.values()) {
+            if (value == SingleStepCostReturnType.SELF_CONSUMPTION_RATIO ||
+                    value == SingleStepCostReturnType.SELF_SUFFICIENCY_RATIO) continue;
             costMap.put(value, (costMap.get(value) * timeFactor) / PhysicalConstants.factor_wsToKWh);
         }
 

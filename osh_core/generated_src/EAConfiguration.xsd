@@ -113,6 +113,8 @@
     <simpleType name="EAObjectives">
         <restriction base="string">
             <enumeration value="MONEY" />
+            <enumeration value="SELF_SUFFICIENCY_RATIO" />
+            <enumeration value="SELF_CONSUMPTION_RATIO" />
         </restriction>
     </simpleType>
 </schema>

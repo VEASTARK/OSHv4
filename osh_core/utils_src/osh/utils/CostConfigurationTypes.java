@@ -44,4 +44,20 @@ public class CostConfigurationTypes {
         CHP,
         BOTH
     }
+
+    /**
+     * Dictates how costs the self-sufficiency-ratio should be calculated.
+     */
+    public enum SELF_SUFFICIENCY_RATIO {
+        NO_RATIO,
+        NORMAL
+    }
+
+    /**
+     * Dictates how costs the self-soncumption-ratio should be calculated.
+     */
+    public enum SELF_CONSUMPTION_RATIO {
+        NO_RATIO,
+        NORMAL
+    }
 }

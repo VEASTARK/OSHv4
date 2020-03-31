@@ -27,6 +27,7 @@ public interface IEALogger {
      * Logs the end of a new algorithm execution.
      *
      * @param bestSolution the result of the algorithm
+     * @param bestAlgorithm the algorithm that produced the result
      */
     void logEnd(Solution<?> bestSolution, AlgorithmType bestAlgorithm);
 

@@ -8,7 +8,9 @@ package osh.utils;
 public enum CostReturnType {
 
     ELECTRICITY,
-    GAS;
+    GAS,
+    SELF_SUFFICIENCY_RATIO,
+    SELF_CONSUMPTION_RATIO;
 
     /**
      * Represents the different type of calculated costs that can be returned of calculated for a single simulation
@@ -21,7 +23,9 @@ public enum CostReturnType {
         FEED_IN_PV,
         FEED_IN_CHP,
         AUTO_CONSUMPTION,
-        GAS;
+        GAS,
+        SELF_SUFFICIENCY_RATIO,
+        SELF_CONSUMPTION_RATIO;
     }
 
 }

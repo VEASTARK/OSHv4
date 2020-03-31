@@ -133,7 +133,6 @@ public class JMetalEnergySolverGA extends JMetalSolver {
 
             //TODO: generate log objects for information about the results according to the new logging
             // configurations in EAConfiguration
-
             eaLogger.logEnd(bestSolution, nonDomUnion.get(0).getAlgorithmType());
             eaLogger.detachWriter();
 

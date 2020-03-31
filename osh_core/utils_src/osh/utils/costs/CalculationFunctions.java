@@ -103,4 +103,33 @@ public class CalculationFunctions {
             return (firstPrice * firstPower + secondPrice * secondPower) * timeFactor;
         }
     }
+
+    public static double negativeQuadPowerFractionFunction(double firstPower, double secondPower, double thirdPower,
+                                                      double forthPower, long timeFactor) {
+        if (firstPower < 0) {
+            //1 = apExternal(-), 2 = autoconPV(-), 3 = autoconCHP(-), 4 = autoConBat(-)
+
+            //total production sum --> ap + sum of autoCon
+            // signs reversed as numerator is neg
+            double denominator = firstPower + secondPower + thirdPower + forthPower;
+
+            return (1.0 - (firstPower / denominator)) * timeFactor;
+        } else {
+            return 1.0 * timeFactor;
+        }
+    }
+
+    public static double positiveQuadPowerFractionFunction(double firstPower, double secondPower, double thirdPower,
+                                                           double forthPower, long timeFactor) {
+        if (firstPower > 0) {
+            //1 = apExternal(+), 2 = autoconPV(-), 3 = autoconCHP(-), 4 = autoConBat(-)
+
+            //total cons --> ap + sum of autoCon
+            double denominator = firstPower - secondPower - thirdPower - forthPower;
+
+            return (1.0 - (firstPower / denominator)) * timeFactor;
+        } else {
+            return 1.0 * timeFactor;
+        }
+    }
 }

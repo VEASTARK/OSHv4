@@ -6,10 +6,7 @@ import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.power.PowerInterval;
 import osh.utils.CostConfigurationContainer;
-import osh.utils.CostConfigurationTypes.AUTO_CONSUMPTION_COSTS;
-import osh.utils.CostConfigurationTypes.FEED_IN_COSTS;
-import osh.utils.CostConfigurationTypes.PLS_COSTS;
-import osh.utils.CostConfigurationTypes.REACTIVE_COSTS;
+import osh.utils.CostConfigurationTypes.*;
 import osh.utils.CostReturnType;
 import osh.utils.dataStructures.Enum2DoubleMap;
 import osh.utils.functions.PrimitiveOperators;
@@ -34,7 +31,7 @@ public class OptimizationCostFunction {
     private EnumMap<AncillaryCommodity, KeysValuesTuple> lowerPowerLimitSignals;
 
     private List<SingularCostFunctionConfiguration<?>> activeConfiguration, reactiveConfiguration, feedInConfiguration,
-            autoConsumptionConfiguration, gasConfiguration;
+            autoConsumptionConfiguration, gasConfiguration, selfSufficiencyParameterList, selfConsumptionParameterList;
 
     /**
      * Constructs this cost function with the given cost configuration and all relevant signals.
@@ -68,6 +65,8 @@ public class OptimizationCostFunction {
         this.feedInConfiguration = new ArrayList<>();
         this.autoConsumptionConfiguration = new ArrayList<>();
         this.gasConfiguration = new ArrayList<>();
+        this.selfSufficiencyParameterList = new ArrayList<>();
+        this.selfConsumptionParameterList = new ArrayList<>();
 
         //active power pricing
         //TODO: in the old cost model, lower pls violations would only be punsihed by refunding the feed-in costs.
@@ -208,6 +207,28 @@ public class OptimizationCostFunction {
 
         this.gasConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_bi,
                 CalculationFunctions::pricePowerFunction));
+
+        if (this.costConfiguration.getSelfSufficiencyConfiguration() == SELF_SUFFICIENCY_RATIO.NORMAL) {
+            List<SingularArgumentTuple> selfSufficiencyArguments = new ArrayList<>();
+            selfSufficiencyArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
+            selfSufficiencyArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION));
+            selfSufficiencyArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION));
+            selfSufficiencyArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION));
+
+            this.selfSufficiencyParameterList.add(new SingularCostFunctionConfiguration<>(selfSufficiencyArguments, this::execute_quad,
+                    CalculationFunctions::positiveQuadPowerFractionFunction));
+        }
+
+        if (this.costConfiguration.getSelfConsumptionConfiguration() == SELF_CONSUMPTION_RATIO.NORMAL) {
+            List<SingularArgumentTuple> selfConsumptionArguments = new ArrayList<>();
+            selfConsumptionArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
+            selfConsumptionArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION));
+            selfConsumptionArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION));
+            selfConsumptionArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.BATTERYACTIVEPOWERAUTOCONSUMPTION));
+
+            this.selfConsumptionParameterList.add(new SingularCostFunctionConfiguration<>(selfConsumptionArguments, this::execute_quad,
+                    CalculationFunctions::negativeQuadPowerFractionFunction));
+        }
     }
 
     /**
@@ -237,7 +258,7 @@ public class OptimizationCostFunction {
             long end,
             ErsatzACLoadProfile ancillaryMeter) {
 
-        double electricity = 0.0, gas = 0.0;
+        double electricity = 0.0, gas = 0.0, selfSufficiency = 0.0, selfConsumption = 0.0;
 
         electricity += this.execute(ancillaryMeter, start, end, this.activeConfiguration);
         electricity += this.execute(ancillaryMeter, start, end, this.reactiveConfiguration);
@@ -246,6 +267,11 @@ public class OptimizationCostFunction {
 
         gas += this.execute(ancillaryMeter, start, end, this.gasConfiguration);
 
+        //minimization problem, but higher ssr is more desirable -> negate
+        selfSufficiency -= this.execute(ancillaryMeter, start, end, this.selfSufficiencyParameterList);
+
+        //minimization problem, but higher scr is more desirable -> negate
+        selfConsumption -= this.execute(ancillaryMeter, start, end, this.selfConsumptionParameterList);
 
         Enum2DoubleMap<CostReturnType> costs = new Enum2DoubleMap<>(CostReturnType.class);
 
@@ -254,6 +280,9 @@ public class OptimizationCostFunction {
 
         costs.put(CostReturnType.ELECTRICITY, electricity / PhysicalConstants.factor_wsToKWh);
         costs.put(CostReturnType.GAS, gas / PhysicalConstants.factor_wsToKWh);
+
+        costs.put(CostReturnType.SELF_SUFFICIENCY_RATIO, selfSufficiency / (end - start));
+        costs.put(CostReturnType.SELF_CONSUMPTION_RATIO, selfConsumption / (end - start));
 
         return costs;
     }
