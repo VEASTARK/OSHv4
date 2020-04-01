@@ -3,18 +3,18 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.uma.jmetal.solution.Solution;
-import osh.datatypes.commodity.AncillaryCommodity;
+import osh.configuration.oc.EAObjectives;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.limit.PowerLimitSignal;
-import osh.datatypes.limit.PriceSignal;
-import osh.datatypes.power.AncillaryCommodityLoadProfile;
+import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
-import osh.mgmt.globalcontroller.jmetal.IFitness;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
+import osh.utils.CostReturnType;
+import osh.utils.costs.OptimizationCostFunction;
+import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,17 +27,17 @@ import java.util.stream.Collectors;
  */
 public class EMProblemEvaluator {
 
-    private final EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
-    private final EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private final long ignoreLoadProfileBefore;
     private final long ignoreLoadProfileAfter;
     private long maxReferenceTime;
     private long maxOptimizationHorizon;
 
     private final int stepSize;
-    private final IFitness fitnessFunction;
+    private final OptimizationCostFunction costFunction;
     private final IEALogger eaLogger;
     private final SolutionDistributor distributor;
+
+    private final List<EAObjectives> eaObjectives;
 
     private final EnergyProblemDataContainer baseDataContainer;
 
@@ -53,33 +53,30 @@ public class EMProblemEvaluator {
      * @param problemParts all problem-parts of this problem
      * @param ocESC the energy-simulation-core to be used for the optimization loop
      * @param distributor the solution distributor for this problem
-     * @param priceSignals the valid price-signals for this problem
-     * @param powerLimitSignals the valid power-limit-signals for this problem
      * @param ignoreLoadProfileBefore the point in time before which all should be ignored for this optimization
      * @param ignoreLoadProfileAfter the point in time after which all should be ignored for this optimization
-     * @param fitnessFunction the function determining which fitness an evaluated solution has
+     * @param costFunction the function determining which fitness an evaluated solution has
      * @param stepSize the size of the time-steps to be used for the evaluation of solutions
+     * @param eaObjectives the collection of all EA-objectvies
      */
     public EMProblemEvaluator(
             InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
             SolutionDistributor distributor,
-            EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
-            EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
             long ignoreLoadProfileAfter,
-            IFitness fitnessFunction,
+            OptimizationCostFunction costFunction,
             IEALogger eaLogger,
-            int stepSize) {
+            int stepSize,
+            List<EAObjectives> eaObjectives) {
 
         this.distributor = distributor;
-        this.priceSignals = priceSignals;
-        this.powerLimitSignals = powerLimitSignals;
         this.ignoreLoadProfileBefore = ignoreLoadProfileBefore;
         this.ignoreLoadProfileAfter = ignoreLoadProfileAfter;
         this.stepSize = stepSize;
-        this.fitnessFunction = fitnessFunction;
+        this.costFunction = costFunction;
         this.eaLogger = eaLogger;
+        this.eaObjectives = eaObjectives;
 
         //mapping of uuid to problem-part id, needed for the construction of UUIDCommodityMaps
         Object2IntOpenHashMap<UUID> uuidIntMap = new Object2IntOpenHashMap<>();
@@ -161,8 +158,11 @@ public class EMProblemEvaluator {
         UUIDCommodityMap baseActiveToPassiveMap = new UUIDCommodityMap(activeUUIDs, uuidIntMap, true);
         UUIDCommodityMap basePassiveToActiveMap = new UUIDCommodityMap(passiveUUIDs, uuidIntMap, true);
 
+        int maxLength = (int) Math.ceil((this.maxOptimizationHorizon - this.maxReferenceTime) / this.stepSize) + 2;
+        ErsatzACLoadProfile ancillaryLoadProfile = new ErsatzACLoadProfile(maxLength);
+
         this.baseDataContainer = new EnergyProblemDataContainer(allIPPsReordered, allActivePPs, allPassivePPs,
-                allActiveNeedsInputPPs, ocESC, baseActiveToPassiveMap, basePassiveToActiveMap);
+                allActiveNeedsInputPPs, ocESC, baseActiveToPassiveMap, basePassiveToActiveMap, ancillaryLoadProfile);
 
     }
 
@@ -224,7 +224,7 @@ public class EMProblemEvaluator {
      * @param log flag if additional logging should be done
      */
     public <S extends Solution<?>> void evaluateFinalTime(S solution, boolean log) {
-        this.evaluateFinalTime(solution, log, new AncillaryCommodityLoadProfile());
+        this.evaluateFinalTime(solution, log, null);
     }
 
     /**
@@ -233,17 +233,17 @@ public class EMProblemEvaluator {
      *
      * @param solution the solution to be evaluated
      * @param log flag if additional logging should be done
-     * @param ancillaryMeter the load profile in which the resulting calculated load will be entered
+     * @param ancillaryLoadProfile the load profile in which the resulting calculated load will be entered
      */
     public <S extends Solution<?>> void evaluateFinalTime(S solution, boolean log,
-                                                          AncillaryCommodityLoadProfile ancillaryMeter) {
+                                                          ErsatzACLoadProfile ancillaryLoadProfile) {
         this.multiThreadingInitialized = false;
-        this.evaluate(solution, log, true, ancillaryMeter);
+        this.evaluate(solution, log, true, ancillaryLoadProfile);
         this.finalizeGrids();
     }
 
     public <S extends Solution<?>> void evaluate(S solution) {
-        this.evaluate(solution, false, false, new AncillaryCommodityLoadProfile());
+        this.evaluate(solution, false, false, null);
     }
 
     /**
@@ -252,10 +252,10 @@ public class EMProblemEvaluator {
      * @param solution the solution to be evaluated
      * @param log flag if additional logging should be done
      * @param keepPrediction flag if problem-parts should log their prediction about the future
-     * @param ancillaryMeter the load profile in which the resulting calculated load will be entered
+     * @param loadProfile the load profile in which the resulting calculated load will be entered
      */
     private <S extends Solution<?>> void evaluate(S solution, boolean log, boolean keepPrediction,
-                                                  AncillaryCommodityLoadProfile ancillaryMeter) {
+                                                  ErsatzACLoadProfile loadProfile) {
 
         EnergyProblemDataContainer dataContainer = this.requestDataCopy();
 
@@ -266,6 +266,8 @@ public class EMProblemEvaluator {
         OCEnergySimulationCore ocESC = dataContainer.getOcESC();
         UUIDCommodityMap activeToPassiveMap = dataContainer.getActiveToPassiveMap();
         UUIDCommodityMap passiveToActiveMap = dataContainer.getPassiveToActiveMap();
+        ErsatzACLoadProfile ancillaryLoadProfile = loadProfile == null ? dataContainer.getAncillaryLoadProfile() :
+                loadProfile;
 
         //clear past information that may be still contained in the maps
         activeToPassiveMap.clearInnerStates();
@@ -285,7 +287,7 @@ public class EMProblemEvaluator {
         }
 
         //initialize sequential entering of data
-        ancillaryMeter.initSequential();
+        ancillaryLoadProfile.resetSequential();
 
         //let all passive states calculate their first state
         for (InterdependentProblemPart<?, ?> part : allPassive) {
@@ -312,7 +314,7 @@ public class EMProblemEvaluator {
             ocESC.doActiveToPassiveExchange(activeToPassiveMap, allPassive, meterState);
 
             //send loads to the ancillary meter profile
-            ancillaryMeter.setLoadSequential(meterState, t);
+            ancillaryLoadProfile.setLoadSequential(meterState, t);
 
             //let all passive states calculate their next step
             for (InterdependentProblemPart<?, ?> part : allPassive) {
@@ -325,31 +327,47 @@ public class EMProblemEvaluator {
         }
 
         //mark that no more data will be added and the profile is finalized
-        ancillaryMeter.endSequential();
-        ancillaryMeter.setEndingTimeOfProfile(this.maxOptimizationHorizon);
+        ancillaryLoadProfile.endSequential(this.maxOptimizationHorizon);
 
 
-        // calculate variable fitness depending on price signals...
-        double fitness = this.fitnessFunction.getFitnessValue(
+        Enum2DoubleMap<CostReturnType> costs = this.costFunction.calculateCosts(
                 this.ignoreLoadProfileBefore,
                 this.ignoreLoadProfileAfter,
-                ancillaryMeter,
-                this.priceSignals,
-                this.powerLimitSignals
-        );
+                ancillaryLoadProfile);
+
+        Enum2DoubleMap<EAObjectives> cervisia = new Enum2DoubleMap<>(EAObjectives.class);
 
         // add lukewarm cervisia (i.e. additional fixed costs...)
         for (InterdependentProblemPart<?, ?> problempart : allIPPs) {
             problempart.finalizeInterdependentCervisia();
-            double add = problempart.getInterdependentCervisia();
-            fitness += add;
+            Enum2DoubleMap<EAObjectives> add = problempart.getFinalInterdependentSchedule().getLukewarmCervisia();
+            cervisia.addAll(add);
 
-            if (log && add != 0) {
+            if (log) {
                 this.eaLogger.logCervisia(problempart.getDeviceType(), add);
             }
         }
 
-        solution.setObjective(0, fitness);
+        for (int i = 0; i < this.eaObjectives.size(); i++) {
+            EAObjectives objective = this.eaObjectives.get(i);
+
+            switch (objective) {
+                case MONEY:
+                    solution.setObjective(i,
+                            costs.get(CostReturnType.ELECTRICITY)
+                                    + costs.get(CostReturnType.GAS)
+                                    + cervisia.get(EAObjectives.MONEY));
+                    break;
+                case SELF_SUFFICIENCY_RATIO:
+                    solution.setObjective(i, costs.get(CostReturnType.SELF_SUFFICIENCY_RATIO)
+                            + cervisia.get(CostReturnType.SELF_SUFFICIENCY_RATIO));
+                    break;
+                case SELF_CONSUMPTION_RATIO:
+                    solution.setObjective(i, costs.get(CostReturnType.SELF_CONSUMPTION_RATIO)
+                            + cervisia.get(CostReturnType.SELF_CONSUMPTION_RATIO));
+                    break;
+            }
+        }
 
         //free the used data for another evaluation
         this.freeDataCopy(dataContainer);

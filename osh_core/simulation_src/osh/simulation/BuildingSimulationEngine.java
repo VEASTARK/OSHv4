@@ -14,7 +14,9 @@ import osh.simulation.energy.SimEnergySimulationCore;
 import osh.simulation.exception.SimulationEngineException;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.Screenplay;
-import osh.utils.CostCalculator;
+import osh.utils.CostReturnType.SingleStepCostReturnType;
+import osh.utils.costs.RegularCostFunction;
+import osh.utils.dataStructures.Enum2DoubleMap;
 import osh.utils.physics.PhysicalConstants;
 import osh.utils.string.ParameterConstants;
 import osh.utils.string.StringConversions;
@@ -408,25 +410,15 @@ public class BuildingSimulationEngine extends SimulationEngine {
             long currentTime = this.timeDriver.getCurrentEpochSecond();
             ZonedDateTime now = this.timeDriver.getCurrentTime();
 
-            /* array
-             * [0] = epsCosts
-             * [1] = plsCosts
-             * [2] = gasCosts
-             * [3] = feedInCompensationPV
-             * [4] = feedInCompensationCHP
-             * [5] = autoConsumptionCosts
-             */
-            double[] costs = CostCalculator.calcSingularCosts(
-                    epse.getEpsOptimizationObjective(),
-                    epse.getVarOptimizationObjective(),
-                    epse.getPlsOptimizationObjective(),
-                    currentTime,
-                    1,
-                    epse.getPlsUpperOverLimitFactor(),
+            RegularCostFunction costFunction = new RegularCostFunction(epse.getPlsUpperOverLimitFactor(),
                     epse.getPlsLowerOverLimitFactor(),
-                    ancillaryMeterState,
+                    epse.getCostConfiguration(),
                     epse.getPs(),
-                    epse.getPwrLimit());
+                    epse.getPwrLimit(),
+                    currentTime);
+
+            Enum2DoubleMap<SingleStepCostReturnType> costs =
+                    costFunction.calculateSingleStepCosts(ancillaryMeterState, currentTime, 1L);
 
             if (this.oshSimulationResults != null
                     && this.oshSimulationResults instanceof OSHSimulationResults) {
@@ -465,13 +457,19 @@ public class BuildingSimulationEngine extends SimulationEngine {
                 ((OSHSimulationResults) this.oshSimulationResults).addGasPowerExternal(
                         currentGasPowerExternal);
 
-                ((OSHSimulationResults) this.oshSimulationResults).addEpsCostsToEpsCosts(costs[0]);
-                ((OSHSimulationResults) this.oshSimulationResults).addPlsCostsToPlsCosts(costs[1]);
-                ((OSHSimulationResults) this.oshSimulationResults).addCostsToTotalCosts(costs[0] + costs[1] + costs[2]);
-                ((OSHSimulationResults) this.oshSimulationResults).addGasCostsToGasCosts(costs[2]);
-                ((OSHSimulationResults) this.oshSimulationResults).addFeedInCostsToFeedInCostsPV(costs[3]);
-                ((OSHSimulationResults) this.oshSimulationResults).addFeedInCostsToFeedInCostsCHP(costs[4]);
-                ((OSHSimulationResults) this.oshSimulationResults).addAutoConsumptionCostsToAutoConsumptionCosts(costs[5]);
+                ((OSHSimulationResults) this.oshSimulationResults).addEpsCostsToEpsCosts(costs.get(SingleStepCostReturnType.EPS));
+                ((OSHSimulationResults) this.oshSimulationResults).addPlsCostsToPlsCosts(costs.get(SingleStepCostReturnType.PLS));
+                ((OSHSimulationResults) this.oshSimulationResults).addCostsToTotalCosts(
+                        costs.get(SingleStepCostReturnType.EPS)
+                        + costs.get(SingleStepCostReturnType.PLS)
+                        + costs.get(SingleStepCostReturnType.GAS)
+                        + costs.get(SingleStepCostReturnType.FEED_IN_PV)
+                        + costs.get(SingleStepCostReturnType.FEED_IN_CHP)
+                        + costs.get(SingleStepCostReturnType.AUTO_CONSUMPTION));
+                ((OSHSimulationResults) this.oshSimulationResults).addGasCostsToGasCosts(costs.get(SingleStepCostReturnType.GAS));
+                ((OSHSimulationResults) this.oshSimulationResults).addFeedInCostsToFeedInCostsPV(costs.get(SingleStepCostReturnType.FEED_IN_PV));
+                ((OSHSimulationResults) this.oshSimulationResults).addFeedInCostsToFeedInCostsCHP(costs.get(SingleStepCostReturnType.FEED_IN_CHP));
+                ((OSHSimulationResults) this.oshSimulationResults).addAutoConsumptionCostsToAutoConsumptionCosts(costs.get(SingleStepCostReturnType.AUTO_CONSUMPTION));
                 // GAS COSTS
             }
 
@@ -619,12 +617,12 @@ public class BuildingSimulationEngine extends SimulationEngine {
                         + ";" + currentActivePowerExternal
                         + ";" + currentReactivePowerExternal
                         + ";" + currentGasPowerExternal
-                        + ";" + costs[0]
-                        + ";" + costs[1]
-                        + ";" + costs[2]
-                        + ";" + costs[3]
-                        + ";" + costs[4]
-                        + ";" + costs[5]
+                        + ";" + costs.get(SingleStepCostReturnType.EPS)
+                        + ";" + costs.get(SingleStepCostReturnType.PLS)
+                        + ";" + costs.get(SingleStepCostReturnType.GAS)
+                        + ";" + costs.get(SingleStepCostReturnType.FEED_IN_PV)
+                        + ";" + costs.get(SingleStepCostReturnType.FEED_IN_CHP)
+                        + ";" + costs.get(SingleStepCostReturnType.AUTO_CONSUMPTION)
                         + ";" + epse.getPs().get(AncillaryCommodity.PVACTIVEPOWERFEEDIN).getPrice(currentTime));
             }
 

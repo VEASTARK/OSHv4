@@ -1,5 +1,6 @@
 package osh.mgmt.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -255,7 +256,7 @@ public class DachsChpIPP
             // either forced on or forced off
             if (chpOn != plannedState && !hysteresisOn) {
                 //avoid forced on/offs
-                this.addInterdependentCervisia(this.forcedOnOffStepMultiplier * this.getStepSize() + this.forcedOffAdditionalCost);
+                this.addInterdependentCervisia(EAObjectives.MONEY, this.forcedOnOffStepMultiplier * this.getStepSize() + this.forcedOffAdditionalCost);
             }
         }
 

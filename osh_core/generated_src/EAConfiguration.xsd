@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://osh/configuration/oc"
+        xmlns:tns="http://osh/configuration/oc"
+        xmlns:ins="http://osh/configuration/system"
+        elementFormDefault="qualified">
+
+    <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system"/>
+
+
+    <complexType name="EAConfiguration">
+        <sequence>
+            <element maxOccurs="unbounded" name="algorithms" type="tns:AlgorithmConfiguration"/>
+            <element maxOccurs="unbounded" name="eaObjectives" type="tns:EAObjectives"/>
+            <element minOccurs="0" name="solutionRanking" type="tns:SolutionRanking"/>
+            <element minOccurs="0" name="loggingConfiguration" type="tns:LoggingConfiguration"/>
+            <element minOccurs="0" name="executeAlgorithmsParallel" type="boolean"/>
+        </sequence>
+    </complexType>
+
+
+    <complexType name="AlgorithmConfiguration">
+        <sequence>
+            <element name="algorithm" type="tns:algorithmType"/>
+            <element name="variableEncoding" type="tns:variableEncoding"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="stoppingRules" type="tns:StoppingRuleConfiguration"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="operators" type="tns:OperatorConfiguration"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="algorithmParameters" type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="StoppingRuleConfiguration">
+        <sequence>
+            <element name="stoppingRuleName" type="string"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="ruleParameters" type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="LoggingConfiguration">
+        <sequence>
+            <element name="logObjectiveBest" type="boolean"/>
+            <element name="logQualityIndicators" type="boolean"/>
+            <element name="logParetoFront" type="boolean"/>
+            <element name="logRanking" type="boolean"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="qualityIndicators"
+                     type="tns:QualityIndicatorConfiguration"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="OperatorConfiguration">
+        <sequence>
+            <element name="type" type="tns:operatorType"/>
+            <element name="name" type="string"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="operatorParameters" type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="QualityIndicatorConfiguration">
+        <sequence>
+            <element name="type" type="tns:qualityIndicator"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="indicatorParameters" type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="SolutionRanking">
+        <sequence>
+            <element name="type" type="tns:rankingType"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="rankingParameters" type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+    <simpleType name="variableEncoding">
+        <restriction base="string">
+            <enumeration value="BINARY" />
+            <enumeration value="REAL" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="qualityIndicator">
+        <restriction base="string">
+            <enumeration value="IGD_PLUS" />
+            <enumeration value="HV" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="rankingType">
+        <restriction base="string">
+            <enumeration value="DOMINANCE" />
+            <enumeration value="OBJECTIVE" />
+            <enumeration value="WEIGHTED_OBJECTIVE" />
+            <enumeration value="CHEBYSHEV" />
+            <enumeration value="NASH_BARGAINING" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="operatorType">
+        <restriction base="string">
+            <enumeration value="SELECTION" />
+            <enumeration value="RECOMBINATION" />
+            <enumeration value="MUTATION" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="algorithmType">
+        <restriction base="string">
+            <enumeration value="gGA" />
+            <enumeration value="ssGA" />
+            <enumeration value="DE" />
+            <enumeration value="PSO" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="EAObjectives">
+        <restriction base="string">
+            <enumeration value="MONEY" />
+            <enumeration value="SELF_SUFFICIENCY_RATIO" />
+            <enumeration value="SELF_CONSUMPTION_RATIO" />
+        </restriction>
+    </simpleType>
+</schema>

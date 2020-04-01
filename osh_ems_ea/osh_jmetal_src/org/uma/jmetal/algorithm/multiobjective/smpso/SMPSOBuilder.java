@@ -9,8 +9,6 @@ import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.archive.BoundedArchive;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
-import org.uma.jmetal.util.pseudorandom.JMetalRandom;
-import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 /**
@@ -215,12 +213,6 @@ public class SMPSOBuilder implements AlgorithmBuilder<SMPSO> {
 
     public SMPSOBuilder setChangeVelocity2(double changeVelocity2) {
         this.changeVelocity2 = changeVelocity2;
-
-        return this;
-    }
-
-    public SMPSOBuilder setRandomGenerator(PseudoRandomGenerator randomGenerator) {
-        JMetalRandom.getInstance().setRandomGenerator(randomGenerator);
 
         return this;
     }

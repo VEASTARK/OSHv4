@@ -1,5 +1,6 @@
 package osh.mgmt.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -179,7 +180,7 @@ public class HotWaterTankNonControllableIPP
             cervisia /= 2.0;
         }
 
-        this.addInterdependentCervisia(cervisia);
+        this.addInterdependentCervisia(EAObjectives.MONEY, cervisia);
     }
 
     @Override

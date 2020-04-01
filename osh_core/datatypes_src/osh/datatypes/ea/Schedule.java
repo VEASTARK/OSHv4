@@ -1,7 +1,9 @@
 package osh.datatypes.ea;
 
+import osh.configuration.oc.EAObjectives;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.ILoadProfile;
+import osh.utils.dataStructures.Enum2DoubleMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -25,7 +27,7 @@ public class Schedule implements Serializable {
     /**
      * needed lukewarm cervisia to pay for this profile (other costs)
      */
-    private double lukewarmCervisia;
+    private Enum2DoubleMap<EAObjectives> lukewarmCervisia;
 
     /**
      * for deep copy
@@ -40,7 +42,7 @@ public class Schedule implements Serializable {
      * @param profile
      * @param lukewarmCervisia
      */
-    public Schedule(ILoadProfile<Commodity> profile, double lukewarmCervisia, String scheduleName) {
+    public Schedule(ILoadProfile<Commodity> profile, Enum2DoubleMap<EAObjectives> lukewarmCervisia, String scheduleName) {
         super();
 
         this.profile = profile;
@@ -53,30 +55,13 @@ public class Schedule implements Serializable {
         return this.profile;
     }
 
-    public double getLukewarmCervisia() {
+    public Enum2DoubleMap<EAObjectives> getLukewarmCervisia() {
         return this.lukewarmCervisia;
     }
 
     public String getScheduleName() {
         return this.scheduleName;
     }
-
-    /**
-     * merge two schedules (use profile.merge and add cervisia)
-     */
-    public Schedule merge(Schedule other) {
-        double cervisia;
-        ILoadProfile<Commodity> profile;
-        try {
-            profile = this.profile.merge(other.profile, 0);
-        } catch (Exception ex) {
-            throw new RuntimeException("Bad error merging profiles", ex);
-        }
-        cervisia = this.lukewarmCervisia + other.lukewarmCervisia;
-
-        return new Schedule(profile, cervisia, this.scheduleName);
-    }
-
 
     public Schedule clone() {
         ILoadProfile<Commodity> clonedProfile = this.profile.clone();

@@ -2,6 +2,9 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 
 import org.uma.jmetal.problem.impl.AbstractGenericProblem;
 import org.uma.jmetal.solution.Solution;
+import osh.configuration.oc.EAObjectives;
+
+import java.util.List;
 
 /**
  * Represents the the optimization problem of the OSH energy simulation.
@@ -14,10 +17,16 @@ public abstract class EnergyManagementProblem<S extends Solution<?>> extends Abs
 
     private final EMProblemEvaluator evaluator;
 
-    public EnergyManagementProblem(EMProblemEvaluator evaluator) {
+    /**
+     * Constructs this energy management problem with the provided problem evaluator and the collection of objectives.
+     *
+     * @param evaluator the evaluator for the problem
+     * @param objectives the collection of objective
+     */
+    public EnergyManagementProblem(EMProblemEvaluator evaluator, List<EAObjectives> objectives) {
         this.evaluator = evaluator;
 
-        this.setNumberOfObjectives(1);
+        this.setNumberOfObjectives(objectives.size());
         this.setNumberOfConstraints(0);
     }
 
@@ -31,6 +40,11 @@ public abstract class EnergyManagementProblem<S extends Solution<?>> extends Abs
         this.evaluator.evaluateFinalTime(solution, log);
     }
 
+    /**
+     * Returns the problem evaluator.
+     *
+     * @return the problem evaluator
+     */
     public EMProblemEvaluator getEvaluator() {
         return this.evaluator;
     }

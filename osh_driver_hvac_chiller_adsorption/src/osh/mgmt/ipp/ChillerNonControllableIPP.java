@@ -1,5 +1,6 @@
 package osh.mgmt.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -218,7 +219,7 @@ public class ChillerNonControllableIPP extends NonControllableIPP<ISolution, IPr
         if (chillerNewState && !this.interdependentLastState) {
             // fixed costs per start, i.e., costs to turn on the CHP
             // (not the variable costs for letting the CHP run)
-            this.addInterdependentCervisia(10.0);
+            this.addInterdependentCervisia(EAObjectives.MONEY,10.0);
         }
 
         this.interdependentLastState = chillerNewState;
