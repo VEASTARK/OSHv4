@@ -59,8 +59,7 @@ public class ThermalEnergyGrid implements IEnergyGrid {
                         new ThermalConnection(Commodity.fromString(conn.getActiveToPassiveCommodity())),
                         new ThermalConnection(Commodity.fromString(conn.getPassiveToActiveCommodity()))));
             }
-            //TODO: update grid-layout to only have one meter in next update that breaks backwards-compatibility
-            this.meterUUID = UUID.fromString(layout.getMeterUUIDs().get(0));
+            this.meterUUID = UUID.fromString(layout.getMeterUUID());
 
         } else
             throw new IllegalArgumentException("layoutFile not instance of GridLayout-class (should not be possible)");

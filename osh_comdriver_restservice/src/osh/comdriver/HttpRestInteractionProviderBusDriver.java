@@ -300,8 +300,6 @@ public abstract class HttpRestInteractionProviderBusDriver extends HALBusDriver 
             applianceDetails.setPhaseName(gapdd.getPhaseName());
 
             applianceDetails.setStartTime(gapdd.getStartTime().toEpochSecond());
-            applianceDetails.setEndTime(gapdd.getEndTime().toEpochSecond());
-            applianceDetails.setRemainingTime((int) gapdd.getRemainingTime().toSeconds());
         } else if (sx instanceof MieleApplianceDriverDetails) {
             MieleApplianceDriverDetails madd = (MieleApplianceDriverDetails) sx;
             RestApplianceDetails applianceDetails = this.getRestStateDetails(uuid).getApplianceDetails();

@@ -370,9 +370,6 @@ public class OSHGlobalControllerJMetal
         EnumMap<AncillaryCommodity, PriceSignal> tempPriceSignals = new EnumMap<>(AncillaryCommodity.class);
         EnumMap<AncillaryCommodity, PowerLimitSignal> tempPowerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
 
-        //TODO: Check if necessary to synchronize full object (this)
-        //TODO: Check why keySet and not entrySet
-
         // Cloning necessary, because of possible price signal changes during optimization
         synchronized (this.priceSignals) {
             for (Map.Entry<AncillaryCommodity, PriceSignal> entry : this.priceSignals.entrySet()) {

@@ -10,6 +10,7 @@ import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.power.PowerInterval;
 import osh.utils.sql.SQLConnectionProvider;
+import osh.utils.string.StringConversions;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -417,8 +418,9 @@ public final class DatabaseLoggerThread extends Thread {
         enqueue(logInf);
     }
 
-    public static void enqueueGA(double avgGenerationsUsed, double[] avgFitnessChange,
-                                 double[] avgFitnessSpread, double[] avgHomogeneity, int noOfOptimizations, double[] cervisia) {
+    public static void enqueueGA(double avgGenerationsUsed, double[][] avgFitnessChange,
+                                 double[][] avgFitnessSpread, double[] avgHomogeneity, int noOfOptimizations,
+                                 double[] cervisia) {
 
         GALogObject logInf = new GALogObject(avgGenerationsUsed, avgFitnessChange,
                 avgFitnessSpread, avgHomogeneity, noOfOptimizations, cervisia);
@@ -1012,8 +1014,8 @@ public final class DatabaseLoggerThread extends Thread {
 
                                 + "VALUES ('" + runName + "'"
                                 + ", " + logObj.avgGenerationsUsed
-                                + ", '" + Arrays.toString(logObj.avgFitnessChange)
-                                + "', '" + Arrays.toString(logObj.avgFitnessSpread)
+                                + ", '" + StringConversions.from2DimDoubleArrayToString(logObj.avgFitnessChange)
+                                + "', '" + StringConversions.from2DimDoubleArrayToString(logObj.avgFitnessSpread)
                                 + "', '" + Arrays.toString(logObj.avgHomogeneity)
                                 + "', " + logObj.noOfOptimizations
                                 + ", " + logObj.cervisia[0]
@@ -1347,15 +1349,16 @@ public final class DatabaseLoggerThread extends Thread {
 
     private static class GALogObject extends QueueLogObject {
         private final double avgGenerationsUsed;
-        private final double[] avgFitnessChange;
-        private final double[] avgFitnessSpread;
+        private final double[][] avgFitnessChange;
+        private final double[][] avgFitnessSpread;
         private final double[] avgHomogeneity;
         private final int noOfOptimizations;
         private final double[] cervisia;
 
 
-        public GALogObject(double avgGenerationsUsed, double[] avgFitnessChange,
-                           double[] avgFitnessSpread, double[] avgHomogeneity, int noOfOptimizations, double[] cervisia) {
+        public GALogObject(double avgGenerationsUsed, double[][] avgFitnessChange,
+                           double[][] avgFitnessSpread, double[] avgHomogeneity, int noOfOptimizations,
+                           double[] cervisia) {
             super();
             this.avgGenerationsUsed = avgGenerationsUsed;
             this.avgFitnessChange = avgFitnessChange;

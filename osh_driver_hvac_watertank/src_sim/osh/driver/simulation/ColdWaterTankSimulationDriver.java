@@ -99,9 +99,7 @@ ColdWaterTankSimulationDriver extends WaterTankSimulationDriver {
             this.rescheduleIfViolatedDuration =
                     Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedDuration)));
         } catch (Exception e) {
-            //TODO: 2 minutes as deault is too low but will be kept for backwards-compatibility, change to 10 as soon
-            // as the next update that breaks backwards-compatibility
-            this.rescheduleIfViolatedDuration = Duration.ofMinutes(2);
+            this.rescheduleIfViolatedDuration = Duration.ofMinutes(10);
             this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedDuration, using the default value: " + this.rescheduleIfViolatedDuration);
         }
 

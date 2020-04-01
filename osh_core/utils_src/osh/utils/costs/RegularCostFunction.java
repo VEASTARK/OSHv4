@@ -139,7 +139,7 @@ public class RegularCostFunction {
         }
 
         //power-limit costs
-        if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.NONE) {
+        if (this.costConfiguration.getActivePlsConfiguration() != ACTIVE_PLS_COSTS.NONE) {
             PowerInterval activePowerLimit =
                     this.powerLimitSignals.get(AncillaryCommodity.ACTIVEPOWEREXTERNAL).getPowerLimitInterval(now);
 
@@ -149,7 +149,7 @@ public class RegularCostFunction {
                 costMap.add(SingleStepCostReturnType.PLS,
                         this.upperOverlimitFactor * Math.abs(activePower - upperLimit) * activePrice);
 
-            if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.UPPER_ACTIVE) {
+            if (this.costConfiguration.getActivePlsConfiguration() != ACTIVE_PLS_COSTS.UPPER) {
                 double lowerLimit = activePowerLimit.getPowerLowerLimit();
 
                 if (activePower < lowerLimit) {
@@ -166,7 +166,7 @@ public class RegularCostFunction {
                 }
             }
 
-            if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL
+            if (this.costConfiguration.getActivePlsConfiguration() == ACTIVE_PLS_COSTS.FULL
                     && this.costConfiguration.getReactiveConfiguration() == REACTIVE_COSTS.FULL) {
                 PowerInterval reactiveLimit =
                         this.powerLimitSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL).getPowerLimitInterval(now);

@@ -18,7 +18,6 @@ import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 /**
  * Represents the evaluator of the optimization problem of the OSH simulation for use in JMetal algorithms.
@@ -136,21 +135,15 @@ public class EMProblemEvaluator {
             }
         }
 
-        //to keep backwards-cpmpatibility we need to reorder the parts slightly as a different order will lead to
-        // slight differences due to floating-point error TODO: remove with next backwards-compatibility breaking
-        // update and order by part-id (not uuid)
-        List<InterdependentProblemPart<?, ?>> allIPPsReorderedList = new ArrayList<>(problemParts.length);
-        allIPPsReorderedList.addAll(allActiveNeedsInputPPsList);
-        allIPPsReorderedList.addAll(Arrays.stream(allActivePPs).filter(p -> !allActiveNeedsInputPPsList.contains(p)).collect(Collectors.toList()));
-        allIPPsReorderedList.addAll(Arrays.stream(allPassivePPs).collect(Collectors.toList()));
-        allIPPsReorderedList.addAll(Arrays.stream(problemParts).filter(p -> !allIPPsReorderedList.contains(p)).collect(Collectors.toList()));
-
         InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs =
                 new InterdependentProblemPart[allActiveNeedsInputPPsList.size()];
         allActiveNeedsInputPPs = allActiveNeedsInputPPsList.toArray(allActiveNeedsInputPPs);
-        InterdependentProblemPart<?, ?>[] allIPPsReordered =
-                new InterdependentProblemPart[allIPPsReorderedList.size()];
-        allIPPsReordered = allIPPsReorderedList.toArray(allIPPsReordered);
+
+        //sort all problem-parts to ensure the same order of execution
+        Arrays.sort(problemParts, Comparator.comparingInt(InterdependentProblemPart::getId));
+        Arrays.sort(allActivePPs, Comparator.comparingInt(InterdependentProblemPart::getId));
+        Arrays.sort(allPassivePPs, Comparator.comparingInt(InterdependentProblemPart::getId));
+        Arrays.sort(allActiveNeedsInputPPs, Comparator.comparingInt(InterdependentProblemPart::getId));
 
         ocESC.initializeGrids(activeUUIDs, activeNeedsInputUUIDs, passiveUUIDs,
                 uuidIntMap, uuidOutputMap, uuidInputMap);
@@ -158,10 +151,11 @@ public class EMProblemEvaluator {
         UUIDCommodityMap baseActiveToPassiveMap = new UUIDCommodityMap(activeUUIDs, uuidIntMap, true);
         UUIDCommodityMap basePassiveToActiveMap = new UUIDCommodityMap(passiveUUIDs, uuidIntMap, true);
 
-        int maxLength = (int) Math.ceil((this.maxOptimizationHorizon - this.maxReferenceTime) / this.stepSize) + 2;
+        int maxLength =
+                (int) Math.ceil((double) (this.maxOptimizationHorizon - this.maxReferenceTime) / this.stepSize) + 2;
         ErsatzACLoadProfile ancillaryLoadProfile = new ErsatzACLoadProfile(maxLength);
 
-        this.baseDataContainer = new EnergyProblemDataContainer(allIPPsReordered, allActivePPs, allPassivePPs,
+        this.baseDataContainer = new EnergyProblemDataContainer(problemParts, allActivePPs, allPassivePPs,
                 allActiveNeedsInputPPs, ocESC, baseActiveToPassiveMap, basePassiveToActiveMap, ancillaryLoadProfile);
 
     }

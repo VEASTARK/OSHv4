@@ -72,8 +72,7 @@ public abstract class BusManager extends OCComponent
         if (this.busDriver != null) {
             this.busDriver.onDataFromOcComponent(halExchange);
         } else {
-            //NOTHING
-            //TODO: error message/exception
+            throw new IllegalArgumentException("No BusDriver available.");
         }
     }
 

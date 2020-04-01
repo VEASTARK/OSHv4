@@ -69,11 +69,7 @@ public class OptimizationCostFunction {
         this.selfConsumptionParameterList = new ArrayList<>();
 
         //active power pricing
-        //TODO: in the old cost model, lower pls violations would only be punsihed by refunding the feed-in costs.
-        // Change this to refunding + punishment according to active power price
-        if ((this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL_ACTIVE
-                || this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL)
-                && this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.NONE) {
+        if (this.costConfiguration.getActivePlsConfiguration() == ACTIVE_PLS_COSTS.FULL) {
             List<SingularArgumentTuple> arguments = new ArrayList<>();
             arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -82,9 +78,7 @@ public class OptimizationCostFunction {
 
             this.activeConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_quad,
                     CalculationFunctions::priceAbsPowerLimitFunction));
-        } else if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.UPPER_ACTIVE
-                || (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.NONE
-                && this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE)) {
+        } else if (this.costConfiguration.getActivePlsConfiguration() == ACTIVE_PLS_COSTS.UPPER) {
             List<SingularArgumentTuple> arguments = new ArrayList<>();
             arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -103,7 +97,7 @@ public class OptimizationCostFunction {
 
         //reactive power pricing
         if (this.costConfiguration.getReactiveConfiguration() != REACTIVE_COSTS.NONE) {
-            if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL) {
+            if (this.costConfiguration.getReactivePlsConfiguration() == VAR_PLS_COSTS.FULL) {
                 List<SingularArgumentTuple> arguments = new ArrayList<>();
                 arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.REACTIVEPOWEREXTERNAL));
                 arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.REACTIVEPOWEREXTERNAL));
@@ -124,8 +118,7 @@ public class OptimizationCostFunction {
 
         //feed in pricing
         if (this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE) {
-            if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL
-                    && this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL_ACTIVE) {
+            if (this.costConfiguration.getActivePlsConfiguration() != ACTIVE_PLS_COSTS.FULL) {
                 if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH
                         || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.PV) {
                     List<SingularArgumentTuple> arguments = new ArrayList<>();

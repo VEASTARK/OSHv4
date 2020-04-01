@@ -256,9 +256,7 @@ public class EALogger implements IEALogger {
                 }
             }
 
-            //TODO: change logging to include multi-objective as soon as next backwards-compatibility breaking update
-            // is released
-            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange[0], this.fitnessSpread[0],
+            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange, this.fitnessSpread,
                     this.homogeneity, this.optimizationCounter, cervisiaResults);
         }
     }

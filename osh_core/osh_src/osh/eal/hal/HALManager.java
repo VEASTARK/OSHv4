@@ -403,19 +403,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
         return boxLifeCycleMembers;
     }
 
-
-//	public void startHAL() {
-//		//TODO: why is nothing here?
-//	}
-//
-//	public void addDevice(HALDeviceDriver driver, String deviceDescription) {
-//		//TODO: why is nothing here?
-//	}
-//
-//	public void removeDevice(HALDeviceDriver driver) {
-//		//TODO: why is nothing here?
-//	}
-
     public ArrayList<BusManager> getConnectedBusManagers() {
         return this.connectedBusManagers;
     }

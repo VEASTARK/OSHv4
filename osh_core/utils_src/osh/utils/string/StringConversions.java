@@ -28,6 +28,10 @@ public class StringConversions {
         return Arrays.stream(trimmed.split(",")).map(Double::parseDouble).toArray(Double[]::new);
     }
 
+    public static String from2DimDoubleArrayToString(double[][] arr) {
+        return Arrays.toString(Arrays.stream(arr).map(Arrays::toString).toArray(String[]::new));
+    }
+
     public static double[] fromStringToPrimitiveDoubleArray(String s) {
         Double[] arr = StringConversions.fromStringToDoubleArray(s);
         double[] ret = new double[arr.length];

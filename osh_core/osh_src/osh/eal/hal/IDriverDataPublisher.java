@@ -11,7 +11,5 @@ import osh.eal.hal.exchange.IHALExchange;
 public interface IDriverDataPublisher {
     void setOcDataSubscriber(IDriverDataSubscriber monitorObject);
 
-    void removeOcDataSubscriber(IDriverDataSubscriber monitorObject);
-
     void updateOcDataSubscriber(IHALExchange halExchange) throws HALDriverException;
 }

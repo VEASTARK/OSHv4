@@ -74,17 +74,6 @@ public class GenericApplianceDriverDetails extends StateExchange {
         if (this.state == null) {
             return other.state == null;
         } else return this.state == other.state;
-
-        //TODO details are currently not relevant
-        /*
-        if(this.programExtras == null) {
-            if(other.programExtras != null)
-                return false;
-            else
-                return true;
-        }
-
-        return (this.programExtras.equals(other.programExtras)); */
     }
 
     @Override

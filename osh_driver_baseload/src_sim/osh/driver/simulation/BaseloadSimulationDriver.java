@@ -125,17 +125,12 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
             SparseLoadProfile dayProfile = new SparseLoadProfile();
-//            ZonedDateTime pastDay = timeAtStart.minusDays(i);
-//            //loadprofile only provides 365 days so we have to reduce further for leapyears
-//            if (pastDay.getDayOfYear() > 365) {
-//                pastDay.minusDays(1);
-//            }
-//            long pastDayStart = TimeConversion.getSecondsSinceYearStart(pastDay);
-            //TODO: this will result in the wrong days used for pastPredictions at the start of a year, but will
-            // remain to keep backwards-compaitiblity. Fix in next update that breaks this (uncomment above lines and
-            // delete the next one)
-            long pastDayStart = (int) Math.abs((timeAtStart.toEpochSecond() / 86400 - i) % 365) * 86400;
-            ZonedDateTime pastDay = TimeConversion.convertUnixTimeToZonedDateTime(pastDayStart);
+            ZonedDateTime pastDay = timeAtStart.minusDays(i);
+            //loadprofile only provides 365 days so we have to reduce further for leapyears
+            if (pastDay.getDayOfYear() > 365) {
+                pastDay.minusDays(1);
+            }
+            long pastDayStart = TimeConversion.getSecondsSinceYearStart(pastDay);
             for (int sec = 0; sec < 86400; sec++) {
                 int activeLoad = this.baseload.getActivePowerAt(pastDay.plusSeconds(sec));
 

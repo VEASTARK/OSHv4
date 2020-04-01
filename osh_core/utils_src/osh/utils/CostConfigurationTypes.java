@@ -16,12 +16,19 @@ public class CostConfigurationTypes {
     }
 
     /**
-     * Dictates how costs for violating power-limit-signals should be calculated.
+     * Dictates how costs for violating power-limit-signals for active power should be calculated.
      */
-    public enum PLS_COSTS {
+    public enum ACTIVE_PLS_COSTS {
         NONE,
-        UPPER_ACTIVE,
-        FULL_ACTIVE,
+        UPPER,
+        FULL
+    }
+
+    /**
+     * Dictates how costs for violating power-limit-signals for reactive power should be calculated.
+     */
+    public enum VAR_PLS_COSTS {
+        NONE,
         FULL
     }
 

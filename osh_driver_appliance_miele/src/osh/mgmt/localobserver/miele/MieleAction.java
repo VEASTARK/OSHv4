@@ -73,13 +73,4 @@ public class MieleAction implements IAction {
     public int hashCode() {
         return this.deviceID.hashCode();
     }
-
-    // TODO: keep for prediction
-//	@Override
-//	public IAction createAction(long newTimestamp) {
-//		MieleEAPart newEAPart = new MieleEAPart(deviceID,newTimestamp,newTimestamp,newTimestamp+eapart.getOriginalDof(),eapart.getProfile(), true);
-//
-//		return new MieleAction(deviceID, newTimestamp, newEAPart);
-//	}
-
 }

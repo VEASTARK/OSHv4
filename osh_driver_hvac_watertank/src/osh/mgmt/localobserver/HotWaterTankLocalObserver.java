@@ -87,9 +87,7 @@ public class HotWaterTankLocalObserver
         ZonedDateTime now = exchange.getTime();
         long nowSeconds = exchange.getEpochSecond();
 
-        //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
-        // backwards-compatibility breaking update is released
-        if (now.isAfter(this.lastTimeIPPSent.plus(this.newIppAfter))) {
+        if (!now.isBefore(this.lastTimeIPPSent.plus(this.newIppAfter))) {
             HotWaterTankNonControllableIPP ex = new HotWaterTankNonControllableIPP(
                     this.getUUID(),
                     now,
@@ -138,9 +136,7 @@ public class HotWaterTankLocalObserver
                     this.temperatureInLastIPP = this.currentTemperature;
                     this.predictionViolatedSince = null;
                 } else if (this.predictionViolatedSince == null){
-                    //this may seem counter-intuitive but we count the violation as beginning directly after the last
-                    // time it was within the temperature borders, so it has been on-going for a minute now
-                    this.predictionViolatedSince = now.minusMinutes(1);
+                    this.predictionViolatedSince = now;
                 }
             } else {
                 this.predictionViolatedSince = null;

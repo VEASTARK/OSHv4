@@ -61,7 +61,9 @@ public abstract class LocalController extends Controller implements IOCHALDataPu
 
     @Override
     public final void removeOcDataSubscriber(IOCHALDataSubscriber monitorObject) {
-        //TODO implement (BBE)
+        if (this.monitorObject.equals(monitorObject)) {
+            this.monitorObject = null;
+        }
     }
 
     /**

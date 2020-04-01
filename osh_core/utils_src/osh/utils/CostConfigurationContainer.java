@@ -10,7 +10,8 @@ import osh.utils.CostConfigurationTypes.*;
 public class CostConfigurationContainer implements Cloneable {
 
     private final REACTIVE_COSTS reactiveConfiguration;
-    private final PLS_COSTS plsConfiguration;
+    private final ACTIVE_PLS_COSTS activePlsConfiguration;
+    private final VAR_PLS_COSTS reactivePlsConfiguration;
     private final FEED_IN_COSTS feedInConfiguration;
     private final AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration;
     private final SELF_SUFFICIENCY_RATIO selfSufficiencyConfiguration;
@@ -20,20 +21,21 @@ public class CostConfigurationContainer implements Cloneable {
      * Creates this data-container with the given values for all configuration values.
      *
      * @param reactiveConfiguration configuration setting for the calculation of reactive power
-     * @param plsConfiguration configuration setting for the calculation of pls-violation
+     * @param activePlsConfiguration configuration setting for the calculation of pls-violation
      * @param feedInConfiguration configuration setting for the calculation of feed-in power
      * @param autoConsumptionConfiguration configuration setting for the calculation of self-consumption of produced
      *                                     power
      * @param selfSufficiencyConfiguration configuration setting for the calculation of the self-sufficiency-ratio
      * @param selfConsumptionConfiguration configuration setting for the calculation of the self-consumption-ratio
      */
-    public CostConfigurationContainer(REACTIVE_COSTS reactiveConfiguration, PLS_COSTS plsConfiguration,
-                                      FEED_IN_COSTS feedInConfiguration,
+    public CostConfigurationContainer(REACTIVE_COSTS reactiveConfiguration, ACTIVE_PLS_COSTS activePlsConfiguration,
+                                      VAR_PLS_COSTS reactivePlsConfiguration, FEED_IN_COSTS feedInConfiguration,
                                       AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration,
                                       SELF_SUFFICIENCY_RATIO selfSufficiencyConfiguration,
                                       SELF_CONSUMPTION_RATIO selfConsumptionConfiguration) {
         this.reactiveConfiguration = reactiveConfiguration;
-        this.plsConfiguration = plsConfiguration;
+        this.activePlsConfiguration = activePlsConfiguration;
+        this.reactivePlsConfiguration = reactivePlsConfiguration;
         this.feedInConfiguration = feedInConfiguration;
         this.autoConsumptionConfiguration = autoConsumptionConfiguration;
         this.selfSufficiencyConfiguration = selfSufficiencyConfiguration;
@@ -63,13 +65,16 @@ public class CostConfigurationContainer implements Cloneable {
 
         switch(plsOptimizationObjective) {
             case 0:
-                this.plsConfiguration = PLS_COSTS.NONE;
+                this.activePlsConfiguration = ACTIVE_PLS_COSTS.NONE;
+                this.reactivePlsConfiguration = VAR_PLS_COSTS.NONE;
                 break;
             case 1:
-                this.plsConfiguration = PLS_COSTS.FULL_ACTIVE;
+                this.activePlsConfiguration = ACTIVE_PLS_COSTS.FULL;
+                this.reactivePlsConfiguration = VAR_PLS_COSTS.NONE;
                 break;
             case 2:
-                this.plsConfiguration = PLS_COSTS.FULL;
+                this.activePlsConfiguration = ACTIVE_PLS_COSTS.FULL;
+                this.reactivePlsConfiguration = VAR_PLS_COSTS.FULL;
                 break;
             default:
                 throw new IllegalArgumentException("optimization objective for power-limit violation not recognized.");
@@ -111,7 +116,8 @@ public class CostConfigurationContainer implements Cloneable {
      */
     public CostConfigurationContainer(CostConfigurationContainer other) {
         this.reactiveConfiguration = other.reactiveConfiguration;
-        this.plsConfiguration = other.plsConfiguration;
+        this.activePlsConfiguration = other.activePlsConfiguration;
+        this.reactivePlsConfiguration = other.reactivePlsConfiguration;
         this.feedInConfiguration = other.feedInConfiguration;
         this.autoConsumptionConfiguration = other.autoConsumptionConfiguration;
         this.selfSufficiencyConfiguration = other.selfSufficiencyConfiguration;
@@ -128,12 +134,21 @@ public class CostConfigurationContainer implements Cloneable {
     }
 
     /**
-     * Returns the configuration for the calculation of pls-violations.
+     * Returns the configuration for the calculation of active power pls-violations.
      *
-     * @return the configuration for the calculation of pls-violations
+     * @return the configuration for the calculation of active power pls-violations
      */
-    public PLS_COSTS getPlsConfiguration() {
-        return this.plsConfiguration;
+    public ACTIVE_PLS_COSTS getActivePlsConfiguration() {
+        return this.activePlsConfiguration;
+    }
+
+    /**
+     * Returns the configuration for the calculation of reactive power pls-violations.
+     *
+     * @return the configuration for the calculation of reactive power pls-violations
+     */
+    public VAR_PLS_COSTS getReactivePlsConfiguration() {
+        return this.reactivePlsConfiguration;
     }
 
     /**

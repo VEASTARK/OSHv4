@@ -160,11 +160,6 @@ public abstract class HALDeviceDriver
     }
 
     @Override
-    public void removeOcDataSubscriber(IDriverDataSubscriber observerObject) {
-        //FIXME add removal routine
-    }
-
-    @Override
     public void updateOcDataSubscriber(IHALExchange halExchange) throws HALDriverException {
         if (this.assignedLocalObserver != null) {
             try {
