@@ -20,7 +20,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
     final EnergySourceSink adsorptionChiller =
             new EnergySourceSink(UUID.fromString("66a74134-4e47-4fc3-8519-acb2817ecd1a"));
     // Virtual Smart Meter
-    private final EnergySourceSink meter =
+    private final EnergySourceSink simMeter =
             new EnergySourceSink(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     // BASELOAD
     private final EnergySourceSink baseload =
@@ -68,7 +68,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
 
         // ### Build sourceSinkList ###
 
-        this.sourceSinkList.add(this.meter);
+        this.sourceSinkList.add(this.simMeter);
         this.sourceSinkList.add(this.baseload);
         this.sourceSinkList.add(this.pv);
         this.sourceSinkList.add(this.pvESHL);
@@ -89,7 +89,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.baseload,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -97,7 +97,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.baseload,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -107,7 +107,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.pv,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER)
             );
@@ -116,7 +116,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.pv,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -126,7 +126,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.pvESHL,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER)
             );
@@ -135,7 +135,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.pvESHL,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -145,7 +145,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.battery,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -153,7 +153,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.battery,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -163,7 +163,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.ihe,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -171,7 +171,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.ihe,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -181,7 +181,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.ghd,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -189,7 +189,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.ghd,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -200,7 +200,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.chp,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -208,7 +208,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.chp,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -219,7 +219,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceDW,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -227,7 +227,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceDW,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -237,7 +237,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceIH,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -245,7 +245,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceIH,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -255,7 +255,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceOV,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -263,7 +263,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceOV,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -273,7 +273,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceTD,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -281,7 +281,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceTD,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -291,7 +291,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceWM,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -299,7 +299,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.applianceWM,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
@@ -309,7 +309,7 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.adsorptionChiller,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.ACTIVEPOWER),
                     new ElectricalConnection(Commodity.ACTIVEPOWER));
             this.relationList.add(relation);
@@ -317,13 +317,13 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ElectricalConnection> relation = new EnergyRelation<>(
                     this.adsorptionChiller,
-                    this.meter,
+                    this.simMeter,
                     new ElectricalConnection(Commodity.REACTIVEPOWER),
                     new ElectricalConnection(Commodity.REACTIVEPOWER));
             this.relationList.add(relation);
         }
 
-        this.meters.add(this.meter);
+        this.meter = this.simMeter;
 
         Map<String, List<EnergySourceSink>> spec = new HashMap<>();
         List<EnergySourceSink> pvs = new ArrayList<>();
@@ -339,6 +339,6 @@ public class SimulationElectricalEnergyGrid extends GridInstance {
         spec.put("chp", chps);
         spec.put("battery", batteries);
 
-        this.specialSnowflakes.put(this.meter, spec);
+        this.specialDevices.put(this.simMeter, spec);
     }
 }

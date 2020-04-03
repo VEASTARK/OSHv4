@@ -31,7 +31,7 @@
 
     <complexType name="StoppingRuleConfiguration">
         <sequence>
-            <element name="stoppingRuleName" type="string"/>
+            <element name="stoppingRule" type="tns:stoppingRuleType"/>
             <element minOccurs="0" maxOccurs="unbounded" name="ruleParameters" type="ins:ConfigurationParameter"/>
         </sequence>
     </complexType>
@@ -98,6 +98,13 @@
             <enumeration value="SELECTION" />
             <enumeration value="RECOMBINATION" />
             <enumeration value="MUTATION" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="stoppingRuleType">
+        <restriction base="string">
+            <enumeration value="MAX_EVALUATIONS" />
+            <enumeration value="DELTA_FITNESS" />
         </restriction>
     </simpleType>
 

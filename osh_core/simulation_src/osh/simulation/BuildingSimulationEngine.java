@@ -410,8 +410,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
             long currentTime = this.timeDriver.getCurrentEpochSecond();
             ZonedDateTime now = this.timeDriver.getCurrentTime();
 
-            RegularCostFunction costFunction = new RegularCostFunction(epse.getPlsUpperOverLimitFactor(),
-                    epse.getPlsLowerOverLimitFactor(),
+            RegularCostFunction costFunction = new RegularCostFunction(epse.getPlsOverLimitFactor(),
                     epse.getCostConfiguration(),
                     epse.getPs(),
                     epse.getPwrLimit(),

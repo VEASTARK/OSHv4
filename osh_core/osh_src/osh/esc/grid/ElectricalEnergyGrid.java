@@ -102,7 +102,7 @@ public class ElectricalEnergyGrid implements IEnergyGrid {
                         new ElectricalConnection(Commodity.fromString(conn.getPassiveToActiveCommodity()))));
             }
 
-            this.meterUUID = UUID.fromString(layout.getMeterUUID());
+            this.meterUUID = UUID.fromString(layout.getSuperMeterUUID());
 
             this.devicesByType.put(GridDeviceType.PV, new ObjectOpenHashSet<>());
             this.devicesByType.put(GridDeviceType.CHP, new ObjectOpenHashSet<>());

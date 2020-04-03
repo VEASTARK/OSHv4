@@ -1,7 +1,8 @@
 package osh.core.oc;
 
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.GAConfiguration;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.EAConfiguration;
 import osh.core.interfaces.IOSHOC;
 import osh.esc.OCEnergySimulationCore;
 
@@ -15,7 +16,8 @@ import java.util.UUID;
 public abstract class GlobalController extends Controller {
 
     protected final OSHParameterCollection configurationParameters;
-    protected final GAConfiguration gaConfiguration;
+    protected final EAConfiguration eaConfiguration;
+    protected final CostConfiguration costConfiguration;
     protected final OCEnergySimulationCore ocESC;
     private GlobalOCUnit assignedOCUnit;
 
@@ -24,10 +26,12 @@ public abstract class GlobalController extends Controller {
      * CONSTRUCTOR
      */
     public GlobalController(IOSHOC osh, OSHParameterCollection configurationParameters,
-                            GAConfiguration gaConfiguration, OCEnergySimulationCore ocESC) {
+                            EAConfiguration eaConfiguration, CostConfiguration costConfiguration,
+                            OCEnergySimulationCore ocESC) {
         super(osh);
         this.configurationParameters = configurationParameters;
-        this.gaConfiguration = gaConfiguration;
+        this.eaConfiguration = eaConfiguration;
+        this.costConfiguration = costConfiguration;
         this.ocESC = ocESC;
     }
 

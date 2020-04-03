@@ -1,10 +1,10 @@
 package osh.datatypes.registry.oc.state.globalobserver;
 
+import osh.configuration.oc.CostConfiguration;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.StateExchange;
-import osh.utils.CostConfigurationContainer;
 
 import java.time.ZonedDateTime;
 import java.util.EnumMap;
@@ -16,9 +16,8 @@ import java.util.UUID;
  */
 public class EpsPlsStateExchange extends StateExchange {
 
-    private final CostConfigurationContainer costConfiguration;
-    private final double plsUpperOverLimitFactor;
-    private final double plsLowerOverLimitFactor;
+    private final CostConfiguration costConfiguration;
+    private final double plsOverLimitFactor;
     private final boolean epsPlsChanged;
     private final EnumMap<AncillaryCommodity, PriceSignal> ps;
     private final EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
@@ -37,17 +36,15 @@ public class EpsPlsStateExchange extends StateExchange {
             ZonedDateTime timestamp,
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit,
-            CostConfigurationContainer costConfiguration,
-            double plsUpperOverLimitFactor,
-            double plsLowerOverLimitFactor,
+            CostConfiguration costConfiguration,
+            double plsOverLimitFactor,
             boolean epsPlsChanged) {
         super(sender, timestamp);
 
         this.ps = ps;
         this.pwrLimit = pwrLimit;
-        this.costConfiguration = costConfiguration.clone();
-        this.plsUpperOverLimitFactor = plsUpperOverLimitFactor;
-        this.plsLowerOverLimitFactor = plsLowerOverLimitFactor;
+        this.costConfiguration = costConfiguration.createCopy();
+        this.plsOverLimitFactor = plsOverLimitFactor;
         this.epsPlsChanged = epsPlsChanged;
     }
 
@@ -60,18 +57,13 @@ public class EpsPlsStateExchange extends StateExchange {
         return this.pwrLimit;
     }
 
-    public CostConfigurationContainer getCostConfiguration() {
+    public CostConfiguration getCostConfiguration() {
         return this.costConfiguration;
     }
 
-    public double getPlsUpperOverLimitFactor() {
-        return this.plsUpperOverLimitFactor;
+    public double getPlsOverLimitFactor() {
+        return this.plsOverLimitFactor;
     }
-
-    public double getPlsLowerOverLimitFactor() {
-        return this.plsLowerOverLimitFactor;
-    }
-
 
     public boolean isEpsPlsChanged() {
         return this.epsPlsChanged;
@@ -89,8 +81,7 @@ public class EpsPlsStateExchange extends StateExchange {
                 this.ps,
                 this.pwrLimit,
                 this.costConfiguration,
-                this.plsUpperOverLimitFactor,
-                this.plsLowerOverLimitFactor,
+                this.plsOverLimitFactor,
                 this.epsPlsChanged);
     }
 

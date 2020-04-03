@@ -59,7 +59,7 @@ public class ThermalEnergyGrid implements IEnergyGrid {
                         new ThermalConnection(Commodity.fromString(conn.getActiveToPassiveCommodity())),
                         new ThermalConnection(Commodity.fromString(conn.getPassiveToActiveCommodity()))));
             }
-            this.meterUUID = UUID.fromString(layout.getMeterUUID());
+            this.meterUUID = UUID.fromString(layout.getSuperMeterUUID());
 
         } else
             throw new IllegalArgumentException("layoutFile not instance of GridLayout-class (should not be possible)");

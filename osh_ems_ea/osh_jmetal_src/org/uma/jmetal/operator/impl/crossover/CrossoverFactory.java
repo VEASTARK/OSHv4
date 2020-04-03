@@ -33,7 +33,6 @@ public class CrossoverFactory {
 
         switch(operator) {
             case BINARY_N_POINT:
-            case BINARY_N_POINT_LEGACY:
                 if (parameters.containsKey(ParameterConstants.EA.probability) && parameters.containsKey(ParameterConstants.EA_RECOMBINATION.points)) {
                     return (CrossoverOperator<S>) new BinaryNPointCrossover(
                             (Double) parameters.get(ParameterConstants.EA.probability),

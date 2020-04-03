@@ -279,7 +279,7 @@ public class AlgorithmExecutor {
             throw new IllegalArgumentException("Algorithm not implemented");
         }
 
-        for (Map.Entry<String, StoppingRuleConfiguration> en : algorithmConfig.getStoppingRuleMap().entrySet()) {
+        for (Map.Entry<StoppingRuleType, StoppingRuleConfiguration> en : algorithmConfig.getStoppingRuleMap().entrySet()) {
             Map<String, Object> params = MapUtils.mapFromCPCollectionUnpacked(en.getValue().getRuleParameters());
 
             StoppingRule sr = StoppingRuleFactory.getStoppingRule(en.getKey(), params);

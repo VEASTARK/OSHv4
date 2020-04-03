@@ -2,7 +2,9 @@ package osh.mgmt.globalcontroller;
 
 import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.*;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.EAConfiguration;
+import osh.configuration.oc.VariableEncoding;
 import osh.configuration.system.ConfigurationParameter;
 import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
@@ -41,7 +43,6 @@ import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.DatabaseLoggerThread;
-import osh.utils.CostConfigurationContainer;
 import osh.utils.costs.OptimizationCostFunction;
 import osh.utils.string.ParameterConstants;
 
@@ -60,12 +61,9 @@ public class OSHGlobalControllerJMetal
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private boolean newEpsPlsReceived;
-    private final CostConfigurationContainer costConfiguration;
-    private double upperOverlimitFactor;
-    private double lowerOverlimitFactor;
+    private double overlimitFactor;
     private ZonedDateTime lastTimeSchedulingStarted;
     private final OSHRandom optimizationMainRandomGenerator;
-    private final EAConfiguration eaConfiguration;
     private final AlgorithmExecutor algorithmExecutor;
     private final String logDir;
     private int stepSize;
@@ -79,87 +77,13 @@ public class OSHGlobalControllerJMetal
     public OSHGlobalControllerJMetal(
             IOSHOC osh,
             OSHParameterCollection configurationParameters,
-            GAConfiguration gaConfiguration, OCEnergySimulationCore ocESC) {
-        super(osh, configurationParameters, gaConfiguration, ocESC);
+            EAConfiguration eaConfiguration,
+            CostConfiguration costConfiguration,
+            OCEnergySimulationCore ocESC) {
+        super(osh, configurationParameters, eaConfiguration, costConfiguration, ocESC);
 
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
         this.powerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
-
-        //to keep compatible with the old configuration files we need to convert it to the new format
-        this.eaConfiguration = new EAConfiguration();
-        this.eaConfiguration.setExecuteAlgorithmsParallel(true);
-        SolutionRanking ranking = new SolutionRanking();
-        ranking.setType(RankingType.OBJECTIVE);
-        ConfigurationParameter obj = new ConfigurationParameter();
-        obj.setParameterName(ParameterConstants.EA_MULTI_OBJECTIVE.objective);
-        obj.setParameterValue("" + 0);
-        obj.setParameterType(Integer.class.getName());
-        ranking.getRankingParameters().add(obj);
-        this.eaConfiguration.setSolutionRanking(ranking);
-        this.eaConfiguration.getEaObjectives().add(EAObjectives.MONEY);
-        AlgorithmConfiguration config = new AlgorithmConfiguration();
-        config.setAlgorithm(AlgorithmType.G_GA);
-
-        ConfigurationParameter popSize = new ConfigurationParameter();
-        popSize.setParameterName(ParameterConstants.EA.populationSize);
-        popSize.setParameterValue("" + gaConfiguration.getPopSize());
-        popSize.setParameterType(Integer.class.getName());
-        config.getAlgorithmParameters().add(popSize);
-
-        OperatorConfiguration sel = new OperatorConfiguration();
-        sel.setName(gaConfiguration.getSelectionOperator());
-        sel.setType(OperatorType.SELECTION);
-        sel.getOperatorParameters().addAll(gaConfiguration.getSelectionParameters());
-        config.getOperators().add(sel);
-
-        OperatorConfiguration mut = new OperatorConfiguration();
-        mut.setName(gaConfiguration.getMutationOperator());
-        mut.setType(OperatorType.MUTATION);
-        mut.getOperatorParameters().addAll(gaConfiguration.getMutationParameters());
-        config.getOperators().add(mut);
-
-        OperatorConfiguration cross = new OperatorConfiguration();
-        cross.setName(gaConfiguration.getCrossoverOperator());
-        cross.setType(OperatorType.RECOMBINATION);
-        cross.getOperatorParameters().addAll(gaConfiguration.getCrossoverParameters());
-        config.getOperators().add(cross);
-
-        //change to true if you want to run it with an additional PSO algorithm
-        if (false) {
-            AlgorithmConfiguration psoConfig = new AlgorithmConfiguration();
-            psoConfig.setAlgorithm(AlgorithmType.PSO);
-
-            ConfigurationParameter psoPopSize = new ConfigurationParameter();
-            psoPopSize.setParameterName(ParameterConstants.EA.populationSize);
-            psoPopSize.setParameterValue("" + gaConfiguration.getPopSize());
-            psoPopSize.setParameterType(Integer.class.getName());
-            psoConfig.getAlgorithmParameters().add(psoPopSize);
-
-            ConfigurationParameter psoPartToInform = new ConfigurationParameter();
-            psoPartToInform.setParameterName(ParameterConstants.EA_ALGORITHM.particlesToInform);
-            psoPartToInform.setParameterValue("" + gaConfiguration.getPopSize() / 2);
-            psoPartToInform.setParameterType(Integer.class.getName());
-            psoConfig.getAlgorithmParameters().add(psoPartToInform);
-
-            psoConfig.setVariableEncoding(VariableEncoding.REAL);
-
-            for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
-                StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
-                scr.setStoppingRuleName(sr.getStoppingRuleName());
-                scr.getRuleParameters().addAll(sr.getRuleParameters());
-                psoConfig.getStoppingRules().add(scr);
-            }
-
-            this.eaConfiguration.getAlgorithms().add(psoConfig);
-        }
-
-        for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
-            StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
-            scr.setStoppingRuleName(sr.getStoppingRuleName());
-            scr.getRuleParameters().addAll(sr.getRuleParameters());
-            config.getStoppingRules().add(scr);
-        }
-        config.setVariableEncoding(VariableEncoding.BINARY);
 
         //set to true if single threaded execution is desired
         if (false) {
@@ -167,58 +91,16 @@ public class OSHGlobalControllerJMetal
             singleT.setParameterName(ParameterConstants.EA_ALGORITHM.singleThreaded);
             singleT.setParameterValue("" + true);
             singleT.setParameterType(Boolean.class.getName());
-            config.getAlgorithmParameters().add(singleT);
-        }
-
-        //change to false to remove the gGA algorithm
-        if (true) {
-            this.eaConfiguration.getAlgorithms().add(config);
+            this.eaConfiguration.getAlgorithms().forEach(c ->c.getAlgorithmParameters().add(singleT));
         }
 
         try {
-            this.upperOverlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.upperOverlimitFactor));
+            this.overlimitFactor =
+                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.overlimitFactor));
         } catch (Exception e) {
-            this.upperOverlimitFactor = 1.0;
-            this.getGlobalLogger().logWarning("Can't get upperOverlimitFactor, using the default value: " + this.upperOverlimitFactor);
+            this.overlimitFactor = 1.0;
+            this.getGlobalLogger().logWarning("Can't get overlimitFactor, using the default value: " + this.overlimitFactor);
         }
-
-        try {
-            this.lowerOverlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.lowerOverlimitFactor));
-        } catch (Exception e) {
-            this.lowerOverlimitFactor = 1.0;
-            this.getGlobalLogger().logWarning("Can't get lowerOverlimitFactor, using the default value: " + this.lowerOverlimitFactor);
-        }
-
-        int epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective;
-
-        try {
-            epsOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.epsObjective));
-        } catch (Exception e) {
-            epsOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get epsOptimizationObjective, using the default value: " + epsOptimizationObjective);
-        }
-
-        try {
-            plsOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.plsObjective));
-        } catch (Exception e) {
-            plsOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get plsOptimizationObjective, using the default value: " + plsOptimizationObjective);
-        }
-
-        try {
-            varOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.varObjective));
-        } catch (Exception e) {
-            varOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get varOptimizationObjective, using the default value: " + varOptimizationObjective);
-        }
-
-        this.costConfiguration = new CostConfigurationContainer(epsOptimizationObjective, plsOptimizationObjective,
-                varOptimizationObjective);
 
         long optimizationMainRandomSeed;
         try {
@@ -314,8 +196,7 @@ public class OSHGlobalControllerJMetal
                     this.priceSignals,
                     this.powerLimitSignals,
                     this.costConfiguration,
-                    this.upperOverlimitFactor,
-                    this.lowerOverlimitFactor,
+                    this.overlimitFactor,
                     this.newEpsPlsReceived);
 
             this.newEpsPlsReceived = false;
@@ -444,8 +325,7 @@ public class OSHGlobalControllerJMetal
 
 
         try {
-            OptimizationCostFunction costFunction = new OptimizationCostFunction(this.upperOverlimitFactor,
-                    this.lowerOverlimitFactor,
+            OptimizationCostFunction costFunction = new OptimizationCostFunction(this.overlimitFactor,
                     this.costConfiguration,
                     tempPriceSignals,
                     tempPowerLimitSignals,

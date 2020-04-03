@@ -7,8 +7,8 @@
 
     <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system"/>
 
-    <include schemaLocation="GAConfiguration.xsd"/>
     <include schemaLocation="EAConfiguration.xsd"/>
+    <include schemaLocation="CostConfiguration.xsd"/>
 
 
     <element name="OCConfiguration">
@@ -22,9 +22,9 @@
                 <element minOccurs="0" maxOccurs="unbounded" name="globalObserverParameters"
                          type="ins:ConfigurationParameter"/>
                 <element name="optimizationMainRandomSeed" type="string"/>
-                <element name="gaConfiguration" type="tns:GAConfiguration"/>
+                <element name="eaConfiguration" type="tns:EAConfiguration"/>
+                <element name="costConfiguration" type="tns:CostConfiguration"/>
             </sequence>
         </complexType>
     </element>
-
 </schema>

@@ -3,7 +3,8 @@ package osh.core;
 import osh.OSH;
 import osh.OSHComponent;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.GAConfiguration;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.EAConfiguration;
 import osh.configuration.oc.OCConfiguration;
 import osh.configuration.system.GridConfig;
 import osh.core.exceptions.OCManagerException;
@@ -131,11 +132,13 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
             globalController = (GlobalController) globalControllerClass
                     .getConstructor(IOSHOC.class,
                             OSHParameterCollection.class,
-                            GAConfiguration.class,
+                            EAConfiguration.class,
+                            CostConfiguration.class,
                             OCEnergySimulationCore.class).newInstance(
                             this.getOSH(),
                             this.globalControllerParameterCollection,
-                            ocConfig.getGaConfiguration(),
+                            ocConfig.getEaConfiguration(),
+                            ocConfig.getCostConfiguration(),
                             ocESC);
         } catch (Exception ex) {
             throw new OCManagerException(ex);

@@ -16,7 +16,7 @@ public class AlgorithmConfigurationWrapper {
     private final AlgorithmType algorithm;
     private final VariableEncoding variableEncoding;
 
-    private final Map<String, StoppingRuleConfiguration> stoppingRuleMap;
+    private final Map<StoppingRuleType, StoppingRuleConfiguration> stoppingRuleMap;
     private final Map<OperatorType, OperatorConfiguration> operatorMap;
     private final Map<String, Object> algorithmParameterMap;
 
@@ -31,7 +31,8 @@ public class AlgorithmConfigurationWrapper {
         this.variableEncoding = base.getVariableEncoding();
 
         this.operatorMap = base.getOperators().stream().collect(Collectors.toMap(OperatorConfiguration::getType, c -> c));
-        this.stoppingRuleMap = base.getStoppingRules().stream().collect(Collectors.toMap(StoppingRuleConfiguration::getStoppingRuleName, s -> s));
+        this.stoppingRuleMap = base.getStoppingRules().stream().collect(Collectors.toMap(StoppingRuleConfiguration::getStoppingRule
+                , s -> s));
         this.algorithmParameterMap = MapUtils.mapFromCPCollectionUnpacked(base.getAlgorithmParameters());
     }
 
@@ -58,7 +59,7 @@ public class AlgorithmConfigurationWrapper {
      *
      * @return a mapping from the stopping rule name to it's parameter configuration
      */
-    public Map<String, StoppingRuleConfiguration> getStoppingRuleMap() {
+    public Map<StoppingRuleType, StoppingRuleConfiguration> getStoppingRuleMap() {
         return this.stoppingRuleMap;
     }
 

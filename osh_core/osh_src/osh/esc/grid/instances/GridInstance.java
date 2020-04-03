@@ -25,18 +25,16 @@ public class GridInstance {
 
     protected final List<EnergyRelation<? extends RealConnectionType>> relationList = new ArrayList<>();
 
-    protected final List<EnergySourceSink> meters = new ArrayList<>();
+    protected EnergySourceSink meter;
 
-    protected final Map<EnergySourceSink, Map<String, List<EnergySourceSink>>> specialSnowflakes = new HashMap<>();
+    protected final Map<EnergySourceSink, Map<String, List<EnergySourceSink>>> specialDevices = new HashMap<>();
 
 
     private static void marshal(GridInstance grid, String fileName) throws FileNotFoundException, JAXBException {
 
         GridLayout produce = new GridLayout();
 
-        for (EnergySourceSink meter : grid.meters) {
-            produce.getMeterUUIDs().add(meter.getDeviceUuid().toString());
-        }
+        produce.setSuperMeterUUID(grid.meter.toString());
 
         for (EnergyRelation<? extends RealConnectionType> er : grid.relationList) {
 
@@ -49,7 +47,7 @@ public class GridInstance {
             produce.getConnections().add(conn);
         }
 
-        for (Entry<EnergySourceSink, Map<String, List<EnergySourceSink>>> en : grid.specialSnowflakes.entrySet()) {
+        for (Entry<EnergySourceSink, Map<String, List<EnergySourceSink>>> en : grid.specialDevices.entrySet()) {
 
             EnergySourceSink meter = en.getKey();
 

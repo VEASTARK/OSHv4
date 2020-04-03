@@ -43,16 +43,12 @@ public class GenerateOC {
 
 
         ocConfig.setGlobalOcUuid(globalOCUuid.toString());
-        ocConfig.setGaConfiguration(EAConfig.generateEAConfig());
+        ocConfig.setEaConfiguration(EAConfig.generateEAConfig());
+        ocConfig.setCostConfiguration(CostConfig.generateCostConfig());
 
         Map<String, String> params = new HashMap<>();
 
-        params.put(ParameterConstants.Optimization.epsObjective, String.valueOf(CostConfig.epsOptimizationObjective));
-        params.put(ParameterConstants.Optimization.plsObjective, String.valueOf(CostConfig.plsOptimizationObjective));
-        params.put(ParameterConstants.Optimization.varObjective, String.valueOf(CostConfig.varOptimizationObjective));
-
-        params.put(ParameterConstants.Optimization.upperOverlimitFactor, String.valueOf(CostConfig.upperOverLimitFactor));
-        params.put(ParameterConstants.Optimization.lowerOverlimitFactor, String.valueOf(CostConfig.lowerOverLimitFactor));
+        params.put(ParameterConstants.Optimization.overlimitFactor, String.valueOf(CostConfig.overLimitFactor));
 
         params.put(ParameterConstants.Optimization.stepSize, String.valueOf(escStepSize));
 
