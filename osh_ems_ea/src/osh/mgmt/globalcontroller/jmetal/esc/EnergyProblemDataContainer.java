@@ -2,7 +2,7 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 
 import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.esc.OCEnergySimulationCore;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 
 import java.util.Arrays;
@@ -19,7 +19,7 @@ public class EnergyProblemDataContainer {
     private final InterdependentProblemPart<?, ?>[] allActivePPs;
     private final InterdependentProblemPart<?, ?>[] allPassivePPs;
     private final InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs;
-    private final OCEnergySimulationCore ocESC;
+    private final OptimizationEnergySimulationCore ocESC;
     private final UUIDCommodityMap activeToPassiveMap;
     private final UUIDCommodityMap passiveToActiveMap;
     private final ErsatzACLoadProfile ancillaryLoadProfile;
@@ -40,7 +40,7 @@ public class EnergyProblemDataContainer {
                                       InterdependentProblemPart<?, ?>[] allActivePPs,
                                       InterdependentProblemPart<?, ?>[] allPassivePPs,
                                       InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs,
-                                      OCEnergySimulationCore ocESC,
+                                      OptimizationEnergySimulationCore ocESC,
                                       UUIDCommodityMap activeToPassiveMap,
                                       UUIDCommodityMap passiveToActiveMap,
                                       ErsatzACLoadProfile ancillaryLoadProfile) {
@@ -104,7 +104,7 @@ public class EnergyProblemDataContainer {
      *
      * @return the energy-simulation-core for use in the optimization loop
      */
-    public OCEnergySimulationCore getOcESC() {
+    public OptimizationEnergySimulationCore getOcESC() {
         return this.ocESC;
     }
 
@@ -172,7 +172,7 @@ public class EnergyProblemDataContainer {
 
         return new EnergyProblemDataContainer(allPPsCopy, allActivePPsCopy,
                 allPassivePPsCopy, allActiveNeedsInputPPsCopy,
-                new OCEnergySimulationCore(this.ocESC),
+                new OptimizationEnergySimulationCore(this.ocESC),
                 new UUIDCommodityMap(this.activeToPassiveMap),
                 new UUIDCommodityMap(this.passiveToActiveMap),
                 new ErsatzACLoadProfile(this.ancillaryLoadProfile));

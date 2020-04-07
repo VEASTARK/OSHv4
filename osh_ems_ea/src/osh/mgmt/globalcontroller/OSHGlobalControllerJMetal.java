@@ -1,6 +1,5 @@
 package osh.mgmt.globalcontroller;
 
-import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
 import osh.configuration.oc.CostConfiguration;
 import osh.configuration.oc.EAConfiguration;
@@ -12,14 +11,8 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.GlobalController;
 import osh.core.oc.LocalController;
 import osh.datatypes.commodity.AncillaryCommodity;
-import osh.datatypes.commodity.Commodity;
-import osh.datatypes.ea.Schedule;
-import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
-import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.power.ErsatzACLoadProfile;
-import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
@@ -33,11 +26,10 @@ import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionState
 import osh.datatypes.registry.oc.state.globalobserver.GUIScheduleStateExchange;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
-import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.builder.AlgorithmExecutor;
-import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
-import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
+import osh.mgmt.globalcontroller.jmetal.builder.EAScheduleResult;
+import osh.mgmt.globalcontroller.jmetal.esc.EnergySolver;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
@@ -47,7 +39,10 @@ import osh.utils.costs.OptimizationCostFunction;
 import osh.utils.string.ParameterConstants;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth, Sebastian Kramer
@@ -68,6 +63,7 @@ public class OSHGlobalControllerJMetal
     private final String logDir;
     private int stepSize;
     private Boolean logGa;
+    private final EnergySolver energySolver;
 
 
     /**
@@ -79,7 +75,7 @@ public class OSHGlobalControllerJMetal
             OSHParameterCollection configurationParameters,
             EAConfiguration eaConfiguration,
             CostConfiguration costConfiguration,
-            OCEnergySimulationCore ocESC) {
+            OptimizationEnergySimulationCore ocESC) {
         super(osh, configurationParameters, eaConfiguration, costConfiguration, ocESC);
 
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
@@ -132,6 +128,7 @@ public class OSHGlobalControllerJMetal
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
         this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.getGlobalLogger());
+        this.energySolver = new EnergySolver(this.getGlobalLogger(), this.eaConfiguration, this.stepSize, this.logDir);
     }
 
 
@@ -148,13 +145,8 @@ public class OSHGlobalControllerJMetal
 
         this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
 //		
-//		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), EpsStateExchange.class, RegistryType.COM, RegistryType.OC);
-//		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), PlsStateExchange.class, RegistryType.COM, RegistryType.OC);
-
         this.getOCRegistry().subscribe(EpsStateExchange.class, this);
         this.getOCRegistry().subscribe(PlsStateExchange.class, this);
-
-//		CostChecker.init(epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective, upperOverlimitFactor, lowerOverlimitFactor);
 
         this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
     }
@@ -239,7 +231,7 @@ public class OSHGlobalControllerJMetal
      */
     public void startScheduling() {
 
-        if (this.ocESC == null) {
+        if (this.optimizationESC == null) {
             throw new RuntimeException("OC-EnergySimulationCore not set, optimisation impossible, crashing now");
         }
 
@@ -272,29 +264,11 @@ public class OSHGlobalControllerJMetal
             return;
         }
 
-//		boolean showSolverDebugMessages = getControllerBoxStatus().getShowSolverDebugMessages();
-        boolean showSolverDebugMessages = true;
         final long now = this.getTimeDriver().getCurrentEpochSecond();
-
-        OSHRandom optimisationRunRandomGenerator = new OSHRandom(this.optimizationMainRandomGenerator.getNextLong());
-
-        // it is a good idea to use a specific random Generator for the EA,
-        // to make it comparable with other optimizers...
-        JMetalEnergySolverGA solver = new JMetalEnergySolverGA(
-                this.getGlobalLogger(),
-                optimisationRunRandomGenerator,
-                showSolverDebugMessages,
-                this.eaConfiguration,
-                now,
-                this.stepSize,
-                this.logDir);
 
         List<InterdependentProblemPart<?, ?>> problemPartsList = this.oshGlobalObserver.getProblemParts();
         InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[problemPartsList.size()];
         problemParts = problemPartsList.toArray(problemParts);
-
-        Solution<?> solution;
-        SolutionWithFitness resultWithAll;
 
         if (!this.oshGlobalObserver.getAndResetProblempartChangedFlag()) {
             return; //nothing new, return
@@ -303,7 +277,6 @@ public class OSHGlobalControllerJMetal
         // debug print
         this.getGlobalLogger().logDebug("=== scheduling... ===");
 
-        long ignoreLoadProfileAfter = now;
         long maxHorizon = now;
 
         for (InterdependentProblemPart<?, ?> problem : problemParts) {
@@ -318,7 +291,6 @@ public class OSHGlobalControllerJMetal
             problem.setId(counter);
             counter++;
         }
-        ignoreLoadProfileAfter = Math.max(ignoreLoadProfileAfter, maxHorizon);
 
         boolean hasGUI = this.getControllerBoxStatus().hasGUI();
         boolean isReal = !this.getControllerBoxStatus().isSimulation();
@@ -331,98 +303,34 @@ public class OSHGlobalControllerJMetal
                     tempPowerLimitSignals,
                     now);
 
-            resultWithAll = solver.getSolution(
-                    problemParts,
-                    this.ocESC,
-                    now,
-                    costFunction,
-                    this.algorithmExecutor);
-            solution = resultWithAll.getSolution();
-
             SolutionDistributor distributor = new SolutionDistributor();
             distributor.gatherVariableInformation(problemParts);
-
-            EMProblemEvaluator problem = new EMProblemEvaluator(
-                    problemParts,
-                    this.ocESC,
-                    distributor,
-                    now,
-                    ignoreLoadProfileAfter,
-                    costFunction,
-                    this.algorithmExecutor.getEaLogger(),
-                    this.stepSize,
-                    this.eaConfiguration.getEaObjectives());
 
             boolean extensiveLogging =
                     (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
 
-            int maxLength = (int) Math.ceil((ignoreLoadProfileAfter - now) / this.stepSize) + 2;
-            ErsatzACLoadProfile ersatzProfile = new ErsatzACLoadProfile(maxLength);
-
-            problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ersatzProfile);
-
-            distributor.distributeSolution(solution, problemParts);
-
+            EAScheduleResult result = this.energySolver.getSolution(
+                    problemParts,
+                    this.optimizationESC,
+                    now,
+                    costFunction,
+                    new OSHRandom(this.optimizationMainRandomGenerator.getNextLong()),
+                    this.algorithmExecutor,
+                    extensiveLogging);
 
             if (extensiveLogging) {
-
-                TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
-                TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
-                TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
-                List<Schedule> schedules = new ArrayList<>();
-
-                for (InterdependentProblemPart<?, ?> part : problemParts) {
-                    schedules.add(part.getFinalInterdependentSchedule());
-
-                    //extract prediction about tank temperatures of the hot-water tank
-                    if (part.getUUID().equals(this.hotWaterTankID)) {
-                        @SuppressWarnings("unchecked")
-                        EAPredictionCommandExchange<TemperaturePrediction> prediction = (EAPredictionCommandExchange<TemperaturePrediction>) part.transformToFinalInterdependentPrediction(
-                                this.getUUID(),
-                                part.getUUID(),
-                                this.getTimeDriver().getCurrentTime());
-
-                        predictedTankTemp = prediction.getPrediction().getTemperatureStates();
-                    }
-
-                    //extract information about hot-water demand and supply
-                    if (part.getAllOutputCommodities().contains(Commodity.DOMESTICHOTWATERPOWER)
-                            || part.getAllOutputCommodities().contains(Commodity.HEATINGHOTWATERPOWER)) {
-                        SparseLoadProfile loadProfile = part.getLoadProfile();
-
-                        for (long t = now; t < maxHorizon + this.stepSize; t += this.stepSize) {
-                            int domLoad = loadProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, t);
-                            int heatLoad = loadProfile.getLoadAt(Commodity.HEATINGHOTWATERPOWER, t);
-
-                            predictedHotWaterDemand.putIfAbsent(t, 0.0);
-                            predictedHotWaterSupply.putIfAbsent(t, 0.0);
-
-                            if (domLoad > 0) {
-                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
-                            } else if (domLoad < 0) {
-                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
-                            }
-
-                            if (heatLoad > 0) {
-                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
-                            } else if (heatLoad < 0) {
-                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
-                            }
-                        }
-                    }
-                }
-
                 this.getOCRegistry().publish(
                         GUIHotWaterPredictionStateExchange.class,
                         this,
                         new GUIHotWaterPredictionStateExchange(this.getUUID(),
-                                this.getTimeDriver().getCurrentTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
+                                this.getTimeDriver().getCurrentTime(), result.getPredictedHotWaterTankTemperature(),
+                                result.getPredictedHotWaterDemand(), result.getPredictedHotWaterSupply()));
 
                 this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
                         new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
-                                AncillaryCommodityLoadProfile.convertFromErsatzProfile(ersatzProfile)));
+                                result.getAncillaryMeter()));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)
@@ -430,7 +338,7 @@ public class OSHGlobalControllerJMetal
                         GUIScheduleStateExchange.class,
                         this,
                         new GUIScheduleStateExchange(this.getUUID(), this.getTimeDriver()
-                                .getCurrentTime(), schedules, this.stepSize));
+                                .getCurrentTime(), result.getSchedules(), this.stepSize));
 
             }
         } catch (Exception e) {

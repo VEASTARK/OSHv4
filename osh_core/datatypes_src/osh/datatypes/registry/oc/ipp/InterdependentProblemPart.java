@@ -86,7 +86,7 @@ public abstract class InterdependentProblemPart<PhenotypeType extends ISolution,
      * Additional (non-monetary) costs produced during the optimization loops which would not be computed in the
      * normal cost-calulcation. To be added at the end of the optimization loop.
      */
-    private Enum2DoubleMap<EAObjectives> interdependentCervisia = new Enum2DoubleMap<>(EAObjectives.class);
+    private final Enum2DoubleMap<EAObjectives> interdependentCervisia = new Enum2DoubleMap<>(EAObjectives.class);
 
     private final UUID deviceID;
 

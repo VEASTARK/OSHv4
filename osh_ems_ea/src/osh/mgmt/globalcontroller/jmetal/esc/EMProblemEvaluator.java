@@ -9,7 +9,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.esc.OCEnergySimulationCore;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.utils.CostReturnType;
@@ -26,8 +26,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class EMProblemEvaluator {
 
-    private final long ignoreLoadProfileBefore;
-    private final long ignoreLoadProfileAfter;
+    private final long optimizationStartPoint;
+    private final long optimizationEndPoint;
     private long maxReferenceTime;
     private long maxOptimizationHorizon;
 
@@ -52,26 +52,26 @@ public class EMProblemEvaluator {
      * @param problemParts all problem-parts of this problem
      * @param ocESC the energy-simulation-core to be used for the optimization loop
      * @param distributor the solution distributor for this problem
-     * @param ignoreLoadProfileBefore the point in time before which all should be ignored for this optimization
-     * @param ignoreLoadProfileAfter the point in time after which all should be ignored for this optimization
+     * @param optimizationStartPoint the point in time where this optimization starts
+     * @param optimizationEndPoint the point in time after which this optimization ends
      * @param costFunction the function determining which fitness an evaluated solution has
      * @param stepSize the size of the time-steps to be used for the evaluation of solutions
      * @param eaObjectives the collection of all EA-objectvies
      */
     public EMProblemEvaluator(
             InterdependentProblemPart<?, ?>[] problemParts,
-            OCEnergySimulationCore ocESC,
+            OptimizationEnergySimulationCore ocESC,
             SolutionDistributor distributor,
-            long ignoreLoadProfileBefore,
-            long ignoreLoadProfileAfter,
+            long optimizationStartPoint,
+            long optimizationEndPoint,
             OptimizationCostFunction costFunction,
             IEALogger eaLogger,
             int stepSize,
             List<EAObjectives> eaObjectives) {
 
         this.distributor = distributor;
-        this.ignoreLoadProfileBefore = ignoreLoadProfileBefore;
-        this.ignoreLoadProfileAfter = ignoreLoadProfileAfter;
+        this.optimizationStartPoint = optimizationStartPoint;
+        this.optimizationEndPoint = optimizationEndPoint;
         this.stepSize = stepSize;
         this.costFunction = costFunction;
         this.eaLogger = eaLogger;
@@ -257,7 +257,7 @@ public class EMProblemEvaluator {
         InterdependentProblemPart<?, ?>[] allActive = dataContainer.getAllActivePPs();
         InterdependentProblemPart<?, ?>[] allPassive = dataContainer.getAllPassivePPs();
         InterdependentProblemPart<?, ?>[] allActiveNeedsInput = dataContainer.getAllActiveNeedsInputPPs();
-        OCEnergySimulationCore ocESC = dataContainer.getOcESC();
+        OptimizationEnergySimulationCore ocESC = dataContainer.getOcESC();
         UUIDCommodityMap activeToPassiveMap = dataContainer.getActiveToPassiveMap();
         UUIDCommodityMap passiveToActiveMap = dataContainer.getPassiveToActiveMap();
         ErsatzACLoadProfile ancillaryLoadProfile = loadProfile == null ? dataContainer.getAncillaryLoadProfile() :
@@ -325,8 +325,8 @@ public class EMProblemEvaluator {
 
 
         Enum2DoubleMap<CostReturnType> costs = this.costFunction.calculateCosts(
-                this.ignoreLoadProfileBefore,
-                this.ignoreLoadProfileAfter,
+                this.optimizationStartPoint,
+                this.optimizationEndPoint,
                 ancillaryLoadProfile);
 
         Enum2DoubleMap<EAObjectives> cervisia = new Enum2DoubleMap<>(EAObjectives.class);
