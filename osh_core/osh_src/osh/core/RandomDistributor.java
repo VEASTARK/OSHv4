@@ -52,24 +52,6 @@ public class RandomDistributor extends OSHComponent {
      * @return a unique random generator based on the unique identifier and the class of the caller
      */
     public OSHRandom getRandomGenerator(UUID identifier, Class<?> className) {
-        return this.getRandomGenerator(identifier, className, false);
-    }
-
-
-    /**
-     * Returns a unique random generator based on the unique identifier and the class of the caller.
-     *
-     * Will ensure that every random generator is unique at any time t by iterating over a master random generator exactly n times, where
-     * n is either seconds passed since the last request of the same caller for a random generator or the seconds passed since creation
-     * of this class.
-     *
-     * @param identifier the unique identifier
-     * @param className the class of the caller
-     * @param getBaseRandom flag if a new random generator should be created in legacy mode
-     *
-     * @return a unique random generator based on the unique identifier and the class of the caller
-     */
-    public OSHRandom getRandomGenerator(UUID identifier, Class<?> className, boolean getBaseRandom) {
 
         RandomWrapper random;
         ZonedDateTime currentTime = this.getTimeDriver().getCurrentTime();
