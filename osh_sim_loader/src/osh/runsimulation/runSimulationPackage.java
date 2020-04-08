@@ -32,7 +32,7 @@ public class runSimulationPackage {
      *  1  : some server
      *  2  : some other server
      */
-    static protected final int[] databasesToLog = {};
+    static protected final String[] databasesToLog = {};
 
     static protected String configFilesDir;
     static protected String logDirName;

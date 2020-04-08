@@ -510,7 +510,7 @@ public class OSHLifeCycleManager {
     }
 
     public void initDatabaseLogging(boolean isDatabaseLogging, String tableName,
-                                    ZonedDateTime forcedStartTime, int[] databasesToLog) throws LifeCycleManagerException {
+                                    ZonedDateTime forcedStartTime, String[] databasesToLog) throws LifeCycleManagerException {
         if (isDatabaseLogging) {
             DatabaseLoggerThread.initLogger(tableName,
                     this.theOrganicSmartHome.getOSHStatus().getLogDir(),

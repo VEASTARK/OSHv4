@@ -43,7 +43,7 @@ public final class DatabaseLoggerThread extends Thread {
     private static String smartHeaterTableName;
     private static String runName;
     private static ZonedDateTime startTime;
-    private static int[] preferredConnection;
+    private static String[] preferredConnection;
     private static Connection[] conn;
     private static boolean running = true;
     private static boolean isLogToDatabase;
@@ -60,7 +60,7 @@ public final class DatabaseLoggerThread extends Thread {
     }
 
     public static void initLogger(String tableName, String runName, ZonedDateTime startTime,
-                                  int[] preferredConnection) {
+                                  String[] preferredConnection) {
         DatabaseLoggerThread.tableName = tableName;
         DatabaseLoggerThread.runName = runName;
         DatabaseLoggerThread.startTime = startTime;
