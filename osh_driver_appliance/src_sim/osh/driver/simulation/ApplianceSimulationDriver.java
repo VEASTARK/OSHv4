@@ -56,7 +56,7 @@ public abstract class ApplianceSimulationDriver
     /**
      * Shares of configurations for screenplay generation
      */
-    private Double[] configurationShares;
+    private double[] configurationShares;
 
 
     // TEMPORAL DEGREE OF FREEDOM
@@ -169,7 +169,7 @@ public abstract class ApplianceSimulationDriver
             // shares of different program configurations
             String configurationsharesString = driverConfig.getParameter(ParameterConstants.Appliances.configurationShares);
             if (configurationsharesString != null) {
-                this.configurationShares = StringConversions.fromStringToDoubleArray(configurationsharesString);
+                this.configurationShares = StringConversions.fromStringToPrimitiveDoubleArray(configurationsharesString);
             } else {
                 throw new RuntimeException("Parameter missing: configurationshares");
             }
@@ -294,7 +294,7 @@ public abstract class ApplianceSimulationDriver
     }
 
     // used by FutureAppliance
-    protected Double[] getConfigurationShares() {
+    protected double[] getConfigurationShares() {
         return this.configurationShares;
     }
 

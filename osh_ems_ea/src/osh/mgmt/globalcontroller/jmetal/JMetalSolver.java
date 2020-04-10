@@ -3,15 +3,13 @@ package osh.mgmt.globalcontroller.jmetal;
 import org.uma.jmetal.solution.Solution;
 import osh.core.OSHRandom;
 import osh.core.logging.IGlobalLogger;
-import osh.datatypes.commodity.AncillaryCommodity;
-import osh.datatypes.limit.PowerLimitSignal;
-import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
+import osh.mgmt.globalcontroller.jmetal.builder.AlgorithmExecutor;
+import osh.utils.costs.OptimizationCostFunction;
 
+import java.io.FileNotFoundException;
 import java.util.Comparator;
-import java.util.EnumMap;
 
 /**
  * @author Till Schuberth, Ingo Mauser
@@ -50,28 +48,23 @@ public class JMetalSolver extends Optimizer {
     public SolutionWithFitness getSolution(
             InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
-            EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
-            EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction, IEALogger eaLogger) throws Exception {
+            OptimizationCostFunction costFunction, AlgorithmExecutor algorithmExecutor) throws FileNotFoundException {
 
         return this.getSolutionAndFitness(
                 problemParts,
                 ocESC,
-                priceSignals,
-                powerLimitSignals,
                 ignoreLoadProfileBefore,
-                fitnessFunction,
-                eaLogger);
+                costFunction,
+                algorithmExecutor);
     }
 
-    public SolutionWithFitness getSolutionAndFitness (
+    public SolutionWithFitness getSolutionAndFitness(
             InterdependentProblemPart<?, ?>[] problemParts,
             OCEnergySimulationCore ocESC,
-            EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
-            EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals,
             long ignoreLoadProfileBefore,
-            IFitness fitnessFunction, IEALogger eaLogger) throws Exception {
+            OptimizationCostFunction costFunction,
+            AlgorithmExecutor algorithmExecutor) throws FileNotFoundException {
         throw new UnsupportedOperationException("not implemented here");
     }
 

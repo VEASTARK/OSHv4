@@ -1,5 +1,6 @@
 package osh.mgmt.localcontroller.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 import osh.datatypes.commodity.Commodity;
@@ -371,7 +372,7 @@ public class FutureApplianceIPP
         if (selectedTDOF.length > 0 && availableTDoF > 0) {
             if (selectedTDOF[0] > 0) {
                 //starting later is better
-                this.addInterdependentCervisia(-((double) selectedTDOF[0] / availableTDoF) * cervisiaDofUsedFactor);
+                this.addInterdependentCervisia(EAObjectives.MONEY, -((double) selectedTDOF[0] / availableTDoF) * cervisiaDofUsedFactor);
             }
         }
 

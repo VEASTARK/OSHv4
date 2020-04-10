@@ -12,6 +12,7 @@ import osh.simulation.database.DatabaseLoggerThread;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -41,7 +42,7 @@ public class runSimulationPackage {
     static protected final int day = 1; // 1 = 1.
     static protected final int month = 1; // 7 = July
     static protected final int year = 1970;
-    static protected final int simulationDuration = 31 * 86400; //simulate 31 days
+    static protected final Duration simulationDuration = Duration.ofDays(31);
     //	static private String configID = "oshsimconfig";
     static protected final String[] configIDs = {
             "example",
@@ -190,12 +191,12 @@ public class runSimulationPackage {
 
                 try {
                     lifeCycleManager.loadScreenplay(currentScreenplayFileName);
-                    simResults = lifeCycleManager.startSimulation(simulationDuration);
+                    simResults = lifeCycleManager.startSimulation(simulationDuration.toSeconds());
 
                     simFinishTime = System.currentTimeMillis();
                     if (logToDatabase) {
                         DatabaseLoggerThread.enqueue(new SimulationResultsLogObject(null, null,
-                                simResults, 0, simulationDuration - 1, (simFinishTime - simStartTime) / 1000));
+                                simResults, 0, simulationDuration.toSeconds() - 1, (simFinishTime - simStartTime) / 1000));
                     }
                     lifeCycleManager.switchToLifeCycleState(LifeCycleStates.ON_SYSTEM_SHUTDOWN);
                 } catch (LifeCycleManagerException | OSHException e) {

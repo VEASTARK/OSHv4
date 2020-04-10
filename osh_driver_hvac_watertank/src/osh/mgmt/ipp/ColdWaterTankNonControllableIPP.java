@@ -1,5 +1,6 @@
 package osh.mgmt.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -160,7 +161,7 @@ public class ColdWaterTankNonControllableIPP
                         this.actualWaterTank.getCurrentWaterTemperature())
                         * this.punishmentFactorPerWsPowerLost;
 
-        this.addInterdependentCervisia(cervisia);
+        this.addInterdependentCervisia(EAObjectives.MONEY, cervisia);
     }
 
     @Override

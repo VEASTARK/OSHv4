@@ -2,7 +2,10 @@ package osh.mgmt.globalcontroller.jmetal.logging;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.solution.Solution;
+import osh.configuration.oc.AlgorithmType;
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
+import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -24,8 +27,9 @@ public interface IEALogger {
      * Logs the end of a new algorithm execution.
      *
      * @param bestSolution the result of the algorithm
+     * @param bestAlgorithm the algorithm that produced the result
      */
-    void logEnd(Solution<?> bestSolution);
+    void logEnd(Solution<?> bestSolution, AlgorithmType bestAlgorithm);
 
     /**
      * Logs the state of the algorithm population during the execution.
@@ -70,5 +74,5 @@ public interface IEALogger {
      * @param type the type of the device that generated cervisia
      * @param cervisia the generated cervisia
      */
-    void logCervisia(DeviceTypes type, double cervisia);
+    void logCervisia(DeviceTypes type, Enum2DoubleMap<EAObjectives> cervisia);
 }

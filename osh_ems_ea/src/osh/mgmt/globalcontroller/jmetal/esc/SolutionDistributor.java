@@ -3,13 +3,13 @@ package osh.mgmt.globalcontroller.jmetal.esc;
 import org.uma.jmetal.solution.BinarySolution;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
+import osh.configuration.oc.VariableEncoding;
 import osh.datatypes.ea.interfaces.IPrediction;
 import osh.datatypes.ea.interfaces.ISolution;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.AbstractEncodedVariableInformation;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.BinaryEncodedVariableInformation;
 import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.RealEncodedVariableInformation;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
 
 import java.util.BitSet;
 

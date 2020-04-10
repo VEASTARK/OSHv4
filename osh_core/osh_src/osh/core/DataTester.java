@@ -20,6 +20,7 @@ import osh.registry.Registry.OCRegistry;
 import osh.registry.TimeRegistry;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
+import osh.utils.CostConfigurationContainer;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -115,7 +116,8 @@ public final class DataTester {
         public void sendState() {
             EpsStateExchange pls = new EpsStateExchange(this.uuid, EPOCH);
             ((OSH) this.getOSH()).getDriverRegistry().publish(EpsStateExchange.class, this, pls);
-            EpsPlsStateExchange epsPls = new EpsPlsStateExchange(this.uuid, EPOCH, null, null, 0, 0, 0, 0, 0, false);
+            EpsPlsStateExchange epsPls = new EpsPlsStateExchange(this.uuid, EPOCH, null, null,
+                    new CostConfigurationContainer(0, 0, 0), 0, 0, false);
             ((OSH) this.getOSH()).getDriverRegistry().publish(EpsPlsStateExchange.class, this, epsPls);
         }
 

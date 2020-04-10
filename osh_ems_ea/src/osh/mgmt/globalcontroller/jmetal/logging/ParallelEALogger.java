@@ -1,0 +1,117 @@
+package osh.mgmt.globalcontroller.jmetal.logging;
+
+import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.solution.Solution;
+import osh.configuration.oc.EAObjectives;
+import osh.core.logging.IGlobalLogger;
+import osh.mgmt.globalcontroller.jmetal.builder.ParallelAlgorithmRunner;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Represents a simple logger implementing the EA logger interface {@link IEALogger} designed for multithreaded usage.
+ *
+ * @author Sebastian Kramer
+ */
+public class ParallelEALogger extends EALogger {
+
+    private final Map<Integer, double[]> bestFirstFitness = new HashMap<>();
+    private final Map<Integer, List<String>> logMessages = new ConcurrentHashMap<>();
+
+    private final Lock writeLock = new ReentrantLock();
+    private boolean queueMessages;
+
+    /**
+     * Constructs this ea-logger with the given global logger and the configuration parameters.
+     *
+     * @param globalLogger the global logger
+     * @param log flag if anything should be logged
+     * @param logExtended flag if extended population values should be logged
+     * @param logXthGeneration counter after how many generations there should be a log of population values
+     * @param logExtendedGenerations counter after how many generations there should be an exteneded log of population
+     *                               values
+     * @param logOverallEA flag if the number of optimization runs should be logges
+     * @param eaObjectives collection of the objectives of the optimization
+     */
+    public ParallelEALogger(IGlobalLogger globalLogger, boolean log, boolean logExtended, int logXthGeneration,
+                            int logExtendedGenerations, boolean logOverallEA, Collection<EAObjectives> eaObjectives) {
+        super(globalLogger, log, logExtended, logXthGeneration, logExtendedGenerations, logOverallEA, eaObjectives);
+    }
+
+    /**
+     * Returns a unique identifier of the current thread.
+     *
+     * @return a unique identifier of the current thread
+     */
+    private int getId() {
+        return ParallelAlgorithmRunner.getAlgorithmId();
+    }
+
+    @Override
+    double[] getBestFirstFitness() {
+        return this.bestFirstFitness.get(this.getId());
+    }
+
+    @Override
+    public void logStart(Algorithm<?> usedAlgorithm) {
+        //nothing, in parallel usage the logStartParallel method should be called
+    }
+
+    /**
+     * Similar to {@link IEALogger#logStart(Algorithm)} this logs the start of an algorithm but is designed to be
+     * called from a multithreaded context.
+     *
+     * @param usedAlgorithm the started algorithm
+     */
+    public void logStartParallel(Algorithm<?> usedAlgorithm) {
+        if (this.log) {
+            this.writeLock.lock();
+            try {
+                this.queueMessages = true;
+                int id = this.getId();
+                this.logMessages.put(id, new ArrayList<>());
+                this.bestFirstFitness.put(id, new double[this.objectiveCount]);
+
+                this.log("===    New Optimization, using " + usedAlgorithm.getDescription() + "    ===");
+                Arrays.fill(this.getBestFirstFitness(), Double.NaN);
+            } finally {
+                this.writeLock.unlock();
+            }
+        }
+    }
+
+    /**
+     * Flushes the saved log messages.
+     */
+    public void flush() {
+        this.queueMessages = false;
+        for (List<String> strings : this.logMessages.values()) {
+            strings.forEach(s -> super.log(s, false));
+        }
+        this.logMessages.clear();
+        this.bestFirstFitness.clear();
+
+    }
+
+    @Override
+    void log(String message, boolean prependTime) {
+        if (this.queueMessages) {
+            this.logMessages.get(this.getId()).add(message);
+        } else {
+            super.log(message, prependTime);
+        }
+    }
+
+    @Override
+    String logExtendedPopulation(List<? extends Solution<?>> population, int generation) {
+        this.writeLock.lock();
+        try {
+            return super.logExtendedPopulation(population, generation);
+        } finally {
+            this.writeLock.unlock();
+        }
+    }
+}
