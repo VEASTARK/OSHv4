@@ -24,9 +24,9 @@ import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.Registry.OCRegistry;
 import osh.registry.TimeRegistry;
-import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationEngineException;
 import osh.utils.xml.XMLSerialization;
 
@@ -510,7 +510,7 @@ public class OSHLifeCycleManager {
     }
 
     public void initDatabaseLogging(boolean isDatabaseLogging, String tableName,
-                                    ZonedDateTime forcedStartTime, int[] databasesToLog) throws LifeCycleManagerException {
+                                    ZonedDateTime forcedStartTime, String[] databasesToLog) throws LifeCycleManagerException {
         if (isDatabaseLogging) {
             DatabaseLoggerThread.initLogger(tableName,
                     this.theOrganicSmartHome.getOSHStatus().getLogDir(),

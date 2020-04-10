@@ -6,8 +6,9 @@ import osh.core.exceptions.LifeCycleManagerException;
 import osh.core.exceptions.OSHException;
 import osh.core.logging.OSHLoggerCore;
 import osh.datatypes.logger.SystemLoggerConfiguration;
-import osh.simulation.DatabaseLoggerThread;
+import osh.datatypes.logging.general.SimulationResultsLogObject;
 import osh.simulation.OSHSimulationResults;
+import osh.simulation.database.DatabaseLoggerThread;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,7 +33,7 @@ public class runSimulationPackage {
      *  1  : some server
      *  2  : some other server
      */
-    static protected final int[] databasesToLog = {};
+    static protected final String[] databasesToLog = {};
 
     static protected String configFilesDir;
     static protected String logDirName;
@@ -193,7 +194,8 @@ public class runSimulationPackage {
 
                     simFinishTime = System.currentTimeMillis();
                     if (logToDatabase) {
-                        DatabaseLoggerThread.enqueueSimResults(simResults, 0, simulationDuration - 1, (simFinishTime - simStartTime) / 1000);
+                        DatabaseLoggerThread.enqueue(new SimulationResultsLogObject(null, null,
+                                simResults, 0, simulationDuration - 1, (simFinishTime - simStartTime) / 1000));
                     }
                     lifeCycleManager.switchToLifeCycleState(LifeCycleStates.ON_SYSTEM_SHUTDOWN);
                 } catch (LifeCycleManagerException | OSHException e) {

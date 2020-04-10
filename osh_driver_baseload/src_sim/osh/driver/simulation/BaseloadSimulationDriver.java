@@ -4,12 +4,13 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.devices.BaseloadLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.BaseloadObserverExchange;
 import osh.hal.exchange.BaseloadPredictionExchange;
-import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
 import osh.utils.physics.PhysicalConstants;
@@ -203,8 +204,9 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueueBaseload(this.sumActivePower / PhysicalConstants.factor_wsToKWh,
-                        this.sumReactivePower / PhysicalConstants.factor_wsToKWh);
+                DatabaseLoggerThread.enqueue(new BaseloadLogObject(this.getUUID(),
+                        this.getTimeDriver().getCurrentTime(), this.sumActivePower / PhysicalConstants.factor_wsToKWh,
+                        this.sumReactivePower / PhysicalConstants.factor_wsToKWh));
             }
         }
     }

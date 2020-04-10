@@ -7,8 +7,14 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
+import osh.datatypes.logging.electrical.DetailedPowerLogObject;
+import osh.datatypes.logging.electrical.H0LogObject;
+import osh.datatypes.logging.general.PowerLimitSignalLogObject;
+import osh.datatypes.logging.general.PriceSignalLogObject;
+import osh.datatypes.logging.general.SimulationResultsLogObject;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.energy.IDeviceEnergySubject;
 import osh.simulation.energy.SimEnergySimulationCore;
 import osh.simulation.exception.SimulationEngineException;
@@ -50,9 +56,9 @@ public class BuildingSimulationEngine extends SimulationEngine {
     private boolean logH0;
     private boolean logIntervals;
     private boolean logDevices;
-    private boolean logHotWater;
+    private boolean logThermal;
     private boolean logWaterTank;
-    private boolean logGA;
+    private boolean logEA;
     private boolean logSmartHeater;
     private OSHSimulationResults[] intervalResults;
     //saved EPS and PLS
@@ -166,9 +172,9 @@ public class BuildingSimulationEngine extends SimulationEngine {
         }
 
         try {
-            this.logHotWater = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logHotWater));
+            this.logThermal = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logThermal));
         } catch (Exception e) {
-            this.logHotWater = false;
+            this.logThermal = false;
         }
 
         try {
@@ -190,9 +196,9 @@ public class BuildingSimulationEngine extends SimulationEngine {
         }
 
         try {
-            this.logGA = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logGA));
+            this.logEA = Boolean.parseBoolean(this.engineParameters.getParameter(ParameterConstants.Logging.logEA));
         } catch (Exception e) {
-            this.logGA = false;
+            this.logEA = false;
         }
 
         try {
@@ -341,9 +347,9 @@ public class BuildingSimulationEngine extends SimulationEngine {
         }
 
         DatabaseLoggerThread.setLogDevices(this.logDevices);
-        DatabaseLoggerThread.setLogHotWater(this.logHotWater);
+        DatabaseLoggerThread.setLogThermal(this.logThermal);
         DatabaseLoggerThread.setLogWaterTank(this.logWaterTank);
-        DatabaseLoggerThread.setLogGA(this.logGA);
+        DatabaseLoggerThread.setLogEA(this.logEA);
         DatabaseLoggerThread.setLogSmartHeater(this.logSmartHeater);
     }
 
@@ -501,7 +507,8 @@ public class BuildingSimulationEngine extends SimulationEngine {
                             OSHSimulationResults toLog = this.intervalResults[i];
                             this.intervalResults[i] = newBase;
                             toLog.generateDiffToOtherResult((OSHSimulationResults) this.oshSimulationResults);
-                            DatabaseLoggerThread.enqueueSimResults(toLog, this.relativeIntervalStart[i], currentTick);
+                            DatabaseLoggerThread.enqueue(new SimulationResultsLogObject(this.entityUUID, now,
+                                    toLog, this.relativeIntervalStart[i], currentTick, 0L));
 
                             this.relativeIntervalStart[i] = currentTick + 1;
                             if (interval[0] > 0) {
@@ -538,7 +545,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
                             this.priceSignals.put(en.getKey(), nowAndFuture);
                         }
                     }
-                    DatabaseLoggerThread.enqueueEps(toLogEps);
+                    DatabaseLoggerThread.enqueue(new PriceSignalLogObject(this.entityUUID, now, toLogEps));
 
                     //handle pls
                     Map<AncillaryCommodity, PowerLimitSignal> toLogPls = new EnumMap<>(AncillaryCommodity.class);
@@ -556,7 +563,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
                             this.powerLimits.put(en.getKey(), nowAndFuture);
                         }
                     }
-                    DatabaseLoggerThread.enqueuePls(toLogPls);
+                    DatabaseLoggerThread.enqueue(new PowerLimitSignalLogObject(this.entityUUID, now, toLogPls));
                 }
             }
 
@@ -573,7 +580,7 @@ public class BuildingSimulationEngine extends SimulationEngine {
                     this.loadProfile = tmpLoadProfile.cloneAfter(currentTick);
 
                     tmpLoadProfile = tmpLoadProfile.getProfileWithoutDuplicateValues();
-                    DatabaseLoggerThread.enqueueDetailedPower(tmpLoadProfile);
+                    DatabaseLoggerThread.enqueue(new DetailedPowerLogObject(this.entityUUID, now, tmpLoadProfile));
                 }
             }
 
@@ -650,8 +657,10 @@ public class BuildingSimulationEngine extends SimulationEngine {
     public void shutdown() {
         if (this.databaseLogging) {
             if (this.logIntervals) {
-                DatabaseLoggerThread.enqueueEps(this.priceSignals);
-                DatabaseLoggerThread.enqueuePls(this.powerLimits);
+                DatabaseLoggerThread.enqueue(new PriceSignalLogObject(this.entityUUID, this.timeDriver.getCurrentTime(),
+                        this.priceSignals));
+                DatabaseLoggerThread.enqueue(new PowerLimitSignalLogObject(this.entityUUID, this.timeDriver.getCurrentTime(),
+                        this.powerLimits));
             }
             if (this.logH0) {
                 double[][][] avgWeekDays = new double[7][1440][2];
@@ -671,8 +680,8 @@ public class BuildingSimulationEngine extends SimulationEngine {
                         avgDays[i][j] = this.aggrH0ResultsDays[i][j] / factor;
                     }
                 }
-
-                DatabaseLoggerThread.enqueueH0(avgWeekDays, avgDays);
+                DatabaseLoggerThread.enqueue(new H0LogObject(this.entityUUID, this.timeDriver.getCurrentTime(),
+                        avgWeekDays, avgDays));
             }
         }
     }

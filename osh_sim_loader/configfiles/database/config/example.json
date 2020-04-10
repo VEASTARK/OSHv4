@@ -1,0 +1,8 @@
+{
+  "identifier": "EXAMPLE",
+  "serverName": "db_server_name",
+  "serverPort": "db_server_port",
+  "serverScheme": "db_scheme",
+  "databaseUser": "db_user",
+  "databasePW": "db_password"
+}

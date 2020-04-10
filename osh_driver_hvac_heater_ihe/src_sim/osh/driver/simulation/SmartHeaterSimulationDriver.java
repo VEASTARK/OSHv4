@@ -5,13 +5,14 @@ import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.devices.SmartHeaterLogObject;
 import osh.driver.ihe.SmartHeaterModel;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.esc.LimitedCommodityStateMap;
 import osh.hal.exchange.SmartHeaterOX;
-import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.string.ParameterConstants;
@@ -88,7 +89,8 @@ public class SmartHeaterSimulationDriver extends DeviceSimulationDriver {
     @Override
     public void onSystemShutdown() {
         if (DatabaseLoggerThread.isLogSmartHeater()) {
-            DatabaseLoggerThread.enqueueSmartHeater(this.model.getCounter(), this.model.getRuntime(), this.model.getPowerTierRunTimes());
+            DatabaseLoggerThread.enqueue(new SmartHeaterLogObject(this.getUUID(),
+                    this.getTimeDriver().getCurrentTime(), this.model.getCounter(), this.model.getRuntime(), this.model.getPowerTierRunTimes()));
         }
     }
 

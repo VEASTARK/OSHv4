@@ -8,12 +8,14 @@ import org.uma.jmetal.util.binarySet.BinarySet;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
-import osh.simulation.DatabaseLoggerThread;
+import osh.datatypes.logging.general.EALogObject;
+import osh.simulation.database.DatabaseLoggerThread;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a simple logger implementing the EA logger interface {@link IEALogger}.
@@ -186,7 +188,7 @@ public class EALogger implements IEALogger {
 
     @Override
     public void shutdown() {
-        if (this.log && DatabaseLoggerThread.isIsLogToDatabase()) {
+        if (this.log && DatabaseLoggerThread.isLogToDatabase()) {
             this.generationsUsed /= this.optimizationCounter;
 
             this.fitnessChange = Arrays.stream(this.fitnessChange).map(d -> d / this.optimizationCounter).toArray();
@@ -200,8 +202,10 @@ public class EALogger implements IEALogger {
                     cervisiaResults[i] = this.cervisiaInformation[i][0] / this.cervisiaInformation[i][1];
                 }
             }
-
-            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange, this.fitnessSpread, this.homogeneity, this.optimizationCounter, cervisiaResults);
+            DatabaseLoggerThread.enqueue(new EALogObject(UUID.randomUUID(), null, this.generationsUsed,
+                    new double[][]{this.fitnessChange}, new double[][]{this.fitnessSpread}, this.homogeneity,
+                    this.optimizationCounter,
+                    cervisiaResults));
         }
     }
 

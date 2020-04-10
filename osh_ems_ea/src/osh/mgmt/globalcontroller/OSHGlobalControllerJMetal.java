@@ -43,7 +43,7 @@ import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
-import osh.simulation.DatabaseLoggerThread;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.utils.string.ParameterConstants;
 
 import java.time.ZonedDateTime;
@@ -281,7 +281,7 @@ public class OSHGlobalControllerJMetal
 
         //retrieve information of ga should log to database
         if (this.logGa == null) {
-            this.logGa = DatabaseLoggerThread.isLogGA();
+            this.logGa = DatabaseLoggerThread.isLogEA();
         }
 
         EnumMap<AncillaryCommodity, PriceSignal> tempPriceSignals = new EnumMap<>(AncillaryCommodity.class);

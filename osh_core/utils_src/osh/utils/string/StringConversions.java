@@ -28,6 +28,10 @@ public class StringConversions {
         return Arrays.stream(trimmed.split(",")).map(Double::parseDouble).toArray(Double[]::new);
     }
 
+    public static String from2DimDoubleArrayToString(double[][] arr) {
+        return Arrays.toString(Arrays.stream(arr).map(Arrays::toString).toArray(String[]::new));
+    }
+
     public static Long[][] fromStringTo2DimLongArray(String s) {
         String trimmed = WHITE_SPACES.matcher(s).replaceAll("");
 

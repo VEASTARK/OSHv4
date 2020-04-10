@@ -8,6 +8,7 @@ import osh.core.interfaces.IOSH;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurationStatus;
 import osh.datatypes.appliance.future.ApplianceProgramConfigurations;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.devices.DevicesLogObject;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exceptions.HALException;
@@ -16,7 +17,7 @@ import osh.en50523.EN50523DeviceState;
 import osh.en50523.EN50523DeviceStateRemoteControl;
 import osh.hal.exchange.FutureApplianceControllerExchange;
 import osh.hal.exchange.FutureApplianceObserverExchange;
-import osh.simulation.DatabaseLoggerThread;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.screenplay.*;
 import osh.util.ApplianceConfigurationProviderSingleton;
 import osh.utils.physics.PhysicalConstants;
@@ -429,9 +430,10 @@ public class GenericFutureApplianceSimulationDriver
             // output the number of runs of this device
 
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueueDevices(this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns,
+                DatabaseLoggerThread.enqueue(new DevicesLogObject(this.getUUID(),
+                        this.getTimeDriver().getCurrentTime(), this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns,
                         this.activePowerConsumption / PhysicalConstants.factor_wsToKWh, this.profileNumberOfRuns,
-                        this.dofs, this.startTimes, this.profilesSelected, this.getDeviceType());
+                        this.dofs, this.startTimes, this.profilesSelected, this.getDeviceType()));
             }
 
             try {
