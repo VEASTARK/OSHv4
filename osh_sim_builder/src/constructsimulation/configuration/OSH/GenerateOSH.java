@@ -93,9 +93,9 @@ public class GenerateOSH {
         params.put(ParameterConstants.Logging.logIntervals, String.valueOf(logIntervals));
         params.put(ParameterConstants.Logging.logDevices, String.valueOf(logDevices));
         params.put(ParameterConstants.Logging.logBaseload, String.valueOf(logBaseload));
-        params.put(ParameterConstants.Logging.logHotWater, String.valueOf(logHotWater));
+        params.put(ParameterConstants.Logging.logThermal, String.valueOf(logHotWater));
         params.put(ParameterConstants.Logging.logWaterTank, String.valueOf(logWaterTank));
-        params.put(ParameterConstants.Logging.logGA, String.valueOf(logGA));
+        params.put(ParameterConstants.Logging.logEA, String.valueOf(logGA));
         params.put(ParameterConstants.Logging.logSmartHeater, String.valueOf(logSmartHeater));
         params.put(ParameterConstants.Logging.loggingIntervals, Arrays.toString(
                 Arrays.stream(loggingIntervals).map(Arrays::toString).toArray(String[]::new)));

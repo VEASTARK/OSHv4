@@ -24,9 +24,9 @@ import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.Registry.OCRegistry;
 import osh.registry.TimeRegistry;
-import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationEngineException;
 import osh.utils.xml.XMLSerialization;
 

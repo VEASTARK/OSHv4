@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +51,7 @@ public class DatabaseLogMethods {
     protected static Connection[] conn;
     protected static String[] preferredConnection;
     protected static String runName;
-    protected static long startTime;
+    protected static ZonedDateTime startTime;
 
     /**
      * Trys to setup the sql-connection, first trying the given preferred connection.
@@ -89,7 +90,7 @@ public class DatabaseLogMethods {
                 + ", UNHEX(REPLACE('" + logObj.getSender().toString() + "','-',''))"
                 + ", '" + logObj.getSender().toString() + "'"
                 + (logObj.getSimRuntime() != null ? ", " + logObj.getSimRuntime() : "")
-                + ", " + startTime
+                + ", " + startTime.toEpochSecond()
                 + ", " + logObj.getRelativeStart()
                 + ", " + logObj.getRelativeEnd() + ", ";
         sql += Arrays.stream(results.getContentsAsDoubleArray()).map(Object::toString).collect(Collectors.joining

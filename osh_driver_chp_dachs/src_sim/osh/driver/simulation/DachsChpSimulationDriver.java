@@ -4,6 +4,7 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.thermal.ThermalSupplyLogObject;
 import osh.driver.chp.ChpOperationMode;
 import osh.driver.chp.model.GenericChpModel;
 import osh.eal.hal.exceptions.HALException;
@@ -12,7 +13,7 @@ import osh.esc.LimitedCommodityStateMap;
 import osh.hal.exchange.ChpControllerExchange;
 import osh.hal.exchange.ChpObserverExchange;
 import osh.hal.exchange.ChpStaticDetailsObserverExchange;
-import osh.simulation.DatabaseLoggerThread;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.ComplexPowerUtil;
@@ -292,7 +293,8 @@ public class DachsChpSimulationDriver
     public void onSystemShutdown() {
         if (this.log) {
             this.supply /= PhysicalConstants.factor_wsToKWh;
-            DatabaseLoggerThread.enqueueChp(this.supply, this.starts);
+            DatabaseLoggerThread.enqueue(new ThermalSupplyLogObject(this.getUUID(), this.getTimeDriver().getCurrentTime(),
+                    Commodity.HEATINGHOTWATERPOWER, this.supply, this.starts));
         }
     }
 

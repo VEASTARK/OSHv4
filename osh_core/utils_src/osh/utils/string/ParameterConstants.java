@@ -245,9 +245,11 @@ public final class ParameterConstants {
         public static final String logIntervals = "logIntervalls";
         public static final String logDevices = "logDevices";
         public static final String logBaseload = "logBaseload";
-        public static final String logHotWater = "logHotWater";
+        //TODO: change string to logThermal in next backwards-compatibility breaking update
+        public static final String logThermal = "logHotWater";
         public static final String logWaterTank = "logWaterTank";
-        public static final String logGA = "logGA";
+        //TODO: change string to logEA in next backwards-compatibility breaking update
+        public static final String logEA = "logGA";
         public static final String logSmartHeater = "logSmartHeater";
         public static final String loggingIntervals = "loggingIntervalls";
     }

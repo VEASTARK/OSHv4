@@ -5,14 +5,15 @@ import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.thermal.ThermalLoggingObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.VDI6002DomesticHotWaterStatistics;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.time.TimeSubscribeEnum;
 import osh.hal.exchange.HotWaterDemandObserverExchange;
 import osh.hal.exchange.prediction.VDI6002WaterDemandPredictionExchange;
-import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.DeviceSimulationDriver;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.csv.CSVImporter;
@@ -148,7 +149,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         super.onSimulationIsUp();
         ZonedDateTime startTime = this.getTimeDriver().getTimeAtStart();
 
-        this.log = DatabaseLoggerThread.isLogHotWater();
+        this.log = DatabaseLoggerThread.isLogThermal();
 
         if (this.log) {
             this.avgWeekDayLoad = new double[7][1440];
@@ -232,8 +233,8 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
                 double factor = (this.avgDayLoadCounter[d0] / 86400.0) * PhysicalConstants.factor_wsToKWh;
                 this.avgDayLoad[d0] /= factor;
             }
-
-            DatabaseLoggerThread.enqueueHotWater(this.avgWeekDayLoad, this.avgDayLoad, Commodity.DOMESTICHOTWATERPOWER);
+            DatabaseLoggerThread.enqueue(new ThermalLoggingObject(this.getUUID(),
+                    this.getTimeDriver().getCurrentTime(), this.avgWeekDayLoad, this.avgDayLoad, Commodity.DOMESTICHOTWATERPOWER));
         }
     }
 
