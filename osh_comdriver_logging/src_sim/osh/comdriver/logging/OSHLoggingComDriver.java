@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @author Sebastian Kramer
  */
-public class OSHLoggerComDriver extends CALComDriver {
+public class OSHLoggingComDriver extends CALComDriver {
 
     //logging intervals
     protected List<Long[]> loggingIntervals = new ArrayList<>();
@@ -64,7 +64,7 @@ public class OSHLoggerComDriver extends CALComDriver {
      * @param driverConfig the parameter configuration
      *
      */
-    public OSHLoggerComDriver(IOSH entity, UUID deviceID, OSHParameterCollection driverConfig) {
+    public OSHLoggingComDriver(IOSH entity, UUID deviceID, OSHParameterCollection driverConfig) {
         super(entity, deviceID, driverConfig);
 
         try {
@@ -240,7 +240,7 @@ public class OSHLoggerComDriver extends CALComDriver {
         @Override
         public <T extends AbstractExchange> void onExchange(final T exchange) {
             if (exchange instanceof StateExchange) {
-                OSHLoggerComDriver.this.eventReciever(((StateExchange) exchange));
+                OSHLoggingComDriver.this.eventReciever(((StateExchange) exchange));
             }
         }
     }

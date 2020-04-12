@@ -66,7 +66,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
         }
 
         this.weekDayHourProbabilitiesFile = driverConfig.getParameter(ParameterConstants.WaterDemand.probabilitiesFile);
-        if (this.drawOffTypesFile == null) {
+        if (this.weekDayHourProbabilitiesFile == null) {
             throw new SimulationSubjectException("Parameter for Thermal VDI6002 Simulation missing!");
         }
 
@@ -233,7 +233,7 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
                 double factor = (this.avgDayLoadCounter[d0] / 86400.0) * PhysicalConstants.factor_wsToKWh;
                 this.avgDayLoad[d0] /= factor;
             }
-            DatabaseLoggerThread.enqueue(new ThermalLoggingObject(this.getUUID(),
+            this.getDriverRegistry().publish(ThermalLoggingObject.class, new ThermalLoggingObject(this.getUUID(),
                     this.getTimeDriver().getCurrentTime(), this.avgWeekDayLoad, this.avgDayLoad, Commodity.DOMESTICHOTWATERPOWER));
         }
     }

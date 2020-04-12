@@ -240,7 +240,7 @@ public class EALogger implements IEALogger {
     }
 
     @Override
-    public void shutdown() {
+    public EALogObject shutdown() {
         if (this.log && DatabaseLoggerThread.isLogToDatabase()) {
             this.generationsUsed /= this.optimizationCounter;
 
@@ -257,11 +257,13 @@ public class EALogger implements IEALogger {
                     cervisiaResults[i] = this.cervisiaInformation[i][0] / this.cervisiaInformation[i][1];
                 }
             }
-            DatabaseLoggerThread.enqueue(new EALogObject(UUID.randomUUID(), null, this.generationsUsed,
+            return new EALogObject(UUID.randomUUID(), null, this.generationsUsed,
                     this.fitnessChange, this.fitnessSpread, this.homogeneity,
                     this.optimizationCounter,
-                    cervisiaResults));
+                    cervisiaResults);
         }
+
+        return null;
     }
 
     /* [0][0] = homogeneity

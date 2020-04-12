@@ -5,6 +5,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.devices.BaseloadLogObject;
+import osh.datatypes.logging.devices.DevicesLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.BaseloadObserverExchange;
@@ -43,7 +44,6 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
     /**
      * CONSTRUCTOR
      *
-     * @throws HALException
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public BaseloadSimulationDriver(IOSH osh, UUID deviceID,
@@ -204,7 +204,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueue(new BaseloadLogObject(this.getUUID(),
+                this.getDriverRegistry().publish(BaseloadLogObject.class, new BaseloadLogObject(this.getUUID(),
                         this.getTimeDriver().getCurrentTime(), this.sumActivePower / PhysicalConstants.factor_wsToKWh,
                         this.sumReactivePower / PhysicalConstants.factor_wsToKWh));
             }

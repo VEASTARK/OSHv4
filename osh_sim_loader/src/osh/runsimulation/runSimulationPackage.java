@@ -27,7 +27,6 @@ public class runSimulationPackage {
 
     //for database logging (mysql)
     static protected boolean logToDatabase;
-    //	static protected boolean logToDatabase = true;
     static protected final String tableName = "TABLE";
     /* in which databases to log, multiple entries will result in logging to multiple databases
      * { } : none
@@ -43,7 +42,6 @@ public class runSimulationPackage {
     static protected final int month = 1; // 7 = July
     static protected final int year = 1970;
     static protected final Duration simulationDuration = Duration.ofDays(31);
-    //	static private String configID = "oshsimconfig";
     static protected final String[] configIDs = {
             "example",
     };
@@ -82,9 +80,7 @@ public class runSimulationPackage {
      * ########	*/
     public static void main(String[] args) {
 
-        // reset starting time
-        // 1.1.1970
-        ZonedDateTime forcedStartTime = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, ZoneId.of("UTC"));
+        ZonedDateTime startTime = ZonedDateTime.of(year, month, day, 0, 0, 0, 0, ZoneId.of("UTC"));
 
         // iterate all configs
         for (String configID : configIDs) {
@@ -123,52 +119,54 @@ public class runSimulationPackage {
                     System.exit(1);
                 }
 
-                System.out.println("[INFO] Simulation running from time " + forcedStartTime + " for " + simulationDuration + " ticks");
+                System.out.println("[INFO] Simulation running from time " + startTime + " for " + simulationDuration + " ticks");
 
                 String configRootPath = configFilesDir == null ? configFilesPath + "/osh/" + configID + "/" : configFilesDir + "/";
 
-                String currentScreenplayFileName = configRootPath + "simulation/Screenplay.xml";
                 String currentEalConfigFileName = configRootPath + "system/EALConfig.xml";
                 String currentOCConfigFileName = configRootPath + "system/OCConfig.xml";
                 String currentOSHConfigFileName = configRootPath + "system/OSHConfig.xml";
                 String currentCALConfigFileName = configRootPath + "system/CALConfig.xml";
 
-                File file1 = new File(currentScreenplayFileName);
-                File file2 = new File(currentEalConfigFileName);
-                File file3 = new File(currentOCConfigFileName);
-                File file4 = new File(currentOSHConfigFileName);
-                File file5 = new File(currentCALConfigFileName);
+                File file1 = new File(currentEalConfigFileName);
+                File file2 = new File(currentOCConfigFileName);
+                File file3 = new File(currentOSHConfigFileName);
+                File file4 = new File(currentCALConfigFileName);
 
                 // check if files exist
-                if (!file1.exists() || !file2.exists() || !file3.exists()) {
+                if (!file1.exists() || !file2.exists() || !file3.exists() || !file4.exists()) {
                     System.out.println("[ERROR] One ore more of the required files is missing");
                     if (!file1.exists()) {
-                        System.out.println("[ERROR] Screenplay file is missing : " + currentScreenplayFileName);
-                    }
-                    if (!file2.exists()) {
                         System.out.println("[ERROR] EALConfigFile is missing : " + currentEalConfigFileName);
                     }
-                    if (!file3.exists()) {
+                    if (!file2.exists()) {
                         System.out.println("[ERROR] OCConfigFile is missing : " + currentOCConfigFileName);
                     }
-                    if (!file4.exists()) {
+                    if (!file3.exists()) {
                         System.out.println("[ERROR] OSHConfigFile is missing : " + currentOSHConfigFileName);
                     }
-                    if (!file5.exists()) {
+                    if (!file4.exists()) {
                         System.out.println("[ERROR] CALConfigFile is missing : " + currentCALConfigFileName);
                     }
                     return;
                 }
 
-                OSHLifeCycleManager lifeCycleManager = new OSHLifeCycleManager(systemLoggingConfiguration);
+                //init database logger
+                if (logToDatabase) {
+                    DatabaseLoggerThread.initLogger(tableName,
+                            logDirName,
+                            startTime,
+                            databasesToLog);
+                }
 
+                OSHLifeCycleManager lifeCycleManager = new OSHLifeCycleManager(systemLoggingConfiguration);
                 try {
                     lifeCycleManager.initOSHFirstStep(
                             currentOSHConfigFileName,
                             currentOCConfigFileName,
                             currentEalConfigFileName,
                             currentCALConfigFileName,
-                            forcedStartTime,
+                            startTime,
                             randomSeed,
                             optimizationMainRandomSeed,
                             runID,
@@ -179,26 +177,12 @@ public class runSimulationPackage {
                     System.exit(1);
                 }
 
-                //init database logger
-                try {
-                    lifeCycleManager.initDatabaseLogging(logToDatabase, tableName, forcedStartTime, databasesToLog);
-                } catch (LifeCycleManagerException e1) {
-                    e1.printStackTrace();
-                    System.exit(1);
-                }
-
                 long simFinishTime = 0L;
 
                 try {
-                    lifeCycleManager.loadScreenplay(currentScreenplayFileName);
                     simResults = lifeCycleManager.startSimulation(simulationDuration.toSeconds());
-
-                    simFinishTime = System.currentTimeMillis();
-                    if (logToDatabase) {
-                        DatabaseLoggerThread.enqueue(new SimulationResultsLogObject(null, null,
-                                simResults, 0, simulationDuration.toSeconds() - 1, (simFinishTime - simStartTime) / 1000));
-                    }
                     lifeCycleManager.switchToLifeCycleState(LifeCycleStates.ON_SYSTEM_SHUTDOWN);
+                    simFinishTime = System.currentTimeMillis();
                 } catch (LifeCycleManagerException | OSHException e) {
                     e.printStackTrace();
                     System.exit(1);
@@ -218,8 +202,7 @@ public class runSimulationPackage {
                     e.printStackTrace();
                 }
                 logDirName = null;
-
-            } //RANDOM SEEDS
-        } //CONFIGS
+            }
+        }
     }
 }

@@ -15,12 +15,14 @@ import osh.datatypes.ea.Schedule;
 import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
+import osh.datatypes.logging.general.EALogObject;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
 import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
+import osh.datatypes.registry.oc.details.energy.CostConfigurationStateExchange;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
@@ -218,7 +220,7 @@ public class OSHGlobalControllerJMetal
         }
 
         this.costConfiguration = new CostConfigurationContainer(epsOptimizationObjective, plsOptimizationObjective,
-                varOptimizationObjective);
+                varOptimizationObjective, this.upperOverlimitFactor, this.lowerOverlimitFactor);
 
         long optimizationMainRandomSeed;
         try {
@@ -265,14 +267,13 @@ public class OSHGlobalControllerJMetal
         }
 
         this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
-//		
-//		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), EpsStateExchange.class, RegistryType.COM, RegistryType.OC);
-//		this.getOSH().getDataBroker().registerDataReachThroughState(getUUID(), PlsStateExchange.class, RegistryType.COM, RegistryType.OC);
 
         this.getOCRegistry().subscribe(EpsStateExchange.class, this);
         this.getOCRegistry().subscribe(PlsStateExchange.class, this);
 
-//		CostChecker.init(epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective, upperOverlimitFactor, lowerOverlimitFactor);
+        this.getOCRegistry().publish(CostConfigurationStateExchange.class,
+                new CostConfigurationStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
+                        this.costConfiguration.clone()));
 
         this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
     }
@@ -281,7 +282,12 @@ public class OSHGlobalControllerJMetal
     public void onSystemShutdown() throws OSHException {
         super.onSystemShutdown();
 
-        this.algorithmExecutor.getEaLogger().shutdown();
+        EALogObject logObject = this.algorithmExecutor.getEaLogger().shutdown();
+
+        if (logObject != null) {
+            logObject.setSender(this.getUUID());
+            this.getOCRegistry().publish(EALogObject.class, logObject);
+        }
     }
 
     @Override
@@ -314,8 +320,6 @@ public class OSHGlobalControllerJMetal
                     this.priceSignals,
                     this.powerLimitSignals,
                     this.costConfiguration,
-                    this.upperOverlimitFactor,
-                    this.lowerOverlimitFactor,
                     this.newEpsPlsReceived);
 
             this.newEpsPlsReceived = false;
@@ -331,7 +335,6 @@ public class OSHGlobalControllerJMetal
     /**
      * decide if a (re-)scheduling is necessary
      *
-     * @throws OSHException
      */
     private void handleScheduling() {
 
@@ -447,8 +450,7 @@ public class OSHGlobalControllerJMetal
 
 
         try {
-            OptimizationCostFunction costFunction = new OptimizationCostFunction(this.upperOverlimitFactor,
-                    this.lowerOverlimitFactor,
+            OptimizationCostFunction costFunction = new OptimizationCostFunction(
                     this.costConfiguration,
                     tempPriceSignals,
                     tempPowerLimitSignals,

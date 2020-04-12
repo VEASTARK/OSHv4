@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<EALConfiguration xmlns:ns2="http://osh/configuration/system" xmlns="http://osh/configuration/eal">
+<EALConfiguration xmlns="http://osh/configuration/eal" xmlns:ns2="http://osh/configuration/system">
     <assignedDevices deviceID="00000000-0000-5348-424c-000000000000">
         <deviceType>BASELOAD</deviceType>
         <deviceClassification>BASELOAD</deviceClassification>
@@ -13,11 +13,6 @@
         <driverParameters>
             <ns2:parameterName>baseloadyearlyconsumption</ns2:parameterName>
             <ns2:parameterValue>2993</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -42,7 +37,7 @@
         </driverParameters>
         <driverParameters>
             <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -71,116 +66,14 @@
             <localObserverClassName>osh.mgmt.localobserver.BaseloadLocalObserver</localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
-    <assignedDevices deviceID="00000000-4d49-4d49-4948-000000000000">
-        <deviceType>INDUCTIONCOOKTOP</deviceType>
-        <deviceClassification>APPLIANCE</deviceClassification>
-        <deviceDescription></deviceDescription>
-        <driverClassName>osh.driver.simulation.GenericFutureApplianceSimulationDriver</driverClassName>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>device2nddof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
-            <ns2:parameterValue>400.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>h0filename</ns2:parameterName>
-            <ns2:parameterValue>configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>h0classname</ns2:parameterName>
-            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>probabilityfilename</ns2:parameterName>
-            <ns2:parameterValue>configfiles/appliance/ih/IH_prob.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>configurationshares</ns2:parameterName>
-            <ns2:parameterValue>[0.4, 0.4, 0.2]</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>profilesource</ns2:parameterName>
-            <ns2:parameterValue>configfiles/appliance/ih/IH_3CO_1PH_1PR_SC_E.xml</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionType</ns2:parameterName>
-            <ns2:parameterValue>DISCONTINUITIES</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <controllable>true</controllable>
-        <observable>true</observable>
-        <assignedLocalOCUnit>
-            <localControllerClassName>osh.mgmt.localcontroller.FutureApplianceLocalController</localControllerClassName>
-            <localObserverClassName>osh.mgmt.localobserver.FutureApplianceLocalObserver</localObserverClassName>
-        </assignedLocalOCUnit>
-    </assignedDevices>
     <assignedDevices deviceID="00000000-4d49-4d49-4457-000000000000">
         <deviceType>DISHWASHER</deviceType>
         <deviceClassification>APPLIANCE</deviceClassification>
         <deviceDescription></deviceDescription>
         <driverClassName>osh.driver.simulation.GenericFutureApplianceSimulationDriver</driverClassName>
         <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
-            <ns2:parameterValue>43200</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>device2nddof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
-            <ns2:parameterValue>310.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
             <ns2:parameterName>h0filename</ns2:parameterName>
             <ns2:parameterValue>configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>h0classname</ns2:parameterName>
-            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>probabilityfilename</ns2:parameterName>
-            <ns2:parameterValue>configfiles/appliance/dw/DW_prob.csv</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -194,8 +87,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
+            <ns2:parameterName>probabilityfilename</ns2:parameterName>
+            <ns2:parameterValue>configfiles/appliance/dw/DW_prob.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>hybridFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>device2nddof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -204,8 +112,95 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
+            <ns2:parameterValue>43200</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>h0classname</ns2:parameterName>
+            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
+            <ns2:parameterValue>310</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <controllable>true</controllable>
+        <observable>true</observable>
+        <assignedLocalOCUnit>
+            <localControllerClassName>osh.mgmt.localcontroller.FutureApplianceLocalController</localControllerClassName>
+            <localObserverClassName>osh.mgmt.localobserver.FutureApplianceLocalObserver</localObserverClassName>
+        </assignedLocalOCUnit>
+    </assignedDevices>
+    <assignedDevices deviceID="00000000-4d49-4d49-4948-000000000000">
+        <deviceType>INDUCTIONCOOKTOP</deviceType>
+        <deviceClassification>APPLIANCE</deviceClassification>
+        <deviceDescription></deviceDescription>
+        <driverClassName>osh.driver.simulation.GenericFutureApplianceSimulationDriver</driverClassName>
+        <driverParameters>
+            <ns2:parameterName>h0filename</ns2:parameterName>
+            <ns2:parameterValue>configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>configurationshares</ns2:parameterName>
+            <ns2:parameterValue>[0.4, 0.4, 0.2]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>profilesource</ns2:parameterName>
+            <ns2:parameterValue>configfiles/appliance/ih/IH_3CO_1PH_1PR_SC_E.xml</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>probabilityfilename</ns2:parameterName>
+            <ns2:parameterValue>configfiles/appliance/ih/IH_prob.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>hybridFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
             <ns2:parameterName>compressionValue</ns2:parameterName>
             <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>device2nddof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionType</ns2:parameterName>
+            <ns2:parameterValue>DISCONTINUITIES</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>h0classname</ns2:parameterName>
+            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
+            <ns2:parameterValue>400</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <controllable>true</controllable>
@@ -221,38 +216,8 @@
         <deviceDescription></deviceDescription>
         <driverClassName>osh.driver.simulation.GenericFutureApplianceSimulationDriver</driverClassName>
         <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>device2nddof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
-            <ns2:parameterValue>200.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
             <ns2:parameterName>h0filename</ns2:parameterName>
             <ns2:parameterValue>configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>h0classname</ns2:parameterName>
-            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>probabilityfilename</ns2:parameterName>
-            <ns2:parameterValue>configfiles/appliance/ov/OV_prob.csv</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -266,8 +231,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
+            <ns2:parameterName>probabilityfilename</ns2:parameterName>
+            <ns2:parameterValue>configfiles/appliance/ov/OV_prob.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>hybridFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>device2nddof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -276,8 +256,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>h0classname</ns2:parameterName>
+            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
+            <ns2:parameterValue>200</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <controllable>true</controllable>
@@ -293,38 +288,8 @@
         <deviceDescription></deviceDescription>
         <driverClassName>osh.driver.simulation.GenericFutureApplianceSimulationDriver</driverClassName>
         <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
-            <ns2:parameterValue>43200</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>device2nddof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
-            <ns2:parameterValue>270.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
             <ns2:parameterName>h0filename</ns2:parameterName>
             <ns2:parameterValue>configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>h0classname</ns2:parameterName>
-            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>probabilityfilename</ns2:parameterName>
-            <ns2:parameterValue>configfiles/appliance/td/TD_prob.csv</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -338,8 +303,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
+            <ns2:parameterName>probabilityfilename</ns2:parameterName>
+            <ns2:parameterValue>configfiles/appliance/td/TD_prob.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>hybridFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>device2nddof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -348,8 +328,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
+            <ns2:parameterValue>43200</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>h0classname</ns2:parameterName>
+            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
+            <ns2:parameterValue>270</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <controllable>true</controllable>
@@ -365,38 +360,8 @@
         <deviceDescription></deviceDescription>
         <driverClassName>osh.driver.simulation.GenericFutureApplianceSimulationDriver</driverClassName>
         <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
-            <ns2:parameterValue>43200</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>device2nddof</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
-            <ns2:parameterValue>360.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
             <ns2:parameterName>h0filename</ns2:parameterName>
             <ns2:parameterValue>configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>h0classname</ns2:parameterName>
-            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>probabilityfilename</ns2:parameterName>
-            <ns2:parameterValue>configfiles/appliance/wm/WM_prob.csv</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -410,8 +375,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
+            <ns2:parameterName>probabilityfilename</ns2:parameterName>
+            <ns2:parameterValue>configfiles/appliance/wm/WM_prob.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>hybridFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>device2nddof</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -420,8 +400,23 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>devicemax1stdof</ns2:parameterName>
+            <ns2:parameterValue>43200</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>h0classname</ns2:parameterName>
+            <ns2:parameterValue>osh.utils.slp.H0Profile15Minutes</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>averageyearlyruns</ns2:parameterName>
+            <ns2:parameterValue>360</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <controllable>true</controllable>
@@ -439,11 +434,6 @@
         <driverParameters>
             <ns2:parameterName>complexpowermax</ns2:parameterName>
             <ns2:parameterValue>10000</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -483,7 +473,7 @@
         </driverParameters>
         <driverParameters>
             <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER]</ns2:parameterValue>
+            <ns2:parameterValue>[activepower, reactivepower]</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -496,6 +486,93 @@
         <assignedLocalOCUnit>
             <localControllerClassName>osh.mgmt.localcontroller.PvLocalController</localControllerClassName>
             <localObserverClassName>osh.mgmt.localobserver.PvLocalObserver</localObserverClassName>
+        </assignedLocalOCUnit>
+    </assignedDevices>
+    <assignedDevices deviceID="00000000-0000-5348-4448-000000000000">
+        <deviceType>DOMESTICHOTWATER</deviceType>
+        <deviceClassification>HVAC</deviceClassification>
+        <deviceDescription></deviceDescription>
+        <driverClassName>osh.driver.simulation.dhw.VDI6002DomesticHotWaterSimulationDriver</driverClassName>
+        <driverParameters>
+            <ns2:parameterName>weekDayHourProbabilitiesFile</ns2:parameterName>
+            <ns2:parameterValue>configfiles/dhw/vdi_6002_weekday_hour_drawoff_probabilities.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>avgYearlyDemamd</ns2:parameterName>
+            <ns2:parameterValue>2800</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>300</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>drawOffTypesFile</ns2:parameterName>
+            <ns2:parameterValue>configfiles/dhw/eu/eu_drawofftypesfile.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionType</ns2:parameterName>
+            <ns2:parameterValue>TIMESLOTS</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[domestichotwaterpower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <controllable>false</controllable>
+        <observable>true</observable>
+        <assignedLocalOCUnit>
+            <localObserverClassName>osh.mgmt.localobserver.dhw.VDI6002DomesticHotWaterLocalObserver</localObserverClassName>
+        </assignedLocalOCUnit>
+    </assignedDevices>
+    <assignedDevices deviceID="00000000-0000-5348-5348-000000000000">
+        <deviceType>SPACEHEATING</deviceType>
+        <deviceClassification>HVAC</deviceClassification>
+        <deviceDescription></deviceDescription>
+        <driverClassName>osh.driver.simulation.heating.ESHLSpaceHeatingSimulationDriver</driverClassName>
+        <driverParameters>
+            <ns2:parameterName>weightForOtherWeekday</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>pastDaysPrediction</ns2:parameterName>
+            <ns2:parameterValue>14</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>300</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionType</ns2:parameterName>
+            <ns2:parameterValue>TIMESLOTS</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[heatinghotwaterpower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>weightForSameWeekday</ns2:parameterName>
+            <ns2:parameterValue>5.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>sourcefile</ns2:parameterName>
+            <ns2:parameterValue>configfiles/heating/heating_demand_4.csv</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <controllable>false</controllable>
+        <observable>true</observable>
+        <assignedLocalOCUnit>
+            <localObserverClassName>osh.mgmt.localobserver.heating.SpaceHeatingLocalObserver</localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
     <assignedDevices deviceID="44414348-5300-0043-4850-000000000000">
@@ -560,7 +637,7 @@
         </driverParameters>
         <driverParameters>
             <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,REACTIVEPOWER,HEATINGHOTWATERPOWER,NATURALGASPOWER]</ns2:parameterValue>
+            <ns2:parameterValue>[activepower, reactivepower, heatinghotwaterpower, naturalgaspower]</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -589,11 +666,6 @@
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
             <ns2:parameterName>typicalActivePower</ns2:parameterName>
             <ns2:parameterValue>-5500</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
@@ -601,6 +673,16 @@
         <driverParameters>
             <ns2:parameterName>rescheduleAfter</ns2:parameterName>
             <ns2:parameterValue>14400</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>bitsPerSlot</ns2:parameterName>
+            <ns2:parameterValue>4</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>timePerSlot</ns2:parameterName>
+            <ns2:parameterValue>300</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -615,24 +697,90 @@
             <localObserverClassName>osh.mgmt.localobserver.DachsChpLocalObserver</localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
+    <assignedDevices deviceID="00000000-0000-5748-4748-000000000000">
+        <deviceType>GASHEATING</deviceType>
+        <deviceClassification>HVAC</deviceClassification>
+        <deviceDescription></deviceDescription>
+        <driverClassName>osh.driver.simulation.GasBoilerSimulationDriver</driverClassName>
+        <driverParameters>
+            <ns2:parameterName>maxGasPower</ns2:parameterName>
+            <ns2:parameterValue>15000</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>maxTemperature</ns2:parameterName>
+            <ns2:parameterValue>80.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>typicalActivePowerOn</ns2:parameterName>
+            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>minTemperature</ns2:parameterName>
+            <ns2:parameterValue>60.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionValue</ns2:parameterName>
+            <ns2:parameterValue>100</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>typicalReactivePowerOff</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>typicalReactivePowerOn</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>maxHotWaterPower</ns2:parameterName>
+            <ns2:parameterValue>15000</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>compressionType</ns2:parameterName>
+            <ns2:parameterValue>DISCONTINUITIES</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>usedcommodities</ns2:parameterName>
+            <ns2:parameterValue>[activepower, reactivepower, heatinghotwaterpower, naturalgaspower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>newIPPAfter</ns2:parameterName>
+            <ns2:parameterValue>3600</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>typicalActivePowerOff</ns2:parameterName>
+            <ns2:parameterValue>0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <controllable>false</controllable>
+        <observable>true</observable>
+        <assignedLocalOCUnit>
+            <localObserverClassName>osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver</localObserverClassName>
+        </assignedLocalOCUnit>
+    </assignedDevices>
     <assignedDevices deviceID="00000000-0000-4857-4853-000000000000">
         <deviceType>HOTWATERSTORAGE</deviceType>
         <deviceClassification>HVAC</deviceClassification>
         <deviceDescription></deviceDescription>
         <driverClassName>osh.driver.simulation.HotWaterTankSimulationDriver</driverClassName>
         <driverParameters>
-            <ns2:parameterName>newIppAfter</ns2:parameterName>
-            <ns2:parameterValue>3600</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
             <ns2:parameterName>tankDiameter</ns2:parameterName>
             <ns2:parameterValue>0.5</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>rescheduleIfViolatedTemperature</ns2:parameterName>
+            <ns2:parameterValue>2.5</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -652,7 +800,7 @@
         </driverParameters>
         <driverParameters>
             <ns2:parameterName>tankCapacity</ns2:parameterName>
-            <ns2:parameterValue>350</ns2:parameterValue>
+            <ns2:parameterValue>350.0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -662,7 +810,12 @@
         </driverParameters>
         <driverParameters>
             <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[HEATINGHOTWATERPOWER]</ns2:parameterValue>
+            <ns2:parameterValue>[heatinghotwaterpower, domestichotwaterpower]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>newIPPAfter</ns2:parameterName>
+            <ns2:parameterValue>3600</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
         <driverParameters>
@@ -670,183 +823,20 @@
             <ns2:parameterValue>20.0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>rescheduleIfViolatedDuration</ns2:parameterName>
+            <ns2:parameterValue>PT10M</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
+        <driverParameters>
+            <ns2:parameterName>standingHeatLossFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </driverParameters>
         <controllable>false</controllable>
         <observable>true</observable>
         <assignedLocalOCUnit>
             <localObserverClassName>osh.mgmt.localobserver.HotWaterTankLocalObserver</localObserverClassName>
-        </assignedLocalOCUnit>
-    </assignedDevices>
-    <assignedDevices deviceID="00000000-0000-5348-4448-000000000000">
-        <deviceType>DOMESTICHOTWATER</deviceType>
-        <deviceClassification>HVAC</deviceClassification>
-        <deviceDescription></deviceDescription>
-        <driverClassName>osh.driver.simulation.dhw.VDI6002DomesticHotWaterSimulationDriver</driverClassName>
-        <driverParameters>
-            <ns2:parameterName>weekDayHourProbabilitiesFile</ns2:parameterName>
-            <ns2:parameterValue>configfiles/dhw/vdi_6002_weekday_hour_drawoff_probabilities.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>avgYearlyDemamd</ns2:parameterName>
-            <ns2:parameterValue>2800</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>drawOffTypesFile</ns2:parameterName>
-            <ns2:parameterValue>configfiles/dhw/eu/eu_drawofftypesfile.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionType</ns2:parameterName>
-            <ns2:parameterValue>DISCONTINUITIES</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[DOMESTICHOTWATERPOWER]</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <controllable>false</controllable>
-        <observable>true</observable>
-        <assignedLocalOCUnit>
-            <localObserverClassName>osh.mgmt.localobserver.dhw.VDI6002DomesticHotWaterLocalObserver</localObserverClassName>
-        </assignedLocalOCUnit>
-    </assignedDevices>
-    <assignedDevices deviceID="00000000-0000-5348-5348-000000000000">
-        <deviceType>SPACEHEATING</deviceType>
-        <deviceClassification>HVAC</deviceClassification>
-        <deviceDescription></deviceDescription>
-        <driverClassName>osh.driver.simulation.heating.ESHLSpaceHeatingSimulationDriver</driverClassName>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>weightForOtherWeekday</ns2:parameterName>
-            <ns2:parameterValue>1.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>pastDaysPrediction</ns2:parameterName>
-            <ns2:parameterValue>14</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionType</ns2:parameterName>
-            <ns2:parameterValue>DISCONTINUITIES</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[HEATINGHOTWATERPOWER]</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>weightForSameWeekday</ns2:parameterName>
-            <ns2:parameterValue>5.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>sourcefile</ns2:parameterName>
-            <ns2:parameterValue>configfiles/heating/heating_demand_4.csv</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <controllable>false</controllable>
-        <observable>true</observable>
-        <assignedLocalOCUnit>
-            <localObserverClassName>osh.mgmt.localobserver.heating.SpaceHeatingLocalObserver</localObserverClassName>
-        </assignedLocalOCUnit>
-    </assignedDevices>
-    <assignedDevices deviceID="00000000-0000-5748-4748-000000000000">
-        <deviceType>GASHEATING</deviceType>
-        <deviceClassification>HVAC</deviceClassification>
-        <deviceDescription></deviceDescription>
-        <driverClassName>osh.driver.simulation.GasBoilerSimulationDriver</driverClassName>
-        <driverParameters>
-            <ns2:parameterName>maxTemperature</ns2:parameterName>
-            <ns2:parameterValue>80.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>maxGasPower</ns2:parameterName>
-            <ns2:parameterValue>15000</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>typicalActivePowerOn</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionValue</ns2:parameterName>
-            <ns2:parameterValue>100</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>typicalReactivePowerOff</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>maxHotWaterPower</ns2:parameterName>
-            <ns2:parameterValue>15000</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>compressionType</ns2:parameterName>
-            <ns2:parameterValue>DISCONTINUITIES</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>usedcommodities</ns2:parameterName>
-            <ns2:parameterValue>[ACTIVEPOWER,HEATINGHOTWATERPOWER,NATURALGASPOWER]</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>newIppAfter</ns2:parameterName>
-            <ns2:parameterValue>3600</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>screenplaytype</ns2:parameterName>
-            <ns2:parameterValue>DYNAMIC</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>minTemperature</ns2:parameterName>
-            <ns2:parameterValue>60.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>typicalReactivePowerOn</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <driverParameters>
-            <ns2:parameterName>typicalActivePowerOff</ns2:parameterName>
-            <ns2:parameterValue>0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </driverParameters>
-        <controllable>false</controllable>
-        <observable>true</observable>
-        <assignedLocalOCUnit>
-            <localObserverClassName>osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver</localObserverClassName>
         </assignedLocalOCUnit>
     </assignedDevices>
 </EALConfiguration>

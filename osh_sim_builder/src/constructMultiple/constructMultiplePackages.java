@@ -1,6 +1,7 @@
 package constructMultiple;
 
 import constructsimulation.configuration.CAL.CALAdditional;
+import constructsimulation.configuration.CAL.additional.GeneralLogger;
 import constructsimulation.configuration.CAL.signals.EPS;
 import constructsimulation.configuration.EAL.HVAC.HVACProducers;
 import constructsimulation.configuration.EAL.HVAC.producers.CHP;
@@ -12,7 +13,6 @@ import constructsimulation.configuration.EAL.electric.producers.PV;
 import constructsimulation.configuration.OC.CostConfig;
 import constructsimulation.configuration.OC.EAConfig;
 import constructsimulation.configuration.OC.GenerateOC;
-import constructsimulation.configuration.OSH.GenerateOSH;
 import constructsimulation.configuration.general.Generate;
 import constructsimulation.configuration.general.HouseConfig;
 import constructsimulation.datatypes.EPSTypes;
@@ -178,15 +178,15 @@ public class constructMultiplePackages {
     }
 
     private static void setLogValues() {
-        GenerateOSH.logH0 = constructMultipleData.logH0;
-        GenerateOSH.logEpsPls = constructMultipleData.logEpsPls;
-        GenerateOSH.logIntervals = constructMultipleData.logIntervals;
-        GenerateOSH.logDevices = constructMultipleData.logDevices;
-        GenerateOSH.logDetailedPower = constructMultipleData.logDetailedPower;
-        GenerateOSH.logHotWater = constructMultipleData.logHotWater;
-        GenerateOSH.logWaterTank = constructMultipleData.logWaterTank;
-        GenerateOSH.logGA = constructMultipleData.logGA;
-        GenerateOSH.logSmartHeater = constructMultipleData.logSmartHeater;
+        GeneralLogger.logH0 = constructMultipleData.logH0;
+        GeneralLogger.logEpsPls = constructMultipleData.logEpsPls;
+        GeneralLogger.logIntervals = constructMultipleData.logIntervals;
+        GeneralLogger.logDevices = constructMultipleData.logDevices;
+        GeneralLogger.logDetailedPower = constructMultipleData.logDetailedPower;
+        GeneralLogger.logThermal = constructMultipleData.logThermal;
+        GeneralLogger.logWaterTank = constructMultipleData.logWaterTank;
+        GeneralLogger.logEA = constructMultipleData.logEA;
+        GeneralLogger.logSmartHeater = constructMultipleData.logSmartHeater;
     }
 
     private static String configToString(HashMap<String, ?> config) {

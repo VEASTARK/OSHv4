@@ -15,6 +15,8 @@ public class CostConfigurationContainer implements Cloneable {
     private final AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration;
     private final SELF_SUFFICIENCY_RATIO selfSufficiencyConfiguration;
     private final SELF_CONSUMPTION_RATIO selfConsumptionConfiguration;
+    private final double upperOverlimitFactor;
+    private final double lowerOverlimitFactor;
 
     /**
      * Creates this data-container with the given values for all configuration values.
@@ -26,18 +28,24 @@ public class CostConfigurationContainer implements Cloneable {
      *                                     power
      * @param selfSufficiencyConfiguration configuration setting for the calculation of the self-sufficiency-ratio
      * @param selfConsumptionConfiguration configuration setting for the calculation of the self-consumption-ratio
+     * @param upperOverlimitFactor configuration setting for the upper pls-violation factor
+     * @param lowerOverlimitFactor configuration setting for the lower pls-violation factor
      */
     public CostConfigurationContainer(REACTIVE_COSTS reactiveConfiguration, PLS_COSTS plsConfiguration,
                                       FEED_IN_COSTS feedInConfiguration,
                                       AUTO_CONSUMPTION_COSTS autoConsumptionConfiguration,
                                       SELF_SUFFICIENCY_RATIO selfSufficiencyConfiguration,
-                                      SELF_CONSUMPTION_RATIO selfConsumptionConfiguration) {
+                                      SELF_CONSUMPTION_RATIO selfConsumptionConfiguration,
+                                      double upperOverlimitFactor,
+                                      double lowerOverlimitFactor) {
         this.reactiveConfiguration = reactiveConfiguration;
         this.plsConfiguration = plsConfiguration;
         this.feedInConfiguration = feedInConfiguration;
         this.autoConsumptionConfiguration = autoConsumptionConfiguration;
         this.selfSufficiencyConfiguration = selfSufficiencyConfiguration;
         this.selfConsumptionConfiguration = selfConsumptionConfiguration;
+        this.upperOverlimitFactor = upperOverlimitFactor;
+        this.lowerOverlimitFactor = lowerOverlimitFactor;
     }
 
     /**
@@ -46,9 +54,15 @@ public class CostConfigurationContainer implements Cloneable {
      * @param epsOptimizationObjective optimization objective for the active power calculation
      * @param plsOptimizationObjective optimization objective for the calculation of pls-violations
      * @param varOptimizationObjective optimization objective for the reactive power calculation
+     * @param upperOverlimitFactor configuration setting for the upper pls-violation factor
+     * @param lowerOverlimitFactor configuration setting for the lower pls-violation factor
      */
     public CostConfigurationContainer(int epsOptimizationObjective, int plsOptimizationObjective,
-                                      int varOptimizationObjective) {
+                                      int varOptimizationObjective, double upperOverlimitFactor,
+                                      double lowerOverlimitFactor) {
+
+        this.upperOverlimitFactor = upperOverlimitFactor;
+        this.lowerOverlimitFactor = lowerOverlimitFactor;
 
          switch(varOptimizationObjective) {
              case 0:
@@ -116,6 +130,8 @@ public class CostConfigurationContainer implements Cloneable {
         this.autoConsumptionConfiguration = other.autoConsumptionConfiguration;
         this.selfSufficiencyConfiguration = other.selfSufficiencyConfiguration;
         this.selfConsumptionConfiguration = other.selfConsumptionConfiguration;
+        this.upperOverlimitFactor = other.upperOverlimitFactor;
+        this.lowerOverlimitFactor = other.lowerOverlimitFactor;
     }
 
     /**
@@ -170,6 +186,24 @@ public class CostConfigurationContainer implements Cloneable {
      */
     public SELF_CONSUMPTION_RATIO getSelfConsumptionConfiguration() {
         return this.selfConsumptionConfiguration;
+    }
+
+    /**
+     * Returns the configuration setting for the upper pls-violation factor.
+     *
+     * @return the configuration setting for the upper pls-violation factor
+     */
+    public double getUpperOverlimitFactor() {
+        return this.upperOverlimitFactor;
+    }
+
+    /**
+     * Returns the configuration setting for the lower pls-violation factor.
+     *
+     * @return the configuration setting for the lower pls-violation factor
+     */
+    public double getLowerOverlimitFactor() {
+        return this.lowerOverlimitFactor;
     }
 
     /**

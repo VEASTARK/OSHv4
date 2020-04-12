@@ -41,6 +41,6 @@ public class AllComponents {
         ElectricStorage.useBattery = false;
 
         //GUI
-        CALAdditional.useGUI = true;
+        CALAdditional.useGUI = false;
     }
 }

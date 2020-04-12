@@ -6,6 +6,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.thermal.ThermalLoggingObject;
+import osh.datatypes.logging.thermal.ThermalSupplyLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.ThermalDemandData;
 import osh.eal.hal.exceptions.HALException;
@@ -199,7 +200,7 @@ public abstract class ThermalDemandSimulationDriver
                 this.avgDayLoad[d0] /= factor;
             }
 
-            DatabaseLoggerThread.enqueue(new ThermalLoggingObject(this.getUUID(),
+            this.getDriverRegistry().publish(ThermalLoggingObject.class, new ThermalLoggingObject(this.getUUID(),
                     this.getTimeDriver().getCurrentTime(), this.avgWeekDayLoad, this.avgDayLoad, this.hotWaterType));
         }
     }

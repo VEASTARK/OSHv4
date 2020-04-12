@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OCConfiguration xmlns:ns2="http://osh/configuration/system" xmlns="http://osh/configuration/oc">
+<OCConfiguration xmlns="http://osh/configuration/oc" xmlns:ns2="http://osh/configuration/system">
     <globalOcUuid>e5ad4b36-d417-4be6-a1c8-c3ad68e52977</globalOcUuid>
     <globalControllerClass>osh.mgmt.globalcontroller.OSHGlobalControllerJMetal</globalControllerClass>
     <globalControllerParameters>
-        <ns2:parameterName>epsoptimizationobjective</ns2:parameterName>
-        <ns2:parameterValue>4</ns2:parameterValue>
+        <ns2:parameterName>hotWaterTankUUID</ns2:parameterName>
+        <ns2:parameterValue>00000000-0000-4857-4853-000000000000</ns2:parameterValue>
         <ns2:parameterType>String</ns2:parameterType>
     </globalControllerParameters>
     <globalControllerParameters>
@@ -28,22 +28,28 @@
         <ns2:parameterType>String</ns2:parameterType>
     </globalControllerParameters>
     <globalControllerParameters>
+        <ns2:parameterName>coldWaterTankUUID</ns2:parameterName>
+        <ns2:parameterValue>441c234e-d340-4c85-b0a0-dbac182b8f81</ns2:parameterValue>
+        <ns2:parameterType>String</ns2:parameterType>
+    </globalControllerParameters>
+    <globalControllerParameters>
         <ns2:parameterName>stepSize</ns2:parameterName>
         <ns2:parameterValue>60</ns2:parameterValue>
         <ns2:parameterType>String</ns2:parameterType>
     </globalControllerParameters>
     <globalControllerParameters>
-        <ns2:parameterName>hotWaterTankUUID</ns2:parameterName>
-        <ns2:parameterValue>00000000-0000-4857-4853-000000000000</ns2:parameterValue>
+        <ns2:parameterName>epsoptimizationobjective</ns2:parameterName>
+        <ns2:parameterValue>4</ns2:parameterValue>
         <ns2:parameterType>String</ns2:parameterType>
     </globalControllerParameters>
     <globalObserverClass>osh.mgmt.globalobserver.OSHGlobalObserver</globalObserverClass>
+    <optimizationMainRandomSeed>13749851</optimizationMainRandomSeed>
     <gaConfiguration>
         <numEvaluations>20000</numEvaluations>
         <popSize>100</popSize>
-        <crossoverOperator>SingleBinaryNPointsCrossover</crossoverOperator>
+        <crossoverOperator>BinaryNPointCrossover</crossoverOperator>
         <mutationOperator>BitFlipAutoProbMutation</mutationOperator>
-        <selectionOperator>BinaryTournament</selectionOperator>
+        <selectionOperator>BinaryTournamentSelection</selectionOperator>
         <crossoverParameters>
             <ns2:parameterName>probability</ns2:parameterName>
             <ns2:parameterValue>0.7</ns2:parameterValue>
@@ -55,13 +61,13 @@
             <ns2:parameterType>java.lang.Integer</ns2:parameterType>
         </crossoverParameters>
         <mutationParameters>
-            <ns2:parameterName>autoProbMutationFactor</ns2:parameterName>
-            <ns2:parameterValue>1.0</ns2:parameterValue>
+            <ns2:parameterName>probability</ns2:parameterName>
+            <ns2:parameterValue>0.001</ns2:parameterValue>
             <ns2:parameterType>java.lang.Double</ns2:parameterType>
         </mutationParameters>
         <mutationParameters>
-            <ns2:parameterName>probability</ns2:parameterName>
-            <ns2:parameterValue>0.001</ns2:parameterValue>
+            <ns2:parameterName>autoProbMutationFactor</ns2:parameterName>
+            <ns2:parameterValue>1.0</ns2:parameterValue>
             <ns2:parameterType>java.lang.Double</ns2:parameterType>
         </mutationParameters>
         <stoppingRules>
@@ -80,14 +86,14 @@
         <stoppingRules>
             <stoppingRuleName>DeltaFitnessStoppingRule</stoppingRuleName>
             <ruleParameters>
-                <ns2:parameterName>maxGenerationsDeltaFitnessViolated</ns2:parameterName>
-                <ns2:parameterValue>20</ns2:parameterValue>
-                <ns2:parameterType>java.lang.Integer</ns2:parameterType>
-            </ruleParameters>
-            <ruleParameters>
                 <ns2:parameterName>minDeltaFitnessPerc</ns2:parameterName>
                 <ns2:parameterValue>5.0E-15</ns2:parameterValue>
                 <ns2:parameterType>java.lang.Double</ns2:parameterType>
+            </ruleParameters>
+            <ruleParameters>
+                <ns2:parameterName>maxGenerationsDeltaFitnessViolated</ns2:parameterName>
+                <ns2:parameterValue>20</ns2:parameterValue>
+                <ns2:parameterType>java.lang.Integer</ns2:parameterType>
             </ruleParameters>
         </stoppingRules>
     </gaConfiguration>

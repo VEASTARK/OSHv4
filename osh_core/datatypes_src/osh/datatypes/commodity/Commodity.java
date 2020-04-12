@@ -72,7 +72,7 @@ public enum Commodity {
         EnumSet<Commodity> commoditySet = EnumSet.noneOf(Commodity.class);
 
         while (strTok.hasMoreElements()) {
-            Commodity uuid = Commodity.fromString(strTok.nextToken());
+            Commodity uuid = Commodity.fromString(strTok.nextToken().trim());
             commoditySet.add(uuid);
         }
         return commoditySet;
