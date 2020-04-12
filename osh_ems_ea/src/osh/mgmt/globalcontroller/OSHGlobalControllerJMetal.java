@@ -34,7 +34,8 @@ import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
-import osh.simulation.DatabaseLoggerThread;
+import osh.simulation.database.DatabaseLoggerThread;
+import osh.utils.CostConfigurationContainer;
 import osh.utils.costs.OptimizationCostFunction;
 import osh.utils.string.ParameterConstants;
 
@@ -144,9 +145,13 @@ public class OSHGlobalControllerJMetal
         }
 
         this.getOSH().getTimeRegistry().subscribe(this, TimeSubscribeEnum.SECOND);
-//		
+
         this.getOCRegistry().subscribe(EpsStateExchange.class, this);
         this.getOCRegistry().subscribe(PlsStateExchange.class, this);
+
+        this.getOCRegistry().publish(CostConfigurationStateExchange.class,
+                new CostConfigurationStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
+                        this.costConfiguration.clone()));
 
         this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
     }
@@ -155,7 +160,12 @@ public class OSHGlobalControllerJMetal
     public void onSystemShutdown() throws OSHException {
         super.onSystemShutdown();
 
-        this.algorithmExecutor.getEaLogger().shutdown();
+        EALogObject logObject = this.algorithmExecutor.getEaLogger().shutdown();
+
+        if (logObject != null) {
+            logObject.setSender(this.getUUID());
+            this.getOCRegistry().publish(EALogObject.class, logObject);
+        }
     }
 
     @Override
@@ -188,7 +198,6 @@ public class OSHGlobalControllerJMetal
                     this.priceSignals,
                     this.powerLimitSignals,
                     this.costConfiguration,
-                    this.overlimitFactor,
                     this.newEpsPlsReceived);
 
             this.newEpsPlsReceived = false;
@@ -204,7 +213,6 @@ public class OSHGlobalControllerJMetal
     /**
      * decide if a (re-)scheduling is necessary
      *
-     * @throws OSHException
      */
     private void handleScheduling() {
 
@@ -237,7 +245,7 @@ public class OSHGlobalControllerJMetal
 
         //retrieve information of ga should log to database
         if (this.logGa == null) {
-            this.logGa = DatabaseLoggerThread.isLogGA();
+            this.logGa = DatabaseLoggerThread.isLogEA();
         }
 
         EnumMap<AncillaryCommodity, PriceSignal> tempPriceSignals = new EnumMap<>(AncillaryCommodity.class);
@@ -297,7 +305,7 @@ public class OSHGlobalControllerJMetal
 
 
         try {
-            OptimizationCostFunction costFunction = new OptimizationCostFunction(this.overlimitFactor,
+            OptimizationCostFunction costFunction = new OptimizationCostFunction(
                     this.costConfiguration,
                     tempPriceSignals,
                     tempPowerLimitSignals,

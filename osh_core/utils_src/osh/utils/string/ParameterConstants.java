@@ -33,6 +33,29 @@ public final class ParameterConstants {
         public static final String signalConstantPeriod = "signalConstantPeriod";
     }
 
+    public static final class Database {
+        public static final String type = "type";
+        public static final String tunneled = "tunneled";
+        public static final String identifier = "identifier";
+
+        public static final String serverName = "serverName";
+        public static final String serverPort = "serverPort";
+        public static final String serverScheme = "serverScheme";
+        public static final String databaseUser = "databaseUser";
+        public static final String databasePW = "databasePW";
+        public static final String useSSL = "useSSL";
+        public static final String truststorePath = "truststorePath";
+        public static final String truststorePW = "truststorePW";
+
+        public static final String sshUser = "sshUser";
+        public static final String sshPassword = "sshPassword";
+        public static final String sshHost = "sshHost";
+        public static final String sshPort = "sshPort";
+        public static final String initialLocalPort = "initialLocalPort";
+        public static final String useKeyFile = "useKeyFile";
+        public static final String keyFilePath = "keyFilePath";
+    }
+
     public static final class EPS {
         public static final String activePrice = "activePowerPrice";
         public static final String reactivePrice = "reactivePowerPrice";
@@ -232,9 +255,9 @@ public final class ParameterConstants {
         public static final String logIntervals = "logIntervalls";
         public static final String logDevices = "logDevices";
         public static final String logBaseload = "logBaseload";
-        public static final String logHotWater = "logHotWater";
+        public static final String logThermal = "logThermal";
         public static final String logWaterTank = "logWaterTank";
-        public static final String logGA = "logGA";
+        public static final String logEA = "logEA";
         public static final String logSmartHeater = "logSmartHeater";
         public static final String loggingIntervals = "loggingIntervalls";
     }

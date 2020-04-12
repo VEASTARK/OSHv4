@@ -41,9 +41,9 @@ public abstract class constructMultipleData {
     public static boolean logIntervals;
     public static boolean logDevices;
     public static boolean logDetailedPower;
-    public static boolean logHotWater;
+    public static boolean logThermal;
     public static final boolean logWaterTank = true;
-    public static final boolean logGA = true;
+    public static final boolean logEA = true;
     public static boolean logSmartHeater;
     static final BatteryOrHeating[] insertHeatingElementOrBatteryStorage = {
             BatteryOrHeating.NONE,

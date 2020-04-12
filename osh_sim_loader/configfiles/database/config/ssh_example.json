@@ -1,0 +1,14 @@
+{
+  "identifier": "SSH_EXAMPLE",
+  "type": "tunneled",
+  "serverName": "db_server_name",
+  "serverPort": "db_server_port",
+  "serverScheme": "db_scheme",
+  "databaseUser": "db_user",
+  "databasePW": "db_password",
+  "sshUser": "ssh_user",
+  "sshPassword": "ssh_password",
+  "sshHost": "ssh_host",
+  "sshPort": "ssh_port",
+  "initialLocalPort": "local_port"
+}

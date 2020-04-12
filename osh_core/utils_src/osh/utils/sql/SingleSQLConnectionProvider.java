@@ -1,12 +1,14 @@
 package osh.utils.sql;
 
 import com.jcraft.jsch.JSchException;
+import osh.utils.string.ParameterConstants.Database;
 
 import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
 /**
  * @author Sebastian Kramer
@@ -15,9 +17,9 @@ public class SingleSQLConnectionProvider {
 
     //test statement for mysql that does not depend on tables
     protected static final String testStatement = "SELECT 1";
-    protected final String databaseServerName;
-    protected final int databaseServerPort;
-    protected final String databaseServerScheme;
+    protected final String serverName;
+    protected final int serverPort;
+    protected final String serverScheme;
 
     protected final String databaseUser;
     protected final String databasePW;
@@ -27,34 +29,28 @@ public class SingleSQLConnectionProvider {
     protected Connection conn;
     protected boolean useSSL;
 
-    public SingleSQLConnectionProvider(String databaseServerName, int databaseServerPort, String databaseServerScheme, String databaseUser,
-                                       String databasePW) {
+    public SingleSQLConnectionProvider(Map<String, String> params) {
         super();
-        this.databaseServerName = databaseServerName;
-        this.databaseServerPort = databaseServerPort;
-        this.databaseServerScheme = databaseServerScheme;
-        this.databaseUser = databaseUser;
-        this.databasePW = databasePW;
-        this.trustStorePath = null;
-        this.trustStorePW = null;
-    }
+        this.serverName = params.get(Database.serverName);
+        this.serverPort = Integer.parseInt(params.get(Database.serverPort));
+        this.serverScheme = params.get(Database.serverScheme);
+        this.databaseUser = params.get(Database.databaseUser);
+        this.databasePW = params.get(Database.databasePW);
 
-    public SingleSQLConnectionProvider(String databaseServerName, int databaseServerPort, String databaseServerScheme, String databaseUser,
-                                       String databasePW, boolean useSSL, String trustStorePath, String trustStorePW) {
-        super();
-        this.databaseServerName = databaseServerName;
-        this.databaseServerPort = databaseServerPort;
-        this.databaseServerScheme = databaseServerScheme;
-        this.databaseUser = databaseUser;
-        this.databasePW = databasePW;
-        this.useSSL = useSSL;
-        this.trustStorePath = trustStorePath;
-        this.trustStorePW = trustStorePW;
+        if (params.containsKey(Database.useSSL)) {
+            this.useSSL = true;
+            this.trustStorePath = params.get(Database.truststorePath);
+            this.trustStorePW = params.get(Database.truststorePW);
+        } else {
+            this.useSSL = false;
+            this.trustStorePath = null;
+            this.trustStorePW = null;
+        }
     }
 
     protected void initConnection() throws ConnectException {
         try {
-            String url = "jdbc:mysql://" + this.databaseServerName + ":" + this.databaseServerPort + "/" + this.databaseServerScheme;
+            String url = "jdbc:mysql://" + this.serverName + ":" + this.serverPort + "/" + this.serverScheme;
 
             if (this.useSSL) {
                 url += "?useSSL=true&requireSSL=true";

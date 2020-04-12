@@ -21,6 +21,7 @@ configurations {
 
 dependencies {
 
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     implementation group: 'com.jcraft', name: 'jsch'
     implementation group: 'it.unimi.dsi', name: 'fastutil'
     implementation group: 'javax.xml.bind', name: 'jaxb-api'

@@ -17,7 +17,6 @@ import java.util.UUID;
 public class EpsPlsStateExchange extends StateExchange {
 
     private final CostConfiguration costConfiguration;
-    private final double plsOverLimitFactor;
     private final boolean epsPlsChanged;
     private final EnumMap<AncillaryCommodity, PriceSignal> ps;
     private final EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
@@ -26,10 +25,6 @@ public class EpsPlsStateExchange extends StateExchange {
     /**
      * CONSTRUCTOR
      *
-     * @param sender
-     * @param timestamp
-     * @param ps
-     * @param pwrLimit
      */
     public EpsPlsStateExchange(
             UUID sender,
@@ -37,14 +32,12 @@ public class EpsPlsStateExchange extends StateExchange {
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit,
             CostConfiguration costConfiguration,
-            double plsOverLimitFactor,
             boolean epsPlsChanged) {
         super(sender, timestamp);
 
         this.ps = ps;
         this.pwrLimit = pwrLimit;
-        this.costConfiguration = costConfiguration.createCopy();
-        this.plsOverLimitFactor = plsOverLimitFactor;
+        this.costConfiguration = costConfiguration.clone();
         this.epsPlsChanged = epsPlsChanged;
     }
 
@@ -61,14 +54,9 @@ public class EpsPlsStateExchange extends StateExchange {
         return this.costConfiguration;
     }
 
-    public double getPlsOverLimitFactor() {
-        return this.plsOverLimitFactor;
-    }
-
     public boolean isEpsPlsChanged() {
         return this.epsPlsChanged;
     }
-
 
     @Override
     public EpsPlsStateExchange clone() {
@@ -80,8 +68,7 @@ public class EpsPlsStateExchange extends StateExchange {
                 this.getTimestamp(),
                 this.ps,
                 this.pwrLimit,
-                this.costConfiguration,
-                this.plsOverLimitFactor,
+                this.costConfiguration.clone(),
                 this.epsPlsChanged);
     }
 

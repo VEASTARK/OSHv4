@@ -24,9 +24,9 @@ import osh.registry.Registry.ComRegistry;
 import osh.registry.Registry.DriverRegistry;
 import osh.registry.Registry.OCRegistry;
 import osh.registry.TimeRegistry;
-import osh.simulation.DatabaseLoggerThread;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.SimulationEngine;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationEngineException;
 import osh.utils.xml.XMLSerialization;
 
@@ -495,36 +495,6 @@ public class OSHLifeCycleManager {
 
     public SimulationEngine getSimEngine() {
         return this.simEngine;
-    }
-
-    public void loadScreenplay(String screenplayFileName) throws LifeCycleManagerException {
-        if (this.ealManager != null) {
-            try {
-                this.ealManager.loadScreenplay(screenplayFileName);
-            } catch (SimulationEngineException | HALManagerException e) {
-                throw new LifeCycleManagerException(e);
-            }
-        } else {
-            throw new LifeCycleManagerException("Unable to load Screenplay with this EAL");
-        }
-    }
-
-    public void initDatabaseLogging(boolean isDatabaseLogging, String tableName,
-                                    ZonedDateTime forcedStartTime, int[] databasesToLog) throws LifeCycleManagerException {
-        if (isDatabaseLogging) {
-            DatabaseLoggerThread.initLogger(tableName,
-                    this.theOrganicSmartHome.getOSHStatus().getLogDir(),
-                    forcedStartTime,
-                    databasesToLog);
-
-            if (this.ealManager != null) {
-                try {
-                    this.ealManager.initDatabaseLogging();
-                } catch (HALManagerException e) {
-                    throw new LifeCycleManagerException(e);
-                }
-            }
-        }
     }
 
     public OSHSimulationResults startSimulation(long simulationDuration) throws LifeCycleManagerException, OSHException {

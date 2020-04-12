@@ -8,7 +8,7 @@ import osh.configuration.oc.AlgorithmType;
 import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
-import osh.simulation.DatabaseLoggerThread;
+import osh.datatypes.logging.general.EALogObject;
 import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.io.PrintWriter;
@@ -238,8 +238,8 @@ public class EALogger implements IEALogger {
     }
 
     @Override
-    public void shutdown() {
-        if (this.log && DatabaseLoggerThread.isIsLogToDatabase()) {
+    public EALogObject shutdown() {
+        if (this.log && DatabaseLoggerThread.isLogToDatabase()) {
             this.generationsUsed /= this.optimizationCounter;
 
             for (int i = 0; i < this.objectiveCount; i++) {
@@ -255,10 +255,13 @@ public class EALogger implements IEALogger {
                     cervisiaResults[i] = this.cervisiaInformation[i][0] / this.cervisiaInformation[i][1];
                 }
             }
-
-            DatabaseLoggerThread.enqueueGA(this.generationsUsed, this.fitnessChange, this.fitnessSpread,
-                    this.homogeneity, this.optimizationCounter, cervisiaResults);
+            return new EALogObject(UUID.randomUUID(), null, this.generationsUsed,
+                    this.fitnessChange, this.fitnessSpread, this.homogeneity,
+                    this.optimizationCounter,
+                    cervisiaResults);
         }
+
+        return null;
     }
 
     /* [0][0] = homogeneity
