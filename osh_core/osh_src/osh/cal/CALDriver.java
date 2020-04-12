@@ -24,14 +24,9 @@ public class CALDriver extends OSHComponent implements ITimeRegistryListener, IL
     private final UUID deviceID;
     private OSHParameterCollection comConfig;
 
-    private ComRegistry comRegistry;
-
     /**
      * CONSTRUCTOR
      *
-     * @param osh
-     * @param deviceID
-     * @param comConfig
      */
     public CALDriver(
             IOSH osh,
@@ -55,7 +50,7 @@ public class CALDriver extends OSHComponent implements ITimeRegistryListener, IL
     }
 
     protected ComRegistry getComRegistry() {
-        return this.comRegistry;
+        return this.getOSH().getComRegistry();
     }
 
     /**
@@ -84,11 +79,7 @@ public class CALDriver extends OSHComponent implements ITimeRegistryListener, IL
 
     @Override
     public void onSystemIsUp() throws OSHException {
-        this.comRegistry = this.getOSH().getComRegistry();
-
-        //...in case of use please override and implement things like:
-//		getTimer().registerComponent(this, 1);
-//		getDriverRegistry().registerStateChangeListener(ComDriverDetails.class, this);
+        //...in case of use please override
     }
 
     @Override

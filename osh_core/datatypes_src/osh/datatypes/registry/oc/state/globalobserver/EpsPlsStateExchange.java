@@ -17,8 +17,6 @@ import java.util.UUID;
 public class EpsPlsStateExchange extends StateExchange {
 
     private final CostConfigurationContainer costConfiguration;
-    private final double plsUpperOverLimitFactor;
-    private final double plsLowerOverLimitFactor;
     private final boolean epsPlsChanged;
     private final EnumMap<AncillaryCommodity, PriceSignal> ps;
     private final EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit;
@@ -27,10 +25,6 @@ public class EpsPlsStateExchange extends StateExchange {
     /**
      * CONSTRUCTOR
      *
-     * @param sender
-     * @param timestamp
-     * @param ps
-     * @param pwrLimit
      */
     public EpsPlsStateExchange(
             UUID sender,
@@ -38,16 +32,12 @@ public class EpsPlsStateExchange extends StateExchange {
             EnumMap<AncillaryCommodity, PriceSignal> ps,
             EnumMap<AncillaryCommodity, PowerLimitSignal> pwrLimit,
             CostConfigurationContainer costConfiguration,
-            double plsUpperOverLimitFactor,
-            double plsLowerOverLimitFactor,
             boolean epsPlsChanged) {
         super(sender, timestamp);
 
         this.ps = ps;
         this.pwrLimit = pwrLimit;
         this.costConfiguration = costConfiguration.clone();
-        this.plsUpperOverLimitFactor = plsUpperOverLimitFactor;
-        this.plsLowerOverLimitFactor = plsLowerOverLimitFactor;
         this.epsPlsChanged = epsPlsChanged;
     }
 
@@ -64,19 +54,9 @@ public class EpsPlsStateExchange extends StateExchange {
         return this.costConfiguration;
     }
 
-    public double getPlsUpperOverLimitFactor() {
-        return this.plsUpperOverLimitFactor;
-    }
-
-    public double getPlsLowerOverLimitFactor() {
-        return this.plsLowerOverLimitFactor;
-    }
-
-
     public boolean isEpsPlsChanged() {
         return this.epsPlsChanged;
     }
-
 
     @Override
     public EpsPlsStateExchange clone() {
@@ -88,9 +68,7 @@ public class EpsPlsStateExchange extends StateExchange {
                 this.getTimestamp(),
                 this.ps,
                 this.pwrLimit,
-                this.costConfiguration,
-                this.plsUpperOverLimitFactor,
-                this.plsLowerOverLimitFactor,
+                this.costConfiguration.clone(),
                 this.epsPlsChanged);
     }
 

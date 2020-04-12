@@ -40,6 +40,35 @@ public class OSHSimulationResults extends SimulationResults {
     protected double totalCosts;
     protected double autoConsumptionCosts;
 
+    public static String[] getDoubleArrayKeys() {
+        String[] ret = new String[21];
+
+        ret[0] = "ActivePowerConsumption";
+        ret[1] = "ActivePowerPV";
+        ret[2] = "ActivePowerPVAutoConsumption";
+        ret[3] = "ActivePowerPVFeedIn";
+        ret[4] = "ActivePowerCHP";
+        ret[5] = "ActivePowerCHPAutoConsumption";
+        ret[6] = "ActivePowerCHPFeedIn";
+        ret[7] = "ActivePowerBatteryCharging";
+        ret[8] = "ActivePowerBatteryDischarging";
+        ret[9] = "ActivePowerBatteryAutoConsumption";
+        ret[10] = "ActivePowerBatteryFeedIn";
+        ret[11] = "ActivePowerExternal";
+        ret[12] = "ReactivePowerExternal";
+        ret[13] = "GasPowerExternal";
+        ret[14] = "EpsCosts";
+        ret[15] = "PlsCosts";
+        ret[16] = "GasCosts";
+        ret[17] = "FeedInCostsPV";
+        ret[17] = "FeedInCostsPV";
+        ret[18] = "FeedInCostsCHP";
+        ret[19] = "AutoConsumptionCosts";
+        ret[20] = "TotalCosts";
+
+        return ret;
+    }
+
     public double getTotalCosts() {
         return this.totalCosts;
     }
@@ -261,44 +290,43 @@ public class OSHSimulationResults extends SimulationResults {
         this.autoConsumptionCosts = result.autoConsumptionCosts - this.autoConsumptionCosts;
     }
 
+    public Double[] getContentsAsDoubleArray() {
+        Double[] ret = new Double[21];
+
+        ret[0] = this.getActivePowerConsumption();
+        ret[1] = this.getActivePowerPV();
+        ret[2] = this.getActivePowerPVAutoConsumption();
+        ret[3] = this.getActivePowerPVFeedIn();
+        ret[4] = this.getActivePowerCHP();
+        ret[5] = this.getActivePowerCHPAutoConsumption();
+        ret[6] = this.getActivePowerCHPFeedIn();
+        ret[7] = this.getActivePowerBatteryCharging();
+        ret[8] = this.getActivePowerBatteryDischarging();
+        ret[9] = this.getActivePowerBatteryAutoConsumption();
+        ret[10] = this.getActivePowerBatteryFeedIn();
+        ret[11] = this.getActivePowerExternal();
+        ret[12] = this.getReactivePowerExternal();
+        ret[13] = this.getGasPowerExternal();
+        ret[14] = this.epsCosts;
+        ret[15] = this.plsCosts;
+        ret[16] = this.gasCosts;
+        ret[17] = this.feedInCostsPV;
+        ret[18] = this.feedInCostsCHP;
+        ret[19] = this.autoConsumptionCosts;
+        ret[20] = this.totalCosts;
+
+        return ret;
+    }
+
     public void logCurrentStateToFile(File file, long runTime) throws FileNotFoundException {
         PrintWriter pwrFull = new PrintWriter(file);
         pwrFull.println("Runtime;" + runTime);
-        pwrFull.println("ActivePowerConsumption;"
-                + this.getActivePowerConsumption());
-        pwrFull.println("ActivePowerPV;"
-                + this.getActivePowerPV());
-        pwrFull.println("ActivePowerPVAutoConsumption;"
-                + this.getActivePowerPVAutoConsumption());
-        pwrFull.println("ActivePowerPVFeedIn;"
-                + this.getActivePowerPVFeedIn());
-        pwrFull.println("ActivePowerCHP;"
-                + this.getActivePowerCHP());
-        pwrFull.println("ActivePowerCHPAutoConsumption;"
-                + this.getActivePowerCHPAutoConsumption());
-        pwrFull.println("ActivePowerCHPFeedIn;"
-                + this.getActivePowerCHPFeedIn());
-        pwrFull.println("ActivePowerBatteryCharging;"
-                + this.getActivePowerBatteryCharging());
-        pwrFull.println("ActivePowerBatteryDischarging;"
-                + this.getActivePowerBatteryDischarging());
-        pwrFull.println("ActivePowerBatteryAutoConsumption;"
-                + this.getActivePowerBatteryAutoConsumption());
-        pwrFull.println("ActivePowerBatteryFeedIn;"
-                + this.getActivePowerBatteryFeedIn());
-        pwrFull.println("ActivePowerExternal;"
-                + this.getActivePowerExternal());
-        pwrFull.println("ReactivePowerExternal;"
-                + this.getReactivePowerExternal());
-        pwrFull.println("GasPowerExternal;"
-                + this.getGasPowerExternal());
-        pwrFull.println("EpsCosts;" + this.epsCosts);
-        pwrFull.println("PlsCosts;" + this.plsCosts);
-        pwrFull.println("GasCosts;" + this.gasCosts);
-        pwrFull.println("FeedInCostsPV;" + this.feedInCostsPV);
-        pwrFull.println("FeedInCostsCHP;" + this.feedInCostsCHP);
-        pwrFull.println("AutoConsumptionCosts;" + this.autoConsumptionCosts);
-        pwrFull.println("TotalCosts;" + this.totalCosts);
+        String[] keys = OSHSimulationResults.getDoubleArrayKeys();
+        Double[] values = this.getContentsAsDoubleArray();
+
+        for (int i = 0; i < keys.length; i++) {
+            pwrFull.println(keys[i] + ";" + values[i]);
+        }
 
         pwrFull.close();
     }

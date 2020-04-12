@@ -32,20 +32,16 @@ public class RegularCostFunction {
     /**
      * Constructs this cost function with the given cost configuration and all relevant signals.
      *
-     * @param upperOverlimitFactor the overlimit factor for upper pls violations
-     * @param lowerOverlimitFactor the overlimit factor for lower pls violations
      * @param costConfiguration the cost configuration
      * @param priceSignals the price signals
      * @param powerLimitSignals the power limit signals
-     * @param now the current time in epoch seconds
      */
-    public RegularCostFunction(double upperOverlimitFactor, double lowerOverlimitFactor,
-                               CostConfigurationContainer costConfiguration, EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
-                               EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals, long now) {
+    public RegularCostFunction(CostConfigurationContainer costConfiguration, EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
+                               EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals) {
 
         this.costConfiguration = costConfiguration;
-        this.upperOverlimitFactor = upperOverlimitFactor;
-        this.lowerOverlimitFactor = lowerOverlimitFactor;
+        this.upperOverlimitFactor = costConfiguration.getUpperOverlimitFactor();
+        this.lowerOverlimitFactor = costConfiguration.getLowerOverlimitFactor();
         this.priceSignals = priceSignals;
         this.powerLimitSignals = powerLimitSignals;
     }

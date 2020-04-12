@@ -5,6 +5,7 @@ import org.uma.jmetal.solution.Solution;
 import osh.configuration.oc.AlgorithmType;
 import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
+import osh.datatypes.logging.general.EALogObject;
 import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.io.PrintWriter;
@@ -47,8 +48,10 @@ public interface IEALogger {
 
     /**
      * Shuts the logger down and commits all information to the database (if configured).
+     *
+     * @return the log-object for committal to the database
      */
-    void shutdown();
+    EALogObject shutdown();
 
     /**
      * Attaches an additional print writer to this loger where evry log-message will be replicated.

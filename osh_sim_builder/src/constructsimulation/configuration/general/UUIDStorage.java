@@ -21,6 +21,8 @@ public class UUIDStorage {
     public static UUID plsSignalUuid = UUID.fromString("99999999-c281-4713-8bbf-a8eaf3f8e7d6");
     public static UUID comDeviceIdDoF = UUID.fromString("32c8b193-6c86-4abd-be5a-2e49fee11535");
     public static UUID comDeviceIdGui = UUID.fromString("6e95bc70-57cb-11e1-b86c-0800200c9a66");
+    public static UUID energyLoggerUuid = UUID.fromString("0dd65640-af28-44eb-9a6c-ecf79b5f020b");
+    public static UUID generalLoggerUuid = UUID.fromString("0dd65640-af28-44eb-9a6c-ecf79b5f020c");
 
     // ### Baseload
     public static UUID baseloadUUID = UUID.fromString("00000000-0000-5348-424C-000000000000"); // SH-BL

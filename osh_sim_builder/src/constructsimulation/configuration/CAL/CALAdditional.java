@@ -1,6 +1,8 @@
 package constructsimulation.configuration.CAL;
 
+import constructsimulation.configuration.CAL.additional.EnergyLogger;
 import constructsimulation.configuration.CAL.additional.GUI;
+import constructsimulation.configuration.CAL.additional.GeneralLogger;
 import osh.configuration.cal.AssignedComDevice;
 
 import java.util.ArrayList;
@@ -16,13 +18,23 @@ public class CALAdditional {
     //#########################################################
     //########  Type of additional CAL-Drivers to use  ########
     //#########################################################
-    public static boolean useGUI = true;
+    public static boolean useGUI = false;
+    public static final boolean useEnergyLogger = true;
+    public static final boolean useLoggerCom = true;
 
 
     private static void applyConfigurations() {
         //####################
         //#### GUI ####
         //####################
+
+        //######################
+        //#### EnergyLogger ####
+        //######################
+
+        //###################
+        //#### LoggerCom ####
+        //###################
 
     }
 
@@ -37,6 +49,12 @@ public class CALAdditional {
         List<AssignedComDevice> additional = new ArrayList<>();
         if (useGUI) {
             additional.add(GUI.generateGUI());
+        }
+        if (useEnergyLogger) {
+            additional.add(EnergyLogger.generateEnergyLogger());
+        }
+        if (useLoggerCom) {
+            additional.add(GeneralLogger.generateLogger());
         }
 
         return additional;

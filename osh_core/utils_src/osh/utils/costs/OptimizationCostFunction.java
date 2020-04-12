@@ -36,19 +36,17 @@ public class OptimizationCostFunction {
     /**
      * Constructs this cost function with the given cost configuration and all relevant signals.
      *
-     * @param upperOverlimitFactor the overlimit factor for upper pls violations
-     * @param lowerOverlimitFactor the overlimit factor for lower pls violations
      * @param costConfiguration the cost configuration
      * @param priceSignals the price signals
      * @param powerLimitSignals the power limit signals
      * @param now the current time in epoch seconds
      */
-    public OptimizationCostFunction(double upperOverlimitFactor, double lowerOverlimitFactor,
-                                    CostConfigurationContainer costConfiguration, Map<AncillaryCommodity, PriceSignal> priceSignals,
+    public OptimizationCostFunction(CostConfigurationContainer costConfiguration, Map<AncillaryCommodity, PriceSignal> priceSignals,
                                     Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals, long now) {
 
         this.costConfiguration = costConfiguration;
-        CalculationFunctions.setOverlimitFactors(upperOverlimitFactor, lowerOverlimitFactor);
+        CalculationFunctions.setOverlimitFactors(costConfiguration.getUpperOverlimitFactor(),
+                costConfiguration.getLowerOverlimitFactor());
 
         this.initializeConfigurations();
         this.processSignals(priceSignals, powerLimitSignals, now);
@@ -490,15 +488,6 @@ public class OptimizationCostFunction {
             default:
                 return null;
         }
-    }
-
-    private double getSignalValueAt(KeysValuesTuple signalValues, long time) {
-        int index = Arrays.binarySearch(signalValues.keys, time);
-        if (index < 0) index = ((index + 1) * -1) - 1;
-        if (index < 0 || index >= signalValues.keys.length) {
-            throw new IllegalArgumentException();
-        }
-        return signalValues.values[index];
     }
 
     /**

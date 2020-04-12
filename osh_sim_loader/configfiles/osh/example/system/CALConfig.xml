@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<CALConfiguration xmlns:ns2="http://osh/configuration/system" xmlns="http://osh/configuration/cal">
-<!--    <assignedComDevices>-->
-<!--        <comDeviceID>6e95bc70-57cb-11e1-b86c-0800200c9a66</comDeviceID>-->
-<!--        <comDeviceType>GUI</comDeviceType>-->
-<!--        <comManagerClassName>osh.mgmt.commanager.GuiComManager</comManagerClassName>-->
-<!--        <comDriverClassName>osh.comdriver.simulation.GuiComDriver</comDriverClassName>-->
-<!--    </assignedComDevices>-->
+<CALConfiguration xmlns="http://osh/configuration/cal" xmlns:ns2="http://osh/configuration/system">
     <assignedComDevices>
         <comDeviceID>0909624f-c281-4713-8bbf-a8eaf3f8e7d6</comDeviceID>
         <comDeviceType>MULTI_COMMODITY</comDeviceType>
@@ -22,38 +16,12 @@
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
         <comDriverParameters>
-            <ns2:parameterName>naturalGasPowerPrice</ns2:parameterName>
-            <ns2:parameterValue>8.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </comDriverParameters>
-        <comDriverParameters>
             <ns2:parameterName>activePowerFeedInCHP</ns2:parameterName>
             <ns2:parameterValue>9.0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
         <comDriverParameters>
-            <ns2:parameterName>resolutionOfPriceSignal</ns2:parameterName>
-            <ns2:parameterValue>900</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </comDriverParameters>
-        <comDriverParameters>
-            <ns2:parameterName>signalConstantPeriod</ns2:parameterName>
-            <ns2:parameterValue>900</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </comDriverParameters>
-        <comDriverParameters>
-            <ns2:parameterName>activePowerPrices</ns2:parameterName>
-            <ns2:parameterValue>0=26.10,21600=35.01,43200=39.58,46800=31.48,61200=35.01,68400=31.48,79200=26.10
-            </ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </comDriverParameters>
-        <comDriverParameters>
             <ns2:parameterName>reactivePowerPrice</ns2:parameterName>
-            <ns2:parameterValue>0.0</ns2:parameterValue>
-            <ns2:parameterType>String</ns2:parameterType>
-        </comDriverParameters>
-        <comDriverParameters>
-            <ns2:parameterName>activePowerAutoConsumptionPV</ns2:parameterName>
             <ns2:parameterValue>0.0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
@@ -64,9 +32,37 @@
         </comDriverParameters>
         <comDriverParameters>
             <ns2:parameterName>ancillaryCommodities</ns2:parameterName>
-            <ns2:parameterValue>[activepowerexternal, reactivepowerexternal, naturalgaspowerexternal,
-                pvactivepowerfeedin, chpactivepowerfeedin, pvactivepowerautoconsumption, chpactivepowerautoconsumption]
-            </ns2:parameterValue>
+            <ns2:parameterValue>[activepowerexternal, reactivepowerexternal, naturalgaspowerexternal, pvactivepowerfeedin, chpactivepowerfeedin, pvactivepowerautoconsumption, chpactivepowerautoconsumption]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>resolutionOfPriceSignal</ns2:parameterName>
+            <ns2:parameterValue>900</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>naturalGasPowerPrice</ns2:parameterName>
+            <ns2:parameterValue>8.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>signalConstantPeriod</ns2:parameterName>
+            <ns2:parameterValue>900</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>activePowerPrice</ns2:parameterName>
+            <ns2:parameterValue>30.0</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>activePowerPrices</ns2:parameterName>
+            <ns2:parameterValue>0=26.10,21600=35.01,43200=39.58,46800=31.48,61200=35.01,68400=31.48,79200=26.10</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>activePowerAutoConsumptionPV</ns2:parameterName>
+            <ns2:parameterValue>0.0</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
         <comDriverParameters>
@@ -108,6 +104,73 @@
         <comDriverParameters>
             <ns2:parameterName>activeLowerLimit</ns2:parameterName>
             <ns2:parameterValue>-3000</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+    </assignedComDevices>
+    <assignedComDevices>
+        <comDeviceID>0dd65640-af28-44eb-9a6c-ecf79b5f020b</comDeviceID>
+        <comDeviceType>GENERALLOGGER</comDeviceType>
+        <comManagerClassName>osh.mgmt.commanager.EnergyLoggingComManager</comManagerClassName>
+        <comDriverClassName>osh.comdriver.logging.EnergyLoggingComDriver</comDriverClassName>
+    </assignedComDevices>
+    <assignedComDevices>
+        <comDeviceID>0dd65640-af28-44eb-9a6c-ecf79b5f020c</comDeviceID>
+        <comDeviceType>GENERALLOGGER</comDeviceType>
+        <comManagerClassName>osh.core.com.DummyComManager</comManagerClassName>
+        <comDriverClassName>osh.comdriver.logging.OSHLoggingComDriver</comDriverClassName>
+        <comDriverParameters>
+            <ns2:parameterName>logEpsPls</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logSmartHeater</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>loggingIntervalls</ns2:parameterName>
+            <ns2:parameterValue>[[0, 0, 1], [0, 1, 0], [1, 0, 0]]</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logEA</ns2:parameterName>
+            <ns2:parameterValue>true</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logDetailedPower</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logWaterTank</ns2:parameterName>
+            <ns2:parameterValue>true</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logH0</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logThermal</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logDevices</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logIntervalls</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
+            <ns2:parameterType>String</ns2:parameterType>
+        </comDriverParameters>
+        <comDriverParameters>
+            <ns2:parameterName>logBaseload</ns2:parameterName>
+            <ns2:parameterValue>false</ns2:parameterValue>
             <ns2:parameterType>String</ns2:parameterType>
         </comDriverParameters>
     </assignedComDevices>

@@ -3,11 +3,13 @@ package osh.driver.simulation;
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.devices.SmartHeaterLogObject;
+import osh.datatypes.logging.devices.WaterTankLogObject;
 import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;
 import osh.hal.exchange.HotWaterTankObserverExchange;
-import osh.simulation.DatabaseLoggerThread;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.simulation.exception.SimulationSubjectException;
 import osh.simulation.screenplay.SubjectAction;
 import osh.utils.physics.PhysicalConstants;
@@ -147,7 +149,9 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
             this.demandLogging /= PhysicalConstants.factor_wsToKWh;
             this.supplyLogging /= PhysicalConstants.factor_wsToKWh;
 
-            DatabaseLoggerThread.enqueueWaterTank(this.temperatureLogging, this.demandLogging, this.supplyLogging);
+            this.getDriverRegistry().publish(WaterTankLogObject.class, new WaterTankLogObject(this.getUUID(), this.getTimeDriver().getCurrentTime(),
+                    Commodity.HEATINGHOTWATERPOWER, this.temperatureLogging, this.demandLogging, this.supplyLogging,
+                    this.waterTank.getCurrentWaterTemperature()));
         }
     }
 
