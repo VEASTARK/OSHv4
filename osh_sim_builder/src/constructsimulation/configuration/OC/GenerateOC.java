@@ -48,8 +48,6 @@ public class GenerateOC {
 
         Map<String, String> params = new HashMap<>();
 
-        params.put(ParameterConstants.Optimization.overlimitFactor, String.valueOf(CostConfig.overLimitFactor));
-
         params.put(ParameterConstants.Optimization.stepSize, String.valueOf(escStepSize));
 
         params.put(ParameterConstants.Optimization.hotWaterTankUUID, String.valueOf(UUIDStorage.hotWaterTankUUID));

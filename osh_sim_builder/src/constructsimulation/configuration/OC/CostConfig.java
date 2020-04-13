@@ -12,7 +12,7 @@ public class CostConfig {
     public static double overLimitFactor = 1.0;
 
     public static ReactiveCosts reactiveCosts = ReactiveCosts.NONE;
-    public static ActivePlsCosts activePlsCosts = ActivePlsCosts.NONE;
+    public static ActivePlsCosts activePlsCosts = ActivePlsCosts.FULL;
     public static ReactivePlsCosts reactivePlsCosts = ReactivePlsCosts.NONE;
     public static FeedInCosts feedInCosts = FeedInCosts.BOTH;
     public static AutoConsumptionCosts autoConsumptionCosts = AutoConsumptionCosts.BOTH;
@@ -34,6 +34,7 @@ public class CostConfig {
         costConfig.setAutoConsumptionCosts(autoConsumptionCosts);
         costConfig.setSelfSufficiencyRatio(selfSufficiencyRatio);
         costConfig.setSelfConsumptionRatio(selfConsumptionRatio);
+        costConfig.setOverlimitFactor(overLimitFactor);
 
         return costConfig;
     }

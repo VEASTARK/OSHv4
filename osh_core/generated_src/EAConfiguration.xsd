@@ -14,7 +14,7 @@
             <element maxOccurs="unbounded" name="eaObjectives" type="tns:EAObjectives"/>
             <element minOccurs="0" name="solutionRanking" type="tns:SolutionRanking"/>
             <element minOccurs="0" name="loggingConfiguration" type="tns:LoggingConfiguration"/>
-            <element minOccurs="0" name="executeAlgorithmsParallel" type="boolean"/>
+            <element name="executeAlgorithmsParallel" type="boolean"/>
         </sequence>
     </complexType>
 

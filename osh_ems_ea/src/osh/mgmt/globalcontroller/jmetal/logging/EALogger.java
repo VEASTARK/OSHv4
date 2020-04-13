@@ -9,6 +9,7 @@ import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.logging.general.EALogObject;
+import osh.simulation.database.DatabaseLoggerThread;
 import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.io.PrintWriter;
@@ -255,7 +256,7 @@ public class EALogger implements IEALogger {
                     cervisiaResults[i] = this.cervisiaInformation[i][0] / this.cervisiaInformation[i][1];
                 }
             }
-            return new EALogObject(UUID.randomUUID(), null, this.generationsUsed,
+            return new EALogObject(null, null, this.generationsUsed,
                     this.fitnessChange, this.fitnessSpread, this.homogeneity,
                     this.optimizationCounter,
                     cervisiaResults);

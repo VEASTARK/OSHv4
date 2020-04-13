@@ -38,7 +38,7 @@ public class RegularCostFunction {
                                EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals) {
 
         this.costConfiguration = costConfiguration;
-        this.overlimitFactor = costConfiguration;
+        this.overlimitFactor = costConfiguration.getOverlimitFactor();
         this.priceSignals = priceSignals;
         this.powerLimitSignals = powerLimitSignals;
     }

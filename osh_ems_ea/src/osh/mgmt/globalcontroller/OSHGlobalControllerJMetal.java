@@ -13,9 +13,11 @@ import osh.core.oc.LocalController;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
+import osh.datatypes.logging.general.EALogObject;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
+import osh.datatypes.registry.oc.details.energy.CostConfigurationStateExchange;
 import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
@@ -35,7 +37,6 @@ import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.database.DatabaseLoggerThread;
-import osh.utils.CostConfigurationContainer;
 import osh.utils.costs.OptimizationCostFunction;
 import osh.utils.string.ParameterConstants;
 
@@ -57,7 +58,6 @@ public class OSHGlobalControllerJMetal
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private boolean newEpsPlsReceived;
-    private double overlimitFactor;
     private ZonedDateTime lastTimeSchedulingStarted;
     private final OSHRandom optimizationMainRandomGenerator;
     private final AlgorithmExecutor algorithmExecutor;
@@ -89,14 +89,6 @@ public class OSHGlobalControllerJMetal
             singleT.setParameterValue("" + true);
             singleT.setParameterType(Boolean.class.getName());
             this.eaConfiguration.getAlgorithms().forEach(c ->c.getAlgorithmParameters().add(singleT));
-        }
-
-        try {
-            this.overlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.overlimitFactor));
-        } catch (Exception e) {
-            this.overlimitFactor = 1.0;
-            this.getGlobalLogger().logWarning("Can't get overlimitFactor, using the default value: " + this.overlimitFactor);
         }
 
         long optimizationMainRandomSeed;
@@ -151,7 +143,7 @@ public class OSHGlobalControllerJMetal
 
         this.getOCRegistry().publish(CostConfigurationStateExchange.class,
                 new CostConfigurationStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
-                        this.costConfiguration.clone()));
+                        new CostConfiguration(this.costConfiguration)));
 
         this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
     }

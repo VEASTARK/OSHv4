@@ -88,7 +88,7 @@ public class EnergySolver {
      *
      * @return the best found solution in addition to (optional) logging information
      *
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if the file for the ea-log can't be found
      */
     public EAScheduleResult getSolution(
             InterdependentProblemPart<?, ?>[] problemParts,
@@ -157,7 +157,7 @@ public class EnergySolver {
             eaLogger.detachWriter();
 
             return this.constructDebuggingObjects(evaluator, bestSolution, optimizationStartPoint, optimizationEndPoint,
-                    true, distributor, problemParts);
+                    logExtensive, distributor, problemParts);
 
         } catch (OCManagerException | InterruptedException e) {
             e.printStackTrace();
@@ -190,7 +190,7 @@ public class EnergySolver {
                 //extract prediction about tank temperatures of the hot-water tank
                 if (part.getDeviceType() == DeviceTypes.HOTWATERSTORAGE) {
                     EAPredictionCommandExchange<TemperaturePrediction> prediction = (EAPredictionCommandExchange<TemperaturePrediction>) part.transformToFinalInterdependentPrediction(
-                            null,
+                            part.getUUID(),
                             part.getUUID(),
                             null);
 

@@ -15,6 +15,7 @@
             <element name="autoConsumptionCosts" type="tns:autoConsumptionCosts"/>
             <element name="selfSufficiencyRatio" type="tns:selfSufficiencyRatio"/>
             <element name="selfConsumptionRatio" type="tns:selfConsumptionRatio"/>
+            <element name="overlimitFactor" type="double"/>
         </sequence>
     </complexType>
 

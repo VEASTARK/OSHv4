@@ -72,17 +72,17 @@ public class GridInstance {
     public static void main(String[] args) throws FileNotFoundException, JAXBException {
 
         GridInstance[] gridsToWrite = {
-//				new SimulationElectricalEnergyGrid(),
-//				new SimulationThermalEnergyGrid(),
-                new ESHLElectricalEnergyGrid(),
-                new ESHLThermalEnergyGrid(),
+                new SimulationElectricalEnergyGrid(),
+                new SimulationThermalEnergyGrid(),
+//                new ESHLElectricalEnergyGrid(),
+//                new ESHLThermalEnergyGrid(),
         };
 
         String[] fileNames = {
-//				"data/SimulationElectricalGrid.xml",
-//				"data/SimulationThermalGrid.xml",
-                "data/ESHLElectricalGrid.xml",
-                "data/ESHLThermalGrid.xml",
+                "data/SimulationElectricalGrid.xml",
+                "data/SimulationThermalGrid.xml",
+//                "data/ESHLElectricalGrid.xml",
+//                "data/ESHLThermalGrid.xml",
         };
 
         for (int i = 0; i < gridsToWrite.length; i++) {

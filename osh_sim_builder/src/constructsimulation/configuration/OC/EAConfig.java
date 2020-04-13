@@ -42,9 +42,9 @@ public class EAConfig {
     //algorithms
     public static AlgorithmType[] algorithmsToUse = {
             AlgorithmType.G_GA,
-            AlgorithmType.SS_GA,
-            AlgorithmType.DE,
-            AlgorithmType.PSO
+//            AlgorithmType.SS_GA,
+//            AlgorithmType.DE,
+//            AlgorithmType.PSO
     };
 
     public static CrossoverType defaultRealCrossoverOperator = CrossoverType.SBX;
@@ -174,6 +174,8 @@ public class EAConfig {
 //            EAObjectives.SELF_CONSUMPTION_RATIO
     };
 
+    public static boolean executeAlgorithmsParallel = true;
+
     private static List<ConfigurationParameter> generateOperatorParameters(OperatorType type, String operatorName) {
         List<ConfigurationParameter> list = new ArrayList<>();
 
@@ -259,7 +261,7 @@ public class EAConfig {
         eaConfig.setSolutionRanking(solRank);
 
         eaConfig.getEaObjectives().addAll(Arrays.stream(eaObjectives).collect(Collectors.toList()));
-
+        eaConfig.setExecuteAlgorithmsParallel(executeAlgorithmsParallel);
 
         List<StoppingRuleConfiguration> stoppingRules = new ArrayList<>();
 

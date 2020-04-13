@@ -8,6 +8,7 @@ import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.AncillaryCommodityLoadProfile;
+import osh.datatypes.registry.oc.details.energy.AncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.simulation.energy.IDeviceEnergySubject;
 import osh.simulation.energy.SimEnergySimulationCore;

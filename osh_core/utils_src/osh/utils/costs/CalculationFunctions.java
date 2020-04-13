@@ -14,7 +14,7 @@ public class CalculationFunctions {
      *
      * @param overlimitFactor the overlimit factor for pls violations
      */
-    public static void setOverlimitFactors(double overlimitFactor) {
+    public static void setOverlimitFactor(double overlimitFactor) {
         CalculationFunctions.overlimitFactor = overlimitFactor;
     }
 

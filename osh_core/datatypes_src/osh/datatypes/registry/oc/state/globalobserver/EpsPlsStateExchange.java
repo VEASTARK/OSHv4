@@ -37,7 +37,7 @@ public class EpsPlsStateExchange extends StateExchange {
 
         this.ps = ps;
         this.pwrLimit = pwrLimit;
-        this.costConfiguration = costConfiguration.clone();
+        this.costConfiguration = new CostConfiguration(costConfiguration);
         this.epsPlsChanged = epsPlsChanged;
     }
 
@@ -68,7 +68,7 @@ public class EpsPlsStateExchange extends StateExchange {
                 this.getTimestamp(),
                 this.ps,
                 this.pwrLimit,
-                this.costConfiguration.clone(),
+                new CostConfiguration(this.costConfiguration),
                 this.epsPlsChanged);
     }
 

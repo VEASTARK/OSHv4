@@ -45,8 +45,7 @@ public class OptimizationCostFunction {
                                     Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals, long now) {
 
         this.costConfiguration = costConfiguration;
-        CalculationFunctions.setOverlimitFactors(costConfiguration.getUpperOverlimitFactor(),
-                costConfiguration.getLowerOverlimitFactor());
+        CalculationFunctions.setOverlimitFactor(costConfiguration.getOverlimitFactor());
 
         this.initializeConfigurations();
         this.processSignals(priceSignals, powerLimitSignals, now);

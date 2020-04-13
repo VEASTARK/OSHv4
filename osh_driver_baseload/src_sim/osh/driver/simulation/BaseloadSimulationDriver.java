@@ -131,7 +131,6 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
             if (pastDay.getDayOfYear() > 365) {
                 pastDay.minusDays(1);
             }
-            long pastDayStart = TimeConversion.getSecondsSinceYearStart(pastDay);
             for (int sec = 0; sec < 86400; sec++) {
                 int activeLoad = this.baseload.getActivePowerAt(pastDay.plusSeconds(sec));
 
