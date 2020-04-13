@@ -190,11 +190,6 @@ public final class ParameterConstants {
     }
 
     public static final class Optimization {
-        public static final String epsObjective = "epsoptimizationobjective";
-        public static final String plsObjective = "plsoptimizationobjective";
-        public static final String varObjective = "varoptimizationobjective";
-        public static final String upperOverlimitFactor = "upperOverlimitFactor";
-        public static final String lowerOverlimitFactor = "lowerOverlimitFactor";
         public static final String optimizationRandomSeed = "optimizationMainRandomSeed";
         public static final String stepSize = "stepSize";
         public static final String hotWaterTankUUID = "hotWaterTankUUID";
@@ -218,6 +213,9 @@ public final class ParameterConstants {
 
     public static final class EA_ALGORITHM {
         public static final String particlesToInform = "particlesToInform";
+        public static final String deF = "F";
+        public static final String deVariant = "variant";
+
         public static final String singleThreaded = "singleThreaded";
     }
 

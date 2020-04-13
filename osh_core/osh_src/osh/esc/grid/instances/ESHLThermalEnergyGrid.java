@@ -20,7 +20,7 @@ public class ESHLThermalEnergyGrid extends GridInstance {
         // ### Devices ###
 
         // Virtual Smart Meter
-        EnergySourceSink meter =
+        EnergySourceSink eshlMeter =
                 new EnergySourceSink(UUID.fromString("00000000-0000-0000-0000-000000000000"));
 
         // Combined Hot Water Storage
@@ -69,7 +69,7 @@ public class ESHLThermalEnergyGrid extends GridInstance {
         {
             EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     chp,
-                    meter,
+                    eshlMeter,
                     new ThermalConnection(Commodity.NATURALGASPOWER),
                     new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
@@ -126,39 +126,6 @@ public class ESHLThermalEnergyGrid extends GridInstance {
             this.relationList.add(relation);
         }
 
-        this.meters.add(meter);
+        this.meter = eshlMeter;
     }
-
-
-    //OLD!!
-    // HotWaterStorage
-
-//	private UUID centralHeatingId = UUID
-//			.fromString("34693aa1-4a15-4504-b6d8-931658b81f09");
-
-    // CHP
-
-//	private UUID chpId = UUID
-//			.fromString("05971dd0-34d1-40bb-9cb6-7a498460fcef");
-
-
-    // DomesticHotWater
-
-//	private UUID domesticHotWaterId = UUID
-//			.fromString("1cbd8276-e615-492e-ad2f-a51a8ffc353c");
-
-
-    // SpaceHeaters/Radiators
-//	private UUID heatingDeviceId_Bath = UUID
-//			.fromString("e3870611-34a4-4be5-8ab6-d50a11630881");
-//	private UUID heatingDeviceId_Bed1 = UUID
-//			.fromString("fa064943-fbd7-4f89-86c5-35dee53d49fa");
-//	private UUID heatingDeviceId_Bed2 = UUID
-//			.fromString("da9d58bd-d043-46d0-8398-19e95871f7ee");
-//	private UUID heatingDeviceId_Living1 = UUID
-//			.fromString("9220e62f-1bf4-48dd-9ffb-ff1a11dac4b2");
-//	private UUID heatingDeviceId_Living2 = UUID
-//			.fromString("c43e2ae7-4ee9-4530-b84c-b7cd8e261f28");
-
-
 }

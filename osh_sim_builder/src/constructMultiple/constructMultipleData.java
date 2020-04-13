@@ -1,6 +1,7 @@
 package constructMultiple;
 
 import constructsimulation.datatypes.EPSTypes;
+import osh.configuration.oc.*;
 import osh.datatypes.power.LoadProfileCompressionTypes;
 
 import java.util.ArrayList;
@@ -82,16 +83,34 @@ public abstract class constructMultipleData {
 //		5
     };
 
-    static final Integer[] epsOptimisationObjective = {
-//			3,
-            4,
+    static final ReactiveCosts[] reactiveTypes = {
+//            ReactiveCosts.FULL,
+            ReactiveCosts.NONE,
     };
 
-    static final PLSType[] plsType = {
-            PLSType.FULL,
-//			PLSType.HALF_NEG,
-//			PLSType.HALF_POS,
-//			PLSType.NONE
+    static final ActivePlsCosts[] activePlsTypes = {
+            ActivePlsCosts.NONE,
+//            ActivePlsCosts.UPPER,
+//            ActivePlsCosts.FULL,
+    };
+
+    static final ReactivePlsCosts[] reactivePlsTypes = {
+//            ReactivePlsCosts.FULL,
+            ReactivePlsCosts.NONE,
+    };
+
+    static final FeedInCosts[] feedInTypes = {
+//            FeedInCosts.NONE,
+//            FeedInCosts.PV,
+//            FeedInCosts.CHP,
+            FeedInCosts.BOTH,
+    };
+
+    static final AutoConsumptionCosts[] autoConsumptionTypes = {
+//            AutoConsumptionCosts.NONE,
+//            AutoConsumptionCosts.PV,
+//            AutoConsumptionCosts.CHP,
+            AutoConsumptionCosts.BOTH,
     };
 
     static final CompressionConfiguration[] compressionTypes = {
@@ -162,8 +181,11 @@ public abstract class constructMultipleData {
 //		map.put("escResolution", new ArrayList<Object>(Arrays.asList(escResolution)));
         map.put("autoProbFactor", new ArrayList<Object>(Arrays.asList(autoProbFactor)));
         map.put("crossoverProb", new ArrayList<Object>(Arrays.asList(crossoverProb)));
-        map.put("epsOptimisationObjective", new ArrayList<Object>(Arrays.asList(epsOptimisationObjective)));
-        map.put("pls", new ArrayList<Object>(Arrays.asList(plsType)));
+        map.put("reactiveTypes", new ArrayList<Object>(Arrays.asList(reactiveTypes)));
+        map.put("activePlsTypes", new ArrayList<Object>(Arrays.asList(activePlsTypes)));
+        map.put("reactivePlsTypes", new ArrayList<Object>(Arrays.asList(reactivePlsTypes)));
+        map.put("feedInTypes", new ArrayList<Object>(Arrays.asList(feedInTypes)));
+        map.put("autoConsumptionTypes", new ArrayList<Object>(Arrays.asList(autoConsumptionTypes)));
 
         return map;
     }

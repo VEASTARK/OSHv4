@@ -46,8 +46,9 @@ public abstract class AbstractExchange implements Cloneable {
     }
 
     /**
-     * Returns the timestamp marking this exchange
-     * @return
+     * Returns the timestamp marking this exchange.
+     *
+     * @return the timestamp marking this exchange
      */
     public ZonedDateTime getTimestamp() {
         return this.timestamp;

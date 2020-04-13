@@ -290,21 +290,9 @@ public abstract class GenericApplianceDriver
 
         // command without ACP available (may be shut off...)
         if (this.applianceConfigurationProfile == null) {
-//			getGlobalLogger().logError(getDeviceType() + " ERROR: received bad command (applianceConfigurationProfile == null)");
             // throw it away...
             return;
         }
-
-        //TODO CHeck if necessary
-        // check whether UUID of ApplianceConfigurationProfile is still valid
-//		getGlobalLogger().logError("applianceConfigurationProfile.getAcpID().equals(cx.getApplianceConfigurationProfileID()" + applianceConfigurationProfile.getAcpID()+" != "+cx.getApplianceConfigurationProfileID());
-//		if (!applianceConfigurationProfile.getAcpID().equals(cx.getApplianceConfigurationProfileID())) {
-//			getGlobalLogger().logError(getDeviceType() + " ERROR: received bad command (invalid UUID of ACP)");
-//			getGlobalLogger().logError(getDeviceType() + " ERROR: mismatch: applianceConfigurationProfileID to OC != applianceConfigurationProfileID from OC");
-//			// throw it away...
-//			return;
-//		}
-
 
         if (this.selectedStartingTimes != null
                 && this.selectedProfileID == cx.getSelectedProfileId()
@@ -639,58 +627,6 @@ public abstract class GenericApplianceDriver
         this.acpChanged = acpChanged;
     }
 
-    private ZonedDateTime getExpectedEndingTime() {
-        if (this.expectedEndingTimeReceivedFromAppliance != null) {
-            // received ending time from appliance
-            return this.expectedEndingTimeReceivedFromAppliance;
-        } else {
-            if (this.applianceConfigurationProfile != null
-                    && this.selectedStartingTimes != null
-                    && this.selectedProfileID != null) {
-
-                //TODO calculate ending time
-                return this.getTimeDriver().getCurrentTime();
-            } else {
-                return null;
-            }
-        }
-    }
-
-    // ### reset method for variables
-    protected void resetVariables() {
-        // ### Expected ending time received from appliance
-        this.expectedEndingTimeReceivedFromAppliance = null;
-
-        // ### Expected Finish time received from appliance DOF
-        this.expectedFinishTimeReceivedFromAppliance = null;
-
-
-        // Device Configuration which is now active: Selected by user on device */
-        this.selectedConfigurationID = null;
-
-        // StartingTime of Active Configuration Profile (ACP) */
-        this.configurationStartedAt = null;
-
-        // StartingTime of Active Phase in Active Configuration Profile */
-        this.phaseStartedAt = null;
-
-
-        // result of optimization
-
-        // in case of eDoF: result of optimization */
-        this.selectedProfileID = null;
-
-        // in case of tDoF: result of optimization  */
-        this.selectedStartingTimes = null;
-
-        // Active Configuration Profile (ACP)<br>
-        this.applianceConfigurationProfile = null;
-
-        // indicates whether ACP has changed */
-        this.acpChanged = false; //TODO check whether this makes sense
-    }
-
-
     // ### Details Creators ###
 
     protected void updateGenericApplianceDriverDetails(ZonedDateTime now) {
@@ -730,20 +666,7 @@ public abstract class GenericApplianceDriver
             details.setStartTime(this.selectedStartingTimes[0]);
         }
 
-        ZonedDateTime expectedEndingTime = this.getExpectedEndingTime();
-        details.setEndTime(expectedEndingTime);
-
-        Duration remainingTime = Duration.between(now, expectedEndingTime);
-
-        if (expectedEndingTime == null) {
-            details.setRemainingTime(null);
-        } else {
-            details.setRemainingTime(remainingTime);
-        }
-
         details.setFinishTime(this.expectedFinishTimeReceivedFromAppliance);
-
-
         return details;
     }
 }

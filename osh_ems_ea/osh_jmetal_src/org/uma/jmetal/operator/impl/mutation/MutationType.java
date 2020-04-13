@@ -7,15 +7,13 @@ package org.uma.jmetal.operator.impl.mutation;
  */
 public enum MutationType {
 
-    //TODO: change the legacy names for the "auto-prob" operators as soon as the next backwards-compatibility
-    // breaking update is released
-    BIT_FLIP_AUTO("BitFlipAutoProbMutation"),
+    BIT_FLIP_AUTO("BitFlipAutoProbabilityMutation"),
     BIT_FLIP("BitFlipMutation"),
     BIT_FLIP_APPROX("ApproximateBitFlipMutation"),
     BIT_FLIP_BLOCK("BlockBitFlipMutation"),
     INTEGER_POLYNOMIAL("IntegerPolynomialMutation"),
     POLYNOMIAL("PolynomialMutation"),
-    POLYNOMIAL_AUTO("PolynomialAutoProbMutation"),
+    POLYNOMIAL_AUTO("PolynomialAutoProbabilityMutation"),
     POLYNOMIAL_APPROX("ApproximatePolynomialMutation"),
     NON_UNIFORM("NonUniformMutation"),
     NULL("NullMutation"),

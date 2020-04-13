@@ -1,12 +1,11 @@
 package osh.utils.costs;
 
+import osh.configuration.oc.*;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.power.PowerInterval;
-import osh.utils.CostConfigurationContainer;
-import osh.utils.CostConfigurationTypes.*;
 import osh.utils.CostReturnType;
 import osh.utils.dataStructures.Enum2DoubleMap;
 import osh.utils.functions.PrimitiveOperators;
@@ -15,14 +14,14 @@ import osh.utils.physics.PhysicalConstants;
 import java.util.*;
 
 /**
- * Represents the internal cost function of the OSH, configurable with the {@link CostConfigurationContainer} variables,
+ * Represents the internal cost function of the OSH, configurable with the {@link CostConfiguration} variables,
  * executing the calculation inside the optimization loop or in the {@link osh.simulation.SimulationEngine}.
  *
  * @author Sebastian Kramer
  */
 public class OptimizationCostFunction {
 
-    private final CostConfigurationContainer costConfiguration;
+    private final CostConfiguration costConfiguration;
 
     private long arraysCalculatedFor;
 
@@ -41,12 +40,12 @@ public class OptimizationCostFunction {
      * @param powerLimitSignals the power limit signals
      * @param now the current time in epoch seconds
      */
-    public OptimizationCostFunction(CostConfigurationContainer costConfiguration, Map<AncillaryCommodity, PriceSignal> priceSignals,
+    public OptimizationCostFunction(CostConfiguration costConfiguration,
+                                    Map<AncillaryCommodity, PriceSignal> priceSignals,
                                     Map<AncillaryCommodity, PowerLimitSignal> powerLimitSignals, long now) {
 
         this.costConfiguration = costConfiguration;
-        CalculationFunctions.setOverlimitFactors(costConfiguration.getUpperOverlimitFactor(),
-                costConfiguration.getLowerOverlimitFactor());
+        CalculationFunctions.setOverlimitFactor(costConfiguration.getOverlimitFactor());
 
         this.initializeConfigurations();
         this.processSignals(priceSignals, powerLimitSignals, now);
@@ -67,11 +66,7 @@ public class OptimizationCostFunction {
         this.selfConsumptionParameterList = new ArrayList<>();
 
         //active power pricing
-        //TODO: in the old cost model, lower pls violations would only be punsihed by refunding the feed-in costs.
-        // Change this to refunding + punishment according to active power price
-        if ((this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL_ACTIVE
-                || this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL)
-                && this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.NONE) {
+        if (this.costConfiguration.getActivePlsCosts() == ActivePlsCosts.FULL) {
             List<SingularArgumentTuple> arguments = new ArrayList<>();
             arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -80,9 +75,7 @@ public class OptimizationCostFunction {
 
             this.activeConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_quad,
                     CalculationFunctions::priceAbsPowerLimitFunction));
-        } else if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.UPPER_ACTIVE
-                || (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.NONE
-                && this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE)) {
+        } else if (this.costConfiguration.getActivePlsCosts() == ActivePlsCosts.UPPER) {
             List<SingularArgumentTuple> arguments = new ArrayList<>();
             arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -100,8 +93,8 @@ public class OptimizationCostFunction {
         }
 
         //reactive power pricing
-        if (this.costConfiguration.getReactiveConfiguration() != REACTIVE_COSTS.NONE) {
-            if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL) {
+        if (this.costConfiguration.getReactiveCosts() != ReactiveCosts.NONE) {
+            if (this.costConfiguration.getReactivePlsCosts() == ReactivePlsCosts.FULL) {
                 List<SingularArgumentTuple> arguments = new ArrayList<>();
                 arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.REACTIVEPOWEREXTERNAL));
                 arguments.add(new SingularArgumentTuple(ArgumentType.UPPER_LIMIT, AncillaryCommodity.REACTIVEPOWEREXTERNAL));
@@ -121,11 +114,10 @@ public class OptimizationCostFunction {
         }
 
         //feed in pricing
-        if (this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE) {
-            if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL
-                    && this.costConfiguration.getPlsConfiguration() != PLS_COSTS.FULL_ACTIVE) {
-                if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH
-                        || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.PV) {
+        if (this.costConfiguration.getFeedInCosts() != FeedInCosts.NONE) {
+            if (this.costConfiguration.getActivePlsCosts() != ActivePlsCosts.FULL) {
+                if (this.costConfiguration.getFeedInCosts() == FeedInCosts.BOTH
+                        || this.costConfiguration.getFeedInCosts() == FeedInCosts.PV) {
                     List<SingularArgumentTuple> arguments = new ArrayList<>();
                     arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.PVACTIVEPOWERFEEDIN));
                     arguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.PVACTIVEPOWERFEEDIN));
@@ -133,8 +125,8 @@ public class OptimizationCostFunction {
                     this.feedInConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_bi,
                             CalculationFunctions::priceNegativePowerFunction));
                 }
-                if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH
-                        || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.CHP) {
+                if (this.costConfiguration.getFeedInCosts() == FeedInCosts.BOTH
+                        || this.costConfiguration.getFeedInCosts() == FeedInCosts.CHP) {
                     List<SingularArgumentTuple> arguments = new ArrayList<>();
                     arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.CHPACTIVEPOWERFEEDIN));
                     arguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.CHPACTIVEPOWERFEEDIN));
@@ -143,7 +135,7 @@ public class OptimizationCostFunction {
                             CalculationFunctions::priceNegativePowerFunction));
                 }
             } else {
-                if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH) {
+                if (this.costConfiguration.getFeedInCosts() == FeedInCosts.BOTH) {
                     List<SingularArgumentTuple> arguments = new ArrayList<>();
                     arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.PVACTIVEPOWERFEEDIN));
                     arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.CHPACTIVEPOWERFEEDIN));
@@ -154,7 +146,7 @@ public class OptimizationCostFunction {
 
                     this.feedInConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_hex,
                             CalculationFunctions::twoPriceNegativePowerLimitFunction));
-                } else if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.PV) {
+                } else if (this.costConfiguration.getFeedInCosts() == FeedInCosts.PV) {
                     List<SingularArgumentTuple> arguments = new ArrayList<>();
                     arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.PVACTIVEPOWERFEEDIN));
                     arguments.add(new SingularArgumentTuple(ArgumentType.LOWER_LIMIT, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
@@ -177,9 +169,9 @@ public class OptimizationCostFunction {
         }
 
         //auto-consumption costs
-        if (this.costConfiguration.getAutoConsumptionConfiguration() != AUTO_CONSUMPTION_COSTS.NONE) {
-            if (this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.BOTH
-                    || this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.PV) {
+        if (this.costConfiguration.getAutoConsumptionCosts() != AutoConsumptionCosts.NONE) {
+            if (this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.BOTH
+                    || this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.PV) {
                 List<SingularArgumentTuple> arguments = new ArrayList<>();
                 arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION));
                 arguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION));
@@ -187,8 +179,8 @@ public class OptimizationCostFunction {
                 this.autoConsumptionConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_bi,
                         CalculationFunctions::pricePowerFunction));
             }
-            if (this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.BOTH
-                    || this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.CHP) {
+            if (this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.BOTH
+                    || this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.CHP) {
                 List<SingularArgumentTuple> arguments = new ArrayList<>();
                 arguments.add(new SingularArgumentTuple(ArgumentType.PRICE, AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION));
                 arguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION));
@@ -206,7 +198,7 @@ public class OptimizationCostFunction {
         this.gasConfiguration.add(new SingularCostFunctionConfiguration<>(arguments, this::execute_bi,
                 CalculationFunctions::pricePowerFunction));
 
-        if (this.costConfiguration.getSelfSufficiencyConfiguration() == SELF_SUFFICIENCY_RATIO.NORMAL) {
+        if (this.costConfiguration.getSelfSufficiencyRatio() == SelfSufficiencyRatio.NORMAL) {
             List<SingularArgumentTuple> selfSufficiencyArguments = new ArrayList<>();
             selfSufficiencyArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             selfSufficiencyArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION));
@@ -217,7 +209,7 @@ public class OptimizationCostFunction {
                     CalculationFunctions::positiveQuadPowerFractionFunction));
         }
 
-        if (this.costConfiguration.getSelfConsumptionConfiguration() == SELF_CONSUMPTION_RATIO.NORMAL) {
+        if (this.costConfiguration.getSelfConsumptionRatio() == SelfConsumptionRatio.NORMAL) {
             List<SingularArgumentTuple> selfConsumptionArguments = new ArrayList<>();
             selfConsumptionArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.ACTIVEPOWEREXTERNAL));
             selfConsumptionArguments.add(new SingularArgumentTuple(ArgumentType.POWER, AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION));

@@ -14,7 +14,7 @@
             <element maxOccurs="unbounded" name="eaObjectives" type="tns:EAObjectives"/>
             <element minOccurs="0" name="solutionRanking" type="tns:SolutionRanking"/>
             <element minOccurs="0" name="loggingConfiguration" type="tns:LoggingConfiguration"/>
-            <element minOccurs="0" name="executeAlgorithmsParallel" type="boolean"/>
+            <element name="executeAlgorithmsParallel" type="boolean"/>
         </sequence>
     </complexType>
 
@@ -31,7 +31,7 @@
 
     <complexType name="StoppingRuleConfiguration">
         <sequence>
-            <element name="stoppingRuleName" type="string"/>
+            <element name="stoppingRule" type="tns:stoppingRuleType"/>
             <element minOccurs="0" maxOccurs="unbounded" name="ruleParameters" type="ins:ConfigurationParameter"/>
         </sequence>
     </complexType>
@@ -98,6 +98,13 @@
             <enumeration value="SELECTION" />
             <enumeration value="RECOMBINATION" />
             <enumeration value="MUTATION" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="stoppingRuleType">
+        <restriction base="string">
+            <enumeration value="MAX_EVALUATIONS" />
+            <enumeration value="DELTA_FITNESS" />
         </restriction>
     </simpleType>
 

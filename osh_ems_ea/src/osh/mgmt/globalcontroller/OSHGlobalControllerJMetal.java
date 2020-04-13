@@ -1,8 +1,9 @@
 package osh.mgmt.globalcontroller;
 
-import org.uma.jmetal.solution.Solution;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.*;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.EAConfiguration;
+import osh.configuration.oc.VariableEncoding;
 import osh.configuration.system.ConfigurationParameter;
 import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
@@ -10,15 +11,9 @@ import osh.core.interfaces.IOSHOC;
 import osh.core.oc.GlobalController;
 import osh.core.oc.LocalController;
 import osh.datatypes.commodity.AncillaryCommodity;
-import osh.datatypes.commodity.Commodity;
-import osh.datatypes.ea.Schedule;
-import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.logging.general.EALogObject;
-import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.power.ErsatzACLoadProfile;
-import osh.datatypes.power.SparseLoadProfile;
 import osh.datatypes.registry.AbstractExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
@@ -27,28 +22,28 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIScheduleStateExchange;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
-import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.mgmt.globalcontroller.jmetal.builder.AlgorithmExecutor;
-import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
-import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
+import osh.mgmt.globalcontroller.jmetal.builder.EAScheduleResult;
+import osh.mgmt.globalcontroller.jmetal.esc.EnergySolver;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
 import osh.registry.interfaces.IProvidesIdentity;
 import osh.simulation.database.DatabaseLoggerThread;
-import osh.utils.CostConfigurationContainer;
 import osh.utils.costs.OptimizationCostFunction;
 import osh.utils.string.ParameterConstants;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth, Sebastian Kramer
@@ -62,16 +57,13 @@ public class OSHGlobalControllerJMetal
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
     private boolean newEpsPlsReceived;
-    private final CostConfigurationContainer costConfiguration;
-    private double upperOverlimitFactor;
-    private double lowerOverlimitFactor;
     private ZonedDateTime lastTimeSchedulingStarted;
     private final OSHRandom optimizationMainRandomGenerator;
-    private final EAConfiguration eaConfiguration;
     private final AlgorithmExecutor algorithmExecutor;
     private final String logDir;
     private int stepSize;
     private Boolean logGa;
+    private final EnergySolver energySolver;
 
 
     /**
@@ -81,87 +73,13 @@ public class OSHGlobalControllerJMetal
     public OSHGlobalControllerJMetal(
             IOSHOC osh,
             OSHParameterCollection configurationParameters,
-            GAConfiguration gaConfiguration, OCEnergySimulationCore ocESC) {
-        super(osh, configurationParameters, gaConfiguration, ocESC);
+            EAConfiguration eaConfiguration,
+            CostConfiguration costConfiguration,
+            OptimizationEnergySimulationCore ocESC) {
+        super(osh, configurationParameters, eaConfiguration, costConfiguration, ocESC);
 
         this.priceSignals = new EnumMap<>(AncillaryCommodity.class);
         this.powerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
-
-        //to keep compatible with the old configuration files we need to convert it to the new format
-        this.eaConfiguration = new EAConfiguration();
-        this.eaConfiguration.setExecuteAlgorithmsParallel(true);
-        SolutionRanking ranking = new SolutionRanking();
-        ranking.setType(RankingType.OBJECTIVE);
-        ConfigurationParameter obj = new ConfigurationParameter();
-        obj.setParameterName(ParameterConstants.EA_MULTI_OBJECTIVE.objective);
-        obj.setParameterValue("" + 0);
-        obj.setParameterType(Integer.class.getName());
-        ranking.getRankingParameters().add(obj);
-        this.eaConfiguration.setSolutionRanking(ranking);
-        this.eaConfiguration.getEaObjectives().add(EAObjectives.MONEY);
-        AlgorithmConfiguration config = new AlgorithmConfiguration();
-        config.setAlgorithm(AlgorithmType.G_GA);
-
-        ConfigurationParameter popSize = new ConfigurationParameter();
-        popSize.setParameterName(ParameterConstants.EA.populationSize);
-        popSize.setParameterValue("" + gaConfiguration.getPopSize());
-        popSize.setParameterType(Integer.class.getName());
-        config.getAlgorithmParameters().add(popSize);
-
-        OperatorConfiguration sel = new OperatorConfiguration();
-        sel.setName(gaConfiguration.getSelectionOperator());
-        sel.setType(OperatorType.SELECTION);
-        sel.getOperatorParameters().addAll(gaConfiguration.getSelectionParameters());
-        config.getOperators().add(sel);
-
-        OperatorConfiguration mut = new OperatorConfiguration();
-        mut.setName(gaConfiguration.getMutationOperator());
-        mut.setType(OperatorType.MUTATION);
-        mut.getOperatorParameters().addAll(gaConfiguration.getMutationParameters());
-        config.getOperators().add(mut);
-
-        OperatorConfiguration cross = new OperatorConfiguration();
-        cross.setName(gaConfiguration.getCrossoverOperator());
-        cross.setType(OperatorType.RECOMBINATION);
-        cross.getOperatorParameters().addAll(gaConfiguration.getCrossoverParameters());
-        config.getOperators().add(cross);
-
-        //change to true if you want to run it with an additional PSO algorithm
-        if (false) {
-            AlgorithmConfiguration psoConfig = new AlgorithmConfiguration();
-            psoConfig.setAlgorithm(AlgorithmType.PSO);
-
-            ConfigurationParameter psoPopSize = new ConfigurationParameter();
-            psoPopSize.setParameterName(ParameterConstants.EA.populationSize);
-            psoPopSize.setParameterValue("" + gaConfiguration.getPopSize());
-            psoPopSize.setParameterType(Integer.class.getName());
-            psoConfig.getAlgorithmParameters().add(psoPopSize);
-
-            ConfigurationParameter psoPartToInform = new ConfigurationParameter();
-            psoPartToInform.setParameterName(ParameterConstants.EA_ALGORITHM.particlesToInform);
-            psoPartToInform.setParameterValue("" + gaConfiguration.getPopSize() / 2);
-            psoPartToInform.setParameterType(Integer.class.getName());
-            psoConfig.getAlgorithmParameters().add(psoPartToInform);
-
-            psoConfig.setVariableEncoding(VariableEncoding.REAL);
-
-            for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
-                StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
-                scr.setStoppingRuleName(sr.getStoppingRuleName());
-                scr.getRuleParameters().addAll(sr.getRuleParameters());
-                psoConfig.getStoppingRules().add(scr);
-            }
-
-            this.eaConfiguration.getAlgorithms().add(psoConfig);
-        }
-
-        for (StoppingRule sr : gaConfiguration.getStoppingRules()) {
-            StoppingRuleConfiguration scr = new StoppingRuleConfiguration();
-            scr.setStoppingRuleName(sr.getStoppingRuleName());
-            scr.getRuleParameters().addAll(sr.getRuleParameters());
-            config.getStoppingRules().add(scr);
-        }
-        config.setVariableEncoding(VariableEncoding.BINARY);
 
         //set to true if single threaded execution is desired
         if (false) {
@@ -169,58 +87,8 @@ public class OSHGlobalControllerJMetal
             singleT.setParameterName(ParameterConstants.EA_ALGORITHM.singleThreaded);
             singleT.setParameterValue("" + true);
             singleT.setParameterType(Boolean.class.getName());
-            config.getAlgorithmParameters().add(singleT);
+            this.eaConfiguration.getAlgorithms().forEach(c ->c.getAlgorithmParameters().add(singleT));
         }
-
-        //change to false to remove the gGA algorithm
-        if (true) {
-            this.eaConfiguration.getAlgorithms().add(config);
-        }
-
-        try {
-            this.upperOverlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.upperOverlimitFactor));
-        } catch (Exception e) {
-            this.upperOverlimitFactor = 1.0;
-            this.getGlobalLogger().logWarning("Can't get upperOverlimitFactor, using the default value: " + this.upperOverlimitFactor);
-        }
-
-        try {
-            this.lowerOverlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.lowerOverlimitFactor));
-        } catch (Exception e) {
-            this.lowerOverlimitFactor = 1.0;
-            this.getGlobalLogger().logWarning("Can't get lowerOverlimitFactor, using the default value: " + this.lowerOverlimitFactor);
-        }
-
-        int epsOptimizationObjective, plsOptimizationObjective, varOptimizationObjective;
-
-        try {
-            epsOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.epsObjective));
-        } catch (Exception e) {
-            epsOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get epsOptimizationObjective, using the default value: " + epsOptimizationObjective);
-        }
-
-        try {
-            plsOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.plsObjective));
-        } catch (Exception e) {
-            plsOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get plsOptimizationObjective, using the default value: " + plsOptimizationObjective);
-        }
-
-        try {
-            varOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.varObjective));
-        } catch (Exception e) {
-            varOptimizationObjective = 0;
-            this.getGlobalLogger().logWarning("Can't get varOptimizationObjective, using the default value: " + varOptimizationObjective);
-        }
-
-        this.costConfiguration = new CostConfigurationContainer(epsOptimizationObjective, plsOptimizationObjective,
-                varOptimizationObjective, this.upperOverlimitFactor, this.lowerOverlimitFactor);
 
         long optimizationMainRandomSeed;
         try {
@@ -252,6 +120,7 @@ public class OSHGlobalControllerJMetal
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
         this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.getGlobalLogger());
+        this.energySolver = new EnergySolver(this.getGlobalLogger(), this.eaConfiguration, this.stepSize, this.logDir);
     }
 
 
@@ -273,7 +142,7 @@ public class OSHGlobalControllerJMetal
 
         this.getOCRegistry().publish(CostConfigurationStateExchange.class,
                 new CostConfigurationStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
-                        this.costConfiguration.clone()));
+                        new CostConfiguration(this.costConfiguration)));
 
         this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
     }
@@ -311,25 +180,6 @@ public class OSHGlobalControllerJMetal
 
         // check whether rescheduling is required and if so do rescheduling
         this.handleScheduling();
-
-        // save current EPS and PLS to registry for logger
-        {
-            EpsPlsStateExchange epse = new EpsPlsStateExchange(
-                    this.getUUID(),
-                    now,
-                    this.priceSignals,
-                    this.powerLimitSignals,
-                    this.costConfiguration,
-                    this.newEpsPlsReceived);
-
-            this.newEpsPlsReceived = false;
-
-            this.getOCRegistry().publish(
-                    EpsPlsStateExchange.class,
-                    this,
-                    epse);
-        }
-
     }
 
     /**
@@ -361,7 +211,7 @@ public class OSHGlobalControllerJMetal
      */
     public void startScheduling() {
 
-        if (this.ocESC == null) {
+        if (this.optimizationESC == null) {
             throw new RuntimeException("OC-EnergySimulationCore not set, optimisation impossible, crashing now");
         }
 
@@ -372,9 +222,6 @@ public class OSHGlobalControllerJMetal
 
         EnumMap<AncillaryCommodity, PriceSignal> tempPriceSignals = new EnumMap<>(AncillaryCommodity.class);
         EnumMap<AncillaryCommodity, PowerLimitSignal> tempPowerLimitSignals = new EnumMap<>(AncillaryCommodity.class);
-
-        //TODO: Check if necessary to synchronize full object (this)
-        //TODO: Check why keySet and not entrySet
 
         // Cloning necessary, because of possible price signal changes during optimization
         synchronized (this.priceSignals) {
@@ -397,29 +244,11 @@ public class OSHGlobalControllerJMetal
             return;
         }
 
-//		boolean showSolverDebugMessages = getControllerBoxStatus().getShowSolverDebugMessages();
-        boolean showSolverDebugMessages = true;
         final long now = this.getTimeDriver().getCurrentEpochSecond();
-
-        OSHRandom optimisationRunRandomGenerator = new OSHRandom(this.optimizationMainRandomGenerator.getNextLong());
-
-        // it is a good idea to use a specific random Generator for the EA,
-        // to make it comparable with other optimizers...
-        JMetalEnergySolverGA solver = new JMetalEnergySolverGA(
-                this.getGlobalLogger(),
-                optimisationRunRandomGenerator,
-                showSolverDebugMessages,
-                this.eaConfiguration,
-                now,
-                this.stepSize,
-                this.logDir);
 
         List<InterdependentProblemPart<?, ?>> problemPartsList = this.oshGlobalObserver.getProblemParts();
         InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[problemPartsList.size()];
         problemParts = problemPartsList.toArray(problemParts);
-
-        Solution<?> solution;
-        SolutionWithFitness resultWithAll;
 
         if (!this.oshGlobalObserver.getAndResetProblempartChangedFlag()) {
             return; //nothing new, return
@@ -428,7 +257,6 @@ public class OSHGlobalControllerJMetal
         // debug print
         this.getGlobalLogger().logDebug("=== scheduling... ===");
 
-        long ignoreLoadProfileAfter = now;
         long maxHorizon = now;
 
         for (InterdependentProblemPart<?, ?> problem : problemParts) {
@@ -443,7 +271,6 @@ public class OSHGlobalControllerJMetal
             problem.setId(counter);
             counter++;
         }
-        ignoreLoadProfileAfter = Math.max(ignoreLoadProfileAfter, maxHorizon);
 
         boolean hasGUI = this.getControllerBoxStatus().hasGUI();
         boolean isReal = !this.getControllerBoxStatus().isSimulation();
@@ -456,98 +283,34 @@ public class OSHGlobalControllerJMetal
                     tempPowerLimitSignals,
                     now);
 
-            resultWithAll = solver.getSolution(
-                    problemParts,
-                    this.ocESC,
-                    now,
-                    costFunction,
-                    this.algorithmExecutor);
-            solution = resultWithAll.getSolution();
-
             SolutionDistributor distributor = new SolutionDistributor();
             distributor.gatherVariableInformation(problemParts);
-
-            EMProblemEvaluator problem = new EMProblemEvaluator(
-                    problemParts,
-                    this.ocESC,
-                    distributor,
-                    now,
-                    ignoreLoadProfileAfter,
-                    costFunction,
-                    this.algorithmExecutor.getEaLogger(),
-                    this.stepSize,
-                    this.eaConfiguration.getEaObjectives());
 
             boolean extensiveLogging =
                     (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
 
-            int maxLength = (int) Math.ceil((ignoreLoadProfileAfter - now) / this.stepSize) + 2;
-            ErsatzACLoadProfile ersatzProfile = new ErsatzACLoadProfile(maxLength);
-
-            problem.evaluateFinalTime(solution, (this.logGa | extensiveLogging), ersatzProfile);
-
-            distributor.distributeSolution(solution, problemParts);
-
+            EAScheduleResult result = this.energySolver.getSolution(
+                    problemParts,
+                    this.optimizationESC,
+                    now,
+                    costFunction,
+                    new OSHRandom(this.optimizationMainRandomGenerator.getNextLong()),
+                    this.algorithmExecutor,
+                    extensiveLogging);
 
             if (extensiveLogging) {
-
-                TreeMap<Long, Double> predictedTankTemp = new TreeMap<>();
-                TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
-                TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
-                List<Schedule> schedules = new ArrayList<>();
-
-                for (InterdependentProblemPart<?, ?> part : problemParts) {
-                    schedules.add(part.getFinalInterdependentSchedule());
-
-                    //extract prediction about tank temperatures of the hot-water tank
-                    if (part.getUUID().equals(this.hotWaterTankID)) {
-                        @SuppressWarnings("unchecked")
-                        EAPredictionCommandExchange<TemperaturePrediction> prediction = (EAPredictionCommandExchange<TemperaturePrediction>) part.transformToFinalInterdependentPrediction(
-                                this.getUUID(),
-                                part.getUUID(),
-                                this.getTimeDriver().getCurrentTime());
-
-                        predictedTankTemp = prediction.getPrediction().getTemperatureStates();
-                    }
-
-                    //extract information about hot-water demand and supply
-                    if (part.getAllOutputCommodities().contains(Commodity.DOMESTICHOTWATERPOWER)
-                            || part.getAllOutputCommodities().contains(Commodity.HEATINGHOTWATERPOWER)) {
-                        SparseLoadProfile loadProfile = part.getLoadProfile();
-
-                        for (long t = now; t < maxHorizon + this.stepSize; t += this.stepSize) {
-                            int domLoad = loadProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, t);
-                            int heatLoad = loadProfile.getLoadAt(Commodity.HEATINGHOTWATERPOWER, t);
-
-                            predictedHotWaterDemand.putIfAbsent(t, 0.0);
-                            predictedHotWaterSupply.putIfAbsent(t, 0.0);
-
-                            if (domLoad > 0) {
-                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
-                            } else if (domLoad < 0) {
-                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
-                            }
-
-                            if (heatLoad > 0) {
-                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
-                            } else if (heatLoad < 0) {
-                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
-                            }
-                        }
-                    }
-                }
-
                 this.getOCRegistry().publish(
                         GUIHotWaterPredictionStateExchange.class,
                         this,
                         new GUIHotWaterPredictionStateExchange(this.getUUID(),
-                                this.getTimeDriver().getCurrentTime(), predictedTankTemp, predictedHotWaterDemand, predictedHotWaterSupply));
+                                this.getTimeDriver().getCurrentTime(), result.getPredictedHotWaterTankTemperature(),
+                                result.getPredictedHotWaterDemand(), result.getPredictedHotWaterSupply()));
 
                 this.getOCRegistry().publish(
                         GUIAncillaryMeterStateExchange.class,
                         this,
                         new GUIAncillaryMeterStateExchange(this.getUUID(), this.getTimeDriver().getCurrentTime(),
-                                AncillaryCommodityLoadProfile.convertFromErsatzProfile(ersatzProfile)));
+                                result.getAncillaryMeter()));
 
                 //sending schedules last so the wait command has all the other things (waterPred, Ancillarymeter) first
                 // Send current Schedule to GUI (via Registry to Com)
@@ -555,7 +318,7 @@ public class OSHGlobalControllerJMetal
                         GUIScheduleStateExchange.class,
                         this,
                         new GUIScheduleStateExchange(this.getUUID(), this.getTimeDriver()
-                                .getCurrentTime(), schedules, this.stepSize));
+                                .getCurrentTime(), result.getSchedules(), this.stepSize));
 
             }
         } catch (Exception e) {

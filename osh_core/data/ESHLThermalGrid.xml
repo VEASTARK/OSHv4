@@ -42,5 +42,5 @@
         <activeToPassiveCommodity>coldwaterpower</activeToPassiveCommodity>
         <passiveToActiveCommodity>coldwaterpower</passiveToActiveCommodity>
     </connections>
-    <meterUUIDs>00000000-0000-0000-0000-000000000000</meterUUIDs>
+    <superMeterUUID>00000000-0000-0000-0000-000000000000</superMeterUUID>
 </GridLayout>

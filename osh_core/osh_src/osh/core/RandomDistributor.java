@@ -22,9 +22,6 @@ public class RandomDistributor extends OSHComponent {
 
     private final long initialRandomSeed;
 
-    private final static boolean IS_LEGACY_MODE = true;
-    private final OSHRandom legacyRandom;
-
     private ZonedDateTime startTime;
 
     private final HashSet<UUID> allIdentifier = new HashSet<>();
@@ -39,13 +36,7 @@ public class RandomDistributor extends OSHComponent {
     public RandomDistributor(OSH entity, long masterSeed) {
         super(entity);
 
-        if (IS_LEGACY_MODE) {
-            this.initialRandomSeed = -1L;
-            this.legacyRandom = new OSHRandom(masterSeed);
-        } else {
-            this.initialRandomSeed = new OSHRandom(masterSeed).getNextLong();
-            this.legacyRandom = null;
-        }
+        this.initialRandomSeed = new OSHRandom(masterSeed).getNextLong();
     }
 
     /**
@@ -61,32 +52,6 @@ public class RandomDistributor extends OSHComponent {
      * @return a unique random generator based on the unique identifier and the class of the caller
      */
     public OSHRandom getRandomGenerator(UUID identifier, Class<?> className) {
-        return this.getRandomGenerator(identifier, className, false);
-    }
-
-
-    /**
-     * Returns a unique random generator based on the unique identifier and the class of the caller.
-     *
-     * Will ensure that every random generator is unique at any time t by iterating over a master random generator exactly n times, where
-     * n is either seconds passed since the last request of the same caller for a random generator or the seconds passed since creation
-     * of this class.
-     *
-     * @param identifier the unique identifier
-     * @param className the class of the caller
-     * @param getBaseRandom flag if a new random generator should be created in legacy mode
-     *
-     * @return a unique random generator based on the unique identifier and the class of the caller
-     */
-    public OSHRandom getRandomGenerator(UUID identifier, Class<?> className, boolean getBaseRandom) {
-
-        if (IS_LEGACY_MODE) {
-            if (!getBaseRandom) {
-                return new OSHRandom(this.legacyRandom.getNextLong());
-            } else {
-                return this.legacyRandom;
-            }
-        }
 
         RandomWrapper random;
         ZonedDateTime currentTime = this.getTimeDriver().getCurrentTime();

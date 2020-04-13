@@ -9,7 +9,7 @@ import osh.datatypes.commodity.Commodity;
 import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.esc.OCEnergySimulationCore;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 import osh.utils.CostReturnType;
@@ -18,7 +18,6 @@ import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 /**
  * Represents the evaluator of the optimization problem of the OSH simulation for use in JMetal algorithms.
@@ -27,8 +26,8 @@ import java.util.stream.Collectors;
  */
 public class EMProblemEvaluator {
 
-    private final long ignoreLoadProfileBefore;
-    private final long ignoreLoadProfileAfter;
+    private final long optimizationStartPoint;
+    private final long optimizationEndPoint;
     private long maxReferenceTime;
     private long maxOptimizationHorizon;
 
@@ -53,26 +52,26 @@ public class EMProblemEvaluator {
      * @param problemParts all problem-parts of this problem
      * @param ocESC the energy-simulation-core to be used for the optimization loop
      * @param distributor the solution distributor for this problem
-     * @param ignoreLoadProfileBefore the point in time before which all should be ignored for this optimization
-     * @param ignoreLoadProfileAfter the point in time after which all should be ignored for this optimization
+     * @param optimizationStartPoint the point in time where this optimization starts
+     * @param optimizationEndPoint the point in time after which this optimization ends
      * @param costFunction the function determining which fitness an evaluated solution has
      * @param stepSize the size of the time-steps to be used for the evaluation of solutions
      * @param eaObjectives the collection of all EA-objectvies
      */
     public EMProblemEvaluator(
             InterdependentProblemPart<?, ?>[] problemParts,
-            OCEnergySimulationCore ocESC,
+            OptimizationEnergySimulationCore ocESC,
             SolutionDistributor distributor,
-            long ignoreLoadProfileBefore,
-            long ignoreLoadProfileAfter,
+            long optimizationStartPoint,
+            long optimizationEndPoint,
             OptimizationCostFunction costFunction,
             IEALogger eaLogger,
             int stepSize,
             List<EAObjectives> eaObjectives) {
 
         this.distributor = distributor;
-        this.ignoreLoadProfileBefore = ignoreLoadProfileBefore;
-        this.ignoreLoadProfileAfter = ignoreLoadProfileAfter;
+        this.optimizationStartPoint = optimizationStartPoint;
+        this.optimizationEndPoint = optimizationEndPoint;
         this.stepSize = stepSize;
         this.costFunction = costFunction;
         this.eaLogger = eaLogger;
@@ -136,21 +135,15 @@ public class EMProblemEvaluator {
             }
         }
 
-        //to keep backwards-cpmpatibility we need to reorder the parts slightly as a different order will lead to
-        // slight differences due to floating-point error TODO: remove with next backwards-compatibility breaking
-        // update and order by part-id (not uuid)
-        List<InterdependentProblemPart<?, ?>> allIPPsReorderedList = new ArrayList<>(problemParts.length);
-        allIPPsReorderedList.addAll(allActiveNeedsInputPPsList);
-        allIPPsReorderedList.addAll(Arrays.stream(allActivePPs).filter(p -> !allActiveNeedsInputPPsList.contains(p)).collect(Collectors.toList()));
-        allIPPsReorderedList.addAll(Arrays.stream(allPassivePPs).collect(Collectors.toList()));
-        allIPPsReorderedList.addAll(Arrays.stream(problemParts).filter(p -> !allIPPsReorderedList.contains(p)).collect(Collectors.toList()));
-
         InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs =
                 new InterdependentProblemPart[allActiveNeedsInputPPsList.size()];
         allActiveNeedsInputPPs = allActiveNeedsInputPPsList.toArray(allActiveNeedsInputPPs);
-        InterdependentProblemPart<?, ?>[] allIPPsReordered =
-                new InterdependentProblemPart[allIPPsReorderedList.size()];
-        allIPPsReordered = allIPPsReorderedList.toArray(allIPPsReordered);
+
+        //sort all problem-parts to ensure the same order of execution
+        Arrays.sort(problemParts, Comparator.comparingInt(InterdependentProblemPart::getId));
+        Arrays.sort(allActivePPs, Comparator.comparingInt(InterdependentProblemPart::getId));
+        Arrays.sort(allPassivePPs, Comparator.comparingInt(InterdependentProblemPart::getId));
+        Arrays.sort(allActiveNeedsInputPPs, Comparator.comparingInt(InterdependentProblemPart::getId));
 
         ocESC.initializeGrids(activeUUIDs, activeNeedsInputUUIDs, passiveUUIDs,
                 uuidIntMap, uuidOutputMap, uuidInputMap);
@@ -158,10 +151,11 @@ public class EMProblemEvaluator {
         UUIDCommodityMap baseActiveToPassiveMap = new UUIDCommodityMap(activeUUIDs, uuidIntMap, true);
         UUIDCommodityMap basePassiveToActiveMap = new UUIDCommodityMap(passiveUUIDs, uuidIntMap, true);
 
-        int maxLength = (int) Math.ceil((this.maxOptimizationHorizon - this.maxReferenceTime) / this.stepSize) + 2;
+        int maxLength =
+                (int) Math.ceil((double) (this.maxOptimizationHorizon - this.maxReferenceTime) / this.stepSize) + 2;
         ErsatzACLoadProfile ancillaryLoadProfile = new ErsatzACLoadProfile(maxLength);
 
-        this.baseDataContainer = new EnergyProblemDataContainer(allIPPsReordered, allActivePPs, allPassivePPs,
+        this.baseDataContainer = new EnergyProblemDataContainer(problemParts, allActivePPs, allPassivePPs,
                 allActiveNeedsInputPPs, ocESC, baseActiveToPassiveMap, basePassiveToActiveMap, ancillaryLoadProfile);
 
     }
@@ -263,7 +257,7 @@ public class EMProblemEvaluator {
         InterdependentProblemPart<?, ?>[] allActive = dataContainer.getAllActivePPs();
         InterdependentProblemPart<?, ?>[] allPassive = dataContainer.getAllPassivePPs();
         InterdependentProblemPart<?, ?>[] allActiveNeedsInput = dataContainer.getAllActiveNeedsInputPPs();
-        OCEnergySimulationCore ocESC = dataContainer.getOcESC();
+        OptimizationEnergySimulationCore ocESC = dataContainer.getOcESC();
         UUIDCommodityMap activeToPassiveMap = dataContainer.getActiveToPassiveMap();
         UUIDCommodityMap passiveToActiveMap = dataContainer.getPassiveToActiveMap();
         ErsatzACLoadProfile ancillaryLoadProfile = loadProfile == null ? dataContainer.getAncillaryLoadProfile() :
@@ -331,8 +325,8 @@ public class EMProblemEvaluator {
 
 
         Enum2DoubleMap<CostReturnType> costs = this.costFunction.calculateCosts(
-                this.ignoreLoadProfileBefore,
-                this.ignoreLoadProfileAfter,
+                this.optimizationStartPoint,
+                this.optimizationEndPoint,
                 ancillaryLoadProfile);
 
         Enum2DoubleMap<EAObjectives> cervisia = new Enum2DoubleMap<>(EAObjectives.class);

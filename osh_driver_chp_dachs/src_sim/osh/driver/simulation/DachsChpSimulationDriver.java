@@ -403,42 +403,7 @@ public class DachsChpSimulationDriver
 
     @Override
     public LimitedCommodityStateMap getCommodityOutputStates() {
-//		EnumMap<Commodity, RealCommodityState> map = new EnumMap<Commodity, RealCommodityState>(Commodity.class);
         LimitedCommodityStateMap map = new LimitedCommodityStateMap(this.usedCommodities);
-//		map.put(
-//				Commodity.ACTIVEPOWER, 
-//				new RealElectricalCommodityState(
-//						Commodity.ACTIVEPOWER, 
-//						this.getPower(Commodity.ACTIVEPOWER) != null 
-//								? (double) this.getPower(Commodity.ACTIVEPOWER) 
-//								: 0.0, 
-//						null));
-//		map.put(
-//				Commodity.REACTIVEPOWER, 
-//				new RealElectricalCommodityState(
-//						Commodity.REACTIVEPOWER, 
-//						this.getPower(Commodity.REACTIVEPOWER) != null 
-//								? (double) this.getPower(Commodity.REACTIVEPOWER)
-//								: 0.0,
-//						null));
-//		map.put(
-//				Commodity.HEATINGHOTWATERPOWER,
-//				new RealThermalCommodityState(
-//						Commodity.HEATINGHOTWATERPOWER, 
-//						this.getPower(Commodity.HEATINGHOTWATERPOWER) != null 
-//								? (double) this.getPower(Commodity.HEATINGHOTWATERPOWER)
-//								: 0.0, 
-//						this.currentTemperatureOut, 
-//						this.currentMassFlow));
-//		map.put(
-//				Commodity.NATURALGASPOWER,
-//				new RealThermalCommodityState(
-//						Commodity.NATURALGASPOWER, 
-//						this.getPower(Commodity.NATURALGASPOWER) != null 
-//								? (double) this.getPower(Commodity.NATURALGASPOWER)
-//								: 0.0, 
-//						0.0, 
-//						null));
         map.setPower(Commodity.ACTIVEPOWER, this.getPower(Commodity.ACTIVEPOWER) != null
                 ? (double) this.getPower(Commodity.ACTIVEPOWER) : 0.0);
 
@@ -458,16 +423,11 @@ public class DachsChpSimulationDriver
     @Override
     public void setCommodityInputStates(
             LimitedCommodityStateMap inputStates,
-//			EnumMap<AncillaryCommodity,AncillaryCommodityState> ancillaryInputStates) {
             AncillaryMeterState ancillaryMeterState) {
         super.setCommodityInputStates(inputStates, ancillaryMeterState);
-        // TODO temperature in (later...)
         if (inputStates != null) {
             if (inputStates.containsCommodity(Commodity.HEATINGHOTWATERPOWER)) {
-//				RealCommodityState cs = inputStates.get(Commodity.HEATINGHOTWATERPOWER);
-//				RealThermalCommodityState tcs = (RealThermalCommodityState) cs;
                 this.waterInTemperature = inputStates.getTemperature(Commodity.HEATINGHOTWATERPOWER);
-//				}
             }
         }
     }
@@ -477,5 +437,4 @@ public class DachsChpSimulationDriver
     public void performNextAction(SubjectAction nextAction) {
         //NOTHING
     }
-
 }

@@ -196,15 +196,14 @@ public class DachsChpIPP
     }
 
     private void updateSolutionInformation(long referenceTime, long maxHorizon) {
-        //TODO: change to Math.ceil as soon as backwards compatibility is broken by another update
-        int slots = (int) Math.round(((double) (maxHorizon - referenceTime)) / ((float) timePerSlot));
-        double[][] boundarys = new double[slots][];
+        int slots = (int) Math.ceil(((double) (maxHorizon - referenceTime)) / this.timePerSlot);
+        double[][] boundaries = new double[slots][];
 
         for (int i = 0; i < slots; i++) {
-            boundarys[i] = new double[]{0, 2};
+            boundaries[i] = new double[]{0, 2};
         }
 
-        this.solutionHandler.updateVariableInformation(VariableType.LONG, slots, boundarys);
+        this.solutionHandler.updateVariableInformation(VariableType.LONG, slots, boundaries);
     }
 
     @Override
@@ -225,7 +224,7 @@ public class DachsChpIPP
         boolean plannedState = false;
         boolean hysteresisOn = false;
 
-        int i = (int) ((this.getInterdependentTime() - this.interdependentTimeOfFirstBit) / timePerSlot);
+        int i = (int) ((this.getInterdependentTime() - this.interdependentTimeOfFirstBit) / this.timePerSlot);
 
         if (i < this.ab.length) {
             chpOn = this.ab[i];
@@ -365,10 +364,10 @@ public class DachsChpIPP
                 if (currentActivation == null) {
                     currentActivation = new Activation();
                     currentActivation.startTime =
-                            TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * timePerSlot);
-                    duration = timePerSlot;
+                            TimeConversion.convertUnixTimeToZonedDateTime(timeOfFirstBit + i * this.timePerSlot);
+                    duration = this.timePerSlot;
                 } else {
-                    duration += timePerSlot;
+                    duration += this.timePerSlot;
                 }
             } else {
                 // turn off
@@ -438,7 +437,7 @@ public class DachsChpIPP
             currentState = ret[i];
 
             if (ret[i]) {
-                runningFor += timePerSlot;
+                runningFor += this.timePerSlot;
             } else {
                 runningFor = 0;
             }
@@ -448,7 +447,7 @@ public class DachsChpIPP
     }
 
     private int getNecessaryNumberOfBits() {
-        return Math.round((float) (this.getOptimizationHorizon() - this.getReferenceTime()) / timePerSlot) * bitsPerSlot;
+        return Math.round((float) (this.getOptimizationHorizon() - this.getReferenceTime()) / this.timePerSlot) * this.bitsPerSlot;
     }
 
     @Override

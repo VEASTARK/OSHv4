@@ -1,8 +1,8 @@
 package osh.datatypes.registry.oc.details.energy;
 
+import osh.configuration.oc.CostConfiguration;
 import osh.datatypes.registry.StateExchange;
 import osh.registry.interfaces.IPromiseToBeImmutable;
-import osh.utils.CostConfigurationContainer;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -14,22 +14,22 @@ import java.util.UUID;
  */
 public class CostConfigurationStateExchange extends StateExchange implements IPromiseToBeImmutable {
 
-    private final CostConfigurationContainer costConfigurationContainer;
+    private final CostConfiguration costConfiguration;
 
     /**
      * Constructs this exchange with the given sender, timestamp and the cost configuration.
      *
      * @param sender the sender
      * @param timestamp the timestamp
-     * @param costConfigurationContainer the cost configuration
+     * @param costConfiguration the cost configuration
      */
     public CostConfigurationStateExchange(UUID sender, ZonedDateTime timestamp,
-                                          CostConfigurationContainer costConfigurationContainer) {
+                                          CostConfiguration costConfiguration) {
         super(sender, timestamp);
-        this.costConfigurationContainer = costConfigurationContainer;
+        this.costConfiguration = costConfiguration;
     }
 
-    public CostConfigurationContainer getCostConfigurationContainer() {
-        return this.costConfigurationContainer;
+    public CostConfiguration getCostConfigurationContainer() {
+        return this.costConfiguration;
     }
 }

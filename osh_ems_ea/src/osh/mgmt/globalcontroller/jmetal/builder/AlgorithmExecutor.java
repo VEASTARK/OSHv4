@@ -2,7 +2,7 @@ package osh.mgmt.globalcontroller.jmetal.builder;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.singleobjective.differentialevolution.DifferentialEvolution;
-import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.OSHLegacyGenerationalGeneticAlgorithm;
+import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.GenerationalGeneticAlgorithm;
 import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.SteadyStateGeneticAlgorithm;
 import org.uma.jmetal.algorithm.singleobjective.particleswarmoptimization.StandardPSO2011;
 import org.uma.jmetal.algorithm.stoppingrule.StoppingRule;
@@ -256,7 +256,7 @@ public class AlgorithmExecutor {
 
         //SO
         if (algorithmConfig.getAlgorithm() == AlgorithmType.G_GA) {
-            algorithm = new OSHLegacyGenerationalGeneticAlgorithm<>(problem, populationSize, crossoverOperator,
+            algorithm = new GenerationalGeneticAlgorithm<>(problem, populationSize, crossoverOperator,
                     mutationOperator, (SelectionOperator<List<S>, S>) selectionOperator, evaluator, this.eaLogger);
         } else if (algorithmConfig.getAlgorithm() == AlgorithmType.SS_GA) {
             algorithm = new SteadyStateGeneticAlgorithm<>(problem, populationSize, crossoverOperator,
@@ -279,7 +279,7 @@ public class AlgorithmExecutor {
             throw new IllegalArgumentException("Algorithm not implemented");
         }
 
-        for (Map.Entry<String, StoppingRuleConfiguration> en : algorithmConfig.getStoppingRuleMap().entrySet()) {
+        for (Map.Entry<StoppingRuleType, StoppingRuleConfiguration> en : algorithmConfig.getStoppingRuleMap().entrySet()) {
             Map<String, Object> params = MapUtils.mapFromCPCollectionUnpacked(en.getValue().getRuleParameters());
 
             StoppingRule sr = StoppingRuleFactory.getStoppingRule(en.getKey(), params);

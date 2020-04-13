@@ -53,7 +53,7 @@ final EnergySourceSink adsorptionChiller =
     final EnergySourceSink spaceHeating =
             new EnergySourceSink(UUID.fromString("00000000-0000-5348-5348-000000000000"));
     // Virtual Smart Meter
-    private final EnergySourceSink meter =
+    private final EnergySourceSink simMeter =
             new EnergySourceSink(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     // Cooktop / Induction Hob
     private final EnergySourceSink applianceIH =
@@ -70,7 +70,7 @@ final EnergySourceSink adsorptionChiller =
 
         // ### Build sourceSinkList ###
 
-        this.sourceSinkList.add(this.meter);
+        this.sourceSinkList.add(this.simMeter);
         this.sourceSinkList.add(this.applianceDW);
         this.sourceSinkList.add(this.applianceTD);
         this.sourceSinkList.add(this.applianceWM);
@@ -100,7 +100,7 @@ final EnergySourceSink adsorptionChiller =
         {
             EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.ghd,
-                    this.meter,
+                    this.simMeter,
                     new ThermalConnection(Commodity.NATURALGASPOWER),
                     new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
@@ -130,7 +130,7 @@ final EnergySourceSink adsorptionChiller =
         {
             EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.chp,
-                    this.meter,
+                    this.simMeter,
                     new ThermalConnection(Commodity.NATURALGASPOWER),
                     new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
@@ -191,7 +191,7 @@ final EnergySourceSink adsorptionChiller =
         {
             EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceIH,
-                    this.meter,
+                    this.simMeter,
                     new ThermalConnection(Commodity.NATURALGASPOWER),
                     new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
@@ -201,7 +201,7 @@ final EnergySourceSink adsorptionChiller =
         {
             EnergyRelation<ThermalConnection> relation = new EnergyRelation<>(
                     this.applianceOV,
-                    this.meter,
+                    this.simMeter,
                     new ThermalConnection(Commodity.NATURALGASPOWER),
                     new ThermalConnection(Commodity.NATURALGASPOWER));
             this.relationList.add(relation);
@@ -237,6 +237,6 @@ final EnergySourceSink adsorptionChiller =
             this.relationList.add(relation);
         }
 
-        this.meters.add(this.meter);
+        this.meter = this.simMeter;
     }
 }

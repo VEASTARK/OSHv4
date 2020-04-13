@@ -1,12 +1,11 @@
 package osh.utils.costs;
 
+import osh.configuration.oc.*;
 import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.power.PowerInterval;
-import osh.utils.CostConfigurationContainer;
-import osh.utils.CostConfigurationTypes.*;
 import osh.utils.CostReturnType.SingleStepCostReturnType;
 import osh.utils.dataStructures.Enum2DoubleMap;
 import osh.utils.physics.PhysicalConstants;
@@ -14,17 +13,16 @@ import osh.utils.physics.PhysicalConstants;
 import java.util.EnumMap;
 
 /**
- * Represents the internal cost function of the OSH, configurable with the {@link CostConfigurationContainer} variables,
+ * Represents the internal cost function of the OSH, configurable with the {@link CostConfiguration} variables,
  * executing the calculation inside the optimization loop or in the {@link osh.simulation.SimulationEngine}.
  *
  * @author Sebastian Kramer
  */
 public class RegularCostFunction {
 
-    private final CostConfigurationContainer costConfiguration;
+    private final CostConfiguration costConfiguration;
 
-    private final double upperOverlimitFactor;
-    private final double lowerOverlimitFactor;
+    private final double overlimitFactor;
 
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
@@ -36,12 +34,11 @@ public class RegularCostFunction {
      * @param priceSignals the price signals
      * @param powerLimitSignals the power limit signals
      */
-    public RegularCostFunction(CostConfigurationContainer costConfiguration, EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
+    public RegularCostFunction(CostConfiguration costConfiguration, EnumMap<AncillaryCommodity, PriceSignal> priceSignals,
                                EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals) {
 
         this.costConfiguration = costConfiguration;
-        this.upperOverlimitFactor = costConfiguration.getUpperOverlimitFactor();
-        this.lowerOverlimitFactor = costConfiguration.getLowerOverlimitFactor();
+        this.overlimitFactor = costConfiguration.getOverlimitFactor();
         this.priceSignals = priceSignals;
         this.powerLimitSignals = powerLimitSignals;
     }
@@ -81,17 +78,17 @@ public class RegularCostFunction {
         }
 
         //reactive power costs
-        if (this.costConfiguration.getReactiveConfiguration() == REACTIVE_COSTS.FULL) {
+        if (this.costConfiguration.getReactiveCosts() == ReactiveCosts.FULL) {
             costMap.add(SingleStepCostReturnType.EPS,
                     Math.abs(ancillaryMeter.getPower(AncillaryCommodity.REACTIVEPOWEREXTERNAL)) *
                             this.priceSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL).getPrice(now));
         }
 
         //feed-in costs
-        if (this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE) {
+        if (this.costConfiguration.getFeedInCosts() != FeedInCosts.NONE) {
 
-            if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.PV
-                    || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH) {
+            if (this.costConfiguration.getFeedInCosts() == FeedInCosts.PV
+                    || this.costConfiguration.getFeedInCosts() == FeedInCosts.BOTH) {
                 if (ancillaryMeter.getPower(AncillaryCommodity.PVACTIVEPOWERFEEDIN) < 0) {
                     costMap.add(SingleStepCostReturnType.FEED_IN_PV,
                             ancillaryMeter.getPower(AncillaryCommodity.PVACTIVEPOWERFEEDIN) *
@@ -99,8 +96,8 @@ public class RegularCostFunction {
                 }
             }
 
-            if (this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.CHP
-                    || this.costConfiguration.getFeedInConfiguration() == FEED_IN_COSTS.BOTH) {
+            if (this.costConfiguration.getFeedInCosts() == FeedInCosts.CHP
+                    || this.costConfiguration.getFeedInCosts() == FeedInCosts.BOTH) {
                 if (ancillaryMeter.getPower(AncillaryCommodity.CHPACTIVEPOWERFEEDIN) < 0) {
                     costMap.add(SingleStepCostReturnType.FEED_IN_CHP,
                             ancillaryMeter.getPower(AncillaryCommodity.CHPACTIVEPOWERFEEDIN) *
@@ -110,17 +107,17 @@ public class RegularCostFunction {
         }
 
         //auto-consumption costs
-        if (this.costConfiguration.getAutoConsumptionConfiguration() != AUTO_CONSUMPTION_COSTS.NONE) {
-            if (this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.PV
-                    || this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.BOTH) {
+        if (this.costConfiguration.getAutoConsumptionCosts() != AutoConsumptionCosts.NONE) {
+            if (this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.PV
+                    || this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.BOTH) {
                 costMap.add(SingleStepCostReturnType.AUTO_CONSUMPTION,
                         ancillaryMeter.getPower(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION) *
                                 this.priceSignals.get(AncillaryCommodity.PVACTIVEPOWERAUTOCONSUMPTION).getPrice(now));
 
             }
 
-            if (this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.CHP
-                    || this.costConfiguration.getAutoConsumptionConfiguration() == AUTO_CONSUMPTION_COSTS.BOTH) {
+            if (this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.CHP
+                    || this.costConfiguration.getAutoConsumptionCosts() == AutoConsumptionCosts.BOTH) {
                 costMap.add(SingleStepCostReturnType.AUTO_CONSUMPTION,
                         ancillaryMeter.getPower(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION) *
                                 this.priceSignals.get(AncillaryCommodity.CHPACTIVEPOWERAUTOCONSUMPTION).getPrice(now));
@@ -135,7 +132,7 @@ public class RegularCostFunction {
         }
 
         //power-limit costs
-        if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.NONE) {
+        if (this.costConfiguration.getActivePlsCosts() != ActivePlsCosts.NONE) {
             PowerInterval activePowerLimit =
                     this.powerLimitSignals.get(AncillaryCommodity.ACTIVEPOWEREXTERNAL).getPowerLimitInterval(now);
 
@@ -143,45 +140,45 @@ public class RegularCostFunction {
 
             if (activePower > upperLimit)
                 costMap.add(SingleStepCostReturnType.PLS,
-                        this.upperOverlimitFactor * Math.abs(activePower - upperLimit) * activePrice);
+                        this.overlimitFactor * Math.abs(activePower - upperLimit) * activePrice);
 
-            if (this.costConfiguration.getPlsConfiguration() != PLS_COSTS.UPPER_ACTIVE) {
+            if (this.costConfiguration.getActivePlsCosts() != ActivePlsCosts.UPPER) {
                 double lowerLimit = activePowerLimit.getPowerLowerLimit();
 
                 if (activePower < lowerLimit) {
-                    if (this.costConfiguration.getFeedInConfiguration() != FEED_IN_COSTS.NONE) {
+                    if (this.costConfiguration.getFeedInCosts() != FeedInCosts.NONE) {
                         //we need to refund the feed-in costs that are over the limit
                         double overLimitPercentage = Math.abs(Math.abs(lowerLimit - activePower) / activePower);
                         costMap.add(SingleStepCostReturnType.PLS,
-                                Math.abs(this.lowerOverlimitFactor * overLimitPercentage * (costMap.get(SingleStepCostReturnType.FEED_IN_PV) +
+                                Math.abs(this.overlimitFactor * overLimitPercentage * (costMap.get(SingleStepCostReturnType.FEED_IN_PV) +
                                         costMap.get(SingleStepCostReturnType.FEED_IN_CHP))));
                     } else {
                         costMap.add(SingleStepCostReturnType.PLS,
-                                this.lowerOverlimitFactor * Math.abs(activePower - lowerLimit) * activePrice);
+                                this.overlimitFactor * Math.abs(activePower - lowerLimit) * activePrice);
                     }
                 }
             }
 
-            if (this.costConfiguration.getPlsConfiguration() == PLS_COSTS.FULL
-                    && this.costConfiguration.getReactiveConfiguration() == REACTIVE_COSTS.FULL) {
+            if (this.costConfiguration.getReactiveCosts() == ReactiveCosts.FULL
+                    && this.costConfiguration.getReactivePlsCosts() == ReactivePlsCosts.FULL) {
                 PowerInterval reactiveLimit =
                         this.powerLimitSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL).getPowerLimitInterval(now);
                 double reactivePower = ancillaryMeter.getPower(AncillaryCommodity.REACTIVEPOWEREXTERNAL);
 
                 if (reactivePower > reactiveLimit.getPowerUpperLimit()) {
                     costMap.add(SingleStepCostReturnType.PLS,
-                            Math.abs(this.upperOverlimitFactor * Math.abs(reactivePower - reactiveLimit.getPowerUpperLimit())
+                            Math.abs(this.overlimitFactor * Math.abs(reactivePower - reactiveLimit.getPowerUpperLimit())
                                     * this.priceSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL).getPrice(now)));
                 } else if (reactivePower < reactiveLimit.getPowerLowerLimit()) {
                     costMap.add(SingleStepCostReturnType.PLS,
-                            Math.abs(this.lowerOverlimitFactor * Math.abs(reactiveLimit.getPowerLowerLimit() - reactivePower)
+                            Math.abs(this.overlimitFactor * Math.abs(reactiveLimit.getPowerLowerLimit() - reactivePower)
                                     * this.priceSignals.get(AncillaryCommodity.REACTIVEPOWEREXTERNAL).getPrice(now)));
                 }
             }
         }
 
         //SELF-SUFF
-        if (this.costConfiguration.getSelfSufficiencyConfiguration() == SELF_SUFFICIENCY_RATIO.NORMAL) {
+        if (this.costConfiguration.getSelfSufficiencyRatio() == SelfSufficiencyRatio.NORMAL) {
 
             double ssr = 1.0;
 
@@ -203,7 +200,7 @@ public class RegularCostFunction {
         }
 
         //SELF-CONS
-        if (this.costConfiguration.getSelfConsumptionConfiguration() == SELF_CONSUMPTION_RATIO.NORMAL) {
+        if (this.costConfiguration.getSelfConsumptionRatio() == SelfConsumptionRatio.NORMAL) {
 
             double scr = 1.0;
 

@@ -6,6 +6,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 
 /**
  * Contains utility-function for handling date-time objects.
@@ -24,12 +26,6 @@ public class TimeConversion {
      */
     public static void setZone(ZoneId zone) {
         TimeConversion.zone = zone;
-    }
-
-    public static int convertUnixTime2DayOfYear(long unixTime) {
-        Instant time = Instant.ofEpochSecond(unixTime);
-        ZonedDateTime zdt = time.atZone(zone);
-        return zdt.getDayOfYear();
     }
 
     /**
@@ -79,7 +75,7 @@ public class TimeConversion {
      * @return the number of seconds passed since the start of the year
      */
     public static long getSecondsSinceYearStart(ZonedDateTime time) {
-        ZonedDateTime yearStart = time.truncatedTo(ChronoUnit.YEARS);
+        ZonedDateTime yearStart = getStartOfYear(time);
         return Duration.between(yearStart, time).toSeconds();
     }
 
@@ -130,7 +126,7 @@ public class TimeConversion {
      * @return the time at the start of the month
      */
     public static ZonedDateTime getStartOfMonth(ZonedDateTime time) {
-        return time.truncatedTo(ChronoUnit.MONTHS);
+        return time.with(TemporalAdjusters.firstDayOfMonth()).truncatedTo(ChronoUnit.DAYS);
     }
 
     /**
@@ -140,7 +136,7 @@ public class TimeConversion {
      * @return the time at the start of the year
      */
     public static ZonedDateTime getStartOfYear(ZonedDateTime time) {
-        return time.truncatedTo(ChronoUnit.YEARS);
+        return time.with(TemporalAdjusters.firstDayOfYear()).truncatedTo(ChronoUnit.DAYS);
     }
 
     /**

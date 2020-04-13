@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Represents a simple logger implementing the EA logger interface {@link IEALogger}.
@@ -257,7 +256,7 @@ public class EALogger implements IEALogger {
                     cervisiaResults[i] = this.cervisiaInformation[i][0] / this.cervisiaInformation[i][1];
                 }
             }
-            return new EALogObject(UUID.randomUUID(), null, this.generationsUsed,
+            return new EALogObject(null, null, this.generationsUsed,
                     this.fitnessChange, this.fitnessSpread, this.homogeneity,
                     this.optimizationCounter,
                     cervisiaResults);

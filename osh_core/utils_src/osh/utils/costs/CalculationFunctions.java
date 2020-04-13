@@ -7,18 +7,15 @@ package osh.utils.costs;
  */
 public class CalculationFunctions {
 
-    private static double upperOverlimitFactor;
-    private static double lowerOverlimitFactor;
+    private static double overlimitFactor;
 
     /**
      * Sets the overlimit factors for pls violations.
      *
-     * @param upperOverlimitFactor the overlimit factor for upper pls violations
-     * @param lowerOverlimitFactor the overlimit factor for lower pls violations
+     * @param overlimitFactor the overlimit factor for pls violations
      */
-    public static void setOverlimitFactors(double upperOverlimitFactor, double lowerOverlimitFactor) {
-        CalculationFunctions.upperOverlimitFactor = upperOverlimitFactor;
-        CalculationFunctions.lowerOverlimitFactor = lowerOverlimitFactor;
+    public static void setOverlimitFactor(double overlimitFactor) {
+        CalculationFunctions.overlimitFactor = overlimitFactor;
     }
 
     public static double pricePowerFunction(double price, double power, long timeFactor) {
@@ -63,9 +60,9 @@ public class CalculationFunctions {
             return base;
         } else {
             if (power < lowerLimit) {
-                return base + lowerOverlimitFactor * price * (Math.abs(lowerLimit) - Math.abs(power)) * timeFactor;
+                return base + overlimitFactor * price * (Math.abs(lowerLimit) - Math.abs(power)) * timeFactor;
             } else {
-                return base + upperOverlimitFactor * price * (Math.abs(power) - Math.abs(upperLimit)) * timeFactor;
+                return base + overlimitFactor * price * (Math.abs(power) - Math.abs(upperLimit)) * timeFactor;
             }
         }
     }
@@ -77,7 +74,7 @@ public class CalculationFunctions {
         if (power <= upperLimit) {
             return price * power * timeFactor;
         } else {
-            return (upperOverlimitFactor * price * (Math.abs(power) - Math.abs(upperLimit)) + price
+            return (overlimitFactor * price * (Math.abs(power) - Math.abs(upperLimit)) + price
                     * power) *
                     timeFactor;
         }

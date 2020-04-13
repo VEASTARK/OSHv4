@@ -29,12 +29,14 @@ dependencies {
     implementation group: 'org.glassfish.jaxb', name: 'jaxb-xjc'
     implementation group: 'log4j', name: 'log4j'
     implementation group: 'mysql', name: 'mysql-connector-java'
+    implementation group: 'net.codesup.util', name: 'jaxb2-rich-contract-plugin'
     implementation group: 'org.eclipse.persistence', name: 'eclipselink'
     implementation group: 'org.reflections', name: 'reflections'
 
     jaxb(
             'org.glassfish.jaxb:jaxb-core',
             'org.glassfish.jaxb:jaxb-xjc',
+            'net.codesup.util:jaxb2-rich-contract-plugin',
     )
 }
 
@@ -58,18 +60,31 @@ task generateXSDClasses {
 
         ant.xjc(
                 destdir: '${jaxbTargetDir}',
-                schema: 'generated_src/CALConfiguration.xsd'
+                schema: 'generated_src/CALConfiguration.xsd',
+                extension: true,
         )
+
+                {
+                    arg(line: '-Xcopy')
+                }
 
         ant.xjc(
                 destdir: '${jaxbTargetDir}',
                 schema: 'generated_src/EALConfiguration.xsd'
         )
 
+                {
+                    arg(line: '-Xcopy')
+                }
+
         ant.xjc(
                 destdir: '${jaxbTargetDir}',
                 schema: 'generated_src/OCConfiguration.xsd'
         )
+
+                {
+                    arg(line: '-Xcopy')
+                }
 
         ant.xjc(
                 destdir: '${jaxbTargetDir}',
@@ -90,6 +105,10 @@ task generateXSDClasses {
                 destdir: '${jaxbTargetDir}',
                 schema: 'generated_src/OSHConfiguration.xsd'
         )
+
+                {
+                    arg(line: '-Xcopy')
+                }
 
         ant.jaxbTargetDir = jaxbTargetDir2
 

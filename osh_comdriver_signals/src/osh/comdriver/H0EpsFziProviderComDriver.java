@@ -276,7 +276,7 @@ public class H0EpsFziProviderComDriver extends CALComDriver {
                 this.activePowerExternalSupplyAvg,
                 this.activePowerExternalSupplyMax,
                 this.h0Profile,
-                this.getOSH().getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass(), true),
+                this.getOSH().getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass()),
                 false,
                 0,
                 0);

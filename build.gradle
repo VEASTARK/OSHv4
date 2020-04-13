@@ -51,6 +51,7 @@ subprojects {
             dependency group: 'javax.xml.bind', name: 'jaxb-api', version: '2.+'
             dependency group: 'log4j', name: 'log4j', version: '1.+'
             dependency group: 'mysql', name: 'mysql-connector-java', version: '8.+'
+            dependency group: 'net.codesup.util', name: 'jaxb2-rich-contract-plugin', version: '2.+'
             dependency group: 'org.apache.commons', name: 'commons-collections4', version: '4.+'
             dependency group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
             dependency group: 'org.apache.commons', name: 'commons-math3', version: '3.+'

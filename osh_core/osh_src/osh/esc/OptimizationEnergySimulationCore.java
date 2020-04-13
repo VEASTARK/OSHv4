@@ -19,7 +19,7 @@ import java.util.Map.Entry;
  *
  * @author Ingo Mauser, Sebastian Kramer
  */
-public class OCEnergySimulationCore extends EnergySimulationCore {
+public class OptimizationEnergySimulationCore extends EnergySimulationCore {
 
     UUIDCommodityMap a2pInputStateMap;
     UUIDCommodityMap p2aInputStateMap;
@@ -29,7 +29,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore {
     /**
      * CONSTRUCTOR
      */
-    public OCEnergySimulationCore(
+    public OptimizationEnergySimulationCore(
             List<GridConfig> grids,
             String meterUUID) throws HALManagerException {
         super(grids, meterUUID);
@@ -43,7 +43,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore {
     /**
      * CONSTRUCTOR
      */
-    public OCEnergySimulationCore(
+    public OptimizationEnergySimulationCore(
             Map<EnergySimulationTypes, IEnergyGrid> grids,
             UUID meterUUID) {
         super(grids, meterUUID);
@@ -54,7 +54,7 @@ public class OCEnergySimulationCore extends EnergySimulationCore {
         this.thermalGrids[0] = this.grids.get(EnergySimulationTypes.THERMAL);
     }
 
-    public OCEnergySimulationCore(OCEnergySimulationCore other) {
+    public OptimizationEnergySimulationCore(OptimizationEnergySimulationCore other) {
         super(other.grids, other.meterUUID);
         this.a2pInputStateMap = new UUIDCommodityMap(other.a2pInputStateMap);
         this.p2aInputStateMap = new UUIDCommodityMap(other.p2aInputStateMap);

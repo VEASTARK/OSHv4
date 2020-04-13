@@ -16,6 +16,7 @@ import constructsimulation.configuration.OC.GenerateOC;
 import constructsimulation.configuration.general.Generate;
 import constructsimulation.configuration.general.HouseConfig;
 import constructsimulation.datatypes.EPSTypes;
+import osh.configuration.oc.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -141,33 +142,21 @@ public class constructMultiplePackages {
         if (config.containsKey("crossoverProb")) {
             EAConfig.crossoverProbability = (Double) config.get("crossoverProb");
         }
-        if (config.containsKey("epsOptimisationObjective")) {
-            CostConfig.epsOptimizationObjective = (Integer) config.get("epsOptimisationObjective");
+        if (config.containsKey("reactiveTypes")) {
+            CostConfig.reactiveCosts = (ReactiveCosts) config.get("reactiveTypes");
         }
-        if (config.containsKey("pls")) {
-            PLSType plsType = (PLSType) config.get("pls");
-
-            if (plsType != PLSType.NONE) {
-                CostConfig.plsOptimizationObjective = 1;
-            } else {
-                CostConfig.plsOptimizationObjective = 0;
-            }
-
-            if (plsType == PLSType.HALF_POS) {
-                CostConfig.upperOverLimitFactor = 1.0;
-                CostConfig.lowerOverLimitFactor = 0.0;
-            } else if (plsType == PLSType.HALF_NEG) {
-                CostConfig.upperOverLimitFactor = 0.0;
-                CostConfig.lowerOverLimitFactor = 1.0;
-            } else if (plsType == PLSType.FULL) {
-                CostConfig.upperOverLimitFactor = 1.0;
-                CostConfig.lowerOverLimitFactor = 1.0;
-            } else {
-                CostConfig.upperOverLimitFactor = 0.0;
-                CostConfig.lowerOverLimitFactor = 0.0;
-            }
+        if (config.containsKey("activePlsTypes")) {
+            CostConfig.activePlsCosts = (ActivePlsCosts) config.get("reactiveTypes");
         }
-
+        if (config.containsKey("reactivePlsTypes")) {
+            CostConfig.reactivePlsCosts = (ReactivePlsCosts) config.get("reactiveTypes");
+        }
+        if (config.containsKey("feedInTypes")) {
+            CostConfig.feedInCosts = (FeedInCosts) config.get("feedInTypes");
+        }
+        if (config.containsKey("autoConsumptionTypes")) {
+            CostConfig.autoConsumptionCosts = (AutoConsumptionCosts) config.get("autoConsumptionTypes");
+        }
 
         setLogValues();
 
@@ -219,9 +208,7 @@ public class constructMultiplePackages {
 //		if (config.containsKey("crossoverProb")) {
 //			name += "xo" + (double) config.get("crossoverProb");
 //		}
-        if (config.containsKey("pls")) {
-            name += PLSType.toShortString(((PLSType) config.get("pls")));
-        }
+        name += costConfigToName();
 
         if (name.endsWith("_")) {
             name = name.substring(0, name.length() - 1);
@@ -287,6 +274,40 @@ public class constructMultiplePackages {
             default:
                 return null;
         }
+    }
+
+    private static String costConfigToName() {
+        String ret = "costs";
+        if (CostConfig.reactiveCosts == ReactiveCosts.FULL) {
+            ret += "-var";
+        }
+        if (CostConfig.activePlsCosts == ActivePlsCosts.UPPER) {
+            ret += "-aPLSUpper";
+        } else if (CostConfig.activePlsCosts == ActivePlsCosts.FULL) {
+            ret += "-aPLSFull";
+        }
+
+        if (CostConfig.reactivePlsCosts == ReactivePlsCosts.FULL) {
+            ret += "-varPLS";
+        }
+
+        if (CostConfig.feedInCosts == FeedInCosts.PV) {
+            ret += "-pvFeed";
+        } else if (CostConfig.feedInCosts == FeedInCosts.CHP) {
+            ret += "-chpFeed";
+        } else if (CostConfig.feedInCosts == FeedInCosts.BOTH) {
+            ret += "-allFeed";
+        }
+
+        if (CostConfig.autoConsumptionCosts == AutoConsumptionCosts.PV) {
+            ret += "-pvAuto";
+        } else if (CostConfig.autoConsumptionCosts == AutoConsumptionCosts.CHP) {
+            ret += "-chpAuto";
+        } else if (CostConfig.autoConsumptionCosts == AutoConsumptionCosts.BOTH) {
+            ret += "-allAuto";
+        }
+
+        return ret;
     }
 
     @SuppressWarnings("unused")
