@@ -176,14 +176,12 @@ public class VDI6002DomesticHotWaterSimulationDriver extends DeviceSimulationDri
     @Override
     public void onNextTimeTick() {
 
-        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
-
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
 
         if (this.dayProfile == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
             if (this.dayProfile == null)
                 this.dayProfile = new SparseLoadProfile();
-            this.generateDailyDemandProfile(now, rand);
+            this.generateDailyDemandProfile(now, this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass()));
         }
 
         int power = this.dayProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, this.getTimeDriver().getCurrentEpochSecond());

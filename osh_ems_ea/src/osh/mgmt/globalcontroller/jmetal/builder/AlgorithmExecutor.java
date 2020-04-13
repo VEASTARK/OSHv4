@@ -31,6 +31,7 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.impl.OSHPseudoRandom;
 import org.uma.jmetal.util.pseudorandom.impl.ParallelOSHPseudoRandom;
 import osh.configuration.oc.*;
+import osh.core.EARandomDistributor;
 import osh.core.OSHRandom;
 import osh.core.exceptions.OCManagerException;
 import osh.core.logging.IGlobalLogger;
@@ -48,6 +49,7 @@ import osh.utils.string.ParameterConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -61,6 +63,7 @@ public class AlgorithmExecutor {
     private final IGlobalLogger logger;
     private IEALogger eaLogger;
     private final List<EAObjectives> objectives;
+    private final EARandomDistributor randomDistributor;
 
     private final List<AlgorithmConfigurationWrapper> algorithms = new ArrayList<>();
     private final boolean useParallelAlgorithms;
@@ -71,7 +74,9 @@ public class AlgorithmExecutor {
      * @param eaConfiguration the configuration of the algoriothms
      * @param globalLogger the global logger
      */
-    public AlgorithmExecutor(EAConfiguration eaConfiguration, IGlobalLogger globalLogger) {
+    public AlgorithmExecutor(EAConfiguration eaConfiguration, EARandomDistributor randomDistributor,
+                             IGlobalLogger globalLogger) {
+        this.randomDistributor = randomDistributor;
         this.objectives = eaConfiguration.getEaObjectives();
         this.logger = globalLogger;
 
@@ -117,15 +122,14 @@ public class AlgorithmExecutor {
     }
 
     /**
-     * Updates the random generator used by the jMetal algorithms.
-     *
-     * @param randomGenerator the new random generator to update on
+     * Updates the parallel random generator used by the jMetal algorithms.
      */
-    public void updateRandomGenerator(OSHRandom randomGenerator) {
+    private void updateRandomGenerators() {
         if (this.useParallelAlgorithms) {
             OSHRandom[] randomGenerators = new OSHRandom[this.algorithms.size()];
             for (int i = 0; i < this.algorithms.size(); i++) {
-                randomGenerators[i] = new OSHRandom(randomGenerator.getNextLong());
+                randomGenerators[i] =
+                        this.randomDistributor.getRandomGenerator(this.algorithms.get(i).getAlgorithm(), i);
             }
 
             if (JMetalRandom.getInstance().getRandomGenerator() == null || !JMetalRandom.getInstance()
@@ -133,9 +137,15 @@ public class AlgorithmExecutor {
                 JMetalRandom.getInstance().setRandomGenerator(new ParallelOSHPseudoRandom(randomGenerators));
             }
             ((ParallelOSHPseudoRandom) JMetalRandom.getInstance().getRandomGenerator()).setRandomGenerators(randomGenerators);
-        } else {
-            JMetalRandom.getInstance().setRandomGenerator(new OSHPseudoRandom(randomGenerator));
         }
+    }
+
+    /**
+     * Updates a single random generator used by the jMetal algorithms.
+     */
+    private void updateRandomGenerator(AlgorithmType algorithmType, int identifier) {
+        JMetalRandom.getInstance().setRandomGenerator(
+                new OSHPseudoRandom(this.randomDistributor.getRandomGenerator(algorithmType, identifier)));
     }
 
     /**
@@ -167,6 +177,7 @@ public class AlgorithmExecutor {
                 distributor);
 
         CountDownLatch latch = new CountDownLatch(this.algorithms.size());
+        this.updateRandomGenerators();
 
         for (int i = 0; i < this.algorithms.size(); i++) {
 
@@ -183,6 +194,10 @@ public class AlgorithmExecutor {
                 }
 
                 continue;
+            }
+
+            if (!this.useParallelAlgorithms) {
+                this.updateRandomGenerator(algorithmConfig.getAlgorithm(), i);
             }
 
             Algorithm<?> algorithm = this.buildAlgorithm(problem, algorithmConfig, problemEvaluator);
