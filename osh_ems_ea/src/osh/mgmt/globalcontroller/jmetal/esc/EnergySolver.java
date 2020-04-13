@@ -82,7 +82,6 @@ public class EnergySolver {
      * @param optimizationESC the energy-simulation-core for the optimization
      * @param optimizationStartPoint the starting point (in time) of the optimization
      * @param costFunction the cost function for the calculation
-     * @param randomGenerator the base-random generator to use
      * @param algorithmExecutor the algorithm executor to use
      * @param logExtensive if extensive log information should be produced (GUI, etc.)
      *
@@ -95,7 +94,6 @@ public class EnergySolver {
             OptimizationEnergySimulationCore optimizationESC,
             long optimizationStartPoint,
             OptimizationCostFunction costFunction,
-            OSHRandom randomGenerator,
             AlgorithmExecutor algorithmExecutor,
             boolean logExtensive) throws FileNotFoundException {
 
@@ -121,8 +119,6 @@ public class EnergySolver {
                 eaLogger,
                 this.stepSize,
                 this.eaConfiguration.getEaObjectives());
-
-        algorithmExecutor.updateRandomGenerator(randomGenerator);
 
         PrintWriter pw = new PrintWriter(new FileOutputStream(
                 new File(this.gaLogPath),

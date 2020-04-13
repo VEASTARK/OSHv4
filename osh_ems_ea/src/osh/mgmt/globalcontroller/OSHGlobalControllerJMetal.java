@@ -5,6 +5,7 @@ import osh.configuration.oc.CostConfiguration;
 import osh.configuration.oc.EAConfiguration;
 import osh.configuration.oc.VariableEncoding;
 import osh.configuration.system.ConfigurationParameter;
+import osh.core.EARandomDistributor;
 import osh.core.OSHRandom;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
@@ -56,9 +57,8 @@ public class OSHGlobalControllerJMetal
     private OSHGlobalObserver oshGlobalObserver;
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
-    private boolean newEpsPlsReceived;
     private ZonedDateTime lastTimeSchedulingStarted;
-    private final OSHRandom optimizationMainRandomGenerator;
+    private final EARandomDistributor eaRandomDistributor;
     private final AlgorithmExecutor algorithmExecutor;
     private final String logDir;
     private int stepSize;
@@ -98,7 +98,7 @@ public class OSHGlobalControllerJMetal
             optimizationMainRandomSeed = 0xd1ce5bL;
             this.getGlobalLogger().logError("Can't get parameter optimizationMainRandomSeed, using the default value: " + optimizationMainRandomSeed);
         }
-        this.optimizationMainRandomGenerator = new OSHRandom(optimizationMainRandomSeed);
+        this.eaRandomDistributor = new EARandomDistributor(this.getOSH(), optimizationMainRandomSeed);
 
         try {
             this.stepSize =
@@ -119,7 +119,8 @@ public class OSHGlobalControllerJMetal
         this.logDir = this.getOSH().getOSHStatus().getLogDir();
 
         this.getGlobalLogger().logDebug("Optimization StepSize = " + this.stepSize);
-        this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.getGlobalLogger());
+        this.algorithmExecutor = new AlgorithmExecutor(this.eaConfiguration, this.eaRandomDistributor,
+                this.getGlobalLogger());
         this.energySolver = new EnergySolver(this.getGlobalLogger(), this.eaConfiguration, this.stepSize, this.logDir);
     }
 
@@ -145,6 +146,7 @@ public class OSHGlobalControllerJMetal
                         new CostConfiguration(this.costConfiguration)));
 
         this.lastTimeSchedulingStarted = this.getTimeDriver().getTimeAtStart().plusSeconds(60);
+        this.eaRandomDistributor.startClock();
     }
 
     @Override
@@ -162,10 +164,8 @@ public class OSHGlobalControllerJMetal
     @Override
     public <T extends AbstractExchange> void onExchange(T exchange) {
         if (exchange instanceof EpsStateExchange) {
-            this.newEpsPlsReceived = true;
             this.priceSignals = ((EpsStateExchange) exchange).getPriceSignals();
         } else if (exchange instanceof PlsStateExchange) {
-            this.newEpsPlsReceived = true;
             this.powerLimitSignals = ((PlsStateExchange) exchange).getPowerLimitSignals();
         } else {
             this.getGlobalLogger().logError("ERROR in " + this.getClass().getCanonicalName() + ": UNKNOWN " +
@@ -176,7 +176,6 @@ public class OSHGlobalControllerJMetal
     @Override
     public <T extends TimeExchange> void onTimeExchange(T exchange) {
         super.onTimeExchange(exchange);
-        ZonedDateTime now = exchange.getTime();
 
         // check whether rescheduling is required and if so do rescheduling
         this.handleScheduling();
@@ -294,7 +293,6 @@ public class OSHGlobalControllerJMetal
                     this.optimizationESC,
                     now,
                     costFunction,
-                    new OSHRandom(this.optimizationMainRandomGenerator.getNextLong()),
                     this.algorithmExecutor,
                     extensiveLogging);
 
