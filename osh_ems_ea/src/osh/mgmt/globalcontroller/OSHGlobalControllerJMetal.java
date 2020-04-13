@@ -22,7 +22,6 @@ import osh.datatypes.registry.oc.details.utility.EpsStateExchange;
 import osh.datatypes.registry.oc.details.utility.PlsStateExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.state.globalobserver.EpsPlsStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIAncillaryMeterStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIHotWaterPredictionStateExchange;
 import osh.datatypes.registry.oc.state.globalobserver.GUIScheduleStateExchange;
@@ -181,25 +180,6 @@ public class OSHGlobalControllerJMetal
 
         // check whether rescheduling is required and if so do rescheduling
         this.handleScheduling();
-
-        // save current EPS and PLS to registry for logger
-        {
-            EpsPlsStateExchange epse = new EpsPlsStateExchange(
-                    this.getUUID(),
-                    now,
-                    this.priceSignals,
-                    this.powerLimitSignals,
-                    this.costConfiguration,
-                    this.newEpsPlsReceived);
-
-            this.newEpsPlsReceived = false;
-
-            this.getOCRegistry().publish(
-                    EpsPlsStateExchange.class,
-                    this,
-                    epse);
-        }
-
     }
 
     /**

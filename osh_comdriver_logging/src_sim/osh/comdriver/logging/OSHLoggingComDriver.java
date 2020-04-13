@@ -200,7 +200,7 @@ public class OSHLoggingComDriver extends CALComDriver {
         } else {
             throw new IllegalArgumentException("Handling of log object of type: " + exchangeObject.getClass() + " is not implemented");
         }
-        // TODO do pre-processing if desired
+        //TODO: do pre-processing if desired
     }
 
     @Override
