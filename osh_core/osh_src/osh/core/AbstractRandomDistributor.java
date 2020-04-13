@@ -1,7 +1,6 @@
 package osh.core;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import osh.OSH;
 import osh.OSHComponent;
 import osh.core.interfaces.IOSH;
 
@@ -37,29 +36,29 @@ public abstract class AbstractRandomDistributor<I, J> extends OSHComponent {
     }
 
     /**
-     * Returns a unique random generator based on the unique first and secondary identifiers.
+     * Returns a unique random generator based on the unique primary and secondary identifiers.
      *
      * Will ensure that every random generator is unique at any time t by iterating over a master random generator exactly n times, where
      * n is either seconds passed since the last request of the same caller for a random generator or the seconds passed since creation
      * of this class.
      *
-     * @param firstIdentifier the unique first identifier
+     * @param primaryIdentifier the unique primary identifier
      * @param secondaryIdentifier the unique secondary identifier
      *
      * @return a unique random generator based on the unique identifiers
      */
-    public OSHRandom getRandomGenerator(I firstIdentifier, J secondaryIdentifier) {
+    public OSHRandom getRandomGenerator(I primaryIdentifier, J secondaryIdentifier) {
 
         RandomWrapper random;
         ZonedDateTime currentTime = this.getTimeDriver().getCurrentTime();
-        IdentifierTuple<I, J> identifierTuple = new IdentifierTuple<>(firstIdentifier, secondaryIdentifier);
+        IdentifierTuple<I, J> identifierTuple = new IdentifierTuple<>(primaryIdentifier, secondaryIdentifier);
 
         if (this.identifierTupleToRandomGenMap.containsKey(identifierTuple)) {
             random = this.identifierTupleToRandomGenMap.get(identifierTuple);
         } else {
             //create a new wrapper
             long constructedSeed =
-                    this.getSeedFromIdentifiers(this.initialRandomSeed, firstIdentifier, secondaryIdentifier);
+                    this.getSeedFromIdentifiers(this.initialRandomSeed, primaryIdentifier, secondaryIdentifier);
 
             random = new RandomWrapper(constructedSeed, this.startTime);
 
@@ -75,7 +74,7 @@ public abstract class AbstractRandomDistributor<I, J> extends OSHComponent {
             random.lastCalled = currentTime;
         } else {
             //multiple calls from same component, better be sure and generate a new random seed
-            random.currentRandomSeed = this.getSeedFromIdentifiers(random.currentRandomSeed, firstIdentifier, secondaryIdentifier);
+            random.currentRandomSeed = this.getSeedFromIdentifiers(random.currentRandomSeed, primaryIdentifier, secondaryIdentifier);
         }
 
         return new OSHRandom(random.currentRandomSeed);
@@ -95,11 +94,11 @@ public abstract class AbstractRandomDistributor<I, J> extends OSHComponent {
      */
     private static final class IdentifierTuple<I, J> {
 
-        private final I firstIdentifier;
+        private final I primaryIdentifier;
         private final J secondaryIdentifier;
 
-        private IdentifierTuple(I firstIdentifier, J secondaryIdentifier) {
-            this.firstIdentifier = firstIdentifier;
+        private IdentifierTuple(I primaryIdentifier, J secondaryIdentifier) {
+            this.primaryIdentifier = primaryIdentifier;
             this.secondaryIdentifier = secondaryIdentifier;
         }
 
@@ -108,13 +107,13 @@ public abstract class AbstractRandomDistributor<I, J> extends OSHComponent {
             if (this == o) return true;
             if (o == null || this.getClass() != o.getClass()) return false;
             final IdentifierTuple<?, ?> that = (IdentifierTuple<?, ?>) o;
-            return this.firstIdentifier.equals(that.firstIdentifier) &&
+            return this.primaryIdentifier.equals(that.primaryIdentifier) &&
                     this.secondaryIdentifier.equals(that.secondaryIdentifier);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.firstIdentifier, this.secondaryIdentifier);
+            return Objects.hash(this.primaryIdentifier, this.secondaryIdentifier);
         }
     }
 
