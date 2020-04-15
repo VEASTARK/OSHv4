@@ -102,8 +102,7 @@ public class ElectricalEnergyGrid implements IEnergyGrid {
                         new ElectricalConnection(Commodity.fromString(conn.getPassiveToActiveCommodity()))));
             }
 
-            //TODO: update grid-layout to only have one meter in next update that breaks backwards-compatibility
-            this.meterUUID = UUID.fromString(layout.getMeterUUIDs().get(0));
+            this.meterUUID = UUID.fromString(layout.getSuperMeterUUID());
 
             this.devicesByType.put(GridDeviceType.PV, new ObjectOpenHashSet<>());
             this.devicesByType.put(GridDeviceType.CHP, new ObjectOpenHashSet<>());

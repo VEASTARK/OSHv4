@@ -1,7 +1,8 @@
 package osh.mgmt.globalcontroller.jmetal.esc;
 
+import osh.datatypes.power.ErsatzACLoadProfile;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.esc.OCEnergySimulationCore;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.esc.UUIDCommodityMap;
 
 import java.util.Arrays;
@@ -18,9 +19,10 @@ public class EnergyProblemDataContainer {
     private final InterdependentProblemPart<?, ?>[] allActivePPs;
     private final InterdependentProblemPart<?, ?>[] allPassivePPs;
     private final InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs;
-    private final OCEnergySimulationCore ocESC;
+    private final OptimizationEnergySimulationCore ocESC;
     private final UUIDCommodityMap activeToPassiveMap;
     private final UUIDCommodityMap passiveToActiveMap;
+    private final ErsatzACLoadProfile ancillaryLoadProfile;
 
     /**
      * Generates this data-object with all the given consituting parts.
@@ -38,9 +40,10 @@ public class EnergyProblemDataContainer {
                                       InterdependentProblemPart<?, ?>[] allActivePPs,
                                       InterdependentProblemPart<?, ?>[] allPassivePPs,
                                       InterdependentProblemPart<?, ?>[] allActiveNeedsInputPPs,
-                                      OCEnergySimulationCore ocESC,
+                                      OptimizationEnergySimulationCore ocESC,
                                       UUIDCommodityMap activeToPassiveMap,
-                                      UUIDCommodityMap passiveToActiveMap) {
+                                      UUIDCommodityMap passiveToActiveMap,
+                                      ErsatzACLoadProfile ancillaryLoadProfile) {
         Objects.requireNonNull(allProblemParts);
         Objects.requireNonNull(allActivePPs);
         Objects.requireNonNull(allPassivePPs);
@@ -48,6 +51,7 @@ public class EnergyProblemDataContainer {
         Objects.requireNonNull(ocESC);
         Objects.requireNonNull(activeToPassiveMap);
         Objects.requireNonNull(passiveToActiveMap);
+        Objects.requireNonNull(ancillaryLoadProfile);
 
         this.allProblemParts = allProblemParts;
         this.allActivePPs = allActivePPs;
@@ -56,6 +60,7 @@ public class EnergyProblemDataContainer {
         this.ocESC = ocESC;
         this.activeToPassiveMap = activeToPassiveMap;
         this.passiveToActiveMap = passiveToActiveMap;
+        this.ancillaryLoadProfile = ancillaryLoadProfile;
     }
 
     /**
@@ -99,7 +104,7 @@ public class EnergyProblemDataContainer {
      *
      * @return the energy-simulation-core for use in the optimization loop
      */
-    public OCEnergySimulationCore getOcESC() {
+    public OptimizationEnergySimulationCore getOcESC() {
         return this.ocESC;
     }
 
@@ -119,6 +124,15 @@ public class EnergyProblemDataContainer {
      */
     public UUIDCommodityMap getPassiveToActiveMap() {
         return this.passiveToActiveMap;
+    }
+
+    /**
+     * Returns the load profile used for storing the ancillary meter state.
+     *
+     * @return the load profile used for storing the ancillary meter state
+     */
+    public ErsatzACLoadProfile getAncillaryLoadProfile() {
+        return this.ancillaryLoadProfile;
     }
 
     /**
@@ -158,8 +172,9 @@ public class EnergyProblemDataContainer {
 
         return new EnergyProblemDataContainer(allPPsCopy, allActivePPsCopy,
                 allPassivePPsCopy, allActiveNeedsInputPPsCopy,
-                new OCEnergySimulationCore(this.ocESC),
+                new OptimizationEnergySimulationCore(this.ocESC),
                 new UUIDCommodityMap(this.activeToPassiveMap),
-                new UUIDCommodityMap(this.passiveToActiveMap));
+                new UUIDCommodityMap(this.passiveToActiveMap),
+                new ErsatzACLoadProfile(this.ancillaryLoadProfile));
     }
 }

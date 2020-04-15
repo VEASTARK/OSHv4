@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.stoppingrule;
 
 import org.uma.jmetal.util.JMetalException;
+import osh.configuration.oc.StoppingRuleType;
 
 import java.util.Map;
 
@@ -12,20 +13,19 @@ public class StoppingRuleFactory {
     /**
      * Contrcuts and returns a stopping rule based on a given name and agiven parameter collection.
      *
-     * @param name the name of the stopping rule
+     * @param stoppingRule the type of the stopping rule
      * @param parameters the parameter collection of the stopping rule
      *
      * @return the constructed stopping rule
      */
-    public static StoppingRule getStoppingRule(String name, Map<String, Object> parameters) {
-        StoppingRuleType ruleType = StoppingRuleType.fromName(name);
+    public static StoppingRule getStoppingRule(StoppingRuleType stoppingRule, Map<String, Object> parameters) {
 
-        if (ruleType == StoppingRuleType.MAX_EVALUATIONS)
+        if (stoppingRule == StoppingRuleType.MAX_EVALUATIONS)
             return new EvaluationsStoppingRule(parameters);
-        else if (ruleType == StoppingRuleType.DELTA_FITNESS)
+        else if (stoppingRule == StoppingRuleType.DELTA_FITNESS)
             return new DeltaFitnessStoppingRule(parameters);
         else {
-            throw new JMetalException("Exception in " + name + ".getStoppingRule()");
+            throw new JMetalException("Exception in " + stoppingRule.name() + ".getStoppingRule()");
         }
     }
 }

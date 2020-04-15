@@ -142,11 +142,6 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * CONSTRUCTOR
      *
-     * @param osh
-     * @param deviceID
-     * @param driverConfig
-     * @throws JAXBException
-     * @throws HALException
      */
     public GenericFutureApplianceSimulationDriver(
             IOSH osh,
@@ -430,7 +425,7 @@ public class GenericFutureApplianceSimulationDriver
             // output the number of runs of this device
 
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueue(new DevicesLogObject(this.getUUID(),
+                this.getDriverRegistry().publish(DevicesLogObject.class, new DevicesLogObject(this.getUUID(),
                         this.getTimeDriver().getCurrentTime(), this.totalPlannedNumberOfRuns, this.totalRealizedNumberOfRuns,
                         this.activePowerConsumption / PhysicalConstants.factor_wsToKWh, this.profileNumberOfRuns,
                         this.dofs, this.startTimes, this.profilesSelected, this.getDeviceType()));
@@ -462,7 +457,6 @@ public class GenericFutureApplianceSimulationDriver
      * temporary until state machine is included<br>
      * re-programming: oldState == newState but state could have changed (e.g. other configurationId)
      *
-     * @param newState
      */
     private void setEN50523State(EN50523DeviceState newState) {
         this.getGlobalLogger().logDebug(
@@ -477,8 +471,6 @@ public class GenericFutureApplianceSimulationDriver
     /**
      * Is called when there is a new CX object
      *
-     * @param controllerRequest
-     * @throws HALException
      */
     @Override
     protected void onControllerRequest(HALControllerExchange controllerRequest) throws HALException {

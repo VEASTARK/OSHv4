@@ -32,6 +32,16 @@ public class StringConversions {
         return Arrays.toString(Arrays.stream(arr).map(Arrays::toString).toArray(String[]::new));
     }
 
+    public static double[] fromStringToPrimitiveDoubleArray(String s) {
+        Double[] arr = StringConversions.fromStringToDoubleArray(s);
+        double[] ret = new double[arr.length];
+        for (int d0 = 0; d0 < ret.length; d0++) {
+            ret[d0] = arr[d0];
+        }
+
+        return ret;
+    }
+
     public static Long[][] fromStringTo2DimLongArray(String s) {
         String trimmed = WHITE_SPACES.matcher(s).replaceAll("");
 

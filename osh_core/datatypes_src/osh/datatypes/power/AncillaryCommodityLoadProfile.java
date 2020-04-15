@@ -2,7 +2,7 @@ package osh.datatypes.power;
 
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import osh.datatypes.commodity.AncillaryCommodity;
-import osh.datatypes.commodity.AncillaryMeterState;
+import osh.utils.dataStructures.fastutil.Long2IntTreeMap;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -13,49 +13,28 @@ import java.util.Map;
  */
 public class AncillaryCommodityLoadProfile extends LoadProfile<AncillaryCommodity> {
 
-    private static final AncillaryCommodity[] ancillaryCommodityValues = AncillaryCommodity.values();
-    private final int[] sequentialFloorValues =
-            new int[AncillaryCommodity.values().length];
-
-
     public AncillaryCommodityLoadProfile() {
         super(AncillaryCommodity.class);
-    }
-
-    public void initSequential() {
-        Arrays.fill(this.sequentialFloorValues, Integer.MAX_VALUE);
-    }
-
-    public void endSequential() {
-    }
-
-    /**
-     * WARNING: Do NOT use if you want to either set Loads non-sequential (now or in the future) or if you want to compress/merge/clone ...
-     * <p>
-     * <p>
-     * Sets the load of the provided ancillaryCommodity, but will ignore same power level inputs
-     *
-     * @param state the ancillary meter states
-     * @param t     the time to put the ancillary meter values
-     */
-    public void setLoadSequential(AncillaryMeterState state, long t) {
-
-        double[] allPowers = state.getAllPowerStates();
-
-        for (int i = 0; i < allPowers.length; i++) {
-            int power = (int) allPowers[i];
-            int oldPower = this.sequentialFloorValues[i];
-
-            if (oldPower != power) {
-                this.commodities.get(ancillaryCommodityValues[i]).put(t, power);
-                this.sequentialFloorValues[i] = power;
-            }
-        }
     }
 
     public LongSortedSet getAllLoadChangesFor(AncillaryCommodity ac, long from, long to) {
         //fastutil maps handles the from-value as inclusive but we need it to be exclusive so we add one
         return this.commodities.get(ac).subMap(from + 1, to).keySet();
+    }
+
+    public static AncillaryCommodityLoadProfile convertFromErsatzProfile(ErsatzACLoadProfile ersatzProfile) {
+        AncillaryCommodityLoadProfile result = new AncillaryCommodityLoadProfile();
+
+        for (AncillaryCommodity ac : AncillaryCommodity.values()) {
+            long[] keys = ersatzProfile.getKeyFor(ac);
+            int[] values = Arrays.stream(ersatzProfile.getValueFor(ac)).mapToInt(d -> (int) d).toArray();
+
+            result.commodities.put(ac, new Long2IntTreeMap(keys, values));
+        }
+
+        result.setEndingTimeOfProfile(ersatzProfile.getEndingTimeOfProfile());
+
+        return result;
     }
 
     @Override

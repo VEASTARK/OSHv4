@@ -497,36 +497,6 @@ public class OSHLifeCycleManager {
         return this.simEngine;
     }
 
-    public void loadScreenplay(String screenplayFileName) throws LifeCycleManagerException {
-        if (this.ealManager != null) {
-            try {
-                this.ealManager.loadScreenplay(screenplayFileName);
-            } catch (SimulationEngineException | HALManagerException e) {
-                throw new LifeCycleManagerException(e);
-            }
-        } else {
-            throw new LifeCycleManagerException("Unable to load Screenplay with this EAL");
-        }
-    }
-
-    public void initDatabaseLogging(boolean isDatabaseLogging, String tableName,
-                                    ZonedDateTime forcedStartTime, String[] databasesToLog) throws LifeCycleManagerException {
-        if (isDatabaseLogging) {
-            DatabaseLoggerThread.initLogger(tableName,
-                    this.theOrganicSmartHome.getOSHStatus().getLogDir(),
-                    forcedStartTime,
-                    databasesToLog);
-
-            if (this.ealManager != null) {
-                try {
-                    this.ealManager.initDatabaseLogging();
-                } catch (HALManagerException e) {
-                    throw new LifeCycleManagerException(e);
-                }
-            }
-        }
-    }
-
     public OSHSimulationResults startSimulation(long simulationDuration) throws LifeCycleManagerException, OSHException {
 
         if (this.ealManager != null) {

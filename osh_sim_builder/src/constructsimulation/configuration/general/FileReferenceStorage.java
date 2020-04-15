@@ -27,6 +27,11 @@ public class FileReferenceStorage {
     public static String OCConfigFileName = "OCConfig";
     public static String CALConfigFileName = "CALConfig";
     public static String OSHConfigFileName = "OSHConfig";
+    //grids
+    public static String simulationElelectricalGrid = "configfiles/grids/SimulationElectricalGrid.xml";
+    public static String simulationThermalGrid = "configfiles/grids/SimulationThermalGrid.xml";
+    public static String eshlElelectricalGrid = "configfiles/grids/ESHLElectricalGrid.xml";
+    public static String eshlThermalGrid = "configfiles/grids/ESHLThermalGrid.xml";
     //h0
     public static String h0Filename15Min = "configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv";
     //appliances

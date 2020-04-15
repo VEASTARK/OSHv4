@@ -156,8 +156,7 @@ public class PvLocalObserver extends LocalObserver {
             if (this.timeRangeCounter >= profileResolutionInSec) {
                 this.lastDayProfile.setLoad(Commodity.ACTIVEPOWER, this.timeFromMidnight, powerDetails.getActivePower());
                 this.lastDayProfile.setLoad(Commodity.REACTIVEPOWER, this.timeFromMidnight, powerDetails.getReactivePower());
-                //TODO: change to 1 in when next backwards-compatibility breaking update gets released
-                this.timeRangeCounter = 0;
+                this.timeRangeCounter = 1;
             } else {
                 ++this.timeRangeCounter;
             }

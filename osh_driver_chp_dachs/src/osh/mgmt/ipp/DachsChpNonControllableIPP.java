@@ -1,5 +1,6 @@
 package osh.mgmt.ipp;
 
+import osh.configuration.oc.EAObjectives;
 import osh.configuration.system.DeviceTypes;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.ea.Schedule;
@@ -154,7 +155,7 @@ public class DachsChpNonControllableIPP
         } else {
             if (this.currentWaterTemperature < this.hotWaterStorageMinTemp) {
                 chpNewState = true;
-                this.addInterdependentCervisia(this.fixedCostPerStart);
+                this.addInterdependentCervisia(EAObjectives.MONEY, this.fixedCostPerStart);
             }
         }
 

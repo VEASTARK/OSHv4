@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://osh/configuration/oc"
+        xmlns:tns="http://osh/configuration/oc"
+        elementFormDefault="qualified">
+
+    <import schemaLocation="includes/SystemMaster.xsd" namespace="http://osh/configuration/system"/>
+
+    <complexType name="CostConfiguration">
+        <sequence>
+            <element name="reactiveCosts" type="tns:reactiveCosts"/>
+            <element name="activePlsCosts" type="tns:activePlsCosts"/>
+            <element name="reactivePlsCosts" type="tns:reactivePlsCosts"/>
+            <element name="feedInCosts" type="tns:feedInCosts"/>
+            <element name="autoConsumptionCosts" type="tns:autoConsumptionCosts"/>
+            <element name="selfSufficiencyRatio" type="tns:selfSufficiencyRatio"/>
+            <element name="selfConsumptionRatio" type="tns:selfConsumptionRatio"/>
+            <element name="overlimitFactor" type="double"/>
+        </sequence>
+    </complexType>
+
+    <simpleType name="reactiveCosts">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="FULL" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="activePlsCosts">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="UPPER" />
+            <enumeration value="FULL" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="reactivePlsCosts">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="FULL" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="feedInCosts">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="PV" />
+            <enumeration value="CHP" />
+            <enumeration value="BOTH" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="autoConsumptionCosts">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="PV" />
+            <enumeration value="CHP" />
+            <enumeration value="BOTH" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="selfSufficiencyRatio">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="NORMAL" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="selfConsumptionRatio">
+        <restriction base="string">
+            <enumeration value="NONE" />
+            <enumeration value="NORMAL" />
+        </restriction>
+    </simpleType>
+</schema>

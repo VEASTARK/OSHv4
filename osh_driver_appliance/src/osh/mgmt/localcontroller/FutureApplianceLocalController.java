@@ -1,5 +1,6 @@
 package osh.mgmt.localcontroller;
 
+import osh.configuration.oc.EAObjectives;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.LocalController;
@@ -19,6 +20,7 @@ import osh.mgmt.localcontroller.ipp.FutureAppliancesStaticIPP;
 import osh.mgmt.localcontroller.ipp.GenericApplianceSolution;
 import osh.mgmt.mox.GenericApplianceMOX;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.dataStructures.Enum2DoubleMap;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -242,7 +244,8 @@ public class FutureApplianceLocalController
                     now,
                     toBeScheduled,
                     this.getLocalObserver().getDeviceType(),
-                    new Schedule(new SparseLoadProfile(), 0.0, this.getLocalObserver().getDeviceType().toString()),
+                    new Schedule(new SparseLoadProfile(), new Enum2DoubleMap<>(EAObjectives.class),
+                            this.getLocalObserver().getDeviceType().toString()),
                     this.compressionType,
                     this.compressionValue);
 //			}

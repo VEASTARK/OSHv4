@@ -9,6 +9,7 @@ sourceSets {
 dependencies {
     implementation project(":osh_core")
     implementation project(":osh_comdriver_gui")
+    implementation project(":osh_comdriver_logging")
     implementation project(":osh_comdriver_signals")
     implementation project(":osh_driver_appliance")
     implementation project(":osh_driver_baseload")

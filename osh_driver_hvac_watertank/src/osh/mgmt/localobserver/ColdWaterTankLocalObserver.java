@@ -82,9 +82,7 @@ public class ColdWaterTankLocalObserver
         ZonedDateTime now = exchange.getTime();
         long nowSeconds = exchange.getEpochSecond();
 
-        //TODO: change to sending as soon as as lasttime+new_ipp_after is reached not the next tick when the next
-        // backwards-compatibility breaking update is released
-        if (this.lastTimeIPPSent == null || now.isAfter(this.lastTimeIPPSent.plus(this.newIppAfter))) {
+        if (this.lastTimeIPPSent == null || !now.isBefore(this.lastTimeIPPSent.plus(this.newIppAfter))) {
             ColdWaterTankNonControllableIPP ex;
             ex = new ColdWaterTankNonControllableIPP(
                     this.getUUID(),

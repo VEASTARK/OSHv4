@@ -3,7 +3,8 @@ package osh.core;
 import osh.OSH;
 import osh.OSHComponent;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.GAConfiguration;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.EAConfiguration;
 import osh.configuration.oc.OCConfiguration;
 import osh.configuration.system.GridConfig;
 import osh.core.exceptions.OCManagerException;
@@ -14,7 +15,7 @@ import osh.core.logging.IGlobalLogger;
 import osh.core.oc.*;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exceptions.HALManagerException;
-import osh.esc.OCEnergySimulationCore;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.utils.string.ParameterConstants;
 
 import java.util.ArrayList;
@@ -81,9 +82,9 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
         this.getLogger().logInfo("...initializing OC Manager of Organic Smart Home");
 
         // create OCEnergySimulationCore
-        OCEnergySimulationCore ocESC;
+        OptimizationEnergySimulationCore ocESC;
         try {
-            ocESC = new OCEnergySimulationCore(gridConfigurations, meterUUID);
+            ocESC = new OptimizationEnergySimulationCore(gridConfigurations, meterUUID);
         } catch (HALManagerException e) {
             throw new OCManagerException(e);
         }
@@ -131,11 +132,13 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
             globalController = (GlobalController) globalControllerClass
                     .getConstructor(IOSHOC.class,
                             OSHParameterCollection.class,
-                            GAConfiguration.class,
-                            OCEnergySimulationCore.class).newInstance(
+                            EAConfiguration.class,
+                            CostConfiguration.class,
+                            OptimizationEnergySimulationCore.class).newInstance(
                             this.getOSH(),
                             this.globalControllerParameterCollection,
-                            ocConfig.getGaConfiguration(),
+                            ocConfig.getEaConfiguration(),
+                            ocConfig.getCostConfiguration(),
                             ocESC);
         } catch (Exception ex) {
             throw new OCManagerException(ex);

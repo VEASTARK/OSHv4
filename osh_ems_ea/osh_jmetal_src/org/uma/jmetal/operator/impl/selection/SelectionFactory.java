@@ -42,7 +42,6 @@ public class SelectionFactory {
                 return new DifferentialEvolutionSelection();
 
             case BINARY_TOURNAMENT:
-            case BINARY_TOURNAMENT_LEGACY:
                 if (parameters.containsKey(ParameterConstants.EA_SELECTION.comparator)) {
                     return new BinaryTournamentSelection<>((Comparator<S>) parameters.get(ParameterConstants.EA_SELECTION.comparator));
                 } else {

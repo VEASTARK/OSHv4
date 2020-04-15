@@ -71,7 +71,7 @@ public class SimpleWaterTank extends WaterTank {
         this.tankHeight = tankCapacity / 1000.0 / (Math.PI * (this.tankDiameter / 2.0) * (this.tankDiameter / 2.0));
         this.tankSurface = this.tankDiameter * Math.PI * this.tankHeight + 2 * 0.5 * this.tankDiameter * Math.PI;
 
-        this.thermalCapacityOfTank = PhysicalConstants.schoolBookIsobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
+        this.thermalCapacityOfTank = PhysicalConstants.isobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
     }
 
     public SimpleWaterTank(SimpleWaterTank other) {
@@ -129,10 +129,7 @@ public class SimpleWaterTank extends WaterTank {
      */
     public double calculatePowerDrawOff(double oldTemperature, double newTemperature, long timeDifference) {
         double deltaTheta = newTemperature - oldTemperature;
-        //TODO: Due to floating point arithmetic voodoo we need to keep the more complicated calculation to ensure
-        // backwards-compatibility. Remove and uncomment as sonn as an update is released which breaks this.
-        double energy = deltaTheta * PhysicalConstants.schoolBookIsobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
-//        double energy = deltaTheta * this.thermalCapacityOfTank;
+        double energy = deltaTheta * this.thermalCapacityOfTank;
         return energy / timeDifference;
     }
 
@@ -143,10 +140,7 @@ public class SimpleWaterTank extends WaterTank {
      */
     public double calculateEnergyDrawOff(double oldTemperature, double newTemperature) {
         double deltaTheta = newTemperature - oldTemperature;
-        //TODO: Due to floating point arithmetic voodoo we need to keep the more complicated calculation to ensure
-        // backwards-compatibility. Remove and uncomment as sonn as an update is released which breaks this.
-        return deltaTheta * PhysicalConstants.schoolBookIsobaricVolumeHeatCapacity_Water_20C * this.tankCapacity;
-//        return deltaTheta * this.thermalCapacityOfTank;
+        return deltaTheta * this.thermalCapacityOfTank;
     }
 
     public double setCurrentWaterTemperature(double temperature) {

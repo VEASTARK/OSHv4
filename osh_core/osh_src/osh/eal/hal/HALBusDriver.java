@@ -68,11 +68,6 @@ public abstract class HALBusDriver extends HALDriver implements IDriverDataPubli
     }
 
     @Override
-    public final void removeOcDataSubscriber(IDriverDataSubscriber monitorObject) {
-        this.assignedBusManager = null;
-    }
-
-    @Override
     public final void updateOcDataSubscriber(IHALExchange halExchange) {
         this.assignedBusManager.onDataFromCALDriver(halExchange);
     }

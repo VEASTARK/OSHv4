@@ -74,8 +74,6 @@ public abstract class ComManager
         if (this.comDriver != null) {
             this.comDriver.onDataFromOcComponent(calExchange);
         } else {
-            //NOTHING
-            //TODO: error message/exception
             throw new IllegalArgumentException("No ComDriver available.");
         }
     }

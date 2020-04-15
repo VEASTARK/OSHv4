@@ -99,7 +99,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
 
         this.loadFromConfiguration(ealConfig, forcedStartTime);
         this.buildSimulationEngine(
-                this.getOSH().getOSHStatus().getRunID(),
                 this.getOSH().getOSHStatus().getConfigurationID(),
                 this.getOSH().getOSHStatus().getLogDir(),
                 randomSeed,
@@ -140,7 +139,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     }
 
     private void buildSimulationEngine(
-            String runID,
             String configurationID,
             String logDir,
             Long randomSeed,
@@ -166,36 +164,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
             e.printStackTrace();
         }
 
-        // MINUTEWISE POWER LOGGER
-        PrintWriter powerWriter = null;
-        try {
-            powerWriter = new PrintWriter(new File("" + logDir + "/" + configurationID + "_" + randomSeed + "_powerlog" + ".csv"));
-            powerWriter.println("currentTick"
-                    + ";" + "currentActivePowerConsumption"
-                    + ";" + "currentActivePowerPv"
-                    + ";" + "currentActivePowerPvAutoConsumption"
-                    + ";" + "currentActivePowerPvFeedIn"
-                    + ";" + "currentActivePowerChp"
-                    + ";" + "currentActivePowerChpAutoConsumption"
-                    + ";" + "currentActivePowerChpFeedIn"
-                    + ";" + "currentActivePowerBatteryCharging"
-                    + ";" + "currentActivePowerBatteryDischarging"
-                    + ";" + "currentActivePowerBatteryAutoConsumption"
-                    + ";" + "currentActivePowerBatteryFeedIn"
-                    + ";" + "currentActivePowerExternal"
-                    + ";" + "currentReactivePowerExternal"
-                    + ";" + "currentGasPowerExternal"
-                    + ";" + "epsCosts"
-                    + ";" + "plsCosts"
-                    + ";" + "gasCosts"
-                    + ";" + "feedInCostsPV"
-                    + ";" + "feedInCostsCHP"
-                    + ";" + "autoConsumptionCosts"
-                    + ";" + "currentPvFeedInPrice");
-        } catch (FileNotFoundException e2) {
-            e2.printStackTrace();
-        }
-
         ArrayList<OSHComponent> allDrivers = new ArrayList<>();
 
         allDrivers.addAll(this.connectedDevices);
@@ -209,7 +177,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
                     engineParameters,
                     esc,
                     simlogger,
-                    powerWriter,
                     this.getOSH().getOSHStatus().getHhUUID());
         } catch (SimulationEngineException e) {
             throw new HALManagerException(e);
@@ -387,7 +354,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     /**
      * get all members of the lifecycle-process. Used to trigger lifecycle-changes
      *
-     * @return
      */
     private ArrayList<ILifeCycleListener> getLifeCycleMembers() {
 
@@ -403,41 +369,12 @@ public class HALManager extends EALManager implements ILifeCycleListener {
         return boxLifeCycleMembers;
     }
 
-
-//	public void startHAL() {
-//		//TODO: why is nothing here?
-//	}
-//
-//	public void addDevice(HALDeviceDriver driver, String deviceDescription) {
-//		//TODO: why is nothing here?
-//	}
-//
-//	public void removeDevice(HALDeviceDriver driver) {
-//		//TODO: why is nothing here?
-//	}
-
     public ArrayList<BusManager> getConnectedBusManagers() {
         return this.connectedBusManagers;
     }
 
     public SimulationEngine getSimEngine() {
         return this.simEngine;
-    }
-
-    public void initDatabaseLogging() throws HALManagerException {
-        if (this.simEngine != null && this.simEngine instanceof BuildingSimulationEngine) {
-            ((BuildingSimulationEngine) this.simEngine).setDatabaseLogging();
-        } else {
-            throw new HALManagerException("Unable to initiate database logging with this SimulationEngine");
-        }
-    }
-
-    public void loadScreenplay(String screenplayFileName) throws SimulationEngineException, HALManagerException {
-        if (this.simEngine != null && this.simEngine instanceof BuildingSimulationEngine) {
-            ((BuildingSimulationEngine) this.simEngine).loadSingleScreenplayFromFile(screenplayFileName);
-        } else {
-            throw new HALManagerException("Unable to load Screenplay with this SimulationEngine");
-        }
     }
 
     public OSHSimulationResults startSimulation(long simulationDuration) throws SimulationEngineException, HALManagerException {
@@ -460,10 +397,6 @@ public class HALManager extends EALManager implements ILifeCycleListener {
     public void onSystemShutdown() throws OSHException {
         for (ILifeCycleListener listener : this.getLifeCycleMembers()) {
             listener.onSystemShutdown();
-        }
-
-        if (this.simEngine != null) {
-            ((BuildingSimulationEngine) this.simEngine).shutdown();
         }
     }
 

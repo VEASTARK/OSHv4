@@ -6,6 +6,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.thermal.ThermalLoggingObject;
+import osh.datatypes.logging.thermal.ThermalSupplyLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.ThermalDemandData;
 import osh.eal.hal.exceptions.HALException;
@@ -135,13 +136,12 @@ public abstract class ThermalDemandSimulationDriver
 
     @Override
     public void onNextTimeTick() {
-        OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
-
         int randomHourShift = 2; // % 2 == 0
 
         // get new values
         ZonedDateTime now = this.getTimeDriver().getCurrentTime();
         if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+            OSHRandom rand = this.getRandomDistributor().getRandomGenerator(this.getUUID(), this.getClass());
 //			double demand = 0;
             int randomNumber = rand.getNextInt(randomHourShift + 1); // randomHourShift + 1 exclusive!! --> max == randomHourShift
             double demand = (0.5 + rand.getNextDouble()) * this.demandData.getTotalThermalDemand(now, randomNumber
@@ -199,7 +199,7 @@ public abstract class ThermalDemandSimulationDriver
                 this.avgDayLoad[d0] /= factor;
             }
 
-            DatabaseLoggerThread.enqueue(new ThermalLoggingObject(this.getUUID(),
+            this.getDriverRegistry().publish(ThermalLoggingObject.class, new ThermalLoggingObject(this.getUUID(),
                     this.getTimeDriver().getCurrentTime(), this.avgWeekDayLoad, this.avgDayLoad, this.hotWaterType));
         }
     }

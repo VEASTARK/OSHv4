@@ -5,6 +5,7 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.devices.BaseloadLogObject;
+import osh.datatypes.logging.devices.DevicesLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.BaseloadObserverExchange;
@@ -43,7 +44,6 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
     /**
      * CONSTRUCTOR
      *
-     * @throws HALException
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public BaseloadSimulationDriver(IOSH osh, UUID deviceID,
@@ -126,17 +126,11 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
         //starting in reverse so that the oldest profile is at index 0 in the list
         for (int i = this.pastDaysPrediction; i >= 1; i--) {
             SparseLoadProfile dayProfile = new SparseLoadProfile();
-//            ZonedDateTime pastDay = timeAtStart.minusDays(i);
-//            //loadprofile only provides 365 days so we have to reduce further for leapyears
-//            if (pastDay.getDayOfYear() > 365) {
-//                pastDay.minusDays(1);
-//            }
-//            long pastDayStart = TimeConversion.getSecondsSinceYearStart(pastDay);
-            //TODO: this will result in the wrong days used for pastPredictions at the start of a year, but will
-            // remain to keep backwards-compaitiblity. Fix in next update that breaks this (uncomment above lines and
-            // delete the next one)
-            long pastDayStart = (int) Math.abs((timeAtStart.toEpochSecond() / 86400 - i) % 365) * 86400;
-            ZonedDateTime pastDay = TimeConversion.convertUnixTimeToZonedDateTime(pastDayStart);
+            ZonedDateTime pastDay = timeAtStart.minusDays(i);
+            //loadprofile only provides 365 days so we have to reduce further for leapyears
+            if (pastDay.getDayOfYear() > 365) {
+                pastDay.minusDays(1);
+            }
             for (int sec = 0; sec < 86400; sec++) {
                 int activeLoad = this.baseload.getActivePowerAt(pastDay.plusSeconds(sec));
 
@@ -204,7 +198,7 @@ public class BaseloadSimulationDriver extends DeviceSimulationDriver {
 
         if (this.getOSH().getOSHStatus().isSimulation()) {
             if (DatabaseLoggerThread.isLogDevices()) {
-                DatabaseLoggerThread.enqueue(new BaseloadLogObject(this.getUUID(),
+                this.getDriverRegistry().publish(BaseloadLogObject.class, new BaseloadLogObject(this.getUUID(),
                         this.getTimeDriver().getCurrentTime(), this.sumActivePower / PhysicalConstants.factor_wsToKWh,
                         this.sumReactivePower / PhysicalConstants.factor_wsToKWh));
             }

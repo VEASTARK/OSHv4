@@ -156,7 +156,7 @@
         <activeToPassiveCommodity>reactivepower</activeToPassiveCommodity>
         <passiveToActiveCommodity>reactivepower</passiveToActiveCommodity>
     </connections>
-    <meterUUIDs>00000000-0000-0000-0000-000000000000</meterUUIDs>
+    <superMeterUUID>00000000-0000-0000-0000-000000000000</superMeterUUID>
     <deviceMeterMap>
         <meterUUID>00000000-0000-0000-0000-000000000000</meterUUID>
         <deviceUUID>484f4c4c-0000-0000-5056-000000000000</deviceUUID>

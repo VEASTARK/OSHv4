@@ -6,10 +6,6 @@
 
     <include schemaLocation="includes/SystemMaster.xsd"/>
 
-    <!--    <include schemaLocation="includes/DeviceTypes.xsd"/>-->
-    <!--    <include schemaLocation="includes/ConfigurationParameter.xsd"/>-->
-
-
     <simpleType name="runningType">
         <restriction base="string">
             <enumeration value="REAL"/>

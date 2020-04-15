@@ -78,15 +78,10 @@ public class SpaceHeatingLocalObserver
 
             this.monitorLoad();
 
-            //only to keep consistent with old mode of operation TODO: remove when next backwards-compatibility breaking update is released
-            boolean firstDay = now.isBefore(this.getTimeDriver().getTimeAtStart().plusDays(1));
-
-            if (firstDay || this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
+            if (this.lastTimeIPPSent == null || this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) {
                 //a new day has begun...
                 this.sendIPP();
-            }
-            //TODO: remove first condition when next backwards-compatibility breaking update is released
-            if ((firstDay || !this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.DAY)) && this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
+            } else if (this.getTimeDriver().getCurrentTimeEvents().contains(TimeSubscribeEnum.HOUR)) {
                 long secondsSinceMidnight = TimeConversion.getSecondsSinceDayStart(now);
                 double predVal = this.predictedWaterDemand.getLoadAt(Commodity.HEATINGHOTWATERPOWER, secondsSinceMidnight);
 

@@ -3,6 +3,7 @@ package osh.driver.simulation;
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
+import osh.datatypes.logging.devices.SmartHeaterLogObject;
 import osh.datatypes.logging.devices.WaterTankLogObject;
 import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exceptions.HALException;
@@ -107,8 +108,6 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
             this.rescheduleIfViolatedDuration =
                     Duration.ofSeconds(Integer.parseInt(driverConfig.getParameter(ParameterConstants.IPP.rescheduleIfViolatedDuration)));
         } catch (Exception e) {
-            //TODO: 2 minutes as deault is too low but will be kept for backwards-compatibility, change to 10 as soon
-            // as the next update that breaks backwards-compatibility
             this.rescheduleIfViolatedDuration = Duration.ofMinutes(2);
             this.getGlobalLogger().logWarning("Can't get rescheduleIfViolatedDuration, using the default value: " + this.rescheduleIfViolatedDuration);
         }
@@ -148,7 +147,7 @@ public class HotWaterTankSimulationDriver extends WaterTankSimulationDriver {
             this.demandLogging /= PhysicalConstants.factor_wsToKWh;
             this.supplyLogging /= PhysicalConstants.factor_wsToKWh;
 
-            DatabaseLoggerThread.enqueue(new WaterTankLogObject(this.getUUID(), this.getTimeDriver().getCurrentTime(),
+            this.getDriverRegistry().publish(WaterTankLogObject.class, new WaterTankLogObject(this.getUUID(), this.getTimeDriver().getCurrentTime(),
                     Commodity.HEATINGHOTWATERPOWER, this.temperatureLogging, this.demandLogging, this.supplyLogging,
                     this.waterTank.getCurrentWaterTemperature()));
         }

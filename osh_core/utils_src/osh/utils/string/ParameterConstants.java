@@ -190,11 +190,6 @@ public final class ParameterConstants {
     }
 
     public static final class Optimization {
-        public static final String epsObjective = "epsoptimizationobjective";
-        public static final String plsObjective = "plsoptimizationobjective";
-        public static final String varObjective = "varoptimizationobjective";
-        public static final String upperOverlimitFactor = "upperOverlimitFactor";
-        public static final String lowerOverlimitFactor = "lowerOverlimitFactor";
         public static final String optimizationRandomSeed = "optimizationMainRandomSeed";
         public static final String stepSize = "stepSize";
         public static final String hotWaterTankUUID = "hotWaterTankUUID";
@@ -214,6 +209,14 @@ public final class ParameterConstants {
         public static final String mutation = "mutation";
         public static final String crossover = "crossover";
         public static final String selection = "selection";
+    }
+
+    public static final class EA_ALGORITHM {
+        public static final String particlesToInform = "particlesToInform";
+        public static final String deF = "F";
+        public static final String deVariant = "variant";
+
+        public static final String singleThreaded = "singleThreaded";
     }
 
     public static final class EA_RECOMBINATION {
@@ -238,6 +241,12 @@ public final class ParameterConstants {
         public static final String tournaments = "numberOfTournaments";
     }
 
+    public static final class EA_MULTI_OBJECTIVE {
+        public static final String ordering = "ordering";
+        public static final String objective = "objective";
+        public static final String objectiveWeights = "objectiveWeights";
+    }
+
     public static final class Logging {
         public static final String logH0 = "logH0";
         public static final String logEpsPls = "logEpsPls";
@@ -245,11 +254,9 @@ public final class ParameterConstants {
         public static final String logIntervals = "logIntervalls";
         public static final String logDevices = "logDevices";
         public static final String logBaseload = "logBaseload";
-        //TODO: change string to logThermal in next backwards-compatibility breaking update
-        public static final String logThermal = "logHotWater";
+        public static final String logThermal = "logThermal";
         public static final String logWaterTank = "logWaterTank";
-        //TODO: change string to logEA in next backwards-compatibility breaking update
-        public static final String logEA = "logGA";
+        public static final String logEA = "logEA";
         public static final String logSmartHeater = "logSmartHeater";
         public static final String loggingIntervals = "loggingIntervalls";
     }

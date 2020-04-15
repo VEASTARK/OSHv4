@@ -3,7 +3,6 @@ package osh.datatypes.registry.driver.details.appliance;
 import osh.configuration.appliance.XsdLoadProfiles;
 import osh.datatypes.registry.StateExchange;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,8 +19,6 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
     protected String programName;
     protected String phaseName;
     protected ZonedDateTime startTime;
-    protected ZonedDateTime endTime;
-    protected Duration remainingTime;
     protected ZonedDateTime finishTime;
 
 
@@ -65,22 +62,6 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         this.startTime = startTime;
     }
 
-    public ZonedDateTime getEndTime() {
-        return this.endTime;
-    }
-
-    public void setEndTime(ZonedDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Duration getRemainingTime() {
-        return this.remainingTime;
-    }
-
-    public void setRemainingTime(Duration remainingTime) {
-        this.remainingTime = remainingTime;
-    }
-
     public ZonedDateTime getFinishTime() {
         return this.finishTime;
     }
@@ -106,8 +87,6 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         GenericApplianceProgramDriverDetails that = (GenericApplianceProgramDriverDetails) o;
 
         if (this.startTime != that.startTime) return false;
-        if (this.endTime != that.endTime) return false;
-        if (this.remainingTime != that.remainingTime) return false;
         if (this.finishTime != that.finishTime) return false;
         if (!Objects.equals(this.programName, that.programName)) return false;
         if (!Objects.equals(this.phaseName, that.phaseName)) return false;
@@ -120,8 +99,6 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         result = 31 * result + (this.programName != null ? this.programName.hashCode() : 0);
         result = 31 * result + (this.phaseName != null ? this.phaseName.hashCode() : 0);
         result = 31 * result + (this.startTime != null ? this.startTime.hashCode() : 0);
-        result = 31 * result + (this.endTime != null ? this.endTime.hashCode() : 0);
-        result = 31 * result + (this.remainingTime != null ? this.remainingTime.hashCode() : 0);
         result = 31 * result + (this.finishTime != null ? this.finishTime.hashCode() : 0);
         result = 31 * result + (this.loadProfiles != null ? this.loadProfiles.hashCode() : 0);
         return result;
@@ -134,8 +111,6 @@ public class GenericApplianceProgramDriverDetails extends StateExchange {
         clone.programName = this.programName;
         clone.phaseName = this.phaseName;
         clone.startTime = this.startTime;
-        clone.endTime = this.endTime;
-        clone.remainingTime = this.remainingTime;
         clone.finishTime = this.finishTime;
 
         return clone;
