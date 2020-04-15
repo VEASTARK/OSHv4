@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <OCConfiguration xmlns:ns2="http://osh/configuration/system" xmlns="http://osh/configuration/oc">
     <globalOcUuid>e5ad4b36-d417-4be6-a1c8-c3ad68e52977</globalOcUuid>
-    <globalControllerClass>osh.mgmt.globalcontroller.OSHGlobalControllerJMetal</globalControllerClass>
+    <globalControllerClass>osh.mgmt.globalcontroller.ModularGlobalController</globalControllerClass>
     <globalControllerParameters>
         <ns2:parameterName>epsoptimizationobjective</ns2:parameterName>
         <ns2:parameterValue>4</ns2:parameterValue>
