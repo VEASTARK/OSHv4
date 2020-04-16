@@ -5,7 +5,6 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.devices.BaseloadLogObject;
-import osh.datatypes.logging.devices.DevicesLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.eal.hal.exceptions.HALException;
 import osh.hal.exchange.BaseloadObserverExchange;
@@ -17,7 +16,6 @@ import osh.utils.physics.ComplexPowerUtil;
 import osh.utils.physics.PhysicalConstants;
 import osh.utils.slp.IH0Profile;
 import osh.utils.string.ParameterConstants;
-import osh.utils.time.TimeConversion;
 
 import java.time.ZonedDateTime;
 import java.util.LinkedList;

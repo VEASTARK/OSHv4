@@ -32,14 +32,14 @@ public class SpaceHeating {
         DO NOT change anything if you merely wish to produce a new configuration file!
 
      */
-    public static UUID heatingUuid = UUIDStorage.spaceHeatingUUID;
-    public static int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
-    public static float weightForOtherWeekday = GeneralConfig.weightForOtherWeekdays;
-    public static float weightForSameWeekday = GeneralConfig.weightForSameWeekday;
-    public static String sourceFileName = FileReferenceStorage.eshl_heatingDrawOffFileName;
-    public static String driverName = osh.driver.simulation.heating.ESHLSpaceHeatingSimulationDriver.class
+    public static final UUID heatingUuid = UUIDStorage.spaceHeatingUUID;
+    public static final int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
+    public static final float weightForOtherWeekday = GeneralConfig.weightForOtherWeekdays;
+    public static final float weightForSameWeekday = GeneralConfig.weightForSameWeekday;
+    public static final String sourceFileName = FileReferenceStorage.eshl_heatingDrawOffFileName;
+    public static final String driverName = osh.driver.simulation.heating.ESHLSpaceHeatingSimulationDriver.class
             .getName();
-    public static String nonControllableObserverName = osh.mgmt.localobserver
+    public static final String nonControllableObserverName = osh.mgmt.localobserver
             .heating.SpaceHeatingLocalObserver.class.getName();
 
     /**

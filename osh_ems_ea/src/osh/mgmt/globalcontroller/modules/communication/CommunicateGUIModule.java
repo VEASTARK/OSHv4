@@ -41,9 +41,9 @@ public class CommunicateGUIModule extends GlobalControllerModule {
 
             if (optResults != null) {
                 EAScheduleResult result = optResults.getScheduleResult();
-                List<InterdependentProblemPart<?, ?>> problemparts = this.getData().getProblemParts();
+                List<InterdependentProblemPart<?, ?>> problemParts = this.getData().getProblemParts();
 
-                if (this.hasGUI && !result.isDummySolution()) {
+                if (this.hasGUI && !result.isHasGUIObjects()) {
                     this.getData().getOCRegistry().publish(
                             GUIHotWaterPredictionStateExchange.class,
                             new GUIHotWaterPredictionStateExchange(this.getData().getUUID(),

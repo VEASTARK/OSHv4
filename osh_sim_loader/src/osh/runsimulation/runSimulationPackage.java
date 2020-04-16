@@ -6,7 +6,6 @@ import osh.core.exceptions.LifeCycleManagerException;
 import osh.core.exceptions.OSHException;
 import osh.core.logging.OSHLoggerCore;
 import osh.datatypes.logger.SystemLoggerConfiguration;
-import osh.datatypes.logging.general.SimulationResultsLogObject;
 import osh.simulation.OSHSimulationResults;
 import osh.simulation.database.DatabaseLoggerThread;
 

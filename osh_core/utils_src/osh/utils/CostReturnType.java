@@ -25,7 +25,7 @@ public enum CostReturnType {
         AUTO_CONSUMPTION,
         GAS,
         SELF_SUFFICIENCY_RATIO,
-        SELF_CONSUMPTION_RATIO;
+        SELF_CONSUMPTION_RATIO
     }
 
 }

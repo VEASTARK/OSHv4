@@ -24,15 +24,15 @@ public class EAConfig {
     public static boolean logParetoFront;
     public static boolean logRanking;
 
-    public static QualityIndicator[] qualityIndicatorsToLog = {
+    public static final QualityIndicator[] qualityIndicatorsToLog = {
             QualityIndicator.IGD_PLUS,
             QualityIndicator.HV
     };
 
     //solution Ranking
-    public static RankingType solutionRanking = RankingType.OBJECTIVE;
-    public static EAObjectives rankingObjective = EAObjectives.MONEY;
-    public static Map<EAObjectives, Double> objectiveWeights = new EnumMap<>(EAObjectives.class);
+    public static final RankingType solutionRanking = RankingType.OBJECTIVE;
+    public static final EAObjectives rankingObjective = EAObjectives.MONEY;
+    public static final Map<EAObjectives, Double> objectiveWeights = new EnumMap<>(EAObjectives.class);
     static {
         objectiveWeights.put(EAObjectives.MONEY, 5.0);
         objectiveWeights.put(EAObjectives.SELF_SUFFICIENCY_RATIO, 1.0);
@@ -40,30 +40,30 @@ public class EAConfig {
     }
 
     //algorithms
-    public static AlgorithmType[] algorithmsToUse = {
+    public static final AlgorithmType[] algorithmsToUse = {
             AlgorithmType.G_GA,
 //            AlgorithmType.SS_GA,
 //            AlgorithmType.DE,
 //            AlgorithmType.PSO
     };
 
-    public static CrossoverType defaultRealCrossoverOperator = CrossoverType.SBX;
-    public static MutationType defaultRealMutationOperator = MutationType.POLYNOMIAL_AUTO;
+    public static final CrossoverType defaultRealCrossoverOperator = CrossoverType.SBX;
+    public static final MutationType defaultRealMutationOperator = MutationType.POLYNOMIAL_AUTO;
 
-    public static CrossoverType defaultBinaryCrossoverOperator = CrossoverType.BINARY_N_POINT;
-    public static MutationType defaultBinaryMutationOperator = MutationType.BIT_FLIP_AUTO;
+    public static final CrossoverType defaultBinaryCrossoverOperator = CrossoverType.BINARY_N_POINT;
+    public static final MutationType defaultBinaryMutationOperator = MutationType.BIT_FLIP_AUTO;
 
-    public static CrossoverType deCrossoverOperator = CrossoverType.DE;
-    public static SelectionType deSelectionOperator = SelectionType.DE;
+    public static final CrossoverType deCrossoverOperator = CrossoverType.DE;
+    public static final SelectionType deSelectionOperator = SelectionType.DE;
 
-    public static SelectionType defaultSelectionOperator = SelectionType.BINARY_TOURNAMENT;
+    public static final SelectionType defaultSelectionOperator = SelectionType.BINARY_TOURNAMENT;
 
-    public static Map<AlgorithmType, List<OperatorConfiguration>> algorithmSpecificOperators =
+    public static final Map<AlgorithmType, List<OperatorConfiguration>> algorithmSpecificOperators =
             new EnumMap<>(AlgorithmType.class);
-    public static Set<AlgorithmType> enforcedRealAlgorithms = EnumSet.noneOf(AlgorithmType.class);
-    public static Set<AlgorithmType> deAlgorithms = EnumSet.noneOf(AlgorithmType.class);
-    public static Collection<AlgorithmType> regularBinaryAlgorithms;
-    public static Collection<AlgorithmType> regularBinaryOperatorAlgorithms;
+    public static final Set<AlgorithmType> enforcedRealAlgorithms = EnumSet.noneOf(AlgorithmType.class);
+    public static final Set<AlgorithmType> deAlgorithms = EnumSet.noneOf(AlgorithmType.class);
+    public static final Collection<AlgorithmType> regularBinaryAlgorithms;
+    public static final Collection<AlgorithmType> regularBinaryOperatorAlgorithms;
 
     static {
         enforcedRealAlgorithms.add(AlgorithmType.PSO);
@@ -128,7 +128,7 @@ public class EAConfig {
         });
     }
 
-    public static Map<AlgorithmType, VariableEncoding> encodingMap = new EnumMap<>(AlgorithmType.class);
+    public static final Map<AlgorithmType, VariableEncoding> encodingMap = new EnumMap<>(AlgorithmType.class);
 
     static {
         regularBinaryAlgorithms.forEach(algorithm -> encodingMap.put(algorithm, VariableEncoding.BINARY));
@@ -137,44 +137,44 @@ public class EAConfig {
     }
 
     // OptimizationAlgorithm specific variables
-    public static int numEvaluations = 20000;
-    public static int popSize = 100;
+    public static final int numEvaluations = 20000;
+    public static final int popSize = 100;
 
     public static double crossoverProbability = 0.99;
-    public static int crossoverPoints = 2;
-    public static int crossoverDistributionIndex = 20;
+    public static final int crossoverPoints = 2;
+    public static final int crossoverDistributionIndex = 20;
 
 
-    public static double mutationProbability = 0.001; // BitFlipMutation
+    public static final double mutationProbability = 0.001; // BitFlipMutation
     public static double autoProbMutationFactor = 9.0; // BitFlipAutoProbMutation
-    public static int mutationDistributionIndex = 20;
+    public static final int mutationDistributionIndex = 20;
 
     //DE
-    public static String deVariant = "rand/1/bin";
-    public static double de_cr = 0.5;
-    public static double de_f = 0.5;
-    public static double de_k = 0.5;
+    public static final String deVariant = "rand/1/bin";
+    public static final double de_cr = 0.5;
+    public static final double de_f = 0.5;
+    public static final double de_k = 0.5;
 
     //stopping Rules
     //should never be false
-    public static boolean useMaxEvaluations = true;
+    public static final boolean useMaxEvaluations = true;
 
     //how many generations the minDeltaFitness can be violated before stopping
-    public static int maxGenerationsViolations = 20;
+    public static final int maxGenerationsViolations = 20;
 
-    public static boolean useMinDeltaFitness = true;
+    public static final boolean useMinDeltaFitness = true;
 //	static boolean useMinDeltaFitness = false;
 
     //min. perc. amount of fitness change required
-    public static double minDeltaFitnessPercent = 5.0E-15;
+    public static final double minDeltaFitnessPercent = 5.0E-15;
 
-    public static EAObjectives[] eaObjectives = {
+    public static final EAObjectives[] eaObjectives = {
             EAObjectives.MONEY,
 //            EAObjectives.SELF_SUFFICIENCY_RATIO,
 //            EAObjectives.SELF_CONSUMPTION_RATIO
     };
 
-    public static boolean executeAlgorithmsParallel = true;
+    public static final boolean executeAlgorithmsParallel = true;
 
     private static List<ConfigurationParameter> generateOperatorParameters(OperatorType type, String operatorName) {
         List<ConfigurationParameter> list = new ArrayList<>();

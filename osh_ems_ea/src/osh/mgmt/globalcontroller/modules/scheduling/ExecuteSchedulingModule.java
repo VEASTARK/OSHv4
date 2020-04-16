@@ -1,35 +1,29 @@
 package osh.mgmt.globalcontroller.modules.scheduling;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.uma.jmetal.solution.Solution;
-import osh.core.OSHRandom;
+import osh.configuration.oc.VariableEncoding;
 import osh.core.oc.LocalController;
 import osh.datatypes.commodity.AncillaryCommodity;
-import osh.datatypes.commodity.Commodity;
-import osh.datatypes.ea.Schedule;
-import osh.datatypes.ea.TemperaturePrediction;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
-import osh.datatypes.power.AncillaryCommodityLoadProfile;
-import osh.datatypes.power.SparseLoadProfile;
+import osh.datatypes.logging.general.EALogObject;
 import osh.datatypes.registry.oc.commands.globalcontroller.EAPredictionCommandExchange;
 import osh.datatypes.registry.oc.commands.globalcontroller.EASolutionCommandExchange;
 import osh.datatypes.registry.oc.ipp.ControllableIPP;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.datatypes.registry.oc.ipp.solutionEncoding.variables.VariableEncoding;
-import osh.mgmt.globalcontroller.jmetal.Fitness;
-import osh.mgmt.globalcontroller.jmetal.IFitness;
-import osh.mgmt.globalcontroller.jmetal.SolutionWithFitness;
+import osh.mgmt.globalcontroller.jmetal.builder.AlgorithmExecutor;
 import osh.mgmt.globalcontroller.jmetal.builder.EAScheduleResult;
-import osh.mgmt.globalcontroller.jmetal.esc.EMProblemEvaluator;
-import osh.mgmt.globalcontroller.jmetal.esc.JMetalEnergySolverGA;
+import osh.mgmt.globalcontroller.jmetal.esc.EnergySolver;
 import osh.mgmt.globalcontroller.jmetal.esc.SolutionDistributor;
 import osh.mgmt.globalcontroller.modules.GlobalControllerDataStorage;
 import osh.mgmt.globalcontroller.modules.GlobalControllerModule;
-import osh.simulation.database.DatabaseLoggerThread;
+import osh.utils.costs.OptimizationCostFunction;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Represents the executing of a planned or forced scheduling.
@@ -37,6 +31,9 @@ import java.util.*;
  * @author Sebastian Kramer
  */
 public class ExecuteSchedulingModule extends GlobalControllerModule {
+
+    private AlgorithmExecutor algorithmExecutor;
+    private EnergySolver energySolver;
 
     /**
      * Constructs this module with the given global data sotrage container.
@@ -46,6 +43,16 @@ public class ExecuteSchedulingModule extends GlobalControllerModule {
     public ExecuteSchedulingModule(GlobalControllerDataStorage data) {
         super(data);
         this.PRIORITY = 1;
+    }
+
+    @Override
+    public void onSystemIsUp() {
+        super.onSystemIsUp();
+
+        this.algorithmExecutor = new AlgorithmExecutor(this.getData().getEaConfiguration(), this.getData().getEARandomDistributor(),
+                this.getData().getGlobalLogger());
+        this.energySolver = new EnergySolver(this.getData().getGlobalLogger(), this.getData().getEaConfiguration(),
+                this.getData().getStepSize(), this.getData().getStatus().getLogDir());
     }
 
     /**
@@ -65,28 +72,12 @@ public class ExecuteSchedulingModule extends GlobalControllerModule {
         this.getData().getGlobalLogger().logDebug("=== scheduling... ===");
 
         final ZonedDateTime now = this.getData().getNow();
-
-        OSHRandom optimisationRunRandomGenerator = new OSHRandom(this.getData().getOptimizationMainRandomGenerator().getNextLong());
-
-        // it is a good idea to use a specific random Generator for the EA,
-        // to make it comparable with other optimizers...
-        JMetalEnergySolverGA solver = new JMetalEnergySolverGA(
-                this.getData().getGlobalLogger(),
-                optimisationRunRandomGenerator,
-                true,
-                this.getData().getGaParameters(),
-                now.toEpochSecond(),
-                this.getData().getStepSize(),
-                this.getData().getStatus().getLogDir());
+        final long nowEpoch = now.toEpochSecond();
 
         InterdependentProblemPart<?, ?>[] problemParts = new InterdependentProblemPart<?, ?>[problemPartsList.size()];
         problemParts = problemPartsList.toArray(problemParts);
 
-        Solution<?> solution;
-        SolutionWithFitness resultWithAll;
-
-        long ignoreLoadProfileAfter = now.toEpochSecond();
-        long maxHorizon = ignoreLoadProfileAfter;
+        long maxHorizon = nowEpoch;
 
         for (InterdependentProblemPart<?, ?> problem : problemParts) {
             if (problem instanceof ControllableIPP<?, ?>) {
@@ -96,110 +87,36 @@ public class ExecuteSchedulingModule extends GlobalControllerModule {
 
         int counter = 0;
         for (InterdependentProblemPart<?, ?> problem : problemParts) {
-            problem.recalculateEncoding(now.toEpochSecond(), maxHorizon);
+            problem.recalculateEncoding(nowEpoch, maxHorizon);
             problem.setId(counter);
             counter++;
         }
-        ignoreLoadProfileAfter = Math.max(ignoreLoadProfileAfter, maxHorizon);
 
         boolean hasGUI = this.getData().getStatus().hasGUI();
+        boolean isReal = !this.getData().getStatus().isSimulation();
 
         EAScheduleResult result;
 
         try {
-            IFitness fitnessFunction = new Fitness(
-                    this.getData().getGlobalLogger(),
-                    this.getData().getEpsOptimizationObjective(),
-                    this.getData().getPlsOptimizationObjective(),
-                    this.getData().getVarOptimizationObjective(),
-                    this.getData().getUpperOverlimitFactor(),
-                    this.getData().getLowerOverlimitFactor());
-
-            resultWithAll = solver.getSolution(
-                    problemParts,
-                    this.getData().getOcESC(),
+            OptimizationCostFunction costFunction = new OptimizationCostFunction(
+                    this.getData().getCostConfiguration(),
                     priceSignal,
                     powerLimitSignal,
-                    now.toEpochSecond(),
-                    fitnessFunction,
-                    this.getData().getEaLogger());
-            solution = resultWithAll.getSolution();
+                    nowEpoch);
 
             SolutionDistributor distributor = new SolutionDistributor();
             distributor.gatherVariableInformation(problemParts);
 
-            EMProblemEvaluator problem = new EMProblemEvaluator(
+            boolean extensiveLogging =
+                    (hasGUI || isReal) && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
+
+            result = this.energySolver.getSolution(
                     problemParts,
-                    this.getData().getOcESC(),
-                    distributor,
-                    priceSignal,
-                    powerLimitSignal,
-                    now.toEpochSecond(),
-                    ignoreLoadProfileAfter,
-                    fitnessFunction,
-                    this.getData().getEaLogger(),
-                    this.getData().getStepSize());
-
-            boolean extensiveLogging = hasGUI && !distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables();
-            AncillaryCommodityLoadProfile ancillaryMeter = new AncillaryCommodityLoadProfile();
-
-            problem.evaluateFinalTime(solution, (DatabaseLoggerThread.isLogEA() | extensiveLogging), ancillaryMeter);
-
-            distributor.distributeSolution(solution, problemParts);
-
-
-            TreeMap<Long, Double> predictedHotWaterTankTemperature = new TreeMap<>();
-            TreeMap<Long, Double> predictedHotWaterDemand = new TreeMap<>();
-            TreeMap<Long, Double> predictedHotWaterSupply = new TreeMap<>();
-            List<Schedule> schedules = new ArrayList<>();
-
-            if (extensiveLogging) {
-                for (InterdependentProblemPart<?, ?> part : problemParts) {
-                    schedules.add(part.getFinalInterdependentSchedule());
-
-                    //extract prediction about tank temperatures of the hot-water tank
-                    if (part.getUUID().equals(this.getData().getHotWaterTankID())) {
-                        @SuppressWarnings("unchecked")
-                        EAPredictionCommandExchange<TemperaturePrediction> prediction = (EAPredictionCommandExchange<TemperaturePrediction>) part.transformToFinalInterdependentPrediction(
-                                this.getData().getUUID(),
-                                part.getUUID(),
-                                now);
-
-                        predictedHotWaterTankTemperature = prediction.getPrediction().getTemperatureStates();
-                    }
-
-                    //extract information about hot-water demand and supply
-                    if (part.getAllOutputCommodities().contains(Commodity.DOMESTICHOTWATERPOWER)
-                            || part.getAllOutputCommodities().contains(Commodity.HEATINGHOTWATERPOWER)) {
-                        SparseLoadProfile loadProfile = part.getLoadProfile();
-
-                        for (long t = now.toEpochSecond(); t < maxHorizon + this.getData().getStepSize(); t += this.getData().getStepSize()) {
-                            int domLoad = loadProfile.getLoadAt(Commodity.DOMESTICHOTWATERPOWER, t);
-                            int heatLoad = loadProfile.getLoadAt(Commodity.HEATINGHOTWATERPOWER, t);
-
-                            predictedHotWaterDemand.putIfAbsent(t, 0.0);
-                            predictedHotWaterSupply.putIfAbsent(t, 0.0);
-
-                            if (domLoad > 0) {
-                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
-                            } else if (domLoad < 0) {
-                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? domLoad : v + domLoad);
-                            }
-
-                            if (heatLoad > 0) {
-                                predictedHotWaterDemand.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
-                            } else if (heatLoad < 0) {
-                                predictedHotWaterSupply.compute(t, (k, v) -> v == null ? heatLoad : v + heatLoad);
-                            }
-                        }
-                    }
-                }
-            }
-
-            result = new EAScheduleResult(predictedHotWaterTankTemperature, predictedHotWaterDemand,
-                    predictedHotWaterSupply, schedules, ancillaryMeter, solution,
-                    distributor.getVariableInformation(VariableEncoding.BINARY).needsNoVariables());
-
+                    this.getData().getOptimizationESC(),
+                    nowEpoch,
+                    costFunction,
+                    this.algorithmExecutor,
+                    extensiveLogging);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -237,6 +154,11 @@ public class ExecuteSchedulingModule extends GlobalControllerModule {
 
     @Override
     public void onSystemShutdown() {
-        this.getData().getEaLogger().shutdown();
+        EALogObject logObject = this.algorithmExecutor.getEaLogger().shutdown();
+
+        if (logObject != null) {
+            logObject.setSender(this.getData().getUUID());
+            this.getData().getOCRegistry().publish(EALogObject.class, logObject);
+        }
     }
 }

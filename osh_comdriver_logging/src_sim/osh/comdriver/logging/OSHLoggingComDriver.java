@@ -31,7 +31,10 @@ import osh.utils.string.ParameterConstants;
 import osh.utils.string.StringConversions;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a {@link CALComDriver} that distributes information about the logging configuration and collects,
@@ -42,7 +45,7 @@ import java.util.*;
 public class OSHLoggingComDriver extends CALComDriver {
 
     //logging intervals
-    protected List<Long[]> loggingIntervals = new ArrayList<>();
+    protected final List<Long[]> loggingIntervals = new ArrayList<>();
     protected boolean logDetailedPower;
     protected boolean logEpsPls;
     protected boolean logH0;

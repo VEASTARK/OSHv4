@@ -3,8 +3,7 @@ package osh.core;
 import osh.OSH;
 import osh.OSHComponent;
 import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.CostConfiguration;
-import osh.configuration.oc.EAConfiguration;
+import osh.configuration.oc.GlobalControllerConfiguration;
 import osh.configuration.oc.OCConfiguration;
 import osh.configuration.system.GridConfig;
 import osh.core.exceptions.OCManagerException;
@@ -16,7 +15,6 @@ import osh.core.oc.*;
 import osh.eal.hal.HALDeviceDriver;
 import osh.eal.hal.exceptions.HALManagerException;
 import osh.esc.OptimizationEnergySimulationCore;
-import osh.utils.string.ParameterConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +26,6 @@ import java.util.UUID;
  * @author Florian Allerding, Kaibin Bao, Ingo Mauser, Till Schuberth, Sebastian Kramer
  */
 public class OCManager extends OSHComponent implements ILifeCycleListener {
-
-    private OSHParameterCollection globalObserverParameterCollection;
-    private OSHParameterCollection globalControllerParameterCollection;
 
     private GlobalOCUnit globalOCunit;
 
@@ -63,8 +58,8 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
          * if a optimisation-random seed is given from external it will override the optimisation-random seed in the configuration package
          */
         Long usedOptimizationRandomSeed = optimizationMainRandomSeed;
-        if (optimizationMainRandomSeed == null && ocConfig.getOptimizationMainRandomSeed() != null) {
-            usedOptimizationRandomSeed = Long.parseLong(ocConfig.getOptimizationMainRandomSeed());
+        if (optimizationMainRandomSeed == null) {
+            usedOptimizationRandomSeed = ocConfig.getGlobalControllerConfiguration().getOptimizationMainRandomSeed();
         }
         if (optimizationMainRandomSeed == null) {
             this.getLogger()
@@ -76,7 +71,7 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
             usedOptimizationRandomSeed = 0xd1ce5bL;
         }
 
-        ocConfig.setOptimizationMainRandomSeed(String.valueOf(usedOptimizationRandomSeed));
+        ocConfig.getGlobalControllerConfiguration().setOptimizationMainRandomSeed(usedOptimizationRandomSeed);
 
 
         this.getLogger().logInfo("...initializing OC Manager of Organic Smart Home");
@@ -100,20 +95,13 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
         Class globalObserverClass;
         Class globalControllerClass;
 
-        this.globalObserverParameterCollection = new OSHParameterCollection();
-        this.globalObserverParameterCollection.loadCollection(ocConfig
+        final OSHParameterCollection globalObserverParameterCollection = new OSHParameterCollection();
+        globalObserverParameterCollection.loadCollection(ocConfig.getGlobalObserverConfiguration()
                 .getGlobalObserverParameters());
 
-        this.globalControllerParameterCollection = new OSHParameterCollection();
-        this.globalControllerParameterCollection.loadCollection(ocConfig
-                .getGlobalControllerParameters());
-
-        this.globalControllerParameterCollection.setParameter(ParameterConstants.Optimization.optimizationRandomSeed,
-                ocConfig.getOptimizationMainRandomSeed());
-
         try {
-            globalObserverClass = Class.forName(ocConfig.getGlobalObserverClass());
-            globalControllerClass = Class.forName(ocConfig.getGlobalControllerClass());
+            globalObserverClass = Class.forName(ocConfig.getGlobalObserverConfiguration().getClassName());
+            globalControllerClass = Class.forName(ocConfig.getGlobalControllerConfiguration().getClassName());
         } catch (Exception ex) {
             throw new OCManagerException(ex);
         }
@@ -123,7 +111,7 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
                     .getConstructor(IOSHOC.class,
                             OSHParameterCollection.class).newInstance(
                             this.getOSH(),
-                            this.globalObserverParameterCollection);
+                            globalObserverParameterCollection);
         } catch (Exception ex) {
             throw new OCManagerException(ex);
         }
@@ -131,14 +119,10 @@ public class OCManager extends OSHComponent implements ILifeCycleListener {
         try {
             globalController = (GlobalController) globalControllerClass
                     .getConstructor(IOSHOC.class,
-                            OSHParameterCollection.class,
-                            EAConfiguration.class,
-                            CostConfiguration.class,
+                            GlobalControllerConfiguration.class,
                             OptimizationEnergySimulationCore.class).newInstance(
                             this.getOSH(),
-                            this.globalControllerParameterCollection,
-                            ocConfig.getEaConfiguration(),
-                            ocConfig.getCostConfiguration(),
+                            ocConfig.getGlobalControllerConfiguration(),
                             ocESC);
         } catch (Exception ex) {
             throw new OCManagerException(ex);

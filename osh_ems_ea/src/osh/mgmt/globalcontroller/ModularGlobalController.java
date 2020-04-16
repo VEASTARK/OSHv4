@@ -1,25 +1,24 @@
 package osh.mgmt.globalcontroller;
 
-import osh.configuration.OSHParameterCollection;
-import osh.configuration.oc.GAConfiguration;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.GlobalControllerConfiguration;
+import osh.configuration.system.ConfigurationParameter;
+import osh.core.EARandomDistributor;
 import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.core.oc.GlobalController;
 import osh.datatypes.registry.AbstractExchange;
+import osh.datatypes.registry.oc.details.energy.CostConfigurationStateExchange;
 import osh.eal.time.TimeExchange;
 import osh.eal.time.TimeSubscribeEnum;
-import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.GAParameters;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.mgmt.globalcontroller.modules.GlobalControllerDataStorage;
 import osh.mgmt.globalcontroller.modules.GlobalControllerModule;
-import osh.mgmt.globalcontroller.modules.communication.CommunicateCommandPredictionModule;
-import osh.mgmt.globalcontroller.modules.communication.CommunicateGUIModule;
-import osh.mgmt.globalcontroller.modules.scheduling.ExecuteSchedulingModule;
-import osh.mgmt.globalcontroller.modules.scheduling.HandleSchedulingModule;
-import osh.mgmt.globalcontroller.modules.signals.HandleSignalsModule;
 import osh.mgmt.globalobserver.OSHGlobalObserver;
 import osh.registry.interfaces.IDataRegistryListener;
+import osh.utils.string.ParameterConstants;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,6 @@ import java.util.List;
 public class ModularGlobalController extends GlobalController implements IDataRegistryListener {
 
     private OSHGlobalObserver oshGlobalObserver;
-    private final GAParameters gaparameters;
 
     private GlobalControllerDataStorage dataStorage;
 
@@ -41,29 +39,28 @@ public class ModularGlobalController extends GlobalController implements IDataRe
 
     /**
      * Constructs this global controller with the given {@link IOSHOC} global entity, the {@link osh.esc.EnergySimulationCore}
-     * and the configuration parameters.
+     * and the controller configuration.
      *
      * @param entity the global entity
-     * @param configurationParameters the configuration parameters for the global controller
-     * @param gaConfiguration the configuration parameters for the genetic algorithm
-     * @param ocESC the energy-simulation-core for the optimization loop
+     * @param controllerConfiguration the controller configuration
+     * @param optimizationESC the energy-simulation-core for the optimization loop
      *
-     * @throws Exception when the gaConfiguration could not be parsed
      */
-    public ModularGlobalController(
-            IOSHOC entity,
-            OSHParameterCollection configurationParameters,
-            GAConfiguration gaConfiguration, OCEnergySimulationCore ocESC) throws Exception {
-        super(entity, configurationParameters, gaConfiguration, ocESC);
+    public ModularGlobalController(IOSHOC entity, GlobalControllerConfiguration controllerConfiguration,
+                                   OptimizationEnergySimulationCore optimizationESC) {
+        super(entity, controllerConfiguration, optimizationESC);
 
-        try {
-            this.gaparameters = new GAParameters(this.gaConfiguration);
-        } catch (Exception ex) {
-            this.getGlobalLogger().logError("Can't parse GAParameters, will shut down now!");
-            throw ex;
+        //set to true if single threaded execution is desired
+        if (false) {
+            ConfigurationParameter singleT = new ConfigurationParameter();
+            singleT.setParameterName(ParameterConstants.EA_ALGORITHM.singleThreaded);
+            singleT.setParameterValue("" + true);
+            singleT.setParameterType(Boolean.class.getName());
+            this.eaConfiguration.getAlgorithms().forEach(c ->c.getAlgorithmParameters().add(singleT));
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onSystemIsUp() throws OSHException {
         super.onSystemIsUp();
@@ -75,6 +72,13 @@ public class ModularGlobalController extends GlobalController implements IDataRe
             throw new OSHException("this global controller only works with global observers of type " + OSHGlobalObserver.class.getName());
         }
 
+        this.getOCRegistry().publish(CostConfigurationStateExchange.class,
+                new CostConfigurationStateExchange(this.getAssignedOCUnit().getUnitID(), this.getTimeDriver().getCurrentTime(),
+                        new CostConfiguration(this.costConfiguration)));
+
+        EARandomDistributor eaRandomDistributor = new EARandomDistributor(this.getOSH(), this.controllerConfiguration.getOptimizationMainRandomSeed());
+        eaRandomDistributor.startClock();
+
         try {
             this.dataStorage = new GlobalControllerDataStorage(
                     this.getAssignedOCUnit().getUnitID(),
@@ -84,20 +88,37 @@ public class ModularGlobalController extends GlobalController implements IDataRe
                     this,
                     this.getGlobalObserver(),
                     this.configurationParameters,
-                    this.gaparameters,
+                    this.eaConfiguration,
                     this.getGlobalLogger(),
-                    this.ocESC);
+                    this.optimizationESC,
+                    this.costConfiguration,
+                    eaRandomDistributor);
         } catch (Exception e) {
             throw new OSHException(e);
         }
-        this.dataStorage.setLastTimeSchedulingStarted(this.getTimeDriver().getTimeAtStart().plusSeconds(60));
 
-        this.modules.add(new HandleSignalsModule(this.dataStorage));
-        this.modules.add(new HandleSchedulingModule(this.dataStorage));
-        this.modules.add(new ExecuteSchedulingModule(this.dataStorage));
-        this.modules.add(new CommunicateCommandPredictionModule(this.dataStorage));
-        if (this.dataStorage.getStatus().hasGUI()) {
-            this.modules.add(new CommunicateGUIModule(this.dataStorage));
+        for (String className : this.controllerConfiguration.getControllerModules()) {
+
+            Class<GlobalControllerModule> clazz;
+            try {
+                clazz = (Class<GlobalControllerModule>) Class.forName(className);
+            } catch (ClassNotFoundException ex) {
+                throw new OSHException(ex);
+            }
+
+            GlobalControllerModule module;
+            try {
+                Constructor<GlobalControllerModule> constructor = clazz.getConstructor(
+                        GlobalControllerDataStorage.class);
+                module = constructor.newInstance(this.dataStorage);
+                this.getGlobalLogger().logInfo("ControllerModule: " + module.getClass().getSimpleName() + " loaded ...... [OK]");
+            } catch (InstantiationException iex) {
+                throw new OSHException("Instantiation of " + clazz + " failed!", iex);
+            } catch (Exception ex) {
+                throw new OSHException(ex);
+            }
+
+            this.modules.add(module);
         }
         Collections.sort(this.modules);
 

@@ -34,28 +34,28 @@ public class Domestic {
 
     private static final Commodity[] usedCommodities = {Commodity.DOMESTICHOTWATERPOWER};
     public static boolean useVDI6002Simulator = true;
-    public static UUID domesticUuid = UUIDStorage.dhwUsageUUID;
-    public static int[] yearlyDomesticHotWaterEnergyUsed = {
+    public static final UUID domesticUuid = UUIDStorage.dhwUsageUUID;
+    public static final int[] yearlyDomesticHotWaterEnergyUsed = {
             700,    //1pax
             1400,    //2pax
             2100,    //3pax
             2800,    //4pax
             3500    //5pax
     };
-    public static int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
-    public static float weightForOtherWeekday = GeneralConfig.weightForOtherWeekdays;
-    public static float weightForSameWeekday = GeneralConfig.weightForSameWeekday;
-    public static String vdiDrawOffProfileFileName = FileReferenceStorage.vdi_drawoffProfileFileName;
-    public static String weekDayHourProbabilityFileName = FileReferenceStorage.vdi_weekDayHourProbabilityFileName;
-    public static String eshlDrawOffProfileFileName = FileReferenceStorage.eshl_drawOffProfileName;
-    public static String vdiDriverName = osh.driver.simulation.dhw.VDI6002DomesticHotWaterSimulationDriver.class
+    public static final int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
+    public static final float weightForOtherWeekday = GeneralConfig.weightForOtherWeekdays;
+    public static final float weightForSameWeekday = GeneralConfig.weightForSameWeekday;
+    public static final String vdiDrawOffProfileFileName = FileReferenceStorage.vdi_drawoffProfileFileName;
+    public static final String weekDayHourProbabilityFileName = FileReferenceStorage.vdi_weekDayHourProbabilityFileName;
+    public static final String eshlDrawOffProfileFileName = FileReferenceStorage.eshl_drawOffProfileName;
+    public static final String vdiDriverName = osh.driver.simulation.dhw.VDI6002DomesticHotWaterSimulationDriver.class
             .getName();
-    public static String vdiNonControllableObserverName = osh.mgmt.localobserver
+    public static final String vdiNonControllableObserverName = osh.mgmt.localobserver
             .dhw.VDI6002DomesticHotWaterLocalObserver.class.getName();
 
-    public static String eshlDriverName = osh.driver.simulation.dhw.ESHLDomesticHotWaterSimulationDriver.class
+    public static final String eshlDriverName = osh.driver.simulation.dhw.ESHLDomesticHotWaterSimulationDriver.class
             .getName();
-    public static String eshlNonControllableObserverName = osh.mgmt.localobserver
+    public static final String eshlNonControllableObserverName = osh.mgmt.localobserver
             .dhw.DomesticHotWaterLocalObserver.class.getName();
 
     /**

@@ -15,16 +15,30 @@
         <complexType>
             <sequence>
                 <element name="globalOcUuid" type="string"/>
-                <element name="globalControllerClass" type="string"/>
-                <element minOccurs="0" maxOccurs="unbounded" name="globalControllerParameters"
-                         type="ins:ConfigurationParameter"/>
-                <element name="globalObserverClass" type="string"/>
-                <element minOccurs="0" maxOccurs="unbounded" name="globalObserverParameters"
-                         type="ins:ConfigurationParameter"/>
-                <element name="optimizationMainRandomSeed" type="string"/>
-                <element name="eaConfiguration" type="tns:EAConfiguration"/>
-                <element name="costConfiguration" type="tns:CostConfiguration"/>
+                <element name="globalControllerConfiguration" type="tns:GlobalControllerConfiguration"/>
+                <element name="globalObserverConfiguration" type="tns:GlobalObserverConfiguration"/>
             </sequence>
         </complexType>
     </element>
+
+    <complexType name="GlobalControllerConfiguration">
+        <sequence>
+            <element name="className" type="string"/>
+            <element name="eaConfiguration" type="tns:EAConfiguration"/>
+            <element name="costConfiguration" type="tns:CostConfiguration"/>
+            <element name="optimizationMainRandomSeed" type="long"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="controllerModules" type="string"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="globalControllerParameters" type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="GlobalObserverConfiguration">
+        <sequence>
+            <element name="className" type="string"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="globalObserverParameters"
+                     type="ins:ConfigurationParameter"/>
+        </sequence>
+    </complexType>
+
+
 </schema>

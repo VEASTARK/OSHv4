@@ -30,8 +30,11 @@ public class HandleSchedulingModule extends GlobalControllerModule {
 
     @Override
     public void onSystemIsUp() {
-        //TODO: reactivate as soon as delay at start is handled better
-//        this.getData().setLastTimeSchedulingStarted(this.getData().getNow());
+        //we only test if the time at rescheduling is >= the last rescheduling plus the delay between schedulings.
+        //To ensure we keep the set time for a delay at start we do a little calculation so the first possible
+        // rescheduling is at t = timeAtStart + delayAtStart
+        this.getData().setLastTimeSchedulingStarted(
+                this.getData().getNow().plus(this.getData().getDelayAtStart()).minus(this.getData().getDelayBetweenScheduling()));
 
         //assert required modules are present
         assert (this.getData().getControllerModule(ExecuteSchedulingModule.class) != null
@@ -44,11 +47,16 @@ public class HandleSchedulingModule extends GlobalControllerModule {
         boolean reschedulingRequired = false;
 
         ZonedDateTime now = exchange.getTime();
-        ZonedDateTime lastTimeSchedulingStarted = this.getData().getLastTimeSchedulingStarted();
+        ZonedDateTime soonestReschedulingPossible = this.getData().getLastTimeSchedulingStarted()
+                .plus(this.getData().getDelayBetweenScheduling());
+
+        if (this.getData().getNow().isBefore(soonestReschedulingPossible)) {
+            this.getData().getGlobalLogger().logDebug("rescheduling forbidden");
+        }
 
         //check if something has been changed:
         for (InterdependentProblemPart<?, ?> problemPart : this.getData().getProblemParts()) {
-            if (problemPart.isToBeScheduled() && !problemPart.getTimestamp().isBefore(lastTimeSchedulingStarted)) {
+            if (problemPart.isToBeScheduled() && !problemPart.getTimestamp().isBefore(soonestReschedulingPossible)) {
                 reschedulingRequired = true;
                 break;
             }

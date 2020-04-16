@@ -31,20 +31,20 @@ public class ColdWaterStorage {
 
  */
     private static final Commodity[] usedCommodities = {Commodity.COLDWATERPOWER};
-    public static UUID coldWaterStorageUuid = UUIDStorage.coldWaterTankUUID;
+    public static final UUID coldWaterStorageUuid = UUIDStorage.coldWaterTankUUID;
     public static double tankSize = 3000.0;
-    public static double standingHeatLossFactor = 1.0;
-    public static double tankDiameter = 0.5;
-    public static double initialTemperature = 15.0;
-    public static double ambientTemperature = 18.0;
+    public static final double standingHeatLossFactor = 1.0;
+    public static final double tankDiameter = 0.5;
+    public static final double initialTemperature = 15.0;
+    public static final double ambientTemperature = 18.0;
 
-    public static Duration newIPPAfter = GeneralConfig.newIppAfter;
-    public static double triggerIfDeltaTemp = 0.1;
-    public static double rescheduleIfViolatedTemperature = 2.5;
-    public static Duration rescheduleIfViolatedDuration = Duration.ofMinutes(10);
+    public static final Duration newIPPAfter = GeneralConfig.newIppAfter;
+    public static final double triggerIfDeltaTemp = 0.1;
+    public static final double rescheduleIfViolatedTemperature = 2.5;
+    public static final Duration rescheduleIfViolatedDuration = Duration.ofMinutes(10);
 
-    public static String driverName = osh.driver.simulation.ColdWaterTankSimulationDriver.class.getName();
-    public static String nonControllableObserverName = osh.mgmt.localobserver.ColdWaterTankLocalObserver.class.getName();
+    public static final String driverName = osh.driver.simulation.ColdWaterTankSimulationDriver.class.getName();
+    public static final String nonControllableObserverName = osh.mgmt.localobserver.ColdWaterTankLocalObserver.class.getName();
 
     /**
      * Generates the configuration file for the coldwater HVAC-storage with the set parameters.

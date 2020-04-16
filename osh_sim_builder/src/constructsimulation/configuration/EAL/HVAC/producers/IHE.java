@@ -36,12 +36,12 @@ public class IHE {
             Commodity.REACTIVEPOWER,
             Commodity.HEATINGHOTWATERPOWER
     };
-    public static UUID iheUuid = UUIDStorage.iheUUID;
-    public static double maxHotWaterTemperature = 80;
-    public static Duration newIPPAfter = GeneralConfig.newIppAfter;
-    public static double triggerIfDeltaTempBigger = 1.0;
-    public static String driverName = osh.driver.simulation.SmartHeaterSimulationDriver.class.getName();
-    public static String nonControllableObserverName = osh.mgmt.localobserver.SmartHeaterLocalObserver.class.getName();
+    public static final UUID iheUuid = UUIDStorage.iheUUID;
+    public static final double maxHotWaterTemperature = 80;
+    public static final Duration newIPPAfter = GeneralConfig.newIppAfter;
+    public static final double triggerIfDeltaTempBigger = 1.0;
+    public static final String driverName = osh.driver.simulation.SmartHeaterSimulationDriver.class.getName();
+    public static final String nonControllableObserverName = osh.mgmt.localobserver.SmartHeaterLocalObserver.class.getName();
 
     /**
      * Generates the configuration file for the ihe HVAC-producer with the set parameters.

@@ -1,8 +1,6 @@
 package osh.datatypes.cal;
 
 import osh.cal.CALComExchange;
-import osh.datatypes.registry.AbstractExchange;
-import osh.datatypes.registry.StateExchange;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

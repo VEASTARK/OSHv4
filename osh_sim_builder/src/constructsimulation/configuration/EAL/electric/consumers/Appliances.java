@@ -100,10 +100,10 @@ public class Appliances {
             ApplianceType.DELAYABLE,     //TUMBLE_DRYER
             ApplianceType.DELAYABLE      //WASHINGMACHINE
     };
-    public static UUID[] applianceUuids = UUIDStorage.applianceUUID;
-    public static String h0FilePath = FileReferenceStorage.h0Filename15Min;
-    public static String h0ClassName = osh.utils.slp.H0Profile15Minutes.class.getName();
-    public static boolean useSecondTDof = false;
+    public static final UUID[] applianceUuids = UUIDStorage.applianceUUID;
+    public static final String h0FilePath = FileReferenceStorage.h0Filename15Min;
+    public static final String h0ClassName = osh.utils.slp.H0Profile15Minutes.class.getName();
+    public static final boolean useSecondTDof = false;
     public static Duration[] firstTDOF = {
             Duration.ofHours(12),
             Duration.ZERO,
@@ -111,7 +111,7 @@ public class Appliances {
             Duration.ofHours(12),
             Duration.ofHours(12)
     };
-    public static Duration[] secondTDOF = {
+    public static final Duration[] secondTDOF = {
             Duration.ZERO,
             Duration.ZERO,
             Duration.ZERO,
@@ -131,7 +131,7 @@ public class Appliances {
      * sources:<br>
      * DESTATIS Fachserie 15 Reihe 2, etc........
      */
-    public static int[][] averageYearlyRuns = {
+    public static final int[][] averageYearlyRuns = {
             // 1p, 	2p, 	...
             /* DW */  {90, 160, 240, 310, 340},
             /* IH */ {170, 300, 350, 400, 420},
@@ -140,7 +140,7 @@ public class Appliances {
             /* WM */ {120, 200, 280, 360, 420}
     };
 
-    public static double[][] configurationShares = {
+    public static final double[][] configurationShares = {
             // 0	1    2   ...
             /* DW */ {0.2, 0.3, 0.3, 0.2},
             /* IH */ {0.4, 0.4, 0.2},
@@ -149,16 +149,16 @@ public class Appliances {
             /* WM */ {0.2, 0.5, 0.3}
     };
 
-    public static double[] hybridFactor = {
+    public static final double[] hybridFactor = {
             1.0, 1.0, 1.0, 1.0, 1.0
     };
 
-    public static String[] probabilityFilePaths = FileReferenceStorage.probabilityFilePaths;
-    public static String[][] profileSourcesPaths = FileReferenceStorage.profileSourcesPaths;
+    public static final String[] probabilityFilePaths = FileReferenceStorage.probabilityFilePaths;
+    public static final String[][] profileSourcesPaths = FileReferenceStorage.profileSourcesPaths;
 
-    public static String driverName = osh.driver.simulation.GenericFutureApplianceSimulationDriver.class.getName();
-    public static String observerName = osh.mgmt.localobserver.FutureApplianceLocalObserver.class.getName();
-    public static String controllerName = osh.mgmt.localcontroller.FutureApplianceLocalController.class.getName();
+    public static final String driverName = osh.driver.simulation.GenericFutureApplianceSimulationDriver.class.getName();
+    public static final String observerName = osh.mgmt.localobserver.FutureApplianceLocalObserver.class.getName();
+    public static final String controllerName = osh.mgmt.localcontroller.FutureApplianceLocalController.class.getName();
 
     /**
      * Generates the configuration file for the household-appliances with the set parameters.

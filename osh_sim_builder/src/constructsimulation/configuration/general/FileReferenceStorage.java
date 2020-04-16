@@ -21,28 +21,28 @@ public class FileReferenceStorage {
     public static final String csvPriceDynamicFilePath = "configfiles/externalSignal/priceDynamic.csv";
     public static final String pvFeedInEPEXFilePath = "configfiles/externalSignal/pricePVFeedInEPEX.csv";
     //system
-    public static String configFilesPath = "configfiles/";
-    public static String systemPath = "system/";
-    public static String EALConfigFileName = "EALConfig";
-    public static String OCConfigFileName = "OCConfig";
-    public static String CALConfigFileName = "CALConfig";
-    public static String OSHConfigFileName = "OSHConfig";
+    public static final String configFilesPath = "configfiles/";
+    public static final String systemPath = "system/";
+    public static final String EALConfigFileName = "EALConfig";
+    public static final String OCConfigFileName = "OCConfig";
+    public static final String CALConfigFileName = "CALConfig";
+    public static final String OSHConfigFileName = "OSHConfig";
     //grids
-    public static String simulationElelectricalGrid = "configfiles/grids/SimulationElectricalGrid.xml";
-    public static String simulationThermalGrid = "configfiles/grids/SimulationThermalGrid.xml";
-    public static String eshlElelectricalGrid = "configfiles/grids/ESHLElectricalGrid.xml";
-    public static String eshlThermalGrid = "configfiles/grids/ESHLThermalGrid.xml";
+    public static final String simulationElelectricalGrid = "configfiles/grids/SimulationElectricalGrid.xml";
+    public static final String simulationThermalGrid = "configfiles/grids/SimulationThermalGrid.xml";
+    public static final String eshlElelectricalGrid = "configfiles/grids/ESHLElectricalGrid.xml";
+    public static final String eshlThermalGrid = "configfiles/grids/ESHLThermalGrid.xml";
     //h0
-    public static String h0Filename15Min = "configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv";
+    public static final String h0Filename15Min = "configfiles/h0/H0Profile15MinWinterSummerIntermediate.csv";
     //appliances
-    public static String[] probabilityFilePaths = {
+    public static final String[] probabilityFilePaths = {
             "configfiles/appliance/dw/DW_prob.csv", //DW
             "configfiles/appliance/ih/IH_prob.csv", //COOKTOP
             "configfiles/appliance/ov/OV_prob.csv", //OVEN
             "configfiles/appliance/td/TD_prob.csv", //TD
             "configfiles/appliance/wm/WM_prob.csv"  //WM
     };
-    public static String[][] profileSourcesPaths = {
+    public static final String[][] profileSourcesPaths = {
             //DW
             {
                     null,

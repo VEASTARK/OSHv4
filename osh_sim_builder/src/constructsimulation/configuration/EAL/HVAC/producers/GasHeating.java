@@ -37,21 +37,21 @@ public class GasHeating {
             Commodity.HEATINGHOTWATERPOWER,
             Commodity.NATURALGASPOWER
     };
-    public static UUID gasUuid = UUIDStorage.gasHeatingUUID;
-    public static double minTemperature = 60.0;
-    public static double maxTemperature = 80.0;
-    public static int maxHotWaterPower = 15000; //15 kW
-    public static int maxGasPower = 15000; //15 kW
+    public static final UUID gasUuid = UUIDStorage.gasHeatingUUID;
+    public static final double minTemperature = 60.0;
+    public static final double maxTemperature = 80.0;
+    public static final int maxHotWaterPower = 15000; //15 kW
+    public static final int maxGasPower = 15000; //15 kW
 
-    public static Duration newIppAfter = GeneralConfig.newIppAfter;
+    public static final Duration newIppAfter = GeneralConfig.newIppAfter;
 
-    public static int typicalActivePowerOn = 100; //W
-    public static int typicalActivePowerOff = 0; //W
-    public static int typicalReactivePowerOn = 0; //W
-    public static int typicalReactivePowerOff = 0; //W
+    public static final int typicalActivePowerOn = 100; //W
+    public static final int typicalActivePowerOff = 0; //W
+    public static final int typicalReactivePowerOn = 0; //W
+    public static final int typicalReactivePowerOff = 0; //W
 
-    public static String driverClassName = osh.driver.simulation.GasBoilerSimulationDriver.class.getName();
-    public static String observerClassName = osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver.class.getName();
+    public static final String driverClassName = osh.driver.simulation.GasBoilerSimulationDriver.class.getName();
+    public static final String observerClassName = osh.mgmt.localobserver.NonControllableGasBoilerLocalObserver.class.getName();
 
     /**
      * Generates the configuration file for the gas-heating HVAC-producer with the set parameters.

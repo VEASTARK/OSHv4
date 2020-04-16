@@ -1,7 +1,9 @@
 package osh.mgmt.globalcontroller.modules;
 
 import osh.configuration.OSHParameterCollection;
-import osh.core.OSHRandom;
+import osh.configuration.oc.CostConfiguration;
+import osh.configuration.oc.EAConfiguration;
+import osh.core.EARandomDistributor;
 import osh.core.interfaces.IOSHStatus;
 import osh.core.logging.IGlobalLogger;
 import osh.core.oc.GlobalController;
@@ -11,14 +13,12 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.limit.PowerLimitSignal;
 import osh.datatypes.limit.PriceSignal;
 import osh.datatypes.registry.oc.ipp.InterdependentProblemPart;
-import osh.esc.OCEnergySimulationCore;
-import osh.mgmt.globalcontroller.jmetal.GAParameters;
-import osh.mgmt.globalcontroller.jmetal.logging.EALogger;
-import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
+import osh.esc.OptimizationEnergySimulationCore;
 import osh.mgmt.globalcontroller.modules.scheduling.DetailedOptimisationResults;
 import osh.registry.Registry.OCRegistry;
-import osh.utils.string.ParameterConstants;
+import osh.utils.string.ParameterConstants.Optimization;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -36,8 +36,8 @@ public class GlobalControllerDataStorage {
     //general
     private final UUID uuid;
     private final IGlobalLogger globalLogger;
-    private final GAParameters gaParameters;
-    private final OCEnergySimulationCore ocESC;
+    private final EAConfiguration eaConfiguration;
+    private final OptimizationEnergySimulationCore optimizationESC;
     private final IOSHStatus status;
     private final OCRegistry ocRegistry;
 
@@ -54,22 +54,18 @@ public class GlobalControllerDataStorage {
     private final Map<Class<? extends GlobalControllerModule>, GlobalControllerModule> moduleMap = new HashMap<>();
 
     //ExecuteSchedulingData
-    private int epsOptimizationObjective;
-    private int plsOptimizationObjective;
-    private int varOptimizationObjective;
-    private double upperOverlimitFactor;
-    private double lowerOverlimitFactor;
+    private final CostConfiguration costConfiguration;
 
-    private final OSHRandom optimizationMainRandomGenerator;
-    private long optimizationMainRandomSeed;
+    private final EARandomDistributor eaRandomDistributor;
     private int stepSize;
     private UUID hotWaterTankID;
-    private final IEALogger eaLogger;
 
     private EnumMap<AncillaryCommodity, PriceSignal> priceSignals;
     private EnumMap<AncillaryCommodity, PowerLimitSignal> powerLimitSignals;
 
     //HandleSchedulingData
+    private Duration delayBetweenScheduling;
+    private Duration delayAtStart;
     private ZonedDateTime lastTimeSchedulingStarted;
     private DetailedOptimisationResults lastOptimisationResults;
 
@@ -85,9 +81,9 @@ public class GlobalControllerDataStorage {
      * @param globalController the global controller
      * @param globalObserver the global observer
      * @param configurationParameters the configuration parameters
-     * @param gaParameters the ga parameters
+     * @param eaConfiguration the ga parameters
      * @param globalLogger the global logger
-     * @param ocESC the oc-ESC
+     * @param optimizationESC the oc-ESC
      */
     public GlobalControllerDataStorage(
             UUID uuid,
@@ -97,9 +93,11 @@ public class GlobalControllerDataStorage {
             GlobalController globalController,
             GlobalObserver globalObserver,
             OSHParameterCollection configurationParameters,
-            GAParameters gaParameters,
+            EAConfiguration eaConfiguration,
             IGlobalLogger globalLogger,
-            OCEnergySimulationCore ocESC) {
+            OptimizationEnergySimulationCore optimizationESC,
+            CostConfiguration costConfiguration,
+            EARandomDistributor eaRandomDistributor) {
 
         this.uuid = uuid;
         this.now = now;
@@ -108,77 +106,45 @@ public class GlobalControllerDataStorage {
         this.globalController = globalController;
         this.globalObserver = globalObserver;
         this.configurationParameters = configurationParameters;
-        this.gaParameters = gaParameters;
+        this.eaConfiguration = eaConfiguration;
         this.globalLogger = globalLogger;
-        this.ocESC = ocESC;
-
-        try {
-            this.upperOverlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.upperOverlimitFactor));
-        } catch (Exception e) {
-            this.upperOverlimitFactor = 1.0;
-            this.globalLogger.logWarning("Can't get upperOverlimitFactor, using the default value: " + this.upperOverlimitFactor);
-        }
-
-        try {
-            this.lowerOverlimitFactor =
-                    Double.parseDouble(this.configurationParameters.getParameter(ParameterConstants.Optimization.lowerOverlimitFactor));
-        } catch (Exception e) {
-            this.lowerOverlimitFactor = 1.0;
-            this.globalLogger.logWarning("Can't get lowerOverlimitFactor, using the default value: " + this.lowerOverlimitFactor);
-        }
-
-        try {
-            this.epsOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.epsObjective));
-        } catch (Exception e) {
-            this.epsOptimizationObjective = 0;
-            this.globalLogger.logWarning("Can't get epsOptimizationObjective, using the default value: " + this.epsOptimizationObjective);
-        }
-
-        try {
-            this.plsOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.plsObjective));
-        } catch (Exception e) {
-            this.plsOptimizationObjective = 0;
-            this.globalLogger.logWarning("Can't get plsOptimizationObjective, using the default value: " + this.plsOptimizationObjective);
-        }
-
-        try {
-            this.varOptimizationObjective =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.varObjective));
-        } catch (Exception e) {
-            this.varOptimizationObjective = 0;
-            this.globalLogger.logWarning("Can't get varOptimizationObjective, using the default value: " + this.varOptimizationObjective);
-        }
-
-        try {
-            this.optimizationMainRandomSeed =
-                    Long.parseLong(this.configurationParameters.getParameter(ParameterConstants.Optimization.optimizationRandomSeed));
-        } catch (Exception e) {
-            this.optimizationMainRandomSeed = 0xd1ce5bL;
-            this.globalLogger.logError("Can't get parameter optimizationMainRandomSeed, using the default value: " + this.optimizationMainRandomSeed);
-        }
-        this.optimizationMainRandomGenerator = new OSHRandom(this.optimizationMainRandomSeed);
+        this.optimizationESC = optimizationESC;
+        this.costConfiguration = costConfiguration;
+        this.eaRandomDistributor = eaRandomDistributor;
 
         try {
             this.stepSize =
-                    Integer.parseInt(this.configurationParameters.getParameter(ParameterConstants.Optimization.stepSize));
+                    Integer.parseInt(this.configurationParameters.getParameter(Optimization.stepSize));
         } catch (Exception e) {
             this.stepSize = 60;
             this.globalLogger.logError("Can't get parameter stepSize, using the default value: " + this.stepSize);
         }
 
         try {
+            this.delayAtStart = Duration.ofSeconds(
+                    Integer.parseInt(this.configurationParameters.getParameter(Optimization.delayAtStart)));
+        } catch (Exception e) {
+            this.delayAtStart = Duration.ofMinutes(1);
+            this.globalLogger.logError("Can't get parameter delayAtStart, using the default value: " + this.delayAtStart.toString());
+        }
+
+        try {
+            this.delayBetweenScheduling = Duration.ofSeconds(
+                    Integer.parseInt(this.configurationParameters.getParameter(Optimization.delayBetweenScheduling)));
+        } catch (Exception e) {
+            this.delayBetweenScheduling = Duration.ofMinutes(1);
+            this.globalLogger.logError("Can't get parameter delayBetweenScheduling, using the default value: " + this.delayBetweenScheduling.toString());
+        }
+
+        try {
             this.hotWaterTankID =
-                    UUID.fromString(this.configurationParameters.getParameter(ParameterConstants.Optimization.hotWaterTankUUID));
+                    UUID.fromString(this.configurationParameters.getParameter(Optimization.hotWaterTankUUID));
         } catch (Exception e) {
             this.hotWaterTankID = UUID.fromString("00000000-0000-4857-4853-000000000000");
             this.globalLogger.logError("Can't get parameter hotWaterTankUUID, using the default value: " + this.hotWaterTankID);
         }
 
         this.globalLogger.logDebug("Optimization StepSize = " + this.stepSize);
-        this.eaLogger = new EALogger(this.globalLogger,true,true,10,20,true);
     }
 
     public void subscribe(GlobalControllerEventEnum event, GlobalControllerModule module) {
@@ -204,12 +170,12 @@ public class GlobalControllerDataStorage {
         return this.globalLogger;
     }
 
-    public GAParameters getGaParameters() {
-        return this.gaParameters;
+    public EAConfiguration getEaConfiguration() {
+        return this.eaConfiguration;
     }
 
-    public OCEnergySimulationCore getOcESC() {
-        return this.ocESC;
+    public OptimizationEnergySimulationCore getOptimizationESC() {
+        return this.optimizationESC;
     }
 
     public IOSHStatus getStatus() {
@@ -254,44 +220,28 @@ public class GlobalControllerDataStorage {
         this.moduleMap.put(moduleClass, module);
     }
 
-    public OSHRandom getOptimizationMainRandomGenerator() {
-        return this.optimizationMainRandomGenerator;
+    public CostConfiguration getCostConfiguration() {
+        return this.costConfiguration;
     }
 
-    public long getOptimizationMainRandomSeed() {
-        return this.optimizationMainRandomSeed;
+    public EARandomDistributor getEARandomDistributor() {
+        return this.eaRandomDistributor;
     }
 
     public int getStepSize() {
         return this.stepSize;
     }
 
-    public int getEpsOptimizationObjective() {
-        return this.epsOptimizationObjective;
-    }
-
-    public int getPlsOptimizationObjective() {
-        return this.plsOptimizationObjective;
-    }
-
-    public int getVarOptimizationObjective() {
-        return this.varOptimizationObjective;
-    }
-
-    public double getUpperOverlimitFactor() {
-        return this.upperOverlimitFactor;
-    }
-
-    public double getLowerOverlimitFactor() {
-        return this.lowerOverlimitFactor;
-    }
-
-    public IEALogger getEaLogger() {
-        return this.eaLogger;
-    }
-
     public UUID getHotWaterTankID() {
         return this.hotWaterTankID;
+    }
+
+    public Duration getDelayBetweenScheduling() {
+        return this.delayBetweenScheduling;
+    }
+
+    public Duration getDelayAtStart() {
+        return this.delayAtStart;
     }
 
     public ZonedDateTime getLastTimeSchedulingStarted() {

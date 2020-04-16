@@ -254,7 +254,7 @@ public abstract class LoadProfile<C extends Enum<C>> implements ILoadProfile<C> 
         while (nextEntry != null) {
             long nextChange = nextEntry.getLongKey();
 
-            avg += ((double) currentEntry.getIntValue()) * ((double) (nextChange - currentTime) / (double) (end - start));
+            avg += currentEntry.getIntValue() * ((double) (nextChange - currentTime) / (end - start));
             currentTime = nextChange;
             currentEntry = nextEntry;
 

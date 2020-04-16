@@ -4,7 +4,6 @@ import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.logging.devices.BaseloadLogObject;
 import osh.datatypes.logging.thermal.ThermalSupplyLogObject;
 import osh.driver.chp.ChpOperationMode;
 import osh.driver.chp.model.GenericChpModel;

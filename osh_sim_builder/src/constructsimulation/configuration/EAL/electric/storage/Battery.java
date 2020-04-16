@@ -35,24 +35,24 @@ public class Battery {
        DO NOT change anything if you merely wish to produce a new configuration file!
 
     */
-    public static UUID batteryUuid = UUIDStorage.batteryUUID;
-    public static int batteryCycles = 10000;
+    public static final UUID batteryUuid = UUIDStorage.batteryUUID;
+    public static final int batteryCycles = 10000;
     //storage Model
     public static int batteryType = 1;
-    public static int minChargingState = 0;
-    public static int maxChargingState = 5 * 1000 * 3600; // [Ws]
-    public static int minDischargePower = -3500; // [W]
-    public static int maxDischargePower = -100;
-    public static int minChargePower = 100; // [W]
-    public static int maxChargePower = 3500;
-    public static int minInverterPower = -1000000000; // [W]
-    public static int maxInverterPower = 1000000000;
-    public static int roomTemperature = 20;
-    public static Duration rescheduleAfter = GeneralConfig.rescheduleAfter;
-    public static Duration newIppAfter = GeneralConfig.newIppAfter;
-    public static int triggerIppIfDeltaSoCBigger = 5000;
-    public static String driverName = osh.driver.simulation.NonControllableBatterySimulationDriver.class.getName();
-    public static String nonControllableObserverName = osh.mgmt.localobserver.NonControllableInverterBatteryStorageObserver.class
+    public static final int minChargingState = 0;
+    public static final int maxChargingState = 5 * 1000 * 3600; // [Ws]
+    public static final int minDischargePower = -3500; // [W]
+    public static final int maxDischargePower = -100;
+    public static final int minChargePower = 100; // [W]
+    public static final int maxChargePower = 3500;
+    public static final int minInverterPower = -1000000000; // [W]
+    public static final int maxInverterPower = 1000000000;
+    public static final int roomTemperature = 20;
+    public static final Duration rescheduleAfter = GeneralConfig.rescheduleAfter;
+    public static final Duration newIppAfter = GeneralConfig.newIppAfter;
+    public static final int triggerIppIfDeltaSoCBigger = 5000;
+    public static final String driverName = osh.driver.simulation.NonControllableBatterySimulationDriver.class.getName();
+    public static final String nonControllableObserverName = osh.mgmt.localobserver.NonControllableInverterBatteryStorageObserver.class
             .getName();
 
     /**

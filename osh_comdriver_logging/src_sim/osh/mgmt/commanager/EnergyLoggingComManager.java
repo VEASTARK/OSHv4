@@ -2,7 +2,6 @@ package osh.mgmt.commanager;
 
 import osh.cal.ICALExchange;
 import osh.core.com.ComManager;
-import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSHOC;
 import osh.datatypes.cal.ObjectWrapperCALExchange;
 import osh.datatypes.registry.AbstractExchange;

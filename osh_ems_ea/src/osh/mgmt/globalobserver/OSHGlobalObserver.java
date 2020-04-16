@@ -35,7 +35,6 @@ public class OSHGlobalObserver
         implements IDataRegistryListener, IProvidesIdentity {
 
     private final Map<UUID, InterdependentProblemPart<?, ?>> iProblempart;
-    private boolean reschedule;
 
     private final HashMap<UUID, EnumMap<Commodity, Double>> deviceCommodityMap = new HashMap<>();
     private EnumMap<Commodity, Double> commodityTotalPowerMap = new EnumMap<>(Commodity.class);
@@ -76,9 +75,6 @@ public class OSHGlobalObserver
         if (exchange instanceof InterdependentProblemPart) {
             InterdependentProblemPart<?, ?> ppex = (InterdependentProblemPart<?, ?>) exchange;
             this.iProblempart.put(exchange.getSender(), ppex);
-            if (ppex.isToBeScheduled()) {
-                this.reschedule = true;
-            }
             problemPartListChanged = true;
         }
         if (problemPartListChanged && this.getControllerBoxStatus().hasGUI()) {
@@ -119,12 +115,6 @@ public class OSHGlobalObserver
         List<InterdependentProblemPart<?, ?>> ippList = new ArrayList<>(this.iProblempart.values());
         ippList.sort(Comparator.comparing(InterdependentProblemPart::getUUID));
         return ippList;
-    }
-
-    public boolean getAndResetProblempartChangedFlag() {
-        boolean tmp = this.reschedule;
-        this.reschedule = false;
-        return tmp;
     }
 
     @Override

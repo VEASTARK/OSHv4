@@ -27,7 +27,7 @@ public class SingleSQLConnectionProvider {
     protected final String trustStorePath;
     protected final String trustStorePW;
     protected Connection conn;
-    protected boolean useSSL;
+    protected final boolean useSSL;
 
     public SingleSQLConnectionProvider(Map<String, String> params) {
         super();

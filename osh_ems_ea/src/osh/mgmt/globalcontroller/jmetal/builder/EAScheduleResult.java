@@ -20,7 +20,7 @@ public class EAScheduleResult {
     private final List<Schedule> schedules;
     private final AncillaryCommodityLoadProfile ancillaryMeter;
     private final Solution<?> solution;
-    private final boolean isDummySolution;
+    private final boolean hasGUIObjects;
 
     /**
      * Constructs this data collection with the given values.
@@ -31,20 +31,20 @@ public class EAScheduleResult {
      * @param schedules the schedules of all involved devices
      * @param ancillaryMeter the resulting ancillary meter of the solution
      * @param solution the solution
-     * @param isDummySolution flag if the solution is a constructed one as the problem had nothing to optimise
      */
     public EAScheduleResult(TreeMap<Long, Double> predictedHotWaterTankTemperature,
                             TreeMap<Long, Double> predictedHotWaterDemand,
                             TreeMap<Long, Double> predictedHotWaterSupply, List<Schedule> schedules,
-                            AncillaryCommodityLoadProfile ancillaryMeter, Solution<?> solution,
-                            boolean isDummySolution) {
+                            AncillaryCommodityLoadProfile ancillaryMeter, Solution<?> solution) {
         this.predictedHotWaterTankTemperature = predictedHotWaterTankTemperature;
         this.predictedHotWaterDemand = predictedHotWaterDemand;
         this.predictedHotWaterSupply = predictedHotWaterSupply;
         this.schedules = schedules;
         this.ancillaryMeter = ancillaryMeter;
         this.solution = solution;
-        this.isDummySolution = isDummySolution;
+        this.hasGUIObjects =
+                !predictedHotWaterTankTemperature.isEmpty() || !predictedHotWaterDemand.isEmpty()
+                        || !predictedHotWaterSupply.isEmpty();
     }
 
     /**
@@ -102,11 +102,11 @@ public class EAScheduleResult {
     }
 
     /**
-     * Returns the flag if the solution is a constructed one as the problem had nothing to optimise.
+     * Returns the flag signalling that gui objects are contained in this result.
      *
-     * @return true flag if the solution is a constructed one
+     * @return true flag signalling that gui objects are contained in this result
      */
-    public boolean isDummySolution() {
-        return this.isDummySolution;
+    public boolean isHasGUIObjects() {
+        return this.hasGUIObjects;
     }
 }

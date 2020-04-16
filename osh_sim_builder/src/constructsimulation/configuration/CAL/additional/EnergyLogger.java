@@ -24,10 +24,10 @@ public class EnergyLogger {
        DO NOT change anything if you merely wish to produce a new configuration file!
 
     */
-    public static UUID energyLoggerUuid = UUIDStorage.energyLoggerUuid;
+    public static final UUID energyLoggerUuid = UUIDStorage.energyLoggerUuid;
 
-    public static String driverName = osh.comdriver.logging.EnergyLoggingComDriver.class.getName();
-    public static String comManagerName = osh.mgmt.commanager.EnergyLoggingComManager.class.getName();
+    public static final String driverName = osh.comdriver.logging.EnergyLoggingComDriver.class.getName();
+    public static final String comManagerName = osh.mgmt.commanager.EnergyLoggingComManager.class.getName();
 
     /**
      * Generates the configuration file for the Energy Logger with the set parameters.
