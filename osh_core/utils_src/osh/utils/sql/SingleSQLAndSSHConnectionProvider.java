@@ -27,7 +27,7 @@ public class SingleSQLAndSSHConnectionProvider extends SingleSQLConnectionProvid
     private final int sshPort;                                    // remote SSH host port number
     private final int initialLocalPort;                             // local port number use to bind SSH tunnel
     private Session sess;
-    private boolean useSSH;
+    private final boolean useSSH;
     private final boolean useKeyFile;                                //if to connect over SSH with user/pw or keyfile
     private final String keyFilePath;                                        //path to the key file
 

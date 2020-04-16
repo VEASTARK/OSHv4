@@ -190,10 +190,11 @@ public final class ParameterConstants {
     }
 
     public static final class Optimization {
-        public static final String optimizationRandomSeed = "optimizationMainRandomSeed";
         public static final String stepSize = "stepSize";
         public static final String hotWaterTankUUID = "hotWaterTankUUID";
         public static final String coldWaterTankUUID = "coldWaterTankUUID";
+        public static final String delayAtStart = "delayAtStart";
+        public static final String delayBetweenScheduling = "delayBetweenScheduling";
     }
 
     public static final class EA {

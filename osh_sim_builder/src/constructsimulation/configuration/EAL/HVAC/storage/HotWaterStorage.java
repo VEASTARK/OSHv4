@@ -35,20 +35,20 @@ public class HotWaterStorage {
             Commodity.HEATINGHOTWATERPOWER,
             Commodity.DOMESTICHOTWATERPOWER
     };
-    public static UUID hotWaterStorageUuid = UUIDStorage.hotWaterTankUUID;
+    public static final UUID hotWaterStorageUuid = UUIDStorage.hotWaterTankUUID;
 
-    public static Duration newIPPAfter = GeneralConfig.newIppAfter;
-    public static double triggerIfDeltaTemp = 0.25;
-    public static double rescheduleIfViolatedTemperature = 2.5;
-    public static Duration rescheduleIfViolatedDuration = Duration.ofMinutes(10);
+    public static final Duration newIPPAfter = GeneralConfig.newIppAfter;
+    public static final double triggerIfDeltaTemp = 0.25;
+    public static final double rescheduleIfViolatedTemperature = 2.5;
+    public static final Duration rescheduleIfViolatedDuration = Duration.ofMinutes(10);
 
     public static double tankSize = 350.0;
-    public static double standingHeatLossFactor = 1.0;
-    public static double tankDiameter = 0.5;
+    public static final double standingHeatLossFactor = 1.0;
+    public static final double tankDiameter = 0.5;
     public static double initialTemperature = 70.0;
-    public static double ambientTemperature = 20.0;
-    public static String driverName = osh.driver.simulation.HotWaterTankSimulationDriver.class.getName();
-    public static String nonControllableObserverName = osh.mgmt.localobserver.HotWaterTankLocalObserver.class.getName();
+    public static final double ambientTemperature = 20.0;
+    public static final String driverName = osh.driver.simulation.HotWaterTankSimulationDriver.class.getName();
+    public static final String nonControllableObserverName = osh.mgmt.localobserver.HotWaterTankLocalObserver.class.getName();
 
     /**
      * Generates the configuration file for the hotwater HVAC-storage with the set parameters.

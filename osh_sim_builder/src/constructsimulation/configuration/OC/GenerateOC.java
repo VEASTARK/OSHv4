@@ -3,10 +3,13 @@ package constructsimulation.configuration.OC;
 import constructsimulation.configuration.general.HouseConfig;
 import constructsimulation.configuration.general.UUIDStorage;
 import constructsimulation.generation.parameter.CreateConfigurationParameter;
+import osh.configuration.oc.GlobalControllerConfiguration;
+import osh.configuration.oc.GlobalObserverConfiguration;
 import osh.configuration.oc.OCConfiguration;
 import osh.configuration.system.ConfigurationParameter;
-import osh.utils.string.ParameterConstants;
+import osh.utils.string.ParameterConstants.Optimization;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -18,15 +21,29 @@ import java.util.UUID;
  */
 public class GenerateOC {
 
-    public static UUID globalOCUuid = UUIDStorage.globalOCUuid;
+    public static final UUID globalOCUuid = UUIDStorage.globalOCUuid;
 
 
     //step size of the optimization algorithm (calculation interval)
     public static int escStepSize = 60;
 
-    public static String globalObserverClass = osh.mgmt.globalobserver.OSHGlobalObserver.class.getName();
+    //enforced delay between schedulings or at the start of the simulation
+    public static final Duration delayBetweenScheduling = Duration.ofMinutes(1);
+    public static final Duration delayAtStart = Duration.ofMinutes(1);
 
-    public static String globalControllerClass = osh.mgmt.globalcontroller.OSHGlobalControllerJMetal.class.getName();
+    public static final String globalObserverClass = osh.mgmt.globalobserver.OSHGlobalObserver.class.getName();
+    public static final String globalControllerClass = osh.mgmt.globalcontroller.ModularGlobalController.class.getName();
+
+    public static final Class<?>[] modules = new Class<?>[]{
+            //communication
+            osh.mgmt.globalcontroller.modules.communication.CommunicateCommandPredictionModule.class,
+//            osh.mgmt.globalcontroller.modules.communication.CommunicateGUIModule.class,
+            //scheduling
+            osh.mgmt.globalcontroller.modules.scheduling.ExecuteSchedulingModule.class,
+            osh.mgmt.globalcontroller.modules.scheduling.HandleSchedulingModule.class,
+            //signals
+            osh.mgmt.globalcontroller.modules.signals.HandleSignalsModule.class,
+    };
 
     /**
      * Generates the OC configuration file.
@@ -36,30 +53,41 @@ public class GenerateOC {
     public static OCConfiguration generateOCConfig() {
         OCConfiguration ocConfig = new OCConfiguration();
 
-        ocConfig.setGlobalObserverClass(globalObserverClass);
-        ocConfig.setGlobalControllerClass(globalControllerClass);
+        GlobalControllerConfiguration controllerConfiguration = new GlobalControllerConfiguration();
+        GlobalObserverConfiguration observerConfiguration = new GlobalObserverConfiguration();
 
-        ocConfig.setOptimizationMainRandomSeed(String.valueOf(HouseConfig.optimizationMainRandomSeed));
+        controllerConfiguration.setClassName(globalControllerClass);
+        controllerConfiguration.setOptimizationMainRandomSeed(HouseConfig.optimizationMainRandomSeed);
+        controllerConfiguration.setCostConfiguration(CostConfig.generateCostConfig());
+        controllerConfiguration.setEaConfiguration(EAConfig.generateEAConfig());
 
-
-        ocConfig.setGlobalOcUuid(globalOCUuid.toString());
-        ocConfig.setEaConfiguration(EAConfig.generateEAConfig());
-        ocConfig.setCostConfiguration(CostConfig.generateCostConfig());
+        for (Class<?> clazz : modules) {
+            controllerConfiguration.getControllerModules().add(clazz.getName());
+        }
 
         Map<String, String> params = new HashMap<>();
 
-        params.put(ParameterConstants.Optimization.stepSize, String.valueOf(escStepSize));
+        params.put(Optimization.stepSize, String.valueOf(escStepSize));
 
-        params.put(ParameterConstants.Optimization.hotWaterTankUUID, String.valueOf(UUIDStorage.hotWaterTankUUID));
-        params.put(ParameterConstants.Optimization.coldWaterTankUUID, String.valueOf(UUIDStorage.coldWaterTankUUID));
+        params.put(Optimization.hotWaterTankUUID, String.valueOf(UUIDStorage.hotWaterTankUUID));
+        params.put(Optimization.coldWaterTankUUID, String.valueOf(UUIDStorage.coldWaterTankUUID));
+
+        params.put(Optimization.delayAtStart, String.valueOf(delayAtStart.toSeconds()));
+        params.put(Optimization.delayBetweenScheduling, String.valueOf(delayBetweenScheduling.toSeconds()));
 
         for (Map.Entry<String, String> en : params.entrySet()) {
             ConfigurationParameter cp = CreateConfigurationParameter.createConfigurationParameter(
                     en.getKey(),
                     "String",
                     en.getValue());
-            ocConfig.getGlobalControllerParameters().add(cp);
+            controllerConfiguration.getGlobalControllerParameters().add(cp);
         }
+
+        observerConfiguration.setClassName(globalObserverClass);
+
+        ocConfig.setGlobalControllerConfiguration(controllerConfiguration);
+        ocConfig.setGlobalObserverConfiguration(observerConfiguration);
+        ocConfig.setGlobalOcUuid(globalOCUuid.toString());
 
         return ocConfig;
     }

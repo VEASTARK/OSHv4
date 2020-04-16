@@ -172,14 +172,14 @@ public class EnergyLoggingComDriver extends CALComDriver implements IDataRegistr
 
                 for (int i = 0; i < avgWeekDays.length; i++) {
                     for (int j = 0; j < avgWeekDays[i].length; j++) {
-                        double factor = (double) this.h0ResultsCounter[i][j] * PhysicalConstants.factor_wsToKWh;
+                        double factor = this.h0ResultsCounter[i][j] * PhysicalConstants.factor_wsToKWh;
                         for (int k = 0; k < avgWeekDays[i][j].length; k++) {
                             avgWeekDays[i][j][k] = this.aggrH0ResultsWeekdays[i][j][k] / factor;
                         }
                     }
                 }
                 for (int i = 0; i < avgDays.length; i++) {
-                    double factor = ((double) this.h0ResultsCounterDays[i] / 1440.0) * PhysicalConstants.factor_wsToKWh;
+                    double factor = (this.h0ResultsCounterDays[i] / 1440.0) * PhysicalConstants.factor_wsToKWh;
                     for (int j = 0; j < avgDays[i].length; j++) {
                         avgDays[i][j] = this.aggrH0ResultsDays[i][j] / factor;
                     }

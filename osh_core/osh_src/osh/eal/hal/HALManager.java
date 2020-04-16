@@ -24,7 +24,6 @@ import osh.simulation.exception.SimulationEngineException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

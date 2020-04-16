@@ -20,6 +20,7 @@ public class EAScheduleResult {
     private final List<Schedule> schedules;
     private final AncillaryCommodityLoadProfile ancillaryMeter;
     private final Solution<?> solution;
+    private final boolean hasGUIObjects;
 
     /**
      * Constructs this data collection with the given values.
@@ -41,6 +42,9 @@ public class EAScheduleResult {
         this.schedules = schedules;
         this.ancillaryMeter = ancillaryMeter;
         this.solution = solution;
+        this.hasGUIObjects =
+                !predictedHotWaterTankTemperature.isEmpty() || !predictedHotWaterDemand.isEmpty()
+                        || !predictedHotWaterSupply.isEmpty();
     }
 
     /**
@@ -95,5 +99,14 @@ public class EAScheduleResult {
      */
     public Solution<?> getSolution() {
         return this.solution;
+    }
+
+    /**
+     * Returns the flag signalling that gui objects are contained in this result.
+     *
+     * @return true flag signalling that gui objects are contained in this result
+     */
+    public boolean isHasGUIObjects() {
+        return this.hasGUIObjects;
     }
 }

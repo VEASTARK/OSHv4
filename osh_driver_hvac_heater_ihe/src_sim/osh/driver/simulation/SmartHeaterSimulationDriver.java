@@ -6,7 +6,6 @@ import osh.datatypes.commodity.AncillaryCommodity;
 import osh.datatypes.commodity.AncillaryMeterState;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.devices.SmartHeaterLogObject;
-import osh.datatypes.logging.thermal.ThermalLoggingObject;
 import osh.driver.ihe.SmartHeaterModel;
 import osh.eal.hal.exceptions.HALException;
 import osh.eal.hal.exchange.ipp.IPPSchedulingExchange;

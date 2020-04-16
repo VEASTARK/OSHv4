@@ -4,15 +4,10 @@ import constructsimulation.configuration.general.FileReferenceStorage;
 import constructsimulation.configuration.general.HouseConfig;
 import constructsimulation.configuration.general.UUIDStorage;
 import constructsimulation.datatypes.GridConfigurationWrapper;
-import constructsimulation.generation.parameter.CreateConfigurationParameter;
-import osh.configuration.system.ConfigurationParameter;
 import osh.configuration.system.GridConfig;
 import osh.configuration.system.OSHConfiguration;
-import osh.utils.string.ParameterConstants;
 
-import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,7 +17,7 @@ import java.util.Map;
  */
 public class GenerateOSH {
 
-    public static Map<GridConfigurationType, GridConfigurationWrapper[]> gridMap = new EnumMap<>(GridConfigurationType.class);
+    public static final Map<GridConfigurationType, GridConfigurationWrapper[]> gridMap = new EnumMap<>(GridConfigurationType.class);
 
     static {
         gridMap.put(GridConfigurationType.SIMULATION, new GridConfigurationWrapper[]{

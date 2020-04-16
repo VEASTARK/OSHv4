@@ -9,15 +9,15 @@ import osh.configuration.oc.*;
  */
 public class CostConfig {
 
-    public static double overLimitFactor = 1.0;
+    public static final double overLimitFactor = 1.0;
 
     public static ReactiveCosts reactiveCosts = ReactiveCosts.NONE;
     public static ActivePlsCosts activePlsCosts = ActivePlsCosts.FULL;
     public static ReactivePlsCosts reactivePlsCosts = ReactivePlsCosts.NONE;
     public static FeedInCosts feedInCosts = FeedInCosts.BOTH;
     public static AutoConsumptionCosts autoConsumptionCosts = AutoConsumptionCosts.BOTH;
-    public static SelfSufficiencyRatio selfSufficiencyRatio = SelfSufficiencyRatio.NONE;
-    public static SelfConsumptionRatio selfConsumptionRatio = SelfConsumptionRatio.NONE;
+    public static final SelfSufficiencyRatio selfSufficiencyRatio = SelfSufficiencyRatio.NONE;
+    public static final SelfConsumptionRatio selfConsumptionRatio = SelfConsumptionRatio.NONE;
 
     /**
      * Generates the cost configuration.

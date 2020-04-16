@@ -4,7 +4,6 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.front.util.FrontNormalizer;
 import osh.configuration.oc.EAConfiguration;
 import osh.configuration.system.DeviceTypes;
-import osh.core.OSHRandom;
 import osh.core.exceptions.OCManagerException;
 import osh.core.logging.IGlobalLogger;
 import osh.datatypes.commodity.Commodity;

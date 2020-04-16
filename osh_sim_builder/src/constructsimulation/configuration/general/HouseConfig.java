@@ -13,13 +13,13 @@ import java.util.UUID;
 public class HouseConfig {
 
     public static int personCount = 4;
-    public static UUID hhUUID = UUID.randomUUID();
-    public static RunningType runningType = RunningType.SIMULATION;
+    public static final UUID hhUUID = UUID.randomUUID();
+    public static final RunningType runningType = RunningType.SIMULATION;
 
-    public static Long mainRandomSeed = 0xd1ce5bL;
-    public static Long optimizationMainRandomSeed = 0xd1ce5bL;
+    public static final Long mainRandomSeed = 0xd1ce5bL;
+    public static final Long optimizationMainRandomSeed = 0xd1ce5bL;
 
-    public static String defaultLogPath = "logs";
+    public static final String defaultLogPath = "logs";
 
-    public static GridConfigurationType gridType = GridConfigurationType.SIMULATION;
+    public static final GridConfigurationType gridType = GridConfigurationType.SIMULATION;
 }

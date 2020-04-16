@@ -6,7 +6,6 @@ import osh.core.exceptions.OSHException;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
 import osh.datatypes.logging.thermal.ThermalLoggingObject;
-import osh.datatypes.logging.thermal.ThermalSupplyLogObject;
 import osh.datatypes.power.SparseLoadProfile;
 import osh.driver.simulation.thermal.ThermalDemandData;
 import osh.eal.hal.exceptions.HALException;

@@ -3,7 +3,6 @@ package osh.driver.simulation;
 import osh.configuration.OSHParameterCollection;
 import osh.core.interfaces.IOSH;
 import osh.datatypes.commodity.Commodity;
-import osh.datatypes.logging.devices.SmartHeaterLogObject;
 import osh.datatypes.logging.devices.WaterTankLogObject;
 import osh.driver.thermal.FactorisedBasicWaterTank;
 import osh.eal.hal.exceptions.HALException;

@@ -12,5 +12,5 @@
         <gridLayoutSource>configfiles/grids/SimulationThermalGrid.xml</gridLayoutSource>
     </gridConfigurations>
     <meterUUID>00000000-0000-0000-0000-000000000000</meterUUID>
-    <hhUUID>81057800-246a-4399-9edc-d960340f41af</hhUUID>
+    <hhUUID>93dfeb0f-d262-4130-abd1-29ee637c09b6</hhUUID>
 </OSHConfiguration>

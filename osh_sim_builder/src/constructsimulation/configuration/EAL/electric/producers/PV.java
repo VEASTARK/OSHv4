@@ -36,24 +36,24 @@ public class PV {
 
      */
     public static boolean usePVHOLL = true;
-    public static boolean usePVEv0 = false;
-    public static UUID pvUuid = UUIDStorage.pvUUID;
+    public static boolean usePVEv0;
+    public static final UUID pvUuid = UUIDStorage.pvUUID;
 
     public static int wattsPeak = 4000;
-    public static int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
+    public static final int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
 
-    public static String hollFilePath = FileReferenceStorage.holl_filePath;
-    public static String hollFileExtension = ".csv";
-    public static String ev0FilePath = FileReferenceStorage.ev0_filePath;
-    public static String ev0FileExtension = ".csv";
+    public static final String hollFilePath = FileReferenceStorage.holl_filePath;
+    public static final String hollFileExtension = ".csv";
+    public static final String ev0FilePath = FileReferenceStorage.ev0_filePath;
+    public static final String ev0FileExtension = ".csv";
 
     public static int pvComplexPowerMax = 10000;
     public static double pvCosPhiMax = -0.8;
-    public static String hollDriverName = osh.driver.simulation.PvSimulationDriverHollData.class.getName();
-    public static String ev0DriverName = osh.driver.simulation.PvSimulationDriverEv0.class.getName();
+    public static final String hollDriverName = osh.driver.simulation.PvSimulationDriverHollData.class.getName();
+    public static final String ev0DriverName = osh.driver.simulation.PvSimulationDriverEv0.class.getName();
 
-    public static String nonControllableObserverName = osh.mgmt.localobserver.PvLocalObserver.class.getName();
-    public static String nonControllableControllerName = osh.mgmt.localcontroller.PvLocalController.class.getName();
+    public static final String nonControllableObserverName = osh.mgmt.localobserver.PvLocalObserver.class.getName();
+    public static final String nonControllableControllerName = osh.mgmt.localcontroller.PvLocalController.class.getName();
 
     /**
      * Generates the configuration file for the pv with the set parameters.

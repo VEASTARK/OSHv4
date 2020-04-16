@@ -63,7 +63,6 @@ public class SQLConnectionProvider {
             } catch (ConnectException | JSchException ignored) {
             }
         }
-        ;
         throw new ConnectException("No database reachable");
     }
 

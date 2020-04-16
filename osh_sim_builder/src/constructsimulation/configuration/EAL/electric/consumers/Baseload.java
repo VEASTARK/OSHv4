@@ -36,23 +36,23 @@ public class Baseload {
        DO NOT change anything if you merely wish to produce a new configuration file!
 
     */
-    public static UUID baseloadUuid = UUIDStorage.baseloadUUID;
-    public static int[] avgYearlyBaseloadConsumption =
+    public static final UUID baseloadUuid = UUIDStorage.baseloadUUID;
+    public static final int[] avgYearlyBaseloadConsumption =
             // 1p, 2p, ...
             {1426, 2097, 2628, 2993, 3370};
-    public static String h0Filename = FileReferenceStorage.h0Filename15Min;
-    public static String h0ClassName = osh.utils.slp.H0Profile15Minutes.class.getName();
-    public static int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
-    public static float weightForOtherWeekday = GeneralConfig.weightForOtherWeekdays;
-    public static float weightForSameWeekday = GeneralConfig.weightForSameWeekday;
-    public static double cosPhi = 0.99;
-    public static boolean isInductive = true;
-    public static LoadProfileCompressionTypes compressionType = GeneralConfig.compressionType;
-    public static int compressionValue = GeneralConfig.compressionValue;
+    public static final String h0Filename = FileReferenceStorage.h0Filename15Min;
+    public static final String h0ClassName = osh.utils.slp.H0Profile15Minutes.class.getName();
+    public static final int pastDaysPrediction = GeneralConfig.pastDaysForPrediction;
+    public static final float weightForOtherWeekday = GeneralConfig.weightForOtherWeekdays;
+    public static final float weightForSameWeekday = GeneralConfig.weightForSameWeekday;
+    public static final double cosPhi = 0.99;
+    public static final boolean isInductive = true;
+    public static final LoadProfileCompressionTypes compressionType = GeneralConfig.compressionType;
+    public static final int compressionValue = GeneralConfig.compressionValue;
 
-    public static String driverName = osh.driver.simulation.BaseloadSimulationDriver.class.getName();
+    public static final String driverName = osh.driver.simulation.BaseloadSimulationDriver.class.getName();
 
-    public static String nonControllableObserverName = osh.mgmt.localobserver.BaseloadLocalObserver.class.getName();
+    public static final String nonControllableObserverName = osh.mgmt.localobserver.BaseloadLocalObserver.class.getName();
 
     /**
      * Generates the configuration file for the baseload with the set parameters.

@@ -27,12 +27,12 @@ public class GeneralLogger {
        DO NOT change anything if you merely wish to produce a new configuration file!
 
     */
-    public static UUID generalLoggerUuid = UUIDStorage.generalLoggerUuid;
+    public static final UUID generalLoggerUuid = UUIDStorage.generalLoggerUuid;
 
     //loggingIntervals for database
     //FORMAT: months, weeks, days
     //only the first non-zero value will be regarded, so {1, 3, 4} is the same as {1, 0, 0} and so on
-    public static int[][] loggingIntervals = {
+    public static final int[][] loggingIntervals = {
             {0, 0, 1},    // 1 day
             {0, 1, 0},    // 1 week
             {1, 0, 0}    // 1 month
@@ -42,15 +42,15 @@ public class GeneralLogger {
     public static boolean logEpsPls = false;
     public static boolean logIntervals = false;
     public static boolean logDevices = false;
-    public static boolean logBaseload = false;
+    public static final boolean logBaseload = false;
     public static boolean logDetailedPower = false;
     public static boolean logThermal = false;
     public static boolean logWaterTank = true;
     public static boolean logEA = true;
     public static boolean logSmartHeater = false;
 
-    public static String driverName = OSHLoggingComDriver.class.getName();
-    public static String comManagerName = osh.core.com.DummyComManager.class.getName();
+    public static final String driverName = OSHLoggingComDriver.class.getName();
+    public static final String comManagerName = osh.core.com.DummyComManager.class.getName();
 
     /**
      * Generates the configuration file for the General Logger ComDriver with the set parameters.

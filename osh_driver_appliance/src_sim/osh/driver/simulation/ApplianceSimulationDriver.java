@@ -29,34 +29,34 @@ public abstract class ApplianceSimulationDriver
     /**
      * Number of avg daily runs for screenplay generation
      */
-    private double avgYearlyRuns;
+    private final double avgYearlyRuns;
 
     /**
      * Correction factor for different probabilities per day (get it from H0)
      */
-    private double[] correctionFactorDay;
+    private final double[] correctionFactorDay;
 
     /**
      * Probability for run at a specific time of the day <br>
      * [d0] = weekday, [d1] = hour of day
      */
-    private double[][] probabilityPerHourOfWeekday;
+    private final double[][] probabilityPerHourOfWeekday;
 
     /**
      * Probability for run at a specific time of the day <br>
      * [d0] = weekday, [d1] = hour of day
      */
-    private double[][] probabilityPerHourOfWeekdayCumulativeDistribution;
+    private final double[][] probabilityPerHourOfWeekdayCumulativeDistribution;
 
     /**
      * Calculated probabilities per day
      */
-    private double avgDailyRuns;
+    private final double avgDailyRuns;
 
     /**
      * Shares of configurations for screenplay generation
      */
-    private double[] configurationShares;
+    private final double[] configurationShares;
 
 
     // TEMPORAL DEGREE OF FREEDOM
@@ -64,7 +64,7 @@ public abstract class ApplianceSimulationDriver
     /**
      * Max 1stTemporalDoF in ticks for generation of TDoF (initial optimization)
      */
-    private int deviceMax1stTDof;
+    private final int deviceMax1stTDof;
 
     /**
      * Max 2ndTemporalDoF in ticks for generation of TDoF (rescheduling)

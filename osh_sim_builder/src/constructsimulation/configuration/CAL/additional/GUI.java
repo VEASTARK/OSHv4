@@ -20,7 +20,7 @@ public class GUI {
         DO NOT change anything if you merely wish to produce a new configuration file!
 
     */
-    public static UUID guiUUID = UUIDStorage.comDeviceIdGui;
+    public static final UUID guiUUID = UUIDStorage.comDeviceIdGui;
 
 
     public static final String guiComManager = osh.mgmt.commanager.GuiComManager.class.getName();
