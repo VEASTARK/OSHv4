@@ -50,10 +50,6 @@ public class HandleSchedulingModule extends GlobalControllerModule {
         ZonedDateTime soonestReschedulingPossible = this.getData().getLastTimeSchedulingStarted()
                 .plus(this.getData().getDelayBetweenScheduling());
 
-        if (this.getData().getNow().isBefore(soonestReschedulingPossible)) {
-            this.getData().getGlobalLogger().logDebug("rescheduling forbidden");
-        }
-
         //check if something has been changed:
         for (InterdependentProblemPart<?, ?> problemPart : this.getData().getProblemParts()) {
             if (problemPart.isToBeScheduled() && !problemPart.getTimestamp().isBefore(soonestReschedulingPossible)) {

@@ -63,6 +63,7 @@ public class CoralReefsOptimization<S extends Solution<?>>
     protected boolean isStoppingConditionReached() {
         for (StoppingRule sr : this.getStoppingRules()) {
             if (sr.checkIfStop(this.problem, -1, this.evaluations, this.population)) {
+                this.getEALogger().logAdditional(sr.getMsg());
                 return true;
             }
         }
