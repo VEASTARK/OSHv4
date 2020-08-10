@@ -15,7 +15,10 @@ public enum SelectionType {
     NARY_RANDOM("NaryRandomSelection"),
     RANDOM("RandomSelection"),
     RANKING_CROWDING("RankingAndCrowdingSelection"),
+    RANKING_DIR_SCORE("RankingAndDirScoreSelection"),
+    RANKING_PREFERENCE("RankingAndPreferenceSelection"),
     ROULETTE_WHEEL("RouletteWheelSelection"),
+    SPATIAL_SPREAD("SpatialSpreadDeviationSelection"),
     SUS("StochasticUniversalSampling"),
     STOCHASTIC_ACCEPTANCE("StochasticAcceptanceSelection");
 

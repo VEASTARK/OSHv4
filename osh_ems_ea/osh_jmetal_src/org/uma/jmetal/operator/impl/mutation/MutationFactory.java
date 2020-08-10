@@ -4,6 +4,7 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import osh.utils.string.ParameterConstants;
+import osh.utils.string.ParameterConstants.EA;
 
 import java.util.Map;
 
@@ -52,12 +53,21 @@ public class MutationFactory {
                 }
 
             case BIT_FLIP_BLOCK:
-                if (parameters.containsKey(ParameterConstants.EA.probability) && parameters.containsKey("blockSize")) {
+                if (parameters.containsKey(EA.probability) && parameters.containsKey(ParameterConstants.EA.blockSize)) {
                     return (MutationOperator<S>) new BlockBitFlipMutation(
                             (Double) parameters.get(ParameterConstants.EA.probability),
-                            (Integer) parameters.get("blockSize"));
+                            (Integer) parameters.get(ParameterConstants.EA.blockSize));
                 } else {
                     throw new JMetalException("Parameter probability or blockSize for BlockBitFlipMutation not given");
+                }
+
+            case CDG:
+                if (parameters.containsKey(ParameterConstants.EA.probability) && parameters.containsKey(ParameterConstants.EA.delta)) {
+                    return (MutationOperator<S>) new CDGMutation(
+                            (Double) parameters.get(ParameterConstants.EA.probability),
+                            (Double) parameters.get(ParameterConstants.EA.delta));
+                } else {
+                    throw new JMetalException("Parameter probability or delta for CDGMutation not given");
                 }
 
             case INTEGER_POLYNOMIAL:

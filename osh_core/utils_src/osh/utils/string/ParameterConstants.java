@@ -206,6 +206,9 @@ public final class ParameterConstants {
         public static final String probability = "probability";
         public static final String solutionRepair = "solutionRepair";
         public static final String distributionIndex = "distributionIndex";
+        public static final String blockSize = "blockSize";
+        public static final String delta = "delta";
+        public static final String epsilon = "epsilon";
 
         public static final String mutation = "mutation";
         public static final String crossover = "crossover";
@@ -239,7 +242,9 @@ public final class ParameterConstants {
     public static final class EA_SELECTION {
         public static final String comparator = "comparator";
         public static final String toSelect = "solutionsToSelect";
+        public static final String referenceVectors = "referenceVectors";
         public static final String tournaments = "numberOfTournaments";
+        public static final String interestPoints = "interestPoints";
     }
 
     public static final class EA_MULTI_OBJECTIVE {

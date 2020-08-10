@@ -11,6 +11,7 @@ public enum MutationType {
     BIT_FLIP("BitFlipMutation"),
     BIT_FLIP_APPROX("ApproximateBitFlipMutation"),
     BIT_FLIP_BLOCK("BlockBitFlipMutation"),
+    CDG("CDGMutation"),
     INTEGER_POLYNOMIAL("IntegerPolynomialMutation"),
     POLYNOMIAL("PolynomialMutation"),
     POLYNOMIAL_AUTO("PolynomialAutoProbabilityMutation"),

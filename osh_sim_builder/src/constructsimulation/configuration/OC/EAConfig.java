@@ -253,7 +253,7 @@ public class EAConfig {
         solRank.setType(solutionRanking);
         if (solutionRanking == RankingType.WEIGHTED_OBJECTIVE || solutionRanking == RankingType.CHEBYSHEV) {
             solRank.getRankingParameters().add(Util.generateClassedParameter(ParameterConstants.EA_MULTI_OBJECTIVE.objectiveWeights,
-                    Arrays.toString(Arrays.stream(eaObjectives).mapToDouble(e -> objectiveWeights.get(e)).toArray())));
+                    Arrays.toString(Arrays.stream(eaObjectives).mapToDouble(objectiveWeights::get).toArray())));
         } else if (solutionRanking == RankingType.OBJECTIVE) {
             solRank.getRankingParameters().add(Util.generateClassedParameter(ParameterConstants.EA_MULTI_OBJECTIVE.objective,
                     Arrays.binarySearch(eaObjectives, rankingObjective)));

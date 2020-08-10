@@ -25,7 +25,7 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
  * This class implements a polynomial mutation operator
  * <p>
  * The implementation is based on the NSGA-II code available in
- * http://www.iitk.ac.in/kangal/codes.shtml
+     * http://www.iitk.ac.in/kangal/codes.shtml
  * <p>
  * If the lower and upper bounds of a variable are the same, no mutation is carried out and the
  * bound value is returned.

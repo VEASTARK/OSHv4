@@ -4,8 +4,11 @@ import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import osh.utils.string.ParameterConstants;
+import osh.utils.string.ParameterConstants.EA;
+import osh.utils.string.ParameterConstants.EA_SELECTION;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -83,11 +86,47 @@ public class SelectionFactory {
                     throw new JMetalException("Parameter solutionsToSelect for RankingAndCrowdingSelection not given");
                 }
 
+            case RANKING_DIR_SCORE:
+                if (parameters.containsKey(ParameterConstants.EA_SELECTION.toSelect) && parameters.containsKey(ParameterConstants.EA_SELECTION.comparator)
+                && parameters.containsKey(ParameterConstants.EA_SELECTION.referenceVectors)) {
+                    return new RankingAndDirScoreSelection<>(
+                            (Integer) parameters.get(ParameterConstants.EA_SELECTION.toSelect),
+                            (Comparator<S>) parameters.get(ParameterConstants.EA_SELECTION.comparator),
+                            (double[][]) parameters.get(ParameterConstants.EA_SELECTION.referenceVectors));
+                } else {
+                    throw new JMetalException("Parameter solutionsToSelect or comparator or referenceVectors for " +
+                            "RankingAndDirScoreSelection not given");
+                }
+
+            case RANKING_PREFERENCE:
+                if (parameters.containsKey(ParameterConstants.EA_SELECTION.toSelect) && parameters.containsKey(EA_SELECTION.interestPoints)
+                        && parameters.containsKey(ParameterConstants.EA.epsilon)) {
+                    return new RankingAndPreferenceSelection<>(
+                            (Integer) parameters.get(ParameterConstants.EA_SELECTION.toSelect),
+                            (List<Double>) parameters.get(ParameterConstants.EA_SELECTION.interestPoints),
+                            (Double) parameters.get(ParameterConstants.EA.epsilon));
+                } else {
+                    throw new JMetalException("Parameter solutionsToSelect or interestPoints or epsilon for " +
+                            "RankingAndCrowdingSelection not given");
+                }
+
             case ROULETTE_WHEEL:
                 if (parameters.containsKey(ParameterConstants.EA_SELECTION.comparator)) {
                     return new RouletteWheelSelection<>((Comparator<S>) parameters.get(ParameterConstants.EA_SELECTION.comparator));
                 } else {
                     return new RouletteWheelSelection<S>();
+                }
+
+            case SPATIAL_SPREAD:
+                if (parameters.containsKey(ParameterConstants.EA_SELECTION.tournaments)) {
+                    if (parameters.containsKey(ParameterConstants.EA_SELECTION.comparator)) {
+                        return new SpatialSpreadDeviationSelection<>((Comparator<S>) parameters.get(ParameterConstants.EA_SELECTION.comparator),
+                                (Integer) parameters.get(ParameterConstants.EA_SELECTION.tournaments));
+                    } else {
+                        return new SpatialSpreadDeviationSelection<>((Integer) parameters.get(ParameterConstants.EA_SELECTION.tournaments));
+                    }
+                } else {
+                    throw new JMetalException("Parameter tournaments for SpatialSpreadDeviationSelection not given");
                 }
 
             case SUS:

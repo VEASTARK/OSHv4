@@ -135,6 +135,18 @@ public class CrossoverFactory {
                     throw new JMetalException("Parameter probability for TwoPointCrossover not given");
                 }
 
+            case N_POINT:
+                if (parameters.containsKey(ParameterConstants.EA_RECOMBINATION.points)) {
+                    if (parameters.containsKey(ParameterConstants.EA.probability)) {
+                        return (CrossoverOperator<S>) new NPointCrossover<>((Double) parameters.get(ParameterConstants.EA.probability),
+                                (Integer) parameters.get(ParameterConstants.EA_RECOMBINATION.points));
+                    } else {
+                        return (CrossoverOperator<S>) new NPointCrossover<>((Integer) parameters.get(ParameterConstants.EA_RECOMBINATION.points));
+                    }
+                } else {
+                    throw new JMetalException("Parameter points for NPointCrossover not given");
+                }
+
             case BINARY_UNIFORM:
                 if (parameters.containsKey(ParameterConstants.EA.probability)) {
                     return (CrossoverOperator<S>) new UniformBinaryCrossover((Double) parameters.get(ParameterConstants.EA.probability));

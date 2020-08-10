@@ -18,6 +18,7 @@ public enum CrossoverType {
     BINARY_SHUFFLE("ShuffledBinaryCrossover"),
     ONE_POINT("SinglePointCrossover"),
     TWO_POINT("DifferentialEvolutionCrossover"),
+    N_POINT("NPointCrossover"),
     BINARY_UNIFORM("UniformBinaryCrossover");
 
     private final String name;
