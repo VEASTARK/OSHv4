@@ -100,11 +100,11 @@ public class SelectionFactory {
 
             case RANKING_PREFERENCE:
                 if (parameters.containsKey(ParameterConstants.EA_SELECTION.toSelect) && parameters.containsKey(EA_SELECTION.interestPoints)
-                        && parameters.containsKey(ParameterConstants.EA.epsilon)) {
+                        && parameters.containsKey(ParameterConstants.ALPHABET.epsilon)) {
                     return new RankingAndPreferenceSelection<>(
                             (Integer) parameters.get(ParameterConstants.EA_SELECTION.toSelect),
                             (List<Double>) parameters.get(ParameterConstants.EA_SELECTION.interestPoints),
-                            (Double) parameters.get(ParameterConstants.EA.epsilon));
+                            (Double) parameters.get(ParameterConstants.ALPHABET.epsilon));
                 } else {
                     throw new JMetalException("Parameter solutionsToSelect or interestPoints or epsilon for " +
                             "RankingAndCrowdingSelection not given");

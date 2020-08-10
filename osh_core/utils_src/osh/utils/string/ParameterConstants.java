@@ -197,6 +197,14 @@ public final class ParameterConstants {
         public static final String delayBetweenScheduling = "delayBetweenScheduling";
     }
 
+    public static final class ALPHABET {
+        public static final String delta = "delta";
+        public static final String epsilon = "epsilon";
+        public static final String lambda = "lambda";
+        public static final String sigma = "sigma";
+        public static final String rho = "rho";
+    }
+
     public static final class EA {
         public static final String populationSize = "populationSize";
         public static final String maxEvaluations = "maxEvaluations";
@@ -207,8 +215,6 @@ public final class ParameterConstants {
         public static final String solutionRepair = "solutionRepair";
         public static final String distributionIndex = "distributionIndex";
         public static final String blockSize = "blockSize";
-        public static final String delta = "delta";
-        public static final String epsilon = "epsilon";
 
         public static final String mutation = "mutation";
         public static final String crossover = "crossover";
@@ -219,6 +225,14 @@ public final class ParameterConstants {
         public static final String particlesToInform = "particlesToInform";
         public static final String deF = "F";
         public static final String deVariant = "variant";
+        public static final String distributionMean = "distributionMean";
+
+        public static final String grid_n = "n";
+        public static final String grid_m = "m";
+        public static final String fbs = "fbs";
+        public static final String fa = "fa";
+        public static final String pd = "pd";
+        public static final String attemptsToSettle = "attemptsToSettle";
 
         public static final String singleThreaded = "singleThreaded";
     }

@@ -1,7 +1,11 @@
 package osh.mgmt.globalcontroller.jmetal.builder;
 
 import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.singleobjective.coralreefsoptimization.CoralReefsOptimization;
+import org.uma.jmetal.algorithm.singleobjective.coralreefsoptimization.CoralReefsOptimizationBuilder;
 import org.uma.jmetal.algorithm.singleobjective.differentialevolution.DifferentialEvolution;
+import org.uma.jmetal.algorithm.singleobjective.evolutionstrategy.CovarianceMatrixAdaptationEvolutionStrategy;
+import org.uma.jmetal.algorithm.singleobjective.evolutionstrategy.ElitistEvolutionStrategy;
 import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.GenerationalGeneticAlgorithm;
 import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.SteadyStateGeneticAlgorithm;
 import org.uma.jmetal.algorithm.singleobjective.particleswarmoptimization.StandardPSO2011;
@@ -24,6 +28,7 @@ import org.uma.jmetal.solution.BinarySolution;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
+import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.MultithreadedStealingSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
@@ -45,6 +50,8 @@ import osh.mgmt.globalcontroller.jmetal.logging.ParallelEALogger;
 import osh.mgmt.globalcontroller.jmetal.solution.AlgorithmSolutionCollection;
 import osh.utils.map.MapUtils;
 import osh.utils.string.ParameterConstants;
+import osh.utils.string.ParameterConstants.ALPHABET;
+import osh.utils.string.ParameterConstants.EA_ALGORITHM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -289,6 +296,27 @@ public class AlgorithmExecutor {
 
             algorithm = new StandardPSO2011((DoubleProblem) problem, populationSize, particlesToInform,
                     (SolutionListEvaluator<DoubleSolution>) evaluator, this.eaLogger);
+        } else if (algorithmConfig.getAlgorithm() == AlgorithmType.ELITIST_ES) {
+            algorithm = new ElitistEvolutionStrategy<>(problem, populationSize,
+                    (int) algorithmConfig.getAlgorithmParameterMap().get(ALPHABET.lambda), mutationOperator, this.eaLogger);
+        } else if (algorithmConfig.getAlgorithm() == AlgorithmType.CMAES) {
+            algorithm = new CovarianceMatrixAdaptationEvolutionStrategy(
+                    (DoubleProblem) problem,
+                    populationSize,
+                    (double[]) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.distributionMean),
+                    (double) algorithmConfig.getAlgorithmParameterMap().get(ALPHABET.sigma),
+                    this.eaLogger);
+        } else if (algorithmConfig.getAlgorithm() == AlgorithmType.CRO) {
+            algorithm = new CoralReefsOptimization<>(problem, (SelectionOperator<List<S>,S>) selectionOperator,
+                    crossoverOperator, mutationOperator,
+                    (int) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.grid_n),
+                    (int) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.grid_m),
+                    (double) algorithmConfig.getAlgorithmParameterMap().get(ALPHABET.rho),
+                    (double) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.fbs),
+                    (double) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.fa),
+                    (double) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.pd),
+                    (int) algorithmConfig.getAlgorithmParameterMap().get(EA_ALGORITHM.attemptsToSettle),
+                    this.eaLogger);
         } else {
             throw new IllegalArgumentException("Algorithm not implemented");
         }

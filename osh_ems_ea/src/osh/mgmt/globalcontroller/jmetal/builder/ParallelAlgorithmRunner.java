@@ -9,6 +9,7 @@ import osh.mgmt.globalcontroller.jmetal.solution.AlgorithmSolutionCollection;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
 /**
  * Represents a runner-thread for a parallel execution of a jMetal {@link Algorithm}.
@@ -23,7 +24,8 @@ public class ParallelAlgorithmRunner extends Thread {
     private final IGlobalLogger logger;
     private final AlgorithmType type;
     private final CountDownLatch latch;
-    private static final ThreadLocal<Integer> threadId = new ThreadLocal<>();
+    //TODO: find a better solution for use of random gens in setup in parallel execution
+    private static final ThreadLocal<Integer> threadId = ThreadLocal.withInitial(() -> 0);
     private final int id;
 
     /**

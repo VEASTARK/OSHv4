@@ -7,6 +7,7 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
@@ -24,6 +25,14 @@ public class CoralReefsOptimization<S extends Solution<?>>
     private final Problem<S> problem;
     private final JMetalRandom random;
     private int evaluations;
+
+    public CoralReefsOptimization(Problem<S> problem, SelectionOperator<List<S>, S> selectionOperator,
+                                  CrossoverOperator<S> crossoverOperator,
+                                  MutationOperator<S> mutationOperator, int n, int m, double rho,
+                                  double fbs, double fa, double pd, int attemptsToSettle, IEALogger eaLogger) {
+        this(problem, new ObjectiveComparator<>(0), selectionOperator, crossoverOperator, mutationOperator, n, m, rho
+                , fbs, fa, pd, attemptsToSettle, eaLogger);
+    }
 
     public CoralReefsOptimization(Problem<S> problem, Comparator<S> comparator,
                                   SelectionOperator<List<S>, S> selectionOperator,

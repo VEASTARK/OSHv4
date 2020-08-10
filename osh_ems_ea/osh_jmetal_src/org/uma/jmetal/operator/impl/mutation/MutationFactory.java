@@ -62,10 +62,10 @@ public class MutationFactory {
                 }
 
             case CDG:
-                if (parameters.containsKey(ParameterConstants.EA.probability) && parameters.containsKey(ParameterConstants.EA.delta)) {
+                if (parameters.containsKey(ParameterConstants.EA.probability) && parameters.containsKey(ParameterConstants.ALPHABET.delta)) {
                     return (MutationOperator<S>) new CDGMutation(
                             (Double) parameters.get(ParameterConstants.EA.probability),
-                            (Double) parameters.get(ParameterConstants.EA.delta));
+                            (Double) parameters.get(ParameterConstants.ALPHABET.delta));
                 } else {
                     throw new JMetalException("Parameter probability or delta for CDGMutation not given");
                 }

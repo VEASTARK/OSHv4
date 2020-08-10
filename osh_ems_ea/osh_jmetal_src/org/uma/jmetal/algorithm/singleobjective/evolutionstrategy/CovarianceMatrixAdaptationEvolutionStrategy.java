@@ -8,6 +8,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import osh.mgmt.globalcontroller.jmetal.logging.IEALogger;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
     private final Comparator<DoubleSolution> comparator;
     private final int lambda;
     private final double[] typicalX;
-    private final Random rand;
+    private final JMetalRandom rand;
     private int evaluations;
     private boolean eigenValuesStoppingCondition;
     /**
@@ -80,18 +81,21 @@ public final class CovarianceMatrixAdaptationEvolutionStrategy
     /**
      * Constructor
      */
-    private CovarianceMatrixAdaptationEvolutionStrategy(Builder builder) {
-        super(builder.problem, builder.eaLogger);
-        this.lambda = builder.lambda;
-        this.typicalX = builder.typicalX;
-        this.sigma = builder.sigma;
+    public CovarianceMatrixAdaptationEvolutionStrategy(DoubleProblem problem, int lambda, double[] typicalX, double sigma,
+                                                       IEALogger eaLogger) {
+        super(problem, eaLogger);
+        this.lambda = lambda;
+        this.typicalX = typicalX;
+        this.sigma = sigma;
 
-        long seed = System.currentTimeMillis();
-        this.rand = new Random(seed);
+        this.rand = JMetalRandom.getInstance();
         this.comparator = new ObjectiveComparator<>(0);
 
         this.initializeInternalParameters();
+    }
 
+    private CovarianceMatrixAdaptationEvolutionStrategy(Builder builder) {
+        this(builder.problem, builder.lambda, builder.typicalX, builder.sigma, builder.eaLogger);
     }
 
     /* Getters */

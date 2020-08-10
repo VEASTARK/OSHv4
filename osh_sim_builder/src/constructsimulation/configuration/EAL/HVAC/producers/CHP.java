@@ -43,7 +43,7 @@ public class CHP {
     public static final UUID hotWaterTankUuid = UUIDStorage.hotWaterTankUUID;
     public static final int typicalActivePower = -5500;
     public static final int typicalThermalPower = -12500;
-    public static final int typicalAdditionalThermalPower;
+    public static final int typicalAdditionalThermalPower = 0;
     public static final int typicalGasPower = 20500;
     public static final double cosPhi = 0.9;
     public static final Duration rescheduleAfter = GeneralConfig.rescheduleAfter;

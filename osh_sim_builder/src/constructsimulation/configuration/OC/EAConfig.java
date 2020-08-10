@@ -7,6 +7,8 @@ import org.uma.jmetal.operator.impl.selection.SelectionType;
 import osh.configuration.oc.*;
 import osh.configuration.system.ConfigurationParameter;
 import osh.utils.string.ParameterConstants;
+import osh.utils.string.ParameterConstants.ALPHABET;
+import osh.utils.string.ParameterConstants.EA_ALGORITHM;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,10 +43,13 @@ public class EAConfig {
 
     //algorithms
     public static final AlgorithmType[] algorithmsToUse = {
-            AlgorithmType.G_GA,
+//            AlgorithmType.G_GA,
 //            AlgorithmType.SS_GA,
 //            AlgorithmType.DE,
-//            AlgorithmType.PSO
+//            AlgorithmType.PSO,
+            AlgorithmType.ELITIST_ES,
+            AlgorithmType.CMAES,
+            AlgorithmType.CRO,
     };
 
     public static final CrossoverType defaultRealCrossoverOperator = CrossoverType.SBX;
@@ -67,6 +72,7 @@ public class EAConfig {
 
     static {
         enforcedRealAlgorithms.add(AlgorithmType.PSO);
+        enforcedRealAlgorithms.add(AlgorithmType.CMAES);
         deAlgorithms.add(AlgorithmType.DE);
 
         regularBinaryAlgorithms = Arrays.stream(AlgorithmType.values()).filter(a -> !enforcedRealAlgorithms.contains(a))
@@ -128,6 +134,7 @@ public class EAConfig {
         });
     }
 
+    //TODO: Allow deviations from the default encoding type (if possible)
     public static final Map<AlgorithmType, VariableEncoding> encodingMap = new EnumMap<>(AlgorithmType.class);
 
     static {
@@ -154,6 +161,16 @@ public class EAConfig {
     public static final double de_cr = 0.5;
     public static final double de_f = 0.5;
     public static final double de_k = 0.5;
+
+    //CMAES
+    public static final double sigma = 0.3;
+
+    //CRO
+    public static final double rho = 0.7;
+    public static final double fbs = 0.9;
+    public static final double fa = 0.1;
+    public static final double pd = 0.1;
+    public static final int attemptsToSettle = 2;
 
     //stopping Rules
     //should never be false
@@ -220,9 +237,30 @@ public class EAConfig {
             list.add(Util.generateClassedParameter(ParameterConstants.EA_ALGORITHM.deF, de_f));
             list.add(Util.generateClassedParameter(ParameterConstants.EA_ALGORITHM.deVariant, deVariant));
         }
+        if (type == AlgorithmType.ELITIST_ES) {
+            list.add(Util.generateClassedParameter(ALPHABET.lambda, popSize));
+        }
+        if (type == AlgorithmType.CMAES) {
+            list.add(Util.generateClassedParameter(ALPHABET.sigma, sigma));
+        }
+        if (type == AlgorithmType.CRO) {
+            double sqr = Math.sqrt(popSize);
+            if (sqr - Math.floor(sqr) == 0) {
+                list.add(Util.generateClassedParameter(EA_ALGORITHM.grid_n, (int) sqr));
+                list.add(Util.generateClassedParameter(EA_ALGORITHM.grid_m, (int) sqr));
+            } else {
+                list.add(Util.generateClassedParameter(EA_ALGORITHM.grid_n, 1));
+                list.add(Util.generateClassedParameter(EA_ALGORITHM.grid_m, popSize));
+            }
+
+            list.add(Util.generateClassedParameter(ALPHABET.rho, rho));
+            list.add(Util.generateClassedParameter(EA_ALGORITHM.fbs, fbs));
+            list.add(Util.generateClassedParameter(EA_ALGORITHM.fa, fa));
+            list.add(Util.generateClassedParameter(EA_ALGORITHM.pd, pd));
+            list.add(Util.generateClassedParameter(EA_ALGORITHM.attemptsToSettle, attemptsToSettle));
+        }
 
         return list;
-
     }
 
 

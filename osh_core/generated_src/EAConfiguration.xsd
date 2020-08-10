@@ -114,6 +114,9 @@
             <enumeration value="ssGA" />
             <enumeration value="DE" />
             <enumeration value="PSO" />
+            <enumeration value="ELITIST_ES" />
+            <enumeration value="CMAES" />
+            <enumeration value="CRO" />
         </restriction>
     </simpleType>
 
