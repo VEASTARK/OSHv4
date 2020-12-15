@@ -91,6 +91,7 @@ public class Long2ObjectErsatzNavigableMap<V> {
                                                                             int tillIndex) {
         assert(tillIndex > -1 && tillIndex < toClone.key.length);
 
+        //TODO: prevent multiple dummy values at Long.Max
         long[] clonedKey = new long[tillIndex + 2];
         V[] clonedValue = (V[]) new Object[tillIndex + 2];
         System.arraycopy(toClone.key, 0, clonedKey, 0, tillIndex + 1);
@@ -107,6 +108,7 @@ public class Long2ObjectErsatzNavigableMap<V> {
 
         int cloneLength = tillIndex - fromIndex;
         long[] clonedKey = new long[cloneLength + 2];
+        //TODO: prevent multiple dummy values at Long.Max 
         V[] clonedValue = (V[]) new Object[cloneLength + 2];
         System.arraycopy(toClone.key, fromIndex, clonedKey, 0, cloneLength + 1);
         System.arraycopy(toClone.value, fromIndex, clonedValue, 0, cloneLength + 1);
